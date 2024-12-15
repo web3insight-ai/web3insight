@@ -181,73 +181,75 @@ export default function Index() {
 	}, [fetcher.state, errorMessage, errorType]);
 
 	return (
-		<div className="min-h-dvh flex items-center justify-center px-4 py-8">
-			<Link
-				to="/claim-reward"
-				className="fixed top-0 left-0 right-0 bg-gradient-to-r from-primary/80 to-primary-400 text-white py-3 text-center shadow-md inline-flex items-center justify-center gap-2 hover:scale-105 transition-transform duration-200 font-medium tracking-wide"
-			>
-				<span className="animate-pulse">🎁</span>
-				Claim Web3Insights & Mantle Network Badge Now!!!
-				<span className="animate-pulse">🎁</span>
-			</Link>
+		<div className="min-h-dvh flex items-center justify-center bg-gradient-to-b from-white to-gray-50 px-4 py-8">
 			<div className="w-full max-w-[640px] mx-auto">
-				<div className="space-y-2 text-center flex flex-col items-center">
-					<div className="mb-8 mt-16 sm:mt-8">
-						<Image src={Logo} width={128} alt="Web3Insights Logo" />
+				<div className="space-y-4 text-center flex flex-col items-center">
+					<div className="mb-10 mt-16 sm:mt-8 transform hover:scale-105 transition-transform duration-300">
+						<Image src={Logo} width={148} alt="Web3Insights Logo" className="drop-shadow-lg" />
 					</div>
-					<h1 className="text-2xl md:text-3xl font-bold">
+					<Link
+						to="/claim-reward"
+						className="bg-gradient-to-r from-primary/90 to-primary-500 text-white py-3.5 px-6 rounded-lg text-center shadow-lg inline-flex items-center justify-center gap-3 hover:scale-102 hover:shadow-xl transition-all duration-300 font-semibold tracking-wide w-full max-w-[580px]"
+					>
+						<span className="animate-bounce">🎁</span>
+						Claim Web3Insights & Mantle Network Badge Now!!!
+						<span className="animate-bounce">🎁</span>
+					</Link>
+					<h1 className="text-2xl md:text-3xl font-bold mt-10 text-gray-800 leading-tight max-w-[520px]">
 						An Intelligent Metric System for Evaluating Web3 Ecosystems,
 						Communities and Repos.
 					</h1>
 				</div>
 
-				<fetcher.Form method="POST" action="?index" className="mt-8">
-					<div className="flex flex-col gap-2 items-center">
+				<fetcher.Form method="POST" action="?index" className="mt-10">
+					<div className="flex flex-col gap-3 items-center">
 						<Input
 							endContent={
 								<Button
 									isLoading={asking}
 									startContent={
-										asking ? null : <Search size={16} strokeWidth={1.5} />
+										asking ? null : <Search size={18} strokeWidth={1.5} />
 									}
 									size="sm"
 									type="submit"
 									color="primary"
 									isIconOnly
-									className="min-w-[40px]"
+									className="min-w-[44px] shadow-md hover:shadow-lg transition-shadow"
 								/>
 							}
 							description="Insight data for Web3 Ecosystems, Communities and Repos."
 							size="lg"
 							isInvalid={!!errorMessage}
 							errorMessage={errorMessage}
-							placeholder="Ecosystem, Community, Repo, Address, ..."
+							placeholder="Search Ecosystem, Community, Repo, Address..."
 							variant="bordered"
 							required
 							name="query"
 							type="text"
-							className="max-w-full"
+							className="max-w-full shadow-sm hover:shadow transition-shadow"
 						/>
 					</div>
 				</fetcher.Form>
 
-				<div className="mt-8">
+				<div className="mt-10">
 					<div className="flex gap-3 items-center justify-center flex-wrap">
 						{pinned.map((query) => (
 							<Link to={`/query/${query.id}`} key={query.id}>
-								<Code className="text-xs">{query.query}</Code>
+								<Code className="text-sm px-4 py-2 hover:bg-gray-100 transition-colors duration-200 cursor-pointer">
+									{query.query}
+								</Code>
 							</Link>
 						))}
 					</div>
 				</div>
 
-				<div className="mt-12 text-center font-medium">
+				<div className="mt-14 text-center font-medium text-gray-600">
 					Supported by{" "}
-					<a href="https://openbuild.xyz/" className="underline">
+					<a href="https://openbuild.xyz/" className="text-primary hover:text-primary-600 transition-colors underline decoration-2 underline-offset-2">
 						OpenBuild
 					</a>{" "}
 					&{" "}
-					<a href="https://rss3.io/" className="underline">
+					<a href="https://rss3.io/" className="text-primary hover:text-primary-600 transition-colors underline decoration-2 underline-offset-2">
 						RSS3
 					</a>
 				</div>
