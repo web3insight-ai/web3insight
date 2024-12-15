@@ -182,6 +182,14 @@ export default function Index() {
 
 	return (
 		<div className="min-h-dvh flex items-center justify-center px-4 py-8">
+			<Link
+				to="/claim-reward"
+				className="fixed top-0 left-0 right-0 bg-gradient-to-r from-primary/80 to-primary-400 text-white py-3 text-center shadow-md inline-flex items-center justify-center gap-2 hover:scale-105 transition-transform duration-200 font-medium tracking-wide"
+			>
+				<span className="animate-pulse">🎁</span>
+				Claim Web3Insights & Mantle Network Badge Now!!!
+				<span className="animate-pulse">🎁</span>
+			</Link>
 			<div className="w-full max-w-[640px] mx-auto">
 				<div className="space-y-2 text-center flex flex-col items-center">
 					<div className="mb-8 mt-16 sm:mt-8">
