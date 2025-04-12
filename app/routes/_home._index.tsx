@@ -187,17 +187,9 @@ export default function Index() {
 					<div className="mb-10 mt-16 sm:mt-8 transform hover:scale-105 transition-transform duration-300">
 						<Image src={Logo} width={148} alt="Web3Insights Logo" className="drop-shadow-lg" />
 					</div>
-					<Link
-						to="/claim-reward"
-						className="bg-gradient-to-r from-primary/90 to-primary-500 text-white py-3.5 px-6 rounded-lg text-center shadow-lg inline-flex items-center justify-center gap-3 hover:scale-102 hover:shadow-xl transition-all duration-300 font-semibold tracking-wide w-full max-w-[580px]"
-					>
-						<span className="animate-bounce">🎁</span>
-						Claim Web3Insights & Mantle Network Badge Now!!!
-						<span className="animate-bounce">🎁</span>
-					</Link>
-					<h1 className="text-2xl md:text-3xl font-bold mt-10 text-gray-800 leading-tight max-w-[520px]">
+					<h1 className="text-2xl md:text-3xl font-bold mt-6 text-gray-800 leading-tight max-w-[520px]">
 						An Intelligent Metric System for Evaluating Web3 Ecosystems,
-						Communities and Repos.
+						Communities and Developers.
 					</h1>
 				</div>
 
