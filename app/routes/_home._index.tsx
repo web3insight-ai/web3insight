@@ -165,17 +165,91 @@ type ChipColor = "success" | "primary" | "secondary" | "warning" | "default" | "
 // Data for display
 const statsData = {
 	totalMonthlyActiveDevelopers: 12500,
+	totalCoreDevelopers: 3800,
 	activeDevelopersByType: 8000,
 	activeDevelopersByTenure: 4500,
 	newDevelopers: 1200,
 	totalCommits: 387500,
 	totalRepositories: 32400,
+	developerLocations: [
+		{ region: "North America", percentage: 28, count: 3500 },
+		{ region: "Europe", percentage: 24, count: 3000 },
+		{ region: "Asia", percentage: 22, count: 2750 },
+		{ region: "South America", percentage: 12, count: 1500 },
+		{ region: "Africa", percentage: 8, count: 1000 },
+		{ region: "Oceania", percentage: 6, count: 750 }
+	],
 	topEcosystems: [
-		{ name: "Ethereum", developers: 3500, growth: "+12%", color: "success" as ChipColor },
-		{ name: "Solana", developers: 2800, growth: "+18%", color: "primary" as ChipColor },
-		{ name: "Polkadot", developers: 1900, growth: "+5%", color: "secondary" as ChipColor },
-		{ name: "Near", developers: 1600, growth: "+8%", color: "warning" as ChipColor },
-		{ name: "Cosmos", developers: 1200, growth: "+7%", color: "success" as ChipColor },
+		{
+			name: "Ethereum",
+			developers: 3500,
+			coreDevelopers: 820,
+			growth: "+12%",
+			color: "success" as ChipColor,
+			monthlyCommits: 24800,
+			developerLocations: [
+				{ region: "North America", percentage: 32 },
+				{ region: "Europe", percentage: 28 },
+				{ region: "Asia", percentage: 18 },
+				{ region: "Others", percentage: 22 }
+			]
+		},
+		{
+			name: "Solana",
+			developers: 2800,
+			coreDevelopers: 650,
+			growth: "+18%",
+			color: "primary" as ChipColor,
+			monthlyCommits: 19200,
+			developerLocations: [
+				{ region: "North America", percentage: 35 },
+				{ region: "Europe", percentage: 25 },
+				{ region: "Asia", percentage: 22 },
+				{ region: "Others", percentage: 18 }
+			]
+		},
+		{
+			name: "Polkadot",
+			developers: 1900,
+			coreDevelopers: 480,
+			growth: "+5%",
+			color: "secondary" as ChipColor,
+			monthlyCommits: 12400,
+			developerLocations: [
+				{ region: "Europe", percentage: 38 },
+				{ region: "North America", percentage: 24 },
+				{ region: "Asia", percentage: 20 },
+				{ region: "Others", percentage: 18 }
+			]
+		},
+		{
+			name: "Near",
+			developers: 1600,
+			coreDevelopers: 390,
+			growth: "+8%",
+			color: "warning" as ChipColor,
+			monthlyCommits: 9800,
+			developerLocations: [
+				{ region: "North America", percentage: 30 },
+				{ region: "Europe", percentage: 26 },
+				{ region: "Asia", percentage: 24 },
+				{ region: "Others", percentage: 20 }
+			]
+		},
+		{
+			name: "Cosmos",
+			developers: 1200,
+			coreDevelopers: 320,
+			growth: "+7%",
+			color: "success" as ChipColor,
+			monthlyCommits: 8600,
+			developerLocations: [
+				{ region: "Asia", percentage: 32 },
+				{ region: "North America", percentage: 28 },
+				{ region: "Europe", percentage: 25 },
+				{ region: "Others", percentage: 15 }
+			]
+		},
 	],
 	topRepositories: [
 		{ name: "ethereum/go-ethereum", stars: 42300, commits: 18540, contributors: 720 },
@@ -219,16 +293,76 @@ const enhancedRepoData = statsData.topRepositories.map(repo => ({
 // Add ecosystem data with chart data
 const enhancedEcosystemData = statsData.topEcosystems.map(ecosystem => ({
 	...ecosystem,
-	chartData: generateChartData(20, ecosystem.growth.startsWith('+'), 6)
+	chartData: generateChartData(20, ecosystem.growth.startsWith('+'), 6),
+	developerActivity: {
+		byMonth: [
+			{ month: "Jan", count: Math.floor(Math.random() * 1000) + 500 },
+			{ month: "Feb", count: Math.floor(Math.random() * 1000) + 500 },
+			{ month: "Mar", count: Math.floor(Math.random() * 1000) + 500 },
+			{ month: "Apr", count: Math.floor(Math.random() * 1000) + 500 },
+			{ month: "May", count: Math.floor(Math.random() * 1000) + 500 },
+			{ month: "Jun", count: Math.floor(Math.random() * 1000) + 500 }
+		],
+		byType: [
+			{ type: "Full-time", percentage: Math.floor(Math.random() * 30) + 50 },
+			{ type: "Part-time", percentage: Math.floor(Math.random() * 20) + 20 },
+			{ type: "Occasional", percentage: Math.floor(Math.random() * 15) + 5 }
+		]
+	}
 }));
 
-// Add top developer data
+// Add top developer data with ecosystem and project contributions
 const topDevelopers = [
-	{ name: "jesse.eth", handle: "@jesse", contribution: "62.3k", growth: "+12.4%", isPositive: true, chartData: generateChartData(20, true, 6) },
-	{ name: "haseeb", handle: "@haseeb_xyz", contribution: "51.7k", growth: "+8.2%", isPositive: true, chartData: generateChartData(20, true, 4) },
-	{ name: "ajxbt", handle: "@ajxbt", contribution: "46.5k", growth: "+6.5%", isPositive: true, chartData: generateChartData(20, true, 5) },
-	{ name: "tomasz", handle: "@tomasz_k", contribution: "45.8k", growth: "+4.1%", isPositive: true, chartData: generateChartData(20, true, 7) },
-	{ name: "binji", handle: "@binji_x", contribution: "41.2k", growth: "-2.3%", isPositive: false, chartData: generateChartData(20, false, 4) },
+	{
+		name: "jesse.eth",
+		handle: "@jesse",
+		contribution: "62.3k",
+		growth: "+12.4%",
+		isPositive: true,
+		chartData: generateChartData(20, true, 6),
+		ecosystems: ["Ethereum", "Optimism", "Arbitrum"],
+		projects: ["ethereum/go-ethereum", "ethereum/consensus-specs", "optimism/optimism"]
+	},
+	{
+		name: "haseeb",
+		handle: "@haseeb_xyz",
+		contribution: "51.7k",
+		growth: "+8.2%",
+		isPositive: true,
+		chartData: generateChartData(20, true, 4),
+		ecosystems: ["Solana", "Ethereum"],
+		projects: ["solana-labs/solana", "solana/spl-token-wallet", "ethereum/EIPs"]
+	},
+	{
+		name: "ajxbt",
+		handle: "@ajxbt",
+		contribution: "46.5k",
+		growth: "+6.5%",
+		isPositive: true,
+		chartData: generateChartData(20, true, 5),
+		ecosystems: ["Cosmos", "Polkadot", "Near"],
+		projects: ["cosmos/cosmos-sdk", "near/nearcore", "paritytech/substrate"]
+	},
+	{
+		name: "tomasz",
+		handle: "@tomasz_k",
+		contribution: "45.8k",
+		growth: "+4.1%",
+		isPositive: true,
+		chartData: generateChartData(20, true, 7),
+		ecosystems: ["Polkadot", "Kusama"],
+		projects: ["paritytech/substrate", "paritytech/polkadot", "paritytech/smoldot"]
+	},
+	{
+		name: "binji",
+		handle: "@binji_x",
+		contribution: "41.2k",
+		growth: "-2.3%",
+		isPositive: false,
+		chartData: generateChartData(20, false, 4),
+		ecosystems: ["Near", "Ethereum"],
+		projects: ["near/nearcore", "near/workspaces", "ethereum/solidity"]
+	},
 ];
 
 export default function Index() {
@@ -415,9 +549,9 @@ export default function Index() {
 									<Zap size={20} className="text-success" />
 								</div>
 								<div>
-									<p className="text-sm text-gray-500 dark:text-gray-400">New Developers</p>
+									<p className="text-sm text-gray-500 dark:text-gray-400">Core Developers</p>
 									<h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-										{statsData.newDevelopers.toLocaleString()}
+										{statsData.totalCoreDevelopers.toLocaleString()}
 									</h2>
 									<GrowthIndicator value="+5.2%" isPositive={true} />
 								</div>
@@ -443,43 +577,43 @@ export default function Index() {
 					</Card>
 				</div>
 
-				{/* Developer Leaderboard Section */}
+				{/* Developer Location Section */}
 				<div className="mt-10">
 					<div className="flex flex-col space-y-1 mb-6">
-						<h2 className="text-2xl font-bold text-gray-900 dark:text-white">Top Developer Activity</h2>
-						<p className="text-gray-500 dark:text-gray-400">Leading contributors across Web3 ecosystems</p>
+						<h2 className="text-2xl font-bold text-gray-900 dark:text-white">Developer Distribution</h2>
+						<p className="text-gray-500 dark:text-gray-400">Global distribution of Web3 developers by region</p>
 					</div>
 
 					<Card className="bg-white dark:bg-gray-800 shadow-sm border-none">
-						<div className="grid grid-cols-1 md:grid-cols-5 gap-0.5">
-							{topDevelopers.map((dev, index) => (
-								<div key={index} className={`relative p-4 ${index < 2 ? 'border-t-4' : ''} ${index === 0 ? 'border-primary' : index === 1 ? 'border-secondary' : ''}`}>
-									<div className="flex justify-between items-start">
-										<div>
-											<div className="flex items-center gap-2">
-												<span className="font-semibold text-gray-900 dark:text-white">{dev.name}</span>
-												{index === 0 && <Crown size={14} className="text-primary fill-primary" />}
-											</div>
-											<p className="text-xs text-gray-500 dark:text-gray-400">{dev.handle}</p>
+						<CardBody className="p-6">
+							<div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+								{statsData.developerLocations.map((location, index) => (
+									<div key={index} className="text-center p-4">
+										<div className="mb-2">
+											<span className="text-xl font-bold text-gray-900 dark:text-white">{location.percentage}%</span>
 										</div>
-										<GrowthIndicator value={dev.growth} isPositive={dev.isPositive} />
+										<div className="w-full h-2 bg-gray-100 dark:bg-gray-700 rounded-full mb-2">
+											<div
+												className={`h-full rounded-full ${
+													index === 0 ? 'bg-primary' :
+													index === 1 ? 'bg-secondary' :
+													index === 2 ? 'bg-success' :
+													index === 3 ? 'bg-warning' :
+													index === 4 ? 'bg-danger' : 'bg-default'
+												}`}
+												style={{ width: `${location.percentage}%` }}
+											></div>
+										</div>
+										<p className="text-sm font-medium text-gray-700 dark:text-gray-300">{location.region}</p>
+										<p className="text-xs text-gray-500 dark:text-gray-400">{location.count.toLocaleString()} devs</p>
 									</div>
-
-									<div className="mt-2">
-										<p className="text-lg font-bold text-gray-900 dark:text-white">{dev.contribution}</p>
-										<p className="text-xs text-gray-500 dark:text-gray-400">contributions</p>
-									</div>
-
-									<div className="mt-3 h-10">
-										<MiniChart data={dev.chartData} color={dev.isPositive ? "success" : "danger"} />
-									</div>
-								</div>
-							))}
-						</div>
+								))}
+							</div>
+						</CardBody>
 					</Card>
 				</div>
 
-				{/* Main Content Section */}
+				{/* Main Content Section - Web3 Ecosystem Analytics */}
 				<div className="mt-10">
 					<div className="flex flex-col space-y-1 mb-6">
 						<h2 className="text-2xl font-bold text-gray-900 dark:text-white">Web3 Ecosystem Analytics</h2>
@@ -495,12 +629,22 @@ export default function Index() {
 							</div>
 						</CardHeader>
 						<Divider />
+
+						{/* Ecosystem header row */}
+						<div className="px-6 py-3 bg-gray-50 dark:bg-gray-750 border-b border-gray-100 dark:border-gray-800 grid grid-cols-12 gap-2">
+							<div className="col-span-1 text-xs font-medium text-gray-500 dark:text-gray-400">#</div>
+							<div className="col-span-4 text-xs font-medium text-gray-500 dark:text-gray-400">Ecosystem</div>
+							<div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400">Total Devs</div>
+							<div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400">Core Devs</div>
+							<div className="col-span-3 text-xs font-medium text-gray-500 dark:text-gray-400">Monthly Commits</div>
+						</div>
+
 						<CardBody className="p-0">
 							<div className="divide-y divide-gray-100 dark:divide-gray-800">
 								{enhancedEcosystemData.map((ecosystem, index) => (
-									<div key={index} className="px-6 py-4 flex items-center hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors duration-200">
+									<div key={index} className="px-6 py-4 grid grid-cols-12 gap-2 items-center hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors duration-200">
 										{/* Rank indicator */}
-										<div className="w-8 flex-shrink-0">
+										<div className="col-span-1">
 											<span className={`inline-flex items-center justify-center w-6 h-6 rounded-full
 												${index === 0 ? 'bg-primary/10 text-primary' :
 												index === 1 ? 'bg-secondary/10 text-secondary' :
@@ -509,24 +653,29 @@ export default function Index() {
 										</div>
 
 										{/* Ecosystem name and growth */}
-										<div className="w-5/12 flex items-center gap-3">
+										<div className="col-span-4 flex items-center gap-2">
 											<span className="font-medium text-gray-900 dark:text-white">{ecosystem.name}</span>
 											<Chip size="sm" color={ecosystem.color} variant="flat">
 												{ecosystem.growth}
 											</Chip>
 										</div>
 
-										{/* Developer count */}
-										<div className="w-3/12 text-gray-700 dark:text-gray-300 font-medium">
-											{ecosystem.developers.toLocaleString()} devs
+										{/* Total developer count */}
+										<div className="col-span-2 font-medium text-gray-700 dark:text-gray-300">
+											{ecosystem.developers.toLocaleString()}
 										</div>
 
-										{/* Chart */}
-										<div className="w-3/12 h-10">
-											<MiniChart
-												data={ecosystem.chartData}
-												color={ecosystem.growth.startsWith('+') ? "success" : "danger"}
-											/>
+										{/* Core developer count */}
+										<div className="col-span-2 font-medium text-gray-700 dark:text-gray-300">
+											{ecosystem.coreDevelopers.toLocaleString()}
+										</div>
+
+										{/* Monthly Commits */}
+										<div className="col-span-3 font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+											<span>{ecosystem.monthlyCommits.toLocaleString()}</span>
+											<div className="w-20 h-8">
+												<MiniChart data={ecosystem.chartData} color={ecosystem.growth.startsWith('+') ? "success" : "danger"} />
+											</div>
 										</div>
 									</div>
 								))}
@@ -539,98 +688,9 @@ export default function Index() {
 							</Button>
 						</CardFooter>
 					</Card>
-
-					{/* Topic Popularity Metrics */}
-					<div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-						{/* Popular Topics */}
-						<Card className="bg-white dark:bg-gray-800 shadow-sm border-none hover:shadow-md transition-all duration-300">
-							<CardHeader className="px-6 py-5">
-								<div className="flex items-center gap-2">
-									<TrendingUp size={18} className="text-secondary" />
-									<h3 className="text-lg font-semibold text-gray-900 dark:text-white">Trending Topics</h3>
-								</div>
-							</CardHeader>
-							<Divider />
-							<CardBody className="px-6 py-4">
-								<div className="space-y-4">
-									{statsData.trendingTopics.slice(0, 3).map((topic, index) => (
-										<div key={index}>
-											<div className="flex justify-between items-center mb-1">
-												<span className="text-sm text-gray-700 dark:text-gray-300">{topic}</span>
-												<span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-													{Math.round(80 - index * 10)}%
-												</span>
-											</div>
-											<div className="w-full h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-												<div
-													className={`h-full rounded-full ${
-														index === 0 ? 'bg-primary' :
-														index === 1 ? 'bg-secondary' :
-														'bg-success'
-													}`}
-													style={{ width: `${Math.round(80 - index * 10)}%` }}
-												></div>
-											</div>
-										</div>
-									))}
-								</div>
-							</CardBody>
-						</Card>
-
-						{/* Trending Categories */}
-						<Card className="bg-white dark:bg-gray-800 shadow-sm border-none hover:shadow-md transition-all duration-300">
-							<CardHeader className="px-6 py-5">
-								<div className="flex items-center gap-2">
-									<Database size={18} className="text-primary" />
-									<h3 className="text-lg font-semibold text-gray-900 dark:text-white">Categories</h3>
-								</div>
-							</CardHeader>
-							<Divider />
-							<CardBody className="px-6 py-4">
-								<div className="flex flex-wrap gap-2">
-									{['DeFi', 'NFT', 'Gaming', 'Social', 'DAO', 'Infrastructure', 'Security', 'Privacy'].map((category, index) => (
-										<Chip
-											key={index}
-											variant="flat"
-											radius="sm"
-											className="text-xs cursor-pointer"
-											color={
-												index % 4 === 0 ? "primary" :
-												index % 4 === 1 ? "secondary" :
-												index % 4 === 2 ? "success" :
-												"default"
-											}
-										>
-											{category}
-										</Chip>
-									))}
-								</div>
-							</CardBody>
-						</Card>
-
-						{/* Top Growing Ecosystems */}
-						<Card className="bg-white dark:bg-gray-800 shadow-sm border-none hover:shadow-md transition-all duration-300">
-							<CardHeader className="px-6 py-5">
-								<div className="flex items-center gap-2">
-									<Zap size={18} className="text-success" />
-									<h3 className="text-lg font-semibold text-gray-900 dark:text-white">Highest Growth</h3>
-								</div>
-							</CardHeader>
-							<Divider />
-							<CardBody className="px-6 py-4 space-y-4">
-								{enhancedEcosystemData.slice(0, 3).map((eco, index) => (
-									<div key={index} className="flex items-center gap-3">
-										<div className="w-2 h-2 rounded-full bg-success"></div>
-										<span className="text-sm font-medium text-gray-700 dark:text-gray-300">{eco.name}</span>
-										<GrowthIndicator value={eco.growth} isPositive={eco.growth.startsWith('+')} />
-									</div>
-								))}
-							</CardBody>
-						</Card>
-					</div>
 				</div>
 
-				{/* Top Repositories Section */}
+				{/* Repository Activity Section */}
 				<div className="mt-10">
 					<div className="flex flex-col space-y-1 mb-6">
 						<h2 className="text-2xl font-bold text-gray-900 dark:text-white">Repository Activity</h2>
@@ -647,35 +707,67 @@ export default function Index() {
 						</CardHeader>
 						<Divider />
 
+						{/* Repository header row */}
+						<div className="px-8 py-3 bg-gray-50 dark:bg-gray-750 border-b border-gray-100 dark:border-gray-800 grid grid-cols-12 gap-2">
+							<div className="col-span-1 text-xs font-medium text-gray-500 dark:text-gray-400">#</div>
+							<div className="col-span-5 text-xs font-medium text-gray-500 dark:text-gray-400">Repository</div>
+							<div className="col-span-1 text-xs font-medium text-gray-500 dark:text-gray-400 text-right">Stars</div>
+							<div className="col-span-1 text-xs font-medium text-gray-500 dark:text-gray-400 text-right">Forks</div>
+							<div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400 text-right">PRs</div>
+							<div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400 text-right">Issues</div>
+						</div>
+
 						{/* Repository rows */}
 						<div>
 							{enhancedRepoData.map((repo, index) => (
 								<div
 									key={index}
-									className="px-8 py-4 flex items-center border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors duration-200"
+									className="px-8 py-4 grid grid-cols-12 gap-2 items-center border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors duration-200"
 								>
 									{/* Rank number */}
-									<div className="w-8 flex-shrink-0">
+									<div className="col-span-1">
 										<span className={`inline-flex items-center justify-center w-6 h-6 rounded-full
-											${index === 0 ? 'bg-blue-50 text-blue-600' :
-											index === 1 ? 'bg-purple-50 text-purple-600' :
+											${index === 0 ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' :
+											index === 1 ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400' :
 											'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}
 											text-xs font-medium`}>{index + 1}</span>
 									</div>
 
 									{/* Repository name */}
-									<div className="w-5/12 flex items-center">
+									<div className="col-span-5 flex items-center">
 										<span className="font-medium text-gray-900 dark:text-white">{repo.name}</span>
 										<span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${
-											repo.isPositive ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
+											repo.isPositive ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400' :
+											'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'
 										}`}>
 											{repo.growth}
 										</span>
 									</div>
 
-									{/* Stars count right-aligned */}
-									<div className="flex-1 text-right font-medium text-gray-700 dark:text-gray-300">
-										{repo.stars.toLocaleString()} stars
+									{/* Stars */}
+									<div className="col-span-1 text-right font-medium text-gray-700 dark:text-gray-300">
+										{repo.stars.toLocaleString()}
+									</div>
+
+                                    {/* Forks - adding mock data */}
+									<div className="col-span-1 text-right font-medium text-gray-700 dark:text-gray-300">
+										{Math.floor(repo.stars * 0.3).toLocaleString()}
+									</div>
+
+                                    {/* PRs - adding mock data */}
+									<div className="col-span-2 text-right font-medium text-gray-700 dark:text-gray-300">
+										<div className="flex items-center justify-end gap-1">
+											<span>{Math.floor(repo.commits * 0.4).toLocaleString()}</span>
+											<span className="text-xs text-green-500">+{Math.floor(Math.random() * 30)}</span>
+										</div>
+									</div>
+
+                                    {/* Issues - adding mock data */}
+									<div className="col-span-2 text-right font-medium text-gray-700 dark:text-gray-300">
+										<div className="flex items-center justify-end gap-1">
+											<span>{Math.floor(repo.commits * 0.25).toLocaleString()}</span>
+											<span className="text-xs text-gray-500">{Math.floor(repo.commits * 0.05).toLocaleString()} open</span>
+										</div>
 									</div>
 								</div>
 							))}
@@ -696,6 +788,157 @@ export default function Index() {
 								View all repositories
 							</Button>
 						</CardFooter>
+					</Card>
+				</div>
+
+				{/* Developer Leaderboard Section */}
+				<div className="mt-10">
+					<div className="flex flex-col space-y-1 mb-6">
+						<h2 className="text-2xl font-bold text-gray-900 dark:text-white">Top Developer Activity</h2>
+						<p className="text-gray-500 dark:text-gray-400">Leading contributors across Web3 ecosystems</p>
+					</div>
+
+					<Card className="bg-white dark:bg-gray-800 shadow-sm border-none">
+						<div className="grid grid-cols-1 md:grid-cols-5 gap-0.5">
+							{topDevelopers.map((dev, index) => (
+								<div key={index} className={`relative p-5 ${index === 0 ? 'border-t-4 border-primary' : index === 1 ? 'border-t-4 border-secondary' : ''}`}>
+									<div className="flex justify-between items-start">
+										<div>
+											<div className="flex items-center gap-2">
+												<span className="font-semibold text-gray-900 dark:text-white">{dev.handle}</span>
+												{index === 0 && <Crown size={14} className="text-primary fill-primary" />}
+											</div>
+										</div>
+										<GrowthIndicator value={dev.growth} isPositive={dev.isPositive} />
+									</div>
+
+									<div className="mt-2">
+										<p className="text-lg font-bold text-gray-900 dark:text-white">{dev.contribution}</p>
+										<p className="text-xs text-gray-500 dark:text-gray-400">contributions</p>
+									</div>
+
+									<div className="mt-3 h-10">
+										<MiniChart data={dev.chartData} color={dev.isPositive ? "success" : "danger"} />
+									</div>
+
+									{/* Ecosystems contributed to */}
+									<div className="mt-3">
+										<p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Ecosystems</p>
+										<div className="flex flex-wrap gap-1">
+											{dev.ecosystems.map((eco, ecoIndex) => (
+												<Chip key={ecoIndex} size="sm" variant="flat" color={
+													ecoIndex === 0 ? "primary" :
+													ecoIndex === 1 ? "secondary" : "default"
+												} className="text-xs">
+													{eco}
+												</Chip>
+											))}
+										</div>
+									</div>
+
+									{/* Projects contributed to */}
+									<div className="mt-2">
+										<p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Top Projects</p>
+										<ul className="text-xs text-gray-700 dark:text-gray-300 space-y-1">
+											{dev.projects.map((proj, projIndex) => (
+												<li key={projIndex} className="truncate" title={proj}>
+													{proj}
+												</li>
+											))}
+										</ul>
+									</div>
+								</div>
+							))}
+						</div>
+					</Card>
+				</div>
+
+				{/* Topic Popularity Metrics */}
+				<div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
+					{/* Popular Topics */}
+					<Card className="bg-white dark:bg-gray-800 shadow-sm border-none hover:shadow-md transition-all duration-300">
+						<CardHeader className="px-6 py-5">
+							<div className="flex items-center gap-2">
+								<TrendingUp size={18} className="text-secondary" />
+								<h3 className="text-lg font-semibold text-gray-900 dark:text-white">Trending Topics</h3>
+							</div>
+						</CardHeader>
+						<Divider />
+						<CardBody className="px-6 py-4">
+							<div className="space-y-4">
+								{statsData.trendingTopics.slice(0, 3).map((topic, index) => (
+									<div key={index}>
+										<div className="flex justify-between items-center mb-1">
+											<span className="text-sm text-gray-700 dark:text-gray-300">{topic}</span>
+											<span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+												{Math.round(80 - index * 10)}%
+											</span>
+										</div>
+										<div className="w-full h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+											<div
+												className={`h-full rounded-full ${
+													index === 0 ? 'bg-primary' :
+													index === 1 ? 'bg-secondary' :
+													'bg-success'
+												}`}
+												style={{ width: `${Math.round(80 - index * 10)}%` }}
+											></div>
+										</div>
+									</div>
+								))}
+							</div>
+						</CardBody>
+					</Card>
+
+					{/* Trending Categories */}
+					<Card className="bg-white dark:bg-gray-800 shadow-sm border-none hover:shadow-md transition-all duration-300">
+						<CardHeader className="px-6 py-5">
+							<div className="flex items-center gap-2">
+								<Database size={18} className="text-primary" />
+								<h3 className="text-lg font-semibold text-gray-900 dark:text-white">Categories</h3>
+							</div>
+						</CardHeader>
+						<Divider />
+						<CardBody className="px-6 py-4">
+							<div className="flex flex-wrap gap-2">
+								{['DeFi', 'NFT', 'Gaming', 'Social', 'DAO', 'Infrastructure', 'Security', 'Privacy'].map((category, index) => (
+									<Chip
+										key={index}
+										variant="flat"
+										radius="sm"
+										className="text-xs cursor-pointer"
+										color={
+											index % 4 === 0 ? "primary" :
+											index % 4 === 1 ? "secondary" :
+											index % 4 === 2 ? "success" :
+											"default"
+										}
+									>
+										{category}
+									</Chip>
+								))}
+							</div>
+						</CardBody>
+					</Card>
+
+					{/* Top Growing Ecosystems */}
+					<Card className="bg-white dark:bg-gray-800 shadow-sm border-none hover:shadow-md transition-all duration-300">
+						<CardHeader className="px-6 py-5">
+							<div className="flex items-center gap-2">
+								<Zap size={18} className="text-success" />
+								<h3 className="text-lg font-semibold text-gray-900 dark:text-white">Highest Growth</h3>
+							</div>
+						</CardHeader>
+						<Divider />
+						<CardBody className="px-6 py-4 space-y-4">
+							{enhancedEcosystemData.slice(0, 3).map((eco, index) => (
+								<div key={index} className="flex items-center gap-3">
+									<div className="w-2 h-2 rounded-full bg-success"></div>
+									<span className="text-sm font-medium text-gray-700 dark:text-gray-300">{eco.name}</span>
+									<GrowthIndicator value={eco.growth} isPositive={eco.growth.startsWith('+')} />
+								</div>
+							))}
+						</CardBody>
 					</Card>
 				</div>
 
