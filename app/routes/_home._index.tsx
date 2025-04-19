@@ -685,7 +685,7 @@ export default function Index() {
 						</CardBody>
 						<Divider />
 						<CardFooter className="px-6 py-3">
-							<Button as={Link} to="#" color="primary" variant="light" size="sm" endContent={<ArrowRight size={14} />} className="ml-auto">
+							<Button as={Link} to="/ecosystems" color="primary" variant="light" size="sm" endContent={<ArrowRight size={14} />} className="ml-auto">
 								View all ecosystems
 							</Button>
 						</CardFooter>
@@ -782,7 +782,7 @@ export default function Index() {
 						<CardFooter className="px-6 py-3">
 							<Button
 								as={Link}
-								to="#"
+								to="/repositories"
 								color="primary"
 								variant="light"
 								size="sm"
