@@ -654,7 +654,9 @@ export default function Index() {
 
 										{/* Ecosystem name and growth */}
 										<div className="col-span-4 flex items-center gap-2">
-											<span className="font-medium text-gray-900 dark:text-white">{ecosystem.name}</span>
+											<Link to={`/ecosystem/${ecosystem.name.toLowerCase()}`} className="font-medium text-gray-900 dark:text-white hover:text-primary hover:underline">
+												{ecosystem.name}
+											</Link>
 											<Chip size="sm" color={ecosystem.color} variant="flat">
 												{ecosystem.growth}
 											</Chip>
@@ -735,7 +737,9 @@ export default function Index() {
 
 									{/* Repository name */}
 									<div className="col-span-5 flex items-center">
-										<span className="font-medium text-gray-900 dark:text-white">{repo.name}</span>
+										<Link to={`/repository/${repo.name}`} className="font-medium text-gray-900 dark:text-white hover:text-primary hover:underline">
+											{repo.name}
+										</Link>
 										<span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${
 											repo.isPositive ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400' :
 											'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'
@@ -805,7 +809,9 @@ export default function Index() {
 									<div className="flex justify-between items-start">
 										<div>
 											<div className="flex items-center gap-2">
-												<span className="font-semibold text-gray-900 dark:text-white">{dev.handle}</span>
+												<Link to={`/developer/${dev.handle.replace('@', '')}`} className="font-semibold text-gray-900 dark:text-white hover:text-primary hover:underline">
+													{dev.handle}
+												</Link>
 												{index === 0 && <Crown size={14} className="text-primary fill-primary" />}
 											</div>
 										</div>
