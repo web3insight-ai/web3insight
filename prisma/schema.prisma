@@ -26,7 +26,8 @@ model Query {
 
 model User {
   id          String   @id @default(cuid())
-  clerkUserId String   @unique @map("clerk_user_id")
+  clerkUserId String?  @unique @map("clerk_user_id")
+  strapiUserId String? @unique @map("strapi_user_id")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   queries     Query[]

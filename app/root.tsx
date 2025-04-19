@@ -5,18 +5,41 @@ import {
 	Outlet,
 	Scripts,
 	ScrollRestoration,
+	json,
+	useLoaderData,
 } from "@remix-run/react";
 import css from "./tailwind.css?url";
 import { NextUIProvider } from "@nextui-org/react";
-import { rootAuthLoader } from "@clerk/remix/ssr.server";
+import { getUser } from "~/services/auth/session.server";
 import { LoaderFunction } from "@remix-run/node";
-import { ClerkApp } from "@clerk/remix";
+import { validateEnvironment } from "~/services/env.server";
+
+export const meta: MetaFunction = () => {
+	return [
+		{
+			title: "Web3Insights - Blockchain Analytics",
+		},
+		{
+			name: "description",
+			content: "Explore insights on blockchain projects and developers",
+		},
+	];
+};
 
 export const links = () => [{ rel: "stylesheet", href: css }];
 
-export const loader: LoaderFunction = (args) => rootAuthLoader(args);
+export const loader: LoaderFunction = async ({ request }) => {
+	// Validate environment variables
+	validateEnvironment();
 
-export function Layout({ children }: { children: React.ReactNode }) {
+	return json({
+		user: await getUser(request),
+	});
+};
+
+function App() {
+	const { user } = useLoaderData<typeof loader>();
+
 	return (
 		<html lang="en">
 			<head>
@@ -26,20 +49,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
 				<Links />
 			</head>
 			<body>
-				{children}
-				<ScrollRestoration />
-				<Scripts />
+				<NextUIProvider>
+					<Outlet context={{ user }} />
+					<ScrollRestoration />
+					<Scripts />
+				</NextUIProvider>
 			</body>
 		</html>
 	);
 }
 
-function App() {
-	return (
-		<NextUIProvider>
-			<Outlet />
-		</NextUIProvider>
-	);
-}
-
-export default ClerkApp(App);
+export default App;

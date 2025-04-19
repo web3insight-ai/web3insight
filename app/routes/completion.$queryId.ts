@@ -14,6 +14,8 @@ import { isAddress } from "viem";
 
 export async function loader(ctx: LoaderFunctionArgs) {
 	const queryId = ctx.params.queryId as string;
+
+	// Fetch the query from database
 	const query = await prisma.query.findUnique({
 		where: {
 			id: queryId,
@@ -24,6 +26,7 @@ export async function loader(ctx: LoaderFunctionArgs) {
 		return redirect("/");
 	}
 
+	// If query has an answer already, return it directly
 	if (query.answer) {
 		return eventStream(ctx.request.signal, function setup(send) {
 			send({
@@ -36,6 +39,7 @@ export async function loader(ctx: LoaderFunctionArgs) {
 		});
 	}
 
+	// If no answer, get info and analyze it
 	const searchKeyword = await getSearchKeyword(query.query);
 	const info = await getInfo(searchKeyword);
 
@@ -51,6 +55,7 @@ export async function loader(ctx: LoaderFunctionArgs) {
 		});
 	}
 
+	// Determine type based on keyword format
 	let type: "evm" | "github_repo" | undefined;
 	if (isAddress(searchKeyword) || searchKeyword.endsWith(".eth")) {
 		type = "evm";
@@ -60,6 +65,7 @@ export async function loader(ctx: LoaderFunctionArgs) {
 		type = undefined;
 	}
 
+	// Analyze the information retrieved
 	const analysis = await analyzeInfo(info, type);
 	const context = `[[citation:0]] ${analysis}`;
 
@@ -83,9 +89,6 @@ export async function loader(ctx: LoaderFunctionArgs) {
 					maxTokens: 4096,
 				});
 
-				console.log("Result type:", typeof result);
-				console.log("Result:", result);
-
 				if (result && typeof result === "object" && "text" in result) {
 					send({
 						data: JSON.stringify({
@@ -93,20 +96,21 @@ export async function loader(ctx: LoaderFunctionArgs) {
 						}),
 					});
 
+					// Save the answer to database
 					await prisma.query.update({
 						where: {
 							id: queryId,
 						},
 						data: {
 							answer: result.text,
+							keyword: searchKeyword,
 						},
 					});
 				} else {
 					console.error("Unexpected result format:", result);
 					send({
 						data: JSON.stringify({
-							error:
-								"An unexpected error occurred while processing the response.",
+							error: "An unexpected error occurred while processing the response.",
 						}),
 					});
 				}

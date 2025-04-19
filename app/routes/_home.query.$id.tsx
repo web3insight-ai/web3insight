@@ -17,7 +17,6 @@ import {
 	Spinner,
 	Link,
 	Chip,
-	Tooltip,
 } from "@nextui-org/react";
 import { Sparkles, ExternalLink, BadgeCent } from "lucide-react";
 import { Footer } from "~/components/Footer";
@@ -219,16 +218,12 @@ export default function QueryPage() {
 	const askErrorType = askFetcher.data?.type;
 
 	const analyzeFetcher = useFetcher<{ error: string; type: ErrorType }>();
-	const analyzeErrorMessage = analyzeFetcher.data?.error;
-	const analyzeErrorType = analyzeFetcher.data?.type;
+	const analyzing = analyzeFetcher.state === "submitting";
 
 	const rewardFetcher = useFetcher<{ error: string; type: ErrorType }>();
-	const rewardErrorMessage = rewardFetcher.data?.error;
-	const rewardErrorType = rewardFetcher.data?.type;
+	const sending = rewardFetcher.state === "submitting";
 
 	const asking = askFetcher.state === "submitting";
-	const analyzing = analyzeFetcher.state === "submitting";
-	const sending = rewardFetcher.state === "submitting";
 
 	const [isChartLoading, setIsChartLoading] = useState(true);
 	const [analyzingRepo, setAnalyzingRepo] = useState<string | null>(null);
@@ -575,7 +570,7 @@ export default function QueryPage() {
 																		const newQuery = `Analyze the GitHub repository ${repo}`;
 																		analyzeFetcher.submit(
 																			{ query: newQuery },
-																			{ method: "post", action: "/?index" },
+																			{ method: "post", action: "/" }
 																		);
 																	}}
 																>
@@ -677,8 +672,18 @@ export default function QueryPage() {
 									</div>
 								) : (
 									<ParticipantsChart
-										data={loaderData.participantsData}
-										repoName={loaderData.keyword}
+										data={{
+											participants: loaderData.participantsData?.participants ?
+												(typeof loaderData.participantsData.participants === 'object' ?
+													loaderData.participantsData.participants : {}) : {},
+											newContributors: loaderData.participantsData?.newContributors ?
+												(typeof loaderData.participantsData.newContributors === 'object' ?
+													loaderData.participantsData.newContributors : {}) : {},
+											inactiveContributors: loaderData.participantsData?.inactiveContributors ?
+												(typeof loaderData.participantsData.inactiveContributors === 'object' ?
+													loaderData.participantsData.inactiveContributors : {}) : {},
+										}}
+										repoName={loaderData.keyword || ''}
 									/>
 								)}
 							</div>
@@ -692,7 +697,7 @@ export default function QueryPage() {
 					transition={{ duration: 0.5, delay: 1.4 }}
 					className="mt-8 sm:mt-12"
 				>
-					<askFetcher.Form method="POST" action="/?index">
+					<askFetcher.Form method="POST" action="/">
 						<div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
 							<Input
 								placeholder="Evaluate a new one..."

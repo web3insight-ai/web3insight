@@ -8,3 +8,7 @@ node_modules
 .deps/
 .states/
 artifacts/
+.roomodes
+memory-bank/
+.cursorrules
+.windsurfrules
