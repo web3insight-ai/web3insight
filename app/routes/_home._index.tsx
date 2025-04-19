@@ -16,6 +16,8 @@ import { Prisma } from "@prisma/client";
 import { guestSearchLimiter, userSearchLimiter } from "~/limiter.server";
 import { getClientIPAddress } from "remix-utils/get-client-ip-address";
 import { useEffect } from "react";
+import { useAtom } from "jotai";
+import { authModalOpenAtom, authModalTypeAtom } from "~/atoms";
 
 export enum ErrorType {
 	Basic = "Basic",
@@ -235,19 +237,28 @@ export default function Index() {
 	const asking = fetcher.state === "submitting";
 	const errorMessage = fetcher.data?.error;
 	const errorType = fetcher.data?.type;
+	const [, setAuthModalOpen] = useAtom(authModalOpenAtom);
+	const [, setAuthModalType] = useAtom(authModalTypeAtom);
 
 	useEffect(() => {
 		if (fetcher.state === "idle" && errorMessage) {
 			if (errorType === ErrorType.SigninNeeded) {
-				// Handle sign-in needed error
-				console.log("Sign-in needed");
+				// Open the sign-in modal when unauthorized
+				setAuthModalType("signin");
+				setAuthModalOpen(true);
 			}
 			if (errorType === ErrorType.ReachMaximized) {
 				// Handle usage limit reached error
 				console.log("Usage limit reached");
 			}
 		}
-	}, [fetcher.state, errorMessage, errorType]);
+	}, [fetcher.state, errorMessage, errorType, setAuthModalOpen, setAuthModalType]);
+
+	// Function to handle signup click
+	const handleSignupClick = () => {
+		setAuthModalType("signup");
+		setAuthModalOpen(true);
+	};
 
 	// Simple line chart component
 	const MiniChart = ({ data, color = "primary", height = 40 }: { data: number[], color?: string, height?: number }) => {
@@ -697,7 +708,7 @@ export default function Index() {
 								<p className="text-gray-600 dark:text-gray-300">Sign up to access advanced analytics and custom reports.</p>
 							</div>
 							<div className="flex gap-3">
-								<Button color="primary" size="lg" className="font-medium">
+								<Button color="primary" size="lg" className="font-medium" onClick={handleSignupClick}>
 									Sign up free
 								</Button>
 								<Button variant="bordered" size="lg" className="font-medium">
