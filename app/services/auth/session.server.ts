@@ -154,3 +154,9 @@ export async function getSessionData(request: Request): Promise<SessionData> {
     userId: session.get("userId"),
   };
 }
+
+// Get JWT token from session
+export async function getJwt(request: Request): Promise<string | null> {
+  const session = await getSession(request);
+  return session.get("userJwt") || null;
+}
