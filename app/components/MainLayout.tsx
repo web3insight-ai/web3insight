@@ -1,23 +1,15 @@
 import { NavToolbar } from "~/components/NavToolbar";
 import AuthModal from "~/components/auth/AuthModal";
-
-type UserData = {
-  id: number;
-  username: string;
-  email: string;
-  confirmed: boolean;
-  blocked?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-};
+import type { StrapiUser } from "~/services/auth/strapi.server";
 
 type MainLayoutProps = {
   children: React.ReactNode;
   history: {
     query: string;
     id: string;
+    documentId: string;
   }[];
-  user: UserData | null;
+  user: StrapiUser | null;
 };
 
 export function MainLayout({ children, history, user }: MainLayoutProps) {

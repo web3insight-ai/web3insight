@@ -1,42 +1,72 @@
 import { json, LoaderFunctionArgs } from "@remix-run/node";
-import { prisma } from "~/prisma.server";
-import { Outlet, useLoaderData } from "@remix-run/react";
-import { getUser } from "~/services/auth/session.server";
+import { Outlet, useLoaderData, useOutletContext } from "@remix-run/react";
 import { MainLayout } from "~/components/MainLayout";
+import { getUser } from "~/services/auth/session.server";
+import { fetchPinnedQueries, fetchUserQueries } from "~/services/strapi";
+import type { StrapiUser } from "~/services/auth/strapi.server";
+
+// Define query history type
+type QueryHistory = {
+	query: string;
+	id: string;
+	documentId: string;
+}[];
+
+type RootContext = {
+	user: StrapiUser | null;
+	setUser: (user: StrapiUser | null) => void;
+};
 
 export const loader = async (ctx: LoaderFunctionArgs) => {
-	const userData = await getUser(ctx.request);
+	const user = await getUser(ctx.request);
 
-	// For now, just return empty history for Strapi users
-	// This will need to be updated after a proper schema migration
-	const history: {
-		query: string;
-		id: string;
-	}[] = [];
+	let history: QueryHistory = [];
+	let pinned: QueryHistory = [];
 
-	const pinned = await prisma.query.findMany({
-		where: {
-			pin: true,
-		},
-		select: {
-			id: true,
-			query: true,
-		},
-	});
+	// Fetch user's query history from Strapi if user is logged in
+	if (user && user.id) {
+		const userQueries = await fetchUserQueries(user.id, 10);
+
+		history = userQueries
+			.filter(query => query.query)
+			.map(query => ({
+				id: query.id.toString(),
+				documentId: query.documentId,
+				query: query.query
+			}))
+			.filter(item => item.query && item.query.trim() !== "" && item.query !== "Untitled query");
+	}
+
+	// Fetch pinned queries
+	const pinnedQueriesData = await fetchPinnedQueries();
+
+	pinned = pinnedQueriesData
+		.filter(query => query.query)
+		.map(query => ({
+			id: query.id.toString(),
+			documentId: query.documentId,
+			query: query.query
+		}))
+		.filter(item => item.query && item.query.trim() !== "" && item.query !== "Untitled query");
 
 	return json({
-		user: userData, // The actual user data from Strapi
+		user,
 		pinned,
 		history,
 	});
 };
 
 export default function HomeLayout() {
-	const { history, user } = useLoaderData<typeof loader>();
+	const { history, pinned, user } = useLoaderData<typeof loader>();
+	const { setUser } = useOutletContext<RootContext>();
+
+	// Combine pinned and regular history for display
+	// This ensures we show both the user's history and pinned queries
+	const combinedHistory = [...(pinned || []), ...(history || [])];
 
 	return (
-		<MainLayout history={history} user={user}>
-			<Outlet context={{ user }} />
+		<MainLayout history={combinedHistory} user={user}>
+			<Outlet context={{ user, setUser }} />
 		</MainLayout>
 	);
 }

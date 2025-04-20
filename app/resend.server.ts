@@ -9,7 +9,7 @@ export async function sendRewardClaimEmail(
 ) {
 	try {
 		const { data, error } = await resend.emails.send({
-			from: "Web3Insights <noreply@resend.pseudoyu.com>",
+			from: "Web3Insights <support@web3insights.app>",
 			to: [recipientEmail],
 			subject: `Your Reward for ${projectName} Contributions is Ready!`,
 			html: `

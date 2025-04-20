@@ -6,7 +6,6 @@ import {
 } from "@remix-run/node";
 import { useFetcher, useLoaderData, useParams } from "@remix-run/react";
 import { useEffect, useMemo, useState } from "react";
-import { prisma } from "~/prisma.server";
 import { useEventSource } from "remix-utils/sse/react";
 import Markdown from "react-markdown";
 import {
@@ -20,7 +19,6 @@ import {
 } from "@nextui-org/react";
 import { Sparkles, ExternalLink, BadgeCent } from "lucide-react";
 import { Footer } from "~/components/Footer";
-import { getAuth } from "@clerk/remix/ssr.server";
 import { useAtom } from "jotai";
 import { signinModalOpenAtom } from "~/atoms";
 import { ErrorType } from "./_home._index";
@@ -31,6 +29,15 @@ import CommunityOpenRank from "~/components/CommunityOpenRank";
 import axios from "axios";
 import { isAddress } from "viem";
 import { motion, AnimatePresence } from "framer-motion";
+import { getUser } from "~/services/auth/session.server";
+import { fetchQuery, fetchUserQueries } from "~/services/strapi";
+
+// Define query history type
+type QueryHistory = {
+	query: string;
+	id: string;
+	documentId: string;
+}[];
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	const title = data ? `${data.query} - Web3Insights` : "Web3Insights";
@@ -53,10 +60,8 @@ async function fetchOpenDiggerData(name: string, type: string) {
 
 	try {
 		const response = await axios.get(url);
-		const data = response.data;
-		return data;
+		return response.data;
 	} catch (error) {
-		console.error(`Error fetching OpenDigger ${type} data:`, error);
 		return null;
 	}
 }
@@ -78,7 +83,6 @@ async function fetchParticipantsData(repoName: string) {
 			]);
 		return { participants, newContributors, inactiveContributors };
 	} catch (error) {
-		console.error("Error fetching participants data:", error);
 		return null;
 	}
 }
@@ -98,7 +102,7 @@ async function fetchCommunityOpenRankData(repoName: string) {
 		const recentMonths = sortedMonths.slice(0, 6);
 
 		// Create a new object with only the recent months' data
-		const recentData: Record<string, any> = {};
+		const recentData: Record<string, Record<string, number>> = {};
 		recentMonths.forEach((month) => {
 			recentData[month] = data.data[month];
 		});
@@ -109,91 +113,134 @@ async function fetchCommunityOpenRankData(repoName: string) {
 			data: recentData,
 		};
 	} catch (error) {
-		console.error("Error fetching Community OpenRank data:", error);
+		return null;
+	}
+}
+
+// Function to fetch ecosystem data from Strapi API
+async function fetchEcosystemData(keyword: string) {
+	if (!keyword) return null;
+
+	try {
+		// Make sure we have a proper Strapi URL
+		const strapiUrl = process.env.STRAPI_API_URL || 'http://localhost:1337';
+
+		const response = await axios.get(
+			`${strapiUrl}/api/ecosystems`,
+			{
+				params: {
+					'filters[name][$eqi]': keyword,
+					'populate[logo][fields][0]': 'url'
+				},
+				headers: {
+					'Authorization': `Bearer ${process.env.STRAPI_API_TOKEN}`
+				}
+			}
+		);
+
+		// Check if we have data
+		if (response.data.data.length === 0) {
+			return null;
+		}
+
+		// Extract first result and transform to expected format
+		const ecosystemData = response.data.data[0];
+
+		// Handle logo URL based on response structure
+		const logoUrl = ecosystemData.attributes?.logo?.data?.attributes?.url || ecosystemData.logo?.url || "";
+
+		// Map Strapi ecosystem data to the project data format expected by the UI
+		return {
+			id: ecosystemData.id,
+			documentId: ecosystemData.documentId,
+			name: ecosystemData.attributes?.name || ecosystemData.name,
+			description: ecosystemData.attributes?.description || ecosystemData.description,
+			website: ecosystemData.attributes?.website || ecosystemData.website,
+			type: "ecosystem", // Set type to ecosystem
+			logo: logoUrl, // Use the extracted logo URL
+			coreContributors: ecosystemData.attributes?.coreContributors || ecosystemData.coreContributors || [],
+			coreRepos: ecosystemData.attributes?.coreRepos || ecosystemData.coreRepos || []
+		};
+	} catch (error) {
+		console.error("Error fetching ecosystem data from Strapi:", error);
 		return null;
 	}
 }
 
 export const loader = async (ctx: LoaderFunctionArgs) => {
-	const auth = await getAuth(ctx);
+	const user = await getUser(ctx.request);
 
-	let history: {
-		query: string;
-		id: string;
-	}[] = [];
+	let history: QueryHistory = [];
 
-	if (auth.userId) {
-		history = await prisma.query.findMany({
-			where: {
-				owner: {
-					clerkUserId: auth.userId,
-				},
-			},
-			select: {
-				id: true,
-				query: true,
-			},
-			orderBy: {
-				createdAt: "desc",
-			},
-			take: 10,
-		});
+	// Fetch user's query history from Strapi if user is logged in
+	if (user && user.id) {
+		const userQueries = await fetchUserQueries(user.id, 10);
+		history = userQueries.map(query => ({
+			id: query.id.toString(),
+			documentId: query.documentId,
+			query: query.query || "Untitled query"
+		})).filter(item => item.query); // Filter out any potentially invalid items
 	}
 
 	const queryId = ctx.params.id as string;
-	const query = await prisma.query.findUnique({
-		where: {
-			id: queryId,
-		},
-	});
 
-	if (!query) {
-		return redirect("/");
-	}
+	// Fetch query from Strapi
+	try {
+		const queryData = await fetchQuery(queryId);
 
-	let openRankData = null;
-	let attentionData = null;
-	let participantsData = null;
-	let communityOpenRankData = null;
-	let projectData = null;
-	if (query.keyword) {
-		const type =
-			isAddress(query.keyword) || query.keyword.endsWith(".eth")
-				? "evm"
-				: query.keyword.includes("/")
-					? "github_repo"
-					: "other";
-
-		if (type === "github_repo") {
-			const openDiggerName = `github/${query.keyword}`;
-			openRankData = await fetchOpenDiggerData(openDiggerName, "openrank");
-			attentionData = await fetchOpenDiggerData(openDiggerName, "attention");
-			participantsData = await fetchParticipantsData(query.keyword);
-			communityOpenRankData = await fetchCommunityOpenRankData(query.keyword);
+		if (!queryData) {
+			return redirect("/");
 		}
 
-		projectData = await prisma.project.findFirst({
-			where: {
-				name: {
-					equals: query.keyword,
-					mode: "insensitive",
-				},
-			},
-		});
-	}
+		const query = queryData;
+		if (!query) {
+			return redirect("/");
+		}
 
-	return json({
-		query: query?.query,
-		answer: query?.answer,
-		keyword: query.keyword,
-		references: query?.references,
-		history,
-		openRankData,
-		attentionData,
-		participantsData,
-		communityOpenRankData,
-		projectData,
-	});
+		const keyword = query.keyboard || ""; // Note: keyboard is used instead of keyword due to schema
+
+		let openRankData = null;
+		let attentionData = null;
+		let participantsData = null;
+		let communityOpenRankData = null;
+		let projectData = null;
+
+		if (keyword) {
+			const type =
+				isAddress(keyword) || keyword.endsWith(".eth")
+					? "evm"
+					: keyword.includes("/")
+						? "github_repo"
+						: "other";
+
+			if (type === "github_repo") {
+				const openDiggerName = `github/${keyword}`;
+				openRankData = await fetchOpenDiggerData(openDiggerName, "openrank");
+				attentionData = await fetchOpenDiggerData(openDiggerName, "attention");
+				participantsData = await fetchParticipantsData(keyword);
+				communityOpenRankData = await fetchCommunityOpenRankData(keyword);
+			}
+
+			// Fetch project data from Strapi API
+			projectData = await fetchEcosystemData(keyword);
+		}
+
+		return json({
+			query: query.query,
+			answer: query.answer,
+			keyword,
+			references: null, // This doesn't seem to be in the new schema
+			history,
+			openRankData,
+			attentionData,
+			participantsData,
+			communityOpenRankData,
+			projectData,
+		});
+	} catch (error) {
+		console.error("Error fetching query:", error);
+		return redirect("/");
+	}
 };
 
 function Placeholder() {
@@ -406,7 +453,7 @@ export default function QueryPage() {
 										<tbody className="relative">
 											<AnimatePresence>
 												{loaderData.projectData.coreContributors?.map(
-													(contributor, index) => (
+													(contributor: string, index: number) => (
 														<motion.tr
 															key={contributor}
 															initial={{ opacity: 0, y: 10 }}
@@ -519,7 +566,7 @@ export default function QueryPage() {
 										</thead>
 										<tbody className="relative">
 											<AnimatePresence>
-												{loaderData.projectData.coreRepos.map((repo, index) => (
+												{loaderData.projectData.coreRepos.map((repo: string, index: number) => (
 													<motion.tr
 														key={repo}
 														initial={{ opacity: 0, y: 10 }}

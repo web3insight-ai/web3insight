@@ -9,15 +9,14 @@ import {
 import { Link, useLoaderData, useFetcher } from "@remix-run/react";
 import { Code2, Github, Users, Warehouse, Zap, ArrowRight, ArrowUpRight, ArrowDownRight, Database, Hash, TrendingUp, Search, Crown } from "lucide-react";
 import { getSearchKeyword } from "~/engine.server";
-import { prisma } from "~/prisma.server";
 import Logo from "../images/logo.png";
-import { getAuth } from "@clerk/remix/ssr.server";
-import { Prisma } from "@prisma/client";
+import { getUser } from "~/services/auth/session.server";
 import { guestSearchLimiter, userSearchLimiter } from "~/limiter.server";
 import { getClientIPAddress } from "remix-utils/get-client-ip-address";
 import { useEffect } from "react";
 import { useAtom } from "jotai";
 import { authModalOpenAtom, authModalTypeAtom } from "~/atoms";
+import { createQuery, fetchPinnedQueries, fetchUserQueries } from "~/services/strapi";
 
 export enum ErrorType {
 	Basic = "Basic",
@@ -40,41 +39,44 @@ export const meta: MetaFunction = () => {
 	];
 };
 
+// Define query history type
+type QueryHistory = {
+	query: string;
+	id: string;
+	documentId: string;
+}[];
+
 export const loader = async (ctx: LoaderFunctionArgs) => {
-	const auth = await getAuth(ctx);
+	const user = await getUser(ctx.request);
 
-	let history: {
-		query: string;
-		id: string;
-	}[] = [];
+	let history: QueryHistory = [];
+	let pinned: QueryHistory = [];
 
-	if (auth.userId) {
-		history = await prisma.query.findMany({
-			where: {
-				owner: {
-					clerkUserId: auth.userId,
-				},
-			},
-			select: {
-				id: true,
-				query: true,
-			},
-			orderBy: {
-				createdAt: "desc",
-			},
-			take: 10,
-		});
+	// Fetch user's query history from Strapi if user is logged in
+	if (user && user.id) {
+		const userQueries = await fetchUserQueries(user.id, 10);
+
+		history = userQueries
+			.filter(query => query.query)
+			.map(query => ({
+				id: query.id.toString(),
+				documentId: query.documentId,
+				query: query.query
+			}))
+			.filter(item => item.query && item.query.trim() !== "" && item.query !== "Untitled query");
 	}
 
-	const pinned = await prisma.query.findMany({
-		where: {
-			pin: true,
-		},
-		select: {
-			id: true,
-			query: true,
-		},
-	});
+	// Fetch pinned queries
+	const pinnedQueriesData = await fetchPinnedQueries();
+
+	pinned = pinnedQueriesData
+		.filter(query => query.query)
+		.map(query => ({
+			id: query.id.toString(),
+			documentId: query.documentId,
+			query: query.query
+		}))
+		.filter(item => item.query && item.query.trim() !== "" && item.query !== "Untitled query");
 
 	return json({
 		pinned,
@@ -83,21 +85,21 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
 };
 
 export const action = async (ctx: ActionFunctionArgs) => {
-	const auth = await getAuth(ctx);
+	const user = await getUser(ctx.request);
 
 	let searchLimiter = guestSearchLimiter;
 	let key = getClientIPAddress(ctx.request.headers) || "unknown";
 
-	if (auth.userId) {
+	if (user) {
 		searchLimiter = userSearchLimiter;
-		key = auth.userId;
+		key = user.id.toString();
 	}
 
 	try {
 		await searchLimiter.consume(key, 1);
 	} catch (e) {
 		// reach limit
-		if (auth.userId) {
+		if (user) {
 			return json({
 				type: ErrorType.ReachMaximized,
 				error: "Usage limit exceeded",
@@ -129,34 +131,32 @@ export const action = async (ctx: ActionFunctionArgs) => {
 		);
 	}
 
-	const owner = auth.userId
-		? ({
-				connectOrCreate: {
-					where: {
-						clerkUserId: auth.userId,
-					},
-					create: {
-						clerkUserId: auth.userId,
-					},
-				},
-			} satisfies Prisma.UserCreateNestedOneWithoutQueriesInput)
-		: undefined;
-
-	if (query) {
-		const newQuery = await prisma.query.create({
-			data: {
+	// Create the query in Strapi
+	try {
+		// If the user is authenticated, link the query to their account
+		if (user) {
+			const newQuery = await createQuery({
 				query,
-				keyword,
-				owner,
-			},
-		});
-		return redirect(`/query/${newQuery.id}`);
-	}
+				keyboard: keyword,
+				userId: user.id
+			});
 
-	return json(
-		{ error: "No query provided", type: ErrorType.Basic },
-		{ status: 400 },
-	);
+			return redirect(`/query/${newQuery.documentId}`);
+		} else {
+			// Create a query without a user association
+			const newQuery = await createQuery({
+				query,
+				keyboard: keyword
+			});
+
+			return redirect(`/query/${newQuery.documentId}`);
+		}
+	} catch (error) {
+		return json(
+			{ error: "Failed to create query", type: ErrorType.Basic },
+			{ status: 500 }
+		);
+	}
 };
 
 // Define chip color type
@@ -381,10 +381,6 @@ export default function Index() {
 				setAuthModalType("signin");
 				setAuthModalOpen(true);
 			}
-			if (errorType === ErrorType.ReachMaximized) {
-				// Handle usage limit reached error
-				console.log("Usage limit reached");
-			}
 		}
 	}, [fetcher.state, errorMessage, errorType, setAuthModalOpen, setAuthModalType]);
 
@@ -483,11 +479,11 @@ export default function Index() {
 						</div>
 
 						{/* Pinned Queries */}
-						{pinned.length > 0 && (
+						{pinned && pinned.length > 0 ? (
 							<div className="mt-8">
 								<div className="flex gap-2 items-center justify-center flex-wrap">
 									{pinned.map((query) => (
-										<Link to={`/query/${query.id}`} key={query.id}>
+										<Link to={`/query/${query.documentId}`} key={query.documentId}>
 											<Chip
 												variant="flat"
 												color="default"
@@ -499,6 +495,20 @@ export default function Index() {
 										</Link>
 									))}
 								</div>
+							</div>
+						) : (
+							// If you want to show something when there are no pinned queries
+							<div className="mt-8">
+								<Link to="/query/new">
+									<Button
+										variant="flat"
+										color="primary"
+										size="sm"
+										startContent={<Hash size={14} />}
+									>
+										Start a new query
+									</Button>
+								</Link>
 							</div>
 						)}
 					</div>
@@ -753,12 +763,12 @@ export default function Index() {
 										{repo.stars.toLocaleString()}
 									</div>
 
-                                    {/* Forks - adding mock data */}
+									{/* Forks - adding mock data */}
 									<div className="col-span-1 text-right font-medium text-gray-700 dark:text-gray-300">
 										{Math.floor(repo.stars * 0.3).toLocaleString()}
 									</div>
 
-                                    {/* PRs - adding mock data */}
+									{/* PRs - adding mock data */}
 									<div className="col-span-2 text-right font-medium text-gray-700 dark:text-gray-300">
 										<div className="flex items-center justify-end gap-1">
 											<span>{Math.floor(repo.commits * 0.4).toLocaleString()}</span>
@@ -766,7 +776,7 @@ export default function Index() {
 										</div>
 									</div>
 
-                                    {/* Issues - adding mock data */}
+									{/* Issues - adding mock data */}
 									<div className="col-span-2 text-right font-medium text-gray-700 dark:text-gray-300">
 										<div className="flex items-center justify-end gap-1">
 											<span>{Math.floor(repo.commits * 0.25).toLocaleString()}</span>

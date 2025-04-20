@@ -6,6 +6,7 @@ import { getUser } from "~/services/auth/session.server";
 import { useAtom } from "jotai";
 import { authModalOpenAtom, authModalTypeAtom } from "~/atoms";
 import { MainLayout } from "~/components/MainLayout";
+import { fetchUserQueries } from "~/services/strapi";
 
 export const meta: MetaFunction = () => {
   return [
@@ -14,21 +15,34 @@ export const meta: MetaFunction = () => {
   ];
 };
 
+// Define query history type
+type QueryHistory = {
+  query: string;
+  id: string;
+  documentId: string;
+}[];
+
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   // Get user data
-  const userData = await getUser(request);
-  if (!userData) {
+  const user = await getUser(request);
+  if (!user) {
     return redirect("/");
   }
 
-  // Empty history for now, similar to home layout
-  const history: {
-    query: string;
-    id: string;
-  }[] = [];
+  let history: QueryHistory = [];
+
+  // Fetch user's query history from Strapi if user is logged in
+  if (user && user.id) {
+    const userQueries = await fetchUserQueries(user.id, 10);
+    history = userQueries.map(query => ({
+      id: query.id.toString(),
+      documentId: query.documentId,
+      query: query.query || "Untitled query"
+    })).filter(item => item.query); // Filter out any potentially invalid items
+  }
 
   return json({
-    user: userData,
+    user,
     history
   });
 };

@@ -9,7 +9,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   try {
     const body = await request.json();
-    const { identifier, password, redirectTo } = body;
+    const { identifier, password, redirectTo, clientSide } = body;
 
     if (!identifier || !password) {
       return json({ error: "Email/username and password are required" }, { status: 400 });
@@ -26,11 +26,37 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
     // If login successful, create a session
     if (loginData.jwt && loginData.user) {
-      return createUserSession(
-        String(loginData.user.id),
-        loginData.jwt,
-        redirectTo || "/"
-      );
+      // If this is a client-side request, just return success without redirect
+      if (clientSide) {
+        const cookieHeader = await createUserSession({
+          request,
+          userJwt: loginData.jwt,
+          userId: loginData.user.id,
+          redirectTo: '/',
+          returnCookieHeader: true
+        });
+
+        return json({
+          success: true,
+          user: {
+            id: loginData.user.id,
+            username: loginData.user.username,
+            email: loginData.user.email
+          }
+        }, {
+          headers: {
+            "Set-Cookie": cookieHeader
+          }
+        });
+      }
+
+      // Otherwise, create session with redirect
+      return createUserSession({
+        request,
+        userJwt: loginData.jwt,
+        userId: loginData.user.id,
+        redirectTo: redirectTo || "/"
+      });
     }
 
     // If we got here, something unexpected happened

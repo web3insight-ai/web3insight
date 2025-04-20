@@ -8,19 +8,65 @@ import {
 	getInfo,
 	getSearchKeyword,
 } from "~/engine.server";
-import { prisma } from "~/prisma.server";
 import { generateText } from "ai";
 import { isAddress } from "viem";
+import axios from "axios";
+
+// Function to fetch a query from Strapi API
+async function fetchQueryFromStrapi(queryId: string) {
+	try {
+		const strapiUrl = process.env.STRAPI_URL || 'http://localhost:1337';
+
+		const response = await axios.get(
+			`${strapiUrl}/api/queries/${queryId}`,
+			{
+				headers: {
+					'Authorization': `Bearer ${process.env.STRAPI_API_TOKEN}`
+				}
+			}
+		);
+
+		if (!response.data || !response.data.data) {
+			return null;
+		}
+
+		return response.data.data;
+	} catch (error) {
+		console.error("Error fetching query from Strapi:", error);
+		return null;
+	}
+}
+
+// Function to update a query in Strapi API
+async function updateQueryInStrapi(queryId: string, data: { answer?: string, keyboard?: string }) {
+	try {
+		const strapiUrl = process.env.STRAPI_URL || 'http://localhost:1337';
+
+		await axios.put(
+			`${strapiUrl}/api/queries/${queryId}`,
+			{
+				data
+			},
+			{
+				headers: {
+					'Authorization': `Bearer ${process.env.STRAPI_API_TOKEN}`,
+					'Content-Type': 'application/json'
+				}
+			}
+		);
+
+		return true;
+	} catch (error) {
+		console.error("Error updating query in Strapi:", error);
+		return false;
+	}
+}
 
 export async function loader(ctx: LoaderFunctionArgs) {
 	const queryId = ctx.params.queryId as string;
 
-	// Fetch the query from database
-	const query = await prisma.query.findUnique({
-		where: {
-			id: queryId,
-		},
-	});
+	// Fetch the query from Strapi
+	const query = await fetchQueryFromStrapi(queryId);
 
 	if (!query) {
 		return redirect("/");
@@ -96,15 +142,10 @@ export async function loader(ctx: LoaderFunctionArgs) {
 						}),
 					});
 
-					// Save the answer to database
-					await prisma.query.update({
-						where: {
-							id: queryId,
-						},
-						data: {
-							answer: result.text,
-							keyword: searchKeyword,
-						},
+					// Save the answer to Strapi
+					await updateQueryInStrapi(queryId, {
+						answer: result.text,
+						keyboard: searchKeyword // Note: keyboard is used instead of keyword in Strapi schema
 					});
 				} else {
 					console.error("Unexpected result format:", result);

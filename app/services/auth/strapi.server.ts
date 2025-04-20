@@ -1,5 +1,5 @@
 import { json } from "@remix-run/node";
-import { STRAPI_API_URL, STRAPI_API_TOKEN } from "~/services/env.server";
+import { STRAPI_API_URL } from "~/services/env.server";
 import { getStrapiUrl, getStrapiHeaders } from "~/services/strapi.server";
 
 // Interface for user data
@@ -76,7 +76,10 @@ export async function loginUser(identifier: string, password: string) {
 // Register a new user
 export async function registerUser(username: string, email: string, password: string) {
   try {
-    const response = await fetch(`${STRAPI_API_URL}/api/auth/local/register`, {
+    const registerEndpoint = getStrapiUrl('api/auth/local/register');
+    console.log(`Attempting registration with Strapi at: ${registerEndpoint}`);
+
+    const response = await fetch(registerEndpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -88,38 +91,48 @@ export async function registerUser(username: string, email: string, password: st
       }),
     });
 
+    console.log("Strapi registration response status:", response.status);
     const data = await response.json();
+    console.log("Strapi registration response data:", JSON.stringify(data));
 
     if (!response.ok) {
       let errorMessage = "Registration failed";
 
-      if (data.error?.message) {
-        errorMessage = data.error.message;
+      if (data.error) {
+        if (typeof data.error === 'string') {
+          errorMessage = data.error;
+        } else if (data.error.message) {
+          errorMessage = data.error.message;
+        }
       }
 
-      return json(
-        { error: errorMessage },
-        { status: response.status }
-      );
+      console.error("Registration error:", errorMessage);
+      return json({ error: errorMessage }, { status: response.status });
     }
 
-    // Send confirmation email using Strapi's built-in endpoint
-    const confirmationResponse = await fetch(`${STRAPI_API_URL}/api/auth/send-email-confirmation`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${STRAPI_API_TOKEN}`,
-      },
-      body: JSON.stringify({
-        email: email,
-      }),
-    });
+    // Check if we need to send confirmation email
+    if (data.user && !data.user.confirmed) {
+      try {
+        // Send confirmation email using Strapi's built-in endpoint
+        const confirmationResponse = await fetch(getStrapiUrl('api/auth/send-email-confirmation'), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${data.jwt}`,
+          },
+          body: JSON.stringify({
+            email: email,
+          }),
+        });
 
-    if (!confirmationResponse.ok) {
-      return json({
-        ...data,
-        message: "Registration successful but verification email could not be sent. Please contact support."
-      });
+        if (!confirmationResponse.ok) {
+          console.warn("Failed to send confirmation email");
+        } else {
+          console.log("Confirmation email sent successfully");
+        }
+      } catch (error) {
+        console.error("Error sending confirmation email:", error);
+      }
     }
 
     return json({
@@ -150,31 +163,14 @@ export async function getCurrentUser(token: string) {
     });
 
     if (!response.ok) {
-      // If user token is invalid, try using admin token
-      if (response.status === 401 && STRAPI_API_TOKEN) {
-        console.log("User token invalid, trying admin token");
-        const adminResponse = await fetch(usersEndpoint, {
-          method: "GET",
-          headers: getStrapiHeaders(true),
-        });
-
-        console.log("Admin token response status:", adminResponse.status);
-
-        if (adminResponse.ok) {
-          const userData = await adminResponse.json();
-          return userData; // Return the actual user data, not wrapped in json()
-        }
-      }
-
-      console.error("Failed to get user data");
-      return { status: response.status, error: "Failed to get user data" };
+      return null;
     }
 
     const userData = await response.json();
-
-    return userData; // Return the actual user data, not wrapped in json()
+    return userData;
   } catch (error) {
-    return { status: 500, error: "An error occurred while fetching user data" };
+    console.error("Error fetching user data:", error);
+    return null;
   }
 }
 

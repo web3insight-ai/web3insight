@@ -1,7 +1,7 @@
 import { LoaderFunctionArgs, json } from "@remix-run/node";
 import { getUser } from "~/services/auth/session.server";
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+export async function loader({ request }: LoaderFunctionArgs) {
   if (request.method === "OPTIONS") {
     return new Response(null, {
       headers: {
@@ -13,29 +13,24 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   }
 
   try {
-    const userData = await getUser(request);
+    // Get the current user from the session
+    const user = await getUser(request);
 
-    if (!userData) {
-      return json({ authenticated: false, user: null }, { status: 401 });
+    if (!user) {
+      return json({ authenticated: false }, { status: 401 });
     }
 
-    // Return user data without sensitive information
     return json({
       authenticated: true,
       user: {
-        id: userData.id,
-        username: userData.username,
-        email: userData.email,
-        confirmed: userData.confirmed,
-        createdAt: userData.createdAt,
-        updatedAt: userData.updatedAt,
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        confirmed: user.confirmed
       }
     });
   } catch (error) {
     console.error("Error fetching user data:", error);
-    return json(
-      { error: "An error occurred while fetching user data" },
-      { status: 500 }
-    );
+    return json({ error: "Failed to fetch user data" }, { status: 500 });
   }
-};
+}

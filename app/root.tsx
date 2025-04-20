@@ -8,11 +8,13 @@ import {
 	json,
 	useLoaderData,
 } from "@remix-run/react";
+import { useState } from "react";
 import css from "./tailwind.css?url";
 import { NextUIProvider } from "@nextui-org/react";
 import { getUser } from "~/services/auth/session.server";
 import { LoaderFunction } from "@remix-run/node";
 import { validateEnvironment } from "~/services/env.server";
+import type { StrapiUser } from "~/services/auth/strapi.server";
 
 export const meta: MetaFunction = () => {
 	return [
@@ -32,13 +34,17 @@ export const loader: LoaderFunction = async ({ request }) => {
 	// Validate environment variables
 	validateEnvironment();
 
+	// Get user authentication data
+	const user = await getUser(request);
+
 	return json({
-		user: await getUser(request),
+		user,
 	});
 };
 
 function App() {
-	const { user } = useLoaderData<typeof loader>();
+	const { user: initialUser } = useLoaderData<typeof loader>();
+	const [user, setUser] = useState<StrapiUser | null>(initialUser);
 
 	return (
 		<html lang="en">
@@ -50,7 +56,7 @@ function App() {
 			</head>
 			<body>
 				<NextUIProvider>
-					<Outlet context={{ user }} />
+					<Outlet context={{ user, setUser }} />
 					<ScrollRestoration />
 					<Scripts />
 				</NextUIProvider>

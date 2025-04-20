@@ -1,152 +1,156 @@
 import { createCookieSessionStorage, redirect } from "@remix-run/node";
+import { StrapiUser } from "~/services/strapi";
 import { getCurrentUser } from "./strapi.server";
 
-// Session storage configuration
-export const sessionStorage = createCookieSessionStorage({
+// Cookie session configuration
+const sessionStorage = createCookieSessionStorage({
   cookie: {
     name: "web3insights_session",
-    secure: process.env.NODE_ENV === "production",
-    secrets: [process.env.SESSION_SECRET || "s3cr3t"],
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 30, // 30 days
     httpOnly: true,
+    path: "/",
+    sameSite: "lax",
+    secrets: [process.env.SESSION_SECRET || "default-secret-change-me"],
+    secure: process.env.NODE_ENV === "production",
   },
 });
 
-// Create a session with user details
-export async function createUserSession(userId: string, jwt: string, redirectTo: string) {
-  console.log("Creating session for user:", userId);
-  console.log("Redirecting to:", redirectTo);
+// Simple in-memory cache for user data
+// This will reduce repeated API calls within the same server instance
+type UserCache = {
+  [key: string]: {
+    user: StrapiUser;
+    timestamp: number;
+  };
+};
 
-  const session = await sessionStorage.getSession();
+const userCache: UserCache = {};
+const CACHE_TTL = 60 * 1000; // 60 seconds cache TTL
+
+// Session data types
+export interface SessionData {
+  userJwt?: string;
+  userId?: number;
+}
+
+// Get the session from the request
+export async function getSession(request: Request) {
+  const cookie = request.headers.get("Cookie");
+  return sessionStorage.getSession(cookie);
+}
+
+// Store user data in session
+export async function createUserSession({
+  request,
+  userJwt,
+  userId,
+  redirectTo,
+  returnCookieHeader = false,
+}: {
+  request: Request;
+  userJwt: string;
+  userId: number;
+  redirectTo: string;
+  returnCookieHeader?: boolean;
+}) {
+  const session = await getSession(request);
+  session.set("userJwt", userJwt);
   session.set("userId", userId);
-  session.set("jwt", jwt);
 
-  const cookie = await sessionStorage.commitSession(session);
-  console.log("Session cookie created");
+  const cookieHeader = await sessionStorage.commitSession(session);
 
+  // If returnCookieHeader flag is true, return just the cookie header
+  if (returnCookieHeader) {
+    return cookieHeader;
+  }
+
+  // Otherwise return redirect response with cookie header
   return redirect(redirectTo, {
     headers: {
-      "Set-Cookie": cookie,
+      "Set-Cookie": cookieHeader,
     },
   });
 }
 
-// Get user session
-export async function getUserSession(request: Request) {
-  try {
-    return sessionStorage.getSession(request.headers.get("Cookie"));
-  } catch (error) {
-    console.error("Error getting user session:", error);
-    // Return an empty session if there's an error
-    return sessionStorage.getSession();
+// Get the authenticated user from the session
+export async function getUser(request: Request): Promise<StrapiUser | null> {
+  const session = await getSession(request);
+  const userJwt = session.get("userJwt");
+
+  // If there's no JWT, user is not authenticated
+  if (!userJwt) return null;
+
+  // Check cache first
+  const now = Date.now();
+  const cachedData = userCache[userJwt];
+  if (cachedData && (now - cachedData.timestamp) < CACHE_TTL) {
+    return cachedData.user;
   }
-}
 
-// Get JWT from session
-export async function getJwt(request: Request) {
   try {
-    const session = await getUserSession(request);
-    const jwt = session.get("jwt");
+    // Fetch current user data from Strapi using the JWT
+    const userData = await getCurrentUser(userJwt);
 
-    if (!jwt) {
-      console.log("No JWT found in session");
-      return null;
-    }
-
-    return jwt;
-  } catch (error) {
-    console.error("Error getting JWT from session:", error);
-    return null;
-  }
-}
-
-// Get user details from session
-export async function getUserDetails(request: Request) {
-  try {
-    const session = await getUserSession(request);
-    const userId = session.get("userId");
-    const jwt = session.get("jwt");
-
-    if (!userId || !jwt) {
-      console.log("No user details in session");
-      return null;
-    }
-
-    return { userId, jwt };
-  } catch (error) {
-    console.error("Error getting user details:", error);
-    return null;
-  }
-}
-
-// Get logged in user
-export async function getUser(request: Request) {
-  try {
-    const userDetails = await getUserDetails(request);
-
-    if (!userDetails) {
-      console.log("getUser: No user details found in session");
-      return null;
-    }
-
-    try {
-      const userData = await getCurrentUser(userDetails.jwt);
-
-      // Check if the response indicates an error
-      if (userData.error || (userData.status && userData.status !== 200)) {
-        console.error("getUser: Failed to get user data:", userData.error || "Unknown error");
-
-        // If we can't get the user data, the session might be invalid
-        // Consider clearing the session in this case
-        if (userData.status === 401) {
-          console.log("getUser: User is not authenticated, clearing session");
-          const session = await getUserSession(request);
-          return redirect("/auth/login", {
-            headers: {
-              "Set-Cookie": await sessionStorage.destroySession(session)
-            }
-          });
-        }
-
-        return null;
-      }
+    // Check if userData is valid and not an error response
+    if (userData && !userData.error && userData.id) {
+      // Cache the result
+      userCache[userJwt] = {
+        user: userData,
+        timestamp: now
+      };
       return userData;
-    } catch (error) {
-      console.error("getUser: Error getting user data:", error);
-      return null;
     }
+
+    // If we couldn't get valid user data, return null
+    return null;
   } catch (error) {
-    console.error("getUser: Unexpected error:", error);
     return null;
   }
 }
 
-// Require authentication for a route
-export async function requireUserId(
-  request: Request,
-  redirectTo: string = new URL(request.url).pathname
-) {
-  const userDetails = await getUserDetails(request);
-
-  if (!userDetails) {
-    const searchParams = new URLSearchParams([
-      ["redirectTo", redirectTo],
-    ]);
-    throw redirect(`/auth/login?${searchParams}`);
+// Check if the user is authenticated
+export async function requireUser(request: Request, redirectTo: string = "/") {
+  const user = await getUser(request);
+  if (!user) {
+    throw redirect(redirectTo);
   }
-
-  return userDetails.userId;
+  return user;
 }
 
-// Logout user
-export async function logout(request: Request) {
-  const session = await getUserSession(request);
+// Log the user out
+export async function logout(
+  request: Request,
+  redirectTo: string = "/",
+  returnCookieHeader: boolean = false
+): Promise<Response | string> {
+  const session = await getSession(request);
+  const userJwt = session.get("userJwt");
 
-  return redirect("/", {
+  // Clear from cache if exists
+  if (userJwt && userCache[userJwt]) {
+    delete userCache[userJwt];
+  }
+
+  // Clear the session
+  const cookieHeader = await sessionStorage.destroySession(session);
+
+  // For client-side requests, just return the cookie header
+  if (returnCookieHeader) {
+    return cookieHeader;
+  }
+
+  // For server-side requests, redirect
+  return redirect(redirectTo, {
     headers: {
-      "Set-Cookie": await sessionStorage.destroySession(session),
+      "Set-Cookie": cookieHeader,
     },
   });
+}
+
+// Get session data
+export async function getSessionData(request: Request): Promise<SessionData> {
+  const session = await getSession(request);
+  return {
+    userJwt: session.get("userJwt"),
+    userId: session.get("userId"),
+  };
 }
