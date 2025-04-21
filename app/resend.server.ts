@@ -3,16 +3,16 @@ import { Resend } from "resend";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendRewardClaimEmail(
-	recipientEmail: string,
-	contributorName: string,
-	projectName: string,
+  recipientEmail: string,
+  contributorName: string,
+  projectName: string,
 ) {
-	try {
-		const { data, error } = await resend.emails.send({
-			from: "Web3Insights <support@web3insights.app>",
-			to: [recipientEmail],
-			subject: `Your Reward for ${projectName} Contributions is Ready!`,
-			html: `
+  try {
+    const { data, error } = await resend.emails.send({
+      from: "Web3Insights <support@web3insights.app>",
+      to: [recipientEmail],
+      subject: `Your Reward for ${projectName} Contributions is Ready!`,
+      html: `
         <div style="font-family: 'Arial', sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; color: #333; background-color: #f7f7f7; border-radius: 10px;">
           <div style="text-align: center; margin-bottom: 30px;">
             <img src="https://web3insights.app/logo.png" alt="Web3Insights Logo" style="width: 100px; height: auto;">
@@ -28,17 +28,17 @@ export async function sendRewardClaimEmail(
           <p style="font-size: 14px; color: #777; text-align: center;">Keep innovating,<br><strong style="color: #2c3e50;">The Web3Insights Team</strong></p>
         </div>
       `,
-		});
+    });
 
-		if (error) {
-			console.error("Error sending reward claim email:", error);
-			return { success: false, error: error.message };
-		}
+    if (error) {
+      console.error("Error sending reward claim email:", error);
+      return { success: false, error: error.message };
+    }
 
-		console.log("Reward claim email sent successfully:", data);
-		return { success: true, data };
-	} catch (err) {
-		console.error("Unexpected error sending reward claim email:", err);
-		return { success: false, error: "An unexpected error occurred" };
-	}
+    console.log("Reward claim email sent successfully:", data);
+    return { success: true, data };
+  } catch (err) {
+    console.error("Unexpected error sending reward claim email:", err);
+    return { success: false, error: "An unexpected error occurred" };
+  }
 }

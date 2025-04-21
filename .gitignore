@@ -1,8 +1,11 @@
+.editorconfig
+
 node_modules
 
 /.cache
 /build
-.env
+.env*
+!.env.example
 .DS_Store
 
 .deps/
@@ -12,3 +15,4 @@ artifacts/
 memory-bank/
 .cursorrules
 .windsurfrules
+/.vscode/
