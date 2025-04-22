@@ -1,6 +1,6 @@
 import NavToolbar from "./NavToolbar";
-import AuthModal from "~/components/auth/AuthModal";
-import type { StrapiUser } from "~/services/auth/strapi.server";
+import AuthFormDialogViewWidget from "~/auth/views/auth-form-dialog";
+import type { StrapiUser } from "#/services/auth/strapi.server";
 
 type DefaultLayoutProps = {
   children: React.ReactNode;
@@ -27,7 +27,7 @@ function DefaultLayout({ children, history, user }: DefaultLayoutProps) {
       </main>
 
       {/* Auth Modal for login/register/password reset */}
-      <AuthModal />
+      <AuthFormDialogViewWidget />
     </div>
   );
 }

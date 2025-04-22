@@ -11,10 +11,10 @@ import {
 import { useState } from "react";
 import css from "./tailwind.css?url";
 import { NextUIProvider } from "@nextui-org/react";
-import { getUser } from "~/services/auth/session.server";
+import { getUser } from "#/services/auth/session.server";
 import { LoaderFunction } from "@remix-run/node";
-import { validateEnvironment } from "~/services/env.server";
-import type { StrapiUser } from "~/services/auth/strapi.server";
+import { validateEnvironment } from "#/services/env.server";
+import type { StrapiUser } from "#/services/auth/strapi.server";
 
 export const meta: MetaFunction = () => {
   return [

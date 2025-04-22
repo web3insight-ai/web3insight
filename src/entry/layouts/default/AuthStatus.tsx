@@ -2,8 +2,8 @@ import { Popover, PopoverContent, PopoverTrigger, Button, Avatar } from "@nextui
 import { Link, useNavigate, useOutletContext } from "@remix-run/react";
 import { LogIn, LogOut, User as UserIcon, Key } from "lucide-react";
 import { useAtom } from "jotai";
-import { authModalOpenAtom, authModalTypeAtom } from "~/atoms";
-import type { StrapiUser } from "~/services/auth/strapi.server";
+import { authModalOpenAtom, authModalTypeAtom } from "#/atoms";
+import type { StrapiUser } from "#/services/auth/strapi.server";
 
 type AuthStatusProps = {
   user: StrapiUser | null;

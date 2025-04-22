@@ -1,6 +1,6 @@
 import { ActionFunctionArgs, json } from "@remix-run/node";
-import { changePassword } from "~/services/auth/strapi.server";
-import { getJwt } from "~/services/auth/session.server";
+import { changePassword } from "#/services/auth/strapi.server";
+import { getJwt } from "#/services/auth/session.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   if (request.method !== "POST") {

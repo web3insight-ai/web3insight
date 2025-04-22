@@ -1,5 +1,5 @@
 import { LoaderFunctionArgs, json, redirect } from "@remix-run/node";
-import { getUser } from "~/services/auth/session.server";
+import { getUser } from "#/services/auth/session.server";
 import { Card, CardBody, CardHeader } from "@nextui-org/react";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {

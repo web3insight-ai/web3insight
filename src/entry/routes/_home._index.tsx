@@ -8,15 +8,15 @@ import {
 } from "@remix-run/node";
 import { Link, useLoaderData, useFetcher } from "@remix-run/react";
 import { Code2, Github, Users, Warehouse, Zap, ArrowRight, ArrowUpRight, ArrowDownRight, Database, Hash, TrendingUp, Search, Crown } from "lucide-react";
-import { getSearchKeyword } from "~/engine.server";
+import { getSearchKeyword } from "#/engine.server";
 import BrandLogo from "@/components/control/brand-logo";
-import { getUser } from "~/services/auth/session.server";
-import { guestSearchLimiter, userSearchLimiter } from "~/limiter.server";
+import { getUser } from "#/services/auth/session.server";
+import { guestSearchLimiter, userSearchLimiter } from "#/limiter.server";
 import { getClientIPAddress } from "remix-utils/get-client-ip-address";
 import { useEffect } from "react";
 import { useAtom } from "jotai";
-import { authModalOpenAtom, authModalTypeAtom } from "~/atoms";
-import { createQuery, fetchPinnedQueries, fetchUserQueries } from "~/services/strapi";
+import { authModalOpenAtom, authModalTypeAtom } from "#/atoms";
+import { createQuery, fetchPinnedQueries, fetchUserQueries } from "#/services/strapi";
 
 export enum ErrorType {
   Basic = "Basic",

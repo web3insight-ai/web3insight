@@ -9,8 +9,8 @@ import { Link } from "@remix-run/react";
 import { History } from "lucide-react";
 import BrandLogo from "@/components/control/brand-logo";
 import { useMediaQuery } from "react-responsive";
-import AuthStatus from "../../components/auth/AuthStatus";
-import type { StrapiUser } from "~/services/auth/strapi.server";
+import AuthStatus from "./AuthStatus";
+import type { StrapiUser } from "#/services/auth/strapi.server";
 import { useEffect, useState, useMemo } from "react";
 
 type NavToolbarProps = {

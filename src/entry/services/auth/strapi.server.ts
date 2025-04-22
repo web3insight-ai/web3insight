@@ -1,6 +1,6 @@
 import { json } from "@remix-run/node";
-import { STRAPI_API_URL } from "~/services/env.server";
-import { getStrapiUrl, getStrapiHeaders } from "~/services/strapi.server";
+import { STRAPI_API_URL } from "#/services/env.server";
+import { getStrapiUrl, getStrapiHeaders } from "#/services/strapi.server";
 
 // Interface for user data
 export interface StrapiUser {

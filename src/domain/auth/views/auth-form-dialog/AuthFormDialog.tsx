@@ -1,9 +1,9 @@
 import { Button, Input, Modal, ModalBody, ModalContent, ModalHeader, Tabs, Tab } from "@nextui-org/react";
 import { FormEvent, useState, useEffect } from "react";
 import { useAtom } from "jotai";
-import { authModalOpenAtom, authModalTypeAtom } from "~/atoms";
+import { authModalOpenAtom, authModalTypeAtom } from "#/atoms";
 import { Form, useActionData, useNavigation, useSubmit, useRevalidator, useOutletContext } from "@remix-run/react";
-import type { StrapiUser } from "~/services/auth/strapi.server";
+import type { StrapiUser } from "#/services/auth/strapi.server";
 
 type AuthActionData = {
   error?: string;
@@ -17,7 +17,7 @@ type AuthContext = {
   setUser: (user: StrapiUser | null) => void;
 };
 
-export default function AuthModal() {
+function AuthFormDialogView() {
   const [isOpen, setIsOpen] = useAtom(authModalOpenAtom);
   const [modalType, setModalType] = useAtom(authModalTypeAtom);
   const { setUser } = useOutletContext<AuthContext>();
@@ -314,3 +314,5 @@ export default function AuthModal() {
     </Modal>
   );
 }
+
+export default AuthFormDialogView;

@@ -1,9 +1,9 @@
 import { json, LoaderFunctionArgs } from "@remix-run/node";
 import { Outlet, useLoaderData, useOutletContext } from "@remix-run/react";
-import DefaultLayout from "~/layouts/default";
-import { getUser } from "~/services/auth/session.server";
-import { fetchPinnedQueries, fetchUserQueries } from "~/services/strapi";
-import type { StrapiUser } from "~/services/auth/strapi.server";
+import DefaultLayout from "#/layouts/default";
+import { getUser } from "#/services/auth/session.server";
+import { fetchPinnedQueries, fetchUserQueries } from "#/services/strapi";
+import type { StrapiUser } from "#/services/auth/strapi.server";
 
 // Define query history type
 type QueryHistory = {

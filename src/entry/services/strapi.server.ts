@@ -1,4 +1,4 @@
-import { STRAPI_API_URL, STRAPI_API_TOKEN } from "~/services/env.server";
+import { STRAPI_API_URL, STRAPI_API_TOKEN } from "#/services/env.server";
 
 /**
  * Helper function to construct Strapi API URLs correctly

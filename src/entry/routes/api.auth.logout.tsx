@@ -1,5 +1,5 @@
 import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
-import { logout } from "~/services/auth/session.server";
+import { logout } from "#/services/auth/session.server";
 
 // Handle both GET and POST for logout
 export const loader = async ({ request }: LoaderFunctionArgs) => {

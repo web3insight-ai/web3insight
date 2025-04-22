@@ -7,7 +7,7 @@ import {
   analyzeInfo,
   getInfo,
   getSearchKeyword,
-} from "~/engine.server";
+} from "#/engine.server";
 import { generateText } from "ai";
 import { isAddress } from "viem";
 import axios from "axios";

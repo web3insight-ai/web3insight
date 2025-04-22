@@ -18,19 +18,19 @@ import {
   Chip,
 } from "@nextui-org/react";
 import { Sparkles, ExternalLink, BadgeCent } from "lucide-react";
-import { Footer } from "~/components/Footer";
+import { Footer } from "#/components/Footer";
 import { useAtom } from "jotai";
-import { signinModalOpenAtom } from "~/atoms";
+import { signinModalOpenAtom } from "#/atoms";
 import { ErrorType } from "./_home._index";
-import OpenRankChart from "~/components/OpenRankChart";
-import AttentionChart from "~/components/AttentionChart";
-import ParticipantsChart from "~/components/ParticipantsChart";
-import CommunityOpenRank from "~/components/CommunityOpenRank";
+import OpenRankChart from "#/components/OpenRankChart";
+import AttentionChart from "#/components/AttentionChart";
+import ParticipantsChart from "#/components/ParticipantsChart";
+import CommunityOpenRank from "#/components/CommunityOpenRank";
 import axios from "axios";
 import { isAddress } from "viem";
 import { motion, AnimatePresence } from "framer-motion";
-import { getUser } from "~/services/auth/session.server";
-import { fetchQuery, fetchUserQueries } from "~/services/strapi";
+import { getUser } from "#/services/auth/session.server";
+import { fetchQuery, fetchUserQueries } from "#/services/strapi";
 
 // Define query history type
 type QueryHistory = {
