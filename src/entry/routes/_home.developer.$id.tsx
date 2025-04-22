@@ -11,8 +11,11 @@ import {
 } from "@nextui-org/react";
 import { Github, Users, Code2, Zap, ArrowUpRight, ArrowDownRight, GitBranch, GitCommit, GitPullRequest, Eye } from "lucide-react";
 
+import { getTitle } from "@/utils/app";
+
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  const title = data ? `${data.developer.handle} Developer Profile - Web3Insights` : "Developer Profile - Web3Insights";
+  const baseTitle = `Developer Profile - ${getTitle()}`
+  const title = data ? `${data.developer.handle} ${baseTitle}` : baseTitle;
 
   return [
     { title },

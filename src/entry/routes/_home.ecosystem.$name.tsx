@@ -11,8 +11,11 @@ import {
 } from "@nextui-org/react";
 import { Github, Users, Warehouse, Zap, Code2, TrendingUp, ArrowUpRight, ArrowDownRight } from "lucide-react";
 
+import { getTitle } from "@/utils/app";
+
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  const title = data ? `${data.ecosystem} Ecosystem - Web3Insights` : "Ecosystem - Web3Insights";
+  const baseTitle = `Ecosystem - ${getTitle()}`
+  const title = data ? `${data.ecosystem} ${baseTitle}` : baseTitle;
 
   return [
     { title },

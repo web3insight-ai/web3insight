@@ -8,10 +8,14 @@ import {
 import { Github, Filter, SortAsc, SortDesc, Search, ArrowUpRight, ArrowDownRight, GitBranch, GitPullRequest } from "lucide-react";
 import { useState, useMemo } from "react";
 
+import { getTitle } from "@/utils/app";
+
 export const meta: MetaFunction = () => {
+  const title = `All Repositories - ${getTitle()}`;
+
   return [
-    { title: "All Repositories - Web3Insights" },
-    { property: "og:title", content: "All Repositories - Web3Insights" },
+    { title },
+    { property: "og:title", content: title },
     {
       name: "description",
       content: "Comprehensive analytics for all Web3 repositories including developer activity, stars, forks and contributions.",

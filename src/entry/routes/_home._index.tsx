@@ -18,6 +18,10 @@ import { useAtom } from "jotai";
 import { authModalOpenAtom, authModalTypeAtom } from "#/atoms";
 import { createQuery, fetchPinnedQueries, fetchUserQueries } from "#/services/strapi";
 
+import { getMetadata } from "@/utils/app";
+
+const { title, tagline, description } = getMetadata();
+
 export enum ErrorType {
   Basic = "Basic",
   SigninNeeded = "SigninNeeded",
@@ -25,16 +29,17 @@ export enum ErrorType {
 }
 
 export const meta: MetaFunction = () => {
+  const pageTitle = `${title} - ${tagline}`;
+
   return [
-    { title: "Web3Insights - Developer Report" },
+    { title: pageTitle },
     {
       property: "og:title",
-      content: "Web3Insights - Developer Report",
+      content: pageTitle,
     },
     {
       name: "description",
-      content:
-        "A comprehensive metric system for evaluating Web3 Ecosystems, Communities and Repos.",
+      content: description,
     },
   ];
 };
@@ -433,7 +438,7 @@ export default function Index() {
               <BrandLogo className="drop-shadow-md" width={120} />
             </div>
             <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl">
-              A comprehensive metric system for evaluating Web3 Ecosystems, Communities and Repos.
+              {description}
             </p>
 
             {/* Search Section - Prominently placed in hero section */}
@@ -990,7 +995,7 @@ export default function Index() {
               <NextUILink href="#" className="hover:text-primary transition-colors">Privacy</NextUILink>
               <NextUILink href="#" className="hover:text-primary transition-colors">Terms</NextUILink>
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-500 mt-6">© 2024 Web3Insights. All rights reserved.</p>
+            <p className="text-xs text-gray-500 dark:text-gray-500 mt-6">© 2024 {title}. All rights reserved.</p>
           </div>
         </footer>
       </div>

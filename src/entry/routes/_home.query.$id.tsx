@@ -32,6 +32,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { getUser } from "#/services/auth/session.server";
 import { fetchQuery, fetchUserQueries } from "#/services/strapi";
 
+import { getMetadata } from "@/utils/app";
+
+const { title: appTitle, description } = getMetadata();
+
 // Define query history type
 type QueryHistory = {
   query: string;
@@ -40,7 +44,7 @@ type QueryHistory = {
 }[];
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  const title = data ? `${data.query} - Web3Insights` : "Web3Insights";
+  const title = data ? `${data.query} - ${appTitle}` : appTitle;
   const answer = data?.answer;
 
   return [
@@ -50,7 +54,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
       name: "description",
       content: answer
         ? `${answer.slice(0, 300)}...`
-        : "A comprehensive metric system for evaluating Web3 Ecosystems, Communities and Repos.",
+        : description,
     },
   ];
 };

@@ -1,5 +1,6 @@
 import { Image, type ImageProps } from "@nextui-org/react";
 
+import { getTitle } from "../../../utils/app";
 import Logo from "./logo.png";
 
 type BrandLogoProps = {
@@ -13,7 +14,7 @@ function BrandLogo({ className, width }: BrandLogoProps) {
       className={className}
       src={Logo}
       width={width}
-      alt="Web3Insights Logo"
+      alt={`${getTitle()} Logo`}
     />
   );
 }

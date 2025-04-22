@@ -16,10 +16,12 @@ import { LoaderFunction } from "@remix-run/node";
 import { validateEnvironment } from "#/services/env.server";
 import type { StrapiUser } from "#/services/auth/strapi.server";
 
+import { getTitle } from "@/utils/app";
+
 export const meta: MetaFunction = () => {
   return [
     {
-      title: "Web3Insights - Blockchain Analytics",
+      title: `${getTitle()} - Blockchain Analytics`,
     },
     {
       name: "description",

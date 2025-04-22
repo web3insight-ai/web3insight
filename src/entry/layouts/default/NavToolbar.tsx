@@ -13,6 +13,8 @@ import AuthStatus from "./AuthStatus";
 import type { StrapiUser } from "#/services/auth/strapi.server";
 import { useEffect, useState, useMemo } from "react";
 
+import { getTitle } from "@/utils/app";
+
 type NavToolbarProps = {
   history: {
     query: string;
@@ -50,7 +52,7 @@ function NavToolbar({ history, user }: NavToolbarProps) {
         <BrandLogo width={isDesktop ? 32 : 24} />
         {!isMobile && (
           <span className="text-sm font-bold text-gray-800">
-            Web3Insights
+            {getTitle()}
           </span>
         )}
       </Link>

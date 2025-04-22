@@ -1,5 +1,7 @@
 import { Resend } from "resend";
 
+import { getTitle } from "@/utils/app";
+
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendRewardClaimEmail(
@@ -8,14 +10,15 @@ export async function sendRewardClaimEmail(
   projectName: string,
 ) {
   try {
+    const appTitle = getTitle();
     const { data, error } = await resend.emails.send({
-      from: "Web3Insights <support@web3insights.app>",
+      from: `${appTitle} <support@web3insights.app>`,
       to: [recipientEmail],
       subject: `Your Reward for ${projectName} Contributions is Ready!`,
       html: `
         <div style="font-family: 'Arial', sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; color: #333; background-color: #f7f7f7; border-radius: 10px;">
           <div style="text-align: center; margin-bottom: 30px;">
-            <img src="https://web3insights.app/logo.png" alt="Web3Insights Logo" style="width: 100px; height: auto;">
+            <img src="https://web3insights.app/logo.png" alt="${appTitle} Logo" style="width: 100px; height: auto;">
           </div>
           <h2 style="color: #3498db; text-align: center; margin-bottom: 30px;">Congratulations, ${contributorName}! 🎉</h2>
           <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">Your outstanding contributions to <strong style="color: #2c3e50;">${projectName}</strong> have been recognized. We're thrilled to inform you that you're eligible for a special reward!</p>
@@ -25,7 +28,7 @@ export async function sendRewardClaimEmail(
           <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">Your dedication and expertise are invaluable to the Web3 ecosystem. We can't wait to see what you'll accomplish next!</p>
           <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">If you have any questions, our support team is always here to help.</p>
           <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
-          <p style="font-size: 14px; color: #777; text-align: center;">Keep innovating,<br><strong style="color: #2c3e50;">The Web3Insights Team</strong></p>
+          <p style="font-size: 14px; color: #777; text-align: center;">Keep innovating,<br><strong style="color: #2c3e50;">The ${appTitle} Team</strong></p>
         </div>
       `,
     });

@@ -5,6 +5,8 @@ import { authModalOpenAtom, authModalTypeAtom } from "#/atoms";
 import { Form, useActionData, useNavigation, useSubmit, useRevalidator, useOutletContext } from "@remix-run/react";
 import type { StrapiUser } from "#/services/auth/strapi.server";
 
+import { getTitle } from "@/utils/app";
+
 type AuthActionData = {
   error?: string;
   success?: boolean;
@@ -147,7 +149,7 @@ function AuthFormDialogView() {
           <>
             <ModalHeader className="flex flex-col gap-1">
               {modalType === "signin" || modalType === "signup"
-                ? "Welcome to Web3Insights"
+                ? `Welcome to ${getTitle()}`
                 : showResetSent
                   ? "Check Your Email"
                   : "Reset Password"}

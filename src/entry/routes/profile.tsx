@@ -8,10 +8,14 @@ import { authModalOpenAtom, authModalTypeAtom } from "#/atoms";
 import DefaultLayout from "#/layouts/default";
 import { fetchUserQueries } from "#/services/strapi";
 
+import { getTitle } from "@/utils/app";
+
 export const meta: MetaFunction = () => {
+  const title = getTitle();
+
   return [
-    { title: "My Profile | Web3Insights" },
-    { name: "description", content: "Manage your Web3Insights profile" },
+    { title: `My Profile | ${title}` },
+    { name: "description", content: `Manage your ${title} profile` },
   ];
 };
 
