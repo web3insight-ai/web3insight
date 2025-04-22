@@ -1,6 +1,6 @@
 import { json, LoaderFunctionArgs } from "@remix-run/node";
 import { Outlet, useLoaderData, useOutletContext } from "@remix-run/react";
-import { MainLayout } from "~/components/MainLayout";
+import DefaultLayout from "~/layouts/default";
 import { getUser } from "~/services/auth/session.server";
 import { fetchPinnedQueries, fetchUserQueries } from "~/services/strapi";
 import type { StrapiUser } from "~/services/auth/strapi.server";
@@ -65,8 +65,8 @@ export default function HomeLayout() {
   const combinedHistory = [...(pinned || []), ...(history || [])];
 
   return (
-    <MainLayout history={combinedHistory} user={user}>
+    <DefaultLayout history={combinedHistory} user={user}>
       <Outlet context={{ user, setUser }} />
-    </MainLayout>
+    </DefaultLayout>
   );
 }

@@ -5,7 +5,7 @@ import { Activity, KeyRound } from "lucide-react";
 import { getUser } from "~/services/auth/session.server";
 import { useAtom } from "jotai";
 import { authModalOpenAtom, authModalTypeAtom } from "~/atoms";
-import { MainLayout } from "~/components/MainLayout";
+import DefaultLayout from "~/layouts/default";
 import { fetchUserQueries } from "~/services/strapi";
 
 export const meta: MetaFunction = () => {
@@ -59,7 +59,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <MainLayout history={history} user={user}>
+    <DefaultLayout history={history} user={user}>
       <div className="flex flex-col items-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl w-full">
           <Card className="shadow-md border-none mb-6">
@@ -139,6 +139,6 @@ export default function ProfilePage() {
           </Card>
         </div>
       </div>
-    </MainLayout>
+    </DefaultLayout>
   );
 }

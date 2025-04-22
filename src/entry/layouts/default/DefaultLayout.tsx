@@ -1,8 +1,8 @@
-import { NavToolbar } from "~/components/NavToolbar";
+import NavToolbar from "./NavToolbar";
 import AuthModal from "~/components/auth/AuthModal";
 import type { StrapiUser } from "~/services/auth/strapi.server";
 
-type MainLayoutProps = {
+type DefaultLayoutProps = {
   children: React.ReactNode;
   history: {
     query: string;
@@ -12,7 +12,7 @@ type MainLayoutProps = {
   user: StrapiUser | null;
 };
 
-export function MainLayout({ children, history, user }: MainLayoutProps) {
+function DefaultLayout({ children, history, user }: DefaultLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="sticky top-0 z-10 border-b bg-white">
@@ -31,3 +31,5 @@ export function MainLayout({ children, history, user }: MainLayoutProps) {
     </div>
   );
 }
+
+export default DefaultLayout;

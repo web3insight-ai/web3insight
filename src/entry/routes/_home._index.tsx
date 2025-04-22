@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, CardFooter, CardHeader, Image, Chip, Link as NextUILink, Divider, Input } from "@nextui-org/react";
+import { Button, Card, CardBody, CardFooter, CardHeader, Chip, Link as NextUILink, Divider, Input } from "@nextui-org/react";
 import {
   json,
   LoaderFunctionArgs,
@@ -9,7 +9,7 @@ import {
 import { Link, useLoaderData, useFetcher } from "@remix-run/react";
 import { Code2, Github, Users, Warehouse, Zap, ArrowRight, ArrowUpRight, ArrowDownRight, Database, Hash, TrendingUp, Search, Crown } from "lucide-react";
 import { getSearchKeyword } from "~/engine.server";
-import Logo from "../images/logo.png";
+import BrandLogo from "@/components/control/brand-logo";
 import { getUser } from "~/services/auth/session.server";
 import { guestSearchLimiter, userSearchLimiter } from "~/limiter.server";
 import { getClientIPAddress } from "remix-utils/get-client-ip-address";
@@ -430,12 +430,7 @@ export default function Index() {
         <div className="w-full max-w-[1200px] mx-auto px-4 sm:px-6 py-16 md:py-24">
           <div className="flex flex-col items-center justify-center text-center">
             <div className="mb-6 transform hover:scale-105 transition-transform duration-300">
-              <Image
-                src={Logo}
-                width={120}
-                alt="Web3Insights Logo"
-                className="drop-shadow-md"
-              />
+              <BrandLogo className="drop-shadow-md" width={120} />
             </div>
             <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl">
               A comprehensive metric system for evaluating Web3 Ecosystems, Communities and Repos.

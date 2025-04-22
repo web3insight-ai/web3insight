@@ -1,5 +1,4 @@
 import {
-  Image,
   Button,
   Popover,
   PopoverContent,
@@ -8,9 +7,9 @@ import {
 } from "@nextui-org/react";
 import { Link } from "@remix-run/react";
 import { History } from "lucide-react";
-import Logo from "../images/logo.png";
+import BrandLogo from "@/components/control/brand-logo";
 import { useMediaQuery } from "react-responsive";
-import AuthStatus from "./auth/AuthStatus";
+import AuthStatus from "../../components/auth/AuthStatus";
 import type { StrapiUser } from "~/services/auth/strapi.server";
 import { useEffect, useState, useMemo } from "react";
 
@@ -23,7 +22,7 @@ type NavToolbarProps = {
   user: StrapiUser | null;
 };
 
-export function NavToolbar({ history, user }: NavToolbarProps) {
+function NavToolbar({ history, user }: NavToolbarProps) {
   const isDesktop = useMediaQuery({ minWidth: 1024 });
   const isMobile = useMediaQuery({ maxWidth: 767 });
   const [isOpen, setIsOpen] = useState(false);
@@ -48,11 +47,7 @@ export function NavToolbar({ history, user }: NavToolbarProps) {
     <div className="flex items-center justify-between w-full px-4 py-2 sm:px-6 lg:px-8 max-w-[1200px] mx-auto">
       {/* Logo on the left side */}
       <Link to="/" className="flex items-center gap-2">
-        <Image
-          src={Logo}
-          width={isDesktop ? 32 : 24}
-          alt="Web3Insights Logo"
-        />
+        <BrandLogo width={isDesktop ? 32 : 24} />
         {!isMobile && (
           <span className="text-sm font-bold text-gray-800">
             Web3Insights
@@ -125,3 +120,5 @@ export function NavToolbar({ history, user }: NavToolbarProps) {
     </div>
   );
 }
+
+export default NavToolbar;
