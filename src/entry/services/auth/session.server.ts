@@ -1,5 +1,5 @@
 import { createCookieSessionStorage, redirect } from "@remix-run/node";
-import { StrapiUser } from "#/services/strapi";
+import type { StrapiUser } from "@/types";
 import { getCurrentUser } from "./strapi.server";
 
 // Cookie session configuration

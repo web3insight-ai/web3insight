@@ -3,7 +3,7 @@ import { FormEvent, useState, useEffect } from "react";
 import { useAtom } from "jotai";
 import { authModalOpenAtom, authModalTypeAtom } from "#/atoms";
 import { Form, useActionData, useNavigation, useSubmit, useRevalidator, useOutletContext } from "@remix-run/react";
-import type { StrapiUser } from "#/services/auth/strapi.server";
+import type { StrapiUser } from "@/types";
 
 import { getTitle } from "@/utils/app";
 

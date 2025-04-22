@@ -10,7 +10,7 @@ import { History } from "lucide-react";
 import BrandLogo from "@/components/control/brand-logo";
 import { useMediaQuery } from "react-responsive";
 import AuthStatus from "./AuthStatus";
-import type { StrapiUser } from "#/services/auth/strapi.server";
+import type { StrapiUser } from "@/types";
 import { useEffect, useState, useMemo } from "react";
 
 import { getTitle } from "@/utils/app";

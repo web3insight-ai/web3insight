@@ -2,23 +2,6 @@ import { json } from "@remix-run/node";
 import { STRAPI_API_URL } from "#/services/env.server";
 import { getStrapiUrl, getStrapiHeaders } from "#/services/strapi.server";
 
-// Interface for user data
-export interface StrapiUser {
-  id: number;
-  username: string;
-  email: string;
-  provider: string;
-  confirmed: boolean;
-  blocked: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface AuthResponse {
-  jwt: string;
-  user: StrapiUser;
-}
-
 // Login with Strapi
 export async function loginUser(identifier: string, password: string) {
   try {

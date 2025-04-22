@@ -3,7 +3,7 @@ import { Link, useNavigate, useOutletContext } from "@remix-run/react";
 import { LogIn, LogOut, User as UserIcon, Key } from "lucide-react";
 import { useAtom } from "jotai";
 import { authModalOpenAtom, authModalTypeAtom } from "#/atoms";
-import type { StrapiUser } from "#/services/auth/strapi.server";
+import type { StrapiUser } from "@/types";
 
 type AuthStatusProps = {
   user: StrapiUser | null;

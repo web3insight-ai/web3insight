@@ -1,5 +1,5 @@
 import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
-import { loginUser, registerUser, forgotPassword, resetPassword } from "#/services/strapi";
+import { loginUser, registerUser, forgotPassword, resetPassword } from "~/auth/repository";
 import { createUserSession } from "#/services/auth/session.server";
 
 // Type for error handling

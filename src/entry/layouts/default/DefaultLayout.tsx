@@ -1,6 +1,6 @@
 import NavToolbar from "./NavToolbar";
 import AuthFormDialogViewWidget from "~/auth/views/auth-form-dialog";
-import type { StrapiUser } from "#/services/auth/strapi.server";
+import type { StrapiUser } from "@/types";
 
 type DefaultLayoutProps = {
   children: React.ReactNode;
