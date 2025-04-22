@@ -2,6 +2,8 @@ import { createCookieSessionStorage, redirect } from "@remix-run/node";
 import type { StrapiUser } from "@/types";
 import { getCurrentUser } from "./strapi.server";
 
+import { getVar } from "@/utils/env";
+
 // Cookie session configuration
 const sessionStorage = createCookieSessionStorage({
   cookie: {
@@ -9,7 +11,7 @@ const sessionStorage = createCookieSessionStorage({
     httpOnly: true,
     path: "/",
     sameSite: "lax",
-    secrets: [process.env.SESSION_SECRET || "default-secret-change-me"],
+    secrets: [getVar("SESSION_SECRET")],
     secure: process.env.NODE_ENV === "production",
   },
 });

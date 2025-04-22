@@ -3,10 +3,12 @@ import { privateKeyToAccount } from "viem/accounts";
 import { mantleSepoliaTestnet } from "viem/chains";
 import { badgeAbi } from "./contracts/abi";
 
+import { getVar } from "@/utils/env";
+
 // Load environment variables
-const privateKey = process.env.PRIVATE_KEY;
-const rpcUrl = process.env.RPC_URL;
-const contractAddress = process.env.CONTRACT_ADDRESS;
+const privateKey = getVar("PRIVATE_KEY");
+const rpcUrl = getVar("RPC_URL");
+const contractAddress = getVar("CONTRACT_ADDRESS");
 
 // Validations for environment variables
 if (!privateKey || !rpcUrl || !contractAddress) {

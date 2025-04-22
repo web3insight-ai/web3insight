@@ -12,16 +12,19 @@ import { generateText } from "ai";
 import { isAddress } from "viem";
 import axios from "axios";
 
+import { getVar } from "@/utils/env";
+
+const strapiUrl = getVar("STRAPI_API_URL");
+const strapiToken = getVar("STRAPI_API_TOKEN");
+
 // Function to fetch a query from Strapi API
 async function fetchQueryFromStrapi(queryId: string) {
   try {
-    const strapiUrl = process.env.STRAPI_URL || 'http://localhost:1337';
-
     const response = await axios.get(
       `${strapiUrl}/api/queries/${queryId}`,
       {
         headers: {
-          'Authorization': `Bearer ${process.env.STRAPI_API_TOKEN}`
+          'Authorization': `Bearer ${strapiToken}`
         }
       }
     );
@@ -40,8 +43,6 @@ async function fetchQueryFromStrapi(queryId: string) {
 // Function to update a query in Strapi API
 async function updateQueryInStrapi(queryId: string, data: { answer?: string, keyboard?: string }) {
   try {
-    const strapiUrl = process.env.STRAPI_URL || 'http://localhost:1337';
-
     await axios.put(
       `${strapiUrl}/api/queries/${queryId}`,
       {
@@ -49,7 +50,7 @@ async function updateQueryInStrapi(queryId: string, data: { answer?: string, key
       },
       {
         headers: {
-          'Authorization': `Bearer ${process.env.STRAPI_API_TOKEN}`,
+          'Authorization': `Bearer ${strapiToken}`,
           'Content-Type': 'application/json'
         }
       }

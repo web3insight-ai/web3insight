@@ -32,7 +32,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { getUser } from "#/services/auth/session.server";
 import { fetchQuery, fetchUserQueries } from "#/services/strapi";
 
+import { getVar } from "@/utils/env";
 import { getMetadata } from "@/utils/app";
+
+const strapiUrl = getVar("STRAPI_API_URL");
+const strapiToken = getVar("STRAPI_API_TOKEN");
+const opendiggerUrl = getVar("OPENDIGGER_URL");
 
 const { title: appTitle, description } = getMetadata();
 
@@ -60,7 +65,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 };
 
 async function fetchOpenDiggerData(name: string, type: string) {
-  const url = `${process.env.OPENDIGGER_URL}/${name}/${type}.json`;
+  const url = `${opendiggerUrl}/${name}/${type}.json`;
 
   try {
     const response = await axios.get(url);
@@ -71,7 +76,7 @@ async function fetchOpenDiggerData(name: string, type: string) {
 }
 
 async function fetchParticipantsData(repoName: string) {
-  const baseUrl = `${process.env.OPENDIGGER_URL}/github`;
+  const baseUrl = `${opendiggerUrl}/github`;
   try {
     const [participants, newContributors, inactiveContributors] =
       await Promise.all([
@@ -92,7 +97,7 @@ async function fetchParticipantsData(repoName: string) {
 }
 
 async function fetchCommunityOpenRankData(repoName: string) {
-  const url = `${process.env.OPENDIGGER_URL}/github/${repoName}/community_openrank.json`;
+  const url = `${opendiggerUrl}/github/${repoName}/community_openrank.json`;
   try {
     const response = await axios.get(url);
     const data = response.data;
@@ -126,9 +131,6 @@ async function fetchEcosystemData(keyword: string) {
   if (!keyword) return null;
 
   try {
-    // Make sure we have a proper Strapi URL
-    const strapiUrl = process.env.STRAPI_API_URL || 'http://localhost:1337';
-
     const response = await axios.get(
       `${strapiUrl}/api/ecosystems`,
       {
@@ -137,7 +139,7 @@ async function fetchEcosystemData(keyword: string) {
           'populate[logo][fields][0]': 'url'
         },
         headers: {
-          'Authorization': `Bearer ${process.env.STRAPI_API_TOKEN}`
+          'Authorization': `Bearer ${strapiToken}`
         }
       }
     );

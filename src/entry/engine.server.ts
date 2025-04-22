@@ -4,11 +4,13 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { generateText } from "ai";
 import { isAddress } from "viem";
 
-export const redis = new Redis(process.env.REDIS_URL as string);
+import { getVar } from "@/utils/env";
+
+export const redis = new Redis(getVar("REDIS_URL") as string);
 
 export const openai = createOpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  baseURL: process.env.OPENAI_BASE_URL,
+  apiKey: getVar("OPENAI_API_KEY"),
+  baseURL: getVar("OPENAI_BASE_URL"),
 });
 
 export const PROMPT = (context: string) => `You are an advanced AI assistant specializing in Web3, blockchain technology, and software development. Your role is to provide concise, accurate, and insightful analysis of GitHub users, repositories, or Ethereum addresses based on the given context. Limit your response to 1024 tokens and stay focused on the query.
@@ -84,7 +86,7 @@ export async function getInfo(query: string) {
 }
 
 async function getEVMInfo(address: string) {
-  const apiUrl = `${process.env.RSS3_DSL_URL}/decentralized/${address}?limit=50&action_limit=10`;
+  const apiUrl = `${getVar("RSS3_DSL_URL")}/decentralized/${address}?limit=50&action_limit=10`;
   try {
     const response = await axios.get(apiUrl);
     return response.data;
@@ -105,7 +107,7 @@ async function getGitHubRepoInfo(repo: string) {
     }
   }
 
-  const apiUrl = `${process.env.OSSINSIGHT_URL}/repo/${repo}`;
+  const apiUrl = `${getVar("OSSINSIGHT_URL")}/repo/${repo}`;
 
   try {
     const response = await axios.get(apiUrl);
@@ -130,7 +132,7 @@ async function getGitHubUserInfo(user: string) {
     }
   }
 
-  const apiUrl = `${process.env.OSSINSIGHT_URL}/users/${user}`;
+  const apiUrl = `${getVar("OSSINSIGHT_URL")}/users/${user}`;
 
   try {
     const response = await axios.get(apiUrl);

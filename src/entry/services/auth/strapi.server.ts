@@ -1,6 +1,8 @@
 import { json } from "@remix-run/node";
-import { STRAPI_API_URL } from "#/services/env.server";
+import { getVar } from "@/utils/env";
 import { getStrapiUrl, getStrapiHeaders } from "#/services/strapi.server";
+
+const STRAPI_API_URL = getVar("STRAPI_API_URL");
 
 // Login with Strapi
 export async function loginUser(identifier: string, password: string) {

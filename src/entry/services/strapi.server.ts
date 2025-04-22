@@ -1,4 +1,7 @@
-import { STRAPI_API_URL, STRAPI_API_TOKEN } from "#/services/env.server";
+import { getVar } from "@/utils/env";
+
+const STRAPI_API_URL = getVar('STRAPI_API_URL');
+const STRAPI_API_TOKEN = getVar('STRAPI_API_TOKEN');
 
 /**
  * Helper function to construct Strapi API URLs correctly

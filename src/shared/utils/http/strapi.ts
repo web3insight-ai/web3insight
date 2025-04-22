@@ -1,16 +1,20 @@
 import axios from "axios";
 
+import { getVar } from "../env";
+
+const token = getVar("STRAPI_API_TOKEN");
+
 // Create an axios instance for Strapi API
 const httpClient = axios.create({
-  baseURL: process.env.STRAPI_API_URL || "http://localhost:1337",
+  baseURL: getVar("STRAPI_API_URL"),
   headers: {
     "Content-Type": "application/json",
-  }
+  },
 });
 
 // Add API token to requests if available
-if (process.env.STRAPI_API_TOKEN) {
-  httpClient.defaults.headers.common["Authorization"] = `Bearer ${process.env.STRAPI_API_TOKEN}`;
+if (token) {
+  httpClient.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 }
 
 export default httpClient;
