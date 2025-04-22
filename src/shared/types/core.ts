@@ -10,3 +10,4 @@ interface StrapiUser {
 }
 
 export type { StrapiUser };
+export type { DataValue, ListValue } from "@handie/runtime-core";
