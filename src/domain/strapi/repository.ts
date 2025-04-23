@@ -8,7 +8,7 @@ async function loginUser(
   data: {
     identifier: string; // This can be email or username
     password: string;
-  }
+  },
 ): Promise<ResponseResult<StrapiAuthResponse | undefined>> {
   try {
     const res = await httpClient.post("/api/auth/local", data);
@@ -48,7 +48,7 @@ async function registerUser(
     username: string;
     email: string;
     password: string;
-  }
+  },
 ): Promise<ResponseResult<StrapiAuthResponse | undefined>> {
   try {
     const res = await httpClient.post("/api/auth/local/register", data);
@@ -99,7 +99,7 @@ async function resetPassword(
     code: string;
     password: string;
     passwordConfirmation: string;
-  }
+  },
 ): Promise<ResponseResult> {
   try {
     const res = await httpClient.post("/api/auth/reset-password", data);
@@ -134,7 +134,7 @@ async function changePassword(
     password: string;
     passwordConfirmation: string;
     token: string;
-  }
+  },
 ): Promise<ResponseResult> {
   try {
     const res = await httpClient.post("/api/auth/change-password", others, {

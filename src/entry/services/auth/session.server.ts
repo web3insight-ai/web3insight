@@ -1,6 +1,6 @@
 import { createCookieSessionStorage, redirect } from "@remix-run/node";
 import type { StrapiUser } from "@/types";
-import { getCurrentUser } from "../../../domain/strapi/repository";
+import { getCurrentUser } from "~/strapi/repository";
 
 import { getVar } from "@/utils/env";
 
@@ -90,10 +90,11 @@ export async function getUser(request: Request): Promise<StrapiUser | null> {
 
   try {
     // Fetch current user data from Strapi using the JWT
-    const userData = await getCurrentUser(userJwt);
+    const res = await getCurrentUser(userJwt);
+    const userData = res.data;
 
     // Check if userData is valid and not an error response
-    if (userData && !userData.error && userData.id) {
+    if (res.success && userData && userData.id) {
       // Cache the result
       userCache[userJwt] = {
         user: userData,

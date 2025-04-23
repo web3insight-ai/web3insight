@@ -21,7 +21,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     const cookieHeader = await logout(request, "/", true);
     return json({ success: true }, {
       headers: {
-        "Set-Cookie": cookieHeader
+        "Set-Cookie": <string>cookieHeader
       }
     });
   }
@@ -48,7 +48,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       const cookieHeader = await logout(request, "/", true);
       return json({ success: true }, {
         headers: {
-          "Set-Cookie": cookieHeader
+          "Set-Cookie": <string>cookieHeader
         }
       });
     }
