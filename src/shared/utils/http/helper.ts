@@ -109,4 +109,13 @@ async function normalizeResponse<VT extends DataValue = DataValue>(res: Response
   };
 }
 
-export { isServerSide, request, normalizeResponse };
+function generateFailedResponse(message: string, statusCode: number | string = 500): ResponseResult<undefined> {
+  return {
+    success: false,
+    code: `${statusCode}`,
+    message,
+    data: undefined,
+  };
+}
+
+export { isServerSide, request, normalizeResponse, generateFailedResponse };

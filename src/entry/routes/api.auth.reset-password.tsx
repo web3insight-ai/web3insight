@@ -1,5 +1,5 @@
 import { ActionFunctionArgs, json } from "@remix-run/node";
-import { resetPassword } from "#/services/auth/strapi.server";
+import { resetPassword } from "~/strapi/repository";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   if (request.method !== "POST") {

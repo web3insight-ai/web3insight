@@ -1,5 +1,5 @@
 import { ActionFunctionArgs, json } from "@remix-run/node";
-import { changePassword } from "#/services/auth/strapi.server";
+import { changePassword } from "~/strapi/repository";
 import { getJwt } from "#/services/auth/session.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {

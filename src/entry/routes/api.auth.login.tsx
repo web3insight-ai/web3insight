@@ -1,5 +1,5 @@
 import { ActionFunctionArgs, json } from "@remix-run/node";
-import { loginUser } from "#/services/auth/strapi.server";
+import { loginUser } from "~/strapi/repository";
 import { createUserSession } from "#/services/auth/session.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {

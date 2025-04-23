@@ -1,6 +1,6 @@
 import { createCookieSessionStorage, redirect } from "@remix-run/node";
 import type { StrapiUser } from "@/types";
-import { getCurrentUser } from "./strapi.server";
+import { getCurrentUser } from "../../../domain/strapi/repository";
 
 import { getVar } from "@/utils/env";
 

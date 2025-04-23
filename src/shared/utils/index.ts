@@ -1,1 +1,1 @@
-export { isBoolean, isFunction, isPlainObject, omit } from "@ntks/toolbox";
+export { isBoolean, isFunction, isPlainObject, pick, omit } from "@ntks/toolbox";
