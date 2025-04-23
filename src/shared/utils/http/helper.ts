@@ -72,14 +72,14 @@ async function normalizeResponse<VT extends DataValue = DataValue>(res: Response
 
   if (res.ok) {
     if (isPlainObject(jsonData)) {
-      const { code, message, data, ...extra } = jsonData;
+      const { success, code, message, data, extra, ...others } = jsonData;
 
       return {
-        success: isLogicalSuccess(code),
+        success: success ?? isLogicalSuccess(Number(code)),
         code,
         message,
         data,
-        extra,
+        extra: { ...extra, ...others },
       };
     }
 

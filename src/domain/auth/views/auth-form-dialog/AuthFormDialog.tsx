@@ -7,7 +7,7 @@ import type { StrapiUser, ResponseResult } from "@/types";
 
 import { getTitle } from "@/utils/app";
 
-import { signIn } from "../../repository";
+import { signIn, fetchCurrentUser } from "../../repository";
 
 type AuthContext = {
   user: StrapiUser | null;
@@ -45,13 +45,12 @@ function AuthFormDialogView() {
 
   const fetchUserData = async () => {
     try {
-      const response = await fetch('/api/auth/me');
-      if (response.ok) {
-        const data = await response.json();
-        if (data.authenticated && data.user) {
+      const res = await fetchCurrentUser();
+      if (res.success) {
+        if (res.extra?.authenticated && res.data) {
           // Update user context
           if (setUser) {
-            setUser(data.user);
+            setUser(res.data);
           }
           // Force re-validation of all loaders
           revalidator.revalidate();

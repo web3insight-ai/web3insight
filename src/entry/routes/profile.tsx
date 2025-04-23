@@ -29,6 +29,7 @@ type QueryHistory = {
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   // Get user data
   const user = await getUser(request);
+
   if (!user) {
     return redirect("/");
   }
@@ -45,10 +46,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     })).filter(item => item.query); // Filter out any potentially invalid items
   }
 
-  return json({
-    user,
-    history
-  });
+  return json({ user, history });
 };
 
 export default function ProfilePage() {

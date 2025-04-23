@@ -117,18 +117,26 @@ async function signOut(request?: Request): Promise<ResponseResult> {
 }
 
 // Get the authenticated user from the session
-async function getUser(request: Request): Promise<StrapiUser | null> {
-  const session = await getSession(request);
+async function fetchCurrentUser(request?: Request): Promise<ResponseResult> {
+  if (!isServerSide()) {
+    return httpClient.get("/api/auth/me");
+  }
+
+  const session = await getSession(request!);
   const userJwt = session.get("userJwt");
 
+  const defaultResult = { success: true, code: "200", message: "", data: null };
+
   // If there's no JWT, user is not authenticated
-  if (!userJwt) return null;
+  if (!userJwt) {
+    return defaultResult;
+  }
 
   // Check cache first
   const now = Date.now();
   const cachedData = userCache[userJwt];
   if (cachedData && (now - cachedData.timestamp) < CACHE_TTL) {
-    return cachedData.user;
+    return { ...defaultResult, data: cachedData.user };
   }
 
   try {
@@ -143,14 +151,18 @@ async function getUser(request: Request): Promise<StrapiUser | null> {
         user: userData,
         timestamp: now
       };
-      return userData;
+      return { ...defaultResult, data: userData };
     }
 
     // If we couldn't get valid user data, return null
-    return null;
+    return defaultResult;
   } catch (error) {
-    return null;
+    return defaultResult;
   }
+}
+
+async function getUser(request: Request): Promise<StrapiUser | null> {
+  return (await fetchCurrentUser(request)).data;
 }
 
 async function changePassword(
@@ -229,4 +241,8 @@ async function resetPassword(
   }
 }
 
-export { signUp, signIn, signOut, getUser, changePassword, sendPasswordResetEmail, resetPassword };
+export {
+  signUp, signIn, signOut,
+  fetchCurrentUser, getUser,
+  changePassword, sendPasswordResetEmail, resetPassword,
+};

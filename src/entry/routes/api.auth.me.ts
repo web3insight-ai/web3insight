@@ -1,5 +1,8 @@
 import { LoaderFunctionArgs, json } from "@remix-run/node";
-import { getUser } from "~/auth/repository";
+
+import { pick } from "@/utils";
+
+import { fetchCurrentUser } from "~/auth/repository";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   if (request.method === "OPTIONS") {
@@ -12,25 +15,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
     });
   }
 
-  try {
-    // Get the current user from the session
-    const user = await getUser(request);
+  const { data, extra, ...others } = await fetchCurrentUser(request);
+  const resolved = { ...others, data, extra: { ...extra, authenticated: !!data } };
 
-    if (!user) {
-      return json({ authenticated: false }, { status: 401 });
-    }
-
-    return json({
-      authenticated: true,
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        confirmed: user.confirmed
-      }
-    });
-  } catch (error) {
-    console.error("Error fetching user data:", error);
-    return json({ error: "Failed to fetch user data" }, { status: 500 });
+  if (data) {
+    resolved.data = pick(data, ["id", "username", "email", "confirmed"]);
+  } else {
+    resolved.code = "401";
   }
+
+  return json(resolved, { status: Number(resolved.code) });
 }

@@ -57,22 +57,4 @@ async function createUserSession({
   };
 }
 
-// Get session data
-async function getSessionData(request: Request): Promise<{
-  userJwt?: string;
-  userId?: number;
-}> {
-  const session = await getSession(request);
-  return {
-    userJwt: session.get("userJwt"),
-    userId: session.get("userId"),
-  };
-}
-
-// Get JWT token from session
-async function getJwt(request: Request): Promise<string | null> {
-  const session = await getSession(request);
-  return session.get("userJwt") || null;
-}
-
-export { getSession, clearSession, createUserSession, getSessionData, getJwt };
+export { getSession, clearSession, createUserSession };

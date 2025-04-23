@@ -5,12 +5,9 @@ import { getUser } from "~/auth/repository";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   // Get user data
-  const userData = await getUser(request);
-  if (!userData) {
-    return redirect("/");
-  }
+  const user = await getUser(request);
 
-  return json({ user: userData });
+  return user ? json({ user }) : redirect("/");
 };
 
 export default function ProfileActivityPage() {
