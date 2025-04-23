@@ -1,5 +1,5 @@
 import { LoaderFunctionArgs, json } from "@remix-run/node";
-import { getUser } from "#/services/auth/session.server";
+import { getUser } from "~/auth/repository";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   if (request.method === "OPTIONS") {

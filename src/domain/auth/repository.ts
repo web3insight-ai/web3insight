@@ -1,12 +1,29 @@
 import type { ResponseResult } from "@/types";
-import { generateFailedResponse } from "@/utils/http";
+import { isServerSide, generateFailedResponse } from "@/utils/http";
+import httpClient from "@/utils/http/default";
 
+import type { StrapiUser } from "../strapi/typing";
 import {
-  registerUser, loginUser,
+  registerUser, loginUser, getCurrentUser,
   changePassword as changePasswordViaStrapi,
   sendPasswordResetEmail as sendPasswordResetEmailViaStrapi,
   resetPassword as resetPasswordViaStrapi,
 } from "../strapi/repository";
+import { getSession, clearSession } from "./helper";
+
+// Simple in-memory cache for user data
+// This will reduce repeated API calls within the same server instance
+type UserCache = {
+  [key: string]: {
+    user: StrapiUser;
+    timestamp: number;
+  };
+};
+
+const userCache: UserCache = {};
+const CACHE_TTL = 60 * 1000; // 60 seconds cache TTL
+
+const passwordMinLength = 6;
 
 async function signUp(
   { username, email, password, passwordConfirm }: {
@@ -15,6 +32,7 @@ async function signUp(
     password: string;
     passwordConfirm: string;
   },
+  requiresEmailVerification: boolean = false,
 ): Promise<ResponseResult> {
   try {
     // Validate required fields
@@ -32,12 +50,12 @@ async function signUp(
       return generateFailedResponse("Username must be at least 3 characters", 400);
     }
 
-    if (password.length < 6) {
-      return generateFailedResponse("Password must be at least 6 characters", 400);
+    if (password.length < passwordMinLength) {
+      return generateFailedResponse(`Password must be at least ${passwordMinLength} characters`, 400);
     }
 
     // Call Strapi registration service
-    return registerUser({ username, email, password });
+    return registerUser({ username, email, password }, requiresEmailVerification);
   } catch (error) {
     console.error("Registration error:", error);
     return generateFailedResponse("An error occurred during registration");
@@ -50,6 +68,10 @@ async function signIn(
     password: string;
   },
 ): Promise<ResponseResult> {
+  if (!isServerSide()) {
+    return httpClient.post("/api/auth/login", { identifier, password, clientSide: true });
+  }
+
   try {
     if (!identifier || !password) {
       return generateFailedResponse("Email/username and password are required", 400);
@@ -66,6 +88,68 @@ async function signIn(
   } catch (error) {
     console.error("Login error:", error);
     return generateFailedResponse("An error occurred during login");
+  }
+}
+
+// Log the user out
+async function signOut(request?: Request): Promise<ResponseResult> {
+  if (!isServerSide()) {
+    return httpClient.post("/api/auth/logout", { clientSide: true });
+  }
+
+  const session = await getSession(request!);
+  const userJwt = session.get("userJwt");
+
+  // Clear from cache if exists
+  if (userJwt && userCache[userJwt]) {
+    delete userCache[userJwt];
+  }
+
+  // Clear the session
+  const cookieHeader = await clearSession(session);
+
+  return {
+    success: true,
+    code: "200",
+    data: cookieHeader,
+    message: "",
+  };
+}
+
+// Get the authenticated user from the session
+async function getUser(request: Request): Promise<StrapiUser | null> {
+  const session = await getSession(request);
+  const userJwt = session.get("userJwt");
+
+  // If there's no JWT, user is not authenticated
+  if (!userJwt) return null;
+
+  // Check cache first
+  const now = Date.now();
+  const cachedData = userCache[userJwt];
+  if (cachedData && (now - cachedData.timestamp) < CACHE_TTL) {
+    return cachedData.user;
+  }
+
+  try {
+    // Fetch current user data from Strapi using the JWT
+    const res = await getCurrentUser(userJwt);
+    const userData = res.data;
+
+    // Check if userData is valid and not an error response
+    if (res.success && userData && userData.id) {
+      // Cache the result
+      userCache[userJwt] = {
+        user: userData,
+        timestamp: now
+      };
+      return userData;
+    }
+
+    // If we couldn't get valid user data, return null
+    return null;
+  } catch (error) {
+    return null;
   }
 }
 
@@ -133,8 +217,8 @@ async function resetPassword(
       return generateFailedResponse("Passwords do not match", 400);
     }
 
-    if (password.length < 6) {
-      return generateFailedResponse("Password must be at least 6 characters", 400);
+    if (password.length < passwordMinLength) {
+      return generateFailedResponse(`Password must be at least ${passwordMinLength} characters`, 400);
     }
 
     // Call Strapi password reset service
@@ -145,4 +229,4 @@ async function resetPassword(
   }
 }
 
-export { signUp, signIn, changePassword, sendPasswordResetEmail, resetPassword };
+export { signUp, signIn, signOut, getUser, changePassword, sendPasswordResetEmail, resetPassword };

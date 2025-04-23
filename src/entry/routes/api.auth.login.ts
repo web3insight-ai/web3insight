@@ -1,6 +1,9 @@
-import { json } from "@remix-run/node";
+import { redirect, json } from "@remix-run/node";
+import { pick } from "@/utils";
+
+import { createUserSession } from "~/auth/helper";
 import { signIn } from "~/auth/repository";
-import { createUserSession } from "#/services/auth/session.server";
+
 import { createServerAction, createPreflightAction } from "../utils";
 
 export const action = createServerAction("POST", async ({ request }) => {
@@ -8,42 +11,18 @@ export const action = createServerAction("POST", async ({ request }) => {
   const res = await signIn({ identifier, password });
 
   if (!res.success) {
-    return json({ error: res.message }, { status: Number(res.code) });
+    return json({ ...res, data: undefined }, { status: Number(res.code) });
   }
 
-  const loginData = res.data;
+  const { jwt, user } = res.data;
+  const initOpts = await createUserSession({ request, userJwt: jwt, userId: user.id });
 
-  // If this is a client-side request, just return success without redirect
-  if (clientSide) {
-    const cookieHeader = await createUserSession({
-      request,
-      userJwt: loginData.jwt,
-      userId: loginData.user.id,
-      redirectTo: '/',
-      returnCookieHeader: true
-    });
-
-    return json({
-      success: true,
-      user: {
-        id: loginData.user.id,
-        username: loginData.user.username,
-        email: loginData.user.email
-      }
-    }, {
-      headers: {
-        "Set-Cookie": <string>cookieHeader
-      }
-    });
-  }
-
-  // Otherwise, create session with redirect
-  return createUserSession({
-    request,
-    userJwt: loginData.jwt,
-    userId: loginData.user.id,
-    redirectTo: redirectTo || "/"
-  });
+  return clientSide ? json({
+    ...res,
+    data: {
+      user: pick(user, ["id", "username", "email"]),
+    },
+  }, initOpts) : redirect(redirectTo || "/", initOpts);
 });
 
 // For preflight requests (important for CORS)

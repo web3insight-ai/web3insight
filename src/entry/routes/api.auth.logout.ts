@@ -1,5 +1,5 @@
-import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
-import { logout } from "#/services/auth/session.server";
+import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from "@remix-run/node";
+import { signOut } from "~/auth/repository";
 
 // Handle both GET and POST for logout
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -16,20 +16,24 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   // Check for client-side request
   const url = new URL(request.url);
   const clientSide = url.searchParams.get('clientSide') === 'true';
+  const { data: cookieHeader, ...others } = await signOut(request);
+  const initOpts = {
+    headers: {
+      "Set-Cookie": cookieHeader,
+    },
+  };
 
-  if (clientSide) {
-    const cookieHeader = await logout(request, "/", true);
-    return json({ success: true }, {
-      headers: {
-        "Set-Cookie": <string>cookieHeader
-      }
-    });
-  }
-
-  return logout(request);
+  return clientSide ? json(others, initOpts): redirect("/", initOpts);
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
+  const { data: cookieHeader, ...others } = await signOut(request);
+  const initOpts = {
+    headers: {
+      "Set-Cookie": cookieHeader,
+    },
+  };
+
   try {
     // Try to parse JSON body
     const contentType = request.headers.get("Content-Type");
@@ -45,17 +49,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     }
 
     if (clientSide) {
-      const cookieHeader = await logout(request, "/", true);
-      return json({ success: true }, {
-        headers: {
-          "Set-Cookie": <string>cookieHeader
-        }
-      });
+      return json(others, initOpts);
     }
   } catch (error) {
     console.error("Error parsing request body:", error);
   }
 
   // Default server-side logout with redirect
-  return logout(request);
+  return redirect("/", initOpts);
 };

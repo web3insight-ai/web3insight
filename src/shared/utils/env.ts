@@ -2,6 +2,15 @@
  * Centralized access to environment variables
  */
 
+import type { DataValue } from "../types";
+
+try {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const test = process.env;
+} catch(err) {
+  window.process = { env: {} } as DataValue;
+}
+
 const vars: Record<string, any> = { // eslint-disable-line @typescript-eslint/no-explicit-any
   API_BASE_URL: process.env.API_BASE_URL || "",
   // Strapi configuration

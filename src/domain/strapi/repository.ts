@@ -49,6 +49,7 @@ async function registerUser(
     email: string;
     password: string;
   },
+  requiresEmailVerification: boolean = false,
 ): Promise<ResponseResult<StrapiAuthResponse | undefined>> {
   try {
     const res = await httpClient.post("/api/auth/local/register", data);
@@ -60,7 +61,7 @@ async function registerUser(
     const resData = res.data as StrapiAuthResponse;
 
     // Check if we need to send confirmation email
-    if (resData.user && !resData.user.confirmed) {
+    if (requiresEmailVerification && resData.user && !resData.user.confirmed) {
       await sendConfirmationEmail(data.email);
     }
 
@@ -71,7 +72,7 @@ async function registerUser(
       message: "Registration successful. Please check your email to verify your account.",
       extra: {
         ...extra,
-        requiresEmailVerification: true,
+        requiresEmailVerification,
       },
     };
   } catch (error) {

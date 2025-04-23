@@ -1,6 +1,6 @@
 import { json } from "@remix-run/node";
 import { changePassword } from "~/auth/repository";
-import { getJwt } from "#/services/auth/session.server";
+import { getJwt } from "~/auth/helper";
 
 import { createServerAction, createPreflightAction } from "../utils";
 

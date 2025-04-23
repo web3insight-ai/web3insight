@@ -3,16 +3,11 @@ import { FormEvent, useState, useEffect } from "react";
 import { useAtom } from "jotai";
 import { authModalOpenAtom, authModalTypeAtom } from "#/atoms";
 import { Form, useActionData, useNavigation, useSubmit, useRevalidator, useOutletContext } from "@remix-run/react";
-import type { StrapiUser } from "@/types";
+import type { StrapiUser, ResponseResult } from "@/types";
 
 import { getTitle } from "@/utils/app";
 
-type AuthActionData = {
-  error?: string;
-  success?: boolean;
-  email?: string;
-  resetSuccess?: boolean;
-};
+import { signIn } from "../../repository";
 
 type AuthContext = {
   user: StrapiUser | null;
@@ -33,7 +28,7 @@ function AuthFormDialogView() {
 
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
-  const actionData = useActionData() as AuthActionData;
+  const actionData = useActionData<ResponseResult>();
   const submit = useSubmit();
 
   // Handle successful login
@@ -86,28 +81,16 @@ function AuthFormDialogView() {
     // Different actions based on modal type
     if (modalType === "signin") {
       try {
-        const response = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            identifier: email,
-            password,
-            clientSide: true // Tell the API this is a client-side request
-          }),
-        });
+        const res = await signIn({ identifier: email, password });
 
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.user) {
+        if (res.success) {
+          if (res.data?.user) {
             // Update user context with the returned user data
-            setUser(data.user);
+            setUser(res.data.user);
           }
           setIsLoginSuccess(true);
         } else {
-          const data = await response.json();
-          alert(data.error || "Login failed");
+          alert(res.message || "Login failed");
         }
       } catch (error) {
         // Silent fail, errors will be handled by the UI
@@ -132,7 +115,7 @@ function AuthFormDialogView() {
   };
 
   // Success state after password reset email sent
-  const showResetSent = modalType === "resetPassword" && actionData?.resetSuccess;
+  const showResetSent = modalType === "resetPassword" && actionData?.extra?.resetSuccess;
 
   return (
     <Modal
@@ -229,8 +212,8 @@ function AuthFormDialogView() {
                         )}
 
                         {/* Error message */}
-                        {actionData?.error && (
-                          <div className="text-danger text-sm">{actionData.error}</div>
+                        {actionData?.success === false && (
+                          <div className="text-danger text-sm">{actionData?.message}</div>
                         )}
 
                         {/* Forgot password link (only for signin) */}
@@ -264,7 +247,7 @@ function AuthFormDialogView() {
                 showResetSent ? (
                   <div className="py-6 text-center">
                     <p className="text-gray-600 dark:text-gray-300 mb-4">
-                      We&apos;ve sent an email to <strong>{actionData?.email}</strong> with instructions to reset your password.
+                      We&apos;ve sent an email to <strong>{actionData?.extra?.email}</strong> with instructions to reset your password.
                     </p>
                     <p className="text-gray-500 dark:text-gray-400 text-sm">
                       If you don&apos;t receive the email within a few minutes, please check your spam folder.
@@ -286,8 +269,8 @@ function AuthFormDialogView() {
                         isRequired
                       />
 
-                      {actionData?.error && (
-                        <div className="text-danger text-sm">{actionData.error}</div>
+                      {actionData?.success === false && (
+                        <div className="text-danger text-sm">{actionData?.message}</div>
                       )}
 
                       <div className="flex justify-between items-center">

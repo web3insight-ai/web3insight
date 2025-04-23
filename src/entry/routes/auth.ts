@@ -1,17 +1,11 @@
-import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
-import { loginUser, registerUser, forgotPassword, resetPassword } from "~/auth/repository-legacy";
-import { createUserSession } from "#/services/auth/session.server";
+import { type ActionFunctionArgs, redirect, json } from "@remix-run/node";
 
-// Type for error handling
-type StrapiError = {
-  response?: {
-    data?: {
-      error?: {
-        message?: string;
-      };
-    };
-  };
-};
+import type { ResponseResult } from "@/types";
+import { omit } from "@/utils";
+import { generateFailedResponse } from "@/utils/http";
+
+import { createUserSession } from "~/auth/helper";
+import { signUp, signIn, sendPasswordResetEmail, resetPassword } from "~/auth/repository";
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
@@ -19,6 +13,19 @@ export async function action({ request }: ActionFunctionArgs) {
 
   // Get the redirect URL (or default to home)
   const redirectTo = formData.get("redirectTo")?.toString() || "/";
+  const resolveResponse = async (result: ResponseResult) => {
+    if (result.success) {
+      const initOpts = await createUserSession({
+        request,
+        userJwt: result.data.jwt,
+        userId: result.data.user.id,
+      });
+
+      return redirect(redirectTo, initOpts);
+    }
+
+    return json(omit(result, ["data"]));
+  };
 
   try {
     // Handle different auth actions
@@ -27,27 +34,9 @@ export async function action({ request }: ActionFunctionArgs) {
         const email = formData.get("email") as string;
         const password = formData.get("password") as string;
 
-        if (!email || !password) {
-          return json({ error: "Email and password are required" });
-        }
+        const res = await signIn({ identifier: email, password});
 
-        try {
-          const response = await loginUser(email, password);
-
-          // Create a session for the user
-          return createUserSession({
-            request,
-            userJwt: response.jwt,
-            userId: response.user.id,
-            redirectTo
-          });
-        } catch (error) {
-          const strapiError = error as StrapiError;
-          console.error("Login error:", error);
-          return json({
-            error: strapiError.response?.data?.error?.message || "Invalid email or password"
-          });
-        }
+        return resolveResponse(res);
       }
 
       case "signup": {
@@ -55,51 +44,19 @@ export async function action({ request }: ActionFunctionArgs) {
         const password = formData.get("password") as string;
         const username = formData.get("username") as string;
 
-        if (!email || !password || !username) {
-          return json({ error: "All fields are required" });
-        }
+        const res = await signUp({ username, email, password, passwordConfirm: password });
 
-        try {
-          const response = await registerUser(username, email, password);
-
-          // Create a session for the newly registered user
-          return createUserSession({
-            request,
-            userJwt: response.jwt,
-            userId: response.user.id,
-            redirectTo
-          });
-        } catch (error) {
-          const strapiError = error as StrapiError;
-          console.error("Registration error:", error);
-          return json({
-            error: strapiError.response?.data?.error?.message || "Registration failed"
-          });
-        }
+        return resolveResponse(res);
       }
 
       case "forgotPassword": {
         const email = formData.get("email") as string;
+        const { extra, ...others } = await sendPasswordResetEmail(email);
 
-        if (!email) {
-          return json({ error: "Email is required" });
-        }
-
-        try {
-          await forgotPassword(email);
-
-          // Return success response
-          return json({
-            resetSuccess: true,
-            email
-          });
-        } catch (error) {
-          const strapiError = error as StrapiError;
-          console.error("Forgot password error:", error);
-          return json({
-            error: strapiError.response?.data?.error?.message || "Failed to send reset email"
-          });
-        }
+        return json({
+          ...others,
+          extra: { ...extra, resetSuccess: true, email },
+        });
       }
 
       case "resetPassword": {
@@ -107,39 +64,17 @@ export async function action({ request }: ActionFunctionArgs) {
         const password = formData.get("password") as string;
         const passwordConfirmation = formData.get("passwordConfirmation") as string;
 
-        if (!code || !password || !passwordConfirmation) {
-          return json({ error: "All fields are required" });
-        }
+        const res = await resetPassword({ code, password, passwordConfirmation });
 
-        if (password !== passwordConfirmation) {
-          return json({ error: "Passwords don't match" });
-        }
-
-        try {
-          const response = await resetPassword(code, password, passwordConfirmation);
-
-          // Create a session for the user after password reset
-          return createUserSession({
-            request,
-            userJwt: response.jwt,
-            userId: response.user.id,
-            redirectTo
-          });
-        } catch (error) {
-          const strapiError = error as StrapiError;
-          console.error("Reset password error:", error);
-          return json({
-            error: strapiError.response?.data?.error?.message || "Failed to reset password"
-          });
-        }
+        return resolveResponse(res);
       }
 
       default:
-        return json({ error: "Invalid action" }, { status: 400 });
+        return json(generateFailedResponse("Invalid action", 400), { status: 400 });
     }
   } catch (error) {
     console.error("Auth action error:", error);
-    return json({ error: "An unexpected error occurred" }, { status: 500 });
+    return json(generateFailedResponse("An unexpected error occurred"), { status: 500 });
   }
 }
 
