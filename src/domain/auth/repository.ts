@@ -1,6 +1,6 @@
 import type { ResponseResult } from "@/types";
-import { isServerSide, generateFailedResponse } from "@/utils/http";
-import httpClient from "@/utils/http/default";
+import { isServerSide, generateFailedResponse } from "@/clients/http";
+import httpClient from "@/clients/http/default";
 
 import type { StrapiUser } from "../strapi/typing";
 import {

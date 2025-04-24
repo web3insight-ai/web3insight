@@ -21,7 +21,6 @@ import { Sparkles, ExternalLink, BadgeCent } from "lucide-react";
 import { Footer } from "#/components/Footer";
 import { useAtom } from "jotai";
 import { signinModalOpenAtom } from "#/atoms";
-import { ErrorType } from "./_home._index";
 import OpenRankChart from "#/components/OpenRankChart";
 import AttentionChart from "#/components/AttentionChart";
 import ParticipantsChart from "#/components/ParticipantsChart";
@@ -29,24 +28,19 @@ import CommunityOpenRank from "#/components/CommunityOpenRank";
 import axios from "axios";
 import { isAddress } from "viem";
 import { motion, AnimatePresence } from "framer-motion";
-import { getUser } from "~/auth/repository";
-import { fetchQuery, fetchUserQueries } from "#/services/strapi";
 
 import { getVar } from "@/utils/env";
 import { getMetadata } from "@/utils/app";
 
-const strapiUrl = getVar("STRAPI_API_URL");
-const strapiToken = getVar("STRAPI_API_TOKEN");
+import { getUser } from "~/auth/repository";
+import type { Query } from "~/query/typing";
+import { ErrorType } from "~/query/helper";
+import { fetchSearchedList, fetchOneWithUser } from "~/query/repository";
+import { fetchOne as fetchEcosystem } from "~/ecosystem/repository";
+
 const opendiggerUrl = getVar("OPENDIGGER_URL");
 
 const { title: appTitle, description } = getMetadata();
-
-// Define query history type
-type QueryHistory = {
-  query: string;
-  id: string;
-  documentId: string;
-}[];
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   const title = data ? `${data.query} - ${appTitle}` : appTitle;
@@ -126,83 +120,27 @@ async function fetchCommunityOpenRankData(repoName: string) {
   }
 }
 
-// Function to fetch ecosystem data from Strapi API
-async function fetchEcosystemData(keyword: string) {
-  if (!keyword) return null;
-
-  try {
-    const response = await axios.get(
-      `${strapiUrl}/api/ecosystems`,
-      {
-        params: {
-          'filters[name][$eqi]': keyword,
-          'populate[logo][fields][0]': 'url'
-        },
-        headers: {
-          'Authorization': `Bearer ${strapiToken}`
-        }
-      }
-    );
-
-    // Check if we have data
-    if (response.data.data.length === 0) {
-      return null;
-    }
-
-    // Extract first result and transform to expected format
-    const ecosystemData = response.data.data[0];
-
-    // Handle logo URL based on response structure
-    const logoUrl = ecosystemData.attributes?.logo?.data?.attributes?.url || ecosystemData.logo?.url || "";
-
-    // Map Strapi ecosystem data to the project data format expected by the UI
-    return {
-      id: ecosystemData.id,
-      documentId: ecosystemData.documentId,
-      name: ecosystemData.attributes?.name || ecosystemData.name,
-      description: ecosystemData.attributes?.description || ecosystemData.description,
-      website: ecosystemData.attributes?.website || ecosystemData.website,
-      type: "ecosystem", // Set type to ecosystem
-      logo: logoUrl, // Use the extracted logo URL
-      coreContributors: ecosystemData.attributes?.coreContributors || ecosystemData.coreContributors || [],
-      coreRepos: ecosystemData.attributes?.coreRepos || ecosystemData.coreRepos || []
-    };
-  } catch (error) {
-    console.error("Error fetching ecosystem data from Strapi:", error);
-    return null;
-  }
-}
-
 export const loader = async (ctx: LoaderFunctionArgs) => {
   const user = await getUser(ctx.request);
 
-  let history: QueryHistory = [];
+  let history: Query[] = [];
 
   // Fetch user's query history from Strapi if user is logged in
   if (user && user.id) {
-    const userQueries = await fetchUserQueries(user.id, 10);
-    history = userQueries.map(query => ({
-      id: query.id.toString(),
-      documentId: query.documentId,
-      query: query.query || "Untitled query"
-    })).filter(item => item.query); // Filter out any potentially invalid items
+    history = (await fetchSearchedList({ userId: user.id })).data;
   }
 
   const queryId = ctx.params.id as string;
 
   // Fetch query from Strapi
   try {
-    const queryData = await fetchQuery(queryId);
+    const res = await fetchOneWithUser(queryId);
 
-    if (!queryData) {
+    if (!res.success || !res.data) {
       return redirect("/");
     }
 
-    const query = queryData;
-    if (!query) {
-      return redirect("/");
-    }
-
+    const query = res.data;
     const keyword = query.keyboard || ""; // Note: keyboard is used instead of keyword due to schema
 
     let openRankData = null;
@@ -228,7 +166,7 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
       }
 
       // Fetch project data from Strapi API
-      projectData = await fetchEcosystemData(keyword);
+      projectData = (await fetchEcosystem(keyword)).data;
     }
 
     return json({

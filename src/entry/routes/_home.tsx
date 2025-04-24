@@ -1,16 +1,11 @@
 import { json, LoaderFunctionArgs } from "@remix-run/node";
 import { Outlet, useLoaderData, useOutletContext } from "@remix-run/react";
-import DefaultLayout from "#/layouts/default";
-import { getUser } from "~/auth/repository";
-import { fetchPinnedQueries, fetchUserQueries } from "#/services/strapi";
-import type { StrapiUser } from "@/types";
 
-// Define query history type
-type QueryHistory = {
-  query: string;
-  id: string;
-  documentId: string;
-}[];
+import type { StrapiUser } from "~/strapi";
+import { getUser } from "~/auth/repository";
+import { fetchListForUser } from "~/query/repository";
+
+import DefaultLayout from "../layouts/default";
 
 type RootContext = {
   user: StrapiUser | null;
@@ -19,41 +14,9 @@ type RootContext = {
 
 export const loader = async (ctx: LoaderFunctionArgs) => {
   const user = await getUser(ctx.request);
+  const { data } = await fetchListForUser({ user });
 
-  let history: QueryHistory = [];
-  let pinned: QueryHistory = [];
-
-  // Fetch user's query history from Strapi if user is logged in
-  if (user && user.id) {
-    const userQueries = await fetchUserQueries(user.id, 10);
-
-    history = userQueries
-      .filter(query => query.query)
-      .map(query => ({
-        id: query.id.toString(),
-        documentId: query.documentId,
-        query: query.query
-      }))
-      .filter(item => item.query && item.query.trim() !== "" && item.query !== "Untitled query");
-  }
-
-  // Fetch pinned queries
-  const pinnedQueriesData = await fetchPinnedQueries();
-
-  pinned = pinnedQueriesData
-    .filter(query => query.query)
-    .map(query => ({
-      id: query.id.toString(),
-      documentId: query.documentId,
-      query: query.query
-    }))
-    .filter(item => item.query && item.query.trim() !== "" && item.query !== "Untitled query");
-
-  return json({
-    user,
-    pinned,
-    history,
-  });
+  return json({ ...data, user });
 };
 
 export default function HomeLayout() {

@@ -2,13 +2,16 @@ import { Button, Card, CardBody, CardHeader, Avatar, Divider } from "@nextui-org
 import { LoaderFunctionArgs, MetaFunction, json, redirect } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import { Activity, KeyRound } from "lucide-react";
-import { getUser } from "~/auth/repository";
 import { useAtom } from "jotai";
-import { authModalOpenAtom, authModalTypeAtom } from "#/atoms";
-import DefaultLayout from "#/layouts/default";
-import { fetchUserQueries } from "#/services/strapi";
 
 import { getTitle } from "@/utils/app";
+
+import { authModalOpenAtom, authModalTypeAtom } from "../atoms";
+import DefaultLayout from "../layouts/default";
+
+import { getUser } from "~/auth/repository";
+import type { Query } from "~/query/typing";
+import { fetchSearchedList } from "~/query/repository";
 
 export const meta: MetaFunction = () => {
   const title = getTitle();
@@ -19,13 +22,6 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-// Define query history type
-type QueryHistory = {
-  query: string;
-  id: string;
-  documentId: string;
-}[];
-
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   // Get user data
   const user = await getUser(request);
@@ -34,16 +30,11 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     return redirect("/");
   }
 
-  let history: QueryHistory = [];
+  let history: Query[] = [];
 
   // Fetch user's query history from Strapi if user is logged in
   if (user && user.id) {
-    const userQueries = await fetchUserQueries(user.id, 10);
-    history = userQueries.map(query => ({
-      id: query.id.toString(),
-      documentId: query.documentId,
-      query: query.query || "Untitled query"
-    })).filter(item => item.query); // Filter out any potentially invalid items
+    history = (await fetchSearchedList({ userId: user.id })).data;
   }
 
   return json({ user, history });

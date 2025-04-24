@@ -2,7 +2,7 @@ import { type ActionFunctionArgs, redirect, json } from "@remix-run/node";
 
 import type { ResponseResult } from "@/types";
 import { omit } from "@/utils";
-import { generateFailedResponse } from "@/utils/http";
+import { generateFailedResponse } from "@/clients/http";
 
 import { createUserSession } from "~/auth/helper";
 import { signUp, signIn, sendPasswordResetEmail, resetPassword } from "~/auth/repository";

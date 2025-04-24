@@ -1,75 +1,18 @@
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 import { eventStream } from "remix-utils/sse/server";
-import {
-  openai,
-  PROMPT,
-  analyzeInfo,
-  getInfo,
-  getSearchKeyword,
-} from "#/engine.server";
-import { generateText } from "ai";
-import { isAddress } from "viem";
-import axios from "axios";
 
-import { getVar } from "@/utils/env";
-
-const strapiUrl = getVar("STRAPI_API_URL");
-const strapiToken = getVar("STRAPI_API_TOKEN");
-
-// Function to fetch a query from Strapi API
-async function fetchQueryFromStrapi(queryId: string) {
-  try {
-    const response = await axios.get(
-      `${strapiUrl}/api/queries/${queryId}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${strapiToken}`
-        }
-      }
-    );
-
-    if (!response.data || !response.data.data) {
-      return null;
-    }
-
-    return response.data.data;
-  } catch (error) {
-    console.error("Error fetching query from Strapi:", error);
-    return null;
-  }
-}
-
-// Function to update a query in Strapi API
-async function updateQueryInStrapi(queryId: string, data: { answer?: string, keyboard?: string }) {
-  try {
-    await axios.put(
-      `${strapiUrl}/api/queries/${queryId}`,
-      {
-        data
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${strapiToken}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-
-    return true;
-  } catch (error) {
-    console.error("Error updating query in Strapi:", error);
-    return false;
-  }
-}
+import { generateText, getSearchKeyword, fetchAnalysisPrompt } from "~/ai/repository";
+import { fetchOne, updateOne } from "~/query/repository";
+import { getInfo } from "~/ecosystem/repository";
 
 export async function loader(ctx: LoaderFunctionArgs) {
   const queryId = ctx.params.queryId as string;
 
   // Fetch the query from Strapi
-  const query = await fetchQueryFromStrapi(queryId);
+  const { success, data: query } = await fetchOne(queryId);
 
-  if (!query) {
+  if (!success || !query) {
     return redirect("/");
   }
 
@@ -102,31 +45,17 @@ export async function loader(ctx: LoaderFunctionArgs) {
     });
   }
 
-  // Determine type based on keyword format
-  let type: "evm" | "github_repo" | undefined;
-  if (isAddress(searchKeyword) || searchKeyword.endsWith(".eth")) {
-    type = "evm";
-  } else if (searchKeyword.includes("/")) {
-    type = "github_repo";
-  } else {
-    type = undefined;
-  }
-
   // Analyze the information retrieved
-  const analysis = await analyzeInfo(info, type);
-  const context = `[[citation:0]] ${analysis}`;
-
-  const model = openai("gpt-4o");
+  const analysisPrompt = await fetchAnalysisPrompt(info, searchKeyword);
 
   return eventStream(ctx.request.signal, function setup(send) {
     async function run() {
       try {
         const result = await generateText({
-          model,
           messages: [
             {
               role: "system",
-              content: PROMPT(context),
+              content: analysisPrompt,
             },
             {
               role: "user",
@@ -144,7 +73,7 @@ export async function loader(ctx: LoaderFunctionArgs) {
           });
 
           // Save the answer to Strapi
-          await updateQueryInStrapi(queryId, {
+          await updateOne(queryId, {
             answer: result.text,
             keyboard: searchKeyword // Note: keyboard is used instead of keyword in Strapi schema
           });

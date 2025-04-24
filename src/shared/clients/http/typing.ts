@@ -9,6 +9,7 @@ type HttpClientInitializer = {
 interface IHttpClient {
   get: (url: string, config?: RequestConfig) => Promise<ResponseResult>;
   post: (url: string, data?: Record<string, DataValue>, config?: RequestConfig) => Promise<ResponseResult>;
+  put: (url: string, data?: Record<string, DataValue>, config?: RequestConfig) => Promise<ResponseResult>;
   use: (interceptor: ResponseInterceptor) => void;
 }
 

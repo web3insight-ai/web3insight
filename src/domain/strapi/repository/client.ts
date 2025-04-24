@@ -1,8 +1,8 @@
 import type { DataValue, ResponseResult } from "@/types";
 import { isPlainObject } from "@/utils";
 import { getVar } from "@/utils/env";
-import HttpClient from "@/utils/http/HttpClient";
-import type { HttpClientInitializer } from "@/utils/http/typing";
+import HttpClient from "@/clients/http/HttpClient";
+import type { HttpClientInitializer } from "@/clients/http/typing";
 
 const token = getVar("STRAPI_API_TOKEN");
 const headers: HttpClientInitializer["headers"] = {
@@ -49,4 +49,4 @@ const httpClient = new HttpClient({
   normalizer: normalizeResponse,
 });
 
-export { httpClient };
+export default httpClient;

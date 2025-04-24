@@ -1,6 +1,6 @@
 import type { DataValue, RequestConfig, ResponseResult } from "../../types";
-import { isBoolean, isPlainObject, omit } from "../index";
-import { getVar } from "../env";
+import { isBoolean, isPlainObject, omit } from "../../utils/index";
+import { getVar } from "../../utils/env";
 
 function isServerSide(inServer?: boolean): boolean {
   if (isBoolean(inServer)) {
@@ -109,6 +109,19 @@ async function normalizeResponse<VT extends DataValue = DataValue>(res: Response
   };
 }
 
+function generateSuccessResponse<VT extends DataValue = DataValue>(
+  data: VT,
+  message: string = "",
+  statusCode: number | string = 200,
+): ResponseResult<VT> {
+  return {
+    success: true,
+    code: `${statusCode}`,
+    message,
+    data,
+  };
+}
+
 function generateFailedResponse(message: string, statusCode: number | string = 500): ResponseResult<undefined> {
   return {
     success: false,
@@ -118,4 +131,4 @@ function generateFailedResponse(message: string, statusCode: number | string = 5
   };
 }
 
-export { isServerSide, request, normalizeResponse, generateFailedResponse };
+export { isServerSide, request, normalizeResponse, generateSuccessResponse, generateFailedResponse };

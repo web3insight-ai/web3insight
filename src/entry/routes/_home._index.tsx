@@ -8,25 +8,18 @@ import {
 } from "@remix-run/node";
 import { Link, useLoaderData, useFetcher } from "@remix-run/react";
 import { Code2, Github, Users, Warehouse, Zap, ArrowRight, ArrowUpRight, ArrowDownRight, Database, Hash, TrendingUp, Search, Crown } from "lucide-react";
-import { getSearchKeyword } from "#/engine.server";
 import BrandLogo from "@/components/control/brand-logo";
 import { getUser } from "~/auth/repository";
-import { guestSearchLimiter, userSearchLimiter } from "#/limiter.server";
 import { getClientIPAddress } from "remix-utils/get-client-ip-address";
 import { useEffect } from "react";
 import { useAtom } from "jotai";
 import { authModalOpenAtom, authModalTypeAtom } from "#/atoms";
-import { createQuery, fetchPinnedQueries, fetchUserQueries } from "#/services/strapi";
+import { ErrorType } from "~/query/helper";
+import { insertOne, fetchListForUser } from "~/query/repository";
 
 import { getMetadata } from "@/utils/app";
 
 const { title, tagline, description } = getMetadata();
-
-export enum ErrorType {
-  Basic = "Basic",
-  SigninNeeded = "SigninNeeded",
-  ReachMaximized = "ReachMaximized",
-}
 
 export const meta: MetaFunction = () => {
   const pageTitle = `${title} - ${tagline}`;
@@ -44,124 +37,29 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-// Define query history type
-type QueryHistory = {
-  query: string;
-  id: string;
-  documentId: string;
-}[];
-
 export const loader = async (ctx: LoaderFunctionArgs) => {
   const user = await getUser(ctx.request);
+  const { data } = await fetchListForUser({ user });
 
-  let history: QueryHistory = [];
-  let pinned: QueryHistory = [];
-
-  // Fetch user's query history from Strapi if user is logged in
-  if (user && user.id) {
-    const userQueries = await fetchUserQueries(user.id, 10);
-
-    history = userQueries
-      .filter(query => query.query)
-      .map(query => ({
-        id: query.id.toString(),
-        documentId: query.documentId,
-        query: query.query
-      }))
-      .filter(item => item.query && item.query.trim() !== "" && item.query !== "Untitled query");
-  }
-
-  // Fetch pinned queries
-  const pinnedQueriesData = await fetchPinnedQueries();
-
-  pinned = pinnedQueriesData
-    .filter(query => query.query)
-    .map(query => ({
-      id: query.id.toString(),
-      documentId: query.documentId,
-      query: query.query
-    }))
-    .filter(item => item.query && item.query.trim() !== "" && item.query !== "Untitled query");
-
-  return json({
-    pinned,
-    history,
-  });
+  return json(data);
 };
 
 export const action = async (ctx: ActionFunctionArgs) => {
   const user = await getUser(ctx.request);
-
-  let searchLimiter = guestSearchLimiter;
-  let key = getClientIPAddress(ctx.request.headers) || "unknown";
-
-  if (user) {
-    searchLimiter = userSearchLimiter;
-    key = user.id.toString();
-  }
-
-  try {
-    await searchLimiter.consume(key, 1);
-  } catch (e) {
-    // reach limit
-    if (user) {
-      return json({
-        type: ErrorType.ReachMaximized,
-        error: "Usage limit exceeded",
-      });
-    }
-
-    return json({
-      type: ErrorType.SigninNeeded,
-      error: "Usage limit exceeded",
-    });
-  }
-
   const formData = await ctx.request.formData();
-  const query = formData.get("query") as string;
 
-  if (query.length > 100) {
-    return json({
-      type: ErrorType.Basic,
-      error: "Query is too long",
-    });
-  }
+  const res = await insertOne({
+    user,
+    ipAddress: getClientIPAddress(ctx.request.headers),
+    query: formData.get("query") as string,
+  });
 
-  const keyword = await getSearchKeyword(query);
-
-  if (!keyword) {
-    return json(
-      { error: "Not supported yet", type: ErrorType.Basic },
-      { status: 400 },
-    );
-  }
-
-  // Create the query in Strapi
-  try {
-    // If the user is authenticated, link the query to their account
-    if (user) {
-      const newQuery = await createQuery({
-        query,
-        keyboard: keyword,
-        userId: user.id
-      });
-
-      return redirect(`/query/${newQuery.documentId}`);
-    } else {
-      // Create a query without a user association
-      const newQuery = await createQuery({
-        query,
-        keyboard: keyword
-      });
-
-      return redirect(`/query/${newQuery.documentId}`);
-    }
-  } catch (error) {
-    return json(
-      { error: "Failed to create query", type: ErrorType.Basic },
-      { status: 500 }
-    );
-  }
+  return res.success && res.data ?
+    redirect(`/query/${res.data.documentId}`) :
+    json({
+      type: res.extra?.type,
+      error: res.message,
+    }, { status: Number(res.code) });
 };
 
 // Define chip color type
