@@ -1,7 +1,7 @@
 import { json, LoaderFunctionArgs } from "@remix-run/node";
 import { Outlet, useLoaderData, useOutletContext } from "@remix-run/react";
 import DefaultLayout from "#/layouts/default";
-import { getUser } from "#/services/auth/session.server";
+import { getUser } from "~/auth/repository";
 import { fetchPinnedQueries, fetchUserQueries } from "#/services/strapi";
 import type { StrapiUser } from "@/types";
 

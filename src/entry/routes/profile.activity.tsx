@@ -1,15 +1,13 @@
 import { LoaderFunctionArgs, json, redirect } from "@remix-run/node";
-import { getUser } from "#/services/auth/session.server";
 import { Card, CardBody, CardHeader } from "@nextui-org/react";
+
+import { getUser } from "~/auth/repository";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   // Get user data
-  const userData = await getUser(request);
-  if (!userData) {
-    return redirect("/");
-  }
+  const user = await getUser(request);
 
-  return json({ user: userData });
+  return user ? json({ user }) : redirect("/");
 };
 
 export default function ProfileActivityPage() {

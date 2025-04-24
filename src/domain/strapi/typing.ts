@@ -9,5 +9,10 @@ interface StrapiUser {
   updatedAt: string;
 }
 
-export type { StrapiUser };
-export type { DataValue, ListValue } from "@handie/runtime-core";
+// Authentication types
+interface StrapiAuthResponse {
+  jwt: string;
+  user: StrapiUser;
+}
+
+export type { StrapiUser, StrapiAuthResponse };

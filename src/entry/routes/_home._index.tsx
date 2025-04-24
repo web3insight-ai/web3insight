@@ -10,7 +10,7 @@ import { Link, useLoaderData, useFetcher } from "@remix-run/react";
 import { Code2, Github, Users, Warehouse, Zap, ArrowRight, ArrowUpRight, ArrowDownRight, Database, Hash, TrendingUp, Search, Crown } from "lucide-react";
 import { getSearchKeyword } from "#/engine.server";
 import BrandLogo from "@/components/control/brand-logo";
-import { getUser } from "#/services/auth/session.server";
+import { getUser } from "~/auth/repository";
 import { guestSearchLimiter, userSearchLimiter } from "#/limiter.server";
 import { getClientIPAddress } from "remix-utils/get-client-ip-address";
 import { useEffect } from "react";

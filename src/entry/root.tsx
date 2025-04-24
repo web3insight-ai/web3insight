@@ -11,7 +11,7 @@ import {
 import { useState } from "react";
 import css from "./tailwind.css?url";
 import { NextUIProvider } from "@nextui-org/react";
-import { getUser } from "#/services/auth/session.server";
+import { getUser } from "~/auth/repository";
 import { LoaderFunction } from "@remix-run/node";
 import { validateEnvironment } from "@/utils/env";
 import type { StrapiUser } from "@/types";

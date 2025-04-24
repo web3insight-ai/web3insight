@@ -5,6 +5,8 @@ import { useAtom } from "jotai";
 import { authModalOpenAtom, authModalTypeAtom } from "#/atoms";
 import type { StrapiUser } from "@/types";
 
+import { signOut } from "~/auth/repository";
+
 type AuthStatusProps = {
   user: StrapiUser | null;
 };
@@ -31,21 +33,15 @@ export default function AuthStatus({ user }: AuthStatusProps) {
     e.preventDefault();
 
     try {
-      const response = await fetch('/api/auth/logout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ clientSide: true }),
-      });
+      const res = await signOut();
 
-      if (response.ok) {
+      if (res.success) {
         // Immediately update the UI
         setUser(null);
         // Navigate to home page
         navigate('/', { replace: true });
       } else {
-        console.error('Logout failed');
+        console.error(`Logout failed: ${res.message}`);
       }
     } catch (error) {
       console.error('Error during logout:', error);

@@ -29,7 +29,7 @@ import CommunityOpenRank from "#/components/CommunityOpenRank";
 import axios from "axios";
 import { isAddress } from "viem";
 import { motion, AnimatePresence } from "framer-motion";
-import { getUser } from "#/services/auth/session.server";
+import { getUser } from "~/auth/repository";
 import { fetchQuery, fetchUserQueries } from "#/services/strapi";
 
 import { getVar } from "@/utils/env";

@@ -2,7 +2,17 @@
  * Centralized access to environment variables
  */
 
+import type { DataValue } from "../types";
+
+try {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const test = process.env;
+} catch(err) {
+  window.process = { env: {} } as DataValue;
+}
+
 const vars: Record<string, any> = { // eslint-disable-line @typescript-eslint/no-explicit-any
+  API_BASE_URL: process.env.API_BASE_URL || "",
   // Strapi configuration
   STRAPI_API_URL: process.env.STRAPI_API_URL || "https://api.web3insights.app",
   STRAPI_API_TOKEN: process.env.STRAPI_API_TOKEN || "",
@@ -24,7 +34,7 @@ const vars: Record<string, any> = { // eslint-disable-line @typescript-eslint/no
 };
 
 function getVar(key: string) {
-  return vars[key];
+  return vars[key] || "";
 }
 
 // Check if important environment variables are set

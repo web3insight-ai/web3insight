@@ -2,7 +2,7 @@ import { Button, Card, CardBody, CardHeader, Avatar, Divider } from "@nextui-org
 import { LoaderFunctionArgs, MetaFunction, json, redirect } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import { Activity, KeyRound } from "lucide-react";
-import { getUser } from "#/services/auth/session.server";
+import { getUser } from "~/auth/repository";
 import { useAtom } from "jotai";
 import { authModalOpenAtom, authModalTypeAtom } from "#/atoms";
 import DefaultLayout from "#/layouts/default";
@@ -29,6 +29,7 @@ type QueryHistory = {
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   // Get user data
   const user = await getUser(request);
+
   if (!user) {
     return redirect("/");
   }
@@ -45,10 +46,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     })).filter(item => item.query); // Filter out any potentially invalid items
   }
 
-  return json({
-    user,
-    history
-  });
+  return json({ user, history });
 };
 
 export default function ProfilePage() {
