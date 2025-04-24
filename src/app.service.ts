@@ -1,11 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Command, Console } from 'nestjs-console';
-import { BigQueryService } from '@/app/db/bigquery.service';
+import { BIGQUERY, Database, KYSELY } from './app/db/db.provider';
+import { BigQuery } from '@google-cloud/bigquery';
+import { CompiledQuery, Kysely } from 'kysely';
 
 @Injectable()
 @Console()
 export class AppService {
-  constructor(private readonly bigQueryService: BigQueryService) {}
+  @Inject(BIGQUERY)
+  private readonly bigquery!: BigQuery;
+
+  @Inject(KYSELY) private readonly db!: Kysely<Database>;
 
   @Command({
     command: 'test',
@@ -28,9 +33,17 @@ GROUP BY
 ORDER BY
   total_contribution_count DESC`;
 
-    // eslint-disable-next-line
-    const rows = await this.bigQueryService.query<any[]>(query);
-    console.log('Executing query:', rows);
+    const [data] = await this.bigquery.query(query);
+    console.log('Executing query:', data);
+
+    const { rows } = await this.db.executeQuery<{ moshe: 1 }>(
+      CompiledQuery.raw('select 1 as moshe', []),
+    );
+
+    console.log('数据库连接成功:', rows);
+
+    console.log('✅ 数据库连接成功');
+
     return 'Hello World!';
   }
 }

@@ -1,0 +1,42 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "name": "NestJS Console",
+      "request": "launch",
+      "runtimeArgs": [
+          "run",
+          "console:dev",
+          "test",
+          ""
+      ],
+      "runtimeExecutable": "pnpm",
+      "skipFiles": [
+          "<node_internals>/**"
+      ],
+      "sourceMaps": true,
+      "envFile": "",
+      "cwd": "${workspaceRoot}",
+      "console": "integratedTerminal",
+    },
+    {
+      "type": "node",
+      "name": "NestJS Debug",
+      "request": "launch",
+      "runtimeArgs": [
+          "run",
+          "start:debug"
+      ],
+      "runtimeExecutable": "pnpm",
+      "skipFiles": [
+          "<node_internals>/**"
+      ],
+      "sourceMaps": true,
+      "envFile": "",
+      "cwd": "${workspaceRoot}",
+      "console": "integratedTerminal",
+    },
+  ]
+}
+

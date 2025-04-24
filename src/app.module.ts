@@ -3,10 +3,13 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DBModule } from './app/db/db.module';
 import { ConsoleModule } from 'nestjs-console';
+import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './app/auth/auth.module';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
-  imports: [ConsoleModule, DBModule],
+  imports: [ConfigModule.forRoot(), ConsoleModule, DBModule, AuthModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, JwtService],
 })
 export class AppModule {}
