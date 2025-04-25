@@ -1,14 +1,13 @@
 import { createPublicClient, http, createWalletClient } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { mantleSepoliaTestnet } from "viem/chains";
-import { badgeAbi } from "./contracts/abi";
 
-import { getVar } from "@/utils/env";
+import { badgeAbi } from "./abi";
 
 // Load environment variables
-const privateKey = getVar("PRIVATE_KEY");
-const rpcUrl = getVar("RPC_URL");
-const contractAddress = getVar("CONTRACT_ADDRESS");
+const privateKey = process.env.PRIVATE_KEY;
+const rpcUrl = process.env.RPC_URL;
+const contractAddress = process.env.CONTRACT_ADDRESS;
 
 // Validations for environment variables
 if (!privateKey || !rpcUrl || !contractAddress) {
@@ -24,7 +23,7 @@ const publicClient = createPublicClient({
 });
 
 // Initialize the wallet client
-const account = privateKeyToAccount(`0x${privateKey}`) as `0x${string}`;
+const account = privateKeyToAccount(`0x${privateKey}` as `0x${string}`);
 const walletClient = createWalletClient({
   account,
   chain: mantleSepoliaTestnet,

@@ -1,9 +1,8 @@
 import { Resend } from "resend";
 
-import { getVar } from "@/utils/env";
 import { getTitle } from "@/utils/app";
 
-const resend = new Resend(getVar("RESEND_API_KEY"));
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendRewardClaimEmail(
   recipientEmail: string,

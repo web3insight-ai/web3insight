@@ -1,37 +1,8 @@
 import type { ResponseResult } from "@/types";
-import { generateFailedResponse } from "@/utils/http";
-import { httpClient } from "./helper";
-import type { StrapiAuthResponse } from "./typing";
+import { generateFailedResponse } from "@/clients/http";
 
-// Login with Strapi
-async function loginUser(
-  data: {
-    identifier: string; // This can be email or username
-    password: string;
-  },
-): Promise<ResponseResult<StrapiAuthResponse | undefined>> {
-  try {
-    const res = await httpClient.post("/api/auth/local", data);
-
-    if (!res.success) {
-      return res;
-    }
-
-    const resData = res.data as StrapiAuthResponse;
-
-    // Check if email is confirmed
-    if (resData.user && !resData.user.confirmed) {
-      return {
-        ...res,
-        message: "Please verify your email address to access all features.",
-      };
-    }
-
-    return res;
-  } catch (error) {
-    return generateFailedResponse("An error occurred during login");
-  }
-}
+import type { StrapiAuthResponse } from "../typing";
+import httpClient from "./client";
 
 async function sendConfirmationEmail(email: string): Promise<ResponseResult> {
   try {
@@ -77,6 +48,49 @@ async function registerUser(
     };
   } catch (error) {
     return generateFailedResponse("An error occurred during registration");
+  }
+}
+
+// Login with Strapi
+async function loginUser(
+  data: {
+    identifier: string; // This can be email or username
+    password: string;
+  },
+): Promise<ResponseResult<StrapiAuthResponse | undefined>> {
+  try {
+    const res = await httpClient.post("/api/auth/local", data);
+
+    if (!res.success) {
+      return res;
+    }
+
+    const resData = res.data as StrapiAuthResponse;
+
+    // Check if email is confirmed
+    if (resData.user && !resData.user.confirmed) {
+      return {
+        ...res,
+        message: "Please verify your email address to access all features.",
+      };
+    }
+
+    return res;
+  } catch (error) {
+    return generateFailedResponse("An error occurred during login");
+  }
+}
+
+// Get current user data
+async function getCurrentUser(token: string) {
+  try {
+    return httpClient.get("/api/users/me", {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+  } catch (error) {
+    return generateFailedResponse("An error occurred while fetch current user");
   }
 }
 
@@ -153,17 +167,4 @@ async function changePassword(
   }
 }
 
-// Get current user data
-async function getCurrentUser(token: string) {
-  try {
-    return httpClient.get("/api/users/me", {
-      headers: {
-        "Authorization": `Bearer ${token}`,
-      },
-    });
-  } catch (error) {
-    return generateFailedResponse("An error occurred while fetch current user");
-  }
-}
-
-export { loginUser, registerUser, sendPasswordResetEmail, resetPassword, confirmEmail, changePassword, getCurrentUser };
+export { registerUser, loginUser, getCurrentUser, sendPasswordResetEmail, resetPassword, confirmEmail, changePassword }

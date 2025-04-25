@@ -1,5 +1,6 @@
 import type { DataValue, RequestConfig, ResponseInterceptor } from "../../types";
-import { isFunction, isPlainObject } from "../index";
+import { isFunction, isPlainObject } from "../../utils/index";
+
 import type { HttpClientInitializer, IHttpClient } from "./typing";
 import { isServerSide, request, normalizeResponse } from "./helper";
 
@@ -47,6 +48,10 @@ class HttpClient implements IHttpClient {
 
   public async post(url: string, data?: Record<string, DataValue>, config?: RequestConfig) {
     return this.request(url, "POST", data ? data : {}, config);
+  }
+
+  public async put(url: string, data?: Record<string, DataValue>, config?: RequestConfig) {
+    return this.request(url, "PUT", data ? data : {}, config);
   }
 
   public use(interceptor: ResponseInterceptor) {
