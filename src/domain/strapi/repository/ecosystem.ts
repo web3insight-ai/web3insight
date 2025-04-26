@@ -11,7 +11,7 @@ async function fetchEcosystem(keyword?: string): Promise<ResponseResult<Record<s
   let found: Record<string, DataValue> | null;
 
   try {
-    const { success, data } = await httpClient.get(
+    const { success, data: resData } = await httpClient.get(
       "/api/ecosystems",
       {
         params: {
@@ -20,6 +20,7 @@ async function fetchEcosystem(keyword?: string): Promise<ResponseResult<Record<s
         },
       },
     );
+    const data = resData?.data;
 
     // Check if we have data
     if (!success || !data || data.length === 0) {

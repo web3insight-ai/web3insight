@@ -7,10 +7,10 @@ import httpClient from "./client";
 
 async function fetchQueryList(params: Record<string, DataValue>): Promise<ResponseResult<StrapiQuery[]>> {
   try {
-    const { data, ...others } = await httpClient.get("/api/queries",  { params });
+    const { data, ...others } = await httpClient.get("/api/queries", { params });
 
-    const resolved: StrapiQuery[] = isArray(data) ?
-      data.filter(({ query }: StrapiQuery) => {
+    const resolved: StrapiQuery[] = isArray(data?.data) ?
+      data.data.filter(({ query }: StrapiQuery) => {
         const queryText = query || '';
         return queryText.trim() !== '' && queryText !== 'Untitled query';
       }) :
@@ -29,7 +29,7 @@ async function fetchQuery(
   try {
     const { data, ...others } = await httpClient.get(`/api/queries/${id}`, { params });
 
-    return { ...others, data: data ?? null };
+    return { ...others, data: data?.data ?? null };
   } catch (error) {
     return generateSuccessResponse(null);
   }
