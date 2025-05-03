@@ -8,7 +8,7 @@
       "runtimeArgs": [
           "run",
           "console:dev",
-          "test",
+          "summary:test",
           ""
       ],
       "runtimeExecutable": "pnpm",
