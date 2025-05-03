@@ -2,6 +2,7 @@ import { Provider } from '@nestjs/common';
 import { BigQuery } from '@google-cloud/bigquery';
 import { Kysely, PostgresDialect } from 'kysely';
 import { Pool } from 'pg';
+import { DB } from './dto/db.dto';
 
 export const BIGQUERY = 'BIGQUERY';
 export const KYSELY = 'KYSELY';
@@ -23,17 +24,8 @@ export const kyselyProvider: Provider = {
       pool: new Pool({ connectionString: process.env.DATABASE_URL }),
     });
 
-    return new Kysely<Database>({
+    return new Kysely<DB>({
       dialect,
     });
   },
 };
-
-// eslint-disable-next-line
-export interface Database {}
-
-// eslint-disable-next-line
-export interface UserTable {}
-
-// eslint-disable-next-line
-export interface PostTable {}

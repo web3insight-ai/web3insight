@@ -1,8 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Command, Console } from 'nestjs-console';
-import { BIGQUERY, Database, KYSELY } from './app/db/db.provider';
+import { BIGQUERY, KYSELY } from './app/db/db.provider';
 import { BigQuery } from '@google-cloud/bigquery';
 import { CompiledQuery, Kysely } from 'kysely';
+import { DB } from './app/db/dto/db.dto';
 
 @Injectable()
 @Console()
@@ -10,10 +11,10 @@ export class AppService {
   @Inject(BIGQUERY)
   private readonly bigquery!: BigQuery;
 
-  @Inject(KYSELY) private readonly db!: Kysely<Database>;
+  @Inject(KYSELY) private readonly db!: Kysely<DB>;
 
   @Command({
-    command: 'test',
+    command: 'app:test',
     description: '测试',
   })
   async getHello(): Promise<string> {
