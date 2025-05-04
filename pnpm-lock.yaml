@@ -23,9 +23,15 @@ importers:
       '@clerk/remix':
         specifier: ^4.2.13
         version: 4.2.13(@remix-run/react@2.11.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4))(@remix-run/server-runtime@2.11.1(typescript@5.5.4))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@handie/runtime-core':
+        specifier: 0.0.13
+        version: 0.0.13(petals-ui@0.0.25)
       '@nextui-org/react':
         specifier: ^2.4.6
         version: 2.4.6(@types/react@18.3.3)(framer-motion@12.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.9)
+      '@ntks/toolbox':
+        specifier: 0.0.6
+        version: 0.0.6
       '@remix-run/node':
         specifier: ^2.11.1
         version: 2.11.1(typescript@5.5.4)
@@ -50,6 +56,9 @@ importers:
       dotted-map:
         specifier: ^2.2.3
         version: 2.2.3
+      echarts:
+        specifier: 5.5.1
+        version: 5.5.1
       echarts-for-react:
         specifier: ^3.0.2
         version: 3.0.2(echarts@5.5.1)(react@18.3.1)
@@ -104,6 +113,9 @@ importers:
       viem:
         specifier: ^2.19.4
         version: 2.19.4(typescript@5.5.4)(zod@3.23.8)
+      zod:
+        specifier: 3.23.8
+        version: 3.23.8
     devDependencies:
       '@remix-run/dev':
         specifier: ^2.11.1
@@ -810,6 +822,11 @@ packages:
   '@formatjs/intl-localematcher@0.5.4':
     resolution: {integrity: sha512-zTwEpWOzZ2CiKcB93BLngUX59hQkuZjT2+SAQEscSm52peDW/getsawMcWF1rGRpMCX6D7nSJA3CzJ8gn13N/g==}
 
+  '@handie/runtime-core@0.0.13':
+    resolution: {integrity: sha512-jyvFwBCzJiZev3oa9zrIQ/tB/4Zbpi3BjQgqXUFtgJJHnFfzgp8D/r7oygQ5bzxN4l761rRLlfdR3NuQOM/W4g==}
+    peerDependencies:
+      petals-ui: ~0.0.25
+
   '@humanwhocodes/config-array@0.11.14':
     resolution: {integrity: sha512-3T8LkOmg45BV5FICb15QQMsyUSWrQ8AygVfC7ZG32zOalnqrilm018ZVCw0eapXux8FtA33q8PSRSstjee3jSg==}
     engines: {node: '>=10.10.0'}
@@ -1381,12 +1398,21 @@ packages:
     resolution: {integrity: sha512-gGq0NJkIGSwdbUt4yhdF8ZrmkGKVz9vAdVzpOfnom+V8PLSmSOVhZwbNvZZS1EYcJN5hzzKBxmmVVAInM6HQLg==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
 
+  '@ntks/event-emitter@0.0.0':
+    resolution: {integrity: sha512-q1HtxPqhe7T9YtuyLME5HWEk5lIwFRiny/grLA5q+ja1eCNyD4nee4ZfDD0PL9juvJXbVVfUGIli+f0yHVOLYQ==}
+
+  '@ntks/toolbox@0.0.6':
+    resolution: {integrity: sha512-EpoW12XUVabG5WhpLSFA8KNG87VTXf2O/HK5OF5/rr9Y53X3EvcKb8c2uSzjaVewd5BGUFiDuezz5KbhkDhPGQ==}
+
   '@one-ini/wasm@0.1.1':
     resolution: {integrity: sha512-XuySG1E38YScSJoMlqovLru4KTUNSjgVTIjyh7qMX6aNN5HY5Ct5LhRJdxO79JtTzKfzV/bnWpz+zquYrISsvw==}
 
   '@opentelemetry/api@1.9.0':
     resolution: {integrity: sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg==}
     engines: {node: '>=8.0.0'}
+
+  '@petals/basic@0.0.4':
+    resolution: {integrity: sha512-QrZt4dK9B1A7e/x6O1K4S3nXMW3CptBTr1ApYdNByylb4T7IlirdXcDszbl0bTx4IyNJRtMay4zPH7PDXOL8lA==}
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -2816,6 +2842,9 @@ packages:
   data-view-byte-offset@1.0.0:
     resolution: {integrity: sha512-t/Ygsytq+R995EJ5PZlD4Cu56sWa8InXySaViRzw9apusqsOO2bQP+SbYzAhR0pFKoB+43lYy8rWban9JSuXnA==}
     engines: {node: '>= 0.4'}
+
+  dayjs@1.10.8:
+    resolution: {integrity: sha512-wbNwDfBHHur9UOzNUjeKUOJ0fCb0a52Wx0xInmQ7Y8FstyajiV1NmK1e00cxsr9YrE9r7yAChE0VvpuY5Rnlow==}
 
   debug@2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
@@ -4644,6 +4673,9 @@ packages:
 
   periscopic@3.1.0:
     resolution: {integrity: sha512-vKiQ8RRtkl9P+r/+oefh25C3fhybptkHKCZSPlcXiJux2tJF55GnEj3BVn4A5gKfq9NWWXXrxkHBwVPUfH0opw==}
+
+  petals-ui@0.0.25:
+    resolution: {integrity: sha512-pmhaiJa4W5qVdh8p/LRr5hoHwe+zVBQHAuoBIxkeY/2YGPbvJbfouP4vBkmnXYQ50rbsrIkWqK3ckSxWy8a00A==}
 
   phenomenon@1.6.0:
     resolution: {integrity: sha512-7h9/fjPD3qNlgggzm88cY58l9sudZ6Ey+UmZsizfhtawO6E3srZQXywaNm2lBwT72TbpHYRPy7ytIHeBUD/G0A==}
@@ -6486,6 +6518,13 @@ snapshots:
     dependencies:
       tslib: 2.6.3
 
+  '@handie/runtime-core@0.0.13(petals-ui@0.0.25)':
+    dependencies:
+      '@ntks/event-emitter': 0.0.0
+      '@ntks/toolbox': 0.0.6
+      dayjs: 1.10.8
+      petals-ui: 0.0.25
+
   '@humanwhocodes/config-array@0.11.14':
     dependencies:
       '@humanwhocodes/object-schema': 2.0.3
@@ -7579,9 +7618,19 @@ snapshots:
     dependencies:
       which: 3.0.1
 
+  '@ntks/event-emitter@0.0.0':
+    dependencies:
+      '@ntks/toolbox': 0.0.6
+
+  '@ntks/toolbox@0.0.6': {}
+
   '@one-ini/wasm@0.1.1': {}
 
   '@opentelemetry/api@1.9.0': {}
+
+  '@petals/basic@0.0.4':
+    dependencies:
+      '@ntks/toolbox': 0.0.6
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
@@ -9577,6 +9626,8 @@ snapshots:
       es-errors: 1.3.0
       is-data-view: 1.0.1
 
+  dayjs@1.10.8: {}
+
   debug@2.6.9:
     dependencies:
       ms: 2.0.0
@@ -9697,7 +9748,7 @@ snapshots:
   dot-case@3.0.4:
     dependencies:
       no-case: 3.0.4
-      tslib: 2.4.1
+      tslib: 2.6.3
 
   dotenv@16.4.5: {}
 
@@ -10998,7 +11049,7 @@ snapshots:
 
   lower-case@2.0.2:
     dependencies:
-      tslib: 2.4.1
+      tslib: 2.6.3
 
   lru-cache@10.4.3: {}
 
@@ -11707,7 +11758,7 @@ snapshots:
   no-case@3.0.4:
     dependencies:
       lower-case: 2.0.2
-      tslib: 2.4.1
+      tslib: 2.6.3
 
   node-domexception@1.0.0: {}
 
@@ -11934,6 +11985,11 @@ snapshots:
       '@types/estree': 1.0.5
       estree-walker: 3.0.3
       is-reference: 3.0.2
+
+  petals-ui@0.0.25:
+    dependencies:
+      '@ntks/toolbox': 0.0.6
+      '@petals/basic': 0.0.4
 
   phenomenon@1.6.0: {}
 
@@ -12502,7 +12558,7 @@ snapshots:
   snake-case@3.0.4:
     dependencies:
       dot-case: 3.0.4
-      tslib: 2.4.1
+      tslib: 2.6.3
 
   snakecase-keys@5.4.4:
     dependencies:
