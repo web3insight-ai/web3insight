@@ -21,9 +21,7 @@ const vars: Record<string, any> = { // eslint-disable-line @typescript-eslint/no
   // Database configuration
   DATABASE_URL: process.env.DATABASE_URL || "",
   REDIS_URL: process.env.REDIS_URL || "",
-  RSS3_DSL_URL: process.env.RSS3_DSL_URL || "",
   OPENDIGGER_URL: process.env.OPENDIGGER_URL || "",
-  OSSINSIGHT_URL: process.env.OSSINSIGHT_URL || "",
 };
 
 function getVar(key: string) {

@@ -67,48 +67,6 @@ function isLogicalSuccess(code: number) {
   return code >= 200 && code < 300;
 }
 
-async function normalizeResponse<VT extends DataValue = DataValue>(res: Response): Promise<ResponseResult<VT>> {
-  const jsonData = await res.json();
-
-  if (res.ok) {
-    if (isPlainObject(jsonData)) {
-      const { success, code, message, data, extra, ...others } = jsonData;
-
-      return {
-        success: success ?? isLogicalSuccess(Number(code)),
-        code,
-        message,
-        data,
-        extra: { ...extra, ...others },
-      };
-    }
-
-    return {
-      success: true,
-      code: `${res.status}`,
-      message: "",
-      data: jsonData,
-      extra: {},
-    };
-  }
-
-  let message;
-
-  if (res.status === 404) {
-    message = `\`${new URL(res.url).pathname}\` is not found`;
-  } if (isPlainObject(jsonData)) {
-    message = jsonData.message;
-  }
-
-  return {
-    success: false,
-    code: `${res.status}`,
-    message: message ?? res.statusText,
-    data: undefined as VT,
-    extra: {},
-  };
-}
-
 function generateSuccessResponse<VT extends DataValue = DataValue>(
   data: VT,
   message: string = "",
@@ -131,4 +89,47 @@ function generateFailedResponse(message: string, statusCode: number | string = 5
   };
 }
 
-export { isServerSide, request, normalizeResponse, generateSuccessResponse, generateFailedResponse };
+async function normalizeResponse<VT extends DataValue = DataValue>(res: Response): Promise<ResponseResult<VT>> {
+  const jsonData = await res.json();
+  const defaultCode = `${res.status}`;
+
+  if (res.ok) {
+    if (isPlainObject(jsonData)) {
+      const { success, code = defaultCode, message, data, extra, ...others } = jsonData;
+
+      return {
+        success: success ?? isLogicalSuccess(Number(code)),
+        code,
+        message,
+        data,
+        extra: { ...extra, ...others },
+      };
+    }
+
+    return {
+      success: true,
+      code: defaultCode,
+      message: "",
+      data: jsonData,
+      extra: {},
+    };
+  }
+
+  let message;
+
+  if (res.status === 404) {
+    message = `\`${new URL(res.url).pathname}\` is not found`;
+  } if (isPlainObject(jsonData)) {
+    message = jsonData.message;
+  }
+
+  return {
+    success: false,
+    code: defaultCode,
+    message: message ?? res.statusText,
+    data: undefined as VT,
+    extra: {},
+  };
+}
+
+export { isServerSide, request, generateSuccessResponse, generateFailedResponse, normalizeResponse };

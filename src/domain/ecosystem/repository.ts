@@ -1,10 +1,11 @@
-import axios from "axios";
 import { isAddress } from "viem";
 
 import type { DataValue, ResponseResult } from "@/types";
-import { getVar } from "@/utils/env";
+import { generateFailedResponse } from "@/clients/http";
 import redis from "@/clients/redis";
 
+import { fetchDecentralizedActivityList } from "../rss3/repository";
+import { fetchUser, fetchRepo } from "../ossinsight/repository";
 import { fetchEcosystem } from "../strapi/repository";
 
 async function fetchOne(keyword?: string): Promise<ResponseResult<Record<string, DataValue> | null>> {
@@ -12,13 +13,11 @@ async function fetchOne(keyword?: string): Promise<ResponseResult<Record<string,
 }
 
 async function getEVMInfo(address: string) {
-  const apiUrl = `${getVar("RSS3_DSL_URL")}/decentralized/${address}?limit=50&action_limit=10`;
   try {
-    const response = await axios.get(apiUrl);
-    return response.data;
+    return fetchDecentralizedActivityList(address);
   } catch (error) {
     console.error("Error fetching EVM info:", error);
-    return null;
+    return generateFailedResponse("Error occurred while fetching EVM info");
   }
 }
 
@@ -33,14 +32,11 @@ async function getGitHubRepoInfo(repo: string) {
     }
   }
 
-  const apiUrl = `${getVar("OSSINSIGHT_URL")}/repo/${repo}`;
-
   try {
-    const response = await axios.get(apiUrl);
-    const result = response.data.data;
+    const { data } = await fetchRepo(repo);
 
-    await redis.set(key, JSON.stringify(result), "EX", 60 * 60 * 24 * 2);
-    return result;
+    await redis.set(key, JSON.stringify(data), "EX", 60 * 60 * 24 * 2);
+    return data;
   } catch (error) {
     console.error("Error fetching GitHub repo info:", error);
     return null;
@@ -58,14 +54,11 @@ async function getGitHubUserInfo(user: string) {
     }
   }
 
-  const apiUrl = `${getVar("OSSINSIGHT_URL")}/users/${user}`;
-
   try {
-    const response = await axios.get(apiUrl);
-    const result = response.data.data;
+    const { data } = await fetchUser(user);
 
-    await redis.set(key, JSON.stringify(result), "EX", 60 * 60 * 24 * 2);
-    return result;
+    await redis.set(key, JSON.stringify(data), "EX", 60 * 60 * 24 * 2);
+    return data;
   } catch (error) {
     console.error("Error fetching GitHub user info:", error);
     return null;

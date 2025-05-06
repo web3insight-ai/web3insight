@@ -50,7 +50,7 @@ async function createQuery(
 
   const { data: strapiData, ...others } = await httpClient.post(`/api/queries`, { data });
 
-  return { ...others, data: strapiData.data };
+  return { ...others, data: strapiData?.data };
 }
 
 async function updateQuery(
@@ -62,7 +62,7 @@ async function updateQuery(
 ): Promise<ResponseResult<StrapiQuery>> {
   const { data: strapiData, ...others } = await httpClient.put(`/api/queries/${id}`, data);
 
-  return { ...others, data: strapiData.data };
+  return { ...others, data: strapiData?.data };
 }
 
 // Query methods
