@@ -23,7 +23,6 @@
     "@remix-run/react": "^2.11.1",
     "@remix-run/serve": "^2.11.1",
     "ai": "^3.3.6",
-    "axios": "^1.7.3",
     "clsx": "^2.1.1",
     "cobe": "^0.6.3",
     "dotted-map": "^2.2.3",

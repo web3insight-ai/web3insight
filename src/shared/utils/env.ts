@@ -20,8 +20,6 @@ const vars: Record<string, any> = { // eslint-disable-line @typescript-eslint/no
   SESSION_SECRET: process.env.SESSION_SECRET || "default-secret-change-me",
   // Database configuration
   DATABASE_URL: process.env.DATABASE_URL || "",
-  REDIS_URL: process.env.REDIS_URL || "",
-  OPENDIGGER_URL: process.env.OPENDIGGER_URL || "",
 };
 
 function getVar(key: string) {

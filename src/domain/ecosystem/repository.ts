@@ -1,15 +1,20 @@
 import { isAddress } from "viem";
 
 import type { DataValue, ResponseResult } from "@/types";
-import { generateFailedResponse } from "@/clients/http";
+import { generateSuccessResponse } from "@/clients/http";
 import redis from "@/clients/redis";
 
 import { fetchDecentralizedActivityList } from "../rss3/repository";
 import { fetchUser, fetchRepo } from "../ossinsight/repository";
+import {
+  fetchRepoOpenrank, fetchRepoCommunityOpenrank,
+  fetchRepoAttention,
+  fetchRepoParticipants, fetchRepoNewContributors, fetchRepoInactiveContributors,
+} from "../opendigger/repository";
 import { fetchEcosystem } from "../strapi/repository";
 
 async function fetchOne(keyword?: string): Promise<ResponseResult<Record<string, DataValue> | null>> {
-  return  fetchEcosystem(keyword);
+  return fetchEcosystem(keyword);
 }
 
 async function getEVMInfo(address: string) {
@@ -17,7 +22,7 @@ async function getEVMInfo(address: string) {
     return fetchDecentralizedActivityList(address);
   } catch (error) {
     console.error("Error fetching EVM info:", error);
-    return generateFailedResponse("Error occurred while fetching EVM info");
+    return null;
   }
 }
 
@@ -75,4 +80,31 @@ async function getInfo(query: string) {
   }
 }
 
-export { fetchOne, getInfo };
+async function fetchRepoAnalysis(repo: string) {
+  const [
+    { data: openrank },
+    communityOpenrankRes,
+    { data: attention },
+    { data: participants },
+    { data: newContributors },
+    { data: inactiveContributors },
+  ] = await Promise.all([
+    fetchRepoOpenrank(repo),
+    fetchRepoCommunityOpenrank(repo),
+    fetchRepoAttention(repo),
+    fetchRepoParticipants(repo),
+    fetchRepoNewContributors(repo),
+    fetchRepoInactiveContributors(repo),
+  ]);
+
+  return generateSuccessResponse({
+    openrank,
+    communityOpenrank: { data: communityOpenrankRes.data, ...communityOpenrankRes.extra },
+    attention,
+    participants,
+    newContributors,
+    inactiveContributors,
+  });
+}
+
+export { fetchOne, getInfo, fetchRepoAnalysis };

@@ -25,20 +25,16 @@ import OpenRankChart from "#/components/OpenRankChart";
 import AttentionChart from "#/components/AttentionChart";
 import ParticipantsChart from "#/components/ParticipantsChart";
 import CommunityOpenRank from "#/components/CommunityOpenRank";
-import axios from "axios";
 import { isAddress } from "viem";
 import { motion, AnimatePresence } from "framer-motion";
 
-import { getVar } from "@/utils/env";
 import { getMetadata } from "@/utils/app";
 
 import { getUser } from "~/auth/repository";
 import type { Query } from "~/query/typing";
 import { ErrorType } from "~/query/helper";
 import { fetchSearchedList, fetchOneWithUser } from "~/query/repository";
-import { fetchOne as fetchEcosystem } from "~/ecosystem/repository";
-
-const opendiggerUrl = getVar("OPENDIGGER_URL");
+import { fetchOne as fetchEcosystem, fetchRepoAnalysis } from "~/ecosystem/repository";
 
 const { title: appTitle, description } = getMetadata();
 
@@ -57,68 +53,6 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
     },
   ];
 };
-
-async function fetchOpenDiggerData(name: string, type: string) {
-  const url = `${opendiggerUrl}/${name}/${type}.json`;
-
-  try {
-    const response = await axios.get(url);
-    return response.data;
-  } catch (error) {
-    return null;
-  }
-}
-
-async function fetchParticipantsData(repoName: string) {
-  const baseUrl = `${opendiggerUrl}/github`;
-  try {
-    const [participants, newContributors, inactiveContributors] =
-      await Promise.all([
-        fetch(`${baseUrl}/${repoName}/participants.json`).then((res) =>
-          res.json(),
-        ),
-        fetch(`${baseUrl}/${repoName}/new_contributors.json`).then((res) =>
-          res.json(),
-        ),
-        fetch(`${baseUrl}/${repoName}/inactive_contributors.json`).then((res) =>
-          res.json(),
-        ),
-      ]);
-    return { participants, newContributors, inactiveContributors };
-  } catch (error) {
-    return null;
-  }
-}
-
-async function fetchCommunityOpenRankData(repoName: string) {
-  const url = `${opendiggerUrl}/github/${repoName}/community_openrank.json`;
-  try {
-    const response = await axios.get(url);
-    const data = response.data;
-
-    // Sort the months in descending order
-    const sortedMonths = Object.keys(data.data).sort((a, b) =>
-      b.localeCompare(a),
-    );
-
-    // Get the most recent 6 months
-    const recentMonths = sortedMonths.slice(0, 6);
-
-    // Create a new object with only the recent months' data
-    const recentData: Record<string, Record<string, number>> = {};
-    recentMonths.forEach((month) => {
-      recentData[month] = data.data[month];
-    });
-
-    // Return the modified data object
-    return {
-      ...data,
-      data: recentData,
-    };
-  } catch (error) {
-    return null;
-  }
-}
 
 export const loader = async (ctx: LoaderFunctionArgs) => {
   const user = await getUser(ctx.request);
@@ -158,11 +92,13 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
             : "other";
 
       if (type === "github_repo") {
-        const openDiggerName = `github/${keyword}`;
-        openRankData = await fetchOpenDiggerData(openDiggerName, "openrank");
-        attentionData = await fetchOpenDiggerData(openDiggerName, "attention");
-        participantsData = await fetchParticipantsData(keyword);
-        communityOpenRankData = await fetchCommunityOpenRankData(keyword);
+        const {
+          data: { participants, newContributors, inactiveContributors, ...analysis },
+        } = await fetchRepoAnalysis(keyword);
+        openRankData = analysis.openrank;
+        attentionData = analysis.attention;
+        participantsData = { participants, newContributors, inactiveContributors };
+        communityOpenRankData = analysis.communityOpenrank;
       }
 
       // Fetch project data from Strapi API
