@@ -104,5 +104,7 @@ export class EcoDataService {
   async testLoadEcoData() {
     await this.loadData(this.dataPath);
     console.log('Load eco data len:', this.repoMap.size);
+    const ecoNames = this.getAllEcoNames();
+    console.log('Eco names:', ecoNames.length);
   }
 }
