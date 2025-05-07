@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
+import { AppController } from './app/app.controller';
 import { AppService } from './app.service';
 import { DBModule } from './app/db/db.module';
 import { ConsoleModule } from 'nestjs-console';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './app/auth/auth.module';
 import { JwtService } from '@nestjs/jwt';
-import { DataModule } from './data/data.module';
+import { DataModule } from './source/source.module';
 
 @Module({
   imports: [
