@@ -25,30 +25,37 @@ export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
-export interface _SqlxMigrations {
-  checksum: Buffer;
-  description: string;
-  execution_time: Int8;
-  installed_on: Generated<Timestamp>;
-  success: boolean;
-  version: Int8;
+export interface Web3Actors {
+  actor_id: Int8;
+  actor_login: string | null;
+  created_at: Timestamp;
 }
 
-export interface AnalysisEcoEvent {
-  created_at: Generated<Timestamp>;
-  eco: Generated<string>;
-  end_time: Generated<Timestamp>;
-  id: Generated<Int8>;
-  pr_count: Generated<number>;
-  push_count: Generated<number>;
-  start_time: Generated<Timestamp>;
-  total_count: Generated<number>;
-  uid: Generated<Int8>;
+export interface Web3Event {
+  actor_id: Int8;
+  actor_login: string;
+  body: string | null;
+  created_at: Timestamp;
+  event_type: string;
+  id: Int8;
+  org_id: Int8 | null;
+  org_login: string | null;
+  payload: Generated<Json>;
+  public: boolean | null;
+  repo_id: Int8 | null;
+  repo_name: string | null;
 }
 
-export interface AnalysisGithubPersonal {
-  data: Generated<Json>;
-  id: Generated<Int8>;
-  login: Generated<string>;
-  updated_at: Generated<Timestamp>;
+export interface Web3Repos {
+  created_at: Timestamp;
+  eco_details: Generated<Json | null>;
+  eco_names: Generated<string[] | null>;
+  repo_id: Int8;
+  repo_name: string | null;
+}
+
+export interface DB {
+  'web3.actors': Web3Actors;
+  'web3.event': Web3Event;
+  'web3.repos': Web3Repos;
 }
