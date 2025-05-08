@@ -1,11 +1,22 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { VersioningType } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      // transformOptions: {
+      //   enableImplicitConversion: true,
+      //   exposeDefaultValues: true,
+      // },
+    }),
+  );
 
   app.enableVersioning({
     defaultVersion: '1',

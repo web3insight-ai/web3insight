@@ -7,6 +7,6 @@ import { CacheDataService } from './services/cache.services';
 @Module({
   imports: [DBModule],
   providers: [InitDataService, EcoDataService, CacheDataService],
-  exports: [InitDataService],
+  exports: [InitDataService, EcoDataService],
 })
-export class DataModule {}
+export class SourceModule {}
