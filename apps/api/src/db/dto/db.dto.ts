@@ -61,10 +61,14 @@ export interface Web3Repos {
 }
 
 export interface Web3Caches {
-  cache_data: Generated<Json | null>;
+  cache_data: Generated<Json | null> | CacheCount;
   cache_key: string;
   created_at: Timestamp;
   eco_name: Generated<string>;
+}
+
+export interface CacheCount {
+  total: number;
 }
 
 export interface DB {
