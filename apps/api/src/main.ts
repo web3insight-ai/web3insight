@@ -11,10 +11,10 @@ async function bootstrap() {
     new ValidationPipe({
       transform: true,
       whitelist: true,
-      // transformOptions: {
-      //   enableImplicitConversion: true,
-      //   exposeDefaultValues: true,
-      // },
+      transformOptions: {
+        enableImplicitConversion: true,
+        exposeDefaultValues: true,
+      },
     }),
   );
 
@@ -41,4 +41,5 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT ?? 3005);
 }
+
 bootstrap().catch((err) => console.error('Err:', err));
