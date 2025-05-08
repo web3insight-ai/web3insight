@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
-import { EcoDataService } from './services/eco.services';
+import { InitDataService } from './services/init.services';
 import { DBModule } from '@/db/db.module';
+import { EcoDataService } from './services/eco.services';
+import { CacheDataService } from './services/cache.services';
 
 @Module({
   imports: [DBModule],
-  providers: [EcoDataService],
-  exports: [EcoDataService],
+  providers: [InitDataService, EcoDataService, CacheDataService],
+  exports: [InitDataService],
 })
 export class DataModule {}
