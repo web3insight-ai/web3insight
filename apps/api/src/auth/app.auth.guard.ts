@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { JwtPayload, RequestWithUser } from '@/app/auth/auth.jwt.dto';
+import { JwtPayload, RequestWithUser } from '@/auth/auth.jwt.dto';
 import { Reflector } from '@nestjs/core';
 
 export enum AuthRole {
@@ -64,7 +64,6 @@ export class AppAuthGuard implements CanActivate {
   }
 
   private async verifyToken(token: string): Promise<JwtPayload> {
-    // eslint-disable-next-line
     return await this.jwtService.verifyAsync(token, {
       secret: process.env.JWT_SECRET,
     });

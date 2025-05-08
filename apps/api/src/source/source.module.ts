@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { EcoDataService } from './services/eco.services';
-import { DBModule } from '@/app/db/db.module';
+import { DBModule } from '@/db/db.module';
 
 @Module({
   imports: [DBModule],

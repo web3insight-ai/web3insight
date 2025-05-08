@@ -31,6 +31,12 @@ export interface Web3Actors {
   created_at: Timestamp;
 }
 
+export interface Web3Ecos {
+  eco_details: Generated<Json | null>;
+  eco_names: Generated<string[] | null>;
+  repo_name: string | null;
+}
+
 export interface Web3Event {
   actor_id: Int8;
   actor_login: string;
@@ -56,6 +62,7 @@ export interface Web3Repos {
 
 export interface DB {
   'web3.actors': Web3Actors;
+  'web3.ecos': Web3Ecos;
   'web3.event': Web3Event;
   'web3.repos': Web3Repos;
 }
