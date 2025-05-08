@@ -1,146 +1,65 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { join } from 'path';
-import * as fs from 'fs';
-import * as readline from 'readline';
-import { Command, Console } from 'nestjs-console';
 import { KYSELY } from '@/db/db.provider';
-import { Kysely, sql } from 'kysely';
 import { DB } from '@/db/dto/db.dto';
-import { chunkArray } from '@/helper';
-
-interface RawRepoData {
-  eco_name: string;
-  branch: string[];
-  repo_url: string;
-  tags: string[];
-}
-interface RepoData {
-  repo_name: string;
-  eco_names: string[];
-  eco_details: Record<string, { branch: string[]; tags: string[] }>;
-}
+import { Inject, Injectable } from '@nestjs/common';
+import { Kysely, sql } from 'kysely';
+import { Command, Console } from 'nestjs-console';
+import { CacheDataService } from './cache.services';
+import { CacheKey } from '../dto/cache.dto';
 
 @Injectable()
 @Console()
 export class EcoDataService {
   @Inject(KYSELY) private readonly db!: Kysely<DB>;
 
-  private repoMap: Map<string, RepoData> = new Map();
-  private dataPath = join(process.cwd(), 'eco.jsonl');
+  constructor(private cacheDataService: CacheDataService) {}
 
-  async loadData(filePath: string): Promise<void> {
-    const fileStream = fs.createReadStream(filePath, { encoding: 'utf-8' });
-    const rl = readline.createInterface({
-      input: fileStream,
-      crlfDelay: Infinity,
-    });
+  async reposNum(ecoName: string, cache: boolean = true) {
+    const dbData = await this.cacheDataService.getCacheData(
+      CacheKey.ReposNum,
+      ecoName,
+    );
 
-    for await (const line of rl) {
-      if (line.trim()) {
-        const item = JSON.parse(line) as RawRepoData;
-        const { repo_url, eco_name, branch, tags } = item;
-
-        const repo = this.repoMap.get(repo_url) || {
-          repo_name: repo_url,
-          eco_names: [],
-          eco_details: {},
-        };
-
-        if (!repo.eco_names.includes(eco_name)) {
-          repo.eco_names.push(eco_name);
-        }
-
-        if (!repo.eco_details[eco_name]) {
-          repo.eco_details[eco_name] = { branch, tags };
-        } else {
-          const existingBranches = repo.eco_details[eco_name].branch;
-          const existingTags = repo.eco_details[eco_name].tags;
-
-          repo.eco_details[eco_name] = {
-            branch: [...new Set([...existingBranches, ...branch])],
-            tags: [...new Set([...existingTags, ...tags])],
-          };
-        }
-        this.repoMap.set(repo_url, repo);
-      }
+    if (!dbData && cache) {
+      throw new Error('Cache not found');
     }
-  }
 
-  getRepoNamesForEco(ecoName: string): string[] {
-    return Array.from(this.repoMap.values())
-      .filter((repo) => repo.eco_names.includes(ecoName))
-      .map((repo) => {
-        const url = new URL(repo.repo_name);
-        return url.pathname.substring(1);
-      });
-  }
-
-  getReposWithBranchesForEco(
-    ecoName: string,
-  ): Array<{ repo: string; branches: string[] }> {
-    return Array.from(this.repoMap.values())
-      .filter((repo) => repo.eco_names.includes(ecoName))
-      .map((repo) => {
-        const url = new URL(repo.repo_name);
-        return {
-          repo: url.pathname.substring(1),
-          branches: repo.eco_details[ecoName].branch,
-        };
-      });
-  }
-
-  getAllEcoNames(): string[] {
-    const ecoNamesSet = new Set<string>();
-    for (const repo of this.repoMap.values()) {
-      for (const ecoName of repo.eco_names) {
-        ecoNamesSet.add(ecoName);
-      }
+    if (dbData && cache) {
+      return dbData;
     }
-    return Array.from(ecoNamesSet);
-  }
 
-  getRepoDetails(repoUrl: string): RepoData | undefined {
-    return this.repoMap.get(repoUrl);
+    let query = this.db
+      .selectFrom('web3.repos')
+      .select(this.db.fn.countAll().as('count'));
+
+    if (!ecoName) {
+      query = query.where(
+        'eco_names',
+        '@>',
+        sql<string[]>`ARRAY[${sql.join([ecoName])}]`,
+      );
+    }
+
+    const result = await query.executeTakeFirst();
+
+    if (!result) {
+      throw new Error('No data found');
+    }
+
+    await this.cacheDataService.updateCacheData(
+      CacheKey.ReposNum,
+      { count: result.count },
+      new Date().toISOString(),
+    );
+
+    return await this.cacheDataService.getCacheData(CacheKey.ReposNum, ecoName);
   }
 
   @Command({
-    command: 'sync:db:eco::repos',
-    description: 'Update eco repos',
+    command: 'test:eco:repos',
+    description: 'Test eco repos',
   })
-  async testLoadEcoData() {
-    await this.loadData(this.dataPath);
-    console.log('Load eco data len:', this.repoMap.size);
-
-    const repos = Array.from(this.repoMap.values()).map((repo) => ({
-      ...repo,
-      repo_name: repo.repo_name?.replace(/^https:\/\/github\.com\//i, ''),
-    }));
-
-    const createTable = sql`
-CREATE UNLOGGED TABLE IF NOT EXISTS "web3"."ecos"
-(
-    "repo_name"   TEXT,
-    "eco_names"   TEXT[] DEFAULT ARRAY []::TEXT[],
-    "eco_details" JSONB  DEFAULT '{}'::JSONB
-);`;
-
-    await createTable.execute(this.db);
-
-    await this.db.deleteFrom('web3.ecos').execute();
-
-    for (const batch of chunkArray(repos, 5000)) {
-      await this.db.insertInto('web3.ecos').values(batch).execute();
-      console.log('Inserted batch of eco data:', batch.length);
-    }
-    const updateTable = sql`
-UPDATE "web3"."repos" r
-SET "eco_names"   = e."eco_names",
-    "eco_details" = e."eco_details"
-FROM "web3"."ecos" e
-WHERE LOWER(r."repo_name") = LOWER(e."repo_name");`;
-
-    await updateTable.execute(this.db);
-
-    await sql`DROP TABLE IF EXISTS "web3"."ecos";`.execute(this.db);
+  async test() {
+    await this.reposNum('ALL', false);
+    return null;
   }
 }

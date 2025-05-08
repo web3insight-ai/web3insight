@@ -60,9 +60,17 @@ export interface Web3Repos {
   repo_name: string | null;
 }
 
+export interface Web3Caches {
+  cache_data: Generated<Json | null>;
+  cache_key: string;
+  created_at: Timestamp;
+  eco_name: Generated<string>;
+}
+
 export interface DB {
   'web3.actors': Web3Actors;
   'web3.ecos': Web3Ecos;
   'web3.event': Web3Event;
   'web3.repos': Web3Repos;
+  'web3.caches': Web3Caches;
 }
