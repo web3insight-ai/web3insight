@@ -6,6 +6,6 @@ export class GetRepoNumReqDto {
   eco_name: string = 'ALL';
 }
 
-export class CountDto {
+export class TotalDto {
   total: number = 0;
 }

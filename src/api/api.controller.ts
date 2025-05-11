@@ -8,17 +8,17 @@ import {
 import { AppAuthGuard } from '../auth/app.auth.guard';
 
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { GetRepoNumReqDto, CountDto } from './api.dto';
+import { GetRepoNumReqDto, TotalDto } from './api.dto';
 import { EcoDataService } from '@/source/services/eco.services';
 
-@Controller('ecosystems')
+@Controller()
 @ApiTags('General')
 export class ApiController {
   constructor(private readonly ecoDataService: EcoDataService) {}
 
   @Get('repos/total')
   @ApiOperation({
-    summary: 'Get a count of all repos in the ecosystem',
+    summary: 'Get total repos count',
     description: '',
   })
   @ApiBearerAuth()
@@ -26,7 +26,7 @@ export class ApiController {
   async getRepoNum(@Query() query: GetRepoNumReqDto) {
     try {
       const res = await this.ecoDataService.reposTotal(query.eco_name);
-      return res?.cache_data as CountDto;
+      return res?.cache_data as TotalDto;
     } catch (e: unknown) {
       if (e instanceof Error) {
         throw new HttpException(e, 400);
@@ -36,7 +36,7 @@ export class ApiController {
 
   @Get('actors/total')
   @ApiOperation({
-    summary: 'Get a count of all actors in the ecosystem',
+    summary: 'Get total actors count',
     description: '',
   })
   @ApiBearerAuth()
@@ -44,7 +44,43 @@ export class ApiController {
   async getAcNum(@Query() query: GetRepoNumReqDto) {
     try {
       const res = await this.ecoDataService.actorsTotal(query.eco_name);
-      return res?.cache_data as CountDto;
+      return res?.cache_data as TotalDto;
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        throw new HttpException(e, 400);
+      }
+    }
+  }
+
+  @Get('ecosystems/total')
+  @ApiOperation({
+    summary: 'Get number of ecosystems',
+    description: '',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AppAuthGuard)
+  async getEcoNum(@Query() query: GetRepoNumReqDto) {
+    try {
+      const res = await this.ecoDataService.actorsTotal(query.eco_name);
+      return res?.cache_data as TotalDto;
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        throw new HttpException(e, 400);
+      }
+    }
+  }
+
+  @Get('ecosystems')
+  @ApiOperation({
+    summary: 'Get list of ecosystem names',
+    description: '',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AppAuthGuard)
+  async getEcoList(@Query() query: GetRepoNumReqDto) {
+    try {
+      const res = await this.ecoDataService.actorsTotal(query.eco_name);
+      return res?.cache_data as TotalDto;
     } catch (e: unknown) {
       if (e instanceof Error) {
         throw new HttpException(e, 400);

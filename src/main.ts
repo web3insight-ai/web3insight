@@ -30,7 +30,8 @@ async function bootstrap() {
     .setDescription('')
     .setVersion('1.0')
     .addBearerAuth()
-    .addServer('http://localhost:3005')
+    .addServer('https://web3insights.openbuild.xyz')
+    .addServer('http://localhost:3010')
     .build();
 
   const document = SwaggerModule.createDocument(app, config, {
@@ -39,7 +40,7 @@ async function bootstrap() {
 
   SwaggerModule.setup('doc/api', app, document);
 
-  await app.listen(process.env.PORT ?? 3005);
+  await app.listen(process.env.PORT ?? 3010);
 }
 
 bootstrap().catch((err) => console.error('Err:', err));

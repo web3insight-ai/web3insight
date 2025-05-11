@@ -5,7 +5,7 @@ import { Kysely, sql } from 'kysely';
 import { Command, Console } from 'nestjs-console';
 import { CacheDataService } from './cache.services';
 import { CacheKey } from '../dto/cache.dto';
-import { CountDto } from '@/api/api.dto';
+import { TotalDto } from '@/api/api.dto';
 
 @Injectable()
 @Console()
@@ -78,7 +78,7 @@ export class EcoDataService {
         .select(this.db.fn.countAll().as('total'))
         .executeTakeFirst();
 
-      total = (result as CountDto).total;
+      total = (result as TotalDto).total;
     } else {
       const result = await this.db
         .selectFrom('web3.event')
@@ -90,7 +90,7 @@ export class EcoDataService {
         )
         .select(this.db.fn.count('web3.event.repo_id').distinct().as('total'))
         .executeTakeFirst();
-      total = (result as CountDto).total;
+      total = (result as TotalDto).total;
     }
 
     await this.cacheDataService.updateCacheData(
