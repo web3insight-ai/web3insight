@@ -8,8 +8,9 @@ import {
 import { AppAuthGuard } from '../auth/app.auth.guard';
 
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { GetRepoNumReqDto, TotalDto } from './api.dto';
-import { EcoDataService } from '@/source/services/eco.services';
+import { GetActorsTotalReqDto, GetTotalReqDto, TotalDto } from './api.dto';
+import { EcoDataService } from '@/source/services/total.services';
+import { ActorsScopeType, EcoType } from '@/source/dto/data.dto';
 
 @Controller()
 @ApiTags('General')
@@ -23,7 +24,7 @@ export class ApiController {
   })
   @ApiBearerAuth()
   @UseGuards(AppAuthGuard)
-  async getRepoNum(@Query() query: GetRepoNumReqDto) {
+  async getRepoNum(@Query() query: GetTotalReqDto) {
     try {
       const res = await this.ecoDataService.reposTotal(query.eco_name);
       return res?.cache_data as TotalDto;
@@ -41,14 +42,18 @@ export class ApiController {
   })
   @ApiBearerAuth()
   @UseGuards(AppAuthGuard)
-  async getAcNum(@Query() query: GetRepoNumReqDto) {
+  async getAcNum(@Query() query: GetActorsTotalReqDto) {
     try {
-      const res = await this.ecoDataService.actorsTotal(query.eco_name);
+      const res =
+        query.eco_name === EcoType.ALL && query.scope === ActorsScopeType.ALL
+          ? await this.ecoDataService.actorsAllTotal(query.eco_name)
+          : await this.ecoDataService.actorsCoreTotal(
+              query.eco_name,
+              query.scope,
+            );
       return res?.cache_data as TotalDto;
-    } catch (e: unknown) {
-      if (e instanceof Error) {
-        throw new HttpException(e, 400);
-      }
+    } catch (e) {
+      throw new HttpException(e instanceof Error ? e : '请求失败', 400);
     }
   }
 
@@ -59,7 +64,7 @@ export class ApiController {
   })
   @ApiBearerAuth()
   @UseGuards(AppAuthGuard)
-  async getEcoNum(@Query() query: GetRepoNumReqDto) {
+  async getEcoNum(@Query() query: GetTotalReqDto) {
     try {
       const res = await this.ecoDataService.ecoTotal(query.eco_name);
       return res?.cache_data as TotalDto;

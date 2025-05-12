@@ -5,8 +5,7 @@ import { Kysely, sql } from 'kysely';
 import { Command, Console } from 'nestjs-console';
 import { CacheDataService } from './cache.services';
 import { CacheKey } from '../dto/cache.dto';
-import { TotalDto } from '@/api/api.dto';
-import { EcoType } from '../dto/data.dto';
+import { ActorsScopeType, EcoType } from '../dto/data.dto';
 
 @Injectable()
 @Console()
@@ -60,7 +59,7 @@ export class EcoDataService {
     );
   }
 
-  async actorsTotal(ecoName: EcoType, cache: boolean = true) {
+  async actorsAllTotal(ecoName: EcoType, cache: boolean = true) {
     const dbData = await this.cacheDataService.getCacheData(
       CacheKey.ActorTotal,
       ecoName,
@@ -74,37 +73,80 @@ export class EcoDataService {
       return dbData;
     }
 
-    let total = 0;
+    const result = await this.db
+      .selectFrom('web3.actors')
+      .select(this.db.fn.countAll().as('total'))
+      .executeTakeFirst();
 
-    if (ecoName === EcoType.ALL) {
-      const result = await this.db
-        .selectFrom('web3.actors')
-        .select(this.db.fn.countAll().as('total'))
-        .executeTakeFirst();
-
-      total = (result as TotalDto).total;
-    } else {
-      const result = await this.db
-        .selectFrom('web3.event')
-        .innerJoin('web3.repos', 'web3.event.repo_id', 'web3.repos.repo_id')
-        .where(
-          'web3.repos.eco_names',
-          '@>',
-          sql<string[]>`ARRAY[${sql.join([ecoName])}]`,
-        )
-        .select(this.db.fn.count('web3.event.repo_id').distinct().as('total'))
-        .executeTakeFirst();
-      total = (result as TotalDto).total;
+    if (!result) {
+      throw new Error('No data found');
     }
-
     await this.cacheDataService.updateCacheData(
       CacheKey.ActorTotal,
-      { total },
+      { total: result.total },
       new Date().toISOString(),
+      ecoName,
     );
 
     return await this.cacheDataService.getCacheData(
       CacheKey.ActorTotal,
+      ecoName,
+    );
+  }
+
+  async actorsCoreTotal(
+    ecoName: EcoType,
+    scope: ActorsScopeType,
+    cache: boolean = true,
+  ) {
+    const dbData = await this.cacheDataService.getCacheData(
+      CacheKey.ActorCoreTotal,
+      ecoName,
+    );
+
+    if (!dbData && cache) {
+      throw new Error('Cache not found');
+    }
+
+    if (dbData && cache) {
+      return dbData;
+    }
+
+    let query = this.db
+      .selectFrom('web3.event')
+      .innerJoin('web3.repos', 'web3.event.repo_id', 'web3.repos.repo_id')
+      .select(this.db.fn.count('web3.event.actor_id').distinct().as('total'));
+
+    if (ecoName !== EcoType.ALL) {
+      query = query.where(
+        'web3.repos.eco_names',
+        '@>',
+        sql<string[]>`ARRAY[${sql.join([ecoName])}]`,
+      );
+    }
+
+    if (scope === ActorsScopeType.Core) {
+      query = query.where('web3.event.event_type', 'in', [
+        'PushEvent',
+        'CreateEvent',
+      ]);
+    }
+
+    const result = await query.executeTakeFirst();
+
+    if (!result) {
+      throw new Error('No data found');
+    }
+
+    await this.cacheDataService.updateCacheData(
+      CacheKey.ActorCoreTotal,
+      { total: result.total },
+      new Date().toISOString(),
+      ecoName,
+    );
+
+    return await this.cacheDataService.getCacheData(
+      CacheKey.ActorCoreTotal,
       ecoName,
     );
   }
@@ -144,11 +186,13 @@ export class EcoDataService {
     description: 'Test eco data',
   })
   async test() {
+    await this.ecoTotal(EcoType.ALL, false);
+    await this.actorsAllTotal(EcoType.ALL);
+
     const ecoTypes = Object.values(EcoType);
     for (const eco of ecoTypes) {
       await this.reposTotal(eco, false);
-      await this.actorsTotal(eco, false);
-      await this.ecoTotal(eco, false);
+      await this.actorsCoreTotal(eco, ActorsScopeType.Core, false);
     }
     return null;
   }
