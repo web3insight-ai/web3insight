@@ -187,7 +187,7 @@ export class EcoDataService {
   })
   async test() {
     await this.ecoTotal(EcoType.ALL, false);
-    await this.actorsAllTotal(EcoType.ALL);
+    await this.actorsAllTotal(EcoType.ALL, false);
 
     const ecoTypes = Object.values(EcoType);
     for (const eco of ecoTypes) {
