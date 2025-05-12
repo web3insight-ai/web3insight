@@ -16,7 +16,7 @@ export class EcoDataService {
 
   async reposTotal(ecoName: string, cache: boolean = true) {
     const dbData = await this.cacheDataService.getCacheData(
-      CacheKey.ReposNum,
+      CacheKey.ReposTotal,
       ecoName,
     );
 
@@ -47,18 +47,21 @@ export class EcoDataService {
     }
 
     await this.cacheDataService.updateCacheData(
-      CacheKey.ReposNum,
+      CacheKey.ReposTotal,
       { total: result.total },
       new Date().toISOString(),
       ecoName,
     );
 
-    return await this.cacheDataService.getCacheData(CacheKey.ReposNum, ecoName);
+    return await this.cacheDataService.getCacheData(
+      CacheKey.ReposTotal,
+      ecoName,
+    );
   }
 
   async actorsTotal(ecoName: string, cache: boolean = true) {
     const dbData = await this.cacheDataService.getCacheData(
-      CacheKey.ActorNum,
+      CacheKey.ActorTotal,
       ecoName,
     );
 
@@ -94,12 +97,45 @@ export class EcoDataService {
     }
 
     await this.cacheDataService.updateCacheData(
-      CacheKey.ActorNum,
+      CacheKey.ActorTotal,
       { total },
       new Date().toISOString(),
     );
 
-    return await this.cacheDataService.getCacheData(CacheKey.ActorNum, ecoName);
+    return await this.cacheDataService.getCacheData(
+      CacheKey.ActorTotal,
+      ecoName,
+    );
+  }
+
+  async ecoTotal(ecoName: string, cache: boolean = true) {
+    const dbData = await this.cacheDataService.getCacheData(CacheKey.EcoTotal);
+
+    if (!dbData && cache) {
+      throw new Error('Cache not found');
+    }
+
+    if (dbData && cache) {
+      return dbData;
+    }
+
+    const result = await this.db
+      .selectFrom(['web3.repos', sql<string>`UNNEST(eco_names)`.as('eco_name')])
+      .select(this.db.fn.count('eco_name').distinct().as('total'))
+      .executeTakeFirst();
+
+    if (!result) {
+      throw new Error('No data found');
+    }
+
+    await this.cacheDataService.updateCacheData(
+      CacheKey.EcoTotal,
+      { total: result.total },
+      new Date().toISOString(),
+      ecoName,
+    );
+
+    return await this.cacheDataService.getCacheData(CacheKey.EcoTotal, ecoName);
   }
 
   @Command({
@@ -109,6 +145,7 @@ export class EcoDataService {
   async test() {
     await this.reposTotal('ALL', false);
     await this.actorsTotal('ALL', false);
+    await this.ecoTotal('ALL', false);
     return null;
   }
 }
