@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
-import { ApiController } from './total.controller';
+import { TotalController } from './total.controller';
 import { JwtService } from '@nestjs/jwt';
 import { SourceModule } from '@/source/source.module';
+import { RankController } from './rank.controller';
 
 @Module({
-  controllers: [ApiController],
+  controllers: [TotalController, RankController],
   providers: [JwtService],
   exports: [],
   imports: [SourceModule],
