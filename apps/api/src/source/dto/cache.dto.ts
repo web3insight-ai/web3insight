@@ -1,6 +1,7 @@
 export const CacheKey = {
-  ReposNum: 'repos_num',
-  ActorNum: 'actor_num',
+  ReposTotal: 'repos_total',
+  ActorTotal: 'actor_total',
+  EcoTotal: 'eco_total',
 } as const;
 
 export type CacheKeyType = typeof CacheKey;
