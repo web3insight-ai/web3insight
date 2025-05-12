@@ -1,6 +1,7 @@
 export const CacheKey = {
   ReposTotal: 'repos_total',
   ActorTotal: 'actor_total',
+  ActorCoreTotal: 'actor_core_total',
   EcoTotal: 'eco_total',
 } as const;
 

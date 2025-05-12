@@ -6,3 +6,10 @@ export enum EcoType {
 }
 
 export type EcoTypeValue = `${EcoType}`;
+
+export enum ActorsScopeType {
+  ALL = 'ALL',
+  Core = 'Core',
+}
+
+export type ActorsScopeTypeValue = `${ActorsScopeType}`;
