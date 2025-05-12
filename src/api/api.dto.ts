@@ -1,10 +1,10 @@
 import { IsEnum, IsOptional } from 'class-validator';
-import { EcoType, EcoTypeValue } from '@/source/dto/data.dto';
+import { EcoType } from '@/source/dto/data.dto';
 
 export class GetRepoNumReqDto {
   @IsEnum(EcoType)
   @IsOptional()
-  eco_name: EcoTypeValue = EcoType.ALL;
+  eco_name: EcoType = EcoType.ALL;
 }
 
 export class TotalDto {
