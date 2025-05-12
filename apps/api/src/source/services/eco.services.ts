@@ -6,7 +6,7 @@ import { Command, Console } from 'nestjs-console';
 import { CacheDataService } from './cache.services';
 import { CacheKey } from '../dto/cache.dto';
 import { TotalDto } from '@/api/api.dto';
-import { EcoType, EcoTypeValue } from '../dto/data.dto';
+import { EcoType } from '../dto/data.dto';
 
 @Injectable()
 @Console()
@@ -15,7 +15,7 @@ export class EcoDataService {
 
   constructor(private cacheDataService: CacheDataService) {}
 
-  async reposTotal(ecoName: EcoTypeValue, cache: boolean = true) {
+  async reposTotal(ecoName: EcoType, cache: boolean = true) {
     const dbData = await this.cacheDataService.getCacheData(
       CacheKey.ReposTotal,
       ecoName,
@@ -60,7 +60,7 @@ export class EcoDataService {
     );
   }
 
-  async actorsTotal(ecoName: EcoTypeValue, cache: boolean = true) {
+  async actorsTotal(ecoName: EcoType, cache: boolean = true) {
     const dbData = await this.cacheDataService.getCacheData(
       CacheKey.ActorTotal,
       ecoName,
@@ -109,7 +109,7 @@ export class EcoDataService {
     );
   }
 
-  async ecoTotal(ecoName: EcoTypeValue, cache: boolean = true) {
+  async ecoTotal(ecoName: EcoType, cache: boolean = true) {
     const dbData = await this.cacheDataService.getCacheData(CacheKey.EcoTotal);
 
     if (!dbData && cache) {
