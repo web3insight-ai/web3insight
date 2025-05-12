@@ -6,6 +6,7 @@ import { Command, Console } from 'nestjs-console';
 import { CacheDataService } from './cache.services';
 import { CacheKey } from '../dto/cache.dto';
 import { TotalDto } from '@/api/api.dto';
+import { EcoType, EcoTypeValue } from '../dto/data.dto';
 
 @Injectable()
 @Console()
@@ -14,7 +15,7 @@ export class EcoDataService {
 
   constructor(private cacheDataService: CacheDataService) {}
 
-  async reposTotal(ecoName: string, cache: boolean = true) {
+  async reposTotal(ecoName: EcoTypeValue, cache: boolean = true) {
     const dbData = await this.cacheDataService.getCacheData(
       CacheKey.ReposTotal,
       ecoName,
@@ -32,7 +33,7 @@ export class EcoDataService {
       .selectFrom('web3.repos')
       .select(this.db.fn.countAll().as('total'));
 
-    if (!ecoName) {
+    if (ecoName !== EcoType.ALL) {
       query = query.where(
         'eco_names',
         '@>',
@@ -59,7 +60,7 @@ export class EcoDataService {
     );
   }
 
-  async actorsTotal(ecoName: string, cache: boolean = true) {
+  async actorsTotal(ecoName: EcoTypeValue, cache: boolean = true) {
     const dbData = await this.cacheDataService.getCacheData(
       CacheKey.ActorTotal,
       ecoName,
@@ -75,7 +76,7 @@ export class EcoDataService {
 
     let total = 0;
 
-    if (ecoName == 'ALL') {
+    if (ecoName === EcoType.ALL) {
       const result = await this.db
         .selectFrom('web3.actors')
         .select(this.db.fn.countAll().as('total'))
@@ -108,7 +109,7 @@ export class EcoDataService {
     );
   }
 
-  async ecoTotal(ecoName: string, cache: boolean = true) {
+  async ecoTotal(ecoName: EcoTypeValue, cache: boolean = true) {
     const dbData = await this.cacheDataService.getCacheData(CacheKey.EcoTotal);
 
     if (!dbData && cache) {
@@ -143,9 +144,12 @@ export class EcoDataService {
     description: 'Test eco data',
   })
   async test() {
-    await this.reposTotal('ALL', false);
-    await this.actorsTotal('ALL', false);
-    await this.ecoTotal('ALL', false);
+    const ecoTypes = Object.values(EcoType);
+    for (const eco of ecoTypes) {
+      await this.reposTotal(eco, false);
+      await this.actorsTotal(eco, false);
+      await this.ecoTotal(eco, false);
+    }
     return null;
   }
 }
