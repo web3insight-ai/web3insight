@@ -13,8 +13,8 @@ import { EcoDataService } from '@/source/services/total.services';
 import { ActorsScopeType, EcoType } from '@/source/dto/data.dto';
 
 @Controller()
-@ApiTags('General')
-export class ApiController {
+@ApiTags('Total')
+export class TotalController {
   constructor(private readonly ecoDataService: EcoDataService) {}
 
   @Get('repos/total')
