@@ -38,3 +38,20 @@ export class RepoRankDto {
   forks_count: number = 0;
   open_issues_count: number = 0;
 }
+
+export class ActorCommitRepoDto {
+  repo_id: number = 0;
+  repo_name: string = '';
+  commit_count: number = 0;
+}
+
+export class ActorCommitRankDto {
+  actor_id: number = 0;
+  actor_login: string = '';
+  total_commit_count: number = 0;
+  top_repos: ActorCommitRepoDto[] = [];
+}
+
+export class ActorCommitRankListDto {
+  list: ActorCommitRankDto[] = [];
+}
