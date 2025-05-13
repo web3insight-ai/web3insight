@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { bigQueryProvider, kyselyProvider } from './db.provider';
+import { kyselyProvider } from './db.provider';
 
 @Module({
-  providers: [bigQueryProvider, kyselyProvider],
-  exports: [bigQueryProvider, kyselyProvider],
+  providers: [kyselyProvider],
+  exports: [kyselyProvider],
 })
 export class DBModule {}
