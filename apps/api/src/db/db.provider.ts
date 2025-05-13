@@ -1,21 +1,9 @@
 import { Provider } from '@nestjs/common';
-import { BigQuery } from '@google-cloud/bigquery';
 import { Kysely, PostgresDialect } from 'kysely';
 import { Pool } from 'pg';
 import { DB } from './dto/db.dto';
 
-export const BIGQUERY = 'BIGQUERY';
 export const KYSELY = 'KYSELY';
-
-export const bigQueryProvider: Provider = {
-  provide: BIGQUERY,
-  useFactory: () => {
-    return new BigQuery({
-      projectId: process.env.GOOGLE_PROJECT_ID,
-      keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
-    });
-  },
-};
 
 export const kyselyProvider: Provider = {
   provide: KYSELY,
