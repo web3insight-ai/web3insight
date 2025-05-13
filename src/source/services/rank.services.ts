@@ -49,11 +49,15 @@ export class RankService {
       (eco) => eco !== EcoType.ALL,
     );
     for (const ecoName of ecoTypes) {
-      const actorsTotalAllScopeResult =
-        await this.totalService.actorsAllTotal(ecoName);
+      const actorsTotalAllScopeResult = await this.totalService.actorsTotal(
+        ecoName,
+        ActorsScopeType.ALL,
+      );
 
-      const actorsTotalCoreScopeResult =
-        await this.totalService.actorsCoreTotal(ecoName, ActorsScopeType.Core);
+      const actorsTotalCoreScopeResult = await this.totalService.actorsTotal(
+        ecoName,
+        ActorsScopeType.Core,
+      );
 
       data.push({
         eco_name: ecoName,

@@ -55,3 +55,23 @@ export class ActorCommitRankDto {
 export class ActorCommitRankListDto {
   list: ActorCommitRankDto[] = [];
 }
+
+export enum StatsPeriod {
+  WEEK = 'week',
+  MONTH = 'month',
+}
+
+export class GetActorDateReqDto extends GetTotalReqDto {
+  @IsEnum(StatsPeriod)
+  @IsOptional()
+  period: StatsPeriod = StatsPeriod.MONTH;
+}
+
+export class ActorDateItemDto {
+  date: Date = new Date();
+  total: number = 0;
+}
+
+export class ActorDateListDto {
+  list: ActorDateItemDto[] = [];
+}

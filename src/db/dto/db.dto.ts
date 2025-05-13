@@ -1,5 +1,6 @@
 import {
   ActorCommitRankListDto,
+  ActorDateListDto,
   EcoRankListDto,
   RepoRankListDto,
 } from '@/api/api.dto';
@@ -71,7 +72,8 @@ export interface Web3Caches {
     | CacheCount
     | EcoRankListDto
     | RepoRankListDto
-    | ActorCommitRankListDto;
+    | ActorCommitRankListDto
+    | ActorDateListDto;
   cache_key: string;
   created_at: Timestamp;
   eco_name: Generated<string>;
