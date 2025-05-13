@@ -52,8 +52,10 @@ export class TotalController {
               query.scope,
             );
       return res?.cache_data as TotalDto;
-    } catch (e) {
-      throw new HttpException(e instanceof Error ? e : '请求失败', 400);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        throw new HttpException(e, 400);
+      }
     }
   }
 
