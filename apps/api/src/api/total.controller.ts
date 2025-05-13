@@ -9,13 +9,13 @@ import { AppAuthGuard } from '../auth/app.auth.guard';
 
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { GetActorsTotalReqDto, GetTotalReqDto, TotalDto } from './api.dto';
-import { EcoDataService } from '@/source/services/total.services';
+import { TotalService } from '@/source/services/total.services';
 import { ActorsScopeType, EcoType } from '@/source/dto/data.dto';
 
 @Controller()
 @ApiTags('Total')
 export class TotalController {
-  constructor(private readonly ecoDataService: EcoDataService) {}
+  constructor(private readonly ecoDataService: TotalService) {}
 
   @Get('repos/total')
   @ApiOperation({

@@ -1,13 +1,20 @@
-import { Controller, Get, HttpException, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpException,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { AppAuthGuard } from '../auth/app.auth.guard';
 
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { EcoDataService } from '@/source/services/total.services';
+import { RankService } from '@/source/services/rank.services';
+import { EcoRankListDto, GetTotalReqDto } from './api.dto';
 
 @Controller()
 @ApiTags('Rank')
 export class RankController {
-  constructor(private readonly ecoDataService: EcoDataService) {}
+  constructor(private readonly rankService: RankService) {}
 
   @Get('ecosystems/top')
   @ApiOperation({
@@ -16,9 +23,10 @@ export class RankController {
   })
   @ApiBearerAuth()
   @UseGuards(AppAuthGuard)
-  async getEcoTop() {
+  async getEcoTop(@Query() query: GetTotalReqDto) {
     try {
-      return Promise.resolve();
+      const res = await this.rankService.EcoRankTotal(query.eco_name);
+      return res?.cache_data as EcoRankListDto;
     } catch (e: unknown) {
       if (e instanceof Error) {
         throw new HttpException(e, 400);

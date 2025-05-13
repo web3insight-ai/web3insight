@@ -16,3 +16,13 @@ export class GetActorsTotalReqDto extends GetTotalReqDto {
 export class TotalDto {
   total: number = 0;
 }
+
+export class EcoRankListDto {
+  list: EcoRankDto[] = [];
+}
+
+export class EcoRankDto {
+  eco_name: string = '';
+  actors_total: number = 0;
+  actors_core_total: number = 0;
+}
