@@ -9,7 +9,7 @@ import { AppAuthGuard } from '../auth/app.auth.guard';
 
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RankService } from '@/source/services/rank.services';
-import { EcoRankListDto, GetTotalReqDto } from './api.dto';
+import { EcoRankListDto, GetTotalReqDto, RepoRankListDto } from './api.dto';
 
 @Controller()
 @ApiTags('Rank')
@@ -44,7 +44,7 @@ export class RankController {
   async getRepoTop(@Query() query: GetTotalReqDto) {
     try {
       const res = await this.rankService.repoStarRank(query.eco_name);
-      return res?.cache_data;
+      return res?.cache_data as RepoRankListDto;
     } catch (e: unknown) {
       if (e instanceof Error) {
         throw new HttpException(e, 400);
