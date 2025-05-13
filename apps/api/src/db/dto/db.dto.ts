@@ -1,4 +1,4 @@
-import { EcoRankListDto } from '@/api/api.dto';
+import { EcoRankListDto, RepoRankListDto } from '@/api/api.dto';
 import type { ColumnType } from 'kysely';
 
 export type Generated<T> =
@@ -62,7 +62,11 @@ export interface Web3Repos {
 }
 
 export interface Web3Caches {
-  cache_data: Generated<Json | null> | CacheCount | EcoRankListDto;
+  cache_data:
+    | Generated<Json | null>
+    | CacheCount
+    | EcoRankListDto
+    | RepoRankListDto;
   cache_key: string;
   created_at: Timestamp;
   eco_name: Generated<string>;
