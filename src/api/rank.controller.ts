@@ -41,7 +41,24 @@ export class RankController {
   })
   @ApiBearerAuth()
   @UseGuards(AppAuthGuard)
-  async getRepoNum(@Query() _query: GetTotalReqDto) {
+  async getRepoTop(@Query() _query: GetTotalReqDto) {
+    try {
+      return Promise.resolve();
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        throw new HttpException(e, 400);
+      }
+    }
+  }
+
+  @Get('actors/top')
+  @ApiOperation({
+    summary: 'Get actors rank list top 10',
+    description: '',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AppAuthGuard)
+  async getActorsTop(@Query() _query: GetTotalReqDto) {
     try {
       return Promise.resolve();
     } catch (e: unknown) {
