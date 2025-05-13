@@ -182,7 +182,7 @@ export class TotalService {
   }
 
   @Command({
-    command: 'test:eco:data',
+    command: 'sync:eco:total',
     description: 'Test eco data',
   })
   async test() {

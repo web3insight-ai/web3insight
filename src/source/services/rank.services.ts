@@ -1,25 +1,33 @@
-import { KYSELY } from '@/db/db.provider';
+import { KYSELY, OCTOKIT } from '@/db/db.provider';
 import { DB } from '@/db/dto/db.dto';
 import { Inject, Injectable } from '@nestjs/common';
-import { Kysely } from 'kysely';
+import { Kysely, sql } from 'kysely';
 import { Command, Console } from 'nestjs-console';
 import { CacheDataService } from './cache.services';
 import { CacheKey } from '../dto/cache.dto';
 import { ActorsScopeType, EcoType } from '../dto/data.dto';
 import { TotalService } from './total.services';
-import { EcoRankDto, EcoRankListDto, TotalDto } from '@/api/api.dto';
+import type { Octokit as OctokitType } from 'octokit';
+import {
+  EcoRankDto,
+  EcoRankListDto,
+  TotalDto,
+  RepoRankDto,
+  RepoRankListDto,
+} from '@/api/api.dto';
 
 @Injectable()
 @Console()
 export class RankService {
   @Inject(KYSELY) private readonly db!: Kysely<DB>;
+  @Inject(OCTOKIT) private readonly github!: OctokitType;
 
   constructor(
     private cacheDataService: CacheDataService,
     private totalService: TotalService,
   ) {}
 
-  async EcoRankTotal(ecoName: EcoType, cache: boolean = true) {
+  async ecoRankTotal(ecoName: EcoType, cache: boolean = true) {
     const dbData = await this.cacheDataService.getCacheData(
       CacheKey.EcoRank,
       ecoName,
@@ -63,12 +71,93 @@ export class RankService {
     );
   }
 
+  async repoStarRank(
+    ecoName: EcoType,
+    limit: number = 10,
+    cache: boolean = true,
+  ) {
+    const dbData = await this.cacheDataService.getCacheData(
+      CacheKey.RepoStarRank,
+      ecoName,
+    );
+
+    if (!dbData && cache) {
+      throw new Error('Cache not found');
+    }
+
+    if (dbData && cache) {
+      return dbData;
+    }
+
+    let query = this.db
+      .selectFrom('web3.event')
+      .innerJoin('web3.repos', 'web3.event.repo_id', 'web3.repos.repo_id')
+      .select([
+        'web3.event.repo_id',
+        'web3.repos.repo_name',
+        this.db.fn.count('web3.event.actor_id').distinct().as('star_count'),
+      ])
+      .where('web3.event.event_type', '=', 'WatchEvent')
+      .groupBy(['web3.event.repo_id', 'web3.repos.repo_name'])
+      .orderBy('star_count', 'desc')
+      .limit(limit);
+
+    if (ecoName !== EcoType.ALL) {
+      query = query.where(
+        'web3.repos.eco_names',
+        '@>',
+        sql<string[]>`ARRAY[${sql.join([ecoName])}]`,
+      );
+    }
+
+    const result = await query.execute();
+
+    if (!result) {
+      throw new Error('No data found');
+    }
+
+    const data: RepoRankDto[] = await Promise.all(
+      result.map(async (row) => {
+        const [owner, repo] = row.repo_name!.split('/');
+        /* eslint-disable */
+        const repoDetails = await this.github.rest.repos.get({
+          owner,
+          repo,
+        });
+        return {
+          repo_id: Number(row.repo_id),
+          repo_name: row.repo_name!,
+          star_count: repoDetails.data.stargazers_count,
+          forks_count: repoDetails.data.forks_count,
+          open_issues_count: repoDetails.data.open_issues_count,
+        };
+        /* eslint-enable */
+      }),
+    );
+
+    data.sort((a, b) => b.star_count - a.star_count);
+
+    const cacheData = new RepoRankListDto();
+    cacheData.list = data;
+
+    return await this.cacheDataService.updateCacheData(
+      CacheKey.RepoStarRank,
+      cacheData,
+      new Date().toISOString(),
+      ecoName,
+    );
+  }
+
   @Command({
-    command: 'test:eco:data:rank',
+    command: 'sync:eco:rank',
     description: 'Test eco data',
   })
   async test() {
-    await this.EcoRankTotal(EcoType.ALL, false);
+    await this.ecoRankTotal(EcoType.ALL, false);
+    const ecoTypes = Object.values(EcoType);
+    for (const eco of ecoTypes) {
+      await this.repoStarRank(eco, 10, false);
+    }
     return Promise.resolve();
   }
 }

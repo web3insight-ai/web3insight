@@ -25,7 +25,7 @@ export class RankController {
   @UseGuards(AppAuthGuard)
   async getEcoTop(@Query() query: GetTotalReqDto) {
     try {
-      const res = await this.rankService.EcoRankTotal(query.eco_name);
+      const res = await this.rankService.ecoRankTotal(query.eco_name);
       return res?.cache_data as EcoRankListDto;
     } catch (e: unknown) {
       if (e instanceof Error) {
@@ -36,14 +36,15 @@ export class RankController {
 
   @Get('repos/top')
   @ApiOperation({
-    summary: 'Get repos rank list top 10',
+    summary: 'Get repos rank list top 10 by star count',
     description: '',
   })
   @ApiBearerAuth()
   @UseGuards(AppAuthGuard)
-  async getRepoTop(@Query() _query: GetTotalReqDto) {
+  async getRepoTop(@Query() query: GetTotalReqDto) {
     try {
-      return Promise.resolve();
+      const res = await this.rankService.repoStarRank(query.eco_name);
+      return res?.cache_data;
     } catch (e: unknown) {
       if (e instanceof Error) {
         throw new HttpException(e, 400);
