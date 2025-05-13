@@ -33,4 +33,21 @@ export class RankController {
       }
     }
   }
+
+  @Get('repos/top')
+  @ApiOperation({
+    summary: 'Get repos rank list top 10',
+    description: '',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AppAuthGuard)
+  async getRepoNum(@Query() _query: GetTotalReqDto) {
+    try {
+      return Promise.resolve();
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        throw new HttpException(e, 400);
+      }
+    }
+  }
 }
