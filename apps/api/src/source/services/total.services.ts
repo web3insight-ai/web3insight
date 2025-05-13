@@ -101,7 +101,9 @@ export class TotalService {
     cache: boolean = true,
   ) {
     const cacheKey =
-      ecoName == EcoType.ALL ? CacheKey.ActorTotal : CacheKey.ActorCoreTotal;
+      scope === ActorsScopeType.ALL
+        ? CacheKey.ActorTotal
+        : CacheKey.ActorCoreTotal;
 
     const dbData = await this.cacheDataService.getCacheData(cacheKey, ecoName);
 
@@ -133,7 +135,16 @@ export class TotalService {
       ]);
     }
 
-    const result = await query.executeTakeFirst();
+    let result: { total: string | number | bigint } | undefined = { total: 0 };
+
+    if (ecoName === EcoType.ALL && scope === ActorsScopeType.ALL) {
+      result = await this.db
+        .selectFrom('web3.actors')
+        .select(this.db.fn.countAll().as('total'))
+        .executeTakeFirst();
+    } else {
+      result = await query.executeTakeFirst();
+    }
 
     if (!result) {
       throw new Error('No data found');
