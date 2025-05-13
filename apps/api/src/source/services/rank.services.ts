@@ -14,6 +14,8 @@ import {
   TotalDto,
   RepoRankDto,
   RepoRankListDto,
+  ActorCommitRepoDto,
+  ActorCommitRankListDto,
 } from '@/api/api.dto';
 
 @Injectable()
@@ -146,6 +148,98 @@ export class RankService {
     );
   }
 
+  async getTopCommitActors(ecoName: EcoType, cache = true) {
+    const dbData = await this.cacheDataService.getCacheData(
+      CacheKey.ActorCommitRank,
+      ecoName,
+    );
+    if (!dbData && cache) {
+      throw new Error('Cache not found');
+    }
+
+    if (dbData && cache) {
+      return dbData;
+    }
+    const limit = 10;
+    const repoLimit = 10;
+    let query = this.db
+      .selectFrom('web3.event as e')
+      .innerJoin('web3.actors as a', 'e.actor_id', 'a.actor_id')
+      .select([
+        'e.actor_id',
+        'a.actor_login',
+        this.db.fn.count(sql.id('e', 'id')).as('total_commit_count'),
+      ])
+      .where('e.event_type', '=', 'PushEvent')
+      .where('a.actor_login', 'not like', '%[bot]%');
+
+    if (ecoName !== EcoType.ALL) {
+      query = query
+        .innerJoin('web3.repos as r', 'e.repo_id', 'r.repo_id')
+        .where(
+          'r.eco_names',
+          '@>',
+          sql<string[]>`ARRAY[${sql.join([ecoName])}]`,
+        );
+    }
+
+    const topActors = await query
+      .groupBy(['e.actor_id', 'a.actor_login'])
+      .orderBy(sql`total_commit_count`, 'desc')
+      .limit(limit)
+      .execute();
+
+    const topActorsBasicInfo = topActors.map((actor) => ({
+      actor_id: BigInt(String(actor.actor_id)),
+      actor_login: actor.actor_login,
+      total_commit_count: BigInt(String(actor.total_commit_count)),
+    }));
+
+    if (topActorsBasicInfo.length === 0) {
+      throw new Error('Cache not found');
+    }
+
+    const resultPromises = topActorsBasicInfo.map(async (actor) => {
+      const repos = await this.db
+        .selectFrom('web3.event as e')
+        .innerJoin('web3.repos as r', 'e.repo_id', 'r.repo_id')
+        .select([
+          'e.repo_id',
+          'r.repo_name',
+          this.db.fn.count(sql.id('e', 'id')).as('event_count'),
+        ])
+        .where('e.actor_id', '=', String(actor.actor_id))
+        .groupBy(['e.repo_id', 'r.repo_name'])
+        .orderBy(sql`event_count`, 'desc')
+        .limit(repoLimit)
+        .execute();
+
+      const topReposData: ActorCommitRepoDto[] = repos.map((repo) => ({
+        repo_id: Number(repo.repo_id),
+        repo_name: repo.repo_name ?? '',
+        commit_count: Number(repo.event_count),
+      }));
+
+      return {
+        actor_id: Number(actor.actor_id),
+        actor_login: actor.actor_login ?? '',
+        total_commit_count: Number(actor.total_commit_count),
+        top_repos: topReposData,
+      };
+    });
+
+    const data = new ActorCommitRankListDto();
+
+    data.list = await Promise.all(resultPromises);
+
+    return await this.cacheDataService.updateCacheData(
+      CacheKey.RepoStarRank,
+      data,
+      new Date().toISOString(),
+      ecoName,
+    );
+  }
+
   @Command({
     command: 'sync:eco:rank',
     description: 'Test eco data',
@@ -155,6 +249,7 @@ export class RankService {
     const ecoTypes = Object.values(EcoType);
     for (const eco of ecoTypes) {
       await this.repoStarRank(eco, 10, false);
+      await this.getTopCommitActors(eco, false);
     }
     return Promise.resolve();
   }
