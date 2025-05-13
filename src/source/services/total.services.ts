@@ -9,7 +9,7 @@ import { ActorsScopeType, EcoType } from '../dto/data.dto';
 
 @Injectable()
 @Console()
-export class EcoDataService {
+export class TotalService {
   @Inject(KYSELY) private readonly db!: Kysely<DB>;
 
   constructor(private cacheDataService: CacheDataService) {}

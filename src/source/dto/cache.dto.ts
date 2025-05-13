@@ -3,6 +3,7 @@ export const CacheKey = {
   ActorTotal: 'actor_total',
   ActorCoreTotal: 'actor_core_total',
   EcoTotal: 'eco_total',
+  EcoRank: 'eco_rank',
 } as const;
 
 export type CacheKeyType = typeof CacheKey;
