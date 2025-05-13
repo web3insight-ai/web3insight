@@ -8,9 +8,14 @@ import {
 import { AppAuthGuard } from '../auth/app.auth.guard';
 
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { GetActorsTotalReqDto, GetTotalReqDto, TotalDto } from './api.dto';
+import {
+  GetActorsTotalReqDto,
+  GetActorDateReqDto,
+  GetTotalReqDto,
+  TotalDto,
+  ActorDateListDto,
+} from './api.dto';
 import { TotalService } from '@/source/services/total.services';
-import { ActorsScopeType, EcoType } from '@/source/dto/data.dto';
 
 @Controller()
 @ApiTags('Total')
@@ -44,13 +49,10 @@ export class TotalController {
   @UseGuards(AppAuthGuard)
   async getAcNum(@Query() query: GetActorsTotalReqDto) {
     try {
-      const res =
-        query.eco_name === EcoType.ALL && query.scope === ActorsScopeType.ALL
-          ? await this.ecoDataService.actorsAllTotal(query.eco_name)
-          : await this.ecoDataService.actorsCoreTotal(
-              query.eco_name,
-              query.scope,
-            );
+      const res = await this.ecoDataService.actorsTotal(
+        query.eco_name,
+        query.scope,
+      );
       return res?.cache_data as TotalDto;
     } catch (e: unknown) {
       if (e instanceof Error) {
@@ -74,6 +76,29 @@ export class TotalController {
       if (e instanceof Error) {
         throw new HttpException(e, 400);
       }
+    }
+  }
+
+  @Get('actors/total/date')
+  @ApiOperation({
+    summary:
+      'Get actor statistics for the last 8 periods (week/month), excluding current period.',
+    description: '',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AppAuthGuard)
+  async getActorStats(@Query() query: GetActorDateReqDto) {
+    try {
+      const res = await this.ecoDataService.getActorStats(
+        query.eco_name,
+        query.period,
+      );
+      return res?.cache_data as ActorDateListDto;
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        throw new HttpException(e.message, 400);
+      }
+      throw new HttpException('An unknown error occurred', 500);
     }
   }
 }
