@@ -26,3 +26,15 @@ export class EcoRankDto {
   actors_total: number = 0;
   actors_core_total: number = 0;
 }
+
+export class RepoRankListDto {
+  list: RepoRankDto[] = [];
+}
+
+export class RepoRankDto {
+  repo_id: number = 0;
+  repo_name: string = '';
+  star_count: number = 0;
+  forks_count: number = 0;
+  open_issues_count: number = 0;
+}
