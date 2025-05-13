@@ -7,7 +7,7 @@ import { CacheDataService } from './cache.services';
 import { CacheKey } from '../dto/cache.dto';
 import { ActorsScopeType, EcoType } from '../dto/data.dto';
 import { TotalService } from './total.services';
-import type { Octokit as OctokitType } from 'octokit';
+import type { Octokit as OctokitType } from '@octokit/rest';
 import {
   EcoRankDto,
   EcoRankListDto,
@@ -119,7 +119,6 @@ export class RankService {
     const data: RepoRankDto[] = await Promise.all(
       result.map(async (row) => {
         const [owner, repo] = row.repo_name!.split('/');
-        /* eslint-disable */
         const repoDetails = await this.github.rest.repos.get({
           owner,
           repo,
@@ -131,7 +130,6 @@ export class RankService {
           forks_count: repoDetails.data.forks_count,
           open_issues_count: repoDetails.data.open_issues_count,
         };
-        /* eslint-enable */
       }),
     );
 
