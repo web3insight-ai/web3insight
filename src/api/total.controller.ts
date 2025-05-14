@@ -16,6 +16,7 @@ import {
   ActorDateListDto,
 } from './api.dto';
 import { TotalService } from '@/source/services/total.services';
+import { EcoType } from '@/source/dto/data.dto';
 
 @Controller()
 @ApiTags('Total')
@@ -68,9 +69,9 @@ export class TotalController {
   })
   @ApiBearerAuth()
   @UseGuards(AppAuthGuard)
-  async getEcoNum(@Query() query: GetTotalReqDto) {
+  async getEcoNum() {
     try {
-      const res = await this.ecoDataService.ecoTotal(query.eco_name);
+      const res = await this.ecoDataService.ecoTotal(EcoType.ALL);
       return res?.cache_data as TotalDto;
     } catch (e: unknown) {
       if (e instanceof Error) {

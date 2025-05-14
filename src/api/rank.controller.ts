@@ -15,6 +15,7 @@ import {
   GetTotalReqDto,
   RepoRankListDto,
 } from './api.dto';
+import { EcoType } from '@/source/dto/data.dto';
 
 @Controller()
 @ApiTags('Rank')
@@ -28,9 +29,9 @@ export class RankController {
   })
   @ApiBearerAuth()
   @UseGuards(AppAuthGuard)
-  async getEcoTop(@Query() query: GetTotalReqDto) {
+  async getEcoTop() {
     try {
-      const res = await this.rankService.ecoRankTotal(query.eco_name);
+      const res = await this.rankService.ecoRankTotal(EcoType.ALL);
       return res?.cache_data as EcoRankListDto;
     } catch (e: unknown) {
       if (e instanceof Error) {
