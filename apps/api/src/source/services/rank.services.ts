@@ -237,7 +237,7 @@ export class RankService {
     data.list = await Promise.all(resultPromises);
 
     return await this.cacheDataService.updateCacheData(
-      CacheKey.RepoStarRank,
+      CacheKey.ActorCommitRank,
       data,
       new Date().toISOString(),
       ecoName,
