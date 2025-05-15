@@ -132,4 +132,4 @@ async function normalizeResponse<VT extends DataValue = DataValue>(res: Response
   };
 }
 
-export { isServerSide, request, generateSuccessResponse, generateFailedResponse, normalizeResponse };
+export { isServerSide, request, isLogicalSuccess, generateSuccessResponse, generateFailedResponse, normalizeResponse };
