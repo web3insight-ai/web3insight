@@ -4,15 +4,19 @@ import type { EcoRequestParams, TotalResponseData, ListResponseData } from "../t
 import httpClient from "./client";
 
 async function fetchTotalCount(
-  params: EcoRequestParams & { scope: "ALL" | "Core" } = { eco: "ALL", scope: "ALL" },
+  params: Partial<EcoRequestParams & { scope: "ALL" | "Core" }> = {},
 ): Promise<ResponseResult<TotalResponseData>> {
-  return httpClient.get("/v1/actors/total", { params: { eco_name: params.eco, scope: params.scope } });
+  const { eco = "ALL", scope = "ALL" } = params;
+
+  return httpClient.get("/v1/actors/total", { params: { eco_name: eco, scope } });
 }
 
 async function fetchTrendList(
-  params: EcoRequestParams & { period: "week" | "month" } = { eco: "ALL", period: "month" },
+  params: Partial<EcoRequestParams & { period: "week" | "month" }> = {},
 ): Promise<ResponseResult<ListResponseData<TotalResponseData & { date: string }>>> {
-  return httpClient.get("/v1/actors/total/date", { params: { eco_name: params.eco, period: params.period } });
+  const { eco = "ALL", period = "month" } = params;
+
+  return httpClient.get("/v1/actors/total/date", { params: { eco_name: eco, period } });
 }
 
 async function fetchRankList(

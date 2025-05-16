@@ -7,7 +7,7 @@ import {
   type MetaFunction,
 } from "@remix-run/node";
 import { Link, useLoaderData, useFetcher } from "@remix-run/react";
-import { Code2, Github, Users, Warehouse, Zap, ArrowRight, ArrowUpRight, ArrowDownRight, Database, Hash, TrendingUp, Search, Crown } from "lucide-react";
+import { Github, Warehouse, Zap, ArrowRight, ArrowUpRight, ArrowDownRight, Database, Hash, TrendingUp, Search, Crown } from "lucide-react";
 import BrandLogo from "@/components/control/brand-logo";
 import { getUser } from "~/auth/repository";
 import { getClientIPAddress } from "remix-utils/get-client-ip-address";
@@ -16,6 +16,8 @@ import { useAtom } from "jotai";
 import { authModalOpenAtom, authModalTypeAtom } from "#/atoms";
 import { ErrorType } from "~/query/helper";
 import { insertOne, fetchListForUser } from "~/query/repository";
+import { fetchStatisticsOverview } from "~/statistics/repository";
+import MetricOverviewWidget from "~/statistics/widgets/metric-overview";
 
 import { getMetadata } from "@/utils/app";
 
@@ -40,8 +42,9 @@ export const meta: MetaFunction = () => {
 export const loader = async (ctx: LoaderFunctionArgs) => {
   const user = await getUser(ctx.request);
   const { data } = await fetchListForUser({ user });
+  const { data: statisticOverview } = await fetchStatisticsOverview();
 
-  return json(data);
+  return json({ ...data, statisticOverview });
 };
 
 export const action = async (ctx: ActionFunctionArgs) => {
@@ -269,7 +272,7 @@ const topDevelopers = [
 ];
 
 export default function Index() {
-  const { pinned } = useLoaderData<typeof loader>();
+  const { pinned, statisticOverview } = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof action>();
   const asking = fetcher.state === "submitting";
   const errorMessage = fetcher.data?.error;
@@ -414,76 +417,7 @@ export default function Index() {
       </div>
 
       <div className="w-full max-w-[1200px] mx-auto px-4 sm:px-6 py-12">
-        {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          <Card className="bg-white dark:bg-gray-800 shadow-sm border-none hover:shadow-md transition-all duration-300">
-            <CardBody className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-primary/10 rounded-xl flex-shrink-0">
-                  <Users size={20} className="text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Active Developers</p>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {statsData.totalMonthlyActiveDevelopers.toLocaleString()}
-                  </h2>
-                  <GrowthIndicator value="+8.3%" isPositive={true} />
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-white dark:bg-gray-800 shadow-sm border-none hover:shadow-md transition-all duration-300">
-            <CardBody className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-secondary/10 rounded-xl flex-shrink-0">
-                  <Code2 size={20} className="text-secondary" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Total Commits</p>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {statsData.totalCommits.toLocaleString()}
-                  </h2>
-                  <GrowthIndicator value="+12.7%" isPositive={true} />
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-white dark:bg-gray-800 shadow-sm border-none hover:shadow-md transition-all duration-300">
-            <CardBody className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-success/10 rounded-xl flex-shrink-0">
-                  <Zap size={20} className="text-success" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Core Developers</p>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {statsData.totalCoreDevelopers.toLocaleString()}
-                  </h2>
-                  <GrowthIndicator value="+5.2%" isPositive={true} />
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-white dark:bg-gray-800 shadow-sm border-none hover:shadow-md transition-all duration-300">
-            <CardBody className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-warning/10 rounded-xl flex-shrink-0">
-                  <Database size={20} className="text-warning" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Repositories</p>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {statsData.totalRepositories.toLocaleString()}
-                  </h2>
-                  <GrowthIndicator value="+3.5%" isPositive={true} />
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-        </div>
+        <MetricOverviewWidget dataSource={statisticOverview} />
 
         {/* Developer Location Section */}
         <div className="mt-10">
