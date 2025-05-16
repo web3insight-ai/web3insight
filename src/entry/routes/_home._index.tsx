@@ -7,7 +7,7 @@ import {
   type MetaFunction,
 } from "@remix-run/node";
 import { Link, useLoaderData, useFetcher } from "@remix-run/react";
-import { Zap, ArrowRight, ArrowUpRight, ArrowDownRight, Database, Hash, TrendingUp, Search, Crown } from "lucide-react";
+import { Zap, ArrowRight, Database, Hash, TrendingUp, Search } from "lucide-react";
 import BrandLogo from "@/components/control/brand-logo";
 import { getUser } from "~/auth/repository";
 import { getClientIPAddress } from "remix-utils/get-client-ip-address";
@@ -20,6 +20,7 @@ import { fetchStatisticsOverview, fetchStatisticsRank } from "~/statistics/repos
 import MetricOverviewWidget from "~/statistics/widgets/metric-overview";
 import EcosystemRankWidget from "~/statistics/widgets/ecosystem-rank";
 import RepositoryRankWidget from "~/statistics/widgets/repository-rank";
+import DeveloperRankWidget from "~/statistics/widgets/developer-rank";
 
 import { getMetadata } from "@/utils/app";
 
@@ -177,74 +178,6 @@ const statsData = {
   ]
 };
 
-// Generate mock chart data for visualization
-const generateChartData = (points: number, isPositive: boolean = true, volatility: number = 5) => {
-  const data = [];
-  let value = Math.random() * 50 + 50;
-
-  for (let i = 0; i < points; i++) {
-    const change = (Math.random() - (isPositive ? 0.4 : 0.6)) * volatility;
-    value = Math.max(0, value + change);
-    data.push(value);
-  }
-
-  return data;
-};
-
-// Add top developer data with ecosystem and project contributions
-const topDevelopers = [
-  {
-    name: "jesse.eth",
-    handle: "@jesse",
-    contribution: "62.3k",
-    growth: "+12.4%",
-    isPositive: true,
-    chartData: generateChartData(20, true, 6),
-    ecosystems: ["Ethereum", "Optimism", "Arbitrum"],
-    projects: ["ethereum/go-ethereum", "ethereum/consensus-specs", "optimism/optimism"]
-  },
-  {
-    name: "haseeb",
-    handle: "@haseeb_xyz",
-    contribution: "51.7k",
-    growth: "+8.2%",
-    isPositive: true,
-    chartData: generateChartData(20, true, 4),
-    ecosystems: ["Solana", "Ethereum"],
-    projects: ["solana-labs/solana", "solana/spl-token-wallet", "ethereum/EIPs"]
-  },
-  {
-    name: "ajxbt",
-    handle: "@ajxbt",
-    contribution: "46.5k",
-    growth: "+6.5%",
-    isPositive: true,
-    chartData: generateChartData(20, true, 5),
-    ecosystems: ["Cosmos", "Polkadot", "Near"],
-    projects: ["cosmos/cosmos-sdk", "near/nearcore", "paritytech/substrate"]
-  },
-  {
-    name: "tomasz",
-    handle: "@tomasz_k",
-    contribution: "45.8k",
-    growth: "+4.1%",
-    isPositive: true,
-    chartData: generateChartData(20, true, 7),
-    ecosystems: ["Polkadot", "Kusama"],
-    projects: ["paritytech/substrate", "paritytech/polkadot", "paritytech/smoldot"]
-  },
-  {
-    name: "binji",
-    handle: "@binji_x",
-    contribution: "41.2k",
-    growth: "-2.3%",
-    isPositive: false,
-    chartData: generateChartData(20, false, 4),
-    ecosystems: ["Near", "Ethereum"],
-    projects: ["near/nearcore", "near/workspaces", "ethereum/solidity"]
-  },
-];
-
 export default function Index() {
   const { pinned, statisticOverview, statisticRank } = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof action>();
@@ -268,39 +201,6 @@ export default function Index() {
   const handleSignupClick = () => {
     setAuthModalType("signup");
     setAuthModalOpen(true);
-  };
-
-  // Simple line chart component
-  const MiniChart = ({ data, color = "primary", height = 40 }: { data: number[], color?: string, height?: number }) => {
-    const max = Math.max(...data);
-    const min = Math.min(...data);
-    const range = max - min;
-
-    return (
-      <div className="w-full h-full" style={{ height: `${height}px` }}>
-        <svg width="100%" height="100%" viewBox={`0 0 ${data.length} ${range || 1}`} preserveAspectRatio="none">
-          <path
-            d={data.map((d, i) => `${i === 0 ? "M" : "L"} ${i} ${max - d + min}`).join(" ")}
-            fill="none"
-            stroke={`var(--${color})`}
-            strokeWidth="1"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="opacity-80"
-          />
-        </svg>
-      </div>
-    );
-  };
-
-  // Growth indicator component
-  const GrowthIndicator = ({ value, isPositive = true }: { value: string, isPositive?: boolean }) => {
-    return (
-      <div className={`flex items-center gap-1 text-xs ${isPositive ? "text-success" : "text-danger"}`}>
-        {isPositive ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
-        <span>{value}</span>
-      </div>
-    );
   };
 
   return (
@@ -452,62 +352,7 @@ export default function Index() {
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Top Developer Activity</h2>
             <p className="text-gray-500 dark:text-gray-400">Leading contributors across Web3 ecosystems</p>
           </div>
-
-          <Card className="bg-white dark:bg-gray-800 shadow-sm border-none">
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-0.5">
-              {topDevelopers.map((dev, index) => (
-                <div key={index} className={`relative p-5 ${index === 0 ? 'border-t-4 border-primary' : index === 1 ? 'border-t-4 border-secondary' : ''}`}>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <Link to={`/developer/${dev.handle.replace('@', '')}`} className="font-semibold text-gray-900 dark:text-white hover:text-primary hover:underline">
-                          {dev.handle}
-                        </Link>
-                        {index === 0 && <Crown size={14} className="text-primary fill-primary" />}
-                      </div>
-                    </div>
-                    <GrowthIndicator value={dev.growth} isPositive={dev.isPositive} />
-                  </div>
-
-                  <div className="mt-2">
-                    <p className="text-lg font-bold text-gray-900 dark:text-white">{dev.contribution}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">contributions</p>
-                  </div>
-
-                  <div className="mt-3 h-10">
-                    <MiniChart data={dev.chartData} color={dev.isPositive ? "success" : "danger"} />
-                  </div>
-
-                  {/* Ecosystems contributed to */}
-                  <div className="mt-3">
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Ecosystems</p>
-                    <div className="flex flex-wrap gap-1">
-                      {dev.ecosystems.map((eco, ecoIndex) => (
-                        <Chip key={ecoIndex} size="sm" variant="flat" color={
-                          ecoIndex === 0 ? "primary" :
-                            ecoIndex === 1 ? "secondary" : "default"
-                        } className="text-xs">
-                          {eco}
-                        </Chip>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Projects contributed to */}
-                  <div className="mt-2">
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Top Projects</p>
-                    <ul className="text-xs text-gray-700 dark:text-gray-300 space-y-1">
-                      {dev.projects.map((proj, projIndex) => (
-                        <li key={projIndex} className="truncate" title={proj}>
-                          {proj}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
+          <DeveloperRankWidget dataSource={statisticRank.developer} />
         </div>
 
         {/* Topic Popularity Metrics */}

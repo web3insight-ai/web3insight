@@ -3,7 +3,7 @@ import { generateSuccessResponse } from "@/clients/http";
 import {
   fetchEcosystemCount, fetchEcosystemRankList,
   fetchRepositoryCount, fetchRepositoryRankList,
-  fetchDeveloperCount,
+  fetchDeveloperCount, fetchDeveloperRankList,
 } from "../api/repository";
 
 async function fetchStatisticsOverview() {
@@ -27,6 +27,7 @@ async function fetchStatisticsRank() {
   const responses = await Promise.all([
     fetchEcosystemRankList(),
     fetchRepositoryRankList(),
+    fetchDeveloperRankList(),
   ]);
   const failed = responses.find(res => !res.success);
 
@@ -35,10 +36,12 @@ async function fetchStatisticsRank() {
     data: {
       ecosystem: [],
       repository: [],
+      developer: [],
     },
   } : generateSuccessResponse({
     ecosystem: responses[0].data.list,
     repository: responses[1].data.list,
+    developer: responses[2].data.list,
   });
 }
 

@@ -5,7 +5,6 @@ import { Warehouse, ArrowRight } from "lucide-react";
 import type { EcosystemRankWidgetProps } from "./typing";
 
 function EcosystemRankWidget({ dataSource }: EcosystemRankWidgetProps) {
-  console.log(dataSource);
   return (
     <Card className="bg-white dark:bg-gray-800 shadow-sm border-none hover:shadow-md transition-all duration-300">
       <CardHeader className="px-6 py-5">
