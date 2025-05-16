@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, CardFooter, CardHeader, Chip, Link as NextUILink, Divider, Input } from "@nextui-org/react";
+import { Button, Card, CardBody, CardHeader, Chip, Link as NextUILink, Divider, Input } from "@nextui-org/react";
 import {
   json,
   LoaderFunctionArgs,
@@ -7,7 +7,7 @@ import {
   type MetaFunction,
 } from "@remix-run/node";
 import { Link, useLoaderData, useFetcher } from "@remix-run/react";
-import { Github, Warehouse, Zap, ArrowRight, ArrowUpRight, ArrowDownRight, Database, Hash, TrendingUp, Search, Crown } from "lucide-react";
+import { Zap, ArrowRight, ArrowUpRight, ArrowDownRight, Database, Hash, TrendingUp, Search, Crown } from "lucide-react";
 import BrandLogo from "@/components/control/brand-logo";
 import { getUser } from "~/auth/repository";
 import { getClientIPAddress } from "remix-utils/get-client-ip-address";
@@ -16,8 +16,10 @@ import { useAtom } from "jotai";
 import { authModalOpenAtom, authModalTypeAtom } from "#/atoms";
 import { ErrorType } from "~/query/helper";
 import { insertOne, fetchListForUser } from "~/query/repository";
-import { fetchStatisticsOverview } from "~/statistics/repository";
+import { fetchStatisticsOverview, fetchStatisticsRank } from "~/statistics/repository";
 import MetricOverviewWidget from "~/statistics/widgets/metric-overview";
+import EcosystemRankWidget from "~/statistics/widgets/ecosystem-rank";
+import RepositoryRankWidget from "~/statistics/widgets/repository-rank";
 
 import { getMetadata } from "@/utils/app";
 
@@ -43,8 +45,9 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
   const user = await getUser(ctx.request);
   const { data } = await fetchListForUser({ user });
   const { data: statisticOverview } = await fetchStatisticsOverview();
+  const { data: statisticRank } = await fetchStatisticsRank();
 
-  return json({ ...data, statisticOverview });
+  return json({ ...data, statisticOverview, statisticRank });
 };
 
 export const action = async (ctx: ActionFunctionArgs) => {
@@ -188,35 +191,6 @@ const generateChartData = (points: number, isPositive: boolean = true, volatilit
   return data;
 };
 
-// Add repository activity data with chart data
-const enhancedRepoData = statsData.topRepositories.map(repo => ({
-  ...repo,
-  chartData: generateChartData(20, Math.random() > 0.3, 8),
-  growth: Math.random() > 0.5 ? `+${(Math.random() * 20).toFixed(1)}%` : `-${(Math.random() * 10).toFixed(1)}%`,
-  isPositive: Math.random() > 0.3
-}));
-
-// Add ecosystem data with chart data
-const enhancedEcosystemData = statsData.topEcosystems.map(ecosystem => ({
-  ...ecosystem,
-  chartData: generateChartData(20, ecosystem.growth.startsWith('+'), 6),
-  developerActivity: {
-    byMonth: [
-      { month: "Jan", count: Math.floor(Math.random() * 1000) + 500 },
-      { month: "Feb", count: Math.floor(Math.random() * 1000) + 500 },
-      { month: "Mar", count: Math.floor(Math.random() * 1000) + 500 },
-      { month: "Apr", count: Math.floor(Math.random() * 1000) + 500 },
-      { month: "May", count: Math.floor(Math.random() * 1000) + 500 },
-      { month: "Jun", count: Math.floor(Math.random() * 1000) + 500 }
-    ],
-    byType: [
-      { type: "Full-time", percentage: Math.floor(Math.random() * 30) + 50 },
-      { type: "Part-time", percentage: Math.floor(Math.random() * 20) + 20 },
-      { type: "Occasional", percentage: Math.floor(Math.random() * 15) + 5 }
-    ]
-  }
-}));
-
 // Add top developer data with ecosystem and project contributions
 const topDevelopers = [
   {
@@ -272,7 +246,7 @@ const topDevelopers = [
 ];
 
 export default function Index() {
-  const { pinned, statisticOverview } = useLoaderData<typeof loader>();
+  const { pinned, statisticOverview, statisticRank } = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof action>();
   const asking = fetcher.state === "submitting";
   const errorMessage = fetcher.data?.error;
@@ -460,77 +434,7 @@ export default function Index() {
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Web3 Ecosystem Analytics</h2>
             <p className="text-gray-500 dark:text-gray-400">Comprehensive insights about major blockchain ecosystems</p>
           </div>
-
-          {/* Main Content Grid */}
-          <Card className="bg-white dark:bg-gray-800 shadow-sm border-none hover:shadow-md transition-all duration-300">
-            <CardHeader className="px-6 py-5">
-              <div className="flex items-center gap-2">
-                <Warehouse size={18} className="text-primary" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Top Ecosystems</h3>
-              </div>
-            </CardHeader>
-            <Divider />
-
-            {/* Ecosystem header row */}
-            <div className="px-6 py-3 bg-gray-50 dark:bg-gray-750 border-b border-gray-100 dark:border-gray-800 grid grid-cols-12 gap-2">
-              <div className="col-span-1 text-xs font-medium text-gray-500 dark:text-gray-400">#</div>
-              <div className="col-span-4 text-xs font-medium text-gray-500 dark:text-gray-400">Ecosystem</div>
-              <div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400">Total Devs</div>
-              <div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400">Core Devs</div>
-              <div className="col-span-3 text-xs font-medium text-gray-500 dark:text-gray-400">Monthly Commits</div>
-            </div>
-
-            <CardBody className="p-0">
-              <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                {enhancedEcosystemData.map((ecosystem, index) => (
-                  <div key={index} className="px-6 py-4 grid grid-cols-12 gap-2 items-center hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors duration-200">
-                    {/* Rank indicator */}
-                    <div className="col-span-1">
-                      <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full
-                        ${index === 0 ? 'bg-primary/10 text-primary' :
-                          index === 1 ? 'bg-secondary/10 text-secondary' :
-                            'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}
-                        text-xs font-medium`}>{index + 1}</span>
-                    </div>
-
-                    {/* Ecosystem name and growth */}
-                    <div className="col-span-4 flex items-center gap-2">
-                      <Link to={`/ecosystem/${ecosystem.name.toLowerCase()}`} className="font-medium text-gray-900 dark:text-white hover:text-primary hover:underline">
-                        {ecosystem.name}
-                      </Link>
-                      <Chip size="sm" color={ecosystem.color} variant="flat">
-                        {ecosystem.growth}
-                      </Chip>
-                    </div>
-
-                    {/* Total developer count */}
-                    <div className="col-span-2 font-medium text-gray-700 dark:text-gray-300">
-                      {ecosystem.developers.toLocaleString()}
-                    </div>
-
-                    {/* Core developer count */}
-                    <div className="col-span-2 font-medium text-gray-700 dark:text-gray-300">
-                      {ecosystem.coreDevelopers.toLocaleString()}
-                    </div>
-
-                    {/* Monthly Commits */}
-                    <div className="col-span-3 font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                      <span>{ecosystem.monthlyCommits.toLocaleString()}</span>
-                      <div className="w-20 h-8">
-                        <MiniChart data={ecosystem.chartData} color={ecosystem.growth.startsWith('+') ? "success" : "danger"} />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardBody>
-            <Divider />
-            <CardFooter className="px-6 py-3">
-              <Button as={Link} to="/ecosystems" color="primary" variant="light" size="sm" endContent={<ArrowRight size={14} />} className="ml-auto">
-                View all ecosystems
-              </Button>
-            </CardFooter>
-          </Card>
+          <EcosystemRankWidget dataSource={statisticRank.ecosystem} />
         </div>
 
         {/* Repository Activity Section */}
@@ -539,100 +443,7 @@ export default function Index() {
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Repository Activity</h2>
             <p className="text-gray-500 dark:text-gray-400">Top repositories by developer engagement and contributions</p>
           </div>
-
-          <Card className="bg-white dark:bg-gray-800 shadow-sm border-none hover:shadow-md transition-all duration-300">
-            {/* Repository icon header */}
-            <CardHeader className="px-8 py-5">
-              <div className="flex items-center gap-2">
-                <Github size={18} className="text-primary" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Top Repositories</h3>
-              </div>
-            </CardHeader>
-            <Divider />
-
-            {/* Repository header row */}
-            <div className="px-8 py-3 bg-gray-50 dark:bg-gray-750 border-b border-gray-100 dark:border-gray-800 grid grid-cols-12 gap-2">
-              <div className="col-span-1 text-xs font-medium text-gray-500 dark:text-gray-400">#</div>
-              <div className="col-span-5 text-xs font-medium text-gray-500 dark:text-gray-400">Repository</div>
-              <div className="col-span-1 text-xs font-medium text-gray-500 dark:text-gray-400 text-right">Stars</div>
-              <div className="col-span-1 text-xs font-medium text-gray-500 dark:text-gray-400 text-right">Forks</div>
-              <div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400 text-right">PRs</div>
-              <div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400 text-right">Issues</div>
-            </div>
-
-            {/* Repository rows */}
-            <div>
-              {enhancedRepoData.map((repo, index) => (
-                <div
-                  key={index}
-                  className="px-8 py-4 grid grid-cols-12 gap-2 items-center border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors duration-200"
-                >
-                  {/* Rank number */}
-                  <div className="col-span-1">
-                    <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full
-                      ${index === 0 ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' :
-                        index === 1 ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400' :
-                          'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}
-                      text-xs font-medium`}>{index + 1}</span>
-                  </div>
-
-                  {/* Repository name */}
-                  <div className="col-span-5 flex items-center">
-                    <Link to={`/repository/${repo.name}`} className="font-medium text-gray-900 dark:text-white hover:text-primary hover:underline">
-                      {repo.name}
-                    </Link>
-                    <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${repo.isPositive ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400' :
-                      'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'
-                      }`}>
-                      {repo.growth}
-                    </span>
-                  </div>
-
-                  {/* Stars */}
-                  <div className="col-span-1 text-right font-medium text-gray-700 dark:text-gray-300">
-                    {repo.stars.toLocaleString()}
-                  </div>
-
-                  {/* Forks - adding mock data */}
-                  <div className="col-span-1 text-right font-medium text-gray-700 dark:text-gray-300">
-                    {Math.floor(repo.stars * 0.3).toLocaleString()}
-                  </div>
-
-                  {/* PRs - adding mock data */}
-                  <div className="col-span-2 text-right font-medium text-gray-700 dark:text-gray-300">
-                    <div className="flex items-center justify-end gap-1">
-                      <span>{Math.floor(repo.commits * 0.4).toLocaleString()}</span>
-                      <span className="text-xs text-green-500">+{Math.floor(Math.random() * 30)}</span>
-                    </div>
-                  </div>
-
-                  {/* Issues - adding mock data */}
-                  <div className="col-span-2 text-right font-medium text-gray-700 dark:text-gray-300">
-                    <div className="flex items-center justify-end gap-1">
-                      <span>{Math.floor(repo.commits * 0.25).toLocaleString()}</span>
-                      <span className="text-xs text-gray-500">{Math.floor(repo.commits * 0.05).toLocaleString()} open</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Footer with right-aligned button */}
-            <Divider />
-            <CardFooter className="px-6 py-3">
-              <Button
-                as={Link}
-                to="/repositories"
-                color="primary"
-                variant="light"
-                size="sm"
-                endContent={<ArrowRight size={14} />}
-                className="ml-auto"
-              >
-                View all repositories
-              </Button>
-            </CardFooter>
-          </Card>
+          <RepositoryRankWidget dataSource={statisticRank.repository} />
         </div>
 
         {/* Developer Leaderboard Section */}
@@ -776,11 +587,11 @@ export default function Index() {
             </CardHeader>
             <Divider />
             <CardBody className="px-6 py-4 space-y-4">
-              {enhancedEcosystemData.slice(0, 3).map((eco, index) => (
+              {statisticRank.ecosystem.slice(0, 3).map((eco, index) => (
                 <div key={index} className="flex items-center gap-3">
                   <div className="w-2 h-2 rounded-full bg-success"></div>
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{eco.name}</span>
-                  <GrowthIndicator value={eco.growth} isPositive={eco.growth.startsWith('+')} />
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{eco.eco_name}</span>
+                  {/* <GrowthIndicator value={eco.growth} isPositive={eco.growth.startsWith('+')} /> */}
                 </div>
               ))}
             </CardBody>
