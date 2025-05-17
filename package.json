@@ -25,6 +25,7 @@
     "ai": "^3.3.6",
     "clsx": "^2.1.1",
     "cobe": "^0.6.3",
+    "dayjs": "1.10.8",
     "dotted-map": "^2.2.3",
     "echarts": "5.5.1",
     "echarts-for-react": "^3.0.2",

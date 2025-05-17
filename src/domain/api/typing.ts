@@ -31,7 +31,12 @@ type DeveloperRankRecord = {
   }[];
 };
 
+type DeveloperTrendRecord = {
+  date: string;
+  total: number;
+}
+
 export type {
   EcoRequestParams, TotalResponseData, ListResponseData,
-  RepositoryRankRecord, DeveloperRankRecord,
+  RepositoryRankRecord, DeveloperRankRecord, DeveloperTrendRecord,
 };

@@ -1,4 +1,4 @@
-function MiniChartWidget({ data, color = "primary", height = 40 }: { data: number[], color?: string, height?: number }) {
+function MiniChart({ data, color = "primary", height = 40 }: { data: number[], color?: string, height?: number }) {
   const max = Math.max(...data);
   const min = Math.min(...data);
   const range = max - min;
@@ -20,4 +20,4 @@ function MiniChartWidget({ data, color = "primary", height = 40 }: { data: numbe
   );
 }
 
-export default MiniChartWidget;
+export default MiniChart;
