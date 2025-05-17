@@ -1,11 +1,17 @@
-import dotenv from "dotenv";
-import axios from "axios";
 import { z } from "zod";
 import { agent, agentInputEvent, agentOutputEvent, agentStreamEvent, agentToolCallResultEvent } from "@llamaindex/workflow";
 import { openai } from "@llamaindex/openai";
 import { tool } from "llamaindex";
+import HttpClient from "@/clients/http/HttpClient";
 
-dotenv.config();
+
+const httpClient = new HttpClient({
+    baseUrl: process.env.DATA_API_URL,
+    headers: {
+        Authorization: `Bearer ${process.env.DATA_API_TOKEN}`,
+    },
+});
+
 
 enum EcosystemEnum {
     near = "NEAR",
@@ -24,18 +30,10 @@ function matchEcosystem(ecosystem: string): string {
     return EcosystemEnum.all;
 }
 
-const apiClient = axios.create({
-    baseURL: "https://api.web3insights.app",
-    timeout: 10000,
-    headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.WEB3INSIGHTS_API_KEY}`,
-    },
-});
 
 async function countRepositories({ ecosystem = "all" }: { ecosystem?: string } = {}): Promise<any> {
     const ecoName = matchEcosystem(ecosystem);
-    const res = await apiClient.get("/v1/repos/total", { params: { eco_name: ecoName } });
+    const res = await httpClient.get("/v1/repos/total", { params: { eco_name: ecoName } });
     return res.data;
 }
 
@@ -44,14 +42,14 @@ async function countContributors(
 ): Promise<any> {
     const ecoName = matchEcosystem(ecosystem);
     const scopeParam = scope.toLowerCase() === "core" ? "Core" : "ALL";
-    const res = await apiClient.get("/v1/actors/total", {
+    const res = await httpClient.get("/v1/actors/total", {
         params: { eco_name: ecoName, scope: scopeParam },
     });
     return res.data;
 }
 
 async function countEcosystemAmount(): Promise<any> {
-    const res = await apiClient.get("/v1/ecosystems/total");
+    const res = await httpClient.get("/v1/ecosystems/total");
     return res.data;
 }
 
@@ -60,26 +58,26 @@ async function countRecentContributors(
 ): Promise<any> {
     const ecoName = matchEcosystem(ecosystem);
     const periodParam = period.toLowerCase() === "month" ? "month" : "week";
-    const res = await apiClient.get("/v1/actors/total/date", {
+    const res = await httpClient.get("/v1/actors/total/date", {
         params: { eco_name: ecoName, period: periodParam },
     });
     return res.data;
 }
 
 async function rankEcosystems(): Promise<any> {
-    const res = await apiClient.get("/v1/ecosystems/top");
+    const res = await httpClient.get("/v1/ecosystems/top");
     return res.data;
 }
 
 async function rankRepositories({ ecosystem = "all" }: { ecosystem?: string } = {}): Promise<any> {
     const ecoName = matchEcosystem(ecosystem);
-    const res = await apiClient.get("/v1/repos/top", { params: { eco_name: ecoName } });
+    const res = await httpClient.get("/v1/repos/top", { params: { eco_name: ecoName } });
     return res.data;
 }
 
 async function rankContributors({ ecosystem = "all" }: { ecosystem?: string } = {}): Promise<any> {
     const ecoName = matchEcosystem(ecosystem);
-    const res = await apiClient.get("/v1/actors/top", { params: { eco_name: ecoName } });
+    const res = await httpClient.get("/v1/actors/top", { params: { eco_name: ecoName } });
     return res.data;
 }
 
