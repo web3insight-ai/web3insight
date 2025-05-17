@@ -1,7 +1,7 @@
 import type { DataValue } from "@/types";
 
-type EcosystemRankWidgetProps = {
+type EcosystemRankViewWidgetProps = {
   dataSource: Record<string, DataValue>[];
 }
 
-export type { EcosystemRankWidgetProps };
+export type { EcosystemRankViewWidgetProps };

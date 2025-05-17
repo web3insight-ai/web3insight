@@ -1,7 +1,7 @@
 import type { DataValue } from "@/types";
 
-type RepositoryRankWidgetProps = {
+type RepositoryRankViewWidgetProps = {
   dataSource: Record<string, DataValue>[];
 }
 
-export type { RepositoryRankWidgetProps };
+export type { RepositoryRankViewWidgetProps };

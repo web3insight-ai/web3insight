@@ -2,9 +2,9 @@ import { Link } from "@remix-run/react";
 import { Button, Card, CardHeader, CardFooter, Divider } from "@nextui-org/react";
 import { Github, ArrowRight } from "lucide-react";
 
-import type { RepositoryRankWidgetProps } from "./typing";
+import type { RepositoryRankViewWidgetProps } from "./typing";
 
-function RepositoryRankWidget({ dataSource }: RepositoryRankWidgetProps) {
+function RepositoryRankView({ dataSource }: RepositoryRankViewWidgetProps) {
   return (
     <Card className="bg-white dark:bg-gray-800 shadow-sm border-none hover:shadow-md transition-all duration-300">
       {/* Repository icon header */}
@@ -94,4 +94,4 @@ function RepositoryRankWidget({ dataSource }: RepositoryRankWidgetProps) {
   );
 }
 
-export default RepositoryRankWidget;
+export default RepositoryRankView;

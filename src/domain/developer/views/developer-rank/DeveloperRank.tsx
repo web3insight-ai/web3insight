@@ -2,9 +2,9 @@ import { Link } from "@remix-run/react";
 import { Card } from "@nextui-org/react";
 import { Crown } from "lucide-react";
 
-import type { DeveloperRankWidgetProps } from "./typing";
+import type { DeveloperRankViewWidgetProps } from "./typing";
 
-function DeveloperRankWidget({ dataSource }: DeveloperRankWidgetProps) {
+function DeveloperRankView({ dataSource }: DeveloperRankViewWidgetProps) {
   return (
     <Card className="bg-white dark:bg-gray-800 shadow-sm border-none">
       <div className="grid grid-cols-1 md:grid-cols-5 gap-0.5">
@@ -41,4 +41,4 @@ function DeveloperRankWidget({ dataSource }: DeveloperRankWidgetProps) {
   );
 }
 
-export default DeveloperRankWidget;
+export default DeveloperRankView;

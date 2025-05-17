@@ -2,9 +2,9 @@ import { Link } from "@remix-run/react";
 import { Button, Card, CardHeader, CardBody, CardFooter, Divider, Chip } from "@nextui-org/react";
 import { Warehouse, ArrowRight } from "lucide-react";
 
-import type { EcosystemRankWidgetProps } from "./typing";
+import type { EcosystemRankViewWidgetProps } from "./typing";
 
-function EcosystemRankWidget({ dataSource }: EcosystemRankWidgetProps) {
+function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
   return (
     <Card className="bg-white dark:bg-gray-800 shadow-sm border-none hover:shadow-md transition-all duration-300">
       <CardHeader className="px-6 py-5">
@@ -71,4 +71,4 @@ function EcosystemRankWidget({ dataSource }: EcosystemRankWidgetProps) {
   );
 }
 
-export default EcosystemRankWidget;
+export default EcosystemRankView;

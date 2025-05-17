@@ -22,9 +22,9 @@ import { ErrorType } from "~/query/helper";
 import { insertOne, fetchListForUser } from "~/query/repository";
 import { fetchStatisticsOverview, fetchStatisticsRank } from "~/statistics/repository";
 import MetricOverviewWidget from "~/statistics/widgets/metric-overview";
-import EcosystemRankWidget from "~/statistics/widgets/ecosystem-rank";
-import RepositoryRankWidget from "~/statistics/widgets/repository-rank";
-import DeveloperRankWidget from "~/statistics/widgets/developer-rank";
+import EcosystemRankViewWidget from "~/ecosystem/views/ecosystem-rank";
+import RepositoryRankViewWidget from "~/repository/views/repository-rank";
+import DeveloperRankViewWidget from "~/developer/views/developer-rank";
 
 import MetricSection from "./MetricSection";
 
@@ -193,21 +193,21 @@ export default function Index() {
           title="Web3 Ecosystem Analytics"
           summary="Comprehensive insights about major blockchain ecosystems"
         >
-          <EcosystemRankWidget dataSource={statisticRank.ecosystem} />
+          <EcosystemRankViewWidget dataSource={statisticRank.ecosystem} />
         </MetricSection>
         <MetricSection
           className="mt-10"
           title="Repository Activity"
           summary="Top repositories by developer engagement and contributions"
         >
-          <RepositoryRankWidget dataSource={statisticRank.repository} />
+          <RepositoryRankViewWidget dataSource={statisticRank.repository} />
         </MetricSection>
         <MetricSection
           className="mt-10"
           title="Top Developer Activity"
           summary="Leading contributors across Web3 ecosystems"
         >
-          <DeveloperRankWidget dataSource={statisticRank.developer} />
+          <DeveloperRankViewWidget dataSource={statisticRank.developer} />
         </MetricSection>
 
         {/* Call to Action */}
