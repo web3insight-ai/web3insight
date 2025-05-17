@@ -1,17 +1,10 @@
+import dotenv from "dotenv";
 import { z } from "zod";
 import { agent, agentInputEvent, agentOutputEvent, agentToolCallResultEvent } from "@llamaindex/workflow";
 import { openai } from "@llamaindex/openai";
 import { tool } from "llamaindex";
-import HttpClient from "@/clients/http/HttpClient";
 
-
-const httpClient = new HttpClient({
-    baseUrl: process.env.DATA_API_URL,
-    headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.DATA_API_TOKEN}`,
-    },
-});
+dotenv.config();
 
 enum EcosystemEnum {
     near = "NEAR",
@@ -22,21 +15,27 @@ enum EcosystemEnum {
 
 function matchEcosystem(ecosystem: string): string {
     const lower = ecosystem.toLowerCase();
-    const EcosystemKeys = Object.keys(EcosystemEnum) as (keyof typeof EcosystemEnum)[];
-    const isValidKey = EcosystemKeys.includes(lower as keyof typeof EcosystemEnum);
-
-    if (isValidKey) {
-        return EcosystemEnum[lower as keyof typeof EcosystemEnum];
-    } else {
-        return EcosystemEnum.all;
-    }
+    Object.entries(EcosystemEnum).forEach(([key, value]) => {
+        if (key === lower) {
+            return value;
+        }
+    });
+    return EcosystemEnum.all;
 }
 
+const options = {
+    method: "GET",
+    headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.DATA_API_TOKEN}`,
+    },
+};
 
 async function countRepositories({ ecosystem = "all" }: { ecosystem?: string } = {}): Promise<any> {
     const ecoName = matchEcosystem(ecosystem);
-    const res = await httpClient.get("/v1/repos/total", { params: { eco_name: ecoName } });
-    return res.data;
+    const url = `https://api.web3insights.app/v1/repos/total?eco_name=${ecoName}`;
+    const response = await fetch(url, options);
+    return await response.json();
 }
 
 async function countContributors(
@@ -44,15 +43,15 @@ async function countContributors(
 ): Promise<any> {
     const ecoName = matchEcosystem(ecosystem);
     const scopeParam = scope.toLowerCase() === "core" ? "Core" : "ALL";
-    const res = await httpClient.get("/v1/actors/total", {
-        params: { eco_name: ecoName, scope: scopeParam },
-    });
-    return res.data;
+    const url = `https://api.web3insights.app/v1/actors/total?eco_name=${ecoName}&scope=${scopeParam}`;
+    const response = await fetch(url, options);
+    return await response.json();
 }
 
 async function countEcosystemAmount(): Promise<any> {
-    const res = await httpClient.get("/v1/ecosystems/total");
-    return res.data;
+    const url = `https://api.web3insights.app/v1/ecosystems/total`;
+    const response = await fetch(url, options);
+    return await response.json();
 }
 
 async function countRecentContributors(
@@ -60,27 +59,29 @@ async function countRecentContributors(
 ): Promise<any> {
     const ecoName = matchEcosystem(ecosystem);
     const periodParam = period.toLowerCase() === "month" ? "month" : "week";
-    const res = await httpClient.get("/v1/actors/total/date", {
-        params: { eco_name: ecoName, period: periodParam },
-    });
-    return res.data;
+    const url = `https://api.web3insights.app/v1/actors/total/date?eco_name=${ecoName}&period=${periodParam}`;
+    const response = await fetch(url, options);
+    return await response.json();
 }
 
 async function rankEcosystems(): Promise<any> {
-    const res = await httpClient.get("/v1/ecosystems/top");
-    return res.data;
+    const url = `https://api.web3insights.app/v1/ecosystems/top`;
+    const response = await fetch(url, options);
+    return await response.json();
 }
 
 async function rankRepositories({ ecosystem = "all" }: { ecosystem?: string } = {}): Promise<any> {
     const ecoName = matchEcosystem(ecosystem);
-    const res = await httpClient.get("/v1/repos/top", { params: { eco_name: ecoName } });
-    return res.data;
+    const url = `https://api.web3insights.app/v1/repos/top?eco_name=${ecoName}`;
+    const response = await fetch(url, options);
+    return await response.json();
 }
 
 async function rankContributors({ ecosystem = "all" }: { ecosystem?: string } = {}): Promise<any> {
     const ecoName = matchEcosystem(ecosystem);
-    const res = await httpClient.get("/v1/actors/top", { params: { eco_name: ecoName } });
-    return res.data;
+    const url = `https://api.web3insights.app/v1/actors/top?eco_name=${ecoName}`;
+    const response = await fetch(url, options);
+    return await response.json();
 }
 
 const countRepositoriesTool = tool(countRepositories, {
@@ -154,7 +155,7 @@ const rankContributorsTool = tool(rankContributors, {
 const llm = openai({
     apiKey: process.env.OPENAI_API_KEY,
     baseURL: process.env.OPENAI_BASE_URL,
-    model: "gpt-4o-mini",
+    model: 'gpt-4o-mini',
 });
 
 const tools = [
@@ -169,19 +170,29 @@ const tools = [
 
 const myAgent = agent({ llm: llm, tools: tools });
 
-async function chatWithAgent(query: string) {
-    // const stream = myAgent.runStream(query);
-    // for await (const event of stream) {
-    //     if (agentInputEvent.include(event)) {
-    //         console.log("LLM INPUT:", event.data.input);
-    //     } else if (agentOutputEvent.include(event)) {
-    //         console.log("LLM OUTPUT:", event.data.response);
-    //     } else if (agentToolCallResultEvent.include(event)) {
-    //         console.log("TOOL CALL NAME:", event.data.toolName, ', KWARGS:', event.data.toolKwargs, ', RESULT:', event.data.toolOutput.result);
-    //     }
-    // }
-    const result = await myAgent.run(query);
-    return result.data;
+async function main() {
+    const testQueries = [
+        "How many repositories are in the NEAR ecosystem?",
+        "What's the total number of contributors in Starknet with core scope?",
+        "How many ecosystems are currently tracked?",
+        "Show repository rankings for OpenBuild.",
+        "Who are the top contributors in NEAR?",
+        "Count recent contributors in Starknet over the last month.",
+        "List the top 5 ecosystems by activity.",
+    ];
+
+    for (const query of testQueries) {
+        const stream = myAgent.runStream(query);
+        for await (const event of stream) {
+            if (agentInputEvent.include(event)) {
+                console.log("LLM INPUT:", event.data.input);
+            } else if (agentOutputEvent.include(event)) {
+                console.log("LLM OUTPUT:", event.data.response);
+            } else if (agentToolCallResultEvent.include(event)) {
+                console.log("TOOL CALL NAME:", event.data.toolName, ', KWARGS:', event.data.toolKwargs, ', RESULT:', event.data.toolOutput.result);
+            }
+        }
+    }
 }
 
-export { chatWithAgent };
+main().catch(console.error);
