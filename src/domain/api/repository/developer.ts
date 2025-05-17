@@ -1,6 +1,6 @@
-import type { DataValue, ResponseResult } from "@/types";
+import type { ResponseResult } from "@/types";
 
-import type { EcoRequestParams, TotalResponseData, ListResponseData } from "../typing";
+import type { EcoRequestParams, TotalResponseData, ListResponseData, DeveloperRankRecord } from "../typing";
 import httpClient from "./client";
 
 async function fetchTotalCount(
@@ -21,7 +21,7 @@ async function fetchTrendList(
 
 async function fetchRankList(
   params: EcoRequestParams = { eco: "ALL" },
-): Promise<ResponseResult<ListResponseData<Record<string, DataValue>>>> {
+): Promise<ResponseResult<ListResponseData<DeveloperRankRecord>>> {
   return httpClient.get("/v1/actors/top", { params: { eco_name: params.eco } });
 }
 

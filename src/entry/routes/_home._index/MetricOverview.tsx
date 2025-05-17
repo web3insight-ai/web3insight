@@ -1,9 +1,10 @@
 import { Code2, Users, Zap, Database } from "lucide-react";
 
-import type { MetricCardProps, MetricOverviewWidgetProps } from "./typing";
-import MetricCard from "./MetricCard";
+import MetricCard, { type MetricCardProps } from "@/components/control/metric-card";
 
-function resolveMetrics(dataSource: MetricOverviewWidgetProps["dataSource"]): MetricCardProps[] {
+import type { MetricOverviewProps } from "./typing";
+
+function resolveMetrics(dataSource: MetricOverviewProps["dataSource"]): MetricCardProps[] {
   return [
     {
       label: "Active Developers",
@@ -32,7 +33,7 @@ function resolveMetrics(dataSource: MetricOverviewWidgetProps["dataSource"]): Me
   ];
 }
 
-function MetricOverviewWidget({ dataSource }: MetricOverviewWidgetProps) {
+function MetricOverview({ dataSource }: MetricOverviewProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
       {resolveMetrics(dataSource).map(metric => (
@@ -42,4 +43,4 @@ function MetricOverviewWidget({ dataSource }: MetricOverviewWidgetProps) {
   );
 }
 
-export default MetricOverviewWidget;
+export default MetricOverview;

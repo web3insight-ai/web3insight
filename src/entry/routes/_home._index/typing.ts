@@ -1,4 +1,9 @@
 import type { PropsWithChildren } from "react";
+import type { DataValue } from "@/types";
+
+type MetricOverviewProps = {
+  dataSource: Record<string, DataValue>;
+};
 
 type MetricSectionProps = PropsWithChildren<{
   className?: string;
@@ -6,4 +11,4 @@ type MetricSectionProps = PropsWithChildren<{
   summary: string;
 }>
 
-export type { MetricSectionProps };
+export type { MetricOverviewProps, MetricSectionProps };

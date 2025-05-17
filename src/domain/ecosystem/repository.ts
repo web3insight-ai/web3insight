@@ -12,6 +12,11 @@ import {
   fetchRepoParticipants, fetchRepoNewContributors, fetchRepoInactiveContributors,
 } from "../opendigger/repository";
 import { fetchEcosystem } from "../strapi/repository";
+import type { RepositoryRankRecord, DeveloperRankRecord } from "../api/typing";
+import {
+  fetchRepositoryCount, fetchRepositoryRankList,
+  fetchDeveloperCount, fetchDeveloperRankList,
+} from "../api/repository";
 
 async function fetchOne(keyword?: string): Promise<ResponseResult<Record<string, DataValue> | null>> {
   return fetchEcosystem(keyword);
@@ -107,4 +112,35 @@ async function fetchRepoAnalysis(repo: string) {
   });
 }
 
-export { fetchOne, getInfo, fetchRepoAnalysis };
+async function fetchStatistics(name: string): Promise<ResponseResult<{
+  developerTotalCount: number | string;
+  developerCoreCount: number | string;
+  developers: DeveloperRankRecord[];
+  repositories: RepositoryRankRecord[];
+}>> {
+  const params = { eco: name } as any;  // eslint-disable-line @typescript-eslint/no-explicit-any
+  const responses = await Promise.all([
+    fetchDeveloperCount(params),
+    fetchRepositoryCount({ ...params, scope: "Core" }),
+    fetchDeveloperRankList(params),
+    fetchRepositoryRankList(params),
+  ]);
+  const failed = responses.find(res => !res.success);
+
+  return failed? {
+   ...failed,
+    data: {
+      developerTotalCount: 0,
+      developerCoreCount: 0,
+      developers: [],
+      repositories: [],
+    },
+  } : generateSuccessResponse({
+    developerTotalCount: responses[0].data.total,
+    developerCoreCount: responses[1].data.total,
+    developers: responses[2].data.list,
+    repositories: responses[3].data.list,
+  });
+}
+
+export { fetchOne, getInfo, fetchRepoAnalysis, fetchStatistics };

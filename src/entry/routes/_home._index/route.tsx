@@ -21,11 +21,11 @@ import { getUser } from "~/auth/repository";
 import { ErrorType } from "~/query/helper";
 import { insertOne, fetchListForUser } from "~/query/repository";
 import { fetchStatisticsOverview, fetchStatisticsRank } from "~/statistics/repository";
-import MetricOverviewWidget from "~/statistics/widgets/metric-overview";
 import EcosystemRankViewWidget from "~/ecosystem/views/ecosystem-rank";
 import RepositoryRankViewWidget from "~/repository/views/repository-rank";
 import DeveloperRankViewWidget from "~/developer/views/developer-rank";
 
+import MetricOverview from "./MetricOverview";
 import MetricSection from "./MetricSection";
 
 const { title, tagline, description } = getMetadata();
@@ -186,7 +186,7 @@ export default function Index() {
       </div>
 
       <div className="w-full max-w-[1200px] mx-auto px-4 sm:px-6 py-12">
-        <MetricOverviewWidget dataSource={statisticOverview} />
+        <MetricOverview dataSource={statisticOverview} />
 
         <MetricSection
           className="mt-10"
@@ -207,7 +207,7 @@ export default function Index() {
           title="Top Developer Activity"
           summary="Leading contributors across Web3 ecosystems"
         >
-          <DeveloperRankViewWidget dataSource={statisticRank.developer} />
+          <DeveloperRankViewWidget dataSource={statisticRank.developer} view="grid" />
         </MetricSection>
 
         {/* Call to Action */}

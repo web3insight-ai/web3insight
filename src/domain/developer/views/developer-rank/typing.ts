@@ -1,7 +1,8 @@
-import type { DataValue } from "@/types";
+import type { DeveloperRankRecord } from "../../../api/typing";
 
 type DeveloperRankViewWidgetProps = {
-  dataSource: Record<string, DataValue>[];
+  dataSource: DeveloperRankRecord[];
+  view?: "table" | "grid";
 }
 
 export type { DeveloperRankViewWidgetProps };
