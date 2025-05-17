@@ -13,9 +13,9 @@ function DeveloperRankView({ dataSource }: DeveloperRankViewWidgetProps) {
             <div className="flex justify-between items-start">
               <div>
                 <div className="flex items-center gap-2">
-                  <Link to={`/developer/${dev.actor_login}`} className="font-semibold text-gray-900 dark:text-white hover:text-primary hover:underline">
+                  <span className="font-semibold text-gray-900 dark:text-white">
                     @{dev.actor_login}
-                  </Link>
+                  </span>
                   {index === 0 && <Crown size={14} className="text-primary fill-primary" />}
                 </div>
               </div>

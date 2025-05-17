@@ -1,6 +1,5 @@
-import { Link } from "@remix-run/react";
-import { Button, Card, CardHeader, CardFooter, Divider } from "@nextui-org/react";
-import { Github, ArrowRight } from "lucide-react";
+import { Card, CardHeader, Divider } from "@nextui-org/react";
+import { Github } from "lucide-react";
 
 import type { RepositoryRankViewWidgetProps } from "./typing";
 
@@ -43,9 +42,9 @@ function RepositoryRankView({ dataSource }: RepositoryRankViewWidgetProps) {
 
             {/* Repository name */}
             <div className="col-span-5 flex items-center">
-              <Link to={`/repository/${repo.repo_name}`} className="font-medium text-gray-900 dark:text-white hover:text-primary hover:underline">
+              <span className="font-medium text-gray-900 dark:text-white">
                 {repo.repo_name}
-              </Link>
+              </span>
               {repo.growth && (
                 <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${repo.isPositive ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400' :
                   'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'
@@ -74,22 +73,6 @@ function RepositoryRankView({ dataSource }: RepositoryRankViewWidgetProps) {
           </div>
         ))}
       </div>
-
-      {/* Footer with right-aligned button */}
-      <Divider />
-      <CardFooter className="px-6 py-3">
-        <Button
-          as={Link}
-          to="/repositories"
-          color="primary"
-          variant="light"
-          size="sm"
-          endContent={<ArrowRight size={14} />}
-          className="ml-auto"
-        >
-          View all repositories
-        </Button>
-      </CardFooter>
     </Card>
   );
 }
