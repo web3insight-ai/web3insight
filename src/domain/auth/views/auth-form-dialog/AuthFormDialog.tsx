@@ -103,12 +103,12 @@ function AuthFormDialogView() {
       }
       submit(
         { email, password, username, action: "signup" },
-        { method: "post", action: "/auth" }
+        { method: "post", action: "/auth" },
       );
     } else if (modalType === "resetPassword") {
       submit(
         { email, action: "forgotPassword" },
-        { method: "post", action: "/auth" }
+        { method: "post", action: "/auth" },
       );
     }
   };

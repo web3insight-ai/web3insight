@@ -67,7 +67,7 @@ export default function ProfilePage() {
                 <p className="text-lg font-bold">{user.username || "User"}</p>
                 <p className="text-sm text-gray-500">{user.email || "No email provided"}</p>
                 <div className="flex items-center mt-1">
-                  <span className={`inline-block h-2 w-2 rounded-full mr-2 ${user.confirmed ? 'bg-success' : 'bg-warning'}`}></span>
+                  <span className={`inline-block h-2 w-2 rounded-full mr-2 ${user.confirmed ? 'bg-success' : 'bg-warning'}`} />
                   <span className="text-xs text-gray-500">{user.confirmed ? 'Verified' : 'Pending verification'}</span>
                 </div>
               </div>

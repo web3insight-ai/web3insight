@@ -30,47 +30,47 @@ export async function action({ request }: ActionFunctionArgs) {
   try {
     // Handle different auth actions
     switch (action) {
-      case "signin": {
-        const email = formData.get("email") as string;
-        const password = formData.get("password") as string;
+    case "signin": {
+      const email = formData.get("email") as string;
+      const password = formData.get("password") as string;
 
-        const res = await signIn({ identifier: email, password});
+      const res = await signIn({ identifier: email, password});
 
-        return resolveResponse(res);
-      }
+      return resolveResponse(res);
+    }
 
-      case "signup": {
-        const email = formData.get("email") as string;
-        const password = formData.get("password") as string;
-        const username = formData.get("username") as string;
+    case "signup": {
+      const email = formData.get("email") as string;
+      const password = formData.get("password") as string;
+      const username = formData.get("username") as string;
 
-        const res = await signUp({ username, email, password, passwordConfirm: password });
+      const res = await signUp({ username, email, password, passwordConfirm: password });
 
-        return resolveResponse(res);
-      }
+      return resolveResponse(res);
+    }
 
-      case "forgotPassword": {
-        const email = formData.get("email") as string;
-        const { extra, ...others } = await sendPasswordResetEmail(email);
+    case "forgotPassword": {
+      const email = formData.get("email") as string;
+      const { extra, ...others } = await sendPasswordResetEmail(email);
 
-        return json({
-          ...others,
-          extra: { ...extra, resetSuccess: true, email },
-        });
-      }
+      return json({
+        ...others,
+        extra: { ...extra, resetSuccess: true, email },
+      });
+    }
 
-      case "resetPassword": {
-        const code = formData.get("code") as string;
-        const password = formData.get("password") as string;
-        const passwordConfirmation = formData.get("passwordConfirmation") as string;
+    case "resetPassword": {
+      const code = formData.get("code") as string;
+      const password = formData.get("password") as string;
+      const passwordConfirmation = formData.get("passwordConfirmation") as string;
 
-        const res = await resetPassword({ code, password, passwordConfirmation });
+      const res = await resetPassword({ code, password, passwordConfirmation });
 
-        return resolveResponse(res);
-      }
+      return resolveResponse(res);
+    }
 
-      default:
-        return json(generateFailedResponse("Invalid action", 400), { status: 400 });
+    default:
+      return json(generateFailedResponse("Invalid action", 400), { status: 400 });
     }
   } catch (error) {
     console.error("Auth action error:", error);

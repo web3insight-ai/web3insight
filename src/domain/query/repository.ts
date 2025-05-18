@@ -60,7 +60,7 @@ async function insertOne(
     return {
       ...generateFailedResponse("Usage limit exceeded", 400),
       extra: { type: user ? ErrorType.ReachMaximized : ErrorType.SigninNeeded },
-    }
+    };
   }
 
   if (query.length > 100) {

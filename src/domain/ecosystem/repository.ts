@@ -130,7 +130,7 @@ async function fetchStatistics(name: string): Promise<ResponseResult<{
   const failed = responses.find(res => !res.success);
 
   return failed? {
-   ...failed,
+    ...failed,
     data: {
       developerTotalCount: 0,
       developerCoreCount: 0,

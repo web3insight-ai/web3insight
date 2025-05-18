@@ -157,7 +157,7 @@ const CommunityOpenRank: FC<CommunityOpenRankProps> = ({
                 <tr
                   key={user.id}
                   className={`transition-colors duration-200 ease-in-out ${index % 2 === 0 ? "bg-[#D6EEEE]" : ""
-                    } hover:bg-blue-100 cursor-pointer`}
+                  } hover:bg-blue-100 cursor-pointer`}
                   onClick={() => setSelectedNode(user.id)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {

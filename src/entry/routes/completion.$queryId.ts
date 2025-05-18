@@ -2,6 +2,8 @@ import type { LoaderFunctionArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 import { eventStream } from "remix-utils/sse/server";
 
+import { noop } from "@/utils";
+
 import { generateText, getSearchKeyword, fetchAnalysisPrompt } from "~/ai/repository";
 import { fetchOne, updateOne } from "~/query/repository";
 import { getInfo } from "~/ecosystem/repository";
@@ -25,7 +27,7 @@ export async function loader(ctx: LoaderFunctionArgs) {
         }),
       });
 
-      return () => { };
+      return noop;
     });
   }
 
@@ -41,7 +43,7 @@ export async function loader(ctx: LoaderFunctionArgs) {
         }),
       });
 
-      return () => { };
+      return noop;
     });
   }
 
@@ -75,7 +77,7 @@ export async function loader(ctx: LoaderFunctionArgs) {
           // Save the answer to Strapi
           await updateOne(queryId, {
             answer: result.text,
-            keyboard: searchKeyword // Note: keyboard is used instead of keyword in Strapi schema
+            keyboard: searchKeyword, // Note: keyboard is used instead of keyword in Strapi schema
           });
         } else {
           console.error("Unexpected result format:", result);
@@ -97,6 +99,6 @@ export async function loader(ctx: LoaderFunctionArgs) {
 
     run();
 
-    return () => { };
+    return noop;
   });
 }

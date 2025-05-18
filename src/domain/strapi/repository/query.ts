@@ -40,7 +40,7 @@ async function createQuery(
     query: string;
     keyboard?: string;
     userId?: number;
-  }
+  },
 ): Promise<ResponseResult<StrapiQuery>> {
   const data: QueryData = { query, keyboard, pin: false };
 

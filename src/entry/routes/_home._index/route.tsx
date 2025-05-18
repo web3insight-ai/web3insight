@@ -123,7 +123,7 @@ export default function Index() {
                     placeholder="Search ecosystem, repository, community..."
                     classNames={{
                       input: "h-12 text-base",
-                      inputWrapper: "h-12 shadow-sm bg-white dark:bg-gray-800 pr-12 border border-gray-200 dark:border-gray-700"
+                      inputWrapper: "h-12 shadow-sm bg-white dark:bg-gray-800 pr-12 border border-gray-200 dark:border-gray-700",
                     }}
                     startContent={<Search size={18} className="text-gray-400" />}
                   />

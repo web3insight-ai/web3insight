@@ -16,7 +16,7 @@ async function fetchEcosystem(keyword?: string): Promise<ResponseResult<Record<s
       {
         params: {
           'filters[name][$eqi]': keyword,
-          'populate[logo][fields][0]': 'url'
+          'populate[logo][fields][0]': 'url',
         },
       },
     );
@@ -42,7 +42,7 @@ async function fetchEcosystem(keyword?: string): Promise<ResponseResult<Record<s
         type: "ecosystem", // Set type to ecosystem
         logo: logoUrl, // Use the extracted logo URL
         coreContributors: ecosystemData.attributes?.coreContributors || ecosystemData.coreContributors || [],
-        coreRepos: ecosystemData.attributes?.coreRepos || ecosystemData.coreRepos || []
+        coreRepos: ecosystemData.attributes?.coreRepos || ecosystemData.coreRepos || [],
       };
     }
   } catch (error) {

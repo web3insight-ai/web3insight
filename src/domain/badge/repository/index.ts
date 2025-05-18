@@ -12,7 +12,7 @@ const contractAddress = process.env.CONTRACT_ADDRESS;
 // Validations for environment variables
 if (!privateKey || !rpcUrl || !contractAddress) {
   throw new Error(
-    "Missing environment variables: Please set PRIVATE_KEY, RPC_URL, and CONTRACT_ADDRESS in your .env file"
+    "Missing environment variables: Please set PRIVATE_KEY, RPC_URL, and CONTRACT_ADDRESS in your .env file",
   );
 }
 

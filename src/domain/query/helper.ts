@@ -14,12 +14,11 @@ function resolveQueryListResponseResult(
 ): ResponseResult<Query[]> {
   return {
     ...others,
-      data: data.map(({ id, documentId, query }) => ({
-        id: id.toString(),
-        documentId,
-        query,
-      }),
-    )
+    data: data.map(({ id, documentId, query }) => ({
+      id: id.toString(),
+      documentId,
+      query,
+    })),
   };
 }
 

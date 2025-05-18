@@ -31,8 +31,8 @@ function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
               <div className="col-span-1">
                 <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full
                   ${index === 0 ? 'bg-primary/10 text-primary' :
-                    index === 1 ? 'bg-secondary/10 text-secondary' :
-                      'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}
+              index === 1 ? 'bg-secondary/10 text-secondary' :
+                'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}
                   text-xs font-medium`}>{index + 1}</span>
               </div>
 

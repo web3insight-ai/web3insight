@@ -167,4 +167,4 @@ async function changePassword(
   }
 }
 
-export { registerUser, loginUser, getCurrentUser, sendPasswordResetEmail, resetPassword, confirmEmail, changePassword }
+export { registerUser, loginUser, getCurrentUser, sendPasswordResetEmail, resetPassword, confirmEmail, changePassword };

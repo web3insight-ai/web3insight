@@ -270,37 +270,37 @@ export default function QueryPage() {
 
         {loaderData.projectData?.type !== "ecosystem" &&
           loaderData.projectData?.type !== "community" && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-              className="mb-8 sm:mb-10 bg-white rounded-xl shadow-lg p-4 sm:p-6"
-            >
-              <AnimatePresence mode="wait">
-                {!result ? (
-                  <motion.div
-                    key="placeholder"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                  >
-                    <Placeholder />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="content"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <div className="text-sm sm:text-base text-gray-800 leading-relaxed">
-                      <Markdown>{parsedAnswer.content}</Markdown>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          )}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            className="mb-8 sm:mb-10 bg-white rounded-xl shadow-lg p-4 sm:p-6"
+          >
+            <AnimatePresence mode="wait">
+              {!result ? (
+                <motion.div
+                  key="placeholder"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <Placeholder />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="content"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <div className="text-sm sm:text-base text-gray-800 leading-relaxed">
+                    <Markdown>{parsedAnswer.content}</Markdown>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
 
         {loaderData.projectData && (
           <motion.div
@@ -497,7 +497,7 @@ export default function QueryPage() {
                                     const newQuery = `Analyze the GitHub repository ${repo}`;
                                     analyzeFetcher.submit(
                                       { query: newQuery },
-                                      { method: "post", action: "/" }
+                                      { method: "post", action: "/" },
                                     );
                                   }}
                                 >
@@ -520,26 +520,26 @@ export default function QueryPage() {
           {loaderData.communityOpenRankData &&
             loaderData.keyword &&
             isGithubRepo && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 1.2 }}
-                className="w-full px-2 sm:px-3 mb-4 sm:mb-6"
-              >
-                <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
-                  {isChartLoading ? (
-                    <div className="flex justify-center items-center h-[400px] sm:h-[800px]">
-                      <Spinner size="lg" color="primary" />
-                    </div>
-                  ) : (
-                    <CommunityOpenRank
-                      repoName={loaderData.keyword}
-                      graphData={loaderData.communityOpenRankData}
-                    />
-                  )}
-                </div>
-              </motion.div>
-            )}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 1.2 }}
+              className="w-full px-2 sm:px-3 mb-4 sm:mb-6"
+            >
+              <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
+                {isChartLoading ? (
+                  <div className="flex justify-center items-center h-[400px] sm:h-[800px]">
+                    <Spinner size="lg" color="primary" />
+                  </div>
+                ) : (
+                  <CommunityOpenRank
+                    repoName={loaderData.keyword}
+                    graphData={loaderData.communityOpenRankData}
+                  />
+                )}
+              </div>
+            </motion.div>
+          )}
 
           {loaderData.openRankData && (
             <motion.div

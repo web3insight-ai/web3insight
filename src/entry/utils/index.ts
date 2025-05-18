@@ -20,7 +20,7 @@ function createServerAction<
     }
 
     return methodValid ? handler(ctx) : json({ error: "Method not allowed" }, { status: 405 }) as ReturnType;
-  }
+  };
 }
 
 function createPreflightAction(allowedMethods: AllowedMethods = ["POST", "OPTIONS"]) {
@@ -30,7 +30,7 @@ function createPreflightAction(allowedMethods: AllowedMethods = ["POST", "OPTION
       "Access-Control-Allow-Methods": ([] as AllowedMethods[]).concat(allowedMethods).join(", "),
       "Access-Control-Allow-Headers": "Content-Type",
     },
-  }))
+  }));
 }
 
 export { createServerAction, createPreflightAction };

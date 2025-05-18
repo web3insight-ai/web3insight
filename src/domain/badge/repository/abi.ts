@@ -4,141 +4,141 @@ export const badgeAbi = [
       {
         "internalType": "address",
         "name": "initialOwner",
-        "type": "address"
+        "type": "address",
       },
       {
         "internalType": "string",
         "name": "baseTokenURI",
-        "type": "string"
-      }
+        "type": "string",
+      },
     ],
     "stateMutability": "nonpayable",
-    "type": "constructor"
+    "type": "constructor",
   },
   {
     "inputs": [
       {
         "internalType": "address",
         "name": "sender",
-        "type": "address"
+        "type": "address",
       },
       {
         "internalType": "uint256",
         "name": "tokenId",
-        "type": "uint256"
+        "type": "uint256",
       },
       {
         "internalType": "address",
         "name": "owner",
-        "type": "address"
-      }
+        "type": "address",
+      },
     ],
     "name": "ERC721IncorrectOwner",
-    "type": "error"
+    "type": "error",
   },
   {
     "inputs": [
       {
         "internalType": "address",
         "name": "operator",
-        "type": "address"
+        "type": "address",
       },
       {
         "internalType": "uint256",
         "name": "tokenId",
-        "type": "uint256"
-      }
+        "type": "uint256",
+      },
     ],
     "name": "ERC721InsufficientApproval",
-    "type": "error"
+    "type": "error",
   },
   {
     "inputs": [
       {
         "internalType": "address",
         "name": "approver",
-        "type": "address"
-      }
+        "type": "address",
+      },
     ],
     "name": "ERC721InvalidApprover",
-    "type": "error"
+    "type": "error",
   },
   {
     "inputs": [
       {
         "internalType": "address",
         "name": "operator",
-        "type": "address"
-      }
+        "type": "address",
+      },
     ],
     "name": "ERC721InvalidOperator",
-    "type": "error"
+    "type": "error",
   },
   {
     "inputs": [
       {
         "internalType": "address",
         "name": "owner",
-        "type": "address"
-      }
+        "type": "address",
+      },
     ],
     "name": "ERC721InvalidOwner",
-    "type": "error"
+    "type": "error",
   },
   {
     "inputs": [
       {
         "internalType": "address",
         "name": "receiver",
-        "type": "address"
-      }
+        "type": "address",
+      },
     ],
     "name": "ERC721InvalidReceiver",
-    "type": "error"
+    "type": "error",
   },
   {
     "inputs": [
       {
         "internalType": "address",
         "name": "sender",
-        "type": "address"
-      }
+        "type": "address",
+      },
     ],
     "name": "ERC721InvalidSender",
-    "type": "error"
+    "type": "error",
   },
   {
     "inputs": [
       {
         "internalType": "uint256",
         "name": "tokenId",
-        "type": "uint256"
-      }
+        "type": "uint256",
+      },
     ],
     "name": "ERC721NonexistentToken",
-    "type": "error"
+    "type": "error",
   },
   {
     "inputs": [
       {
         "internalType": "address",
         "name": "owner",
-        "type": "address"
-      }
+        "type": "address",
+      },
     ],
     "name": "OwnableInvalidOwner",
-    "type": "error"
+    "type": "error",
   },
   {
     "inputs": [
       {
         "internalType": "address",
         "name": "account",
-        "type": "address"
-      }
+        "type": "address",
+      },
     ],
     "name": "OwnableUnauthorizedAccount",
-    "type": "error"
+    "type": "error",
   },
   {
     "anonymous": false,
@@ -147,23 +147,23 @@ export const badgeAbi = [
         "indexed": true,
         "internalType": "address",
         "name": "owner",
-        "type": "address"
+        "type": "address",
       },
       {
         "indexed": true,
         "internalType": "address",
         "name": "approved",
-        "type": "address"
+        "type": "address",
       },
       {
         "indexed": true,
         "internalType": "uint256",
         "name": "tokenId",
-        "type": "uint256"
-      }
+        "type": "uint256",
+      },
     ],
     "name": "Approval",
-    "type": "event"
+    "type": "event",
   },
   {
     "anonymous": false,
@@ -172,23 +172,23 @@ export const badgeAbi = [
         "indexed": true,
         "internalType": "address",
         "name": "owner",
-        "type": "address"
+        "type": "address",
       },
       {
         "indexed": true,
         "internalType": "address",
         "name": "operator",
-        "type": "address"
+        "type": "address",
       },
       {
         "indexed": false,
         "internalType": "bool",
         "name": "approved",
-        "type": "bool"
-      }
+        "type": "bool",
+      },
     ],
     "name": "ApprovalForAll",
-    "type": "event"
+    "type": "event",
   },
   {
     "anonymous": false,
@@ -197,23 +197,23 @@ export const badgeAbi = [
         "indexed": false,
         "internalType": "uint256",
         "name": "tokenId",
-        "type": "uint256"
+        "type": "uint256",
       },
       {
         "indexed": false,
         "internalType": "address",
         "name": "recipient",
-        "type": "address"
+        "type": "address",
       },
       {
         "indexed": false,
         "internalType": "uint256",
         "name": "timestamp",
-        "type": "uint256"
-      }
+        "type": "uint256",
+      },
     ],
     "name": "BadgeMinted",
-    "type": "event"
+    "type": "event",
   },
   {
     "anonymous": false,
@@ -222,17 +222,17 @@ export const badgeAbi = [
         "indexed": true,
         "internalType": "address",
         "name": "previousOwner",
-        "type": "address"
+        "type": "address",
       },
       {
         "indexed": true,
         "internalType": "address",
         "name": "newOwner",
-        "type": "address"
-      }
+        "type": "address",
+      },
     ],
     "name": "OwnershipTransferred",
-    "type": "event"
+    "type": "event",
   },
   {
     "anonymous": false,
@@ -241,60 +241,60 @@ export const badgeAbi = [
         "indexed": true,
         "internalType": "address",
         "name": "from",
-        "type": "address"
+        "type": "address",
       },
       {
         "indexed": true,
         "internalType": "address",
         "name": "to",
-        "type": "address"
+        "type": "address",
       },
       {
         "indexed": true,
         "internalType": "uint256",
         "name": "tokenId",
-        "type": "uint256"
-      }
+        "type": "uint256",
+      },
     ],
     "name": "Transfer",
-    "type": "event"
+    "type": "event",
   },
   {
     "inputs": [
       {
         "internalType": "address",
         "name": "to",
-        "type": "address"
+        "type": "address",
       },
       {
         "internalType": "uint256",
         "name": "tokenId",
-        "type": "uint256"
-      }
+        "type": "uint256",
+      },
     ],
     "name": "approve",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
+    "type": "function",
   },
   {
     "inputs": [
       {
         "internalType": "address",
         "name": "owner",
-        "type": "address"
-      }
+        "type": "address",
+      },
     ],
     "name": "balanceOf",
     "outputs": [
       {
         "internalType": "uint256",
         "name": "",
-        "type": "uint256"
-      }
+        "type": "uint256",
+      },
     ],
     "stateMutability": "view",
-    "type": "function"
+    "type": "function",
   },
   {
     "inputs": [],
@@ -305,53 +305,53 @@ export const badgeAbi = [
           {
             "internalType": "uint256",
             "name": "tokenId",
-            "type": "uint256"
+            "type": "uint256",
           },
           {
             "internalType": "address",
             "name": "owner",
-            "type": "address"
+            "type": "address",
           },
           {
             "internalType": "uint256",
             "name": "mintTime",
-            "type": "uint256"
-          }
+            "type": "uint256",
+          },
         ],
         "internalType": "struct Web3InsightsBadge.Badge[]",
         "name": "",
-        "type": "tuple[]"
-      }
+        "type": "tuple[]",
+      },
     ],
     "stateMutability": "view",
-    "type": "function"
+    "type": "function",
   },
   {
     "inputs": [
       {
         "internalType": "uint256",
         "name": "tokenId",
-        "type": "uint256"
-      }
+        "type": "uint256",
+      },
     ],
     "name": "getApproved",
     "outputs": [
       {
         "internalType": "address",
         "name": "",
-        "type": "address"
-      }
+        "type": "address",
+      },
     ],
     "stateMutability": "view",
-    "type": "function"
+    "type": "function",
   },
   {
     "inputs": [
       {
         "internalType": "uint256",
         "name": "tokenId",
-        "type": "uint256"
-      }
+        "type": "uint256",
+      },
     ],
     "name": "getBadgeInfo",
     "outputs": [
@@ -360,82 +360,82 @@ export const badgeAbi = [
           {
             "internalType": "uint256",
             "name": "tokenId",
-            "type": "uint256"
+            "type": "uint256",
           },
           {
             "internalType": "address",
             "name": "owner",
-            "type": "address"
+            "type": "address",
           },
           {
             "internalType": "uint256",
             "name": "mintTime",
-            "type": "uint256"
-          }
+            "type": "uint256",
+          },
         ],
         "internalType": "struct Web3InsightsBadge.Badge",
         "name": "",
-        "type": "tuple"
-      }
+        "type": "tuple",
+      },
     ],
     "stateMutability": "view",
-    "type": "function"
+    "type": "function",
   },
   {
     "inputs": [
       {
         "internalType": "address",
         "name": "owner",
-        "type": "address"
-      }
+        "type": "address",
+      },
     ],
     "name": "hasBadge",
     "outputs": [
       {
         "internalType": "bool",
         "name": "",
-        "type": "bool"
-      }
+        "type": "bool",
+      },
     ],
     "stateMutability": "view",
-    "type": "function"
+    "type": "function",
   },
   {
     "inputs": [
       {
         "internalType": "address",
         "name": "owner",
-        "type": "address"
+        "type": "address",
       },
       {
         "internalType": "address",
         "name": "operator",
-        "type": "address"
-      }
+        "type": "address",
+      },
     ],
     "name": "isApprovedForAll",
     "outputs": [
       {
         "internalType": "bool",
         "name": "",
-        "type": "bool"
-      }
+        "type": "bool",
+      },
     ],
     "stateMutability": "view",
-    "type": "function"
+    "type": "function",
   },
   {
     "inputs": [
       {
         "internalType": "address",
         "name": "recipient",
-        "type": "address"
-      }
+        "type": "address",
+      },
     ],
     "name": "mintBadge",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
+    "type": "function",
   },
   {
     "inputs": [],
@@ -444,11 +444,11 @@ export const badgeAbi = [
       {
         "internalType": "string",
         "name": "",
-        "type": "string"
-      }
+        "type": "string",
+      },
     ],
     "stateMutability": "view",
-    "type": "function"
+    "type": "function",
   },
   {
     "inputs": [],
@@ -457,138 +457,138 @@ export const badgeAbi = [
       {
         "internalType": "address",
         "name": "",
-        "type": "address"
-      }
+        "type": "address",
+      },
     ],
     "stateMutability": "view",
-    "type": "function"
+    "type": "function",
   },
   {
     "inputs": [
       {
         "internalType": "uint256",
         "name": "tokenId",
-        "type": "uint256"
-      }
+        "type": "uint256",
+      },
     ],
     "name": "ownerOf",
     "outputs": [
       {
         "internalType": "address",
         "name": "",
-        "type": "address"
-      }
+        "type": "address",
+      },
     ],
     "stateMutability": "view",
-    "type": "function"
+    "type": "function",
   },
   {
     "inputs": [],
     "name": "renounceOwnership",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
+    "type": "function",
   },
   {
     "inputs": [
       {
         "internalType": "address",
         "name": "from",
-        "type": "address"
+        "type": "address",
       },
       {
         "internalType": "address",
         "name": "to",
-        "type": "address"
+        "type": "address",
       },
       {
         "internalType": "uint256",
         "name": "tokenId",
-        "type": "uint256"
-      }
+        "type": "uint256",
+      },
     ],
     "name": "safeTransferFrom",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
+    "type": "function",
   },
   {
     "inputs": [
       {
         "internalType": "address",
         "name": "from",
-        "type": "address"
+        "type": "address",
       },
       {
         "internalType": "address",
         "name": "to",
-        "type": "address"
+        "type": "address",
       },
       {
         "internalType": "uint256",
         "name": "tokenId",
-        "type": "uint256"
+        "type": "uint256",
       },
       {
         "internalType": "bytes",
         "name": "data",
-        "type": "bytes"
-      }
+        "type": "bytes",
+      },
     ],
     "name": "safeTransferFrom",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
+    "type": "function",
   },
   {
     "inputs": [
       {
         "internalType": "address",
         "name": "operator",
-        "type": "address"
+        "type": "address",
       },
       {
         "internalType": "bool",
         "name": "approved",
-        "type": "bool"
-      }
+        "type": "bool",
+      },
     ],
     "name": "setApprovalForAll",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
+    "type": "function",
   },
   {
     "inputs": [
       {
         "internalType": "string",
         "name": "newBaseTokenURI",
-        "type": "string"
-      }
+        "type": "string",
+      },
     ],
     "name": "setBaseURI",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
+    "type": "function",
   },
   {
     "inputs": [
       {
         "internalType": "bytes4",
         "name": "interfaceId",
-        "type": "bytes4"
-      }
+        "type": "bytes4",
+      },
     ],
     "name": "supportsInterface",
     "outputs": [
       {
         "internalType": "bool",
         "name": "",
-        "type": "bool"
-      }
+        "type": "bool",
+      },
     ],
     "stateMutability": "view",
-    "type": "function"
+    "type": "function",
   },
   {
     "inputs": [],
@@ -597,65 +597,65 @@ export const badgeAbi = [
       {
         "internalType": "string",
         "name": "",
-        "type": "string"
-      }
+        "type": "string",
+      },
     ],
     "stateMutability": "view",
-    "type": "function"
+    "type": "function",
   },
   {
     "inputs": [
       {
         "internalType": "uint256",
         "name": "tokenId",
-        "type": "uint256"
-      }
+        "type": "uint256",
+      },
     ],
     "name": "tokenURI",
     "outputs": [
       {
         "internalType": "string",
         "name": "",
-        "type": "string"
-      }
+        "type": "string",
+      },
     ],
     "stateMutability": "view",
-    "type": "function"
+    "type": "function",
   },
   {
     "inputs": [
       {
         "internalType": "address",
         "name": "from",
-        "type": "address"
+        "type": "address",
       },
       {
         "internalType": "address",
         "name": "to",
-        "type": "address"
+        "type": "address",
       },
       {
         "internalType": "uint256",
         "name": "tokenId",
-        "type": "uint256"
-      }
+        "type": "uint256",
+      },
     ],
     "name": "transferFrom",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
+    "type": "function",
   },
   {
     "inputs": [
       {
         "internalType": "address",
         "name": "newOwner",
-        "type": "address"
-      }
+        "type": "address",
+      },
     ],
     "name": "transferOwnership",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
-  }
+    "type": "function",
+  },
 ] as const;

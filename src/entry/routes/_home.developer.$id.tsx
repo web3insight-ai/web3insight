@@ -7,14 +7,14 @@ import { Link, useLoaderData } from "@remix-run/react";
 import {
   Card, CardBody, CardHeader, Divider,
   Table, TableHeader, TableColumn, TableBody, TableRow, TableCell,
-  Avatar, Progress
+  Avatar, Progress,
 } from "@nextui-org/react";
 import { Github, Users, Code2, Zap, ArrowUpRight, ArrowDownRight, GitBranch, GitCommit, GitPullRequest, Eye } from "lucide-react";
 
 import { getTitle } from "@/utils/app";
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  const baseTitle = `Developer Profile - ${getTitle()}`
+  const baseTitle = `Developer Profile - ${getTitle()}`;
   const title = data ? `${data.developer.handle} ${baseTitle}` : baseTitle;
 
   return [
@@ -85,8 +85,8 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
         { day: "Fri", value: Math.floor(Math.random() * 100) + 20 },
         { day: "Sat", value: Math.floor(Math.random() * 60) + 10 },
         { day: "Sun", value: Math.floor(Math.random() * 40) + 5 },
-      ]
-    }
+      ],
+    },
   };
 
   // Ecosystems contributed to
@@ -98,7 +98,7 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
       color: "primary",
       growth: `+${(Math.random() * 15).toFixed(1)}%`,
       isPositive: true,
-      chartData: generateChartData(20, true, 5)
+      chartData: generateChartData(20, true, 5),
     },
     {
       name: "Solana",
@@ -107,7 +107,7 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
       color: "secondary",
       growth: `+${(Math.random() * 12).toFixed(1)}%`,
       isPositive: true,
-      chartData: generateChartData(20, true, 4)
+      chartData: generateChartData(20, true, 4),
     },
     {
       name: "Polkadot",
@@ -116,7 +116,7 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
       color: "success",
       growth: Math.random() > 0.7 ? `-${(Math.random() * 5).toFixed(1)}%` : `+${(Math.random() * 10).toFixed(1)}%`,
       isPositive: Math.random() > 0.7 ? false : true,
-      chartData: generateChartData(20, Math.random() > 0.7 ? false : true, 6)
+      chartData: generateChartData(20, Math.random() > 0.7 ? false : true, 6),
     },
     {
       name: "Near",
@@ -125,7 +125,7 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
       color: "warning",
       growth: Math.random() > 0.6 ? `-${(Math.random() * 8).toFixed(1)}%` : `+${(Math.random() * 7).toFixed(1)}%`,
       isPositive: Math.random() > 0.6 ? false : true,
-      chartData: generateChartData(20, Math.random() > 0.6 ? false : true, 5)
+      chartData: generateChartData(20, Math.random() > 0.6 ? false : true, 5),
     },
     {
       name: "Cosmos",
@@ -134,8 +134,8 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
       color: "danger",
       growth: Math.random() > 0.5 ? `-${(Math.random() * 10).toFixed(1)}%` : `+${(Math.random() * 5).toFixed(1)}%`,
       isPositive: Math.random() > 0.5 ? false : true,
-      chartData: generateChartData(20, Math.random() > 0.5 ? false : true, 4)
-    }
+      chartData: generateChartData(20, Math.random() > 0.5 ? false : true, 4),
+    },
   ];
 
   // Projects contributed to
@@ -149,7 +149,7 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
       pullRequests: Math.floor(Math.random() * 50) + 10,
       issues: Math.floor(Math.random() * 40) + 5,
       lastActive: new Date(Date.now() - Math.floor(Math.random() * 30) * 86400000).toLocaleDateString(), // Random date within last 30 days
-      chartData: generateChartData(20, true, 5)
+      chartData: generateChartData(20, true, 5),
     },
     {
       name: "solana-labs/solana",
@@ -160,7 +160,7 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
       pullRequests: Math.floor(Math.random() * 40) + 8,
       issues: Math.floor(Math.random() * 30) + 4,
       lastActive: new Date(Date.now() - Math.floor(Math.random() * 30) * 86400000).toLocaleDateString(),
-      chartData: generateChartData(20, true, 4)
+      chartData: generateChartData(20, true, 4),
     },
     {
       name: "near/nearcore",
@@ -171,7 +171,7 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
       pullRequests: Math.floor(Math.random() * 30) + 6,
       issues: Math.floor(Math.random() * 25) + 3,
       lastActive: new Date(Date.now() - Math.floor(Math.random() * 30) * 86400000).toLocaleDateString(),
-      chartData: generateChartData(20, Math.random() > 0.3, 6)
+      chartData: generateChartData(20, Math.random() > 0.3, 6),
     },
     {
       name: "cosmos/cosmos-sdk",
@@ -182,7 +182,7 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
       pullRequests: Math.floor(Math.random() * 25) + 5,
       issues: Math.floor(Math.random() * 20) + 2,
       lastActive: new Date(Date.now() - Math.floor(Math.random() * 60) * 86400000).toLocaleDateString(),
-      chartData: generateChartData(20, Math.random() > 0.4, 5)
+      chartData: generateChartData(20, Math.random() > 0.4, 5),
     },
     {
       name: "polkadot-js/api",
@@ -193,8 +193,8 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
       pullRequests: Math.floor(Math.random() * 20) + 4,
       issues: Math.floor(Math.random() * 15) + 2,
       lastActive: new Date(Date.now() - Math.floor(Math.random() * 90) * 86400000).toLocaleDateString(),
-      chartData: generateChartData(20, Math.random() > 0.5, 4)
-    }
+      chartData: generateChartData(20, Math.random() > 0.5, 4),
+    },
   ];
 
   // Activity feed
@@ -205,7 +205,7 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
     "Reported an issue in",
     "Reviewed code in",
     "Forked",
-    "Starred"
+    "Starred",
   ];
 
   const recentActivity = Array.from({ length: 10 }, (_, i) => {
@@ -237,7 +237,7 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
           ? `Add ${['new feature', 'bugfix', 'performance improvement', 'refactoring', 'security patch'][Math.floor(Math.random() * 5)]}`
           : activityTypes[activityIndex] === "issue"
             ? `Report ${['bug', 'enhancement request', 'documentation issue', 'security vulnerability', 'performance issue'][Math.floor(Math.random() * 5)]}`
-            : ""
+            : "",
     };
   });
 
@@ -245,7 +245,7 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
     developer,
     ecosystems,
     projects,
-    recentActivity
+    recentActivity,
   });
 };
 
@@ -288,20 +288,20 @@ export default function DeveloperPage() {
   // Activity icon component
   const ActivityIcon = ({ type }: { type: string }) => {
     switch (type) {
-      case "commit":
-        return <GitCommit size={16} className="text-primary" />;
-      case "pull_request":
-        return <GitPullRequest size={16} className="text-secondary" />;
-      case "issue":
-        return <div className="w-4 h-4 rounded-full bg-warning flex items-center justify-center text-xs text-white">!</div>;
-      case "code_review":
-        return <Eye size={16} className="text-success" />;
-      case "fork":
-        return <GitBranch size={16} className="text-indigo-500" />;
-      case "star":
-        return <div className="w-4 h-4 text-yellow-500">★</div>;
-      default:
-        return <Code2 size={16} className="text-gray-500" />;
+    case "commit":
+      return <GitCommit size={16} className="text-primary" />;
+    case "pull_request":
+      return <GitPullRequest size={16} className="text-secondary" />;
+    case "issue":
+      return <div className="w-4 h-4 rounded-full bg-warning flex items-center justify-center text-xs text-white">!</div>;
+    case "code_review":
+      return <Eye size={16} className="text-success" />;
+    case "fork":
+      return <GitBranch size={16} className="text-indigo-500" />;
+    case "star":
+      return <div className="w-4 h-4 text-yellow-500">★</div>;
+    default:
+      return <Code2 size={16} className="text-gray-500" />;
     }
   };
 
@@ -336,24 +336,24 @@ export default function DeveloperPage() {
 
                   <div className="flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
-                      <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
+                      <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
                     </svg>
                     <span className="text-gray-700 dark:text-gray-300">{developer.twitterHandle}</span>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <line x1="2" y1="12" x2="22" y2="12"></line>
-                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="2" y1="12" x2="22" y2="12" />
+                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                     </svg>
                     <span className="text-gray-700 dark:text-gray-300">{developer.website}</span>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
-                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                      <circle cx="12" cy="10" r="3"></circle>
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                      <circle cx="12" cy="10" r="3" />
                     </svg>
                     <span className="text-gray-700 dark:text-gray-300">{developer.location}</span>
                   </div>

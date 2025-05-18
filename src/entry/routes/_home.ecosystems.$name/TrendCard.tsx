@@ -32,8 +32,8 @@ function resolveChartOptions(dataSource: TrendCardProps["dataSource"]) {
         data: seriesData,
         type: "line",
         label: { show: true, position: "top" },
-      }
-    ]
+      },
+    ],
   };
 }
 

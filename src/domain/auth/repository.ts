@@ -149,7 +149,7 @@ async function fetchCurrentUser(request?: Request): Promise<ResponseResult> {
       // Cache the result
       userCache[userJwt] = {
         user: userData,
-        timestamp: now
+        timestamp: now,
       };
       return { ...defaultResult, data: userData };
     }
@@ -218,7 +218,7 @@ async function resetPassword(
     code: string;
     password: string;
     passwordConfirmation: string;
-  }
+  },
 ): Promise<ResponseResult> {
   try {
     if (!code || !password || !passwordConfirmation) {

@@ -61,18 +61,18 @@ async function analyzeInfo( info: DataValue, type: AnalysisType ) {
   let prompt;
 
   switch (type) {
-    case "evm":
-      prompt = `Analyze the following EVM address information and provide a concise summary:
+  case "evm":
+    prompt = `Analyze the following EVM address information and provide a concise summary:
         ${stringified}`;
-      break;
-    case "github_repo":
-      prompt = `Analyze the following GitHub repository information and provide a concise summary:
+    break;
+  case "github_repo":
+    prompt = `Analyze the following GitHub repository information and provide a concise summary:
         ${stringified}`;
-      break;
-    default:
-      prompt = `Analyze the following information and provide a concise summary:
+    break;
+  default:
+    prompt = `Analyze the following information and provide a concise summary:
         ${stringified}`;
-      break;
+    break;
   }
 
   const result = await generateText({

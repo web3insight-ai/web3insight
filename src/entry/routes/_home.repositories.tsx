@@ -3,7 +3,7 @@ import { Link, useLoaderData } from "@remix-run/react";
 import {
   Card, CardBody, CardHeader, Divider, Input, Dropdown, DropdownTrigger,
   DropdownMenu, DropdownItem, Button, Table, TableHeader, TableColumn,
-  TableBody, TableRow, TableCell, Pagination
+  TableBody, TableRow, TableCell, Pagination,
 } from "@nextui-org/react";
 import { Github, Filter, SortAsc, SortDesc, Search, ArrowUpRight, ArrowDownRight, GitBranch, GitPullRequest } from "lucide-react";
 import { useState, useMemo } from "react";
@@ -54,7 +54,7 @@ export const loader = async () => {
       lastActivityDays: 0,
       growth: "-3.4%",
       isPositive: false,
-      chartData: generateChartData(20, false, 3)
+      chartData: generateChartData(20, false, 3),
     },
     {
       name: "solana-labs/solana",
@@ -68,7 +68,7 @@ export const loader = async () => {
       lastActivityDays: 0,
       growth: "-9.6%",
       isPositive: false,
-      chartData: generateChartData(20, false, 4)
+      chartData: generateChartData(20, false, 4),
     },
     {
       name: "paritytech/substrate",
@@ -82,7 +82,7 @@ export const loader = async () => {
       lastActivityDays: 0,
       growth: "-7.7%",
       isPositive: false,
-      chartData: generateChartData(20, false, 3)
+      chartData: generateChartData(20, false, 3),
     },
     {
       name: "near/nearcore",
@@ -96,7 +96,7 @@ export const loader = async () => {
       lastActivityDays: 0,
       growth: "-3.5%",
       isPositive: false,
-      chartData: generateChartData(20, false, 2)
+      chartData: generateChartData(20, false, 2),
     },
     {
       name: "cosmos/cosmos-sdk",
@@ -110,7 +110,7 @@ export const loader = async () => {
       lastActivityDays: 0,
       growth: "+11.3%",
       isPositive: true,
-      chartData: generateChartData(20, true, 5)
+      chartData: generateChartData(20, true, 5),
     },
     {
       name: "starkware-libs/cairo",
@@ -124,7 +124,7 @@ export const loader = async () => {
       lastActivityDays: 0,
       growth: "+24.8%",
       isPositive: true,
-      chartData: generateChartData(20, true, 8)
+      chartData: generateChartData(20, true, 8),
     },
     {
       name: "solana-labs/solana-program-library",
@@ -138,7 +138,7 @@ export const loader = async () => {
       lastActivityDays: 0,
       growth: "+4.2%",
       isPositive: true,
-      chartData: generateChartData(20, true, 4)
+      chartData: generateChartData(20, true, 4),
     },
     {
       name: "aptos-labs/aptos-core",
@@ -152,7 +152,7 @@ export const loader = async () => {
       lastActivityDays: 0,
       growth: "+21.5%",
       isPositive: true,
-      chartData: generateChartData(20, true, 7)
+      chartData: generateChartData(20, true, 7),
     },
     {
       name: "ethereum/consensus-specs",
@@ -166,7 +166,7 @@ export const loader = async () => {
       lastActivityDays: 0,
       growth: "-1.3%",
       isPositive: false,
-      chartData: generateChartData(20, false, 2)
+      chartData: generateChartData(20, false, 2),
     },
     {
       name: "polkadot-js/api",
@@ -180,7 +180,7 @@ export const loader = async () => {
       lastActivityDays: 0,
       growth: "+3.7%",
       isPositive: true,
-      chartData: generateChartData(20, true, 3)
+      chartData: generateChartData(20, true, 3),
     },
     {
       name: "sui-foundation/sui",
@@ -194,7 +194,7 @@ export const loader = async () => {
       lastActivityDays: 0,
       growth: "+29.4%",
       isPositive: true,
-      chartData: generateChartData(20, true, 8)
+      chartData: generateChartData(20, true, 8),
     },
     {
       name: "osmosis-labs/osmosis",
@@ -208,7 +208,7 @@ export const loader = async () => {
       lastActivityDays: 0,
       growth: "+5.8%",
       isPositive: true,
-      chartData: generateChartData(20, true, 4)
+      chartData: generateChartData(20, true, 4),
     },
     {
       name: "ethereum/EIPs",
@@ -222,7 +222,7 @@ export const loader = async () => {
       lastActivityDays: 0,
       growth: "+1.2%",
       isPositive: true,
-      chartData: generateChartData(20, true, 2)
+      chartData: generateChartData(20, true, 2),
     },
     {
       name: "uniswap/v3-core",
@@ -236,7 +236,7 @@ export const loader = async () => {
       lastActivityDays: 2,
       growth: "-2.1%",
       isPositive: false,
-      chartData: generateChartData(20, false, 2)
+      chartData: generateChartData(20, false, 2),
     },
     {
       name: "arbitrum/nitro",
@@ -250,7 +250,7 @@ export const loader = async () => {
       lastActivityDays: 0,
       growth: "+18.5%",
       isPositive: true,
-      chartData: generateChartData(20, true, 7)
+      chartData: generateChartData(20, true, 7),
     },
     {
       name: "optimism/optimism",
@@ -264,7 +264,7 @@ export const loader = async () => {
       lastActivityDays: 0,
       growth: "+15.2%",
       isPositive: true,
-      chartData: generateChartData(20, true, 6)
+      chartData: generateChartData(20, true, 6),
     },
     {
       name: "ethereum/solidity",
@@ -278,7 +278,7 @@ export const loader = async () => {
       lastActivityDays: 0,
       growth: "+2.8%",
       isPositive: true,
-      chartData: generateChartData(20, true, 3)
+      chartData: generateChartData(20, true, 3),
     },
     {
       name: "OpenZeppelin/openzeppelin-contracts",
@@ -292,7 +292,7 @@ export const loader = async () => {
       lastActivityDays: 0,
       growth: "+0.7%",
       isPositive: true,
-      chartData: generateChartData(20, true, 2)
+      chartData: generateChartData(20, true, 2),
     },
     {
       name: "ton-blockchain/ton",
@@ -306,7 +306,7 @@ export const loader = async () => {
       lastActivityDays: 0,
       growth: "+13.6%",
       isPositive: true,
-      chartData: generateChartData(20, true, 6)
+      chartData: generateChartData(20, true, 6),
     },
     {
       name: "avalanchego/avalanchego",
@@ -320,8 +320,8 @@ export const loader = async () => {
       lastActivityDays: 0,
       growth: "+8.2%",
       isPositive: true,
-      chartData: generateChartData(20, true, 5)
-    }
+      chartData: generateChartData(20, true, 5),
+    },
   ];
 
   return json({
@@ -329,7 +329,7 @@ export const loader = async () => {
     totalRepositories: repositories.length,
     totalStars: repositories.reduce((acc, repo) => acc + repo.stars, 0),
     totalForks: repositories.reduce((acc, repo) => acc + repo.forks, 0),
-    totalPRs: repositories.reduce((acc, repo) => acc + repo.prs, 0)
+    totalPRs: repositories.reduce((acc, repo) => acc + repo.prs, 0),
   });
 };
 
@@ -344,7 +344,7 @@ export default function AllRepositoriesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortDescriptor, setSortDescriptor] = useState({
     column: "stars",
-    direction: "descending"
+    direction: "descending",
   });
 
   // Simple line chart component
@@ -384,7 +384,7 @@ export default function AllRepositoriesPage() {
   const filteredRepositories = useMemo(() => {
     return repositories.filter(repo =>
       repo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      repo.ecosystem.toLowerCase().includes(searchQuery.toLowerCase())
+      repo.ecosystem.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [repositories, searchQuery]);
 
@@ -421,7 +421,7 @@ export default function AllRepositoriesPage() {
       column,
       direction: prev.column === column && prev.direction === "ascending"
         ? "descending"
-        : "ascending"
+        : "ascending",
     }));
   };
 
@@ -598,7 +598,7 @@ export default function AllRepositoriesPage() {
                       <TableCell>
                         <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full
                           ${absoluteIndex <= 3 ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' :
-                          'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}
+                      'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}
                           text-xs font-medium`}>{absoluteIndex}</span>
                       </TableCell>
                       <TableCell>

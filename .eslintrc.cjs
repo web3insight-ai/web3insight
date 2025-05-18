@@ -24,10 +24,20 @@ module.exports = {
   // Base config
   extends: ["eslint:recommended"],
 
+  rules: {
+    "no-empty-function": "error",
+    "no-unused-vars": "error",
+    "semi": ["warn", "always"],
+    "indent": ["error", 2],
+    "comma-dangle": ["warn", "always-multiline"],
+    "eol-last": ["error", "always"],
+    "react/self-closing-comp": ["error", { component: true, html: true }],
+  },
+
   overrides: [
     // React
     {
-      files: ["**/*.{js,jsx,ts,tsx}"],
+      files: ["src/**/*.{js,jsx,ts,tsx}"],
       plugins: ["react", "jsx-a11y"],
       extends: [
         "plugin:react/recommended",

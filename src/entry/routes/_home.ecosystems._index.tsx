@@ -3,7 +3,7 @@ import { Link, useLoaderData } from "@remix-run/react";
 import {
   Card, CardBody, CardHeader, Divider, Input, Dropdown, DropdownTrigger,
   DropdownMenu, DropdownItem, Button, Table, TableHeader, TableColumn,
-  TableBody, TableRow, TableCell, Pagination
+  TableBody, TableRow, TableCell, Pagination,
 } from "@nextui-org/react";
 import { Filter, SortAsc, SortDesc, Search, ArrowUpRight, ArrowDownRight, Warehouse, Database, Code2, Users } from "lucide-react";
 import { useState, useMemo } from "react";
@@ -38,7 +38,7 @@ export const loader = async () => {
       commits: 84200,
       growth: 12.5,
       tvl: 89.2,
-      description: "Leading smart contract platform with the largest developer ecosystem"
+      description: "Leading smart contract platform with the largest developer ecosystem",
     },
     {
       id: "solana",
@@ -48,7 +48,7 @@ export const loader = async () => {
       commits: 41500,
       growth: 28.3,
       tvl: 19.8,
-      description: "High-performance blockchain focused on speed and low transaction costs"
+      description: "High-performance blockchain focused on speed and low transaction costs",
     },
     {
       id: "polkadot",
@@ -58,7 +58,7 @@ export const loader = async () => {
       commits: 38700,
       growth: 8.7,
       tvl: 12.5,
-      description: "Multi-chain network enabling cross-blockchain transfers of any data or asset types"
+      description: "Multi-chain network enabling cross-blockchain transfers of any data or asset types",
     },
     {
       id: "cosmos",
@@ -68,7 +68,7 @@ export const loader = async () => {
       commits: 31200,
       growth: 15.4,
       tvl: 9.1,
-      description: "Ecosystem of blockchains designed to scale and interoperate with each other"
+      description: "Ecosystem of blockchains designed to scale and interoperate with each other",
     },
     {
       id: "avalanche",
@@ -78,7 +78,7 @@ export const loader = async () => {
       commits: 27800,
       growth: 20.1,
       tvl: 15.3,
-      description: "Platform for launching decentralized applications and enterprise blockchain deployments"
+      description: "Platform for launching decentralized applications and enterprise blockchain deployments",
     },
     {
       id: "near",
@@ -88,7 +88,7 @@ export const loader = async () => {
       commits: 19500,
       growth: 16.8,
       tvl: 5.7,
-      description: "Blockchain designed for usability with sharding technology"
+      description: "Blockchain designed for usability with sharding technology",
     },
     {
       id: "arbitrum",
@@ -98,7 +98,7 @@ export const loader = async () => {
       commits: 15300,
       growth: 38.2,
       tvl: 8.4,
-      description: "Layer 2 scaling solution for Ethereum that increases throughput and reduces costs"
+      description: "Layer 2 scaling solution for Ethereum that increases throughput and reduces costs",
     },
     {
       id: "optimism",
@@ -108,7 +108,7 @@ export const loader = async () => {
       commits: 14100,
       growth: 35.9,
       tvl: 7.2,
-      description: "Layer 2 scaling solution for Ethereum using optimistic rollups"
+      description: "Layer 2 scaling solution for Ethereum using optimistic rollups",
     },
     {
       id: "polygon",
@@ -118,7 +118,7 @@ export const loader = async () => {
       commits: 22800,
       growth: 14.2,
       tvl: 11.5,
-      description: "Protocol and framework for building and connecting Ethereum-compatible blockchain networks"
+      description: "Protocol and framework for building and connecting Ethereum-compatible blockchain networks",
     },
     {
       id: "aptos",
@@ -128,8 +128,8 @@ export const loader = async () => {
       commits: 9800,
       growth: 42.5,
       tvl: 3.8,
-      description: "Layer 1 blockchain built with Move programming language focusing on safety and usability"
-    }
+      description: "Layer 1 blockchain built with Move programming language focusing on safety and usability",
+    },
   ];
 
   return json({
@@ -137,7 +137,7 @@ export const loader = async () => {
     totalEcosystems: ecosystems.length,
     totalRepositories: ecosystems.reduce((acc, ecosystem) => acc + ecosystem.repositories, 0),
     totalDevelopers: ecosystems.reduce((acc, ecosystem) => acc + ecosystem.developers, 0),
-    totalCommits: ecosystems.reduce((acc, ecosystem) => acc + ecosystem.commits, 0)
+    totalCommits: ecosystems.reduce((acc, ecosystem) => acc + ecosystem.commits, 0),
   });
 };
 
@@ -152,7 +152,7 @@ export default function AllEcosystemsPage() {
   const [filterValue, setFilterValue] = useState("");
   const [sortDescriptor, setSortDescriptor] = useState({
     column: "repositories",
-    direction: "descending"
+    direction: "descending",
   });
 
   // Filter ecosystems based on search query
@@ -162,7 +162,7 @@ export default function AllEcosystemsPage() {
     if (filterValue) {
       filtered = filtered.filter(ecosystem =>
         ecosystem.name.toLowerCase().includes(filterValue.toLowerCase()) ||
-        ecosystem.description.toLowerCase().includes(filterValue.toLowerCase())
+        ecosystem.description.toLowerCase().includes(filterValue.toLowerCase()),
       );
     }
 
@@ -198,7 +198,7 @@ export default function AllEcosystemsPage() {
       column,
       direction: prev.column === column && prev.direction === "ascending"
         ? "descending"
-        : "ascending"
+        : "ascending",
     }));
   };
 
@@ -389,7 +389,7 @@ export default function AllEcosystemsPage() {
                       <TableCell>
                         <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full
                           ${absoluteIndex <= 3 ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' :
-                          'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}
+                      'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}
                           text-xs font-medium`}>{absoluteIndex}</span>
                       </TableCell>
                       <TableCell>

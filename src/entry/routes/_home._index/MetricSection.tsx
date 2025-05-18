@@ -9,7 +9,7 @@ function MetricSection({ title, summary, className, children }: MetricSectionPro
       </div>
       {children}
     </div>
-  )
+  );
 }
 
 export default MetricSection;

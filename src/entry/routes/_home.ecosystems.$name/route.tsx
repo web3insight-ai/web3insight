@@ -18,7 +18,7 @@ import MetricOverview from "./MetricOverview";
 import TrendCard from "./TrendCard";
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  const baseTitle = `Ecosystem - ${getTitle()}`
+  const baseTitle = `Ecosystem - ${getTitle()}`;
   const title = data ? `${data.ecosystem} ${baseTitle}` : baseTitle;
 
   return [
