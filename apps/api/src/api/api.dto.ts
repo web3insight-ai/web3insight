@@ -17,18 +17,10 @@ export class TotalDto {
   total: number = 0;
 }
 
-export class EcoRankListDto {
-  list: EcoRankDto[] = [];
-}
-
 export class EcoRankDto {
   eco_name: string = '';
   actors_total: number = 0;
   actors_core_total: number = 0;
-}
-
-export class RepoRankListDto {
-  list: RepoRankDto[] = [];
 }
 
 export class RepoRankDto {
@@ -52,10 +44,6 @@ export class ActorCommitRankDto {
   top_repos: ActorCommitRepoDto[] = [];
 }
 
-export class ActorCommitRankListDto {
-  list: ActorCommitRankDto[] = [];
-}
-
 export enum StatsPeriod {
   WEEK = 'week',
   MONTH = 'month',
@@ -71,7 +59,18 @@ export class ActorDateItemDto {
   date: Date = new Date();
   total: number = 0;
 }
+export class EcoRankListDto {
+  list: EcoRankDto[] = [];
+}
 
 export class ActorDateListDto {
   list: ActorDateItemDto[] = [];
+}
+
+export class RepoRankListDto {
+  list: RepoRankDto[] = [];
+}
+
+export class ActorCommitRankListDto {
+  list: ActorCommitRankDto[] = [];
 }

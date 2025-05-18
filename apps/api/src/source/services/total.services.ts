@@ -60,41 +60,6 @@ export class TotalService {
     );
   }
 
-  // async actorsAllTotal(ecoName: EcoType, cache: boolean = true) {
-  //   const dbData = await this.cacheDataService.getCacheData(
-  //     CacheKey.ActorTotal,
-  //     ecoName,
-  //   );
-
-  //   if (!dbData && cache) {
-  //     throw new Error('Cache not found');
-  //   }
-
-  //   if (dbData && cache) {
-  //     return dbData;
-  //   }
-
-  //   const result = await this.db
-  //     .selectFrom('web3.actors')
-  //     .select(this.db.fn.countAll().as('total'))
-  //     .executeTakeFirst();
-
-  //   if (!result) {
-  //     throw new Error('No data found');
-  //   }
-  //   await this.cacheDataService.updateCacheData(
-  //     CacheKey.ActorTotal,
-  //     { total: result.total },
-  //     new Date().toISOString(),
-  //     ecoName,
-  //   );
-
-  //   return await this.cacheDataService.getCacheData(
-  //     CacheKey.ActorTotal,
-  //     ecoName,
-  //   );
-  // }
-
   async actorsTotal(
     ecoName: EcoType,
     scope: ActorsScopeType,
