@@ -5,6 +5,7 @@
   "engines": {
     "node": ">=20.0.0"
   },
+  "packageManager": "pnpm@9.4.0",
   "scripts": {
     "env": "node .knosys/scripts env",
     "build": "remix vite:build",
