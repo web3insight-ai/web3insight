@@ -213,6 +213,7 @@ export class RankService {
           this.db.fn.count(sql.id('e', 'id')).as('event_count'),
         ])
         .where('e.actor_id', '=', String(actor.actor_id))
+        .where('e.event_type', '=', 'PushEvent')
         .groupBy(['e.repo_id', 'r.repo_name'])
         .orderBy(sql`event_count`, 'desc')
         .limit(repoLimit)
