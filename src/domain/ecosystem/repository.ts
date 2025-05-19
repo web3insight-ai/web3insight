@@ -116,15 +116,17 @@ async function fetchStatistics(name: string): Promise<ResponseResult<{
   developerTotalCount: number | string;
   developerCoreCount: number | string;
   developers: DeveloperRankRecord[];
-  repositories: RepositoryRankRecord[];
   trend: DeveloperTrendRecord[];
+  repositoryTotalCount: number | string;
+  repositories: RepositoryRankRecord[];
 }>> {
   const params = { eco: name } as any;  // eslint-disable-line @typescript-eslint/no-explicit-any
   const responses = await Promise.all([
     fetchDeveloperCount(params),
-    fetchRepositoryCount({ ...params, scope: "Core" }),
-    fetchDeveloperTrendList(params),
+    fetchDeveloperCount({ ...params, scope: "Core" }),
     fetchDeveloperRankList(params),
+    fetchDeveloperTrendList(params),
+    fetchRepositoryCount(params),
     fetchRepositoryRankList(params),
   ]);
   const failed = responses.find(res => !res.success);
@@ -135,15 +137,17 @@ async function fetchStatistics(name: string): Promise<ResponseResult<{
       developerTotalCount: 0,
       developerCoreCount: 0,
       developers: [],
-      repositories: [],
       trend: [],
+      repositoryTotalCount: 0,
+      repositories: [],
     },
   } : generateSuccessResponse({
     developerTotalCount: responses[0].data.total,
     developerCoreCount: responses[1].data.total,
-    developers: responses[3].data.list,
-    repositories: responses[4].data.list,
-    trend: responses[2].data.list,
+    developers: responses[2].data.list,
+    trend: responses[3].data.list,
+    repositoryTotalCount: responses[4].data.total,
+    repositories: responses[5].data.list,
   });
 }
 
