@@ -67,6 +67,8 @@ export class RankService {
       });
     }
 
+    data.sort((a, b) => b.actors_total - a.actors_total);
+
     const cacheData = new EcoRankListDto();
     cacheData.list = data;
 
