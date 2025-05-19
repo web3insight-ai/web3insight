@@ -106,4 +106,35 @@ WHERE LOWER(r."repo_name") = LOWER(e."repo_name");`;
 
     await sql`DROP TABLE IF EXISTS "web3"."ecos";`.execute(this.db);
   }
+
+  @Command({
+    command: 'sync:db:repos:abnormal-direct',
+    description: '',
+  })
+  async updateAllReposAbnormalStatusDirectSQL() {
+    const updateQuery = sql`
+WITH "RepoStats" AS (
+    SELECT
+        "repo_id",
+        COUNT(CASE WHEN "event_type" = 'PushEvent' THEN 1 END) AS commit_count,
+        COUNT(DISTINCT "actor_id") FILTER (WHERE ("actor_login" NOT LIKE '%[bot]' AND "actor_login" NOT LIKE '%-ci')) AS developer_count
+    FROM
+        "web3"."event"
+    GROUP BY
+        "repo_id"
+)
+UPDATE
+    "web3"."repos" r
+SET
+    "is_abnormal" = CASE
+        WHEN rs.developer_count <= 2 AND rs.commit_count > 3000 THEN TRUE
+        ELSE FALSE
+    END
+FROM
+    "RepoStats" rs
+WHERE
+    r."repo_id" = rs."repo_id";`;
+
+    await updateQuery.execute(this.db);
+  }
 }
