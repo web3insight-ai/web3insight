@@ -92,17 +92,38 @@ export class TotalService {
         sql<string[]>`ARRAY[${sql.join([ecoName])}]`,
       );
     }
-
-    if (scope === ActorsScopeType.Core) {
-      query = query.where('web3.event.event_type', 'in', [
-        'PushEvent',
-        'CreateEvent',
-      ]);
-    }
-
     let result: { total: string | number | bigint } | undefined = { total: 0 };
 
-    if (ecoName === EcoType.ALL && scope === ActorsScopeType.ALL) {
+    if (scope === ActorsScopeType.Core) {
+      const subQuery = this.db
+        .selectFrom('web3.event')
+        .innerJoin('web3.repos', 'web3.event.repo_id', 'web3.repos.repo_id')
+        .select('web3.event.actor_id')
+        .where('web3.event.event_type', 'in', ['PullRequestEvent', 'PushEvent'])
+        .where(
+          'web3.event.created_at',
+          '>=',
+          sql<Date>`NOW() - INTERVAL '3 year'`,
+        )
+        .$if(ecoName !== EcoType.ALL, (qb) =>
+          qb.where(
+            'web3.repos.eco_names',
+            '@>',
+            sql<string[]>`ARRAY[${sql.join([ecoName])}]`,
+          ),
+        )
+        .groupBy('web3.event.actor_id')
+        .having(
+          (eb) => eb.fn.count('web3.event.event_type').distinct(),
+          '=',
+          2,
+        );
+
+      const coreQuery = this.db
+        .selectFrom(subQuery.as('eligible_actors'))
+        .select((eb) => eb.fn.countAll().as('total'));
+      result = await coreQuery.executeTakeFirst();
+    } else if (ecoName === EcoType.ALL && scope === ActorsScopeType.ALL) {
       result = await this.db
         .selectFrom('web3.actors')
         .select(this.db.fn.countAll().as('total'))
