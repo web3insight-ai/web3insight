@@ -110,77 +110,6 @@ export default function Index() {
             <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl">
               {description}
             </p>
-
-            {/* Search Section - Prominently placed in hero section */}
-            <div className="w-full max-w-[650px] mx-auto mt-12">
-              <fetcher.Form method="POST" action="?index">
-                <div className="relative">
-                  <Input
-                    name="query"
-                    required
-                    fullWidth
-                    size="lg"
-                    placeholder="Search ecosystem, repository, community..."
-                    classNames={{
-                      input: "h-12 text-base",
-                      inputWrapper: "h-12 shadow-sm bg-white dark:bg-gray-800 pr-12 border border-gray-200 dark:border-gray-700",
-                    }}
-                    startContent={<Search size={18} className="text-gray-400" />}
-                  />
-                  <button
-                    type="submit"
-                    disabled={asking}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-md flex items-center justify-center"
-                  >
-                    {asking ? (
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <ArrowRight size={18} />
-                    )}
-                  </button>
-                </div>
-                {errorMessage && (
-                  <p className="text-sm text-danger mt-2 text-center">{errorMessage}</p>
-                )}
-              </fetcher.Form>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 text-center">
-                Try queries like &quot;ethereum ecosystem&quot;, &quot;OpenZeppelin/contracts&quot;, or &quot;openbuild community&quot;
-              </p>
-            </div>
-
-            {/* Pinned Queries */}
-            {pinned && pinned.length > 0 ? (
-              <div className="mt-8">
-                <div className="flex gap-2 items-center justify-center flex-wrap">
-                  {pinned.map((query) => (
-                    <Link to={`/query/${query.documentId}`} key={query.documentId}>
-                      <Chip
-                        variant="flat"
-                        color="default"
-                        className="text-xs px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors duration-200 cursor-pointer"
-                        startContent={<Hash size={12} />}
-                      >
-                        {query.query}
-                      </Chip>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              // If you want to show something when there are no pinned queries
-              <div className="mt-8">
-                <Link to="/query/new">
-                  <Button
-                    variant="flat"
-                    color="primary"
-                    size="sm"
-                    startContent={<Hash size={14} />}
-                  >
-                    Start a new query
-                  </Button>
-                </Link>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -209,6 +138,79 @@ export default function Index() {
         >
           <DeveloperRankViewWidget dataSource={statisticRank.developer} view="grid" />
         </MetricSection>
+
+        <div className="mt-16">
+          {/* Search Section - Prominently placed in hero section */}
+          <div className="w-full max-w-[650px] mx-auto">
+            <fetcher.Form method="POST" action="?index">
+              <div className="relative">
+                <Input
+                  name="query"
+                  required
+                  fullWidth
+                  size="lg"
+                  placeholder="Search ecosystem, repository, community..."
+                  classNames={{
+                    input: "h-12 text-base",
+                    inputWrapper: "h-12 shadow-sm bg-white dark:bg-gray-800 pr-12 border border-gray-200 dark:border-gray-700",
+                  }}
+                  startContent={<Search size={18} className="text-gray-400" />}
+                />
+                <button
+                  type="submit"
+                  disabled={asking}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-md flex items-center justify-center"
+                >
+                  {asking ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <ArrowRight size={18} />
+                  )}
+                </button>
+              </div>
+              {errorMessage && (
+                <p className="text-sm text-danger mt-2 text-center">{errorMessage}</p>
+              )}
+            </fetcher.Form>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 text-center">
+              Try queries like &quot;ethereum ecosystem&quot;, &quot;OpenZeppelin/contracts&quot;, or &quot;openbuild community&quot;
+            </p>
+          </div>
+
+          {/* Pinned Queries */}
+          {pinned && pinned.length > 0 ? (
+            <div className="mt-8">
+              <div className="flex gap-2 items-center justify-center flex-wrap">
+                {pinned.map((query) => (
+                  <Link to={`/query/${query.documentId}`} key={query.documentId}>
+                    <Chip
+                      variant="flat"
+                      color="default"
+                      className="text-xs px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors duration-200 cursor-pointer"
+                      startContent={<Hash size={12} />}
+                    >
+                      {query.query}
+                    </Chip>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ) : (
+            // If you want to show something when there are no pinned queries
+            <div className="mt-8">
+              <Link to="/query/new">
+                <Button
+                  variant="flat"
+                  color="primary"
+                  size="sm"
+                  startContent={<Hash size={14} />}
+                >
+                  Start a new query
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
 
         {/* Call to Action */}
         <div className="mt-16">
