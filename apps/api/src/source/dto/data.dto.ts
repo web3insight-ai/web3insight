@@ -3,6 +3,8 @@ export enum EcoType {
   NEAR = 'NEAR',
   OpenBuild = 'OpenBuild',
   Starknet = 'Starknet',
+  Bitcoin = 'Bitcoin',
+  Ethereum = 'Ethereum',
 }
 
 export type EcoTypeValue = `${EcoType}`;
