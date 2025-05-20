@@ -166,7 +166,7 @@ export class RankService {
     if (dbData && cache) {
       return dbData;
     }
-    const limit = 10;
+    const limit = 100;
     const repoLimit = 10;
     let query = this.db
       .selectFrom('web3.event as e')
@@ -176,8 +176,9 @@ export class RankService {
         'a.actor_login',
         this.db.fn.count(sql.id('e', 'id')).as('total_commit_count'),
       ])
-      .where('e.event_type', '=', 'PushEvent')
-      .where('a.actor_login', 'not like', '%[bot]%');
+      .where('e.event_type', '=', 'PullRequestEvent')
+      .where('a.actor_login', 'not like', '%[bot]%')
+      .where('a.actor_login', 'not like', '%-bot');
 
     if (ecoName !== EcoType.ALL) {
       query = query
@@ -206,7 +207,7 @@ export class RankService {
     }
 
     const resultPromises = topActorsBasicInfo.map(async (actor) => {
-      const repos = await this.db
+      let query2 = this.db
         .selectFrom('web3.event as e')
         .innerJoin('web3.repos as r', 'e.repo_id', 'r.repo_id')
         .select([
@@ -215,7 +216,17 @@ export class RankService {
           this.db.fn.count(sql.id('e', 'id')).as('event_count'),
         ])
         .where('e.actor_id', '=', String(actor.actor_id))
-        .where('e.event_type', '=', 'PushEvent')
+        .where('e.event_type', '=', 'PullRequestEvent');
+
+      if (ecoName !== EcoType.ALL) {
+        query2 = query2.where(
+          'r.eco_names',
+          '@>',
+          sql<string[]>`ARRAY[${sql.join([ecoName])}]`,
+        );
+      }
+
+      const repos = await query2
         .groupBy(['e.repo_id', 'r.repo_name'])
         .orderBy(sql`event_count`, 'desc')
         .limit(repoLimit)
@@ -255,7 +266,7 @@ export class RankService {
     await this.ecoRankTotal(EcoType.ALL, false);
     const ecoTypes = Object.values(EcoType);
     for (const eco of ecoTypes) {
-      await this.repoStarRank(eco, 10, false);
+      // await this.repoStarRank(eco, 10, false);
       await this.getTopCommitActors(eco, false);
     }
     return Promise.resolve();
