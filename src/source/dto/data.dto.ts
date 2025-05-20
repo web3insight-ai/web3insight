@@ -5,6 +5,7 @@ export enum EcoType {
   Starknet = 'Starknet',
   Bitcoin = 'Bitcoin',
   Ethereum = 'Ethereum',
+  NSL = 'Natural Selection Labs  (RSS3)',
 }
 
 export type EcoTypeValue = `${EcoType}`;
