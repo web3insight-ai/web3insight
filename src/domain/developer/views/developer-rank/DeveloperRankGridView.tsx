@@ -23,7 +23,7 @@ function DeveloperRankGridView({ dataSource }: Pick<DeveloperRankViewWidgetProps
             </div>
             <div className="mt-2">
               <p className="text-lg font-bold text-gray-900 dark:text-white">{dev.total_commit_count.toLocaleString()}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">contributions</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">score</p>
             </div>
             <div className="mt-2">
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Top Projects</p>

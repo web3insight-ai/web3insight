@@ -18,7 +18,7 @@ function DeveloperRankTableView({ dataSource }: Pick<DeveloperRankViewWidgetProp
       <div className="px-8 py-3 bg-gray-50 dark:bg-gray-750 border-b border-gray-100 dark:border-gray-800 grid grid-cols-12 gap-2">
         <div className="col-span-1 text-xs font-medium text-gray-500 dark:text-gray-400">#</div>
         <div className="col-span-3 text-xs font-medium text-gray-500 dark:text-gray-400">Developer</div>
-        <div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400">Contributions</div>
+        <div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400">Score</div>
         <div className="col-span-6 text-xs font-medium text-gray-500 dark:text-gray-400">Top Projects</div>
       </div>
       <div>

@@ -41,7 +41,7 @@ async function fetchStatisticsRank() {
   } : generateSuccessResponse({
     ecosystem: responses[0].data.list,
     repository: responses[1].data.list,
-    developer: responses[2].data.list,
+    developer: responses[2].data.list.slice(0, 10),
   });
 }
 
