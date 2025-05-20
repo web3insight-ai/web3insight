@@ -1,6 +1,8 @@
 import { Card } from "@nextui-org/react";
 import { Crown } from "lucide-react";
 
+import RepoLinkWidget from "../../../repository/widgets/repo-link";
+
 import type { DeveloperRankViewWidgetProps } from "./typing";
 
 function DeveloperRankGridView({ dataSource }: Pick<DeveloperRankViewWidgetProps, "dataSource">) {
@@ -28,7 +30,7 @@ function DeveloperRankGridView({ dataSource }: Pick<DeveloperRankViewWidgetProps
               <ul className="text-xs text-gray-700 dark:text-gray-300 space-y-1">
                 {dev.top_repos.map(proj => (
                   <li key={`${dev.actor_id}-${proj.repo_id}`} className="truncate" title={proj.repo_name}>
-                    {proj.repo_name}
+                    <RepoLinkWidget repo={proj.repo_name} />
                   </li>
                 ))}
               </ul>

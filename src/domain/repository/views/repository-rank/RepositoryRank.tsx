@@ -2,6 +2,7 @@ import clsx from "clsx";
 import { Card, CardHeader, Divider } from "@nextui-org/react";
 import { Github } from "lucide-react";
 
+import RepoLinkWidget from "../../widgets/repo-link";
 import type { RepositoryRankViewWidgetProps } from "./typing";
 
 function RepositoryRankView({ className, dataSource }: RepositoryRankViewWidgetProps) {
@@ -43,9 +44,10 @@ function RepositoryRankView({ className, dataSource }: RepositoryRankViewWidgetP
 
             {/* Repository name */}
             <div className="col-span-5 flex items-center">
-              <span className="font-medium text-gray-900 dark:text-white">
-                {repo.repo_name}
-              </span>
+              <RepoLinkWidget
+                className="font-medium text-gray-900 dark:text-white"
+                repo={repo.repo_name}
+              />
             </div>
 
             {/* Stars */}

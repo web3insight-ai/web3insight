@@ -1,6 +1,8 @@
 import { Card, CardHeader, Divider } from "@nextui-org/react";
 import { Users } from "lucide-react";
 
+import RepoLinkWidget from "../../../repository/widgets/repo-link";
+
 import type { DeveloperRankViewWidgetProps } from "./typing";
 
 function DeveloperRankTableView({ dataSource }: Pick<DeveloperRankViewWidgetProps, "dataSource">) {
@@ -43,9 +45,11 @@ function DeveloperRankTableView({ dataSource }: Pick<DeveloperRankViewWidgetProp
             <div className="col-span-6 font-medium text-gray-700 dark:text-gray-300">
               <div className="flex flex-col gap-1">
                 {developer.top_repos.slice(0, 2).map(project => (
-                  <span key={`${developer.actor_id}-${project.repo_id}`} className="text-xs text-gray-600 dark:text-gray-400 truncate max-w-full">
-                    {project.repo_name}
-                  </span>
+                  <RepoLinkWidget
+                    key={`${developer.actor_id}-${project.repo_id}`}
+                    className="text-xs text-gray-600 dark:text-gray-400 truncate max-w-full"
+                    repo={project.repo_name}
+                  />
                 ))}
                 {developer.top_repos.length > 2 && (
                   <span className="text-xs text-gray-500">+{developer.top_repos.length - 2} more</span>
