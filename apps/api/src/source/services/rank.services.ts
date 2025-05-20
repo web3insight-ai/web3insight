@@ -266,7 +266,7 @@ export class RankService {
     await this.ecoRankTotal(EcoType.ALL, false);
     const ecoTypes = Object.values(EcoType);
     for (const eco of ecoTypes) {
-      // await this.repoStarRank(eco, 10, false);
+      await this.repoStarRank(eco, 10, false);
       await this.getTopCommitActors(eco, false);
     }
     return Promise.resolve();
