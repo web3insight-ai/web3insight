@@ -7,7 +7,7 @@ export {
   fetchRankList as fetchRepositoryRankList,
 } from "./repository";
 export {
-  fetchTotalCount as fetchDeveloperCount,
-  fetchTrendList as fetchDeveloperTrendList,
-  fetchRankList as fetchDeveloperRankList,
-} from "./developer";
+  fetchTotalCount as fetchActorCount,
+  fetchTrendList as fetchActorTrendList,
+  fetchRankList as fetchActorRankList,
+} from "./actor";

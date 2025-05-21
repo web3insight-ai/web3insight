@@ -1,5 +1,7 @@
 # Web3Insights
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Web3Insights/Web3Insights)
+
 > A comprehensive metrics platform focused on Web3 ecosystems, communities, repositories, and developers
 
 ## Project Overview

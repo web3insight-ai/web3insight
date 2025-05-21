@@ -2,7 +2,7 @@ import type { ResponseResult } from "@/types";
 
 import type {
   EcoRequestParams, TotalResponseData, ListResponseData,
-  DeveloperRankRecord, DeveloperTrendRecord,
+  ActorRankRecord, ActorTrendRecord,
 } from "../typing";
 import httpClient from "./client";
 
@@ -16,13 +16,13 @@ async function fetchTotalCount(
 
 async function fetchRankList(
   params: EcoRequestParams = { eco: "ALL" },
-): Promise<ResponseResult<ListResponseData<DeveloperRankRecord>>> {
+): Promise<ResponseResult<ListResponseData<ActorRankRecord>>> {
   return httpClient.get("/v1/actors/top", { params: { eco_name: params.eco } });
 }
 
 async function fetchTrendList(
   params: Partial<EcoRequestParams & { period: "week" | "month" }> = {},
-): Promise<ResponseResult<ListResponseData<DeveloperTrendRecord>>> {
+): Promise<ResponseResult<ListResponseData<ActorTrendRecord>>> {
   const { eco = "ALL", period = "month" } = params;
 
   return httpClient.get("/v1/actors/total/date", { params: { eco_name: eco, period } });

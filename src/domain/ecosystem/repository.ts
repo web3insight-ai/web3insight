@@ -12,10 +12,10 @@ import {
   fetchRepoParticipants, fetchRepoNewContributors, fetchRepoInactiveContributors,
 } from "../opendigger/repository";
 import { fetchEcosystem } from "../strapi/repository";
-import type { RepositoryRankRecord, DeveloperRankRecord, DeveloperTrendRecord } from "../api/typing";
+import type { RepositoryRankRecord, ActorRankRecord, ActorTrendRecord } from "../api/typing";
 import {
   fetchRepositoryCount, fetchRepositoryRankList,
-  fetchDeveloperCount, fetchDeveloperRankList, fetchDeveloperTrendList,
+  fetchActorCount, fetchActorRankList, fetchActorTrendList,
 } from "../api/repository";
 
 async function fetchOne(keyword?: string): Promise<ResponseResult<Record<string, DataValue> | null>> {
@@ -115,17 +115,17 @@ async function fetchRepoAnalysis(repo: string) {
 async function fetchStatistics(name: string): Promise<ResponseResult<{
   developerTotalCount: number | string;
   developerCoreCount: number | string;
-  developers: DeveloperRankRecord[];
-  trend: DeveloperTrendRecord[];
+  developers: ActorRankRecord[];
+  trend: ActorTrendRecord[];
   repositoryTotalCount: number | string;
   repositories: RepositoryRankRecord[];
 }>> {
   const params = { eco: name } as any;  // eslint-disable-line @typescript-eslint/no-explicit-any
   const responses = await Promise.all([
-    fetchDeveloperCount(params),
-    fetchDeveloperCount({ ...params, scope: "Core" }),
-    fetchDeveloperRankList(params),
-    fetchDeveloperTrendList(params),
+    fetchActorCount(params),
+    fetchActorCount({ ...params, scope: "Core" }),
+    fetchActorRankList(params),
+    fetchActorTrendList(params),
     fetchRepositoryCount(params),
     fetchRepositoryRankList(params),
   ]);

@@ -1,12 +1,12 @@
-import type { DeveloperRankRecord } from "../../../api/typing";
+import type { ActorRankRecord } from "../../../api/typing";
 
 type DeveloperLinkProps = {
   className?: string;
-  developer: DeveloperRankRecord;
+  developer: ActorRankRecord;
 };
 
 type DeveloperRankViewWidgetProps = {
-  dataSource: DeveloperRankRecord[];
+  dataSource: ActorRankRecord[];
   view?: "table" | "grid";
 }
 

@@ -20,7 +20,7 @@ type RepositoryRankRecord = {
   open_issues_count: number;
 }
 
-type DeveloperRankRecord = {
+type ActorRankRecord = {
   actor_id: number;
   actor_login: string;
   total_commit_count: number;
@@ -31,12 +31,12 @@ type DeveloperRankRecord = {
   }[];
 };
 
-type DeveloperTrendRecord = {
+type ActorTrendRecord = {
   date: string;
   total: number;
 }
 
 export type {
   EcoRequestParams, TotalResponseData, ListResponseData,
-  RepositoryRankRecord, DeveloperRankRecord, DeveloperTrendRecord,
+  RepositoryRankRecord, ActorRankRecord, ActorTrendRecord,
 };

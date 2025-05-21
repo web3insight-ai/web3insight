@@ -1,6 +1,6 @@
 import type { DataValue } from "@/types";
 
-import type { DeveloperTrendRecord } from "~/api/typing";
+import type { ActorTrendRecord } from "~/api/typing";
 
 type MetricOverviewProps = {
   className?: string;
@@ -9,7 +9,7 @@ type MetricOverviewProps = {
 
 type TrendCardProps = {
   className?: string;
-  dataSource: DeveloperTrendRecord[];
+  dataSource: ActorTrendRecord[];
 }
 
 export type { MetricOverviewProps, TrendCardProps };
