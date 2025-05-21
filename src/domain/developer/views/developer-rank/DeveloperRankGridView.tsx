@@ -4,6 +4,7 @@ import { Crown } from "lucide-react";
 import RepoLinkWidget from "../../../repository/widgets/repo-link";
 
 import type { DeveloperRankViewWidgetProps } from "./typing";
+import DeveloperLink from "./DeveloperLink";
 
 function DeveloperRankGridView({ dataSource }: Pick<DeveloperRankViewWidgetProps, "dataSource">) {
   return (
@@ -14,9 +15,7 @@ function DeveloperRankGridView({ dataSource }: Pick<DeveloperRankViewWidgetProps
             <div className="flex justify-between items-start">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-gray-900 dark:text-white">
-                    @{dev.actor_login}
-                  </span>
+                  <DeveloperLink className="font-semibold" developer={dev} />
                   {index === 0 && <Crown size={14} className="text-primary fill-primary" />}
                 </div>
               </div>

@@ -4,6 +4,7 @@ import { Users } from "lucide-react";
 import RepoLinkWidget from "../../../repository/widgets/repo-link";
 
 import type { DeveloperRankViewWidgetProps } from "./typing";
+import DeveloperLink from "./DeveloperLink";
 
 function DeveloperRankTableView({ dataSource }: Pick<DeveloperRankViewWidgetProps, "dataSource">) {
   return (
@@ -35,9 +36,7 @@ function DeveloperRankTableView({ dataSource }: Pick<DeveloperRankViewWidgetProp
                 text-xs font-medium`}>{index + 1}</span>
             </div>
             <div className="col-span-3 flex items-center">
-              <span className="font-medium text-gray-900 dark:text-white">
-                @{developer.actor_login}
-              </span>
+              <DeveloperLink className="font-medium" developer={developer} />
             </div>
             <div className="col-span-2 font-medium text-gray-700 dark:text-gray-300">
               {developer.total_commit_count.toLocaleString()}

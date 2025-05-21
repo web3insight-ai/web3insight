@@ -7,11 +7,14 @@ import { Link, useLoaderData } from "@remix-run/react";
 import {
   Card, CardBody, CardHeader, Divider,
   Table, TableHeader, TableColumn, TableBody, TableRow, TableCell,
-  Avatar, Progress,
+  Progress,
 } from "@nextui-org/react";
 import { Github, Users, Code2, Zap, ArrowUpRight, ArrowDownRight, GitBranch, GitCommit, GitPullRequest, Eye } from "lucide-react";
 
 import { getTitle } from "@/utils/app";
+
+import { fetchOne } from "~/developer/repository";
+import ProfileCardWidget from "~/developer/widgets/profile-card";
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   const baseTitle = `Developer Profile - ${getTitle()}`;
@@ -50,6 +53,7 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
   // For this example, we're creating mock data based on the developer ID
 
   // Generate a consistent name based on the developer ID
+  const res = await fetchOne(developerId!);
   const devIdNumber = parseInt(developerId?.replace(/\D/g, '1') || '1');
   const nameOptions = ["alex", "sam", "taylor", "jordan", "casey", "morgan", "riley", "jamie", "jesse", "avery"];
   const developerName = nameOptions[devIdNumber % nameOptions.length];
@@ -243,6 +247,7 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
 
   return json({
     developer,
+    newDeveloper: res.data,
     ecosystems,
     projects,
     recentActivity,
@@ -250,7 +255,7 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
 };
 
 export default function DeveloperPage() {
-  const { developer, ecosystems, projects, recentActivity } = useLoaderData<typeof loader>();
+  const { developer, newDeveloper, ecosystems, projects, recentActivity } = useLoaderData<typeof loader>();
 
   // Simple line chart component
   const MiniChart = ({ data, color = "primary", height = 40 }: { data: number[], color?: string, height?: number }) => {
@@ -308,68 +313,7 @@ export default function DeveloperPage() {
   return (
     <div className="min-h-dvh bg-gray-50 dark:bg-gray-900 py-10">
       <div className="w-full max-w-[1200px] mx-auto px-4 sm:px-6">
-        {/* Developer Profile Header */}
-        <Card className="bg-white dark:bg-gray-800 shadow-sm border-none mb-6">
-          <CardBody className="p-6">
-            <div className="flex flex-col md:flex-row gap-6">
-              <div className="md:w-1/4">
-                <Avatar
-                  src={developer.avatarUrl}
-                  className="w-24 h-24 text-large"
-                  fallback={developer.handle.substring(0, 2)}
-                />
-              </div>
-
-              <div className="md:w-3/4">
-                <div className="mb-2">
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{developer.name}</h1>
-                  <p className="text-gray-500 dark:text-gray-400">{developer.handle}</p>
-                </div>
-
-                <p className="text-gray-700 dark:text-gray-300 mb-4">{developer.bio}</p>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                  <div className="flex items-center gap-2">
-                    <Github size={16} className="text-gray-500" />
-                    <span className="text-gray-700 dark:text-gray-300">{developer.githubHandle}</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
-                      <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
-                    </svg>
-                    <span className="text-gray-700 dark:text-gray-300">{developer.twitterHandle}</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
-                      <circle cx="12" cy="12" r="10" />
-                      <line x1="2" y1="12" x2="22" y2="12" />
-                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                    </svg>
-                    <span className="text-gray-700 dark:text-gray-300">{developer.website}</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
-                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                      <circle cx="12" cy="10" r="3" />
-                    </svg>
-                    <span className="text-gray-700 dark:text-gray-300">{developer.location}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                  <span>Joined {developer.joinedDate}</span>
-                  <span>•</span>
-                  <span>{developer.stats.repositories} repositories</span>
-                  <span>•</span>
-                  <GrowthIndicator value={developer.stats.growth} isPositive={developer.stats.isPositive} />
-                </div>
-              </div>
-            </div>
-          </CardBody>
-        </Card>
+        <ProfileCardWidget className="mb-6" developer={newDeveloper} />
 
         {/* Developer Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">

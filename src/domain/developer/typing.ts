@@ -1,0 +1,18 @@
+type GithubId = number;
+type GithubLogin = string;
+
+type Developer = {
+  id: GithubId;
+  username: GithubLogin;
+  nickname: string;
+  description: string;
+  avatar: string;
+  location: string;
+  social: {
+    github: string;
+    twitter: string;
+    website: string;
+  };
+};
+
+export type { Developer };
