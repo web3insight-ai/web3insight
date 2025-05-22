@@ -15,6 +15,7 @@ import { getTitle } from "@/utils/app";
 
 import { fetchOne } from "~/developer/repository";
 import ProfileCardWidget from "~/developer/widgets/profile-card";
+import MetricOverviewWidget from "~/developer/widgets/metric-overview";
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   const baseTitle = `Developer Profile - ${getTitle()}`;
@@ -313,46 +314,8 @@ export default function DeveloperPage() {
   return (
     <div className="min-h-dvh bg-gray-50 dark:bg-gray-900 py-10">
       <div className="w-full max-w-[1200px] mx-auto px-4 sm:px-6">
-        <ProfileCardWidget className="mb-6" developer={newDeveloper} />
-
-        {/* Developer Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <Card className="bg-white dark:bg-gray-800 shadow-sm border-none">
-            <CardBody className="p-4">
-              <div className="flex flex-col items-center text-center">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Contributions</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{developer.stats.totalContributions.toLocaleString()}</p>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-white dark:bg-gray-800 shadow-sm border-none">
-            <CardBody className="p-4">
-              <div className="flex flex-col items-center text-center">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Commits</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{developer.stats.commits.toLocaleString()}</p>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-white dark:bg-gray-800 shadow-sm border-none">
-            <CardBody className="p-4">
-              <div className="flex flex-col items-center text-center">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Pull Requests</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{developer.stats.pullRequests.toLocaleString()}</p>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-white dark:bg-gray-800 shadow-sm border-none">
-            <CardBody className="p-4">
-              <div className="flex flex-col items-center text-center">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Code Reviews</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{developer.stats.codeReviews.toLocaleString()}</p>
-              </div>
-            </CardBody>
-          </Card>
-        </div>
+        <ProfileCardWidget className="mb-6" developer={newDeveloper!} />
+        <MetricOverviewWidget className="mb-6" dataSource={newDeveloper!.statistics} />
 
         {/* Activity Chart */}
         <Card className="bg-white dark:bg-gray-800 shadow-sm border-none mb-6">

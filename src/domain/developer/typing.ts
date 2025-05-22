@@ -13,6 +13,12 @@ type Developer = {
     twitter: string;
     website: string;
   };
+  statistics: {
+    repository: number;
+    pullRequest: number;
+    codeReview: number;
+  };
+  joinedAt: string;
 };
 
 export type { Developer };

@@ -9,7 +9,16 @@ type GithubUser = {
   company: string;
   blog: string;
   twitter_username: string;
+  public_repos: number;
   html_url: string;
+  created_at: string;
 };
 
-export type { GithubUser };
+type PersonalOverview = {
+  user_id: number;
+  issues: number;
+  pull_requests: number;
+  code_reviews: number;
+}
+
+export type { GithubUser, PersonalOverview };

@@ -1,5 +1,5 @@
 import clsx from "clsx";
-
+import dayjs from "dayjs";
 import { Card, CardBody, Avatar } from "@nextui-org/react";
 import { Github } from "lucide-react";
 
@@ -60,13 +60,11 @@ function ProfileCard({ className, developer }: ProfileCardWidgetProps) {
               </div>}
             </div>
 
-            {/* <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-              <span>Joined {developer.joinedDate}</span>
+            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+              <span>Joined on {dayjs(developer.joinedAt).format("MMM, YYYY")}</span>
               <span>•</span>
-              <span>{developer.stats.repositories} repositories</span>
-              <span>•</span>
-              <GrowthIndicator value={developer.stats.growth} isPositive={developer.stats.isPositive} />
-            </div> */}
+              <span>{developer.statistics.repository} repositories</span>
+            </div>
           </div>
         </div>
       </CardBody>

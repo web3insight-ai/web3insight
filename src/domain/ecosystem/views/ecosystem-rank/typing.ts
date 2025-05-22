@@ -1,7 +1,7 @@
-import type { DataValue } from "@/types";
+import type { EcoRankRecord } from "../../../api/typing";
 
 type EcosystemRankViewWidgetProps = {
-  dataSource: Record<string, DataValue>[];
+  dataSource: EcoRankRecord[];
 }
 
 export type { EcosystemRankViewWidgetProps };

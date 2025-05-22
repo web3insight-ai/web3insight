@@ -1,5 +1,5 @@
 import { Link } from "@remix-run/react";
-import { Card, CardHeader, CardBody, Divider, Chip } from "@nextui-org/react";
+import { Card, CardHeader, CardBody, Divider } from "@nextui-org/react";
 import { Warehouse } from "lucide-react";
 
 import type { EcosystemRankViewWidgetProps } from "./typing";
@@ -41,11 +41,6 @@ function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
                 <Link to={`/ecosystems/${encodeURIComponent(ecosystem.eco_name)}`} className="font-medium text-gray-900 dark:text-white hover:text-primary hover:underline">
                   {ecosystem.eco_name}
                 </Link>
-                {ecosystem.growth && (
-                  <Chip size="sm" color={ecosystem.color} variant="flat">
-                    {ecosystem.growth}
-                  </Chip>
-                )}
               </div>
 
               {/* Total developer count */}

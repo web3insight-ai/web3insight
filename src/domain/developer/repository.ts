@@ -1,12 +1,22 @@
 import type { ResponseResult } from "@/types";
 import { isNumeric } from "@/utils";
 
-import { fetchUser, fetchUserById } from "../ossinsight/repository";
+import { fetchUser, fetchUserById, fetchPersonalOverview } from "../ossinsight/repository";
 import type { Developer } from "./typing";
 
 async function fetchOne(idOrUsername: number | string): Promise<ResponseResult<Developer | null>> {
   const { data, ...others } = isNumeric(idOrUsername) ? await fetchUserById(idOrUsername) : await fetchUser(<string>idOrUsername);
-  
+
+  if (!others.success) {
+    return { ...others, data: null  };
+  }
+
+  const { data: statistics, ...rest } = await fetchPersonalOverview(data.id);
+
+  if (!rest.success) {
+    return { ...rest, data: null  };
+  }
+
   return {
     ...others,
     data: others.success? {
@@ -21,6 +31,12 @@ async function fetchOne(idOrUsername: number | string): Promise<ResponseResult<D
         twitter: data.twitter_username,
         website: data.blog,
       },
+      statistics: {
+        repository: data.public_repos,
+        pullRequest: statistics[0].pull_requests,
+        codeReview: statistics[0].code_reviews,
+      },
+      joinedAt: data.created_at,
     } : null,
   };
 }
