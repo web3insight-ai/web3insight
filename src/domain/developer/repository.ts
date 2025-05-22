@@ -2,9 +2,12 @@ import type { ResponseResult } from "@/types";
 import { isNumeric } from "@/utils";
 
 import { fetchUser, fetchUserById, fetchPersonalOverview } from "../ossinsight/repository";
-import { fetchListByDeveloper } from "../repository/repository";
+import { fetchGithubUserActivity } from "../rsshub/repository";
+
 import type { Repository } from "../repository/typing";
-import type { Developer } from "./typing";
+import { fetchListByDeveloper } from "../repository/repository";
+
+import type { Developer, DeveloperActivity } from "./typing";
 
 async function fetchOne(idOrUsername: number | string): Promise<ResponseResult<Developer | null>> {
   const { data, ...others } = isNumeric(idOrUsername) ? await fetchUserById(idOrUsername) : await fetchUser(<string>idOrUsername);
@@ -52,4 +55,17 @@ async function fetchRepositoryRankList(username: string): Promise<ResponseResult
   };
 }
 
-export { fetchOne, fetchRepositoryRankList };
+async function fetchActivityList(username: string): Promise<ResponseResult<DeveloperActivity[]>> {
+  const { data, ...others } = await fetchGithubUserActivity(username);
+
+  return {
+    ...others,
+    data: others.success ? data.items.map(item => ({
+      id: item.id,
+      description: item.title,
+      date: item.date_published,
+    })) : [],
+  };
+}
+
+export { fetchOne, fetchRepositoryRankList, fetchActivityList };

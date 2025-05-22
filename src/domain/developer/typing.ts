@@ -20,4 +20,10 @@ type Developer = {
   joinedAt: string;
 };
 
-export type { Developer };
+type DeveloperActivity = {
+  id: string;
+  description: string;
+  date: string;
+}
+
+export type { Developer, DeveloperActivity };

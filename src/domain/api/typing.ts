@@ -36,9 +36,9 @@ type ActorBasic = {
 
 type ActorRankRecord = ActorBasic & {
   total_commit_count: number;
-  top_repos: RepoBasic & {
+  top_repos: (RepoBasic & {
     commit_count: number;
-  }[];
+  })[];
 };
 
 type ActorTrendRecord = {
