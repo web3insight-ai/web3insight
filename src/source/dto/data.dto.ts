@@ -1,6 +1,7 @@
 export enum EcoType {
   ALL = 'ALL',
   NEAR = 'NEAR',
+  Aurora = 'Aurora',
   OpenBuild = 'OpenBuild',
   Starknet = 'Starknet',
   Bitcoin = 'Bitcoin',
