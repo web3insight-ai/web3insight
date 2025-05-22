@@ -12,9 +12,9 @@ import {
   fetchRepoParticipants, fetchRepoNewContributors, fetchRepoInactiveContributors,
 } from "../opendigger/repository";
 import { fetchEcosystem } from "../strapi/repository";
-import type { RepositoryRankRecord, ActorRankRecord, ActorTrendRecord } from "../api/typing";
+import type { RepoRankRecord, ActorRankRecord, ActorTrendRecord } from "../api/typing";
 import {
-  fetchRepositoryCount, fetchRepositoryRankList,
+  fetchRepoCount, fetchRepoRankList,
   fetchActorCount, fetchActorRankList, fetchActorTrendList,
 } from "../api/repository";
 
@@ -118,7 +118,7 @@ async function fetchStatistics(name: string): Promise<ResponseResult<{
   developers: ActorRankRecord[];
   trend: ActorTrendRecord[];
   repositoryTotalCount: number | string;
-  repositories: RepositoryRankRecord[];
+  repositories: RepoRankRecord[];
 }>> {
   const params = { eco: name } as any;  // eslint-disable-line @typescript-eslint/no-explicit-any
   const responses = await Promise.all([
@@ -126,8 +126,8 @@ async function fetchStatistics(name: string): Promise<ResponseResult<{
     fetchActorCount({ ...params, scope: "Core" }),
     fetchActorRankList(params),
     fetchActorTrendList(params),
-    fetchRepositoryCount(params),
-    fetchRepositoryRankList(params),
+    fetchRepoCount(params),
+    fetchRepoRankList(params),
   ]);
   const failed = responses.find(res => !res.success);
 

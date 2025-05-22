@@ -12,7 +12,7 @@ type ListResponseData<T> = {
   list: T[];
 };
 
-type RepositoryRankRecord = {
+type RepoRankRecord = {
   repo_id: number;
   repo_name: string;
   star_count: number;
@@ -38,5 +38,5 @@ type ActorTrendRecord = {
 
 export type {
   EcoRequestParams, TotalResponseData, ListResponseData,
-  RepositoryRankRecord, ActorRankRecord, ActorTrendRecord,
+  RepoRankRecord, ActorRankRecord, ActorTrendRecord,
 };

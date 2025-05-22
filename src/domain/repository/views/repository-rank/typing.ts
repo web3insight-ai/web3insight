@@ -1,8 +1,8 @@
-import type { RepositoryRankRecord } from "../../../api/typing";
+import type { RepoRankRecord } from "../../../api/typing";
 
 type RepositoryRankViewWidgetProps = {
   className?: string;
-  dataSource: RepositoryRankRecord[];
+  dataSource: RepoRankRecord[];
 }
 
 export type { RepositoryRankViewWidgetProps };

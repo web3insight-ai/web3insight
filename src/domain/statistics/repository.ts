@@ -2,14 +2,14 @@ import { generateSuccessResponse } from "@/clients/http";
 
 import {
   fetchEcosystemCount, fetchEcosystemRankList,
-  fetchRepositoryCount, fetchRepositoryRankList,
+  fetchRepoCount, fetchRepoRankList,
   fetchActorCount, fetchActorRankList,
 } from "../api/repository";
 
 async function fetchStatisticsOverview() {
   const responses = await Promise.all([
     fetchEcosystemCount(),
-    fetchRepositoryCount(),
+    fetchRepoCount(),
     fetchActorCount(),
     fetchActorCount({ scope: "Core" }),
   ]);
@@ -26,7 +26,7 @@ async function fetchStatisticsOverview() {
 async function fetchStatisticsRank() {
   const responses = await Promise.all([
     fetchEcosystemRankList(),
-    fetchRepositoryRankList(),
+    fetchRepoRankList(),
     fetchActorRankList(),
   ]);
   const failed = responses.find(res => !res.success);
