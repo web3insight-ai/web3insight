@@ -1,9 +1,8 @@
-type GithubId = number;
-type GithubLogin = string;
+import type { User } from "../github/typing";
 
 type Developer = {
-  id: GithubId;
-  username: GithubLogin;
+  id: User["id"];
+  username: User["login"];
   nickname: string;
   description: string;
   avatar: string;

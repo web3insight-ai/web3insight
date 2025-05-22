@@ -2,6 +2,8 @@ import type { ResponseResult } from "@/types";
 import { isNumeric } from "@/utils";
 
 import { fetchUser, fetchUserById, fetchPersonalOverview } from "../ossinsight/repository";
+import { fetchListByDeveloper } from "../repository/repository";
+import type { Repository } from "../repository/typing";
 import type { Developer } from "./typing";
 
 async function fetchOne(idOrUsername: number | string): Promise<ResponseResult<Developer | null>> {
@@ -41,4 +43,13 @@ async function fetchOne(idOrUsername: number | string): Promise<ResponseResult<D
   };
 }
 
-export { fetchOne };
+async function fetchRepositoryRankList(username: string): Promise<ResponseResult<Repository[]>> {
+  const { data, ...others } = await fetchListByDeveloper(username);
+
+  return {
+    ...others,
+    data: data.sort((a, b) => a.statistics.star >= b.statistics.star ? -1 : 1).slice(0, 10),
+  };
+}
+
+export { fetchOne, fetchRepositoryRankList };

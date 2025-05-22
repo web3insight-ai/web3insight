@@ -132,4 +132,39 @@ async function normalizeResponse<VT extends DataValue = DataValue>(res: Response
   };
 }
 
-export { isServerSide, request, isLogicalSuccess, generateSuccessResponse, generateFailedResponse, normalizeResponse };
+async function normalizeRestfulResponse<VT extends DataValue = DataValue>(res: Response): Promise<ResponseResult<VT>> {
+  const jsonData = await res.json();
+  const defaultCode = `${res.status}`;
+
+  if (res.ok) {
+    return {
+      success: isLogicalSuccess(res.status),
+      code: defaultCode,
+      message: "",
+      data: jsonData,
+      extra: {},
+    };
+  }
+
+  let message;
+
+  if (res.status === 404) {
+    message = `\`${new URL(res.url).pathname}\` is not found`;
+  } if (isPlainObject(jsonData)) {
+    message = jsonData.message;
+  }
+
+  return {
+    success: false,
+    code: defaultCode,
+    message: message ?? res.statusText,
+    data: undefined as VT,
+    extra: {},
+  };
+}
+
+export {
+  isServerSide, request,
+  generateSuccessResponse, generateFailedResponse,
+  normalizeResponse, normalizeRestfulResponse,
+};

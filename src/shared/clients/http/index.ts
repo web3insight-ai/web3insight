@@ -1,1 +1,1 @@
-export { isServerSide, isLogicalSuccess, generateSuccessResponse, generateFailedResponse } from "./helper";
+export { isServerSide, generateSuccessResponse, generateFailedResponse, normalizeRestfulResponse } from "./helper";

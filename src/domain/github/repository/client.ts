@@ -2,10 +2,7 @@ import { normalizeRestfulResponse } from "@/clients/http";
 import HttpClient from "@/clients/http/HttpClient";
 
 const httpClient = new HttpClient({
-  baseUrl: process.env.DATA_API_URL,
-  headers: {
-    Authorization: `Bearer ${process.env.DATA_API_TOKEN}`,
-  },
+  baseUrl: "https://api.github.com",
   normalizer: normalizeRestfulResponse,
 });
 

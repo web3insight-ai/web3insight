@@ -4,16 +4,14 @@ import {
   MetaFunction,
 } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
-import {
-  Card, CardBody, CardHeader, Divider,
-  Table, TableHeader, TableColumn, TableBody, TableRow, TableCell,
-  Progress,
-} from "@nextui-org/react";
-import { Github, Users, Code2, Zap, ArrowUpRight, ArrowDownRight, GitBranch, GitCommit, GitPullRequest, Eye } from "lucide-react";
+import { Card, CardBody, CardHeader, Divider, Progress } from "@nextui-org/react";
+import { Users, Code2, Zap, ArrowUpRight, ArrowDownRight, GitBranch, GitCommit, GitPullRequest, Eye } from "lucide-react";
 
 import { getTitle } from "@/utils/app";
 
-import { fetchOne } from "~/developer/repository";
+import RepositoryRankView from "~/repository/views/repository-rank";
+
+import { fetchOne, fetchRepositoryRankList } from "~/developer/repository";
 import ProfileCardWidget from "~/developer/widgets/profile-card";
 import MetricOverviewWidget from "~/developer/widgets/metric-overview";
 
@@ -59,6 +57,8 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
   const nameOptions = ["alex", "sam", "taylor", "jordan", "casey", "morgan", "riley", "jamie", "jesse", "avery"];
   const developerName = nameOptions[devIdNumber % nameOptions.length];
   const handle = `@${developerName}_${devIdNumber}`;
+
+  const repositories = (res.success && (await fetchRepositoryRankList(res.data!.username)).data) || [];
 
   // Mock developer data
   const developer = {
@@ -249,14 +249,14 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
   return json({
     developer,
     newDeveloper: res.data,
+    repositories,
     ecosystems,
-    projects,
     recentActivity,
   });
 };
 
 export default function DeveloperPage() {
-  const { developer, newDeveloper, ecosystems, projects, recentActivity } = useLoaderData<typeof loader>();
+  const { developer, newDeveloper, ecosystems, repositories, recentActivity } = useLoaderData<typeof loader>();
 
   // Simple line chart component
   const MiniChart = ({ data, color = "primary", height = 40 }: { data: number[], color?: string, height?: number }) => {
@@ -427,61 +427,16 @@ export default function DeveloperPage() {
           </Card>
         </div>
 
-        {/* Projects Table */}
-        <Card className="bg-white dark:bg-gray-800 shadow-sm border-none mb-6">
-          <CardHeader className="px-6 py-4">
-            <div className="flex items-center gap-2">
-              <Github size={18} className="text-primary" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Top Projects</h3>
-            </div>
-          </CardHeader>
-          <Divider />
-          <CardBody className="px-0 py-0">
-            <Table aria-label="Developer's top projects">
-              <TableHeader>
-                <TableColumn>PROJECT</TableColumn>
-                <TableColumn>CONTRIBUTIONS</TableColumn>
-                <TableColumn>STARS</TableColumn>
-                <TableColumn>COMMITS</TableColumn>
-                <TableColumn>PRS</TableColumn>
-                <TableColumn>LAST ACTIVE</TableColumn>
-                <TableColumn>ACTIVITY</TableColumn>
-              </TableHeader>
-              <TableBody>
-                {projects.map((project, index) => (
-                  <TableRow key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                    <TableCell>
-                      <Link to={`/repository/${project.name}`} className="font-medium text-primary hover:underline">
-                        {project.name}
-                      </Link>
-                    </TableCell>
-                    <TableCell>
-                      {project.contributions.toLocaleString()}
-                    </TableCell>
-                    <TableCell className="flex items-center gap-1">
-                      <span className="text-yellow-500">★</span>
-                      {project.stars.toLocaleString()}
-                    </TableCell>
-                    <TableCell>
-                      {project.commits.toLocaleString()}
-                    </TableCell>
-                    <TableCell>
-                      {project.pullRequests.toLocaleString()}
-                    </TableCell>
-                    <TableCell>
-                      {project.lastActive}
-                    </TableCell>
-                    <TableCell>
-                      <div className="w-20 h-8">
-                        <MiniChart data={project.chartData} color="primary" />
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardBody>
-        </Card>
+        <RepositoryRankView
+          className="mb-6"
+          dataSource={repositories.map(repo => ({
+            repo_id: repo.id,
+            repo_name: repo.fullName,
+            star_count: repo.statistics.star,
+            forks_count: repo.statistics.fork,
+            open_issues_count: repo.statistics.openIssue,
+          }))}
+        />
 
         {/* All Activity Feed */}
         <Card className="bg-white dark:bg-gray-800 shadow-sm border-none mb-6">
