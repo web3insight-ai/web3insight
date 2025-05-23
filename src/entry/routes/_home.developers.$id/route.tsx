@@ -26,9 +26,20 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
   let recentActivity: DeveloperActivity[] = [];
 
   if (res.success) {
-    contributions = (await fetchContributionList(res.data!.id)).data;
-    repositories = (await fetchRepositoryRankList(res.data!.username)).data;
-    recentActivity = (await fetchActivityList(res.data!.username)).data;
+    const responses = await Promise.all([
+      fetchContributionList(res.data!.id),
+      fetchRepositoryRankList(res.data!.username),
+      fetchActivityList(res.data!.username),
+    ]);
+
+    contributions = responses[0].data;
+    repositories = responses[1].data;
+    recentActivity = responses[2].data;
+  } else if (res.code === "404") {
+    throw new Response(`Developer \`${developerId}\` doesn't exist.`, {
+      status: 404,
+      statusText: "Not Found",
+    });
   }
 
   return json({
@@ -72,25 +83,6 @@ export default function DeveloperPage() {
             option={resolveChartOptions(contributions)}
           />
         </ClientOnly>
-        {/* <Card className="bg-white dark:bg-gray-800 shadow-sm border-none mb-6">
-          <CardHeader className="px-6 py-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Contribution Activity</h3>
-          </CardHeader>
-          <Divider />
-          <CardBody className="p-6">
-            <div className="h-64 w-full">
-              <MiniChart data={developer.stats.activityChartData} height={250} />
-            </div>
-            <div className="mt-6 grid grid-cols-7 gap-4">
-              {developer.stats.contributionsByDay.map((item, index) => (
-                <div key={index} className="text-center">
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{item.day}</p>
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{item.value}</p>
-                </div>
-              ))}
-            </div>
-          </CardBody>
-        </Card> */}
         <RepositoryRankView
           className="mb-6"
           dataSource={repositories.map(repo => ({

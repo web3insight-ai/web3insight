@@ -13,7 +13,11 @@ async function fetchOne(idOrUsername: number | string): Promise<ResponseResult<D
   const { data, ...others } = isNumeric(idOrUsername) ? await fetchUserById(idOrUsername) : await fetchUser(<string>idOrUsername);
 
   if (!others.success) {
-    return { ...others, data: null  };
+    return {
+      ...others,
+      code: others.message.toLowerCase().indexOf("not found") > -1 ? "404" : others.code,
+      data: null,
+    };
   }
 
   const { data: statistics, ...rest } = await fetchPersonalOverview(data.id);
