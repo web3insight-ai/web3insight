@@ -15,7 +15,7 @@ type DefaultLayoutProps = {
 function DefaultLayout({ children, history, user }: DefaultLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="sticky top-0 z-10 border-b bg-white">
+      <header className="sticky top-0 z-20 border-b bg-white">
         <NavToolbar
           history={history}
           user={user}

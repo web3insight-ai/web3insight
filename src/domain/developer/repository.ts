@@ -1,13 +1,13 @@
 import type { ResponseResult } from "@/types";
 import { isNumeric } from "@/utils";
 
-import { fetchUser, fetchUserById, fetchPersonalOverview } from "../ossinsight/repository";
+import { fetchUser, fetchUserById, fetchPersonalOverview, fetchPersonalContributionTrends } from "../ossinsight/repository";
 import { fetchGithubUserActivity } from "../rsshub/repository";
 
 import type { Repository } from "../repository/typing";
 import { fetchListByDeveloper } from "../repository/repository";
 
-import type { Developer, DeveloperActivity } from "./typing";
+import type { Developer, DeveloperActivity, DeveloperContribution } from "./typing";
 
 async function fetchOne(idOrUsername: number | string): Promise<ResponseResult<Developer | null>> {
   const { data, ...others } = isNumeric(idOrUsername) ? await fetchUserById(idOrUsername) : await fetchUser(<string>idOrUsername);
@@ -68,4 +68,19 @@ async function fetchActivityList(username: string): Promise<ResponseResult<Devel
   };
 }
 
-export { fetchOne, fetchRepositoryRankList, fetchActivityList };
+async function fetchContributionList(id: number): Promise<ResponseResult<DeveloperContribution[]>> {
+  const { data,...others } = await fetchPersonalContributionTrends(id);
+
+  return {
+    ...others,
+    data: others.success
+      ? data
+        .filter(({ contribution_type }) => contribution_type === "pushes")
+        .map(({ event_month, cnt }) => ({ date: event_month, total: cnt }))
+        .slice(-10)
+        .reverse()
+      : [],
+  };
+}
+
+export { fetchOne, fetchRepositoryRankList, fetchActivityList, fetchContributionList };

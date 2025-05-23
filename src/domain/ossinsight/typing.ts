@@ -5,5 +5,13 @@ type PersonalOverview = {
   code_reviews: number;
 }
 
-export type { PersonalOverview };
+type ContributionType = "pushes" | "issues" | "issue_comments" | "pull_requests" | "reviews" | "review_comments";
+
+type PersonalContributionTrend = {
+  cnt: number;
+  contribution_type: ContributionType;
+  event_month: string;
+};
+
+export type { PersonalOverview, PersonalContributionTrend };
 export type { User as GithubUser } from "../github/typing";

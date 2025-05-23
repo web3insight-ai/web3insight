@@ -26,4 +26,9 @@ type DeveloperActivity = {
   date: string;
 }
 
-export type { Developer, DeveloperActivity };
+type DeveloperContribution = {
+  date: string;
+  total: number;
+};
+
+export type { Developer, DeveloperActivity, DeveloperContribution };
