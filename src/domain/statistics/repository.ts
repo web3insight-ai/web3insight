@@ -13,9 +13,25 @@ async function fetchStatisticsOverview() {
     fetchActorCount(),
     fetchActorCount({ scope: "Core" }),
   ]);
-  const failed = responses.find(res => !res.success);
+  const failedIndex = responses.findIndex(res => !res.success);
 
-  return failed ? failed : generateSuccessResponse({
+  if (failedIndex > -1) {
+    const failed = responses[failedIndex];
+
+    console.log("request failed while fetching statistics overview", failedIndex, failed?.code, failed?.message);
+
+    return {
+      ...failed,
+      data: {
+        ecosystem: 0,
+        repository: 0,
+        developer: 0,
+        coreDeveloper: 0,
+      },
+    };
+  }
+
+  return generateSuccessResponse({
     ecosystem: responses[0].data.total,
     repository: responses[1].data.total,
     developer: responses[2].data.total,
