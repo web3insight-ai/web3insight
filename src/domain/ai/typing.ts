@@ -1,3 +1,8 @@
 type AnalysisType = "evm" | "github_repo" | undefined;
 
-export type { AnalysisType };
+type fetchAIStatisticProps = {
+  query: string;
+  request_id: string;
+};
+
+export type { AnalysisType, fetchAIStatisticProps };

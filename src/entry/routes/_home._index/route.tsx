@@ -2,13 +2,13 @@ import { Button, Card, CardBody, Chip, Link as NextUILink, Input } from "@nextui
 import {
   json,
   LoaderFunctionArgs,
-  redirect,
+  // redirect,
   type ActionFunctionArgs,
   type MetaFunction,
 } from "@remix-run/node";
 import { Link, useLoaderData, useFetcher } from "@remix-run/react";
 import { ArrowRight, Hash, Search } from "lucide-react";
-import { getClientIPAddress } from "remix-utils/get-client-ip-address";
+// import { getClientIPAddress } from "remix-utils/get-client-ip-address";
 import { useEffect } from "react";
 import { useAtom } from "jotai";
 
@@ -19,7 +19,7 @@ import { authModalOpenAtom, authModalTypeAtom } from "#/atoms";
 
 import { getUser } from "~/auth/repository";
 import { ErrorType } from "~/query/helper";
-import { insertOne, fetchListForUser } from "~/query/repository";
+import { fetchListForUser } from "~/query/repository";
 import { fetchStatisticsOverview, fetchStatisticsRank } from "~/statistics/repository";
 import EcosystemRankViewWidget from "~/ecosystem/views/ecosystem-rank";
 import RepositoryRankViewWidget from "~/repository/views/repository-rank";
@@ -27,6 +27,8 @@ import DeveloperRankViewWidget from "~/developer/views/developer-rank";
 
 import MetricOverview from "./MetricOverview";
 import MetricSection from "./MetricSection";
+import { fetchAIStatistic } from "~/ai/repository";
+import { v4 as uuidv4 } from "uuid";
 
 const { title, tagline, description } = getMetadata();
 
@@ -56,29 +58,49 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
 };
 
 export const action = async (ctx: ActionFunctionArgs) => {
-  const user = await getUser(ctx.request);
-  const formData = await ctx.request.formData();
+  // const user = await getUser(ctx.request);
+  // const formData = await ctx.request.formData();
 
-  const res = await insertOne({
-    user,
-    ipAddress: getClientIPAddress(ctx.request.headers),
+  // const res = await insertOne({
+  //   user,
+  //   ipAddress: getClientIPAddress(ctx.request.headers),
+  //   query: formData.get("query") as string,
+  // });
+
+  // return res.success && res.data ?
+  //   redirect(`/query/${res.data.documentId}`) :
+  //   json({
+  //     type: res.extra?.type,
+  //     error: res.message,
+  //   }, { status: Number(res.code) });
+
+  const formData = await ctx.request.formData();
+  const res = await fetchAIStatistic({
     query: formData.get("query") as string,
+    request_id: uuidv4(),
   });
 
-  return res.success && res.data ?
-    redirect(`/query/${res.data.documentId}`) :
-    json({
-      type: res.extra?.type,
-      error: res.message,
-    }, { status: Number(res.code) });
+  return res.success && res.data
+    ? json({
+      data: res.data.answer,
+    })
+    : json(
+      {
+        type: res.extra?.type,
+        error: res.message,
+      },
+      { status: Number(res.code) },
+    );
 };
 
 export default function Index() {
   const { pinned, statisticOverview, statisticRank } = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof action>();
   const asking = fetcher.state === "submitting";
-  const errorMessage = fetcher.data?.error;
-  const errorType = fetcher.data?.type;
+  const errorMessage =
+    fetcher.data && "error" in fetcher.data ? fetcher.data?.error : null;
+  const errorType =
+    fetcher.data && "type" in fetcher.data ? fetcher.data?.type : null;
   const [, setAuthModalOpen] = useAtom(authModalOpenAtom);
   const [, setAuthModalType] = useAtom(authModalTypeAtom);
 
@@ -210,6 +232,15 @@ export default function Index() {
               </Link>
             </div>
           )}
+          {fetcher.data && "data" in fetcher.data ? (
+            <Card className="w-full max-w-[650px] mx-auto mt-8">
+              <CardBody>
+                <p className="text-gray-500 dark:text-gray-400 ">
+                  {fetcher.data?.data}
+                </p>
+              </CardBody>
+            </Card>
+          ) : null}
         </div>
 
         {/* Call to Action */}
