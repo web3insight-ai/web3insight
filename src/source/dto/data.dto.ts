@@ -8,6 +8,8 @@ export enum EcoType {
   Bitcoin = 'Bitcoin',
   Ethereum = 'Ethereum',
   NSL = 'Natural Selection Labs  (RSS3)',
+  Aptos = 'Aptos',
+  Sui = 'Sui',
 }
 
 export type EcoTypeValue = `${EcoType}`;
