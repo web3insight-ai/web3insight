@@ -7,7 +7,7 @@ const openai = createOpenAI({
 });
 
 const httpClient = new HttpClient({
-  baseUrl: process.env.AI_API_URL,
+  baseUrl: `${process.env.AI_API_URL}/api/v1`,
   headers: {
     Authorization: `Bearer ${process.env.AI_API_TOKEN}`,
   },

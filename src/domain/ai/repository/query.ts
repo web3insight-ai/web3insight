@@ -1,16 +1,18 @@
 import type { ResponseResult } from "@/types";
 
 import { httpClient } from "./client";
-import { fetchAIStatisticProps } from "../typing";
 
-async function fetchAIStatistic({
+async function fetchAnalyzedStatistics({
   query,
   request_id,
-}: fetchAIStatisticProps): Promise<ResponseResult> {
-  return httpClient.post("/api/v1/statistic", {
+}: {
+  query: string;
+  request_id: string;
+}): Promise<ResponseResult> {
+  return httpClient.post("/statistic", {
     query,
     request_id,
   });
 }
 
-export { fetchAIStatistic };
+export { fetchAnalyzedStatistics };

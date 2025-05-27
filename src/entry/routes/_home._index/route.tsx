@@ -27,8 +27,8 @@ import DeveloperRankViewWidget from "~/developer/views/developer-rank";
 
 import MetricOverview from "./MetricOverview";
 import MetricSection from "./MetricSection";
-import { fetchAIStatistic } from "~/ai/repository";
-import { v4 as uuidv4 } from "uuid";
+import { fetchAnalyzedStatistics } from "~/ai/repository";
+import { v4 as uuidv4 } from 'uuid';
 
 const { title, tagline, description } = getMetadata();
 
@@ -75,32 +75,38 @@ export const action = async (ctx: ActionFunctionArgs) => {
   //   }, { status: Number(res.code) });
 
   const formData = await ctx.request.formData();
-  const res = await fetchAIStatistic({
+  const res = await fetchAnalyzedStatistics({
     query: formData.get("query") as string,
     request_id: uuidv4(),
   });
 
   return res.success && res.data
-    ? json({
-      data: res.data.answer,
-    })
-    : json(
-      {
-        type: res.extra?.type,
-        error: res.message,
-      },
-      { status: Number(res.code) },
-    );
+    ? json<{
+        data?: string;
+        type?: string;
+        error?: string;
+      }>({
+        data: res.data.answer,
+      })
+    : json<{
+        data?: string;
+        type?: string;
+        error?: string;
+      }>(
+        {
+          type: res.extra?.type,
+          error: res.message,
+        },
+        { status: Number(res.code) },
+      );
 };
 
 export default function Index() {
   const { pinned, statisticOverview, statisticRank } = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof action>();
   const asking = fetcher.state === "submitting";
-  const errorMessage =
-    fetcher.data && "error" in fetcher.data ? fetcher.data?.error : null;
-  const errorType =
-    fetcher.data && "type" in fetcher.data ? fetcher.data?.type : null;
+  const errorMessage = fetcher.data?.error || null;
+  const errorType = fetcher.data?.type || null;
   const [, setAuthModalOpen] = useAtom(authModalOpenAtom);
   const [, setAuthModalType] = useAtom(authModalTypeAtom);
 
@@ -232,7 +238,7 @@ export default function Index() {
               </Link>
             </div>
           )}
-          {fetcher.data && "data" in fetcher.data ? (
+          {fetcher.data?.data ? (
             <Card className="w-full max-w-[650px] mx-auto mt-8">
               <CardBody>
                 <p className="text-gray-500 dark:text-gray-400 ">
