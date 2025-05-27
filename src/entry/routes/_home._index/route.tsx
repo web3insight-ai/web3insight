@@ -28,7 +28,6 @@ import DeveloperRankViewWidget from "~/developer/views/developer-rank";
 import MetricOverview from "./MetricOverview";
 import MetricSection from "./MetricSection";
 import { fetchAnalyzedStatistics } from "~/ai/repository";
-import { v4 as uuidv4 } from 'uuid';
 
 const { title, tagline, description } = getMetadata();
 
@@ -77,7 +76,7 @@ export const action = async (ctx: ActionFunctionArgs) => {
   const formData = await ctx.request.formData();
   const res = await fetchAnalyzedStatistics({
     query: formData.get("query") as string,
-    request_id: uuidv4(),
+    request_id: Math.random().toString(),
   });
 
   return res.success && res.data
