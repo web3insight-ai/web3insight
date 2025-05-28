@@ -9,7 +9,6 @@ export enum EcoType {
   Aptos = 'Aptos',
   Sui = 'Sui',
   Mantle = 'Mantle',
-  Monad = 'Monad',
 }
 
 export type EcoTypeValue = `${EcoType}`;
