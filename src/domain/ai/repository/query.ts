@@ -1,6 +1,6 @@
 import type { ResponseResult } from "@/types";
 
-import { httpClient } from "./client";
+import httpClient from "./client";
 
 async function fetchAnalyzedStatistics({
   query,

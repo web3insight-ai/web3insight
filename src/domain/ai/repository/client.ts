@@ -13,4 +13,5 @@ const httpClient = new HttpClient({
   },
 });
 
-export { openai, httpClient };
+export { openai };
+export default httpClient;
