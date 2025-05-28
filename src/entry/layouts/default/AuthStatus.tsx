@@ -1,10 +1,11 @@
 import { Popover, PopoverContent, PopoverTrigger, Button, Avatar } from "@nextui-org/react";
 import { Link, useNavigate, useOutletContext } from "@remix-run/react";
-import { LogIn, LogOut, User as UserIcon, Key } from "lucide-react";
+import { LogIn, LogOut, User as UserIcon, Key, Shield } from "lucide-react";
 import { useAtom } from "jotai";
 import { authModalOpenAtom, authModalTypeAtom } from "#/atoms";
 import type { StrapiUser } from "@/types";
 
+import { isAdmin } from "~/auth/helper";
 import { signOut } from "~/auth/repository";
 
 type AuthStatusProps = {
@@ -89,6 +90,18 @@ export default function AuthStatus({ user }: AuthStatusProps) {
                 Change Password
               </button>
             </div>
+
+            {isAdmin(user) && (
+              <div className="py-1 border-t border-gray-100">
+                <Link
+                  to="/admin"
+                  className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  <Shield size={15} className="mr-2 text-gray-500" />
+                  Manage
+                </Link>
+              </div>
+            )}
 
             {/* Logout section */}
             <div className="py-1 border-t border-gray-100">

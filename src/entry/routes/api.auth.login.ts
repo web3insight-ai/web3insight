@@ -1,7 +1,7 @@
 import { redirect, json } from "@remix-run/node";
 import { pick } from "@/utils";
 
-import { createUserSession } from "~/auth/helper";
+import { createUserSession } from "~/auth/helper/server-only";
 import { signIn } from "~/auth/repository";
 
 import { createServerAction, createPreflightAction } from "../utils";

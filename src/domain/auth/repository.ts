@@ -9,7 +9,7 @@ import {
   sendPasswordResetEmail as sendPasswordResetEmailViaStrapi,
   resetPassword as resetPasswordViaStrapi,
 } from "../strapi/repository";
-import { getSession, clearSession } from "./helper";
+import { getSession, clearSession } from "./helper/server-only";
 
 // Simple in-memory cache for user data
 // This will reduce repeated API calls within the same server instance
