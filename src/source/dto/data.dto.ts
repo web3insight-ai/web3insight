@@ -10,6 +10,7 @@ export enum EcoType {
   NSL = 'Natural Selection Labs  (RSS3)',
   Aptos = 'Aptos',
   Sui = 'Sui',
+  Mantle = 'Mantle',
 }
 
 export type EcoTypeValue = `${EcoType}`;
