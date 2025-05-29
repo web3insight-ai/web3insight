@@ -1,6 +1,7 @@
 export const CacheKey = {
   ReposTotal: 'repos_total',
   ActorTotal: 'actor_total',
+  ActorTotalNew: 'actor_total_new',
   ActorWeekTotal: 'actor_week_total',
   ActorMonthTotal: 'actor_month_total',
   ActorCoreTotal: 'actor_core_total',
