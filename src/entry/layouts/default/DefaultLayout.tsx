@@ -1,25 +1,20 @@
-import NavToolbar from "./NavToolbar";
 import AuthFormDialogViewWidget from "~/auth/views/auth-form-dialog";
-import type { StrapiUser } from "@/types";
 
-type DefaultLayoutProps = {
-  children: React.ReactNode;
-  history: {
-    query: string;
-    id: string;
-    documentId: string;
-  }[];
-  user: StrapiUser | null;
-};
+import Navbar from "../../components/navbar";
+
+import type { DefaultLayoutProps } from "./typing";
+import SearchHistory from "./SearchHistory";
 
 function DefaultLayout({ children, history, user }: DefaultLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="sticky top-0 z-20 border-b bg-white">
-        <NavToolbar
-          history={history}
-          user={user}
-        />
+        <Navbar className="max-w-[1200px] mx-auto" user={user}>
+          <SearchHistory
+            history={history}
+            placeholder={user ? "Your search history will appear here" : "Sign in to save your search history"}
+          />
+        </Navbar>
       </header>
 
       <main className="pb-20">
