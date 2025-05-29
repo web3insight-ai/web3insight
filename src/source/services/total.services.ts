@@ -6,7 +6,7 @@ import { Command, Console } from 'nestjs-console';
 import { CacheDataService } from './cache.services';
 import { CacheKey } from '../dto/cache.dto';
 import { ActorsScopeType, EcoType } from '../dto/data.dto';
-import { ActorDateListDto, StatsPeriod } from '@/api/api.dto';
+import { ActorDateListDto, StatsPeriod, TotalDto } from '@/api/api.dto';
 
 @Injectable()
 @Console()
@@ -244,20 +244,66 @@ export class TotalService {
     return await this.cacheDataService.getCacheData(cacheKey, ecoName);
   }
 
+  async getActorTotalNew(ecoName: EcoType, cache: boolean = true) {
+    const dbData = await this.cacheDataService.getCacheData(
+      CacheKey.ActorTotalNew,
+    );
+
+    if (!dbData && cache) {
+      throw new Error('Cache not found');
+    }
+
+    if (dbData && cache) {
+      return dbData;
+    }
+
+    const query = sql`
+WITH first_activity AS (SELECT e.actor_id,
+                               MIN(e.created_at) as first_activity_time
+                        FROM web3.event e
+                                 JOIN web3.repos r ON e.repo_id = r.repo_id
+                        WHERE ${
+                          ecoName === EcoType.ALL
+                            ? sql`array_length(r.eco_names, 1) > 0`
+                            : sql`r.eco_names @> ARRAY[${sql.join([ecoName])}]`
+                        }
+                        GROUP BY e.actor_id)
+SELECT COUNT(*) as total
+FROM first_activity
+WHERE first_activity_time >= NOW() - INTERVAL '90 days';
+    `;
+
+    const results = await query.execute(this.db);
+
+    await this.cacheDataService.updateCacheData(
+      CacheKey.ActorTotalNew,
+      results.rows[0] as TotalDto,
+      new Date().toISOString(),
+      ecoName,
+    );
+
+    return await this.cacheDataService.getCacheData(
+      CacheKey.ActorTotalNew,
+      ecoName,
+    );
+  }
+
   @Command({
     command: 'sync:eco:total',
     description: 'Test eco data',
   })
   async test() {
-    await this.ecoTotal(EcoType.ALL, false);
+    //await this.ecoTotal(EcoType.ALL, false);
     const ecoTypes = Object.values(EcoType);
     for (const eco of ecoTypes) {
-      await this.reposTotal(eco, false);
-      await this.actorsTotal(eco, ActorsScopeType.Core, false);
-      await this.actorsTotal(eco, ActorsScopeType.ALL, false);
-      await this.getActorStats(eco, StatsPeriod.MONTH, false);
-      await this.getActorStats(eco, StatsPeriod.WEEK, false);
+      await this.getActorTotalNew(eco, false);
+      // await this.reposTotal(eco, false);
+      // await this.actorsTotal(eco, ActorsScopeType.Core, false);
+      // await this.actorsTotal(eco, ActorsScopeType.ALL, false);
+      // await this.getActorStats(eco, StatsPeriod.MONTH, false);
+      // await this.getActorStats(eco, StatsPeriod.WEEK, false);
     }
+
     return null;
   }
 }

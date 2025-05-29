@@ -48,12 +48,30 @@ export class TotalController {
   })
   @ApiBearerAuth()
   @UseGuards(AppAuthGuard)
-  async getAcNum(@Query() query: GetActorsTotalReqDto) {
+  async getActorsNum(@Query() query: GetActorsTotalReqDto) {
     try {
       const res = await this.ecoDataService.actorsTotal(
         query.eco_name,
         query.scope,
       );
+      return res?.cache_data as TotalDto;
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        throw new HttpException(e, 400);
+      }
+    }
+  }
+
+  @Get('actors/total/new/quarter/last')
+  @ApiOperation({
+    summary: 'Get total new actors count for the last quarter',
+    description: '',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AppAuthGuard)
+  async getActorsNumQuarter(@Query() query: GetTotalReqDto) {
+    try {
+      const res = await this.ecoDataService.getActorTotalNew(query.eco_name);
       return res?.cache_data as TotalDto;
     } catch (e: unknown) {
       if (e instanceof Error) {
