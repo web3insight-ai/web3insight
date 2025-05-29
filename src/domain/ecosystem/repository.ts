@@ -15,7 +15,7 @@ import { fetchEcosystem } from "../strapi/repository";
 import type { RepoRankRecord, ActorRankRecord, ActorTrendRecord } from "../api/typing";
 import {
   fetchRepoCount, fetchRepoRankList,
-  fetchActorCount, fetchActorRankList, fetchActorTrendList,
+  fetchActorCount, fetchActorGrowthCount, fetchActorRankList, fetchActorTrendList,
 } from "../api/repository";
 
 async function fetchOne(keyword?: string): Promise<ResponseResult<Record<string, DataValue> | null>> {
@@ -115,6 +115,7 @@ async function fetchRepoAnalysis(repo: string) {
 async function fetchStatistics(name: string): Promise<ResponseResult<{
   developerTotalCount: number | string;
   developerCoreCount: number | string;
+  developerGrowthCount: number | string;
   developers: ActorRankRecord[];
   trend: ActorTrendRecord[];
   repositoryTotalCount: number | string;
@@ -124,6 +125,7 @@ async function fetchStatistics(name: string): Promise<ResponseResult<{
   const responses = await Promise.all([
     fetchActorCount(params),
     fetchActorCount({ ...params, scope: "Core" }),
+    fetchActorGrowthCount(params),
     fetchActorRankList(params),
     fetchActorTrendList(params),
     fetchRepoCount(params),
@@ -136,6 +138,7 @@ async function fetchStatistics(name: string): Promise<ResponseResult<{
     data: {
       developerTotalCount: 0,
       developerCoreCount: 0,
+      developerGrowthCount: 0,
       developers: [],
       trend: [],
       repositoryTotalCount: 0,
@@ -144,10 +147,11 @@ async function fetchStatistics(name: string): Promise<ResponseResult<{
   } : generateSuccessResponse({
     developerTotalCount: responses[0].data.total,
     developerCoreCount: responses[1].data.total,
-    developers: responses[2].data.list,
-    trend: responses[3].data.list,
-    repositoryTotalCount: responses[4].data.total,
-    repositories: responses[5].data.list,
+    developerGrowthCount: responses[2].data.total,
+    developers: responses[3].data.list,
+    trend: responses[4].data.list,
+    repositoryTotalCount: responses[5].data.total,
+    repositories: responses[6].data.list,
   });
 }
 

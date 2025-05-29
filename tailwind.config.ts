@@ -12,6 +12,6 @@ export default {
     extend: {},
   },
   plugins: [
-    nextui()
+    nextui(),
   ],
 } satisfies Config;
