@@ -294,15 +294,16 @@ WHERE first_activity_time >= NOW() - INTERVAL '90 days';
     description: 'Test eco data',
   })
   async test() {
-    //await this.ecoTotal(EcoType.ALL, false);
+    await this.ecoTotal(EcoType.ALL, false);
     const ecoTypes = Object.values(EcoType);
     for (const eco of ecoTypes) {
       await this.getActorTotalNew(eco, false);
-      // await this.reposTotal(eco, false);
-      // await this.actorsTotal(eco, ActorsScopeType.Core, false);
-      // await this.actorsTotal(eco, ActorsScopeType.ALL, false);
-      // await this.getActorStats(eco, StatsPeriod.MONTH, false);
-      // await this.getActorStats(eco, StatsPeriod.WEEK, false);
+      await this.reposTotal(eco, false);
+      await this.getActorTotalNew(eco, false);
+      await this.actorsTotal(eco, ActorsScopeType.Core, false);
+      await this.actorsTotal(eco, ActorsScopeType.ALL, false);
+      await this.getActorStats(eco, StatsPeriod.MONTH, false);
+      await this.getActorStats(eco, StatsPeriod.WEEK, false);
     }
 
     return null;
