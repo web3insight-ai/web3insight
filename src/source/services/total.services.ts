@@ -247,6 +247,7 @@ export class TotalService {
   async getActorTotalNew(ecoName: EcoType, cache: boolean = true) {
     const dbData = await this.cacheDataService.getCacheData(
       CacheKey.ActorTotalNew,
+      ecoName,
     );
 
     if (!dbData && cache) {
