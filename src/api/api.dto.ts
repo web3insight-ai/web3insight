@@ -140,3 +140,7 @@ export class BaseIdReqAndResDto {
   @Expose()
   id: number = 0;
 }
+
+export class SucessResDto {
+  sucess: boolean = true;
+}

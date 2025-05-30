@@ -11,6 +11,7 @@ import {
   ReposCustomMarkReqDto,
   ReposOrderEnum,
   ReposOrderReqDto,
+  SucessResDto,
 } from '@/api/api.dto';
 
 @Injectable()
@@ -25,10 +26,10 @@ export class ReposService {
     }
 
     if (params.search && params.search !== '') {
-      query = query.where('repo_name', 'like', `%${params.search}%`);
+      query = query.where('repo_name', 'ilike', `%${params.search}%`);
     }
 
-    const _total = await query
+    const total = await query
       .select(this.db.fn.count('repo_id').as('total'))
       .execute();
 
@@ -54,7 +55,7 @@ export class ReposService {
 
     const res = new GetReposMarkResDto();
     res.list = list;
-    res.total = _total[0].total as number;
+    res.total = total[0].total as number;
 
     return res;
   }
@@ -77,7 +78,7 @@ export class ReposService {
       })
       .where('repo_id', '=', String(param.id))
       .execute();
-    return { success: true };
+    return (new SucessResDto().sucess = true);
   }
 
   @Command({
