@@ -22,7 +22,7 @@ function AdminLayout({ user }: AdminLayoutProps) {
         <div className="flex-shrink-0 w-60 p-4 bg-slate-300">
           <NavMenu />
         </div>
-        <div className="flex-grow flex flex-col p-4">
+        <div className="flex-grow flex flex-col p-10">
           <Outlet />
         </div>
       </main>

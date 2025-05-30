@@ -1,6 +1,6 @@
-import type { MetricSectionProps } from "./typing";
+import type { SectionProps } from "./typing";
 
-function MetricSection({ title, summary, className, children }: MetricSectionProps) {
+function Section({ title, summary, className, children }: SectionProps) {
   return (
     <div className={className}>
       <div className="flex flex-col space-y-1 mb-6">
@@ -12,4 +12,4 @@ function MetricSection({ title, summary, className, children }: MetricSectionPro
   );
 }
 
-export default MetricSection;
+export default Section;

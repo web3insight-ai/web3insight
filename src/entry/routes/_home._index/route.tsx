@@ -25,8 +25,8 @@ import EcosystemRankViewWidget from "~/ecosystem/views/ecosystem-rank";
 import RepositoryRankViewWidget from "~/repository/views/repository-rank";
 import DeveloperRankViewWidget from "~/developer/views/developer-rank";
 
+import Section from "../../components/section";
 import MetricOverview from "./MetricOverview";
-import MetricSection from "./MetricSection";
 import { fetchAnalyzedStatistics } from "~/ai/repository";
 
 const { title, tagline, description } = getMetadata();
@@ -144,27 +144,27 @@ export default function Index() {
       <div className="w-full max-w-[1200px] mx-auto px-4 sm:px-6 py-12">
         <MetricOverview dataSource={statisticOverview} />
 
-        <MetricSection
+        <Section
           className="mt-10"
           title="Web3 Ecosystem Analytics"
           summary="Comprehensive insights about major blockchain ecosystems"
         >
           <EcosystemRankViewWidget dataSource={statisticRank.ecosystem} />
-        </MetricSection>
-        <MetricSection
+        </Section>
+        <Section
           className="mt-10"
           title="Repository Activity"
           summary="Top repositories by developer engagement and contributions"
         >
           <RepositoryRankViewWidget dataSource={statisticRank.repository} />
-        </MetricSection>
-        <MetricSection
+        </Section>
+        <Section
           className="mt-10"
           title="Top Developer Activity"
           summary="Leading contributors across Web3 ecosystems"
         >
           <DeveloperRankViewWidget dataSource={statisticRank.developer} view="grid" />
-        </MetricSection>
+        </Section>
 
         <div className="mt-16">
           {/* Search Section - Prominently placed in hero section */}

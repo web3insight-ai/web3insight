@@ -11,7 +11,7 @@ function NavMenu() {
       {getMenu().map(item => (
         <Link
           key={item.text}
-          className={clsx("block px-4 py-2 rounded-md text-gray-800 hover:text-gray-600 hover:bg-white/15", { "!bg-white": isMenuItemActive(pathname, item) })}
+          className={clsx("block px-4 py-2 text-sm rounded-md text-gray-800 hover:text-gray-600 hover:bg-white/15", { "!bg-white": isMenuItemActive(pathname, item) })}
           to={item.path}
         >
           {item.text}
