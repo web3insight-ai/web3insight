@@ -4,6 +4,8 @@ import { useLoaderData } from "@remix-run/react";
 import { fetchManageableRepositoryList } from "~/ecosystem/repository";
 import RepositoryListViewWidget from "~/repository/views/repository-list";
 
+import Section from "../components/section";
+
 async function loader({ params }: LoaderFunctionArgs) {
   const name = decodeURIComponent(params.name!);
   const { data } = await fetchManageableRepositoryList(name);
@@ -17,10 +19,12 @@ function AdminEcosystemDetailPage() {
   const { ecosystem } = useLoaderData<typeof loader>();
 
   return (
-    <div>
-      <h1>Ecosystem: {ecosystem.name}</h1>
+    <Section
+      title={ecosystem.name}
+      summary={`Manage stuff of ${ecosystem.name} ecosystem`}
+    >
       <RepositoryListViewWidget dataSource={ecosystem.repositories} />
-    </div>
+    </Section>
   );
 }
 
