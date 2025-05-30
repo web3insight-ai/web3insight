@@ -6,8 +6,14 @@ type SearchHistoryProps = {
   placeholder: string;
 };
 
-type NavToolbarProps = Pick<SearchHistoryProps, "history"> & {
+type DefaultLayoutProps = {
+  children: React.ReactNode;
+  history: {
+    query: string;
+    id: string;
+    documentId: string;
+  }[];
   user: StrapiUser | null;
 };
 
-export type { SearchHistoryProps, NavToolbarProps };
+export type { SearchHistoryProps, DefaultLayoutProps };

@@ -17,6 +17,9 @@ import {
   fetchRepoCount, fetchRepoRankList,
   fetchActorCount, fetchActorGrowthCount, fetchActorRankList, fetchActorTrendList,
 } from "../api/repository";
+import { fetchListByEcosystem } from "../repository/repository";
+
+import type { Ecosystem } from "./typing";
 
 async function fetchOne(keyword?: string): Promise<ResponseResult<Record<string, DataValue> | null>> {
   return fetchEcosystem(keyword);
@@ -155,4 +158,22 @@ async function fetchStatistics(name: string): Promise<ResponseResult<{
   });
 }
 
-export { fetchOne, getInfo, fetchRepoAnalysis, fetchStatistics };
+function fetchManageableList(): Promise<ResponseResult<Ecosystem[]>> {
+  return Promise.resolve(generateSuccessResponse([
+    { name: "Ethereum" },
+    { name: "Ethereum Classic" },
+    { name: "Polygon" },
+    { name: "Avalanche" },
+    { name: "Optimism" },
+    { name: "Arbitrum" },
+  ]));
+}
+
+function fetchManageableRepositoryList(name: string) {
+  return fetchListByEcosystem(name);
+}
+
+export {
+  fetchOne, getInfo, fetchRepoAnalysis, fetchStatistics,
+  fetchManageableList, fetchManageableRepositoryList,
+};

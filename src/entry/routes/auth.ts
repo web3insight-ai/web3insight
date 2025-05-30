@@ -4,7 +4,7 @@ import type { ResponseResult } from "@/types";
 import { omit } from "@/utils";
 import { generateFailedResponse } from "@/clients/http";
 
-import { createUserSession } from "~/auth/helper";
+import { createUserSession } from "~/auth/helper/server-only";
 import { signUp, signIn, sendPasswordResetEmail, resetPassword } from "~/auth/repository";
 
 export async function action({ request }: ActionFunctionArgs) {
