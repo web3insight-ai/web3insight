@@ -1,5 +1,16 @@
-import { IsEnum, IsOptional } from 'class-validator';
+import {
+  IsEnum,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  Max,
+  MaxLength,
+  Min,
+  ValidateIf,
+} from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 import { ActorsScopeType, EcoType } from '@/source/dto/data.dto';
+import { Expose, Type } from 'class-transformer';
 
 export class GetTotalReqDto {
   @IsEnum(EcoType)
@@ -73,4 +84,59 @@ export class RepoRankListDto {
 
 export class ActorCommitRankListDto {
   list: ActorCommitRankDto[] = [];
+}
+
+export enum ReposOrderEnum {
+  ID = 'id',
+  ORG = 'org',
+}
+
+export class ReposOrderReqDto {
+  @IsEnum(ReposOrderEnum)
+  @IsOptional()
+  order: ReposOrderEnum = ReposOrderEnum.ID;
+  @IsEnum(EcoType)
+  @IsOptional()
+  eco_name: EcoType = EcoType.ALL;
+  @IsNumber()
+  skip: number = 0;
+  @IsNumber()
+  @Min(1)
+  @Max(100)
+  take: number = 100;
+  @ApiProperty({ required: false })
+  @MaxLength(50)
+  @IsOptional()
+  search: string | undefined;
+}
+
+export class RepoMarkDto {
+  repo_id: number = 0;
+  repo_name: string = '';
+  upstream_marks: object = {};
+  custom_marks: object = {};
+}
+
+export class GetReposMarkResDto {
+  list: RepoMarkDto[] = [];
+  total: number = 0;
+}
+
+export class ReposCustomMarkReqDto {
+  @IsEnum(EcoType)
+  @IsOptional()
+  @ValidateIf((o: ReposCustomMarkReqDto) => o.eco_name !== EcoType.ALL)
+  eco_name: EcoType = EcoType.Bitcoin;
+  @IsNumber()
+  @Min(0)
+  @Max(10)
+  mark: number = 1;
+}
+
+export class BaseIdReqAndResDto {
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Expose()
+  id: number = 0;
 }
