@@ -61,7 +61,8 @@ export interface Web3Event {
 
 export interface Web3Repos {
   created_at: Timestamp;
-  eco_details: Generated<Json | null>;
+  upstream_marks: Generated<Json | null>;
+  custom_marks: Generated<Json | null>;
   eco_names: Generated<string[] | null>;
   repo_id: Int8;
   repo_name: string | null;

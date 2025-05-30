@@ -4,10 +4,17 @@ import { DBModule } from '@/db/db.module';
 import { TotalService } from './services/total.services';
 import { CacheDataService } from './services/cache.services';
 import { RankService } from './services/rank.services';
+import { ReposService } from './services/repos.services';
 
 @Module({
   imports: [DBModule],
-  providers: [InitDataService, TotalService, CacheDataService, RankService],
-  exports: [InitDataService, TotalService, RankService],
+  providers: [
+    InitDataService,
+    TotalService,
+    CacheDataService,
+    RankService,
+    ReposService,
+  ],
+  exports: [InitDataService, TotalService, RankService, ReposService],
 })
 export class SourceModule {}
