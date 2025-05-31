@@ -1,6 +1,7 @@
 export {
   fetchTotalCount as fetchEcosystemCount,
   fetchRankList as fetchEcosystemRankList,
+  fetchAdminRepoList,
 } from "./ecosystem";
 export {
   fetchTotalCount as fetchRepoCount,

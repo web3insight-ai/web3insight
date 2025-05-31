@@ -1,6 +1,6 @@
 import type { ResponseResult } from "@/types";
 
-import type { TotalResponseData, ListResponseData, EcoRankRecord } from "../typing";
+import type { PaginatableParams, TotalResponseData, ListResponseData, EcoRequestParams, EcoRankRecord, EcoRepo } from "../typing";
 import httpClient from "./client";
 
 async function fetchTotalCount(): Promise<ResponseResult<TotalResponseData>> {
@@ -11,4 +11,12 @@ async function fetchRankList(): Promise<ResponseResult<ListResponseData<EcoRankR
   return httpClient.get("/v1/ecosystems/top");
 }
 
-export { fetchTotalCount, fetchRankList };
+async function fetchAdminRepoList(
+  params: Partial<PaginatableParams & EcoRequestParams> = {},
+): Promise<ResponseResult<ListResponseData<EcoRepo> & TotalResponseData>> {
+  const { eco, ...others } = params;
+
+  return httpClient.get("/v1/admin/ecosystems/repos", { params: { ...others, eco_name: eco } });
+}
+
+export { fetchTotalCount, fetchRankList, fetchAdminRepoList };

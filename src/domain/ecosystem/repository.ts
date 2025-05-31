@@ -14,10 +14,11 @@ import {
 import { fetchEcosystem } from "../strapi/repository";
 import type { RepoRankRecord, ActorRankRecord, ActorTrendRecord } from "../api/typing";
 import {
+  fetchEcosystemRankList,
   fetchRepoCount, fetchRepoRankList,
   fetchActorCount, fetchActorGrowthCount, fetchActorRankList, fetchActorTrendList,
 } from "../api/repository";
-import { fetchListByEcosystem } from "../repository/repository";
+import { fetchManageableList as fetchManageableRepoListByEco } from "../repository/repository";
 
 import type { Ecosystem } from "./typing";
 
@@ -158,19 +159,17 @@ async function fetchStatistics(name: string): Promise<ResponseResult<{
   });
 }
 
-function fetchManageableList(): Promise<ResponseResult<Ecosystem[]>> {
-  return Promise.resolve(generateSuccessResponse([
-    { name: "Ethereum" },
-    { name: "Ethereum Classic" },
-    { name: "Polygon" },
-    { name: "Avalanche" },
-    { name: "Optimism" },
-    { name: "Arbitrum" },
-  ]));
+async function fetchManageableList(): Promise<ResponseResult<Ecosystem[]>> {
+  const { data, ...others } = await fetchEcosystemRankList();
+
+  return {
+    ...others,
+    data: data.list.map(eco => ({ name: eco.eco_name })),
+  };
 }
 
-function fetchManageableRepositoryList(name: string) {
-  return fetchListByEcosystem(name);
+async function fetchManageableRepositoryList(name: string) {
+  return fetchManageableRepoListByEco({ eco: name });
 }
 
 export {

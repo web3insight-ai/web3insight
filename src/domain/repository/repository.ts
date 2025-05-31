@@ -4,6 +4,7 @@ import { generateSuccessResponse } from "@/clients/http";
 import type { Repository } from "./typing";
 
 import { fetchRepoListByUserLogin } from "../github/repository";
+import { fetchAdminRepoList } from "../api/repository";
 
 async function fetchListByDeveloper(username: string): Promise<ResponseResult<Repository[]>> {
   const { data, ...others } = await fetchRepoListByUserLogin(username);
@@ -39,4 +40,24 @@ async function fetchListByEcosystem(name: string): Promise<ResponseResult<Reposi
   })));
 }
 
-export { fetchListByDeveloper, fetchListByEcosystem };
+async function fetchManageableList(params): Promise<ResponseResult<Repository[]>> {
+  const { data, extra, ...others } = await fetchAdminRepoList(params);
+
+  return {
+    ...others,
+    data: data.list ? data.list.map(item => ({
+      id: item.repo_id,
+      name: item.repo_name,
+      fullName: item.repo_name,
+      description: "",
+      statistics: { star: -1, fork: -1, watch: -1, openIssue: -1 },
+      customMark: item.custom_marks[params.eco] || -1,
+    })) : [],
+    extra: {
+      ...extra,
+      total: data.total,
+    },
+  };
+}
+
+export { fetchListByDeveloper, fetchListByEcosystem, fetchManageableList };

@@ -1,7 +1,10 @@
-type EcosystemType = "NEAR" | "OpenBuild" | "Starknet";
+import type { DataValue } from "@/types";
 
-type EcoRequestParams = {
-  eco: EcosystemType | "ALL";
+type PaginatableParams = {
+  search?: string;
+  order?: string;
+  skip?: number;
+  take?: number
 };
 
 type TotalResponseData = {
@@ -10,6 +13,12 @@ type TotalResponseData = {
 
 type ListResponseData<T> = {
   list: T[];
+};
+
+type EcosystemType = "NEAR" | "OpenBuild" | "Starknet";
+
+type EcoRequestParams = {
+  eco: EcosystemType | "ALL";
 };
 
 type EcoRankRecord = {
@@ -22,6 +31,11 @@ type RepoBasic = {
   repo_id: number;
   repo_name: string;
 }
+
+type EcoRepo = RepoBasic & {
+  upstream_marks: Record<string, DataValue>;
+  custom_marks: Record<string, DataValue>;
+};
 
 type RepoRankRecord =  RepoBasic & {
   star_count: number;
@@ -47,6 +61,8 @@ type ActorTrendRecord = {
 }
 
 export type {
-  EcoRequestParams, TotalResponseData, ListResponseData,
-  EcoRankRecord, RepoRankRecord, ActorRankRecord, ActorTrendRecord,
+  PaginatableParams, TotalResponseData, ListResponseData,
+  EcosystemType, EcoRequestParams, EcoRankRecord, EcoRepo,
+  RepoRankRecord,
+  ActorRankRecord, ActorTrendRecord,
 };

@@ -9,6 +9,7 @@ type Repository = Pick<Repo, "id" | "name"> & {
     watch: number;
     openIssue: number;
   };
+  customMark?: number | string;
 };
 
 export type { Repository };
