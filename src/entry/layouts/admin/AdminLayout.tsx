@@ -18,11 +18,11 @@ function AdminLayout({ user }: AdminLayoutProps) {
           }
         />
       </header>
-      <main className="flex-grow flex">
+      <main className="flex-grow flex min-h-0">
         <div className="flex-shrink-0 w-60 p-4 bg-slate-300">
           <NavMenu />
         </div>
-        <div className="flex-grow flex flex-col p-10">
+        <div className="flex-grow flex flex-col min-h-0 p-10 overflow-auto">
           <Outlet />
         </div>
       </main>
