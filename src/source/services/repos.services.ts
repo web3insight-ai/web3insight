@@ -6,7 +6,6 @@ import { Command, Console } from 'nestjs-console';
 import { EcoType } from '../dto/data.dto';
 import {
   BaseIdReqAndResDto,
-  DirectionEnum,
   GetReposMarkResDto,
   RepoMarkDto,
   ReposCustomMarkReqDto,
