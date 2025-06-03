@@ -6,6 +6,7 @@ import { Command, Console } from 'nestjs-console';
 import { EcoType } from '../dto/data.dto';
 import {
   BaseIdReqAndResDto,
+  DirectionEnum,
   GetReposMarkResDto,
   RepoMarkDto,
   ReposCustomMarkReqDto,
@@ -34,11 +35,11 @@ export class ReposService {
       .execute();
 
     if (params.order === ReposOrderEnum.ID) {
-      query = query.orderBy('repo_id');
+      query = query.orderBy('repo_id', params.direction);
     }
 
     if (params.order === ReposOrderEnum.ORG) {
-      query = query.orderBy('repo_name');
+      query = query.orderBy('repo_name', params.direction);
     }
 
     query = query.offset(params.skip);

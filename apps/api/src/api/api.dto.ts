@@ -91,6 +91,10 @@ export enum ReposOrderEnum {
   ORG = 'org',
 }
 
+export enum DirectionEnum {
+  ASC = 'asc',
+  DESC = 'desc',
+}
 export class ReposOrderReqDto {
   @IsEnum(ReposOrderEnum)
   @IsOptional()
@@ -104,6 +108,9 @@ export class ReposOrderReqDto {
   @Min(1)
   @Max(100)
   take: number = 100;
+  @IsEnum(DirectionEnum)
+  @IsOptional()
+  direction: DirectionEnum = DirectionEnum.ASC;
   @ApiProperty({ required: false })
   @MaxLength(50)
   @IsOptional()
