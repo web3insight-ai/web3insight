@@ -263,11 +263,7 @@ WITH first_activity AS (SELECT e.actor_id,
                                MIN(e.created_at) as first_activity_time
                         FROM web3.event e
                                  JOIN web3.repos r ON e.repo_id = r.repo_id
-                        WHERE ${
-                          ecoName === EcoType.ALL
-                            ? sql`array_length(r.eco_names, 1) > 0`
-                            : sql`r.eco_names @> ARRAY[${sql.join([ecoName])}]`
-                        }
+                        WHERE r.upstream_marks ?| ARRAY[${sql.join([ecoName])}]
                         GROUP BY e.actor_id)
 SELECT COUNT(*) as total
 FROM first_activity
