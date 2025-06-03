@@ -42,4 +42,11 @@ function resolveColumnClassName(col: TableColumn, baseClassName: string = ""): s
   });
 }
 
-export { resolveColumns, resolveColumnClassName };
+function resolveItemCountRange(currentPage: number, total: number, pageSize: number): [number, number] {
+  const start = (currentPage - 1) * pageSize + 1;
+  const end = Math.min(start + pageSize - 1, total);
+
+  return [start, end];
+}
+
+export { resolveColumns, resolveColumnClassName, resolveItemCountRange };
