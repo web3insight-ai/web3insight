@@ -2,6 +2,8 @@ import type { DataValue, RequestConfig, ResponseResult } from "../../types";
 import { isBoolean, isPlainObject, omit } from "../../utils/index";
 import { getVar } from "../../utils/env";
 
+import type { NormalizedPagination, SqlStylePagination } from "./typing";
+
 function isServerSide(inServer?: boolean): boolean {
   if (isBoolean(inServer)) {
     return <boolean>inServer;
@@ -163,8 +165,24 @@ async function normalizeRestfulResponse<VT extends DataValue = DataValue>(res: R
   };
 }
 
+const defaultPageSize = 20;
+
+function getDefaultPageSize(): number {
+  return defaultPageSize;
+}
+
+function resolvePaginationParams(params: NormalizedPagination = {}): SqlStylePagination {
+  const { pageSize = getDefaultPageSize(), pageNum = 1 } = params;
+
+  return {
+    take: pageSize,
+    skip: (pageNum - 1) * pageSize,
+  };
+}
+
 export {
   isServerSide, request,
   generateSuccessResponse, generateFailedResponse,
   normalizeResponse, normalizeRestfulResponse,
+  getDefaultPageSize, resolvePaginationParams,
 };

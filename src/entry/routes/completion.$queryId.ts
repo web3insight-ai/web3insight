@@ -6,7 +6,7 @@ import { noop } from "@/utils";
 
 import { generateText, getSearchKeyword, fetchAnalysisPrompt } from "~/ai/repository";
 import { fetchOne, updateOne } from "~/query/repository";
-import { getInfo } from "~/ecosystem/repository";
+import { getInfo } from "~/ecosystem/repository/legacy";
 
 export async function loader(ctx: LoaderFunctionArgs) {
   const queryId = ctx.params.queryId as string;

@@ -1,10 +1,10 @@
 import type { ResponseResult } from "@/types";
-import { generateSuccessResponse } from "@/clients/http";
-
-import type { Repository } from "./typing";
+import { generateSuccessResponse, resolvePaginationParams } from "@/clients/http";
 
 import { fetchRepoListByUserLogin } from "../github/repository";
 import { fetchAdminRepoList } from "../api/repository";
+
+import type { Repository, ManageableListParams } from "./typing";
 
 async function fetchListByDeveloper(username: string): Promise<ResponseResult<Repository[]>> {
   const { data, ...others } = await fetchRepoListByUserLogin(username);
@@ -40,8 +40,13 @@ async function fetchListByEcosystem(name: string): Promise<ResponseResult<Reposi
   })));
 }
 
-async function fetchManageableList(params): Promise<ResponseResult<Repository[]>> {
-  const { data, extra, ...others } = await fetchAdminRepoList(params);
+async function fetchManageableList(
+  { pageSize, pageNum, ...rest }: ManageableListParams,
+): Promise<ResponseResult<Repository[]>> {
+  const { data, extra, ...others } = await fetchAdminRepoList({
+    ...rest,
+    ...resolvePaginationParams({ pageSize, pageNum }),
+  });
 
   return {
     ...others,
@@ -51,7 +56,7 @@ async function fetchManageableList(params): Promise<ResponseResult<Repository[]>
       fullName: item.repo_name,
       description: "",
       statistics: { star: -1, fork: -1, watch: -1, openIssue: -1 },
-      customMark: item.custom_marks[params.eco] || -1,
+      customMark: item.custom_marks[rest.eco] || -1,
     })) : [],
     extra: {
       ...extra,

@@ -8,11 +8,7 @@ import { LinkReadFieldWidget } from "../../widgets/link-field";
 
 import type { RepositoryListViewWidgetProps } from "./typing";
 
-function RepositoryListView({ className, dataSource, pagination }: RepositoryListViewWidgetProps ) {
-  const handlePageChange = (page: number) => {
-    console.log("page change", page);
-  };
-
+function RepositoryListView({ className, dataSource, pagination, onCurrentChange }: RepositoryListViewWidgetProps ) {
   return (
     <Card className={clsx("h-full bg-white dark:bg-gray-800 shadow-sm border-none hover:shadow-md transition-all duration-300", className)}>
       <DataTable
@@ -34,7 +30,7 @@ function RepositoryListView({ className, dataSource, pagination }: RepositoryLis
         total={pagination.total}
         currentPage={pagination.pageNum}
         pageSize={pagination.pageSize}
-        onCurrentChange={handlePageChange}
+        onCurrentChange={onCurrentChange}
       />
     </Card>
   );

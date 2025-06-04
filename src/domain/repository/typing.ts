@@ -1,4 +1,7 @@
+import type { NormalizedPagination, SqlStylePagination } from "@/clients/http";
+
 import type { Repo } from "../github/typing";
+import type { PaginatableParams } from "../api/typing";
 
 type Repository = Pick<Repo, "id" | "name"> & {
   fullName: string;
@@ -12,4 +15,8 @@ type Repository = Pick<Repo, "id" | "name"> & {
   customMark?: number | string;
 };
 
-export type { Repository };
+type ManageableListParams = NormalizedPagination & Omit<PaginatableParams, keyof SqlStylePagination> & {
+  eco: string;
+};
+
+export type { Repository, ManageableListParams };

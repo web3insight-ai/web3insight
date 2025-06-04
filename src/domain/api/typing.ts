@@ -1,10 +1,9 @@
 import type { DataValue } from "@/types";
+import type { SqlStylePagination } from "@/clients/http";
 
-type PaginatableParams = {
+type PaginatableParams = Partial<SqlStylePagination> & {
   search?: string;
   order?: string;
-  skip?: number;
-  take?: number
 };
 
 type TotalResponseData = {
@@ -15,10 +14,8 @@ type ListResponseData<T> = {
   list: T[];
 };
 
-type EcosystemType = "NEAR" | "OpenBuild" | "Starknet";
-
 type EcoRequestParams = {
-  eco: EcosystemType | "ALL";
+  eco: string;
 };
 
 type EcoRankRecord = {
@@ -62,7 +59,7 @@ type ActorTrendRecord = {
 
 export type {
   PaginatableParams, TotalResponseData, ListResponseData,
-  EcosystemType, EcoRequestParams, EcoRankRecord, EcoRepo,
+  EcoRequestParams, EcoRankRecord, EcoRepo,
   RepoRankRecord,
   ActorRankRecord, ActorTrendRecord,
 };
