@@ -1,13 +1,21 @@
 import clsx from "clsx";
+import { Spinner } from "@nextui-org/react";
 
 import type { DataTableProps } from "./typing";
 import { resolveColumns, resolveColumnClassName } from "./helper";
 
-function Table({ className, dataSource, columns: rawCols }: Pick<DataTableProps, "className" | "dataSource" | "columns">) {
+function Table(
+  {
+    className,
+    dataSource,
+    columns: rawCols,
+    loading,
+  }: Pick<DataTableProps, "className" | "dataSource" | "columns" | "loading">,
+) {
   const { showSerialNumber, columns } = resolveColumns(rawCols);
 
   return (
-    <div className={clsx("flex flex-col", className)}>
+    <div className={clsx("relative flex flex-col", className)}>
       <div className="flex-shrink-0 px-8 py-3 bg-gray-50 dark:bg-gray-750 border-b border-gray-100 dark:border-gray-800 grid grid-cols-12 gap-2">
         {showSerialNumber && (
           <div className="col-span-1 text-xs font-medium text-gray-500 dark:text-gray-400">#</div>
@@ -47,6 +55,11 @@ function Table({ className, dataSource, columns: rawCols }: Pick<DataTableProps,
           </div>
         ))}
       </div>
+      {loading && (
+        <div className="absolute top-0 left-0 z-10 w-full h-full flex items-center justify-center bg-white/90">
+          <Spinner label="Loading" />
+        </div>
+      )}
     </div>
   );
 }

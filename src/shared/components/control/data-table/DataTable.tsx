@@ -10,6 +10,7 @@ function DataTable({
   className,
   dataSource,
   columns,
+  loading,
   total,
   currentPage,
   pageSize,
@@ -22,9 +23,11 @@ function DataTable({
         className="flex-grow min-h-0 overflow-auto"
         dataSource={dataSource}
         columns={columns}
+        loading={loading}
       />
       <Pagination
         className="flex-shrink-0 border-t"
+        disabled={loading}
         total={total}
         currentPage={currentPage}
         pageSize={pageSize}

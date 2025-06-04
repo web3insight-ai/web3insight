@@ -21,4 +21,8 @@ type DataTableProps<T extends DataValue = Record<string, DataValue>> = Partial<O
   columns: TableColumn<T>[];
 };
 
-export type { TableColumn, DataTableProps };
+type PaginationProps = Pick<DataTableProps, "className" | "total" | "pageSize" | "currentPage" | "onCurrentChange"> & {
+  disabled?: boolean;
+};
+
+export type { TableColumn, DataTableProps, PaginationProps };

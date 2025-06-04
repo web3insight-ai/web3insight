@@ -1,10 +1,17 @@
 import clsx from "clsx";
 import { Pagination as NextUiPagination } from "@nextui-org/react";
 
-import type { DataTableProps } from "./typing";
+import type { PaginationProps } from "./typing";
 import { resolveItemCountRange } from "./helper";
 
-function Pagination({ className, total = 0, pageSize = 20, currentPage = 1, onCurrentChange }: Pick<DataTableProps, "className" | "total" | "pageSize" | "currentPage" | "onCurrentChange">) {
+function Pagination({
+  className,
+  total = 0,
+  pageSize = 20,
+  currentPage = 1,
+  disabled,
+  onCurrentChange,
+}: PaginationProps) {
   const [startCount, endCount] = resolveItemCountRange(currentPage, total, pageSize);
 
   return (
@@ -13,6 +20,7 @@ function Pagination({ className, total = 0, pageSize = 20, currentPage = 1, onCu
       <NextUiPagination
         page={currentPage}
         total={Math.ceil(total / pageSize)}
+        isDisabled={disabled}
         onChange={onCurrentChange}
       />
     </div>

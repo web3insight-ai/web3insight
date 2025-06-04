@@ -25,22 +25,28 @@ async function loader({ params }: LoaderFunctionArgs) {
 
 function AdminEcosystemDetailPage() {
   const { ecosystem, pagination } = useLoaderData<typeof loader>();
-  const [page, setPage] = useState(pagination);
   const [dataSource, setDataSource] = useState(ecosystem.repositories);
+  const [page, setPage] = useState(pagination);
+  const [loading, setLoading] = useState(false);
 
   const pageSize = getPageSize();
 
-  const handlePageChange = (pageNum: number) => fetchManageableRepositoryList({
-    eco: ecosystem.name,
-    pageSize,
-    pageNum,
-  })
-    .then(res => {
-      if (res.success) {
-        setPage({ ...pagination, pageNum });
-        setDataSource(res.data);
-      }
-    });
+  const handlePageChange = (pageNum: number) => {
+    setLoading(true);
+
+    fetchManageableRepositoryList({
+      eco: ecosystem.name,
+      pageSize,
+      pageNum,
+    })
+      .then(res => {
+        if (res.success) {
+          setPage({ ...pagination, pageNum });
+          setDataSource(res.data);
+        }
+      })
+      .finally(() => setLoading(false));
+  };
 
   return (
     <Section
@@ -52,6 +58,7 @@ function AdminEcosystemDetailPage() {
       <RepositoryListViewWidget
         dataSource={dataSource}
         pagination={page}
+        loading={loading}
         onCurrentChange={handlePageChange}
       />
     </Section>

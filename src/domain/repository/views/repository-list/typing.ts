@@ -8,6 +8,7 @@ type RepositoryListViewWidgetProps = {
     pageNum: number;
     pageSize: number;
   };
+  loading: boolean;
   onCurrentChange: (currentPage: number) => void;
 };
 
