@@ -1,7 +1,7 @@
 import { KYSELY, OCTOKIT } from '@/db/db.provider';
 import { DB } from '@/db/dto/db.dto';
 import { Inject, Injectable } from '@nestjs/common';
-import { Kysely, sql } from 'kysely';
+import { Kysely, sql, sql } from 'kysely';
 import { Command, Console } from 'nestjs-console';
 import { CacheDataService } from './cache.services';
 import { CacheKey } from '../dto/cache.dto';
@@ -256,6 +256,46 @@ export class RankService {
       new Date().toISOString(),
       ecoName,
     );
+  }
+
+  async repoStarRankNew(eco_names: string[]) {
+    const query = sql`
+WITH ecosystem_list AS (SELECT UNNEST(ARRAY [${sql.join(eco_names)}]) AS ecosystem_name),
+     repo_stars AS (SELECT event.repo_id,
+                           COUNT(DISTINCT event.actor_id) star_count
+                    FROM web3.repos repos
+                             JOIN web3.event event ON repos.repo_id = event.repo_id
+                    WHERE event.event_type = 'WatchEvent'
+                      AND repos.upstream_marks ?| (SELECT ARRAY_AGG(ecosystem_name)
+                                                   FROM ecosystem_list)
+                    GROUP BY event.repo_id),
+     top_ecosystem AS (SELECT ecosystem.ecosystem_name ecosystem,
+                              repo_stars.repo_id,
+                              repos.repo_name,
+                              repo_stars.star_count,
+                              ROW_NUMBER() OVER (
+                                  PARTITION BY ecosystem.ecosystem_name
+                                  ORDER BY repo_stars.star_count DESC
+                                  )                    ranking
+                       FROM repo_stars
+                                JOIN web3.repos repos ON repo_stars.repo_id = repos.repo_id
+                                CROSS JOIN ecosystem_list ecosystem
+                       WHERE repos.upstream_marks ? ecosystem.ecosystem_name)
+SELECT ecosystem,
+       json_agg(
+               json_build_object(
+                       'repo_id', repo_id,
+                       'repo_name', repo_name,
+                       'star_count', star_count
+               )
+       ) top_repositories
+FROM top_ecosystem
+WHERE ranking <= 10
+GROUP BY ecosystem
+ORDER BY ecosystem;`;
+
+    const results = await query.execute(this.db);
+    return results.rows;
   }
 
   @Command({
