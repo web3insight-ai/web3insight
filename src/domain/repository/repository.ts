@@ -1,8 +1,10 @@
 import type { ResponseResult } from "@/types";
-
-import type { Repository } from "./typing";
+import { generateSuccessResponse, resolvePaginationParams } from "@/clients/http";
 
 import { fetchRepoListByUserLogin } from "../github/repository";
+import { fetchAdminRepoList } from "../api/repository";
+
+import type { Repository, ManageableListParams } from "./typing";
 
 async function fetchListByDeveloper(username: string): Promise<ResponseResult<Repository[]>> {
   const { data, ...others } = await fetchRepoListByUserLogin(username);
@@ -24,4 +26,43 @@ async function fetchListByDeveloper(username: string): Promise<ResponseResult<Re
   };
 }
 
-export { fetchListByDeveloper };
+async function fetchListByEcosystem(name: string): Promise<ResponseResult<Repository[]>> {
+  return Promise.resolve(generateSuccessResponse(Array.from({ length: 10 }, (_, index) => {
+    const num = index + 1;
+
+    return {
+      id: num,
+      name: `repo${num}`,
+      fullName: `repo${num}`,
+      description: `repo${num} of ${name}`,
+      statistics: { star: 1, fork: 1, watch: 1, openIssue: 1 },
+    };
+  })));
+}
+
+async function fetchManageableList(
+  { pageSize, pageNum, ...rest }: ManageableListParams,
+): Promise<ResponseResult<Repository[]>> {
+  const { data, extra, ...others } = await fetchAdminRepoList({
+    ...rest,
+    ...resolvePaginationParams({ pageSize, pageNum }),
+  });
+
+  return {
+    ...others,
+    data: data.list ? data.list.map(item => ({
+      id: item.repo_id,
+      name: item.repo_name,
+      fullName: item.repo_name,
+      description: "",
+      statistics: { star: -1, fork: -1, watch: -1, openIssue: -1 },
+      customMark: item.custom_marks[rest.eco] || -1,
+    })) : [],
+    extra: {
+      ...extra,
+      total: data.total,
+    },
+  };
+}
+
+export { fetchListByDeveloper, fetchListByEcosystem, fetchManageableList };

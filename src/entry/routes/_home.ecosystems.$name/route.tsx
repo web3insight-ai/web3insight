@@ -7,6 +7,7 @@ import { useLoaderData } from "@remix-run/react";
 import { Warehouse } from "lucide-react";
 
 import { getTitle } from "@/utils/app";
+import ChartCard from "@/components/control/chart-card";
 
 import { fetchStatistics } from "~/ecosystem/repository";
 import RepositoryRankViewWidget from "~/repository/views/repository-rank";
@@ -14,8 +15,8 @@ import DeveloperRankViewWidget from "~/developer/views/developer-rank";
 
 import ClientOnly from "../../components/ClientOnly";
 
+import { resolveChartOptions } from "./helper";
 import MetricOverview from "./MetricOverview";
-import TrendCard from "./TrendCard";
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   const baseTitle = `Ecosystem - ${getTitle()}`;
@@ -59,7 +60,12 @@ export default function EcosystemPage() {
 
         <MetricOverview className="mb-10" dataSource={statistics} />
         <ClientOnly>
-          <TrendCard dataSource={statistics.trend} />
+          <ChartCard
+            className="mb-10"
+            style={{ height: "250px" }}
+            title="Developer Activity Trend"
+            option={resolveChartOptions(statistics.trend)}
+          />
         </ClientOnly>
         <RepositoryRankViewWidget className="mb-10" dataSource={statistics.repositories} />
         <DeveloperRankViewWidget dataSource={statistics.developers} />

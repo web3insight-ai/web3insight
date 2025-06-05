@@ -14,6 +14,12 @@ async function fetchTotalCount(
   return httpClient.get("/v1/actors/total", { params: { eco_name: eco, scope } });
 }
 
+async function fetchGrowthCount(
+  params: EcoRequestParams = { eco: "ALL" },
+): Promise<ResponseResult<TotalResponseData>> {
+  return httpClient.get("/v1/actors/total/new/quarter/last", { params: { eco_name: params.eco } });
+}
+
 async function fetchRankList(
   params: EcoRequestParams = { eco: "ALL" },
 ): Promise<ResponseResult<ListResponseData<ActorRankRecord>>> {
@@ -28,4 +34,4 @@ async function fetchTrendList(
   return httpClient.get("/v1/actors/total/date", { params: { eco_name: eco, period } });
 }
 
-export { fetchTotalCount, fetchRankList, fetchTrendList };
+export { fetchTotalCount, fetchGrowthCount, fetchRankList, fetchTrendList };

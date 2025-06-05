@@ -13,4 +13,17 @@ interface IHttpClient {
   use: (interceptor: ResponseInterceptor) => void;
 }
 
-export type { HttpClientInitializer, IHttpClient };
+type NormalizedPagination = {
+  pageNum?: number;
+  pageSize?: number;
+};
+
+type SqlStylePagination = {
+  take: number;
+  skip: number;
+};
+
+export type {
+  HttpClientInitializer, IHttpClient,
+  NormalizedPagination, SqlStylePagination,
+};

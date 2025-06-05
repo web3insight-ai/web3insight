@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { Users, Code2, Zap } from "lucide-react";
+import { Users, Code2, Zap, Database } from "lucide-react";
 
 import MetricCard, { type MetricCardProps } from "@/components/control/metric-card";
 
@@ -25,12 +25,18 @@ function resolveMetrics(dataSource: MetricOverviewProps["dataSource"]): MetricCa
       icon: <Zap size={20} className="text-success" />,
       iconBgClassName: "bg-success/10",
     },
+    {
+      label: "New Developers",
+      value: Number(dataSource.developerGrowthCount).toLocaleString(),
+      icon: <Database size={20} className="text-warning" />,
+      iconBgClassName: "bg-warning/10",
+    },
   ];
 }
 
 function MetricOverview({ className, dataSource }: MetricOverviewProps) {
   return (
-    <div className={clsx("grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6", className)}>
+    <div className={clsx("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6", className)}>
       {resolveMetrics(dataSource).map(metric => (
         <MetricCard key={metric.label.replaceAll(" ", "")} {...metric} />
       ))}

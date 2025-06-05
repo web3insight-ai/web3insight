@@ -34,7 +34,7 @@ import { getUser } from "~/auth/repository";
 import type { Query } from "~/query/typing";
 import { ErrorType } from "~/query/helper";
 import { fetchSearchedList, fetchOneWithUser } from "~/query/repository";
-import { fetchOne as fetchEcosystem, fetchRepoAnalysis } from "~/ecosystem/repository";
+import { fetchOne as fetchEcosystem, fetchRepoAnalysis } from "~/ecosystem/repository/legacy";
 
 const { title: appTitle, description } = getMetadata();
 

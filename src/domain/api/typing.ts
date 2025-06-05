@@ -1,7 +1,9 @@
-type EcosystemType = "NEAR" | "OpenBuild" | "Starknet";
+import type { DataValue } from "@/types";
+import type { SqlStylePagination } from "@/clients/http";
 
-type EcoRequestParams = {
-  eco: EcosystemType | "ALL";
+type PaginatableParams = Partial<SqlStylePagination> & {
+  search?: string;
+  order?: string;
 };
 
 type TotalResponseData = {
@@ -10,6 +12,10 @@ type TotalResponseData = {
 
 type ListResponseData<T> = {
   list: T[];
+};
+
+type EcoRequestParams = {
+  eco: string;
 };
 
 type EcoRankRecord = {
@@ -22,6 +28,11 @@ type RepoBasic = {
   repo_id: number;
   repo_name: string;
 }
+
+type EcoRepo = RepoBasic & {
+  upstream_marks: Record<string, DataValue>;
+  custom_marks: Record<string, DataValue>;
+};
 
 type RepoRankRecord =  RepoBasic & {
   star_count: number;
@@ -47,6 +58,8 @@ type ActorTrendRecord = {
 }
 
 export type {
-  EcoRequestParams, TotalResponseData, ListResponseData,
-  EcoRankRecord, RepoRankRecord, ActorRankRecord, ActorTrendRecord,
+  PaginatableParams, TotalResponseData, ListResponseData,
+  EcoRequestParams, EcoRankRecord, EcoRepo,
+  RepoRankRecord,
+  ActorRankRecord, ActorTrendRecord,
 };
