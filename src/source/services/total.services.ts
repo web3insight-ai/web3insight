@@ -6,7 +6,7 @@ import { Command, Console } from 'nestjs-console';
 import { CacheDataService } from './cache.services';
 import { CacheKey } from '../dto/cache.dto';
 import { ActorsScopeType, EcoType } from '../dto/data.dto';
-import { ActorDateListDto, StatsPeriod, TotalDto } from '@/api/api.dto';
+import { ActorDateListDto, StatsPeriod, TotalDto } from '@/api/dto/api.dto';
 
 @Injectable()
 @Console()

@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { TotalController } from './total.controller';
+import { TotalController } from './controller/total.controller';
 import { JwtService } from '@nestjs/jwt';
 import { SourceModule } from '@/source/source.module';
-import { RankController } from './rank.controller';
-import { AdminController } from './admin.controller';
+import { RankController } from './controller/rank.controller';
+import { AdminController } from './controller/admin.controller';
 
 @Module({
   controllers: [TotalController, RankController, AdminController],

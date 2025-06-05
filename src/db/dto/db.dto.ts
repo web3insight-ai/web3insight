@@ -4,7 +4,7 @@ import {
   EcoRankListDto,
   RepoRankListDto,
   TotalDto,
-} from '@/api/api.dto';
+} from '@/api/dto/api.dto';
 import type { ColumnType } from 'kysely';
 
 export type Generated<T> =
