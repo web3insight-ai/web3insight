@@ -37,8 +37,8 @@ function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
               </div>
 
               {/* Ecosystem name and growth */}
-              <div className="col-span-7 flex items-center gap-2">
-                <Link to={`/ecosystems/${encodeURIComponent(ecosystem.eco_name)}`} className="font-medium text-gray-900 dark:text-white hover:text-primary hover:underline">
+              <div className="col-span-7 flex items-center gap-2 ">
+                <Link to={`/ecosystems/${encodeURIComponent(ecosystem.eco_name)}`} className="font-medium text-gray-900 dark:text-gray-300 hover:text-primary hover:underline">
                   {ecosystem.eco_name}
                 </Link>
               </div>

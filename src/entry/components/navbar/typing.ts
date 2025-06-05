@@ -8,4 +8,6 @@ type NavbarProps = PropsWithChildren<{
   extra?: ReactNode;
 }>;
 
-export type { NavbarProps };
+type Theme = "light" | "dark" | "system";
+
+export type { NavbarProps, Theme };

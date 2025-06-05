@@ -43,7 +43,7 @@ function SearchHistory({ history, placeholder }: SearchHistoryProps) {
       </PopoverTrigger>
       <PopoverContent className="w-72">
         <div className="w-full p-2">
-          <div className="text-sm font-medium text-gray-900 mb-2">
+          <div className="text-sm font-medium text-gray-900 mb-2 dark:text-gray-300">
             Recent Searches
           </div>
           <Divider className="my-2" />

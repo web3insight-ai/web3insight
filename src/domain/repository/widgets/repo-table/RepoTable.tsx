@@ -44,7 +44,7 @@ function RepoTable({ className, dataSource, title, icon }: RepoTableProps ) {
             {/* Repository name */}
             <div className="col-span-5 flex items-center">
               <RepoLinkWidget
-                className="font-medium text-gray-900 dark:text-white"
+                className="font-medium text-gray-900 dark:text-gray-300"
                 repo={repo.fullName}
               />
             </div>
