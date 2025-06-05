@@ -5,7 +5,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { AppAuthGuard } from '../auth/app.auth.guard';
+import { AppAuthGuard } from '../../auth/app.auth.guard';
 
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RankService } from '@/source/services/rank.services';
@@ -14,7 +14,7 @@ import {
   EcoRankListDto,
   GetTotalReqDto,
   RepoRankListDto,
-} from './api.dto';
+} from '../dto/api.dto';
 import { EcoType } from '@/source/dto/data.dto';
 
 @Controller()

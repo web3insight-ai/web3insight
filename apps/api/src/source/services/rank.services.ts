@@ -16,7 +16,7 @@ import {
   RepoRankListDto,
   ActorCommitRepoDto,
   ActorCommitRankListDto,
-} from '@/api/api.dto';
+} from '@/api/dto/api.dto';
 
 @Injectable()
 @Console()

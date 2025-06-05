@@ -15,7 +15,7 @@ import {
   BaseIdReqAndResDto,
   ReposCustomMarkReqDto,
   ReposOrderReqDto,
-} from './api.dto';
+} from '../dto/api.dto';
 
 @Controller()
 @ApiTags('Admin')

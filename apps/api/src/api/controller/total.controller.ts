@@ -5,7 +5,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { AppAuthGuard } from '../auth/app.auth.guard';
+import { AppAuthGuard } from '../../auth/app.auth.guard';
 
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
@@ -14,7 +14,7 @@ import {
   GetTotalReqDto,
   TotalDto,
   ActorDateListDto,
-} from './api.dto';
+} from '../dto/api.dto';
 import { TotalService } from '@/source/services/total.services';
 import { EcoType } from '@/source/dto/data.dto';
 
