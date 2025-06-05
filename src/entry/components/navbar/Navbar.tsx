@@ -19,7 +19,7 @@ function Navbar({ className, children, user, extra }: NavbarProps) {
         <Link className="flex items-center gap-2" title="Back to home" to="/">
           <BrandLogo width={isDesktop ? 32 : 24} />
           {!isMobile && (
-            <span className="text-sm font-bold text-gray-800">
+            <span className="text-sm font-bold text-gray-800 dark:text-gray-300">
               {getTitle()}
             </span>
           )}

@@ -7,8 +7,8 @@ import SearchHistory from "./SearchHistory";
 
 function DefaultLayout({ children, history, user }: DefaultLayoutProps) {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="sticky top-0 z-20 border-b bg-white">
+    <div className="min-h-screen bg-gray-50  dark:bg-gray-900">
+      <header className="sticky top-0 z-20 border-b bg-white dark:bg-gray-900 dark:border-gray-800">
         <Navbar className="max-w-[1200px] mx-auto" user={user}>
           <SearchHistory
             history={history}
