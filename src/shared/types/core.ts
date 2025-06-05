@@ -10,4 +10,7 @@ interface StrapiUser {
 }
 
 export type { StrapiUser };
-export type { DataValue, ListValue } from "@handie/runtime-core";
+export type {
+  DataValue, ListValue,
+  ViewFieldDescriptor, ViewDescriptor, FieldRendererProps,
+} from "@handie/runtime-core";

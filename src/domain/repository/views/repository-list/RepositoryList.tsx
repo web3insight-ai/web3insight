@@ -1,30 +1,29 @@
 import clsx from "clsx";
 import { Card } from "@nextui-org/react";
 
-import DataTable from "@/components/control/data-table";
+import TableViewWidget from "@/components/widget/view/table";
 
-import { resolveCustomMarkText } from "../../helper";
 import { LinkReadFieldWidget } from "../../widgets/link-field";
 
 import type { RepositoryListViewWidgetProps } from "./typing";
+import MarkedFieldWidget from "./MarkedField";
 
 function RepositoryListView({ className, dataSource, pagination, loading, onCurrentChange }: RepositoryListViewWidgetProps ) {
   return (
     <Card className={clsx("h-full bg-white dark:bg-gray-800 shadow-sm border-none hover:shadow-md transition-all duration-300", className)}>
-      <DataTable
+      <TableViewWidget
         dataSource={dataSource}
-        columns={[
-          { title: "#", key: "serialNumber", type: "index" },
+        fields={[
           {
-            title: "Repository",
-            key: "fullName",
-            span: 5,
-            render: (_, { row }) => <LinkReadFieldWidget value={row.fullName} />,
+            label: "Repository",
+            name: "fullName",
+            widget: LinkReadFieldWidget,
+            config: { span: 5 },
           },
           {
-            title: "Custom Mark",
-            key: "customMark",
-            render: (_, { row }) => resolveCustomMarkText(row.customMark),
+            label: "Custom Mark",
+            name: "customMark",
+            widget: MarkedFieldWidget,
           },
         ]}
         total={pagination.total}

@@ -1,2 +1,2 @@
 export { default } from "./DataTable";
-export type { DataTableProps } from "./typing";
+export type { TableColumn, DataTableProps } from "./typing";
