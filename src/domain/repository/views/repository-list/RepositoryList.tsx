@@ -6,9 +6,17 @@ import TableViewWidget from "@/components/widget/view/table";
 import { LinkReadFieldWidget } from "../../widgets/link-field";
 
 import type { RepositoryListViewWidgetProps } from "./typing";
+import FormSearchWidget from "./FormSearch";
 import MarkedFieldWidget from "./MarkedField";
 
-function RepositoryListView({ className, dataSource, pagination, loading, onCurrentChange }: RepositoryListViewWidgetProps ) {
+function RepositoryListView({
+  className,
+  dataSource,
+  pagination,
+  loading,
+  onCurrentChange,
+  onSearch,
+}: RepositoryListViewWidgetProps ) {
   return (
     <Card className={clsx("h-full bg-white dark:bg-gray-800 shadow-sm border-none hover:shadow-md transition-all duration-300", className)}>
       <TableViewWidget
@@ -26,6 +34,7 @@ function RepositoryListView({ className, dataSource, pagination, loading, onCurr
             widget: MarkedFieldWidget,
           },
         ]}
+        search={<FormSearchWidget onSearch={onSearch} />}
         total={pagination.total}
         currentPage={pagination.pageNum}
         pageSize={pagination.pageSize}

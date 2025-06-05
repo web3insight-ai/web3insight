@@ -4,6 +4,7 @@ import type { SqlStylePagination } from "@/clients/http";
 type PaginatableParams = Partial<SqlStylePagination> & {
   search?: string;
   order?: string;
+  direction?: string;
 };
 
 type TotalResponseData = {
