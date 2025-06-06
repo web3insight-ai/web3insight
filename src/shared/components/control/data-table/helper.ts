@@ -34,7 +34,13 @@ const spanClassNameMap: Record<number, string> = {
 };
 
 function resolveColumnClassName(col: TableColumn, baseClassName: string = ""): string {
-  const spanClassName = spanClassNameMap[col.span || 1] || spanClassNameMap[1];
+  let spanClassName: string;
+
+  if (col.key === "_SYS_ACTION_COL_") {
+    spanClassName = "col-auto";
+  } else {
+    spanClassName = spanClassNameMap[col.span || 1] || spanClassNameMap[1];
+  }
 
   return clsx(baseClassName, spanClassName, {
     "text-center": col.align === "center",
