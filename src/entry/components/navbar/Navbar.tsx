@@ -8,7 +8,7 @@ import BrandLogo from "@/components/control/brand-logo";
 import AuthStatus from "../../components/AuthStatus";
 
 import type { NavbarProps } from "./typing";
-import { PrefersColorSchemeSelector } from "./PrefersColorSchemeSelector";
+import { PrefersColorSchemeSelector } from "./aPrefersColorSchemeSelector";
 
 function Navbar({ className, children, user, extra }: NavbarProps) {
   const isDesktop = useMediaQuery({ minWidth: 1024 });
