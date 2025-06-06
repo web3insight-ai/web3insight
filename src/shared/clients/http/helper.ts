@@ -50,7 +50,7 @@ async function request(
 
   let sendBody;
 
-  if (method === "POST") {
+  if (["POST", "PUT"].includes(method)) {
     sendBody = JSON.stringify(data);
   }
 

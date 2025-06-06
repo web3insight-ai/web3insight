@@ -5,7 +5,7 @@ import { useLoaderData } from "@remix-run/react";
 import type { DataValue } from '@/types';
 
 import { getPageSize } from "~/ecosystem/helper";
-import { fetchManageableRepositoryList } from "~/ecosystem/repository";
+import { fetchManageableRepositoryList, updateManageableRepositoryMark } from "~/ecosystem/repository";
 import RepositoryListViewWidget from "~/repository/views/repository-list";
 
 import Section from "../components/section";
@@ -59,6 +59,17 @@ function AdminEcosystemDetailPage() {
     fetchData({ pageNum: 1, ...searchValue });
   };
 
+  const handleMark = (mark: number | string | undefined, record: Record<string, DataValue>) => {
+    return updateManageableRepositoryMark({ eco: ecosystem.name, id: record.id, mark: mark ? Number(mark) : 0 })
+      .then(res => {
+        if (res.success) {
+          fetchData({ pageNum: page.pageNum,...search });
+        }
+
+        return res;
+      });
+  };
+
   return (
     <Section
       className="h-full"
@@ -72,6 +83,7 @@ function AdminEcosystemDetailPage() {
         loading={loading}
         onCurrentChange={handlePageChange}
         onSearch={handleSearch}
+        onMark={handleMark}
       />
     </Section>
   );

@@ -10,6 +10,7 @@ function TableView({
   className,
   dataSource,
   fields,
+  actions,
   search,
   loading,
   total,
@@ -27,7 +28,7 @@ function TableView({
       <DataTable
         className="flex-grow min-h-0"
         dataSource={dataSource}
-        columns={resolveColumns(fields)}
+        columns={resolveColumns({ fields, actions })}
         loading={loading}
         total={total}
         pageSize={pageSize}

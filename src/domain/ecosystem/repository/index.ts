@@ -7,6 +7,7 @@ import {
   fetchEcosystemRankList,
   fetchRepoCount, fetchRepoRankList,
   fetchActorCount, fetchActorGrowthCount, fetchActorRankList, fetchActorTrendList,
+  updateRepoCustomMark,
 } from "../../api/repository";
 
 import type { Repository } from "../../repository/typing";
@@ -74,4 +75,12 @@ async function fetchManageableRepositoryList(params: RepositoryListParams): Prom
   return fetchManageableRepoListByEco(params);
 }
 
-export { fetchStatistics, fetchManageableList, fetchManageableRepositoryList };
+async function updateManageableRepositoryMark(data) {
+  if (!isServerSide()) {
+    return httpClient.put("/api/ecosystem/repos/mark", data);
+  }
+
+  return updateRepoCustomMark(data);
+}
+
+export { fetchStatistics, fetchManageableList, fetchManageableRepositoryList, updateManageableRepositoryMark };
