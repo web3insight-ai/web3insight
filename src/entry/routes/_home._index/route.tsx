@@ -95,7 +95,7 @@ export default function Index() {
   const [, setAuthModalOpen] = useAtom(authModalOpenAtom);
   const [, setAuthModalType] = useAtom(authModalTypeAtom);
   const [input, setInput] = useState("");
-  const [output, setOutput] = useState<string[]>([]);
+  const [output, setOutput] = useState<string>("");
 
   useEffect(() => {
     if (fetcher.state === "idle" && errorMessage) {
