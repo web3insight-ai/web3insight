@@ -295,7 +295,7 @@ export default function Index() {
                 <Button color="primary" size="lg" className="font-medium" onClick={handleSignupClick}>
                   Sign up free
                 </Button>
-                <Button variant="bordered" size="lg" className="font-medium">
+                <Button variant="bordered" size="lg" className="font-medium text-gray-500 dark:text-white">
                   Learn more
                 </Button>
               </div>

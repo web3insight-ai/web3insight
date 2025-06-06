@@ -8,6 +8,7 @@ import BrandLogo from "@/components/control/brand-logo";
 import AuthStatus from "../../components/AuthStatus";
 
 import type { NavbarProps } from "./typing";
+import { PrefersColorSchemeSelector } from "./PrefersColorSchemeSelector";
 
 function Navbar({ className, children, user, extra }: NavbarProps) {
   const isDesktop = useMediaQuery({ minWidth: 1024 });
@@ -19,7 +20,7 @@ function Navbar({ className, children, user, extra }: NavbarProps) {
         <Link className="flex items-center gap-2" title="Back to home" to="/">
           <BrandLogo width={isDesktop ? 32 : 24} />
           {!isMobile && (
-            <span className="text-sm font-bold text-gray-800">
+            <span className="text-sm font-bold text-gray-800 dark:text-gray-300">
               {getTitle()}
             </span>
           )}
@@ -29,6 +30,7 @@ function Navbar({ className, children, user, extra }: NavbarProps) {
       <div className="flex items-center gap-4">
         {children}
         <AuthStatus user={user} />
+        <PrefersColorSchemeSelector />
       </div>
     </div>
   );

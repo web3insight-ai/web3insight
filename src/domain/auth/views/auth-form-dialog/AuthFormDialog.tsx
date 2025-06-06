@@ -129,7 +129,7 @@ function AuthFormDialogView() {
       <ModalContent>
         {() => (
           <>
-            <ModalHeader className="flex flex-col gap-1">
+            <ModalHeader className="flex flex-col gap-1 dark:text-gray-300">
               {modalType === "signin" || modalType === "signup"
                 ? `Welcome to ${getTitle()}`
                 : showResetSent

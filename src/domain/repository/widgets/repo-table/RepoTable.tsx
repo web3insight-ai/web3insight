@@ -19,7 +19,7 @@ function RepoTable({ className, dataSource, title, icon }: RepoTableProps ) {
           <Divider />
         </>
       )}
-      <div className="px-8 py-3 bg-gray-50 dark:bg-gray-750 border-b border-gray-100 dark:border-gray-800 grid grid-cols-12 gap-2">
+      <div className="px-8 py-3 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-800 grid grid-cols-12 gap-2">
         <div className="col-span-1 text-xs font-medium text-gray-500 dark:text-gray-400">#</div>
         <div className="col-span-5 text-xs font-medium text-gray-500 dark:text-gray-400">Repository</div>
         <div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400 text-right">Stars</div>
@@ -44,7 +44,7 @@ function RepoTable({ className, dataSource, title, icon }: RepoTableProps ) {
             {/* Repository name */}
             <div className="col-span-5 flex items-center">
               <RepoLinkWidget
-                className="font-medium text-gray-900 dark:text-white"
+                className="font-medium text-gray-900 dark:text-gray-300"
                 repo={repo.fullName}
               />
             </div>
