@@ -9,7 +9,7 @@ import {
 import { Link, useLoaderData, useFetcher } from "@remix-run/react";
 import { ArrowRight, Hash, Search } from "lucide-react";
 // import { getClientIPAddress } from "remix-utils/get-client-ip-address";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAtom } from "jotai";
 
 import { getMetadata } from "@/utils/app";
@@ -76,28 +76,14 @@ export const action = async (ctx: ActionFunctionArgs) => {
   const formData = await ctx.request.formData();
   const res = await fetchAnalyzedStatistics({
     query: formData.get("query") as string,
-    request_id: Math.random().toString(),
   });
-
-  return res.success && res.data
-    ? json<{
-        data?: string;
-        type?: string;
-        error?: string;
-      }>({
-        data: res.data.answer,
-      })
-    : json<{
-        data?: string;
-        type?: string;
-        error?: string;
-      }>(
-        {
-          type: res.extra?.type,
-          error: res.message,
-        },
-        { status: Number(res.code) },
-      );
+  return new Response(res.body, {
+    headers: {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+    },
+  });
 };
 
 export default function Index() {
@@ -108,6 +94,8 @@ export default function Index() {
   const errorType = fetcher.data?.type || null;
   const [, setAuthModalOpen] = useAtom(authModalOpenAtom);
   const [, setAuthModalType] = useAtom(authModalTypeAtom);
+  const [input, setInput] = useState("");
+  const [output, setOutput] = useState<string>("");
 
   useEffect(() => {
     if (fetcher.state === "idle" && errorMessage) {
@@ -123,6 +111,53 @@ export default function Index() {
   const handleSignupClick = () => {
     setAuthModalType("signup");
     setAuthModalOpen(true);
+  };
+
+  const onClickHandle = () => {
+    setOutput([]);
+    const controller = new AbortController();
+
+    fetch("/api/ai/query", {
+      method: "POST",
+      body: new URLSearchParams({ query: input }),
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Accept: "text/event-stream",
+      },
+      signal: controller.signal,
+    }).then(async (res) => {
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let buffer = "";
+      if (!reader) return;
+
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const { value, done } = await reader!.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+
+        for (let line of lines) {
+          line = line.trim();
+          if (!line.startsWith("data:")) continue;
+          const jsonStr = line.replace(/^data:\s*/, "");
+          if (jsonStr === "[DONE]") return;
+
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const piece = parsed?.data?.answer || "";
+            setOutput((prev) => prev + piece);
+          } catch (e) {
+            console.log(e);
+          }
+        }
+
+        buffer = lines[lines.length - 1];
+      }
+    });
+
+    return () => controller.abort();
   };
 
   return (
@@ -173,6 +208,8 @@ export default function Index() {
               <div className="relative">
                 <Input
                   name="query"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
                   required
                   fullWidth
                   size="lg"
@@ -186,6 +223,7 @@ export default function Index() {
                 <button
                   type="submit"
                   disabled={asking}
+                  onClick={onClickHandle}
                   className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-md flex items-center justify-center"
                 >
                   {asking ? (
@@ -203,7 +241,6 @@ export default function Index() {
               Try queries like &quot;ethereum ecosystem&quot;, &quot;OpenZeppelin/contracts&quot;, or &quot;openbuild community&quot;
             </p>
           </div>
-
           {/* Pinned Queries */}
           {pinned && pinned.length > 0 ? (
             <div className="mt-8">
@@ -237,12 +274,10 @@ export default function Index() {
               </Link>
             </div>
           )}
-          {fetcher.data?.data ? (
+          {output.length > 0 ? (
             <Card className="w-full max-w-[650px] mx-auto mt-8">
               <CardBody>
-                <p className="text-gray-500 dark:text-gray-400 ">
-                  {fetcher.data?.data}
-                </p>
+                <p className="text-gray-500 dark:text-gray-400 ">{output}</p>
               </CardBody>
             </Card>
           ) : null}
