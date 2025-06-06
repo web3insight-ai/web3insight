@@ -13,7 +13,7 @@ function RepoTable({ className, dataSource, title, icon }: RepoTableProps ) {
           <CardHeader className="px-8 py-5">
             <div className="flex items-center gap-2">
               {icon}
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-400">{title}</h3>
             </div>
           </CardHeader>
           <Divider />
@@ -30,7 +30,7 @@ function RepoTable({ className, dataSource, title, icon }: RepoTableProps ) {
         {dataSource.map((repo, index) => (
           <div
             key={index}
-            className="px-8 py-4 grid grid-cols-12 gap-2 items-center border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors duration-200"
+            className="px-8 py-4 grid grid-cols-12 gap-2 items-center border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-500 transition-colors duration-200"
           >
             {/* Rank number */}
             <div className="col-span-1">

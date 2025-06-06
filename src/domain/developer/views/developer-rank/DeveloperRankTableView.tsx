@@ -16,7 +16,7 @@ function DeveloperRankTableView({ dataSource }: Pick<DeveloperRankViewWidgetProp
         </div>
       </CardHeader>
       <Divider />
-      <div className="px-8 py-3 bg-gray-50 dark:bg-gray-750 border-b border-gray-100 dark:border-gray-800 grid grid-cols-12 gap-2">
+      <div className="px-8 py-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-800 grid grid-cols-12 gap-2">
         <div className="col-span-1 text-xs font-medium text-gray-500 dark:text-gray-400">#</div>
         <div className="col-span-3 text-xs font-medium text-gray-500 dark:text-gray-400">Developer</div>
         <div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400">Score</div>
@@ -26,7 +26,7 @@ function DeveloperRankTableView({ dataSource }: Pick<DeveloperRankViewWidgetProp
         {dataSource.map((developer, index) => (
           <div
             key={developer.actor_id}
-            className="px-8 py-4 grid grid-cols-12 gap-2 items-center border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors duration-200"
+            className="px-8 py-4 grid grid-cols-12 gap-2 items-center border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-500 transition-colors duration-200"
           >
             <div className="col-span-1">
               <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full
