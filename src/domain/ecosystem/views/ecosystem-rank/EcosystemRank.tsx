@@ -26,7 +26,7 @@ function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
       <CardBody className="p-0">
         <div className="divide-y divide-gray-100 dark:divide-gray-800">
           {dataSource.map((ecosystem, index) => (
-            <div key={index} className="px-6 py-4 grid grid-cols-12 gap-2 items-center hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors duration-200">
+            <div key={index} className="px-6 py-4 grid grid-cols-12 gap-2 items-center hover:bg-gray-50 dark:hover:bg-gray-500 transition-colors duration-200">
               {/* Rank indicator */}
               <div className="col-span-1">
                 <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full
