@@ -1,6 +1,28 @@
 [package]
-name = "dw"
+name = "web3insights-dw"
 version = "0.1.0"
 edition = "2024"
 
+
 [dependencies]
+anyhow = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+flate2 = { version = "^1.1", features = ["zlib-rs"], default-features = false }
+octocrab = { git = "https://github.com/vincent-forks/octocrab" }
+tokio = { version = "1.0", features = ["full"] }
+chrono = { version = "0.4", features = ["serde"] }
+sqlx = { version = "0.8", features = [
+  "runtime-tokio",
+  "postgres",
+  "chrono",
+  "uuid",
+  "json",
+  "time",
+] }
+dotenvy = { version = "^0.15" }
+rust_decimal = "^1.37"
+tokio-mpmc = "0.2"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing = "0.1"
+duckdb = { version = "1.3.0", features = [] }
