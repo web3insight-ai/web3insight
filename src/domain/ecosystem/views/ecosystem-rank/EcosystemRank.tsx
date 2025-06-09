@@ -18,9 +18,11 @@ function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
       {/* Ecosystem header row */}
       <div className="px-6 py-3 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-800 grid grid-cols-12 gap-2">
         <div className="col-span-1 text-xs font-medium text-gray-500 dark:text-gray-400">#</div>
-        <div className="col-span-7 text-xs font-medium text-gray-500 dark:text-gray-400">Ecosystem</div>
+        <div className="col-span-3 text-xs font-medium text-gray-500 dark:text-gray-400">Ecosystem</div>
+        <div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400">Total Repos</div>
         <div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400">Total Devs</div>
         <div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400">Core Devs</div>
+        <div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400">New Devs</div>
       </div>
 
       <CardBody className="p-0">
@@ -35,22 +37,22 @@ function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
                 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}
                   text-xs font-medium`}>{index + 1}</span>
               </div>
-
-              {/* Ecosystem name and growth */}
-              <div className="col-span-7 flex items-center gap-2 ">
+              <div className="col-span-3 flex items-center gap-2 ">
                 <Link to={`/ecosystems/${encodeURIComponent(ecosystem.eco_name)}`} className="font-medium text-gray-900 dark:text-gray-300 hover:text-primary hover:underline">
                   {ecosystem.eco_name}
                 </Link>
               </div>
-
-              {/* Total developer count */}
+              <div className="col-span-2 font-medium text-gray-700 dark:text-gray-300">
+                {Number(ecosystem.repos_total).toLocaleString()}
+              </div>
               <div className="col-span-2 font-medium text-gray-700 dark:text-gray-300">
                 {Number(ecosystem.actors_total).toLocaleString()}
               </div>
-
-              {/* Core developer count */}
               <div className="col-span-2 font-medium text-gray-700 dark:text-gray-300">
                 {Number(ecosystem.actors_core_total).toLocaleString()}
+              </div>
+              <div className="col-span-2 font-medium text-gray-700 dark:text-gray-300">
+                {Number(ecosystem.actors_new_total).toLocaleString()}
               </div>
             </div>
           ))}
