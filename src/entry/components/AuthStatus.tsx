@@ -4,7 +4,7 @@ import { LogIn, LogOut, User as UserIcon, Key, Shield } from "lucide-react";
 import { useAtom } from "jotai";
 import { authModalOpenAtom, authModalTypeAtom } from "#/atoms";
 
-import type { StrapiUser } from "~/strapi/typing";
+import type { User as StrapiUser } from "~/strapi/typing";
 import { isAdmin } from "~/auth/helper";
 import { signOut } from "~/auth/repository";
 

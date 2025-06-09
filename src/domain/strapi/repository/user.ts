@@ -1,7 +1,7 @@
 import type { ResponseResult } from "@/types";
 import { generateFailedResponse } from "@/clients/http";
 
-import type { StrapiAuthResponse } from "../typing";
+import type { User, StrapiAuthResponse } from "../typing";
 import httpClient from "./client";
 
 async function sendConfirmationEmail(email: string): Promise<ResponseResult> {
@@ -82,12 +82,11 @@ async function loginUser(
 }
 
 // Get current user data
-async function getCurrentUser(token: string) {
+async function getCurrentUser(token: string): Promise<ResponseResult<User | undefined>> {
   try {
     return httpClient.get("/api/users/me", {
-      headers: {
-        "Authorization": `Bearer ${token}`,
-      },
+      params: { populate: "*" },
+      headers: { "Authorization": `Bearer ${token}` },
     });
   } catch (error) {
     return generateFailedResponse("An error occurred while fetch current user");

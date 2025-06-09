@@ -2,7 +2,6 @@ import type { ResponseResult } from "@/types";
 import { isServerSide, generateFailedResponse } from "@/clients/http";
 import httpClient from "@/clients/http/default";
 
-import type { StrapiUser } from "../strapi/typing";
 import {
   registerUser, loginUser, getCurrentUser,
   changePassword as changePasswordViaStrapi,
@@ -10,6 +9,8 @@ import {
   resetPassword as resetPasswordViaStrapi,
 } from "../strapi/repository";
 import { getSession, clearSession } from "./helper/server-only";
+
+import type { StrapiUser } from "./typing";
 
 // Simple in-memory cache for user data
 // This will reduce repeated API calls within the same server instance

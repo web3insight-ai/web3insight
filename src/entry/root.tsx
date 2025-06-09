@@ -14,7 +14,7 @@ import { NextUIProvider } from "@nextui-org/react";
 import { getUser } from "~/auth/repository";
 import { LoaderFunction } from "@remix-run/node";
 import { validateEnvironment } from "@/utils/env";
-import type { StrapiUser } from "@/types";
+import type { User } from "~/strapi/typing";
 
 import { getTitle } from "@/utils/app";
 
@@ -46,7 +46,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 function App() {
   const { user: initialUser } = useLoaderData<typeof loader>();
-  const [user, setUser] = useState<StrapiUser | null>(initialUser);
+  const [user, setUser] = useState<User | null>(initialUser);
 
   return (
     <html lang="en">

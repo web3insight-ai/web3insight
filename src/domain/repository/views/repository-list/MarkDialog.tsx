@@ -25,7 +25,6 @@ function MarkDialog({ record, visible, onClose, onChange }: MarkDialogProps) {
   const [loading, setLoading] = useState(false);
 
   const computedMark = useMemo(() => mark || `${record.customMark}`, [mark, record]);
-  console.log("mark", mark || undefined, record.customMark, computedMark);
 
   const closeDialog = () => {
     setMark("");
