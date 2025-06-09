@@ -120,7 +120,7 @@ export class RankService {
       query = query.where(
         'web3.repos.upstream_marks',
         '?|',
-        sql<string[]>`ARRAY[${sql.join([ecoName])}]`,
+        sql<string[]>`ARRAY[${ecoName}]`,
       );
     }
 
