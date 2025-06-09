@@ -35,8 +35,8 @@ export class TotalService {
 
     if (ecoName !== EcoType.ALL) {
       query = query.where(
-        'eco_names',
-        '@>',
+        'upstream_marks',
+        '?',
         sql<string[]>`ARRAY[${sql.join([ecoName])}]`,
       );
     }

@@ -59,11 +59,17 @@ export class RankService {
         ActorsScopeType.Core,
       );
 
+      const totalRepos = await this.totalService.reposTotal(ecoName);
+
+      const actorsNewTotal = await this.totalService.getActorTotalNew(ecoName);
+
       data.push({
         eco_name: ecoName,
         actors_total: (actorsTotalAllScopeResult?.cache_data as TotalDto).total,
+        actors_new_total: (actorsNewTotal?.cache_data as TotalDto).total,
         actors_core_total: (actorsTotalCoreScopeResult?.cache_data as TotalDto)
           .total,
+        repos_total: (totalRepos?.cache_data as TotalDto).total,
       });
     }
 
@@ -112,8 +118,8 @@ export class RankService {
 
     if (ecoName !== EcoType.ALL) {
       query = query.where(
-        'web3.repos.eco_names',
-        '@>',
+        'web3.repos.upstream_marks',
+        '?|',
         sql<string[]>`ARRAY[${sql.join([ecoName])}]`,
       );
     }
