@@ -1,7 +1,7 @@
 import { KYSELY, OCTOKIT } from '@/db/db.provider';
 import { DB } from '@/db/dto/db.dto';
 import { Inject, Injectable } from '@nestjs/common';
-import { Kysely, sql, sql } from 'kysely';
+import { CompiledQuery, Kysely, sql } from 'kysely';
 import { Command, Console } from 'nestjs-console';
 import { CacheDataService } from './cache.services';
 import { CacheKey } from '../dto/cache.dto';
@@ -259,8 +259,8 @@ export class RankService {
   }
 
   async repoStarRankNew(eco_names: string[]) {
-    const query = sql`
-WITH ecosystem_list AS (SELECT UNNEST(ARRAY [${sql.join(eco_names)}]) AS ecosystem_name),
+    const sqlRawQuery = `
+WITH ecosystem_list AS (SELECT UNNEST($1::text[]) AS ecosystem_name),
      repo_stars AS (SELECT event.repo_id,
                            COUNT(DISTINCT event.actor_id) star_count
                     FROM web3.repos repos
@@ -294,7 +294,10 @@ WHERE ranking <= 10
 GROUP BY ecosystem
 ORDER BY ecosystem;`;
 
-    const results = await query.execute(this.db);
+    const query = CompiledQuery.raw(sqlRawQuery, [eco_names]);
+
+    const results = await this.db.executeQuery(query);
+
     return results.rows;
   }
 
@@ -310,5 +313,13 @@ ORDER BY ecosystem;`;
       await this.getTopCommitActors(eco, false);
     }
     return Promise.resolve();
+  }
+
+  @Command({
+    command: 'test:eco:rank',
+  })
+  async test2() {
+    const ecoTypes = Object.values(EcoType);
+    await this.repoStarRankNew(ecoTypes);
   }
 }
