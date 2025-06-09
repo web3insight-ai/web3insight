@@ -13,9 +13,11 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   BaseIdReqAndResDto,
+  EcoList,
   ReposCustomMarkReqDto,
   ReposOrderReqDto,
 } from '../dto/api.dto';
+import { EcoTypeArray } from '@/source/dto/data.dto';
 
 @Controller()
 @ApiTags('Admin')
@@ -24,6 +26,20 @@ export class AdminController {
     private readonly _rankService: RankService,
     private readonly reposService: ReposService,
   ) {}
+
+  @Get('admin/ecosystems')
+  @ApiOperation({
+    summary: 'Get ecosystems repos list',
+    description: '',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AppAuthGuard)
+  getEcoSystems(): EcoList {
+    return {
+      available_ecosystem: EcoTypeArray,
+      provider_ecosystem: EcoTypeArray,
+    };
+  }
 
   @Get('admin/ecosystems/repos')
   @ApiOperation({
