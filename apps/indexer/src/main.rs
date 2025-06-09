@@ -38,7 +38,6 @@ struct EventTableStruct {
     event_type: String,
     payload: String,
     body: Option<String>,
-    public: bool,
     created_at: DateTime<Utc>,
 }
 
@@ -57,8 +56,8 @@ async fn main() -> Result<()> {
 
     let files = load_gh_path(
         "/bpool-1/gharchive/data",
-        "2020-01-01T00:00:00Z",
-        "2020-02-01T00:00:00Z",
+        "2025-01-01T00:00:00Z",
+        "2025-02-01T00:00:00Z",
     )?;
 
     let db = connect_db().await?;
@@ -99,7 +98,6 @@ async fn connect_db() -> Result<Connection> {
             event_type TEXT NOT NULL,
             payload JSON NOT NULL,
             body TEXT,
-            public BOOLEAN NOT NULL,
             created_at TIMESTAMP WITH TIME ZONE NOT NULL
         )",
     )?;
@@ -112,33 +110,26 @@ async fn batch_insert_events(conn: &mut Connection, events: &Vec<EventTableStruc
         return Ok(());
     }
 
-    let tx = conn.transaction()?;
-
-    let mut stmt = tx.prepare(
-        "INSERT INTO gh_events (
-            id, actor_id, actor_login, repo_id, repo_name, org_id, org_login,
-            event_type, payload, body, public, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-    )?;
+    let mut tx = conn.transaction()?;
+    tx.set_drop_behavior(duckdb::DropBehavior::Commit);
+    let mut app = tx.appender("gh_events")?;
 
     for event in events {
-        stmt.execute(params![
+        app.append_row(params![
             event.id,
             event.actor_id,
-            event.actor_login,
+            &event.actor_login,
             event.repo_id,
-            event.repo_name,
+            &event.repo_name,
             event.org_id,
-            event.org_login,
-            event.event_type,
-            event.payload,
-            event.body,
-            event.public,
-            event.created_at.to_rfc3339(),
+            event.org_login.as_ref(),
+            &event.event_type,
+            &event.payload,
+            event.body.as_ref(),
+            &event.created_at.to_rfc3339(),
         ])?;
     }
 
-    tx.commit()?;
     Ok(())
 }
 
@@ -209,13 +200,28 @@ async fn load_gh_event(file_path: PathBuf) -> Result<Vec<EventTableStruct>> {
                 None
             }
         })
-        .map(format_event_module)
+        .filter_map(format_event_module)
         .collect();
     Ok(batch)
 }
 
-fn format_event_module(event: Event) -> EventTableStruct {
+fn format_event_module(event: Event) -> Option<EventTableStruct> {
+    let filter_out_payload =
+        env::var("FILTER_OUT_PAYLOAD").is_ok_and(|v| v.to_lowercase() == "true");
     let filter_out_body = env::var("FILTER_OUT_BODY").is_ok_and(|v| v.to_lowercase() == "true");
+    let filter_out_bot = env::var("FILTER_OUT_BOT").is_ok_and(|v| v.to_lowercase() == "true");
+
+    let actor = event.actor.clone();
+
+    if filter_out_bot
+        && [
+            "[bot]", "-bot", "_bot", "-ci", "_ci", "-action", "_action", "-actions", "_actions",
+        ]
+        .iter()
+        .any(|suffix| actor.login.ends_with(suffix))
+    {
+        return None;
+    }
 
     let body_raw = match event.payload.clone() {
         Some(data) => match data.specific {
@@ -240,6 +246,12 @@ fn format_event_module(event: Event) -> EventTableStruct {
         None
     };
 
+    let payload = if filter_out_payload {
+        String::from("{}")
+    } else {
+        serde_json::to_string(&event.payload).unwrap_or_default()
+    };
+
     let event_struct = EventTableStruct {
         id: Decimal::from_str(&event.id)
             .unwrap_or(Decimal::zero())
@@ -253,9 +265,8 @@ fn format_event_module(event: Event) -> EventTableStruct {
         org_login: event.org.as_ref().map(|org| org.login.clone()),
         event_type: event.r#type.to_string(),
         body,
-        payload: serde_json::to_string(&event.payload).unwrap_or_default(),
-        public: event.public,
+        payload: payload,
         created_at: event.created_at,
     };
-    event_struct
+    Some(event_struct)
 }
