@@ -37,7 +37,7 @@ export class TotalService {
       query = query.where(
         'upstream_marks',
         '?',
-        sql<string[]>`ARRAY[${sql.join([ecoName])}]`,
+        sql<string[]>`ARRAY[${ecoName}]`,
       );
     }
 
