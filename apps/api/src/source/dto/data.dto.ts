@@ -19,3 +19,5 @@ export enum ActorsScopeType {
 }
 
 export type ActorsScopeTypeValue = `${ActorsScopeType}`;
+
+export const EcoTypeArray: string[] = Object.values(EcoType);

@@ -152,3 +152,8 @@ export class BaseIdReqAndResDto {
 export class SucessResDto {
   sucess: boolean = true;
 }
+
+export class EcoList {
+  provider_ecosystem: string[] = [];
+  available_ecosystem: string[] = [];
+}
