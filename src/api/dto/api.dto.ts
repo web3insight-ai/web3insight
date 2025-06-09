@@ -31,7 +31,9 @@ export class TotalDto {
 export class EcoRankDto {
   eco_name: string = '';
   actors_total: number = 0;
+  actors_new_total: number = 0;
   actors_core_total: number = 0;
+  repos_total: number = 0;
 }
 
 export class RepoRankDto {
