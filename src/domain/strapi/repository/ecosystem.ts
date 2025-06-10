@@ -12,7 +12,7 @@ async function fetchEcosystem(keyword?: string): Promise<ResponseResult<Record<s
 
   try {
     const { success, data: resData } = await httpClient.get(
-      "/api/ecosystems",
+      "/ecosystems",
       {
         params: {
           'filters[name][$eqi]': keyword,

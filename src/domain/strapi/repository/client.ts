@@ -44,7 +44,7 @@ async function normalizeResponse<VT extends DataValue = DataValue>(res: Response
 }
 
 const httpClient = new HttpClient({
-  baseUrl: getVar("STRAPI_API_URL"),
+  baseUrl: `${getVar("STRAPI_API_URL")}/api`,
   headers,
   normalizer: normalizeResponse,
 });

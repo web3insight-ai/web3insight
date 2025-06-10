@@ -7,7 +7,7 @@ import httpClient from "./client";
 
 async function fetchQueryList(params: Record<string, DataValue>): Promise<ResponseResult<StrapiQuery[]>> {
   try {
-    const { data, ...others } = await httpClient.get("/api/queries", { params });
+    const { data, ...others } = await httpClient.get("/queries", { params });
 
     const resolved: StrapiQuery[] = isArray(data?.data) ?
       data.data.filter(({ query }: StrapiQuery) => {
@@ -27,7 +27,7 @@ async function fetchQuery(
   params?: Record<string, DataValue>,
 ): Promise<ResponseResult<StrapiQuery | null>> {
   try {
-    const { data, ...others } = await httpClient.get(`/api/queries/${id}`, { params });
+    const { data, ...others } = await httpClient.get(`/queries/${id}`, { params });
 
     return { ...others, data: data?.data ?? null };
   } catch (error) {
@@ -48,7 +48,7 @@ async function createQuery(
     data.user = userId;
   }
 
-  const { data: strapiData, ...others } = await httpClient.post(`/api/queries`, { data });
+  const { data: strapiData, ...others } = await httpClient.post(`/queries`, { data });
 
   return { ...others, data: strapiData?.data };
 }
@@ -60,7 +60,7 @@ async function updateQuery(
     keyboard?: string;
   },
 ): Promise<ResponseResult<StrapiQuery>> {
-  const { data: strapiData, ...others } = await httpClient.put(`/api/queries/${id}`, data);
+  const { data: strapiData, ...others } = await httpClient.put(`/queries/${id}`, data);
 
   return { ...others, data: strapiData?.data };
 }

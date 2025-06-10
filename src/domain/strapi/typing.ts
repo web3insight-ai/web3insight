@@ -6,7 +6,7 @@ interface Entry {
   publishedAt: string;
 }
 
-type RoleType = "public" | "authenticated" | "manager";
+type RoleType = "public" | "authenticated" | "manager" | "admin";
 
 interface Role extends Entry {
   name: string;

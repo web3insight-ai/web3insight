@@ -16,8 +16,15 @@ const menu: MenuItem[] = [
   childrenPrefix: prefixPath(item.childrenPrefix),
 }));
 
-function getMenu() {
-  return menu;
+const settingsMenu: MenuItem[] = [
+  {
+    text: "Managers",
+    path: "/settings",
+  },
+];
+
+function getMenu(settings: boolean) {
+  return settings ? settingsMenu : menu;
 }
 
 function isMenuItemActive(path: string, item: MenuItem): boolean {

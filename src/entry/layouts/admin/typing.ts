@@ -8,6 +8,9 @@ type MenuItem = {
 
 type AdminLayoutProps = {
   user: User | null;
+  settings?: boolean;
 };
 
-export type { MenuItem, AdminLayoutProps };
+type NavMenuProps = Pick<AdminLayoutProps, "settings">;
+
+export type { MenuItem, AdminLayoutProps, NavMenuProps };
