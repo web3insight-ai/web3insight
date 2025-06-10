@@ -10,12 +10,13 @@ use octocrab::models::events::payload::EventPayload::{
 };
 use rust_decimal::Decimal;
 use rust_decimal::prelude::*;
+use serde::{Deserialize, Serialize};
 use std::env;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::PathBuf;
+use std::sync::Arc;
 use std::time::Instant;
-use tokio::sync::mpsc;
 use tokio::task::JoinSet;
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{
@@ -25,7 +26,7 @@ use tracing_subscriber::{
     util::SubscriberInitExt,
 };
 
-#[derive(Debug)]
+#[derive(sqlx::FromRow, Debug, Serialize, Deserialize)]
 #[allow(dead_code)]
 struct EventTableStruct {
     id: u64,
@@ -50,31 +51,58 @@ async fn main() -> Result<()> {
     let console = fmt::Layer::new()
         .with_span_events(FmtSpan::CLOSE)
         .pretty()
+        .with_ansi(false)
         .with_filter(LevelFilter::INFO);
 
     tracing_subscriber::registry().with(console).init();
 
     let files = load_gh_path(
-        "/bpool-1/gharchive/data",
-        "2025-01-01T00:00:00Z",
-        "2025-02-01T00:00:00Z",
+        "/dpool/gharchive/data",
+        "2020-01-01T00:00:00Z",
+        "2020-02-01T00:00:00Z",
     )?;
 
     let db = connect_db().await?;
 
-    let (tx, mut rx) = mpsc::channel(2);
+    let (tx, rx) = tokio_mpmc::channel(48);
 
-    let mut test = db.try_clone()?;
+    let rx = Arc::new(rx);
 
-    let db_handle = tokio::spawn(async move {
-        while let Some((_path, content)) = rx.recv().await {
-            batch_insert_events(&mut test, &content).await.unwrap();
-        }
-    });
+    let mut consumers = JoinSet::new();
+
+    let max_concurrent = env::var("MAX_DB_CONCURRENT")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(2);
+
+    for _ in 0..max_concurrent {
+        let mut db = db.try_clone().unwrap();
+        let rx = rx.clone();
+
+        consumers.spawn(async move {
+            println!("Consumer started");
+            // Consume
+            loop {
+                match rx.recv().await {
+                    Ok(Some((path, events))) => {
+                        batch_insert_events(&mut db, &events, path).await.unwrap();
+                    }
+                    Ok(None) => {
+                        tracing::info!("DB Channel closed, exiting");
+                        break;
+                    }
+                    Err(e) => {
+                        tracing::error!("DB Channel error receiving value: {:?}", e);
+                        break;
+                    }
+                }
+            }
+        });
+    }
 
     run_task(files, tx).await?;
 
-    db_handle.await?;
+    while let Some(Ok(_)) = consumers.join_next().await {}
 
     let duration = start.elapsed();
 
@@ -87,7 +115,7 @@ async fn connect_db() -> Result<Connection> {
     let db_path = env::var("DUCKDB_PATH").unwrap_or_else(|_| "gh_events.db".to_string());
     let conn = Connection::open(&db_path)?;
     conn.execute_batch(
-        "CREATE TABLE IF NOT EXISTS gh_events (
+        "CREATE TABLE IF NOT EXISTS events (
             id UBIGINT NOT NULL,
             actor_id UBIGINT NOT NULL,
             actor_login TEXT NOT NULL,
@@ -105,14 +133,15 @@ async fn connect_db() -> Result<Connection> {
 }
 
 #[tracing::instrument(skip(events))]
-async fn batch_insert_events(conn: &mut Connection, events: &Vec<EventTableStruct>) -> Result<()> {
+async fn batch_insert_events(
+    conn: &mut Connection,
+    events: &Vec<EventTableStruct>,
+    _path: String,
+) -> Result<()> {
     if events.is_empty() {
         return Ok(());
     }
-
-    let mut tx = conn.transaction()?;
-    tx.set_drop_behavior(duckdb::DropBehavior::Commit);
-    let mut app = tx.appender("gh_events")?;
+    let mut app = conn.appender("events")?;
 
     for event in events {
         app.append_row(params![
@@ -135,11 +164,11 @@ async fn batch_insert_events(conn: &mut Connection, events: &Vec<EventTableStruc
 
 async fn run_task(
     files: Vec<PathBuf>,
-    tx: mpsc::Sender<(String, Vec<EventTableStruct>)>,
+    tx: tokio_mpmc::Sender<(String, Vec<EventTableStruct>)>,
 ) -> Result<()> {
     let mut tasks = JoinSet::new();
 
-    let max_concurrent = env::var("MAX_CONCURRENT")
+    let max_concurrent = env::var("MAX_FILE_CONCURRENT")
         .ok()
         .and_then(|v| v.parse().ok())
         .unwrap_or(4);
@@ -154,15 +183,13 @@ async fn run_task(
         }
         tasks.spawn(async move {
             let event = load_gh_event(path).await;
-            file_tx.send((path_str, event.unwrap())).await.unwrap();
+            file_tx.send((path_str, event)).await.unwrap();
         });
     }
 
     while let Some(result) = tasks.join_next().await {
         result?;
     }
-
-    drop(tx);
 
     Ok(())
 }
@@ -185,8 +212,14 @@ fn load_gh_path(base: &str, start: &str, end: &str) -> Result<Vec<PathBuf>> {
 }
 
 #[tracing::instrument]
-async fn load_gh_event(file_path: PathBuf) -> Result<Vec<EventTableStruct>> {
-    let file = File::open(file_path)?;
+async fn load_gh_event(file_path: PathBuf) -> Vec<EventTableStruct> {
+    let file = match File::open(file_path) {
+        Ok(file) => file,
+        Err(e) => {
+            tracing::error!("Failed {} to open file: ", e);
+            return vec![];
+        }
+    };
     let decoder = GzDecoder::new(file);
     let reader = BufReader::with_capacity(10 * 1024 * 1024, decoder);
 
@@ -202,7 +235,7 @@ async fn load_gh_event(file_path: PathBuf) -> Result<Vec<EventTableStruct>> {
         })
         .filter_map(format_event_module)
         .collect();
-    Ok(batch)
+    batch
 }
 
 fn format_event_module(event: Event) -> Option<EventTableStruct> {
@@ -265,7 +298,7 @@ fn format_event_module(event: Event) -> Option<EventTableStruct> {
         org_login: event.org.as_ref().map(|org| org.login.clone()),
         event_type: event.r#type.to_string(),
         body,
-        payload: payload,
+        payload,
         created_at: event.created_at,
     };
     Some(event_struct)
