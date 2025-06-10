@@ -5,14 +5,17 @@ import { useMediaQuery } from "react-responsive";
 import { getTitle } from "@/utils/app";
 import BrandLogo from "@/components/control/brand-logo";
 
-import AuthStatus from "../../components/AuthStatus";
+import SignedUserWidget from "~/auth/widgets/signed-user";
 
 import type { NavbarProps } from "./typing";
+import useSessionActions from "./useSessionActions";
 import PrefersColorSchemeSelector from "./PrefersColorSchemeSelector";
 
 function Navbar({ className, children, user, extra }: NavbarProps) {
   const isDesktop = useMediaQuery({ minWidth: 1024 });
   const isMobile = useMediaQuery({ maxWidth: 767 });
+
+  const { signIn, signOut, resetPassword } = useSessionActions();
 
   return (
     <div className={clsx("flex items-center justify-between w-full px-4 py-2 sm:px-6 lg:px-8", className)}>
@@ -29,7 +32,12 @@ function Navbar({ className, children, user, extra }: NavbarProps) {
       </div>
       <div className="flex items-center gap-4">
         {children}
-        <AuthStatus user={user} />
+        <SignedUserWidget
+          user={user}
+          onSignIn={signIn}
+          onSignOut={signOut}
+          onResetPassword={resetPassword}
+        />
         <PrefersColorSchemeSelector />
       </div>
     </div>
