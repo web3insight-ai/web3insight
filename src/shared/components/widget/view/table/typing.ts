@@ -6,7 +6,7 @@ import type { DataTableProps } from "../../../control/data-table";
 type TableViewWidgetProps<T extends DataValue = Record<string, DataValue>> = Pick<
   ViewDescriptor, "fields"
 > & Pick<
-  DataTableProps<T>, "className" | "dataSource" | "loading" | "total" | "pageSize" | "currentPage" | "onCurrentChange"
+  DataTableProps<T>, "className" | "dataSource" | "loading" | "hidePagination" | "total" | "pageSize" | "currentPage" | "onCurrentChange"
 > & {
   search?: ReactNode;
   actions?: (Omit<ClientAction, "category" | "execute"> & {

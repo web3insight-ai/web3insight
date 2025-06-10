@@ -1,7 +1,8 @@
 import type { User } from "../../strapi/typing";
+import { isRoleManageable } from "../../admin/helper";
 
 function isManageable(user: User | null): boolean {
-  return !!user && ["manager", "admin"].includes(user.role.type);
+  return !!user && isRoleManageable(user.role.type);
 }
 
 function isAdmin(user: User | null): boolean {

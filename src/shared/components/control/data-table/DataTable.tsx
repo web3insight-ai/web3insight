@@ -10,6 +10,7 @@ function DataTable({
   dataSource,
   columns,
   loading,
+  hidePagination = false,
   total,
   currentPage,
   pageSize,
@@ -23,14 +24,16 @@ function DataTable({
         columns={columns}
         loading={loading}
       />
-      <Pagination
-        className="flex-shrink-0 border-t"
-        disabled={loading}
-        total={total}
-        currentPage={currentPage}
-        pageSize={pageSize}
-        onCurrentChange={onCurrentChange}
-      />
+      {!hidePagination && (
+        <Pagination
+          className="flex-shrink-0 border-t"
+          disabled={loading}
+          total={total}
+          currentPage={currentPage}
+          pageSize={pageSize}
+          onCurrentChange={onCurrentChange}
+        />
+      )}
     </div>
   );
 }

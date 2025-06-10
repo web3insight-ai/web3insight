@@ -20,4 +20,8 @@ async function fetchUserList(params = {}): Promise<ResponseResult<User[]>> {
   return httpClient.get("/users", { params });
 }
 
-export { getCurrentUser, fetchUserList };
+async function fetchUser(id: number, params = {}): Promise<ResponseResult<User | undefined>> {
+  return httpClient.get(`/users/${id}`, { params });
+}
+
+export { getCurrentUser, fetchUserList, fetchUser };
