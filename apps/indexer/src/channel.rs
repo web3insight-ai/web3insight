@@ -93,7 +93,7 @@ fn load_gh_path(base: &str, start: &str, end: &str) -> Result<Vec<PathBuf>> {
     let start_time = DateTime::parse_from_rfc3339(start)?.with_timezone(&Utc);
     let end_time = DateTime::parse_from_rfc3339(end)?.with_timezone(&Utc);
 
-    let timt_vec = (0..=end_time.signed_duration_since(start_time).num_hours())
+    let timt_vec = (0..end_time.signed_duration_since(start_time).num_hours())
         .map(|h| {
             PathBuf::from(base).join(
                 (start_time + Duration::hours(h))
