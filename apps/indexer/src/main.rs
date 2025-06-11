@@ -2,9 +2,7 @@ mod channel;
 mod db;
 
 use anyhow::Result;
-
 use dotenvy::dotenv;
-
 use std::time::Instant;
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{
@@ -13,7 +11,6 @@ use tracing_subscriber::{
     layer::SubscriberExt,
     util::SubscriberInitExt,
 };
-
 use crate::channel::start_channel;
 
 #[tokio::main]

@@ -30,9 +30,11 @@ pub async fn start_channel() -> Result<()> {
     let max_concurrent = env::var("MAX_DB_CONCURRENT")
         .ok()
         .and_then(|v| v.parse().ok())
-        .unwrap_or(2);
+        .unwrap_or(4);
 
     let duckdb = init_duckdb().await?;
+
+    duckdb.execute("CALL start_ui();", [])?;
 
     init_pg().await?;
 
@@ -48,9 +50,11 @@ pub async fn start_channel() -> Result<()> {
             loop {
                 match rx.recv().await {
                     Ok(Some((path, events))) => {
-                        let db_select = env::var("DB_SELECT").unwrap_or("duckdb".to_string()).to_lowercase();
+                        let db_select = env::var("DB_SELECT")
+                            .unwrap_or("duckdb".to_string())
+                            .to_lowercase();
 
-                        if db_select != "pg" {
+                        if db_select == "both" || db_select == "duckdb" {
                             EventTableStruct::batch_insert_events_duckdb(&mut db, &events, &path)
                                 .await
                                 .map_err(|_| {
@@ -59,7 +63,7 @@ pub async fn start_channel() -> Result<()> {
                                 .ok();
                         }
 
-                        if db_select != "duckdb" {
+                        if db_select == "both" || db_select == "pg" {
                             EventTableStruct::batch_insert_events_pg(events, &path)
                                 .await
                                 .map_err(|_| {
@@ -117,7 +121,7 @@ pub async fn read_file_tx(
     let max_concurrent = env::var("MAX_FILE_CONCURRENT")
         .ok()
         .and_then(|v| v.parse().ok())
-        .unwrap_or(4);
+        .unwrap_or(12);
 
     for path in files {
         let path_str = path.to_string_lossy().to_string();

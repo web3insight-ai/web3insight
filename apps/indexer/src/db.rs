@@ -49,10 +49,26 @@ pub async fn init_duckdb() -> Result<Connection> {
 }
 
 pub async fn init_pg() -> Result<()> {
-    let pool = PgPoolOptions::new()
-        .connect(env::var("DATABASE_URL")?.as_str())
-        .await?;
-    DB_POOL.set(pool).ok();
+    match env::var("DATABASE_URL") {
+        Ok(url) => match PgPoolOptions::new().connect(&url).await {
+            Ok(pool) => {
+                DB_POOL.set(pool).ok();
+                tracing::info!("PostgreSQL connection initialized successfully");
+            }
+            Err(err) => {
+                tracing::warn!(
+                    "Failed to connect to PostgreSQL, skipping initialization: {}",
+                    err
+                );
+            }
+        },
+        Err(err) => {
+            tracing::warn!(
+                "DATABASE_URL environment variable not found, skipping PostgreSQL initialization: {}",
+                err
+            );
+        }
+    }
     Ok(())
 }
 
