@@ -14,12 +14,14 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::PathBuf;
 use std::sync::Arc;
+use tokio::fs;
+use tokio::process::Command;
 use tokio::task::JoinSet;
 
 pub async fn start_channel() -> Result<()> {
     let start = env::var("TIME_START").unwrap_or_else(|_| "2020-01-01T00:00:00Z".to_string());
     let end = env::var("TIME_END").unwrap_or_else(|_| "2020-02-01T00:00:00Z".to_string());
-    let file_path = env::var("FILE_PATH").unwrap_or_else(|_| "./".to_string());
+    let file_path = env::var("GHARCHIVE_FILE_PATH").unwrap_or_else(|_| "./gharchive".to_string());
 
     let files = load_gh_path(file_path.as_str(), start.as_str(), end.as_str())?;
 
@@ -46,7 +48,7 @@ pub async fn start_channel() -> Result<()> {
             loop {
                 match rx.recv().await {
                     Ok(Some((path, events))) => {
-                        let db_select = env::var("DB_SELECT").unwrap_or_default().to_lowercase();
+                        let db_select = env::var("DB_SELECT").unwrap_or("duckdb".to_string()).to_lowercase();
 
                         if db_select != "pg" {
                             EventTableStruct::batch_insert_events_duckdb(&mut db, &events, &path)
@@ -138,14 +140,41 @@ pub async fn read_file_tx(
     Ok(())
 }
 
+async fn try_open_file(file_path: &PathBuf) -> Option<File> {
+    let max_retries = env::var("MAX_FILE_RETRIES")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(3);
+
+    for i in 0..max_retries {
+        if let Ok(file) = File::open(file_path) {
+            return Some(file);
+        }
+
+        tracing::info!(
+            "Try {}/{}: download... {}",
+            i + 1,
+            max_retries,
+            file_path.display()
+        );
+        if download_gh_archive(file_path).await.is_err() {
+            continue;
+        }
+    }
+
+    tracing::error!(
+        "Try {} failed to open file: {}",
+        max_retries,
+        file_path.display()
+    );
+    None
+}
+
 #[tracing::instrument]
 async fn load_gh_event(file_path: PathBuf) -> Vec<EventTableStruct> {
-    let file = match File::open(file_path) {
-        Ok(file) => file,
-        Err(e) => {
-            tracing::error!("Failed {} to open file: ", e);
-            return vec![];
-        }
+    let file = match try_open_file(&file_path).await {
+        Some(file) => file,
+        None => return vec![],
     };
     let decoder = GzDecoder::new(file);
     let reader = BufReader::with_capacity(10 * 1024 * 1024, decoder);
@@ -163,6 +192,38 @@ async fn load_gh_event(file_path: PathBuf) -> Vec<EventTableStruct> {
         .filter_map(format_event_module)
         .collect();
     batch
+}
+
+async fn download_gh_archive(file_path: &PathBuf) -> Result<()> {
+    let url = format!(
+        "https://data.gharchive.org/{}",
+        file_path.file_name().unwrap_or_default().to_string_lossy()
+    );
+
+    if let Some(parent) = file_path.parent() {
+        fs::create_dir_all(parent).await?;
+    }
+
+    tracing::info!("Downloading {} to {}", url, file_path.display());
+
+    let bytes = reqwest::get(&url).await?.bytes().await?;
+    fs::write(file_path, &bytes).await?;
+
+    let output = Command::new("gzip")
+        .arg("-t")
+        .arg(file_path)
+        .output()
+        .await?;
+
+    if !output.status.success() {
+        let _ = fs::remove_file(file_path).await;
+        return Err(anyhow::anyhow!(
+            "Downloaded file is corrupted, {}",
+            file_path.display()
+        ));
+    }
+
+    Ok(())
 }
 
 fn format_event_module(event: Event) -> Option<EventTableStruct> {
