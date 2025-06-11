@@ -1,2 +1,4 @@
 /target
 .env
+events.db
+events.db.wal
