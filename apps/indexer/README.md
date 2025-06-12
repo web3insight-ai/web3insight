@@ -32,13 +32,27 @@ Web3Insights is a data lake indexer designed to analyze GitHub events. It effici
    git clone https://github.com/yourusername/web3insights.git
    cd web3insights
    cp .env.example .env  # Edit with your configuration
-   cargo build --release
    ```
 
 2. **Run**:
 
    ```bash
    cargo run --release
+   ```
+
+   ```bash
+   cargo build --release
+   ```
+
+   Note:
+   If use x86_64 cpu，enable modern cpu optimization:
+
+   ```bash
+   RUSTFLAGS='-C target-cpu=x86-64-v4' cargo run --release
+   ```
+
+   ```bash
+   RUSTFLAGS='-C target-cpu=x86-64-v4' cargo build --release
    ```
 
 3. **Process Flow**:

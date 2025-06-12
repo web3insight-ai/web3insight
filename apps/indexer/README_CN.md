@@ -32,13 +32,23 @@ Web3Insights 是一个数据湖索引器，专为分析 GitHub 事件而设计�
    git clone https://github.com/yourusername/web3insights.git
    cd web3insights
    cp .env.example .env  # 编辑配置
-   cargo build --release
    ```
 
 2. **运行**：
 
    ```bash
-   cargo run --release
+   cargo build --release
+   ```
+
+   提示:
+   如果使用 x86_64 cpu，建议开启现代 cpu 优化:
+
+   ```bash
+   RUSTFLAGS='-C target-cpu=x86-64-v4' cargo run --release
+   ```
+
+   ```bash
+   RUSTFLAGS='-C target-cpu=x86-64-v4' cargo build --release
    ```
 
 3. **处理流程**：
