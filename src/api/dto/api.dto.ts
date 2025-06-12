@@ -11,6 +11,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { ActorsScopeType, EcoType } from '@/source/dto/data.dto';
 import { Expose, Type } from 'class-transformer';
+import { QueryTopStarRepo } from '@/source/dto/query.dto';
 
 export class GetTotalReqDto {
   @IsEnum(EcoType)
@@ -34,14 +35,6 @@ export class EcoRankDto {
   actors_new_total: number = 0;
   actors_core_total: number = 0;
   repos_total: number = 0;
-}
-
-export class RepoRankDto {
-  repo_id: number = 0;
-  repo_name: string = '';
-  star_count: number = 0;
-  forks_count: number = 0;
-  open_issues_count: number = 0;
 }
 
 export class ActorCommitRepoDto {
@@ -81,7 +74,7 @@ export class ActorDateListDto {
 }
 
 export class RepoRankListDto {
-  list: RepoRankDto[] = [];
+  list: QueryTopStarRepo[] = [];
 }
 
 export class ActorCommitRankListDto {

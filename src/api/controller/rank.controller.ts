@@ -16,11 +16,16 @@ import {
   RepoRankListDto,
 } from '../dto/api.dto';
 import { EcoType } from '@/source/dto/data.dto';
+import { CacheDataService } from '@/source/services/cache.services';
+import { CacheKey } from '@/source/dto/cache.dto';
 
 @Controller()
 @ApiTags('Rank')
 export class RankController {
-  constructor(private readonly rankService: RankService) {}
+  constructor(
+    private readonly rankService: RankService,
+    private readonly cacheDataService: CacheDataService,
+  ) {}
 
   @Get('ecosystems/top')
   @ApiOperation({
@@ -49,7 +54,10 @@ export class RankController {
   @UseGuards(AppAuthGuard)
   async getRepoTop(@Query() query: GetTotalReqDto) {
     try {
-      const res = await this.rankService.repoStarRank(query.eco_name);
+      const res = await this.cacheDataService.getCacheData(
+        CacheKey.RepoStarRank,
+        query.eco_name,
+      );
       return res?.cache_data as RepoRankListDto;
     } catch (e: unknown) {
       if (e instanceof Error) {

@@ -15,6 +15,12 @@ import { ReposService } from './services/repos.services';
     RankService,
     ReposService,
   ],
-  exports: [InitDataService, TotalService, RankService, ReposService],
+  exports: [
+    InitDataService,
+    TotalService,
+    RankService,
+    ReposService,
+    CacheDataService,
+  ],
 })
 export class SourceModule {}

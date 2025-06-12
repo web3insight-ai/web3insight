@@ -12,11 +12,11 @@ import {
   EcoRankDto,
   EcoRankListDto,
   TotalDto,
-  RepoRankDto,
   RepoRankListDto,
   ActorCommitRepoDto,
   ActorCommitRankListDto,
 } from '@/api/dto/api.dto';
+import { QueryTopStar, QueryTopStarRepo } from '../dto/query.dto';
 
 @Injectable()
 @Console()
@@ -82,81 +82,6 @@ export class RankService {
       CacheKey.EcoRank,
       cacheData,
       new Date().toISOString(),
-    );
-  }
-
-  async repoStarRank(
-    ecoName: EcoType,
-    limit: number = 10,
-    cache: boolean = true,
-  ) {
-    const dbData = await this.cacheDataService.getCacheData(
-      CacheKey.RepoStarRank,
-      ecoName,
-    );
-
-    if (!dbData && cache) {
-      throw new Error('Cache not found');
-    }
-
-    if (dbData && cache) {
-      return dbData;
-    }
-
-    let query = this.db
-      .selectFrom('web3.event')
-      .innerJoin('web3.repos', 'web3.event.repo_id', 'web3.repos.repo_id')
-      .select([
-        'web3.event.repo_id',
-        'web3.repos.repo_name',
-        this.db.fn.count('web3.event.actor_id').distinct().as('star_count'),
-      ])
-      .where('web3.event.event_type', '=', 'WatchEvent')
-      .groupBy(['web3.event.repo_id', 'web3.repos.repo_name'])
-      .orderBy('star_count', 'desc')
-      .limit(limit);
-
-    if (ecoName !== EcoType.ALL) {
-      query = query.where(
-        'web3.repos.upstream_marks',
-        '?|',
-        sql<string[]>`ARRAY[${ecoName}]`,
-      );
-    }
-
-    const result = await query.execute();
-
-    if (!result) {
-      throw new Error('No data found');
-    }
-
-    const data: RepoRankDto[] = await Promise.all(
-      result.map(async (row) => {
-        const [owner, repo] = row.repo_name!.split('/');
-        const repoDetails = await this.github.rest.repos.get({
-          owner,
-          repo,
-        });
-        return {
-          repo_id: Number(row.repo_id),
-          repo_name: row.repo_name!,
-          star_count: repoDetails.data.stargazers_count,
-          forks_count: repoDetails.data.forks_count,
-          open_issues_count: repoDetails.data.open_issues_count,
-        };
-      }),
-    );
-
-    data.sort((a, b) => b.star_count - a.star_count);
-
-    const cacheData = new RepoRankListDto();
-    cacheData.list = data;
-
-    return await this.cacheDataService.updateCacheData(
-      CacheKey.RepoStarRank,
-      cacheData,
-      new Date().toISOString(),
-      ecoName,
     );
   }
 
@@ -275,24 +200,35 @@ WITH ecosystem_list AS (SELECT UNNEST($1::text[]) AS ecosystem_name),
                       AND repos.upstream_marks ?| (SELECT ARRAY_AGG(ecosystem_name)
                                                    FROM ecosystem_list)
                     GROUP BY event.repo_id),
-     top_ecosystem AS (SELECT ecosystem.ecosystem_name ecosystem,
+     repo_contributors AS (SELECT event.repo_id,
+                                  COUNT(DISTINCT event.actor_id) contributor_count
+                           FROM web3.repos repos
+                                    JOIN web3.event event ON repos.repo_id = event.repo_id
+                           WHERE event.event_type IN ('PushEvent', 'PullRequestEvent')
+                             AND repos.upstream_marks ?| (SELECT ARRAY_AGG(ecosystem_name)
+                                                          FROM ecosystem_list)
+                           GROUP BY event.repo_id),
+     top_ecosystem AS (SELECT ecosystem.ecosystem_name             ecosystem,
                               repo_stars.repo_id,
                               repos.repo_name,
                               repo_stars.star_count,
+                              COALESCE(rc.contributor_count, 0) as contributor_count,
                               ROW_NUMBER() OVER (
                                   PARTITION BY ecosystem.ecosystem_name
                                   ORDER BY repo_stars.star_count DESC
-                                  )                    ranking
+                                  )                                ranking
                        FROM repo_stars
                                 JOIN web3.repos repos ON repo_stars.repo_id = repos.repo_id
                                 CROSS JOIN ecosystem_list ecosystem
+                                LEFT JOIN repo_contributors rc ON repo_stars.repo_id = rc.repo_id
                        WHERE repos.upstream_marks ? ecosystem.ecosystem_name)
 SELECT ecosystem,
        json_agg(
                json_build_object(
                        'repo_id', repo_id,
                        'repo_name', repo_name,
-                       'star_count', star_count
+                       'star_count', star_count,
+                       'contributor_count', contributor_count
                )
        ) top_repositories
 FROM top_ecosystem
@@ -304,6 +240,36 @@ ORDER BY ecosystem;`;
 
     const results = await this.db.executeQuery(query);
 
+    for (const row of results.rows as QueryTopStar[]) {
+      const data: QueryTopStarRepo[] = await Promise.all(
+        row.top_repositories.map(async (row) => {
+          const [owner, repo] = row.repo_name.split('/');
+          const repoDetails = await this.github.rest.repos.get({
+            owner,
+            repo,
+          });
+          return {
+            repo_id: Number(row.repo_id),
+            repo_name: row.repo_name,
+            star_count: repoDetails.data.stargazers_count,
+            forks_count: repoDetails.data.forks_count,
+            contributor_count: row.contributor_count,
+            open_issues_count: repoDetails.data.open_issues_count,
+          };
+        }),
+      );
+      data.sort((a, b) => b.star_count - a.star_count);
+
+      const cacheData = new RepoRankListDto();
+      cacheData.list = data;
+
+      return await this.cacheDataService.updateCacheData(
+        CacheKey.RepoStarRank,
+        cacheData,
+        new Date().toISOString(),
+        row.ecosystem,
+      );
+    }
     return results.rows;
   }
 
@@ -314,8 +280,8 @@ ORDER BY ecosystem;`;
   async test() {
     await this.ecoRankTotal(EcoType.ALL, false);
     const ecoTypes = Object.values(EcoType);
+    await this.repoStarRankNew(ecoTypes);
     for (const eco of ecoTypes) {
-      await this.repoStarRank(eco, 10, false);
       await this.getTopCommitActors(eco, false);
     }
     return Promise.resolve();
