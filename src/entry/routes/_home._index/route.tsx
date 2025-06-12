@@ -28,6 +28,7 @@ import DeveloperRankViewWidget from "~/developer/views/developer-rank";
 import Section from "../../components/section";
 import MetricOverview from "./MetricOverview";
 import { fetchAnalyzedStatistics } from "~/ai/repository";
+import Markdown from "react-markdown";
 
 const { title, tagline, description } = getMetadata();
 
@@ -277,7 +278,7 @@ export default function Index() {
           {output.length > 0 ? (
             <Card className="w-full max-w-[650px] mx-auto mt-8">
               <CardBody>
-                <p className="text-gray-500 dark:text-gray-400 ">{output}</p>
+                <p className="text-gray-500 dark:text-gray-400 "><Markdown>{output}</Markdown></p>
               </CardBody>
             </Card>
           ) : null}
