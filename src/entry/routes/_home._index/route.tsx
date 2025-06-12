@@ -115,7 +115,7 @@ export default function Index() {
   };
 
   const onClickHandle = () => {
-    setOutput([]);
+    setOutput("");
     const controller = new AbortController();
 
     fetch("/api/ai/query", {

@@ -11,6 +11,7 @@ type Repository = Pick<Repo, "id" | "name"> & {
     fork: number;
     watch: number;
     openIssue: number;
+    contributor: number;
   };
   customMark?: number | string;
 };

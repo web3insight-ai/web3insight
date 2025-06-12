@@ -21,10 +21,11 @@ function RepoTable({ className, dataSource, title, icon }: RepoTableProps ) {
       )}
       <div className="px-8 py-3 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-800 grid grid-cols-12 gap-2">
         <div className="col-span-1 text-xs font-medium text-gray-500 dark:text-gray-400">#</div>
-        <div className="col-span-5 text-xs font-medium text-gray-500 dark:text-gray-400">Repository</div>
+        <div className="col-span-3 text-xs font-medium text-gray-500 dark:text-gray-400">Repository</div>
         <div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400 text-right">Stars</div>
         <div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400 text-right">Forks</div>
         <div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400 text-right">Issues (open)</div>
+        <div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400 text-right">Contributors</div>
       </div>
       <div>
         {dataSource.map((repo, index) => (
@@ -42,7 +43,7 @@ function RepoTable({ className, dataSource, title, icon }: RepoTableProps ) {
             </div>
 
             {/* Repository name */}
-            <div className="col-span-5 flex items-center">
+            <div className="col-span-3 flex items-center">
               <RepoLinkWidget
                 className="font-medium text-gray-900 dark:text-gray-300"
                 repo={repo.fullName}
@@ -58,6 +59,9 @@ function RepoTable({ className, dataSource, title, icon }: RepoTableProps ) {
               <div className="flex items-center justify-end gap-1">
                 <span>{repo.statistics.openIssue.toLocaleString()}</span>
               </div>
+            </div>
+            <div className="col-span-2 text-right font-medium text-gray-700 dark:text-gray-300">
+              {repo.statistics.contributor.toLocaleString()}
             </div>
           </div>
         ))}

@@ -30,6 +30,7 @@ function resolveDataSource(raw: RepoRankRecord[]): Repository[] {
       fork: repo.forks_count,
       watch: 0,
       openIssue: repo.open_issues_count,
+      contributor: repo.contributor_count,
     },
   }));
 }

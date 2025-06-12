@@ -41,6 +41,7 @@ type RepoRankRecord =  RepoBasic & {
   star_count: number;
   forks_count: number;
   open_issues_count: number;
+  contributor_count: number;
 }
 
 type ActorBasic = {

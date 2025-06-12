@@ -21,6 +21,7 @@ async function fetchListByDeveloper(username: string): Promise<ResponseResult<Re
         fork: repo.forks_count,
         watch: repo.watchers_count,
         openIssue: repo.open_issues_count,
+        contributor: -1,
       },
     })),
   };
@@ -35,7 +36,7 @@ async function fetchListByEcosystem(name: string): Promise<ResponseResult<Reposi
       name: `repo${num}`,
       fullName: `repo${num}`,
       description: `repo${num} of ${name}`,
-      statistics: { star: 1, fork: 1, watch: 1, openIssue: 1 },
+      statistics: { star: 1, fork: 1, watch: 1, openIssue: 1, contributor: 1 },
     };
   })));
 }
@@ -55,7 +56,7 @@ async function fetchManageableList(
       name: item.repo_name,
       fullName: item.repo_name,
       description: "",
-      statistics: { star: -1, fork: -1, watch: -1, openIssue: -1 },
+      statistics: { star: -1, fork: -1, watch: -1, openIssue: -1, contributor: -1 },
       customMark: item.custom_marks[rest.eco] || -1,
     })) : [],
     extra: {
