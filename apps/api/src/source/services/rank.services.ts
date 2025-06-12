@@ -91,72 +91,63 @@ export class RankService {
   async getTopScoreActorsNew(ecoNames: string[]) {
     const sqlRawQuery = `
 WITH ecosystem_list AS (SELECT UNNEST($1::text[]) AS ecosystem_name),
-     contributor_pr_scores AS (SELECT event.actor_id,
-                                      event.repo_id,
-                                      COUNT(*) AS score
-                               FROM web3.repos repos
-                                        JOIN web3.event event ON repos.repo_id = event.repo_id
-                               WHERE event.event_type = 'PullRequestEvent'
-                                 AND repos.upstream_marks ?| (SELECT ARRAY_AGG(ecosystem_name) FROM ecosystem_list)
-                               GROUP BY event.actor_id, event.repo_id),
+     filtered_events AS (SELECT event.actor_id,
+                                event.repo_id,
+                                COUNT(*) AS score
+                         FROM web3.repos repos
+                                  JOIN web3.event event ON repos.repo_id = event.repo_id
+                         WHERE event.event_type = 'PullRequestEvent'
+                           AND repos.upstream_marks ?| (SELECT ARRAY_AGG(ecosystem_name) FROM ecosystem_list)
+                         GROUP BY event.actor_id, event.repo_id),
 
-     ecosystem_contributors AS (SELECT ecosystem.ecosystem_name AS ecosystem,
-                                       cpc.actor_id,
-                                       SUM(cpc.score)           AS total_score
-                                FROM contributor_pr_scores cpc
-                                         JOIN web3.repos repos ON cpc.repo_id = repos.repo_id
-                                         CROSS JOIN ecosystem_list ecosystem
-                                WHERE repos.upstream_marks ? ecosystem.ecosystem_name
-                                GROUP BY ecosystem.ecosystem_name, cpc.actor_id),
+     ecosystem_scores AS (SELECT e.ecosystem_name AS ecosystem,
+                                 fe.actor_id,
+                                 fe.repo_id,
+                                 repos.repo_name,
+                                 fe.score
+                          FROM filtered_events fe
+                                   JOIN web3.repos repos ON fe.repo_id = repos.repo_id
+                                   CROSS JOIN ecosystem_list e
+                          WHERE repos.upstream_marks ? e.ecosystem_name),
 
-     top_contributors_per_ecosystem AS (SELECT ecosystem,
-                                               actor_id,
-                                               total_score,
-                                               ROW_NUMBER() OVER (PARTITION BY ecosystem ORDER BY total_score DESC) AS contributor_rank
-                                        FROM ecosystem_contributors),
-     ranked_repos_per_contributor AS (SELECT tc.ecosystem,
-                                             tc.actor_id,
-                                             tc.contributor_rank,
-                                             tc.total_score,
-                                             repos.repo_id,
-                                             repos.repo_name,
-                                             cpc.score,
-                                             ROW_NUMBER()
-                                             OVER (PARTITION BY tc.ecosystem, tc.actor_id ORDER BY cpc.score DESC) AS repo_rank
-                                      FROM top_contributors_per_ecosystem tc
-                                               JOIN contributor_pr_scores cpc ON tc.actor_id = cpc.actor_id
-                                               JOIN web3.repos repos ON cpc.repo_id = repos.repo_id
-                                      WHERE repos.upstream_marks ? tc.ecosystem
-                                        AND tc.contributor_rank <= 10),
-     contributors_with_repos AS (SELECT r.ecosystem,
-                                        r.contributor_rank,
-                                        r.actor_id,
-                                        a.actor_login,
-                                        r.total_score,
-                                        json_agg(
-                                        json_build_object(
-                                                'repo_id', r.repo_id,
-                                                'repo_name', r.repo_name,
-                                                'score', r.score
-                                        ) ORDER BY r.score DESC
-                                                ) FILTER (WHERE r.repo_rank <= 100) AS top_repos
+     actor_totals AS (SELECT es.ecosystem,
+                             es.actor_id,
+                             a.actor_login,
+                             SUM(es.score)                                                             AS total_score,
+                             ROW_NUMBER() OVER (PARTITION BY es.ecosystem ORDER BY SUM(es.score) DESC) AS rank
+                      FROM ecosystem_scores es
+                               JOIN web3.actors a ON es.actor_id = a.actor_id
+                      WHERE a.actor_login NOT ILIKE '%[bot]%'
+                        AND a.actor_login NOT ILIKE 'bot-%'
+                        AND a.actor_login NOT ILIKE '%-bot'
+                      GROUP BY es.ecosystem, es.actor_id, a.actor_login),
 
-                                 FROM ranked_repos_per_contributor r
-                                          JOIN web3.actors a ON r.actor_id = a.actor_id
-                                 WHERE a.actor_login NOT ILIKE '%[bot]%'
-                                   AND a.actor_login NOT ILIKE 'bot-%'
-                                   AND a.actor_login NOT ILIKE '%-bot'
-                                 GROUP BY r.ecosystem, r.contributor_rank, r.actor_id, a.actor_login, r.total_score)
+     top_contributors AS (SELECT at.ecosystem,
+                                 at.rank,
+                                 at.actor_id,
+                                 at.actor_login,
+                                 at.total_score,
+                                 (SELECT json_agg(json_build_object(
+                                                          'repo_id', es.repo_id,
+                                                          'repo_name', es.repo_name,
+                                                          'score', es.score
+                                                  ) ORDER BY es.score DESC)
+                                  FROM (SELECT repo_id, repo_name, score
+                                        FROM ecosystem_scores
+                                        WHERE ecosystem = at.ecosystem
+                                          AND actor_id = at.actor_id
+                                        ORDER BY score DESC
+                                        LIMIT 10) es) AS top_repos
+                          FROM actor_totals at
+                          WHERE at.rank <= 100)
 SELECT ecosystem,
-       json_agg(
-               json_build_object(
-                       'actor_id', actor_id,
-                       'actor_login', actor_login,
-                       'total_score', total_score,
-                       'top_repos', top_repos
-               ) ORDER BY contributor_rank
-       ) AS top_contributors
-FROM contributors_with_repos
+       json_agg(json_build_object(
+                        'actor_id', actor_id,
+                        'actor_login', actor_login,
+                        'total_score', total_score,
+                        'top_repos', top_repos
+                ) ORDER BY rank) AS top_actors
+FROM top_contributors
 GROUP BY ecosystem
 ORDER BY ecosystem;
 `;
@@ -172,7 +163,7 @@ ORDER BY ecosystem;
       cacheData.list = row.top_actors;
       await this.cacheDataService.updateCacheData(
         CacheKey.ActorScoreRank,
-        row,
+        cacheData,
         new Date().toISOString(),
         row.ecosystem,
       );
@@ -268,10 +259,10 @@ ORDER BY ecosystem;`;
     description: 'Test eco data',
   })
   async test() {
-    await this.ecoRankTotal(EcoType.ALL, false);
     const ecoTypes = Object.values(EcoType);
-    await this.repoStarRankNew(ecoTypes);
     await this.getTopScoreActorsNew(ecoTypes);
+    await this.repoStarRankNew(ecoTypes);
+    await this.ecoRankTotal(EcoType.ALL, false);
   }
 
   @Command({
