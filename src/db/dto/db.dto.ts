@@ -1,5 +1,5 @@
 import {
-  ActorCommitRankListDto,
+  ActorScoreRankListDto,
   ActorDateListDto,
   EcoRankListDto,
   RepoRankListDto,
@@ -74,7 +74,7 @@ export interface Web3Caches {
     | TotalDto
     | EcoRankListDto
     | RepoRankListDto
-    | ActorCommitRankListDto
+    | ActorScoreRankListDto
     | ActorDateListDto;
   cache_key: string;
   created_at: Timestamp;

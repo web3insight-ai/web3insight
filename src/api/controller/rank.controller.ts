@@ -10,7 +10,7 @@ import { AppAuthGuard } from '../../auth/app.auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RankService } from '@/source/services/rank.services';
 import {
-  ActorCommitRankListDto,
+  ActorScoreRankListDto,
   EcoRankListDto,
   GetTotalReqDto,
   RepoRankListDto,
@@ -75,8 +75,11 @@ export class RankController {
   @UseGuards(AppAuthGuard)
   async getActorsTop(@Query() query: GetTotalReqDto) {
     try {
-      const res = await this.rankService.getTopCommitActors(query.eco_name);
-      return res?.cache_data as ActorCommitRankListDto;
+      const res = await this.cacheDataService.getCacheData(
+        CacheKey.ActorScoreRank,
+        query.eco_name,
+      );
+      return res?.cache_data as ActorScoreRankListDto;
     } catch (e: unknown) {
       if (e instanceof Error) {
         throw new HttpException(e, 400);
