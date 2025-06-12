@@ -11,3 +11,23 @@ export class QueryTopStarRepo {
   open_issues_count: number = 0;
   contributor_count: number;
 }
+
+export class QueryTopActors {
+  ecosystem: string;
+  top_actors: QueryTopActor[];
+}
+
+export class QueryTopActor {
+  actor_id: number;
+  actor_login: string;
+  total_score: number;
+  total_commit_count: number = 0;
+  top_repos: QueryTopActorRepo[];
+}
+
+export class QueryTopActorRepo {
+  repo_id: number;
+  repo_name: string;
+  commit_count: number = 0;
+  score: number;
+}

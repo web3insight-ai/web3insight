@@ -1,7 +1,7 @@
 import { KYSELY, OCTOKIT } from '@/db/db.provider';
 import { DB } from '@/db/dto/db.dto';
 import { Inject, Injectable } from '@nestjs/common';
-import { CompiledQuery, Kysely, sql } from 'kysely';
+import { CompiledQuery, Kysely } from 'kysely';
 import { Command, Console } from 'nestjs-console';
 import { CacheDataService } from './cache.services';
 import { CacheKey } from '../dto/cache.dto';
@@ -13,10 +13,13 @@ import {
   EcoRankListDto,
   TotalDto,
   RepoRankListDto,
-  ActorCommitRepoDto,
-  ActorCommitRankListDto,
+  ActorScoreRankListDto,
 } from '@/api/dto/api.dto';
-import { QueryTopStar, QueryTopStarRepo } from '../dto/query.dto';
+import {
+  QueryTopActors,
+  QueryTopStar,
+  QueryTopStarRepo,
+} from '../dto/query.dto';
 
 @Injectable()
 @Console()
@@ -85,111 +88,98 @@ export class RankService {
     );
   }
 
-  async getTopCommitActors(ecoName: EcoType, cache = true) {
-    const dbData = await this.cacheDataService.getCacheData(
-      CacheKey.ActorCommitRank,
-      ecoName,
-    );
-    if (!dbData && cache) {
-      throw new Error('Cache not found');
+  async getTopScoreActorsNew(ecoNames: string[]) {
+    const sqlRawQuery = `
+WITH ecosystem_list AS (SELECT UNNEST($1::text[]) AS ecosystem_name),
+     contributor_pr_scores AS (SELECT event.actor_id,
+                                      event.repo_id,
+                                      COUNT(*) AS score
+                               FROM web3.repos repos
+                                        JOIN web3.event event ON repos.repo_id = event.repo_id
+                               WHERE event.event_type = 'PullRequestEvent'
+                                 AND repos.upstream_marks ?| (SELECT ARRAY_AGG(ecosystem_name) FROM ecosystem_list)
+                               GROUP BY event.actor_id, event.repo_id),
+
+     ecosystem_contributors AS (SELECT ecosystem.ecosystem_name AS ecosystem,
+                                       cpc.actor_id,
+                                       SUM(cpc.score)           AS total_score
+                                FROM contributor_pr_scores cpc
+                                         JOIN web3.repos repos ON cpc.repo_id = repos.repo_id
+                                         CROSS JOIN ecosystem_list ecosystem
+                                WHERE repos.upstream_marks ? ecosystem.ecosystem_name
+                                GROUP BY ecosystem.ecosystem_name, cpc.actor_id),
+
+     top_contributors_per_ecosystem AS (SELECT ecosystem,
+                                               actor_id,
+                                               total_score,
+                                               ROW_NUMBER() OVER (PARTITION BY ecosystem ORDER BY total_score DESC) AS contributor_rank
+                                        FROM ecosystem_contributors),
+     ranked_repos_per_contributor AS (SELECT tc.ecosystem,
+                                             tc.actor_id,
+                                             tc.contributor_rank,
+                                             tc.total_score,
+                                             repos.repo_id,
+                                             repos.repo_name,
+                                             cpc.score,
+                                             ROW_NUMBER()
+                                             OVER (PARTITION BY tc.ecosystem, tc.actor_id ORDER BY cpc.score DESC) AS repo_rank
+                                      FROM top_contributors_per_ecosystem tc
+                                               JOIN contributor_pr_scores cpc ON tc.actor_id = cpc.actor_id
+                                               JOIN web3.repos repos ON cpc.repo_id = repos.repo_id
+                                      WHERE repos.upstream_marks ? tc.ecosystem
+                                        AND tc.contributor_rank <= 10),
+     contributors_with_repos AS (SELECT r.ecosystem,
+                                        r.contributor_rank,
+                                        r.actor_id,
+                                        a.actor_login,
+                                        r.total_score,
+                                        json_agg(
+                                        json_build_object(
+                                                'repo_id', r.repo_id,
+                                                'repo_name', r.repo_name,
+                                                'score', r.score
+                                        ) ORDER BY r.score DESC
+                                                ) FILTER (WHERE r.repo_rank <= 100) AS top_repos
+
+                                 FROM ranked_repos_per_contributor r
+                                          JOIN web3.actors a ON r.actor_id = a.actor_id
+                                 WHERE a.actor_login NOT ILIKE '%[bot]%'
+                                   AND a.actor_login NOT ILIKE 'bot-%'
+                                   AND a.actor_login NOT ILIKE '%-bot'
+                                 GROUP BY r.ecosystem, r.contributor_rank, r.actor_id, a.actor_login, r.total_score)
+SELECT ecosystem,
+       json_agg(
+               json_build_object(
+                       'actor_id', actor_id,
+                       'actor_login', actor_login,
+                       'total_score', total_score,
+                       'top_repos', top_repos
+               ) ORDER BY contributor_rank
+       ) AS top_contributors
+FROM contributors_with_repos
+GROUP BY ecosystem
+ORDER BY ecosystem;
+`;
+    const query = CompiledQuery.raw(sqlRawQuery, [ecoNames]);
+
+    const results = await this.db.executeQuery(query);
+
+    for (const row of results.rows as QueryTopActors[]) {
+      row.top_actors.forEach((actor) => {
+        actor.total_commit_count = actor.total_score;
+      });
+      const cacheData = new ActorScoreRankListDto();
+      cacheData.list = row.top_actors;
+      await this.cacheDataService.updateCacheData(
+        CacheKey.ActorScoreRank,
+        row,
+        new Date().toISOString(),
+        row.ecosystem,
+      );
     }
-
-    if (dbData && cache) {
-      return dbData;
-    }
-    const limit = 100;
-    const repoLimit = 10;
-    let query = this.db
-      .selectFrom('web3.event as e')
-      .innerJoin('web3.actors as a', 'e.actor_id', 'a.actor_id')
-      .select([
-        'e.actor_id',
-        'a.actor_login',
-        this.db.fn.count(sql.id('e', 'id')).as('total_commit_count'),
-      ])
-      .where('e.event_type', '=', 'PullRequestEvent')
-      .where('a.actor_login', 'not like', '%[bot]%')
-      .where('a.actor_login', 'not like', '%-bot');
-
-    if (ecoName !== EcoType.ALL) {
-      query = query
-        .innerJoin('web3.repos as r', 'e.repo_id', 'r.repo_id')
-        .where(
-          'r.eco_names',
-          '@>',
-          sql<string[]>`ARRAY[${sql.join([ecoName])}]`,
-        );
-    }
-
-    const topActors = await query
-      .groupBy(['e.actor_id', 'a.actor_login'])
-      .orderBy(sql`total_commit_count`, 'desc')
-      .limit(limit)
-      .execute();
-
-    const topActorsBasicInfo = topActors.map((actor) => ({
-      actor_id: BigInt(String(actor.actor_id)),
-      actor_login: actor.actor_login,
-      total_commit_count: BigInt(String(actor.total_commit_count)),
-    }));
-
-    if (topActorsBasicInfo.length === 0) {
-      throw new Error('Cache not found');
-    }
-
-    const resultPromises = topActorsBasicInfo.map(async (actor) => {
-      let query2 = this.db
-        .selectFrom('web3.event as e')
-        .innerJoin('web3.repos as r', 'e.repo_id', 'r.repo_id')
-        .select([
-          'e.repo_id',
-          'r.repo_name',
-          this.db.fn.count(sql.id('e', 'id')).as('event_count'),
-        ])
-        .where('e.actor_id', '=', String(actor.actor_id))
-        .where('e.event_type', '=', 'PullRequestEvent');
-
-      if (ecoName !== EcoType.ALL) {
-        query2 = query2.where(
-          'r.eco_names',
-          '@>',
-          sql<string[]>`ARRAY[${sql.join([ecoName])}]`,
-        );
-      }
-
-      const repos = await query2
-        .groupBy(['e.repo_id', 'r.repo_name'])
-        .orderBy(sql`event_count`, 'desc')
-        .limit(repoLimit)
-        .execute();
-
-      const topReposData: ActorCommitRepoDto[] = repos.map((repo) => ({
-        repo_id: Number(repo.repo_id),
-        repo_name: repo.repo_name ?? '',
-        commit_count: Number(repo.event_count),
-      }));
-
-      return {
-        actor_id: Number(actor.actor_id),
-        actor_login: actor.actor_login ?? '',
-        total_commit_count: Number(actor.total_commit_count),
-        top_repos: topReposData,
-      };
-    });
-
-    const data = new ActorCommitRankListDto();
-
-    data.list = await Promise.all(resultPromises);
-
-    return await this.cacheDataService.updateCacheData(
-      CacheKey.ActorCommitRank,
-      data,
-      new Date().toISOString(),
-      ecoName,
-    );
   }
 
-  async repoStarRankNew(eco_names: string[]) {
+  async repoStarRankNew(ecoNames: string[]) {
     const sqlRawQuery = `
 WITH ecosystem_list AS (SELECT UNNEST($1::text[]) AS ecosystem_name),
      repo_stars AS (SELECT event.repo_id,
@@ -236,7 +226,7 @@ WHERE ranking <= 10
 GROUP BY ecosystem
 ORDER BY ecosystem;`;
 
-    const query = CompiledQuery.raw(sqlRawQuery, [eco_names]);
+    const query = CompiledQuery.raw(sqlRawQuery, [ecoNames]);
 
     const results = await this.db.executeQuery(query);
 
@@ -263,7 +253,7 @@ ORDER BY ecosystem;`;
       const cacheData = new RepoRankListDto();
       cacheData.list = data;
 
-      return await this.cacheDataService.updateCacheData(
+      await this.cacheDataService.updateCacheData(
         CacheKey.RepoStarRank,
         cacheData,
         new Date().toISOString(),
@@ -281,10 +271,7 @@ ORDER BY ecosystem;`;
     await this.ecoRankTotal(EcoType.ALL, false);
     const ecoTypes = Object.values(EcoType);
     await this.repoStarRankNew(ecoTypes);
-    for (const eco of ecoTypes) {
-      await this.getTopCommitActors(eco, false);
-    }
-    return Promise.resolve();
+    await this.getTopScoreActorsNew(ecoTypes);
   }
 
   @Command({
