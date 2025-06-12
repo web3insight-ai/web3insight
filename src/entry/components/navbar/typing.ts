@@ -1,10 +1,10 @@
 import type { PropsWithChildren, ReactNode } from "react";
 
-import type { StrapiUser } from "~/strapi/typing";
+import type { User } from "~/strapi/typing";
 
 type NavbarProps = PropsWithChildren<{
   className?: string;
-  user: StrapiUser | null;
+  user: User | null;
   extra?: ReactNode;
 }>;
 

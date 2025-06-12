@@ -4,7 +4,7 @@ import type { DataValue, ResponseResult } from "@/types";
 import { generateSuccessResponse, generateFailedResponse } from "@/clients/http";
 import redis from "@/clients/redis";
 
-import type { StrapiUser, StrapiQuery } from "../strapi";
+import type { User as StrapiUser, StrapiQuery } from "../strapi";
 import { createQuery, updateQuery, fetchQueryList, fetchQuery, fetchUserQueries, fetchPinnedQueries } from "../strapi/repository";
 import { getSearchKeyword } from "../ai/repository";
 

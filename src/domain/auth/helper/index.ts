@@ -1,7 +1,12 @@
-import type { StrapiUser } from "../../strapi/typing";
+import type { User } from "../../strapi/typing";
+import { isRoleManageable } from "../../admin/helper";
 
-function isAdmin(user: StrapiUser | null): boolean {
-  return !!user;
+function isManageable(user: User | null): boolean {
+  return !!user && isRoleManageable(user.role.type);
 }
 
-export { isAdmin };
+function isAdmin(user: User | null): boolean {
+  return !!user && user.role.type === "admin";
+}
+
+export { isManageable, isAdmin };

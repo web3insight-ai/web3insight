@@ -4,13 +4,16 @@ import httpClient from "@/clients/http/default";
 
 import type { RepoRankRecord, ActorRankRecord, ActorTrendRecord } from "../../api/typing";
 import {
-  fetchEcosystemRankList,
   fetchRepoCount, fetchRepoRankList,
   fetchActorCount, fetchActorGrowthCount, fetchActorRankList, fetchActorTrendList,
+  updateRepoCustomMark,
 } from "../../api/repository";
 
 import type { Repository } from "../../repository/typing";
 import { fetchManageableList as fetchManageableRepoListByEco } from "../../repository/repository";
+
+import type { Manager } from "../../admin/typing";
+import { fetchManager } from "../../admin/repository";
 
 import type { Ecosystem, RepositoryListParams } from "../typing";
 
@@ -57,12 +60,12 @@ async function fetchStatistics(name: string): Promise<ResponseResult<{
   });
 }
 
-async function fetchManageableList(): Promise<ResponseResult<Ecosystem[]>> {
-  const { data, ...others } = await fetchEcosystemRankList();
+async function fetchManageableList(managerId: Manager["id"]): Promise<ResponseResult<Ecosystem[]>> {
+  const { data, ...others } = await fetchManager(managerId);
 
   return {
     ...others,
-    data: data.list.map(eco => ({ name: eco.eco_name })),
+    data: data?.ecosystems.map(eco => ({ name: eco })) || [],
   };
 }
 
@@ -74,4 +77,12 @@ async function fetchManageableRepositoryList(params: RepositoryListParams): Prom
   return fetchManageableRepoListByEco(params);
 }
 
-export { fetchStatistics, fetchManageableList, fetchManageableRepositoryList };
+async function updateManageableRepositoryMark(data) {
+  if (!isServerSide()) {
+    return httpClient.put("/api/ecosystem/repos/mark", data);
+  }
+
+  return updateRepoCustomMark(data);
+}
+
+export { fetchStatistics, fetchManageableList, fetchManageableRepositoryList, updateManageableRepositoryMark };

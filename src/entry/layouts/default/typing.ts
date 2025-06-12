@@ -1,4 +1,4 @@
-import type { StrapiUser } from "~/strapi/typing";
+import type { User } from "~/strapi/typing";
 import type { Query } from "~/query/typing";
 
 type SearchHistoryProps = {
@@ -13,7 +13,7 @@ type DefaultLayoutProps = {
     id: string;
     documentId: string;
   }[];
-  user: StrapiUser | null;
+  user: User | null;
 };
 
 export type { SearchHistoryProps, DefaultLayoutProps };

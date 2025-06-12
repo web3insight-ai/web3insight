@@ -1,1 +1,1 @@
-export type { StrapiUser, StrapiQuery } from "./typing";
+export type { User, StrapiQuery } from "./typing";

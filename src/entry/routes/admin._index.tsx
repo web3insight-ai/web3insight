@@ -1,15 +1,18 @@
+import type { LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 
+import { fetchCurrentUser } from "~/auth/repository";
 import { fetchManageableList } from "~/ecosystem/repository";
 import EcosystemListViewWidget from "~/ecosystem/views/ecosystem-list";
 
 import Section from "../components/section";
 
-async function loader() {
-  const res = await fetchManageableList();
+async function loader({ request }: LoaderFunctionArgs) {
+  const res = await fetchCurrentUser(request);
+  const { data } = await fetchManageableList(res.data.id);
 
   return {
-    ecosystems: res.data,
+    ecosystems: data,
   };
 }
 

@@ -19,4 +19,18 @@ async function fetchAdminRepoList(
   return httpClient.get("/v1/admin/ecosystems/repos", { params: { ...others, eco_name: eco } });
 }
 
-export { fetchTotalCount, fetchRankList, fetchAdminRepoList };
+async function updateRepoCustomMark(
+  data: EcoRequestParams & {
+    id: number;
+    mark: number;
+  },
+) {
+  const { id, eco, ...others } = data;
+
+  return httpClient.post(`/v1/admin/ecosystems/repos/${id}/mark`, { ...others, eco_name: eco });
+}
+
+export {
+  fetchTotalCount, fetchRankList,
+  fetchAdminRepoList, updateRepoCustomMark,
+};

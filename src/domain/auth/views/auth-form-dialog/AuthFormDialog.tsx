@@ -3,15 +3,16 @@ import { FormEvent, useState, useEffect } from "react";
 import { useAtom } from "jotai";
 import { authModalOpenAtom, authModalTypeAtom } from "#/atoms";
 import { Form, useActionData, useNavigation, useSubmit, useRevalidator, useOutletContext } from "@remix-run/react";
-import type { StrapiUser, ResponseResult } from "@/types";
+import type { ResponseResult } from "@/types";
 
 import { getTitle } from "@/utils/app";
 
+import type { StrapiUser } from "../../typing";
 import { signIn, fetchCurrentUser } from "../../repository";
 
-type AuthContext = {
-  user: StrapiUser | null;
-  setUser: (user: StrapiUser | null) => void;
+type AuthContext<U = StrapiUser | null> = {
+  user: U;
+  setUser: (user: U) => void;
 };
 
 function AuthFormDialogView() {

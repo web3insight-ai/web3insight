@@ -1,4 +1,4 @@
-import type { StrapiUser } from "~/strapi/typing";
+import type { User } from "~/strapi/typing";
 
 type MenuItem = {
   text: string;
@@ -7,7 +7,10 @@ type MenuItem = {
 };
 
 type AdminLayoutProps = {
-  user: StrapiUser | null;
+  user: User | null;
+  settings?: boolean;
 };
 
-export type { MenuItem, AdminLayoutProps };
+type NavMenuProps = Pick<AdminLayoutProps, "settings">;
+
+export type { MenuItem, AdminLayoutProps, NavMenuProps };

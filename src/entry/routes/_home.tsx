@@ -1,15 +1,15 @@
 import { json, LoaderFunctionArgs } from "@remix-run/node";
 import { Outlet, useLoaderData, useOutletContext } from "@remix-run/react";
 
-import type { StrapiUser } from "~/strapi";
+import type { User } from "~/strapi/typing";
 import { getUser } from "~/auth/repository";
 import { fetchListForUser } from "~/query/repository";
 
 import DefaultLayout from "../layouts/default";
 
-type RootContext = {
-  user: StrapiUser | null;
-  setUser: (user: StrapiUser | null) => void;
+type RootContext<U = User | null> = {
+  user: U;
+  setUser: (user: U) => void;
 };
 
 export const loader = async (ctx: LoaderFunctionArgs) => {

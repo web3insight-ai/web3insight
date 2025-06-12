@@ -4,6 +4,7 @@ import type { SqlStylePagination } from "@/clients/http";
 type PaginatableParams = Partial<SqlStylePagination> & {
   search?: string;
   order?: string;
+  direction?: string;
 };
 
 type TotalResponseData = {
@@ -22,6 +23,8 @@ type EcoRankRecord = {
   eco_name: string;
   actors_total: number;
   actors_core_total: number;
+  actors_new_total: number;
+  repos_total: number;
 }
 
 type RepoBasic = {
