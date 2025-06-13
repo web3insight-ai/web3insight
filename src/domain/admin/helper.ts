@@ -8,7 +8,7 @@ function isRoleManageable(role: Manager["role"]): boolean {
 
 function resolveManager(user: StrapiUser): Manager {
   return {
-    id: user.documentId,
+    id: user.id,
     username: user.username,
     email: user.email,
     role: user.role.type,
