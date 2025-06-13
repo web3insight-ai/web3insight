@@ -19,10 +19,10 @@ function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
       <div className="px-6 py-3 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-800 grid grid-cols-12 gap-2">
         <div className="col-span-1 text-xs font-medium text-gray-500 dark:text-gray-400">#</div>
         <div className="col-span-3 text-xs font-medium text-gray-500 dark:text-gray-400">Ecosystem</div>
-        <div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400">Total Repos</div>
-        <div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400">Total Devs</div>
-        <div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400">Core Devs</div>
-        <div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400">New Devs</div>
+        <div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400 text-right">Total Repos</div>
+        <div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400 text-right">Total Devs</div>
+        <div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400 text-right">Core Devs</div>
+        <div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400 text-right">New Devs</div>
       </div>
 
       <CardBody className="p-0">
@@ -42,16 +42,16 @@ function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
                   {ecosystem.eco_name}
                 </Link>
               </div>
-              <div className="col-span-2 font-medium text-gray-700 dark:text-gray-300">
+              <div className="col-span-2 font-medium text-gray-700 dark:text-gray-300 text-right">
                 {Number(ecosystem.repos_total).toLocaleString()}
               </div>
-              <div className="col-span-2 font-medium text-gray-700 dark:text-gray-300">
+              <div className="col-span-2 font-medium text-gray-700 dark:text-gray-300 text-right">
                 {Number(ecosystem.actors_total).toLocaleString()}
               </div>
-              <div className="col-span-2 font-medium text-gray-700 dark:text-gray-300">
+              <div className="col-span-2 font-medium text-gray-700 dark:text-gray-300 text-right">
                 {Number(ecosystem.actors_core_total).toLocaleString()}
               </div>
-              <div className="col-span-2 font-medium text-gray-700 dark:text-gray-300">
+              <div className="col-span-2 font-medium text-gray-700 dark:text-gray-300 text-right">
                 {Number(ecosystem.actors_new_total).toLocaleString()}
               </div>
             </div>
