@@ -24,4 +24,8 @@ async function fetchUser(id: number, params = {}): Promise<ResponseResult<User |
   return httpClient.get(`/users/${id}`, { params });
 }
 
-export { getCurrentUser, fetchUserList, fetchUser };
+async function updateUser({ id, ...others }: User): Promise<ResponseResult<User>> {
+  return httpClient.put(`/users/${id}`, others);
+}
+
+export { getCurrentUser, fetchUserList, fetchUser, updateUser };

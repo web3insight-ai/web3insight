@@ -21,6 +21,7 @@ interface User extends Entry {
   confirmed: boolean;
   blocked: boolean;
   role: Role;
+  ecosystem: string | null;
 }
 
 // Authentication types

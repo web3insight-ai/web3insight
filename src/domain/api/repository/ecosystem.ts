@@ -11,6 +11,13 @@ async function fetchRankList(): Promise<ResponseResult<ListResponseData<EcoRankR
   return httpClient.get("/v1/ecosystems/top");
 }
 
+async function fetchAdminEcosystemList(): Promise<ResponseResult<{
+  provider_ecosystem: string[];
+  available_ecosystem: string[];
+}>> {
+  return httpClient.get("/v1/admin/ecosystems");
+}
+
 async function fetchAdminRepoList(
   params: Partial<PaginatableParams & EcoRequestParams> = {},
 ): Promise<ResponseResult<ListResponseData<EcoRepo> & TotalResponseData>> {
@@ -32,5 +39,5 @@ async function updateRepoCustomMark(
 
 export {
   fetchTotalCount, fetchRankList,
-  fetchAdminRepoList, updateRepoCustomMark,
+  fetchAdminEcosystemList, fetchAdminRepoList, updateRepoCustomMark,
 };

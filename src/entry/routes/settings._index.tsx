@@ -1,27 +1,44 @@
 import { useLoaderData } from "@remix-run/react";
 
-import { fetchManagerList } from "~/admin/repository";
+import { fetchAdminEcosystemList } from "~/api/repository";
+import type { Manager } from "~/admin/typing";
+import { fetchManagerList, updateManager } from "~/admin/repository";
 import ManagerListViewWidget from "~/admin/views/manager-list";
 
 import Section from "../components/section";
 
 async function loader() {
-  const { data } = await fetchManagerList();
-   
+  const [{ data }, { data: managers }] = await Promise.all([fetchAdminEcosystemList(), fetchManagerList()]);
+
   return {
-    managers: data,
+    managers,
+    ecosystems: data.provider_ecosystem.filter(eco => eco.toLowerCase() !== "all"),
   };
 }
 
 function SettingsHomepage() {
-  const { managers } = useLoaderData<typeof loader>();
+  const { managers, ecosystems } = useLoaderData<typeof loader>();
+
+  const handleAssign = async (assigned: string[], record: Manager) => {
+    return updateManager({ ...record, ecosystems: assigned }).then(res => {
+      if (res.success) {
+        location.reload();
+      }
+
+      return res;
+    });
+  };
 
   return (
     <Section
       title="Managers"
       summary="You can manage the managers listed below"
     >
-      <ManagerListViewWidget dataSource={managers} />
+      <ManagerListViewWidget
+        dataSource={managers}
+        metadata={{ ecosystems }}
+        onAssign={handleAssign}
+      />
     </Section>
   );
 }
