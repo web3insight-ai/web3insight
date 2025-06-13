@@ -4,15 +4,24 @@ import { useLoaderData } from "@remix-run/react";
 
 import type { DataValue } from '@/types';
 
+import { fetchCurrentUser } from "~/auth/repository";
 import { getPageSize } from "~/ecosystem/helper";
-import { fetchManageableRepositoryList, updateManageableRepositoryMark } from "~/ecosystem/repository";
+import { fetchManageableList, fetchManageableRepositoryList, updateManageableRepositoryMark } from "~/ecosystem/repository";
 import RepositoryListViewWidget from "~/repository/views/repository-list";
 
 import Section from "../components/section";
 
-async function loader({ params }: LoaderFunctionArgs) {
-  const pageSize = getPageSize();
+async function loader({ request, params }: LoaderFunctionArgs) {
   const name = decodeURIComponent(params.name!);
+
+  const res = await fetchCurrentUser(request);
+  const { data: ecosystems } = await fetchManageableList(res.data.id);
+
+  if (!ecosystems.find(eco => eco.name === name)) {
+    throw new Response(null, { status: 404, statusText: "Not Found" });
+  }
+
+  const pageSize = getPageSize();
   const { data, extra } = await fetchManageableRepositoryList({ eco: name, pageSize });
 
   return json({
