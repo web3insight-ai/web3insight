@@ -50,12 +50,12 @@ export class CacheDataService {
   })
   async test() {
     await this.updateCacheData(
-      CacheKey.ReposTotal,
+      CacheKey.RepoTotal,
       { count: 0 },
       '2023-10-01',
       'Test',
     );
-    const result = await this.getCacheData(CacheKey.ReposTotal, 'Test');
+    const result = await this.getCacheData(CacheKey.RepoTotal, 'Test');
 
     console.log('result', result);
     return null;

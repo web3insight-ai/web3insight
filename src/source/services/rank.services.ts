@@ -5,8 +5,7 @@ import { CompiledQuery, Kysely } from 'kysely';
 import { Command, Console } from 'nestjs-console';
 import { CacheDataService } from './cache.services';
 import { CacheKey } from '../dto/cache.dto';
-import { ActorsScopeType, EcoType } from '../dto/data.dto';
-import { TotalService } from './total.services';
+import { EcoType } from '../dto/data.dto';
 import type { Octokit as OctokitType } from '@octokit/rest';
 import {
   EcoRankDto,
@@ -27,10 +26,7 @@ export class RankService {
   @Inject(KYSELY) private readonly db!: Kysely<DB>;
   @Inject(OCTOKIT) private readonly github!: OctokitType;
 
-  constructor(
-    private cacheDataService: CacheDataService,
-    private totalService: TotalService,
-  ) {}
+  constructor(private cacheDataService: CacheDataService) {}
 
   async ecoRankTotal(ecoName: EcoType, cache: boolean = true) {
     const dbData = await this.cacheDataService.getCacheData(
@@ -52,19 +48,24 @@ export class RankService {
       (eco) => eco !== EcoType.ALL,
     );
     for (const ecoName of ecoTypes) {
-      const actorsTotalAllScopeResult = await this.totalService.actorsTotal(
+      const actorsTotalAllScopeResult =
+        await this.cacheDataService.getCacheData(CacheKey.ActorTotal, ecoName);
+
+      const actorsTotalCoreScopeResult =
+        await this.cacheDataService.getCacheData(
+          CacheKey.ActorCoreTotal,
+          ecoName,
+        );
+
+      const actorsNewTotal = await this.cacheDataService.getCacheData(
+        CacheKey.ActorTotalNew,
         ecoName,
-        ActorsScopeType.ALL,
       );
 
-      const actorsTotalCoreScopeResult = await this.totalService.actorsTotal(
+      const totalRepos = await this.cacheDataService.getCacheData(
+        CacheKey.RepoTotal,
         ecoName,
-        ActorsScopeType.Core,
       );
-
-      const totalRepos = await this.totalService.reposTotal(ecoName);
-
-      const actorsNewTotal = await this.totalService.getActorTotalNew(ecoName);
 
       data.push({
         eco_name: ecoName,
@@ -157,6 +158,7 @@ ORDER BY ecosystem;
 
     for (const row of results.rows as QueryTopActors[]) {
       row.top_actors.forEach((actor) => {
+        // Old version compatibility
         actor.total_commit_count = actor.total_score;
       });
       const cacheData = new ActorScoreRankListDto();
@@ -268,8 +270,5 @@ ORDER BY ecosystem;`;
   @Command({
     command: 'test:eco:rank',
   })
-  async test2() {
-    const ecoTypes = Object.values(EcoType);
-    await this.repoStarRankNew(ecoTypes);
-  }
+  async test2() {}
 }

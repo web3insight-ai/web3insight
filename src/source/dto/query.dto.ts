@@ -17,6 +17,22 @@ export class QueryTopActors {
   top_actors: QueryTopActor[];
 }
 
+export class QueryReposTotal {
+  ecosystem: string;
+  repo_count: number;
+}
+
+export class QueryEcoTotal {
+  ecosystem_count: number;
+}
+
+export class QueryActorsTotal {
+  ecosystem: string;
+  total_actors: number;
+  recent_active_actors: number;
+  new_developers_90days: number;
+}
+
 export class QueryTopActor {
   actor_id: number;
   actor_login: string;
