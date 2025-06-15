@@ -18,7 +18,7 @@ export class QueryTopActors {
 }
 
 export class QueryReposTotal {
-  ecosystem: string;
+  ecosystem_name: string;
   repo_count: number;
 }
 

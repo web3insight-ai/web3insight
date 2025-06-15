@@ -61,7 +61,7 @@ ORDER BY
         CacheKey.RepoTotal,
         { total: row.repo_count },
         new Date().toISOString(),
-        row.ecosystem,
+        row.ecosystem_name,
       );
     }
   }

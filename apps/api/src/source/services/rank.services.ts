@@ -89,7 +89,7 @@ export class RankService {
     );
   }
 
-  async getTopScoreActorsNew(ecoNames: string[]) {
+  async getTopScoreActors(ecoNames: string[]) {
     const sqlRawQuery = `
 WITH ecosystem_list AS (SELECT UNNEST($1::text[]) AS ecosystem_name),
      filtered_events AS (SELECT event.actor_id,
@@ -172,7 +172,7 @@ ORDER BY ecosystem;
     }
   }
 
-  async repoStarRankNew(ecoNames: string[]) {
+  async repoStarRank(ecoNames: string[]) {
     const sqlRawQuery = `
 WITH ecosystem_list AS (SELECT UNNEST($1::text[]) AS ecosystem_name),
      repo_stars AS (SELECT event.repo_id,
@@ -262,8 +262,8 @@ ORDER BY ecosystem;`;
   })
   async test() {
     const ecoTypes = Object.values(EcoType);
-    await this.getTopScoreActorsNew(ecoTypes);
-    await this.repoStarRankNew(ecoTypes);
+    await this.getTopScoreActors(ecoTypes);
+    await this.repoStarRank(ecoTypes);
     await this.ecoRankTotal(EcoType.ALL, false);
   }
 
