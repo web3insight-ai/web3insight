@@ -61,13 +61,13 @@ export class TotalController {
     try {
       if (query.scope == ActorsScopeType.Core) {
         const res = await this.cacheDataService.getCacheData(
-          CacheKey.ActorTotal,
+          CacheKey.ActorCoreTotal,
           query.eco_name,
         );
         return res?.cache_data as TotalDto;
       } else {
         const res = await this.cacheDataService.getCacheData(
-          CacheKey.ActorCoreTotal,
+          CacheKey.ActorTotal,
           query.eco_name,
         );
         return res?.cache_data as TotalDto;

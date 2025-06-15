@@ -222,6 +222,7 @@ FROM (
   async test() {
     const ecoTypes = Object.values(EcoType);
     await this.reposTotal(ecoTypes);
+    await this.actorsTotalNew(ecoTypes);
     await this.ecoTotal();
     await this.getActorStats(
       ecoTypes.filter((eco) => eco !== EcoType.ALL),
