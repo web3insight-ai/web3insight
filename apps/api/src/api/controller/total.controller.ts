@@ -19,7 +19,7 @@ import {
 import { TotalService } from '@/source/services/total.services';
 import { CacheDataService } from '@/source/services/cache.services';
 import { CacheKey } from '@/source/dto/cache.dto';
-import { EcoType } from '@/source/dto/data.dto';
+import { ActorsScopeType, EcoType } from '@/source/dto/data.dto';
 
 @Controller()
 @ApiTags('Total')
@@ -59,11 +59,19 @@ export class TotalController {
   @UseGuards(AppAuthGuard)
   async getActorsNum(@Query() query: GetActorsTotalReqDto) {
     try {
-      const res = await this.cacheDataService.getCacheData(
-        CacheKey.ActorTotal,
-        query.eco_name,
-      );
-      return res?.cache_data as TotalDto;
+      if (query.scope == ActorsScopeType.Core) {
+        const res = await this.cacheDataService.getCacheData(
+          CacheKey.ActorTotal,
+          query.eco_name,
+        );
+        return res?.cache_data as TotalDto;
+      } else {
+        const res = await this.cacheDataService.getCacheData(
+          CacheKey.ActorCoreTotal,
+          query.eco_name,
+        );
+        return res?.cache_data as TotalDto;
+      }
     } catch (e: unknown) {
       if (e instanceof Error) {
         throw new HttpException(e, 400);
@@ -102,7 +110,7 @@ export class TotalController {
   async getEcoNum() {
     try {
       const res = await this.cacheDataService.getCacheData(
-        CacheKey.ActorTotalNew,
+        CacheKey.EcoTotal,
         EcoType.ALL,
       );
       return res?.cache_data as TotalDto;
