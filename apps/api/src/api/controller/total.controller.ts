@@ -14,14 +14,20 @@ import {
   GetTotalReqDto,
   TotalDto,
   ActorDateListDto,
+  StatsPeriod,
 } from '../dto/api.dto';
 import { TotalService } from '@/source/services/total.services';
+import { CacheDataService } from '@/source/services/cache.services';
+import { CacheKey } from '@/source/dto/cache.dto';
 import { EcoType } from '@/source/dto/data.dto';
 
 @Controller()
 @ApiTags('Total')
 export class TotalController {
-  constructor(private readonly ecoDataService: TotalService) {}
+  constructor(
+    private readonly ecoDataService: TotalService,
+    private readonly cacheDataService: CacheDataService,
+  ) {}
 
   @Get('repos/total')
   @ApiOperation({
@@ -32,7 +38,10 @@ export class TotalController {
   @UseGuards(AppAuthGuard)
   async getRepoNum(@Query() query: GetTotalReqDto) {
     try {
-      const res = await this.ecoDataService.reposTotal(query.eco_name);
+      const res = await this.cacheDataService.getCacheData(
+        CacheKey.RepoTotal,
+        query.eco_name,
+      );
       return res?.cache_data as TotalDto;
     } catch (e: unknown) {
       if (e instanceof Error) {
@@ -50,9 +59,9 @@ export class TotalController {
   @UseGuards(AppAuthGuard)
   async getActorsNum(@Query() query: GetActorsTotalReqDto) {
     try {
-      const res = await this.ecoDataService.actorsTotal(
+      const res = await this.cacheDataService.getCacheData(
+        CacheKey.ActorTotal,
         query.eco_name,
-        query.scope,
       );
       return res?.cache_data as TotalDto;
     } catch (e: unknown) {
@@ -71,7 +80,10 @@ export class TotalController {
   @UseGuards(AppAuthGuard)
   async getActorsNumQuarter(@Query() query: GetTotalReqDto) {
     try {
-      const res = await this.ecoDataService.getActorTotalNew(query.eco_name);
+      const res = await this.cacheDataService.getCacheData(
+        CacheKey.ActorTotalNew,
+        query.eco_name,
+      );
       return res?.cache_data as TotalDto;
     } catch (e: unknown) {
       if (e instanceof Error) {
@@ -89,7 +101,10 @@ export class TotalController {
   @UseGuards(AppAuthGuard)
   async getEcoNum() {
     try {
-      const res = await this.ecoDataService.ecoTotal(EcoType.ALL);
+      const res = await this.cacheDataService.getCacheData(
+        CacheKey.ActorTotalNew,
+        EcoType.ALL,
+      );
       return res?.cache_data as TotalDto;
     } catch (e: unknown) {
       if (e instanceof Error) {
@@ -108,11 +123,19 @@ export class TotalController {
   @UseGuards(AppAuthGuard)
   async getActorStats(@Query() query: GetActorDateReqDto) {
     try {
-      const res = await this.ecoDataService.getActorStats(
-        query.eco_name,
-        query.period,
-      );
-      return res?.cache_data as ActorDateListDto;
+      if (query.period == StatsPeriod.MONTH) {
+        const res = await this.cacheDataService.getCacheData(
+          CacheKey.ActorMonthTotal,
+          query.eco_name,
+        );
+        return res?.cache_data as ActorDateListDto;
+      } else {
+        const res = await this.cacheDataService.getCacheData(
+          CacheKey.ActorWeekTotal,
+          query.eco_name,
+        );
+        return res?.cache_data as ActorDateListDto;
+      }
     } catch (e: unknown) {
       if (e instanceof Error) {
         throw new HttpException(e.message, 400);

@@ -1,12 +1,17 @@
 import { KYSELY } from '@/db/db.provider';
 import { DB } from '@/db/dto/db.dto';
 import { Inject, Injectable } from '@nestjs/common';
-import { Kysely, sql } from 'kysely';
+import { CompiledQuery, Kysely, sql } from 'kysely';
 import { Command, Console } from 'nestjs-console';
 import { CacheDataService } from './cache.services';
 import { CacheKey } from '../dto/cache.dto';
-import { ActorsScopeType, EcoType } from '../dto/data.dto';
-import { ActorDateListDto, StatsPeriod, TotalDto } from '@/api/dto/api.dto';
+import { EcoType } from '../dto/data.dto';
+import { ActorDateListDto, StatsPeriod } from '@/api/dto/api.dto';
+import {
+  QueryActorsTotal,
+  QueryEcoTotal,
+  QueryReposTotal,
+} from '../dto/query.dto';
 
 @Injectable()
 @Console()
@@ -15,274 +20,199 @@ export class TotalService {
 
   constructor(private cacheDataService: CacheDataService) {}
 
-  async reposTotal(ecoName: EcoType, cache: boolean = true) {
-    const dbData = await this.cacheDataService.getCacheData(
-      CacheKey.ReposTotal,
-      ecoName,
-    );
+  async reposTotal(ecoNames: string[]) {
+    const sqlRawQuery = `
+WITH ecosystem_list AS (SELECT UNNEST($1::text[]) AS ecosystem_name),
+filtered_repos AS (
+    SELECT 
+        repo_id,
+        jsonb_object_keys(upstream_marks) AS ecosystem
+    FROM 
+        web3.repos
+    WHERE 
+        repos.upstream_marks ?| (SELECT ARRAY_AGG(ecosystem_name) FROM ecosystem_list)
+),
+repo_counts AS (
+    SELECT 
+        ecosystem,
+        COUNT(DISTINCT repo_id) AS repo_count
+    FROM 
+        filtered_repos
+    WHERE 
+        ecosystem IN (SELECT ecosystem_name FROM ecosystem_list)
+    GROUP BY 
+        ecosystem
+)
+SELECT 
+    el.ecosystem_name,
+    COALESCE(rc.repo_count, 0) AS repo_count
+FROM 
+    ecosystem_list el
+LEFT JOIN
+    repo_counts rc ON el.ecosystem_name = rc.ecosystem
+ORDER BY 
+    repo_count DESC;`;
+    const query = CompiledQuery.raw(sqlRawQuery, [ecoNames]);
 
-    if (!dbData && cache) {
-      throw new Error('Cache not found');
-    }
+    const results = await this.db.executeQuery(query);
 
-    if (dbData && cache) {
-      return dbData;
-    }
-
-    let query = this.db
-      .selectFrom('web3.repos')
-      .select(this.db.fn.countAll().as('total'));
-
-    if (ecoName !== EcoType.ALL) {
-      query = query.where(
-        'upstream_marks',
-        '?|',
-        sql<string[]>`ARRAY[${ecoName}]`,
+    for (const row of results.rows as QueryReposTotal[]) {
+      await this.cacheDataService.updateCacheData(
+        CacheKey.RepoTotal,
+        { total: row.repo_count },
+        new Date().toISOString(),
+        row.ecosystem,
       );
     }
-
-    const result = await query.executeTakeFirst();
-
-    if (!result) {
-      throw new Error('No data found');
-    }
-
-    await this.cacheDataService.updateCacheData(
-      CacheKey.ReposTotal,
-      { total: result.total },
-      new Date().toISOString(),
-      ecoName,
-    );
-
-    return await this.cacheDataService.getCacheData(
-      CacheKey.ReposTotal,
-      ecoName,
-    );
   }
 
-  async actorsTotal(
-    ecoName: EcoType,
-    scope: ActorsScopeType,
-    cache: boolean = true,
-  ) {
-    const cacheKey =
-      scope === ActorsScopeType.ALL
-        ? CacheKey.ActorTotal
-        : CacheKey.ActorCoreTotal;
+  async actorsTotalNew(ecoNames: string[]) {
+    const sqlRawQuery = `
+WITH ecosystem_list AS (SELECT UNNEST($1::text[]) AS ecosystem_name),
+     ecosystem_repos AS (SELECT e.ecosystem_name,
+                                r.repo_id
+                         FROM ecosystem_list e
+                                  JOIN
+                              web3.repos r ON r.upstream_marks ? e.ecosystem_name),
 
-    const dbData = await this.cacheDataService.getCacheData(cacheKey, ecoName);
+     actor_first_activity AS (SELECT er.ecosystem_name,
+                                     ev.actor_id,
+                                     MIN(ev.created_at) AS first_activity_time
+                              FROM ecosystem_repos er
+                                       JOIN web3.event ev ON ev.repo_id = er.repo_id
+                              GROUP BY er.ecosystem_name, ev.actor_id),
 
-    if (!dbData && cache) {
-      throw new Error('Cache not found');
-    }
+     active_dev_ids AS (SELECT er.ecosystem_name,
+                               ev.actor_id
+                        FROM ecosystem_repos er
+                                 JOIN web3.event ev ON ev.repo_id = er.repo_id
+                        WHERE ev.event_type IN ('PullRequestEvent', 'PushEvent')
+                          AND ev.created_at >= NOW() - INTERVAL '3 years'
+                        GROUP BY er.ecosystem_name, ev.actor_id
+                        HAVING COUNT(DISTINCT ev.event_type) = 2),
 
-    if (dbData && cache) {
-      return dbData;
-    }
+     total_participants AS (SELECT ecosystem_name,
+                                   COUNT(DISTINCT actor_id) AS count
+                            FROM actor_first_activity
+                            GROUP BY ecosystem_name),
 
-    let query = this.db
-      .selectFrom('web3.event')
-      .innerJoin('web3.repos', 'web3.event.repo_id', 'web3.repos.repo_id')
-      .select(this.db.fn.count('web3.event.actor_id').distinct().as('total'));
+     active_participants AS (SELECT ecosystem_name,
+                                    COUNT(DISTINCT actor_id) AS count
+                             FROM active_dev_ids
+                             GROUP BY ecosystem_name),
 
-    if (ecoName !== EcoType.ALL) {
-      query = query.where(
-        'web3.repos.eco_names',
-        '@>',
-        sql<string[]>`ARRAY[${sql.join([ecoName])}]`,
+     new_developers AS (SELECT ecosystem_name,
+                               COUNT(DISTINCT actor_id) AS count
+                        FROM actor_first_activity
+                        WHERE first_activity_time >= NOW() - INTERVAL '90 days'
+                        GROUP BY ecosystem_name)
+
+SELECT el.ecosystem_name     AS ecosystem,
+       COALESCE(tp.count, 0) AS total_actors,
+       COALESCE(ap.count, 0) AS recent_active_actors,
+       COALESCE(nd.count, 0) AS new_developers_90days
+FROM ecosystem_list el
+         LEFT JOIN total_participants tp ON el.ecosystem_name = tp.ecosystem_name
+         LEFT JOIN active_participants ap ON el.ecosystem_name = ap.ecosystem_name
+         LEFT JOIN new_developers nd ON el.ecosystem_name = nd.ecosystem_name;`;
+    const query = CompiledQuery.raw(sqlRawQuery, [ecoNames]);
+
+    const results = await this.db.executeQuery(query);
+
+    for (const row of results.rows as QueryActorsTotal[]) {
+      await this.cacheDataService.updateCacheData(
+        CacheKey.ActorTotal,
+        { total: row.total_actors },
+        new Date().toISOString(),
+        row.ecosystem,
+      );
+      await this.cacheDataService.updateCacheData(
+        CacheKey.ActorCoreTotal,
+        { total: row.recent_active_actors },
+        new Date().toISOString(),
+        row.ecosystem,
+      );
+      await this.cacheDataService.updateCacheData(
+        CacheKey.ActorTotalNew,
+        { total: row.new_developers_90days },
+        new Date().toISOString(),
+        row.ecosystem,
       );
     }
-    let result: { total: string | number | bigint } | undefined = { total: 0 };
+  }
 
-    if (scope === ActorsScopeType.Core) {
-      const subQuery = this.db
+  async ecoTotal() {
+    const sqlRawQuery = `
+SELECT COUNT(DISTINCT ecosystem_name) AS ecosystem_count
+FROM (
+    SELECT jsonb_object_keys(upstream_marks) AS ecosystem_name
+    FROM web3.repos
+    WHERE upstream_marks != '{}'::jsonb
+) AS ecosystems;`;
+    const query = CompiledQuery.raw(sqlRawQuery);
+
+    const results = await this.db.executeQuery(query);
+
+    for (const row of results.rows as QueryEcoTotal[]) {
+      await this.cacheDataService.updateCacheData(
+        CacheKey.EcoTotal,
+        { total: row.ecosystem_count },
+        new Date().toISOString(),
+        EcoType.ALL,
+      );
+    }
+  }
+
+  async getActorStats(ecoNames: string[], period: StatsPeriod) {
+    for (const ecoName of ecoNames) {
+      const cacheKey =
+        period == StatsPeriod.MONTH
+          ? CacheKey.ActorMonthTotal
+          : CacheKey.ActorWeekTotal;
+
+      let dateTruncUnit: string = StatsPeriod.WEEK;
+
+      const aliasName = 'date';
+
+      if (period === StatsPeriod.WEEK) {
+        dateTruncUnit = 'week';
+      } else if (period === StatsPeriod.MONTH) {
+        dateTruncUnit = 'month';
+      }
+
+      let query = this.db
         .selectFrom('web3.event')
-        .innerJoin('web3.repos', 'web3.event.repo_id', 'web3.repos.repo_id')
-        .select('web3.event.actor_id')
-        .where('web3.event.event_type', 'in', ['PullRequestEvent', 'PushEvent'])
-        .where(
-          'web3.event.created_at',
-          '>=',
-          sql<Date>`NOW() - INTERVAL '3 year'`,
-        )
-        .$if(ecoName !== EcoType.ALL, (qb) =>
-          qb.where(
-            'web3.repos.eco_names',
-            '@>',
-            sql<string[]>`ARRAY[${sql.join([ecoName])}]`,
+        .select([
+          sql<Date>`DATE_TRUNC(${dateTruncUnit}, "web3"."event"."created_at")`.as(
+            aliasName,
           ),
-        )
-        .groupBy('web3.event.actor_id')
-        .having(
-          (eb) => eb.fn.count('web3.event.event_type').distinct(),
-          '=',
-          2,
-        );
+          this.db.fn.count('web3.event.actor_id').distinct().as('total'),
+        ]);
 
-      const coreQuery = this.db
-        .selectFrom(subQuery.as('eligible_actors'))
-        .select((eb) => eb.fn.countAll().as('total'));
-      result = await coreQuery.executeTakeFirst();
-    } else if (ecoName === EcoType.ALL && scope === ActorsScopeType.ALL) {
-      result = await this.db
-        .selectFrom('web3.actors')
-        .select(this.db.fn.countAll().as('total'))
-        .executeTakeFirst();
-    } else {
-      result = await query.executeTakeFirst();
-    }
-
-    if (!result) {
-      throw new Error('No data found');
-    }
-
-    await this.cacheDataService.updateCacheData(
-      cacheKey,
-      { total: result.total },
-      new Date().toISOString(),
-      ecoName,
-    );
-
-    return await this.cacheDataService.getCacheData(cacheKey, ecoName);
-  }
-
-  async ecoTotal(ecoName: EcoType, cache: boolean = true) {
-    const dbData = await this.cacheDataService.getCacheData(CacheKey.EcoTotal);
-
-    if (!dbData && cache) {
-      throw new Error('Cache not found');
-    }
-
-    if (dbData && cache) {
-      return dbData;
-    }
-
-    const result = await this.db
-      .selectFrom(['web3.repos', sql<string>`UNNEST(eco_names)`.as('eco_name')])
-      .select(this.db.fn.count('eco_name').distinct().as('total'))
-      .executeTakeFirst();
-
-    if (!result) {
-      throw new Error('No data found');
-    }
-
-    await this.cacheDataService.updateCacheData(
-      CacheKey.EcoTotal,
-      { total: result.total },
-      new Date().toISOString(),
-      ecoName,
-    );
-
-    return await this.cacheDataService.getCacheData(CacheKey.EcoTotal, ecoName);
-  }
-
-  async getActorStats(ecoName: EcoType, period: StatsPeriod, cache = true) {
-    const cacheKey =
-      period == StatsPeriod.MONTH
-        ? CacheKey.ActorMonthTotal
-        : CacheKey.ActorWeekTotal;
-
-    const dbData = await this.cacheDataService.getCacheData(cacheKey, ecoName);
-
-    if (!dbData && cache) {
-      throw new Error('Cache not found');
-    }
-
-    if (dbData && cache) {
-      return dbData;
-    }
-
-    let dateTruncUnit: string = StatsPeriod.WEEK;
-
-    const aliasName = 'date';
-
-    if (period === StatsPeriod.WEEK) {
-      dateTruncUnit = 'week';
-    } else if (period === StatsPeriod.MONTH) {
-      dateTruncUnit = 'month';
-    }
-
-    let query = this.db
-      .selectFrom('web3.event')
-      .select([
-        sql<Date>`DATE_TRUNC(${dateTruncUnit}, "web3"."event"."created_at")`.as(
-          aliasName,
-        ),
-        this.db.fn.count('web3.event.actor_id').distinct().as('total'),
-      ]);
-
-    if (ecoName !== EcoType.ALL) {
       query = query
         .innerJoin('web3.repos', 'web3.event.repo_id', 'web3.repos.repo_id')
-        .where(
-          'web3.repos.eco_names',
-          '@>',
-          sql<string[]>`ARRAY[${sql.join([ecoName])}]`,
-        );
+        .where('upstream_marks', '?|', sql<string[]>`ARRAY[${ecoName}]`);
+
+      query = query.groupBy(aliasName).orderBy(aliasName, 'desc').limit(8);
+
+      const results = await query.execute();
+
+      const data = results.map((row) => ({
+        date: row[aliasName],
+        total: Number(row.total),
+      }));
+
+      const resData = new ActorDateListDto();
+
+      resData.list = data;
+
+      await this.cacheDataService.updateCacheData(
+        cacheKey,
+        resData,
+        new Date().toISOString(),
+        ecoName,
+      );
     }
-
-    query = query.groupBy(aliasName).orderBy(aliasName, 'desc').limit(8);
-
-    const results = await query.execute();
-
-    const data = results.map((row) => ({
-      date: row[aliasName],
-      total: Number(row.total),
-    }));
-
-    const resData = new ActorDateListDto();
-
-    resData.list = data;
-
-    await this.cacheDataService.updateCacheData(
-      cacheKey,
-      resData,
-      new Date().toISOString(),
-      ecoName,
-    );
-
-    return await this.cacheDataService.getCacheData(cacheKey, ecoName);
-  }
-
-  async getActorTotalNew(ecoName: EcoType, cache: boolean = true) {
-    const dbData = await this.cacheDataService.getCacheData(
-      CacheKey.ActorTotalNew,
-      ecoName,
-    );
-
-    if (!dbData && cache) {
-      throw new Error('Cache not found');
-    }
-
-    if (dbData && cache) {
-      return dbData;
-    }
-
-    const query = sql`
-WITH first_activity AS (SELECT e.actor_id,
-                               MIN(e.created_at) as first_activity_time
-                        FROM web3.event e
-                                 JOIN web3.repos r ON e.repo_id = r.repo_id
-                        WHERE r.upstream_marks ?| ARRAY[${sql.join([ecoName])}]
-                        GROUP BY e.actor_id)
-SELECT COUNT(*) as total
-FROM first_activity
-WHERE first_activity_time >= NOW() - INTERVAL '90 days';
-    `;
-
-    const results = await query.execute(this.db);
-
-    await this.cacheDataService.updateCacheData(
-      CacheKey.ActorTotalNew,
-      results.rows[0] as TotalDto,
-      new Date().toISOString(),
-      ecoName,
-    );
-
-    return await this.cacheDataService.getCacheData(
-      CacheKey.ActorTotalNew,
-      ecoName,
-    );
   }
 
   @Command({
@@ -290,18 +220,17 @@ WHERE first_activity_time >= NOW() - INTERVAL '90 days';
     description: 'Test eco data',
   })
   async test() {
-    await this.ecoTotal(EcoType.ALL, false);
     const ecoTypes = Object.values(EcoType);
-    for (const eco of ecoTypes) {
-      await this.getActorTotalNew(eco, false);
-      await this.reposTotal(eco, false);
-      await this.getActorTotalNew(eco, false);
-      await this.actorsTotal(eco, ActorsScopeType.Core, false);
-      await this.actorsTotal(eco, ActorsScopeType.ALL, false);
-      await this.getActorStats(eco, StatsPeriod.MONTH, false);
-      await this.getActorStats(eco, StatsPeriod.WEEK, false);
-    }
-
+    await this.reposTotal(ecoTypes);
+    await this.ecoTotal();
+    await this.getActorStats(
+      ecoTypes.filter((eco) => eco !== EcoType.ALL),
+      StatsPeriod.MONTH,
+    );
+    await this.getActorStats(
+      ecoTypes.filter((eco) => eco !== EcoType.ALL),
+      StatsPeriod.WEEK,
+    );
     return null;
   }
 }

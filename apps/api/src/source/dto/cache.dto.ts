@@ -1,11 +1,11 @@
 export const CacheKey = {
-  ReposTotal: 'repos_total',
+  RepoTotal: 'repo_total',
   ActorTotal: 'actor_total',
   ActorTotalNew: 'actor_total_new',
   ActorWeekTotal: 'actor_week_total',
   ActorMonthTotal: 'actor_month_total',
   ActorCoreTotal: 'actor_core_total',
-  EcoTotal: 'eco_total',
+  EcoTotal: 'eco_repo_total',
   EcoRank: 'eco_rank',
   RepoStarRank: 'repo_star_rank',
   ActorScoreRank: 'actor_score_rank',
