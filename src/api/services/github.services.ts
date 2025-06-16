@@ -51,21 +51,4 @@ export class GithubService {
     );
     return data;
   }
-
-  async post(req: Request): Promise<unknown> {
-    const url = new URL(`${this.githubApiBase}${this.extractGitHubPath(req)}`);
-    const { token, headers } = this.createRequestHeaders();
-    const response = await fetch(url.toString(), {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(req.body),
-    });
-    const data: unknown = await response.json();
-
-    this.tokenPool.updateToken(
-      token,
-      Object.fromEntries(response.headers.entries()),
-    );
-    return data;
-  }
 }

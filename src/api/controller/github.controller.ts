@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { GithubService } from '../services/github.services';
 import { Request } from 'express';
 import { ApiBearerAuth } from '@nestjs/swagger';
@@ -13,12 +13,5 @@ export class GithubController {
   @UseGuards(AppAuthGuard)
   async getGitHub(@Req() req: Request) {
     return this.githubService.get(req);
-  }
-
-  @Post('proxy/*path')
-  @ApiBearerAuth()
-  @UseGuards(AppAuthGuard)
-  async postGitHub(@Req() req: Request) {
-    return this.githubService.post(req);
   }
 }
