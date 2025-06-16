@@ -83,7 +83,7 @@ export interface Web3Caches {
 
 export interface ApiConfigs {
   available: Generated<boolean>;
-  body: Generated<Json>;
+  body: string;
   id: Generated<Int8>;
   name: string;
 }

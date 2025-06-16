@@ -23,4 +23,4 @@ import { ReposService } from './services/repos.services';
     CacheDataService,
   ],
 })
-export class SourceModule {}
+export class DataModule {}

@@ -1,4 +1,4 @@
-import { KYSELY, OCTOKIT } from '@/db/db.provider';
+import { KYSELY } from '@/db/db.provider';
 import { DB } from '@/db/dto/db.dto';
 import { Inject, Injectable } from '@nestjs/common';
 import { CompiledQuery, Kysely } from 'kysely';
@@ -6,7 +6,6 @@ import { Command, Console } from 'nestjs-console';
 import { CacheDataService } from './cache.services';
 import { CacheKey } from '../dto/cache.dto';
 import { EcoType } from '../dto/data.dto';
-import type { Octokit as OctokitType } from '@octokit/rest';
 import {
   EcoRankDto,
   EcoRankListDto,
@@ -19,14 +18,17 @@ import {
   QueryTopStar,
   QueryTopStarRepo,
 } from '../dto/query.dto';
+import { TokenPoolService } from '@/db/pool.services';
 
 @Injectable()
 @Console()
 export class RankService {
   @Inject(KYSELY) private readonly db!: Kysely<DB>;
-  @Inject(OCTOKIT) private readonly github!: OctokitType;
 
-  constructor(private cacheDataService: CacheDataService) {}
+  constructor(
+    private cacheDataService: CacheDataService,
+    private tokenPoolService: TokenPoolService,
+  ) {}
 
   async ecoRankTotal(ecoName: EcoType, cache: boolean = true) {
     const dbData = await this.cacheDataService.getCacheData(
@@ -227,10 +229,12 @@ ORDER BY ecosystem;`;
       const data: QueryTopStarRepo[] = await Promise.all(
         row.top_repositories.map(async (row) => {
           const [owner, repo] = row.repo_name.split('/');
-          const repoDetails = await this.github.rest.repos.get({
-            owner,
-            repo,
-          });
+          const repoDetails = await this.tokenPoolService
+            .getClient()
+            .rest.repos.get({
+              owner,
+              repo,
+            });
           return {
             repo_id: Number(row.repo_id),
             repo_name: row.repo_name,
@@ -242,10 +246,8 @@ ORDER BY ecosystem;`;
         }),
       );
       data.sort((a, b) => b.star_count - a.star_count);
-
       const cacheData = new RepoRankListDto();
       cacheData.list = data;
-
       await this.cacheDataService.updateCacheData(
         CacheKey.RepoStarRank,
         cacheData,

@@ -4,9 +4,10 @@ import { ConsoleModule } from 'nestjs-console';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { JwtService } from '@nestjs/jwt';
-import { SourceModule } from './data/source.module';
+import { DataModule } from './data/data.module';
 import { ApiModule } from './api/api.module';
 import { AppAuthGuard } from './auth/app.auth.guard';
+import { AppConfigModule } from './config/config.module';
 
 @Module({
   imports: [
@@ -14,8 +15,9 @@ import { AppAuthGuard } from './auth/app.auth.guard';
     ConsoleModule,
     DBModule,
     AuthModule,
-    SourceModule,
+    DataModule,
     ApiModule,
+    AppConfigModule,
   ],
   controllers: [],
   providers: [AppAuthGuard, JwtService],
