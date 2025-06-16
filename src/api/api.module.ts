@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TotalController } from './controller/total.controller';
 import { JwtService } from '@nestjs/jwt';
-import { SourceModule } from '@/data/source.module';
+import { DataModule } from '@/data/data.module';
 import { RankController } from './controller/rank.controller';
 import { AdminController } from './controller/admin.controller';
 
@@ -9,6 +9,6 @@ import { AdminController } from './controller/admin.controller';
   controllers: [TotalController, RankController, AdminController],
   providers: [JwtService],
   exports: [],
-  imports: [SourceModule],
+  imports: [DataModule],
 })
 export class ApiModule {}

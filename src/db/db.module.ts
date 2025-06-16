@@ -1,8 +1,11 @@
 import { Module } from '@nestjs/common';
-import { kyselyProvider, octokitProvider } from './db.provider';
+import { KYSELY, kyselyProvider } from './db.provider';
+import { AppConfigModule } from '@/config/config.module';
+import { TokenPoolService } from './pool.services';
 
 @Module({
-  providers: [kyselyProvider, octokitProvider],
-  exports: [kyselyProvider, octokitProvider],
+  imports: [AppConfigModule],
+  providers: [kyselyProvider, TokenPoolService],
+  exports: [KYSELY, kyselyProvider, TokenPoolService],
 })
 export class DBModule {}
