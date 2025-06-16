@@ -3,7 +3,7 @@ import { DB } from '@/db/dto/db.dto';
 import { Inject, Injectable } from '@nestjs/common';
 import { Kysely } from 'kysely';
 import { Command, Console } from 'nestjs-console';
-import { CacheKey, CacheKeyValue } from '@/source/dto/cache.dto';
+import { CacheKey, CacheKeyValue } from '@/data/dto/cache.dto';
 
 @Injectable()
 @Console()

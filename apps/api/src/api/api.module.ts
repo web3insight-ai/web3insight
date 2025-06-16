@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TotalController } from './controller/total.controller';
 import { JwtService } from '@nestjs/jwt';
-import { SourceModule } from '@/source/source.module';
+import { SourceModule } from '@/data/source.module';
 import { RankController } from './controller/rank.controller';
 import { AdminController } from './controller/admin.controller';
 
