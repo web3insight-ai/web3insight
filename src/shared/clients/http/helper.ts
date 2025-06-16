@@ -135,7 +135,38 @@ async function normalizeResponse<VT extends DataValue = DataValue>(res: Response
 }
 
 async function normalizeRestfulResponse<VT extends DataValue = DataValue>(res: Response): Promise<ResponseResult<VT>> {
-  const jsonData = await res.json();
+  console.log(`[HTTP] ${res.status} ${res.url}`);
+
+  // Get the response text first to check if it's valid JSON
+  const responseText = await res.text();
+
+  if (!responseText) {
+    console.warn(`[HTTP] Empty response from: ${res.url}`);
+    return {
+      success: false,
+      code: `${res.status}`,
+      message: "Empty response received",
+      data: undefined as VT,
+      extra: {},
+    };
+  }
+
+  let jsonData;
+  try {
+    jsonData = JSON.parse(responseText);
+  } catch (error) {
+    console.error(`[HTTP] JSON parse error for ${res.url}:`, error instanceof Error ? error.message : 'Unknown error');
+    console.error(`[HTTP] Response content (first 200 chars):`, responseText.substring(0, 200));
+
+    return {
+      success: false,
+      code: `${res.status}`,
+      message: `Invalid JSON response: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      data: undefined as VT,
+      extra: { rawResponse: responseText.substring(0, 500) },
+    };
+  }
+
   const defaultCode = `${res.status}`;
 
   if (res.ok) {

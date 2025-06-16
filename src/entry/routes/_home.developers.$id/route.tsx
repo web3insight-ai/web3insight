@@ -19,6 +19,7 @@ import { resolveChartOptions } from "./helper";
 
 export const loader = async (ctx: LoaderFunctionArgs) => {
   const developerId = ctx.params.id;
+
   const res = await fetchOne(developerId!);
 
   let contributions: DeveloperContribution[] = [];
@@ -26,15 +27,20 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
   let recentActivity: DeveloperActivity[] = [];
 
   if (res.success) {
-    const responses = await Promise.all([
-      fetchContributionList(res.data!.id),
-      fetchRepositoryRankList(res.data!.username),
-      fetchActivityList(res.data!.username),
-    ]);
+    try {
+      const responses = await Promise.all([
+        fetchContributionList(res.data!.id),
+        fetchRepositoryRankList(res.data!.username),
+        fetchActivityList(res.data!.username),
+      ]);
 
-    contributions = responses[0].data;
-    repositories = responses[1].data;
-    recentActivity = responses[2].data;
+      contributions = responses[0].data;
+      repositories = responses[1].data;
+      recentActivity = responses[2].data;
+    } catch (error) {
+      console.error(`[Route] Error during API calls:`, error);
+      // Continue with empty data rather than throwing
+    }
   } else if (res.code === "404") {
     throw new Response(`Developer \`${developerId}\` doesn't exist.`, {
       status: 404,
@@ -91,6 +97,7 @@ export default function DeveloperPage() {
             star_count: repo.statistics.star,
             forks_count: repo.statistics.fork,
             open_issues_count: repo.statistics.openIssue,
+            contributor_count: repo.statistics.contributor || 0,
           }))}
         />
         <ActivityListViewWidget className="mb-6" dataSource={recentActivity} title="Activity Feed" />

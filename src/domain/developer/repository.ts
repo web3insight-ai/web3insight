@@ -60,16 +60,26 @@ async function fetchRepositoryRankList(username: string): Promise<ResponseResult
 }
 
 async function fetchActivityList(username: string): Promise<ResponseResult<DeveloperActivity[]>> {
-  const { data, ...others } = await fetchGithubUserActivity(username);
+  try {
+    const { data, ...others } = await fetchGithubUserActivity(username);
 
-  return {
-    ...others,
-    data: others.success ? data.items.map(item => ({
-      id: item.id,
-      description: item.title,
-      date: item.date_published,
-    })) : [],
-  };
+    return {
+      ...others,
+      data: others.success && data && data.items ? data.items.map(item => ({
+        id: item.id,
+        description: item.title,
+        date: item.date_published,
+      })) : [],
+    };
+  } catch (error) {
+    console.error(`[Developer] Error fetching activity for ${username}:`, error);
+    return {
+      success: false,
+      code: "500",
+      message: `Failed to fetch activity: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      data: [],
+    };
+  }
 }
 
 async function fetchContributionList(id: number): Promise<ResponseResult<DeveloperContribution[]>> {
