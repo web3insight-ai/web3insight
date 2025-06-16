@@ -1,6 +1,6 @@
 import { AppAuthGuard } from '@/auth/app.auth.guard';
-import { RankService } from '@/source/services/rank.services';
-import { ReposService } from '@/source/services/repos.services';
+import { RankService } from '@/data/services/rank.services';
+import { ReposService } from '@/data/services/repos.services';
 import {
   Body,
   Controller,
@@ -17,7 +17,7 @@ import {
   ReposCustomMarkReqDto,
   ReposOrderReqDto,
 } from '../dto/api.dto';
-import { EcoTypeArray } from '@/source/dto/data.dto';
+import { EcoTypeArray } from '@/data/dto/data.dto';
 
 @Controller()
 @ApiTags('Admin')

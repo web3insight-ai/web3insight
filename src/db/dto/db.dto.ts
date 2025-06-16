@@ -81,10 +81,18 @@ export interface Web3Caches {
   eco_name: Generated<string>;
 }
 
+export interface ApiConfigs {
+  available: Generated<boolean>;
+  body: Generated<Json>;
+  id: Generated<Int8>;
+  name: string;
+}
+
 export interface DB {
   'web3.actors': Web3Actors;
   'web3.ecos': Web3Ecos;
   'web3.event': Web3Event;
   'web3.repos': Web3Repos;
   'web3.caches': Web3Caches;
+  'api.configs': ApiConfigs;
 }

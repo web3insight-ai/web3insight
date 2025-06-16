@@ -9,9 +9,9 @@ import {
   ValidateIf,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ActorsScopeType, EcoType } from '@/source/dto/data.dto';
+import { ActorsScopeType, EcoType } from '@/data/dto/data.dto';
 import { Expose, Type } from 'class-transformer';
-import { QueryTopActor, QueryTopStarRepo } from '@/source/dto/query.dto';
+import { QueryTopActor, QueryTopStarRepo } from '@/data/dto/query.dto';
 
 export class GetTotalReqDto {
   @IsEnum(EcoType)

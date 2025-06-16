@@ -8,16 +8,16 @@ import {
 import { AppAuthGuard } from '../../auth/app.auth.guard';
 
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { RankService } from '@/source/services/rank.services';
+import { RankService } from '@/data/services/rank.services';
 import {
   ActorScoreRankListDto,
   EcoRankListDto,
   GetTotalReqDto,
   RepoRankListDto,
 } from '../dto/api.dto';
-import { EcoType } from '@/source/dto/data.dto';
-import { CacheDataService } from '@/source/services/cache.services';
-import { CacheKey } from '@/source/dto/cache.dto';
+import { EcoType } from '@/data/dto/data.dto';
+import { CacheDataService } from '@/data/services/cache.services';
+import { CacheKey } from '@/data/dto/cache.dto';
 
 @Controller()
 @ApiTags('Rank')
