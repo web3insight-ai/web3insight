@@ -18,7 +18,7 @@ class GitHubTokenInfo {
 
   reset() {
     this.remaining = 5000;
-    this.resetTime = Date.now() + 3600000;
+    this.resetTime = Math.floor(Date.now() / 1000 + 3600);
   }
 }
 
@@ -51,14 +51,6 @@ export class TokenPoolService implements OnModuleInit {
   }
 
   getToken(): string {
-    const now = Date.now();
-
-    this.tokens.forEach((info) => {
-      if (now > info.resetTime) {
-        info.reset();
-      }
-    });
-
     const sorted = this.tokens
       .filter((info) => info.remaining > 0)
       .sort((a, b) => b.remaining - a.remaining);
@@ -70,12 +62,14 @@ export class TokenPoolService implements OnModuleInit {
     const info = this.tokens.find((t) => t.token === token);
     if (info) {
       const newRemaining = parseInt(headers['x-ratelimit-remaining'] || '0');
-      const newResetTime = parseInt(headers['x-ratelimit-reset'] || '0') * 1000;
+      const newResetTime = parseInt(headers['x-ratelimit-reset'] || '0');
 
-      if (newRemaining < info.remaining || newResetTime < info.resetTime) {
-        info.remaining = newRemaining;
-        info.resetTime = newResetTime;
+      if (newResetTime == info.resetTime && newRemaining > info.remaining) {
+        return;
       }
+
+      info.remaining = newRemaining;
+      info.resetTime = newResetTime;
     }
   }
 
@@ -87,7 +81,7 @@ export class TokenPoolService implements OnModuleInit {
   }
 
   @Command({
-    command: 'test:github',
+    command: 'test:pool:github',
     description: '',
   })
   async testGithubApi() {
