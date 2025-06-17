@@ -51,6 +51,13 @@ export class TokenPoolService implements OnModuleInit {
   }
 
   getToken(): string {
+    const now = Math.floor(Date.now() / 1000);
+
+    this.tokens.forEach((info) => {
+      if (now > info.resetTime) {
+        info.reset();
+      }
+    });
     const sorted = this.tokens
       .filter((info) => info.remaining > 0)
       .sort((a, b) => b.remaining - a.remaining);
