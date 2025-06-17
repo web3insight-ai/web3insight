@@ -88,6 +88,17 @@ export interface ApiConfigs {
   name: string;
 }
 
+export interface ApiAnalysisUsers {
+  created_at: Generated<Timestamp>;
+  data: Generated<Json>;
+  github: Generated<Json>;
+  id: Generated<Int8>;
+  intent: Generated<string>;
+  request_data: Generated<Json>;
+  submitter_email: Generated<string>;
+  updated_at: Generated<Timestamp>;
+}
+
 export interface DB {
   'web3.actors': Web3Actors;
   'web3.ecos': Web3Ecos;
@@ -95,4 +106,5 @@ export interface DB {
   'web3.repos': Web3Repos;
   'web3.caches': Web3Caches;
   'api.configs': ApiConfigs;
+  'api.analysis_users': ApiAnalysisUsers;
 }
