@@ -1,7 +1,7 @@
 -- Add migration script here
 CREATE SCHEMA IF NOT EXISTS "web3";
 
-CREATE EXTENSION pg_mooncake;
+CREATE EXTENSION IF NOT EXISTS pg_mooncake;
 
 CREATE TABLE "web3"."events"
 (

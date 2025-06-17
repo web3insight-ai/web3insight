@@ -29,7 +29,7 @@ Web3Insights 是一个数据湖索引器，专为分析 GitHub 事件而设计�
 1. **设置**：
 
    ```bash
-   git clone https://github.com/yourusername/web3insights.git
+   git clone https://github.com/Web3Insights/web3insights.git
    cd web3insights
    cp .env.example .env  # 编辑配置
    ```

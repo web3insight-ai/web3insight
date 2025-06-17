@@ -29,7 +29,7 @@ Web3Insights is a data lake indexer designed to analyze GitHub events. It effici
 1. **Setup**:
 
    ```bash
-   git clone https://github.com/yourusername/web3insights.git
+   git clone https://github.com/Web3Insights/web3insights.git
    cd web3insights
    cp .env.example .env  # Edit with your configuration
    ```
