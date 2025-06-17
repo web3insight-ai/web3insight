@@ -2,12 +2,13 @@ import type { ResponseResult } from "@/types";
 import { isNumeric } from "@/utils";
 
 import { fetchUser, fetchUserById, fetchPersonalOverview, fetchPersonalContributionTrends } from "../ossinsight/repository";
-import { fetchGithubUserActivity } from "../rsshub/repository";
+import { fetchPublicEventListByUserLogin } from "../github/repository";
 
 import type { Repository } from "../repository/typing";
 import { fetchListByDeveloper } from "../repository/repository";
 
 import type { Developer, DeveloperActivity, DeveloperContribution } from "./typing";
+import { resolveActivityFromGithubEvent } from "./helper";
 
 async function fetchOne(idOrUsername: number | string): Promise<ResponseResult<Developer | null>> {
   const { data, ...others } = isNumeric(idOrUsername) ? await fetchUserById(idOrUsername) : await fetchUser(<string>idOrUsername);
@@ -60,26 +61,12 @@ async function fetchRepositoryRankList(username: string): Promise<ResponseResult
 }
 
 async function fetchActivityList(username: string): Promise<ResponseResult<DeveloperActivity[]>> {
-  try {
-    const { data, ...others } = await fetchGithubUserActivity(username);
+  const { data, ...others } = await fetchPublicEventListByUserLogin(username);
 
-    return {
-      ...others,
-      data: others.success && data && data.items ? data.items.map(item => ({
-        id: item.id,
-        description: item.title,
-        date: item.date_published,
-      })) : [],
-    };
-  } catch (error) {
-    console.error(`[Developer] Error fetching activity for ${username}:`, error);
-    return {
-      success: false,
-      code: "500",
-      message: `Failed to fetch activity: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      data: [],
-    };
-  }
+  return {
+    ...others,
+    data: others.success ? data.map(resolveActivityFromGithubEvent) : [],
+  };
 }
 
 async function fetchContributionList(id: number): Promise<ResponseResult<DeveloperContribution[]>> {

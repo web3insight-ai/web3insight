@@ -82,12 +82,13 @@ function generateSuccessResponse<VT extends DataValue = DataValue>(
   };
 }
 
-function generateFailedResponse(message: string, statusCode: number | string = 500): ResponseResult<undefined> {
+function generateFailedResponse(message: string, statusCode: number | string = 500, extra?: ResponseResult["extra"]): ResponseResult<undefined> {
   return {
     success: false,
     code: `${statusCode}`,
     message,
     data: undefined,
+    extra,
   };
 }
 
@@ -142,29 +143,22 @@ async function normalizeRestfulResponse<VT extends DataValue = DataValue>(res: R
 
   if (!responseText) {
     console.warn(`[HTTP] Empty response from: ${res.url}`);
-    return {
-      success: false,
-      code: `${res.status}`,
-      message: "Empty response received",
-      data: undefined as VT,
-      extra: {},
-    };
+    return generateFailedResponse("Empty response received", res.status) as ResponseResult<VT>;
   }
 
   let jsonData;
+
   try {
     jsonData = JSON.parse(responseText);
   } catch (error) {
     console.error(`[HTTP] JSON parse error for ${res.url}:`, error instanceof Error ? error.message : 'Unknown error');
     console.error(`[HTTP] Response content (first 200 chars):`, responseText.substring(0, 200));
 
-    return {
-      success: false,
-      code: `${res.status}`,
-      message: `Invalid JSON response: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      data: undefined as VT,
-      extra: { rawResponse: responseText.substring(0, 500) },
-    };
+    return generateFailedResponse(
+      `Invalid JSON response: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      res.status,
+      { rawResponse: responseText.substring(0, 500) },
+    ) as ResponseResult<VT>;
   }
 
   const defaultCode = `${res.status}`;
@@ -187,13 +181,7 @@ async function normalizeRestfulResponse<VT extends DataValue = DataValue>(res: R
     message = jsonData.message;
   }
 
-  return {
-    success: false,
-    code: defaultCode,
-    message: message ?? res.statusText,
-    data: undefined as VT,
-    extra: {},
-  };
+  return generateFailedResponse(message ?? res.statusText, defaultCode, {}) as ResponseResult<VT>;
 }
 
 const defaultPageSize = 20;

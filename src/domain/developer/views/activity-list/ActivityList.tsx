@@ -19,7 +19,7 @@ function ActivityListView({ className, dataSource, title = "Recent Activity" }: 
   return (
     <Card className={clsx("bg-white dark:bg-gray-800 shadow-sm border-none", className)}>
       <CardHeader className="px-6 py-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title} (latest {dataSource.length})</h3>
       </CardHeader>
       <Divider />
       <CardBody className="p-0">

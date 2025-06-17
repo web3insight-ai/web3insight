@@ -1,4 +1,4 @@
-import type { User } from "../github/typing";
+import type { User, Event } from "../github/typing";
 
 type Developer = {
   id: User["id"];
@@ -20,6 +20,8 @@ type Developer = {
   joinedAt: string;
 };
 
+type ActivityDescriptionResolver = (event: Event) => string;
+
 type DeveloperActivity = {
   id: string;
   description: string;
@@ -31,4 +33,4 @@ type DeveloperContribution = {
   total: number;
 };
 
-export type { Developer, DeveloperActivity, DeveloperContribution };
+export type { Developer, ActivityDescriptionResolver, DeveloperActivity, DeveloperContribution };

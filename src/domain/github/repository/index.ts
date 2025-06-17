@@ -1,1 +1,4 @@
-export { fetchRepoList as fetchRepoListByUserLogin } from "./user";
+export {
+  fetchRepoList as fetchRepoListByUserLogin,
+  fetchPublicEventList as fetchPublicEventListByUserLogin,
+} from "./user";
