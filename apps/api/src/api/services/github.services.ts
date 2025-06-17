@@ -30,13 +30,10 @@ export class GithubService {
   async get(req: Request): Promise<unknown> {
     const url = new URL(`${this.githubApiBase}${this.extractGitHubPath(req)}`);
 
-    if (req.query) {
-      Object.entries(req.query).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          url.searchParams.append(key, JSON.stringify(value));
-        }
-      });
-    }
+    if (req.query)
+      url.search = new URLSearchParams(
+        req.query as Record<string, string>,
+      ).toString();
 
     const { token, headers } = this.createRequestHeaders();
     const response = await fetch(url.toString(), {
