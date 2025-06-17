@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { KYSELY, kyselyProvider } from './db.provider';
-import { AppConfigModule } from '@/config/config.module';
+import { AppConfigModule } from '@/app/config/config.module';
 import { TokenPoolService } from './pool.services';
 
 @Module({

@@ -1,5 +1,5 @@
 import { KYSELY } from './db.provider';
-import { DB } from '@/db/dto/db.dto';
+import { DB } from '@/app/db/dto/db.dto';
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { Octokit } from '@octokit/rest';
 import { Kysely } from 'kysely';

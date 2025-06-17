@@ -6,7 +6,7 @@ import { RankController } from './controller/rank.controller';
 import { AdminController } from './controller/admin.controller';
 import { GithubController } from './controller/github.controller';
 import { GithubService } from './services/github.services';
-import { DBModule } from '@/db/db.module';
+import { DBModule } from '@/app/db/db.module';
 
 @Module({
   controllers: [
