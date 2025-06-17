@@ -1,5 +1,5 @@
-import { KYSELY } from '@/db/db.provider';
-import { DB } from '@/db/dto/db.dto';
+import { KYSELY } from '@/app/db/db.provider';
+import { DB } from '@/app/db/dto/db.dto';
 import { Inject, Injectable } from '@nestjs/common';
 import { Kysely } from 'kysely';
 import { Command, Console } from 'nestjs-console';

@@ -1,5 +1,5 @@
-import { KYSELY } from '@/db/db.provider';
-import { DB } from '@/db/dto/db.dto';
+import { KYSELY } from '@/app/db/db.provider';
+import { DB } from '@/app/db/dto/db.dto';
 import { Inject, Injectable } from '@nestjs/common';
 import { CompiledQuery, Kysely } from 'kysely';
 import { Command, Console } from 'nestjs-console';
@@ -18,7 +18,7 @@ import {
   QueryTopStar,
   QueryTopStarRepo,
 } from '../dto/query.dto';
-import { TokenPoolService } from '@/db/pool.services';
+import { TokenPoolService } from '@/app/db/pool.services';
 
 @Injectable()
 @Console()

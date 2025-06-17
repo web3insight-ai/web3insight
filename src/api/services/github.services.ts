@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { TokenPoolService } from '@/db/pool.services';
+import { TokenPoolService } from '@/app/db/pool.services';
 import { Request } from 'express';
 
 @Injectable()

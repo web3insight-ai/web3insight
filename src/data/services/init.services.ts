@@ -3,9 +3,9 @@ import { join } from 'path';
 import * as fs from 'fs';
 import * as readline from 'readline';
 import { Command, Console } from 'nestjs-console';
-import { KYSELY } from '@/db/db.provider';
+import { KYSELY } from '@/app/db/db.provider';
 import { Kysely, sql } from 'kysely';
-import { DB } from '@/db/dto/db.dto';
+import { DB } from '@/app/db/dto/db.dto';
 import { chunkArray } from '@/helper';
 
 interface RawRepoData {
