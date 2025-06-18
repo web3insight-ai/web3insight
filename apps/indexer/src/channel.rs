@@ -227,6 +227,14 @@ async fn download_gh_archive(file_path: &PathBuf) -> Result<()> {
     Ok(())
 }
 
+fn check_is_bot(login: &str) -> bool {
+    [
+        "[bot]", "-bot", "_bot", "-ci", "_ci", "-action", "_action", "-actions", "_actions",
+    ]
+    .iter()
+    .any(|suffix| login.ends_with(suffix))
+}
+
 fn format_event_module(event: Event) -> Option<EventTableStruct> {
     let filter_out_payload =
         env::var("FILTER_OUT_PAYLOAD").is_ok_and(|v| v.to_lowercase() == "true");
@@ -235,13 +243,7 @@ fn format_event_module(event: Event) -> Option<EventTableStruct> {
 
     let actor = event.actor.clone();
 
-    if filter_out_bot
-        && [
-            "[bot]", "-bot", "_bot", "-ci", "_ci", "-action", "_action", "-actions", "_actions",
-        ]
-        .iter()
-        .any(|suffix| actor.login.ends_with(suffix))
-    {
+    if filter_out_bot && check_is_bot(&actor.login) {
         return None;
     }
 
