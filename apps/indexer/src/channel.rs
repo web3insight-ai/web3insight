@@ -182,7 +182,7 @@ async fn load_gh_event(file_path: PathBuf) -> Vec<EventTableStruct> {
 
     let batch: Vec<EventTableStruct> = reader
         .lines()
-        .map_while(Result::ok)
+        .filter_map(Result::ok)
         .filter_map(|line| match serde_json::from_str::<Event>(&line) {
             Ok(event) => Some(event),
             Err(e) => {
@@ -235,32 +235,29 @@ fn check_is_bot(login: &str) -> bool {
     .any(|suffix| login.ends_with(suffix))
 }
 
+fn get_env_bool(key: &str) -> bool {
+    env::var(key).is_ok_and(|v| v.to_lowercase() == "true")
+}
+
 fn format_event_module(event: Event) -> Option<EventTableStruct> {
-    let filter_out_payload =
-        env::var("FILTER_OUT_PAYLOAD").is_ok_and(|v| v.to_lowercase() == "true");
-    let filter_out_body = env::var("FILTER_OUT_BODY").is_ok_and(|v| v.to_lowercase() == "true");
-    let filter_out_bot = env::var("FILTER_OUT_BOT").is_ok_and(|v| v.to_lowercase() == "true");
-
-    let actor = event.actor.clone();
-
-    if filter_out_bot && check_is_bot(&actor.login) {
+    if get_env_bool("FILTER_OUT_BOT") && check_is_bot(&event.actor.login) {
         return None;
     }
 
-    let body_raw = match event.payload.clone() {
-        Some(data) => match data.specific {
-            Some(IssuesEvent(payload)) => payload.issue.body,
-            Some(IssueCommentEvent(payload)) => payload.comment.body,
-            Some(CommitCommentEvent(payload)) => payload.comment.body,
-            Some(PullRequestEvent(payload)) => payload.pull_request.body,
-            Some(PullRequestReviewCommentEvent(payload)) => payload.comment.body,
-            Some(ReleaseEvent(payload)) => payload.release.body,
+    let body_raw = event
+        .payload
+        .as_ref()
+        .and_then(|data| match &data.specific {
+            Some(IssuesEvent(payload)) => payload.issue.body.as_ref(),
+            Some(IssueCommentEvent(payload)) => payload.comment.body.as_ref(),
+            Some(CommitCommentEvent(payload)) => payload.comment.body.as_ref(),
+            Some(PullRequestEvent(payload)) => payload.pull_request.body.as_ref(),
+            Some(PullRequestReviewCommentEvent(payload)) => payload.comment.body.as_ref(),
+            Some(ReleaseEvent(payload)) => payload.release.body.as_ref(),
             _ => None,
-        },
-        None => None,
-    };
+        });
 
-    let body = if !filter_out_body {
+    let body = if !get_env_bool("FILTER_OUT_BODY") {
         body_raw.map(|b| {
             b.chars()
                 .filter(|&c| !c.is_control() || c.is_whitespace())
@@ -270,15 +267,15 @@ fn format_event_module(event: Event) -> Option<EventTableStruct> {
         None
     };
 
-    let payload = if filter_out_payload {
-        String::from("{}")
-    } else {
+    let payload = if !get_env_bool("FILTER_OUT_PAYLOAD") {
         serde_json::to_string(&event.payload).unwrap_or_default()
+    } else {
+        "{}".to_string()
     };
 
-    let event_struct = EventTableStruct {
+    Some(EventTableStruct {
         id: Decimal::from_str(&event.id)
-            .unwrap_or(Decimal::zero())
+            .unwrap_or_default()
             .to_u64()
             .unwrap_or(0),
         actor_id: *event.actor.id,
@@ -291,6 +288,5 @@ fn format_event_module(event: Event) -> Option<EventTableStruct> {
         body,
         payload,
         created_at: event.created_at,
-    };
-    Some(event_struct)
+    })
 }
