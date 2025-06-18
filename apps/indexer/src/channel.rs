@@ -10,11 +10,10 @@ use octocrab::models::events::payload::EventPayload::{
 use rust_decimal::Decimal;
 use rust_decimal::prelude::*;
 use std::env;
-use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::PathBuf;
-use std::sync::Arc;
 use tokio::fs;
+use tokio::fs::File;
 use tokio::process::Command;
 use tokio::task::JoinSet;
 
@@ -37,8 +36,6 @@ pub async fn start_channel() -> Result<()> {
     duckdb.execute("CALL start_ui();", [])?;
 
     init_pg().await?;
-
-    let rx = Arc::new(rx);
 
     let mut consumers = JoinSet::new();
 
@@ -151,7 +148,7 @@ async fn try_open_file(file_path: &PathBuf) -> Option<File> {
         .unwrap_or(3);
 
     for i in 0..max_retries {
-        if let Ok(file) = File::open(file_path) {
+        if let Ok(file) = File::open(file_path).await {
             return Some(file);
         }
 
@@ -177,7 +174,7 @@ async fn try_open_file(file_path: &PathBuf) -> Option<File> {
 #[tracing::instrument]
 async fn load_gh_event(file_path: PathBuf) -> Vec<EventTableStruct> {
     let file = match try_open_file(&file_path).await {
-        Some(file) => file,
+        Some(file) => file.into_std().await,
         None => return vec![],
     };
     let decoder = GzDecoder::new(file);

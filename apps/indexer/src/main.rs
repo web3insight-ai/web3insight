@@ -1,6 +1,7 @@
 mod channel;
 mod db;
 
+use crate::channel::start_channel;
 use anyhow::Result;
 use dotenvy::dotenv;
 use std::time::Instant;
@@ -11,7 +12,6 @@ use tracing_subscriber::{
     layer::SubscriberExt,
     util::SubscriberInitExt,
 };
-use crate::channel::start_channel;
 
 #[tokio::main]
 async fn main() -> Result<()> {
