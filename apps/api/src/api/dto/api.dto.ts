@@ -15,6 +15,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { ActorsScopeType, EcoType } from '@/data/dto/data.dto';
 import { Expose, Type } from 'class-transformer';
 import { QueryTopActor, QueryTopStarRepo } from '@/data/dto/query.dto';
+import { ApiAnalysisUsers } from '@/app/db/dto/db.dto';
 
 export class GetTotalReqDto {
   @IsEnum(EcoType)
@@ -150,11 +151,35 @@ export enum Intent {
 export class CustomQueryUsersReqDto {
   @IsEnum(Intent)
   intent: Intent = Intent.Hackathon;
-  @IsEmail()
-  submitter_email: string;
+  @IsString()
+  submitter_id: string;
   @IsArray()
   @IsString({ each: true })
+  @ApiProperty({
+    example: ['https://github.com/zhang-wenchao'],
+  })
   request_data: string[] = [];
+  @IsString()
+  description: string;
+}
+
+export class CustomQueryUsersOrderReqDto {
+  @IsString()
+  submitter_id: string;
+  @IsNumber()
+  skip: number = 0;
+  @IsNumber()
+  @Min(1)
+  @Max(100)
+  take: number = 10;
+  @IsEnum(DirectionEnum)
+  @IsOptional()
+  direction: DirectionEnum = DirectionEnum.ASC;
+}
+
+export class CustomQueryUsersResDto {
+  list: ApiAnalysisUsers[] = [];
+  total: number = 0;
 }
 
 export class CustomUploadResDto {

@@ -1,12 +1,14 @@
 import {
   BaseIdReqAndResDto,
+  CustomQueryUsersOrderReqDto,
   CustomQueryUsersReqDto,
+  CustomQueryUsersResDto,
   CustomUploadResDto,
   GithubUsersDto,
   Intent,
 } from '@/api/dto/api.dto';
 import { KYSELY } from '@/app/db/db.provider';
-import { DB } from '@/app/db/dto/db.dto';
+import { ApiAnalysisUsers, DB } from '@/app/db/dto/db.dto';
 import { TokenPoolService } from '@/app/db/pool.services';
 import { Inject, Injectable } from '@nestjs/common';
 import { CompiledQuery, Kysely } from 'kysely';
@@ -60,12 +62,36 @@ export class UsersService {
         request_data: { urls: body.request_data },
         github: JSON.stringify({ users: githubData }),
         intent: body.intent,
-        submitter_email: body.submitter_email,
+        submitter_id: body.submitter_id,
       })
       .returning('id')
       .executeTakeFirstOrThrow();
 
     res.id = Number(id.id);
+
+    return res;
+  }
+
+  async getList(params: CustomQueryUsersOrderReqDto) {
+    let query = this.db
+      .selectFrom('api.analysis_users')
+      .where('submitter_id', '=', params.submitter_id);
+
+    const total = await query
+      .select(this.db.fn.count('id').as('total'))
+      .execute();
+
+    query = query.orderBy('id', params.direction);
+    query = query.offset(params.skip);
+    query = query.limit(params.take);
+
+    const find = await query
+      .select(['id', 'description', 'created_at'])
+      .execute();
+
+    const res = new CustomQueryUsersResDto();
+    res.list = find as unknown as ApiAnalysisUsers[];
+    res.total = total[0].total as number;
 
     return res;
   }
@@ -82,7 +108,7 @@ export class UsersService {
     }
 
     if (analysis.data && Object.keys(analysis.data).length > 0) {
-      return analysis.data;
+      return analysis;
     }
 
     const sqlRawQuery = `
@@ -162,10 +188,11 @@ FROM user_ids u;`;
         .where('id', '=', analysis.id)
         .set({
           data: JSON.stringify({ users: results.rows }),
-        });
+        })
+        .returningAll();
       await this.db.executeQuery(update);
+      return { users: update };
     }
-    return { users: results.rows };
   }
 
   private extractUsername(url: string): string | null {
@@ -192,7 +219,7 @@ FROM user_ids u;`;
     const data = new CustomQueryUsersReqDto();
     data.request_data = urls;
     data.intent = Intent.Hackathon;
-    data.submitter_email = 'test@example.com';
+    data.submitter_id = 'user_id';
     const res = await this.uploadAndGetUsers(data);
 
     const id = new BaseIdReqAndResDto();

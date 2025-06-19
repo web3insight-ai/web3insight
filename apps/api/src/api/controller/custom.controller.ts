@@ -1,8 +1,20 @@
 import { AppAuthGuard } from '@/auth/app.auth.guard';
 import { UsersService } from '@/data/services/users.services';
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { BaseIdReqAndResDto, CustomQueryUsersReqDto } from '../dto/api.dto';
+import {
+  BaseIdReqAndResDto,
+  CustomQueryUsersOrderReqDto,
+  CustomQueryUsersReqDto,
+} from '../dto/api.dto';
 
 @Controller()
 @ApiTags('Custom')
@@ -11,13 +23,24 @@ export class CustomController {
 
   @Post('custom/analysis/users')
   @ApiOperation({
-    summary: 'Get users from github api',
+    summary: 'Post upload users from github url',
     description: '',
   })
   @ApiBearerAuth()
   @UseGuards(AppAuthGuard)
   async upload(@Body() body: CustomQueryUsersReqDto) {
     return await this.userServices.uploadAndGetUsers(body);
+  }
+
+  @Get('custom/analysis/users')
+  @ApiOperation({
+    summary: 'Get users from github api',
+    description: '',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AppAuthGuard)
+  async get(@Query() query: CustomQueryUsersOrderReqDto) {
+    return await this.userServices.getList(query);
   }
 
   @Get('custom/analysis/users/:id')
