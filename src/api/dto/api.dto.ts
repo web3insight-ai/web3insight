@@ -1,6 +1,5 @@
 import {
   IsArray,
-  IsEmail,
   IsEnum,
   IsInt,
   IsNumber,
