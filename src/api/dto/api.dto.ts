@@ -145,7 +145,7 @@ export class EcoList {
 
 export enum Intent {
   Hackathon = 'hackathon',
-  AiProfile = 'ai_profile',
+  Profile = 'profile',
 }
 
 export class CustomQueryUsersReqDto {
