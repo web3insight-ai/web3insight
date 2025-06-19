@@ -11,7 +11,7 @@ type TotalResponseData = {
   total: string;
 };
 
-type ListResponseData<T> = {
+type ListResponseData<T extends DataValue = DataValue> = {
   list: T[];
 };
 

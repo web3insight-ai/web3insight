@@ -1,5 +1,5 @@
 export {
   noop,
-  isBoolean, isNumeric, isFunction, isArray, isPlainObject,
+  isBoolean, isString, isNumeric, isFunction, isArray, isPlainObject,
   pick, omit,
 } from "@ntks/toolbox";

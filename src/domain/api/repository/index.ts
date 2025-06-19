@@ -13,3 +13,4 @@ export {
   fetchTrendList as fetchActorTrendList,
   fetchRankList as fetchActorRankList,
 } from "./actor";
+export { fetchAnalysisUserList, analyzeUserList, fetchAnalysisUser } from "./custom";

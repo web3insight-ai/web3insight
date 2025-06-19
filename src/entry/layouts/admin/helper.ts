@@ -10,10 +10,14 @@ const menu: MenuItem[] = [
     path: "",
     childrenPrefix: "/ecosystems",
   },
+  {
+    text: "Events",
+    path: "/events",
+  },
 ].map(item => ({
   ...item,
   path: prefixPath(item.path),
-  childrenPrefix: prefixPath(item.childrenPrefix),
+  childrenPrefix: item.childrenPrefix ? prefixPath(item.childrenPrefix) : undefined,
 }));
 
 const settingsMenu: MenuItem[] = [

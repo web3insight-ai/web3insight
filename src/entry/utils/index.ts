@@ -1,10 +1,10 @@
 import { type ActionFunctionArgs, json } from "@remix-run/node";
 
-import type { DataValue, ResponseResult } from "@/types";
+import type { DataValue } from "@/types";
+import { isString } from "@/utils";
 import { generateFailedResponse } from "@/clients/http";
 
-type RequestMethod = "OPTIONS" | "GET" | "POST" | "PUT" | "DELETE";
-type AllowedMethods = RequestMethod | "*" | RequestMethod[];
+import type { RequestMethod, AllowedMethods, RepositoryService, RepositoryServiceMap, RepositoryServiceAdapter } from "./typing";
 
 const notAllowedMessage = "Method not allowed";
 const notAllowedStatus = 405;
@@ -50,34 +50,53 @@ function createPreflightAction(allowedMethods: AllowedMethods = ["POST", "OPTION
   return createServerAction("OPTIONS", generatePreflightResponse.bind(null, allowedMethods), normalize);
 }
 
+function createServiceAdapter(method: RequestMethod, service: RepositoryService): RepositoryServiceAdapter;
+function createServiceAdapter(serviceMap: RepositoryServiceMap): RepositoryServiceAdapter;
 function createServiceAdapter(
-  method: RequestMethod,
-  service: (...args: DataValue[]) => Promise<ResponseResult>,
-) {
-  if (["POST", "PUT"].includes(method)) {
-    return {
-      action: createServerAction(method, async ({ request }) => {
-        const data = await request.json();
+  methodOrServices: RequestMethod | RepositoryServiceMap,
+  service?: RepositoryService,
+): RepositoryServiceAdapter {
+  const resolvedMap = (isString(methodOrServices) ? {
+    [methodOrServices as RequestMethod]: service!,
+  } : methodOrServices) as RepositoryServiceMap;
+  const allMethods = (Object.keys(resolvedMap) as RequestMethod[]);
 
-        return service(data);
-      }, true),
-      loader: createPreflightAction([method, "OPTIONS"], true),
-    };
-  }
+  const mutableMethods: RequestMethod[] = [];
+  const immutableMethods: RequestMethod[] = [];
 
-  return {
-    loader: createServerAction(method, async ({ request }) => {
-      if (request.method === "OPTIONS") {
-        return generatePreflightResponse([method]);
+  allMethods.forEach(key => {
+    if (["POST", "PUT"].includes(key)) {
+      mutableMethods.push(key);
+    } else {
+      immutableMethods.push(key);
+    }
+  });
+
+  const adapters: RepositoryServiceAdapter = {
+    loader: createServerAction(allMethods, async ({ request }) => {
+      const method = request.method as RequestMethod;
+
+      if (method === "OPTIONS") {
+        return generatePreflightResponse(allMethods);
       }
 
       const url = new URL(request.url);
       const params = Object.fromEntries(url.searchParams.entries());
-      const res = await service(params as DataValue);
+      const res = await resolvedMap[method]!(params as DataValue);
     
       return json(res, { status: Number(res.code) });
     }, true),
   };
+
+  if (mutableMethods.length > 0) {
+    adapters.action = createServerAction(mutableMethods, async ({ request }) => {
+      const data = await request.json();
+
+      return resolvedMap[request.method as RequestMethod]!(data);
+    }, true);
+  }
+
+  return adapters;
 }
 
 export { createServerAction, createPreflightAction, createServiceAdapter };

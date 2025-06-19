@@ -8,7 +8,7 @@ function NavMenu({ settings = false }: NavMenuProps) {
   const { pathname } = useLocation();
 
   return (
-    <nav>
+    <nav className="flex flex-col gap-2">
       {getMenu(settings).map(item => (
         <Link
           key={item.text}
