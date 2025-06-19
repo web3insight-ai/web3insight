@@ -30,6 +30,12 @@ jobs:
           toolchain: stable
           targets: ${{ matrix.target }}
 
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+          cache-on-failure: true
+
       - name: Build
         run: cargo build --release --target ${{ matrix.target }}
         env:
