@@ -2,10 +2,46 @@ import type { JSXElementConstructor } from "react";
 
 import { type ButtonProps, Button } from "@nextui-org/react";
 
-import type { ViewFieldDescriptor, FieldRendererProps } from "../../../../types";
+import type { DataValue, ViewFieldDescriptor, FieldRendererProps } from "../../../../types";
 import type { TableColumn } from "../../../control/data-table";
 
-import type { TableViewWidgetProps } from "./typing";
+import type { TableViewAction, ActionGroup, TableViewWidgetProps } from "./typing";
+
+function resolveActionGroup(actions: TableViewWidgetProps["actions"] = []): ActionGroup {
+  const group: ActionGroup = { inline: [], others: [] };
+
+  actions.forEach(action => {
+    if (!action.context || action.context === "single") {
+      group.inline.push(action);
+    } else {
+      group.others.push(action);
+    }
+  });
+
+  return group;
+}
+
+function renderButton(action: TableViewAction, payload: Record<string, DataValue> = {}) {
+  let color: ButtonProps["color"] = "default";
+  let variant: ButtonProps["variant"] = "bordered";
+
+  if (action.primary) {
+    color = "primary";
+    variant = "solid";
+  }
+
+  return (
+    <Button
+      key={action.name}
+      color={color}
+      variant={variant}
+      size="sm"
+      onClick={() => action.execute?.(payload)}
+    >
+      {action.text}
+    </Button>
+  );
+}
 
 function resolveColumns({
   fields = [],
@@ -30,35 +66,13 @@ function resolveColumns({
 
   cols.unshift({ title: "#", key: "serialNumber", type: "index" });
 
-  const singleActions = actions.filter(action => !action.context || action.context === "single");
-
-  if (singleActions.length > 0) {
+  if (actions.length > 0) {
     cols.push({
       title: "Actions",
       key: "_SYS_ACTION_COL_",
       render: (_, { row }) => (
         <div className="flex items-center gap-2 px-4">
-          {singleActions.map(action => {
-            let color: ButtonProps["color"] = "default";
-            let variant: ButtonProps["variant"] = "bordered";
-
-            if (action.primary) {
-              color = "primary";
-              variant = "solid";
-            }
-
-            return (
-              <Button
-                key={action.name}
-                color={color}
-                variant={variant}
-                size="sm"
-                onClick={() => action.execute?.(row)}
-              >
-                {action.text}
-              </Button>
-            );
-          })}
+          {actions.map(action => renderButton(action, row))}
         </div>
       ),
     });
@@ -67,4 +81,4 @@ function resolveColumns({
   return cols;
 }
 
-export { resolveColumns };
+export { resolveActionGroup, renderButton, resolveColumns };

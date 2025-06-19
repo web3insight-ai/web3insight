@@ -30,30 +30,36 @@ function Table(
         ))}
       </div>
       <div className="flex-grow min-h-0 overflow-auto">
-        {dataSource.map((item, index) => (
-          <div
-            key={index}
-            className="px-8 py-4 grid grid-cols-12 gap-2 items-center border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors duration-200"
-          >
-            {showSerialNumber && (
-              <div className="col-span-1">
-                <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full
-                  ${index === 0 ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' :
-                index === 1 ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400' :
-                  'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}
-                  text-xs font-medium`}>{index + 1}</span>
-              </div>
-            )}
-            {columns.map(col => (
+        {dataSource.length > 0 ? (
+          <>
+            {dataSource.map((item, index) => (
               <div
-                key={`${col.key}-${index}`}
-                className={resolveColumnClassName(col, "font-medium text-gray-700 dark:text-gray-300")}
+                key={index}
+                className="px-8 py-4 grid grid-cols-12 gap-2 items-center border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors duration-200"
               >
-                {col.render? col.render(undefined, { row: item, column: col, index }) : item[col.key]}
+                {showSerialNumber && (
+                  <div className="col-span-1">
+                    <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full
+                      ${index === 0 ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' :
+                    index === 1 ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400' :
+                      'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}
+                      text-xs font-medium`}>{index + 1}</span>
+                  </div>
+                )}
+                {columns.map(col => (
+                  <div
+                    key={`${col.key}-${index}`}
+                    className={resolveColumnClassName(col, "font-medium text-gray-700 dark:text-gray-300")}
+                  >
+                    {col.render? col.render(undefined, { row: item, column: col, index }) : item[col.key]}
+                  </div>
+                ))}
               </div>
             ))}
-          </div>
-        ))}
+          </>
+        ) : (
+          <div className="flex items-center justify-center h-96 text-gray-500">No data</div>
+        )}
       </div>
       {loading && (
         <div className="absolute top-0 left-0 z-10 w-full h-full flex items-center justify-center bg-white/90">
