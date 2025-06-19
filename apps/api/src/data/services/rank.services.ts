@@ -84,11 +84,12 @@ export class RankService {
     const cacheData = new EcoRankListDto();
     cacheData.list = data;
 
-    return await this.cacheDataService.updateCacheData(
+    await this.cacheDataService.updateCacheData(
       CacheKey.EcoRank,
       cacheData,
       new Date().toISOString(),
     );
+    return dbData;
   }
 
   async getTopScoreActors(ecoNames: string[]) {

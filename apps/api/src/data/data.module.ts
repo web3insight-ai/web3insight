@@ -23,6 +23,7 @@ import { UsersService } from './services/users.services';
     RankService,
     ReposService,
     CacheDataService,
+    UsersService,
   ],
 })
 export class DataModule {}

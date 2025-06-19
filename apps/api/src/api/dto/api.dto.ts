@@ -1,8 +1,11 @@
 import {
+  IsArray,
+  IsEmail,
   IsEnum,
   IsInt,
   IsNumber,
   IsOptional,
+  IsString,
   Max,
   MaxLength,
   Min,
@@ -138,4 +141,30 @@ export class SucessResDto {
 export class EcoList {
   provider_ecosystem: string[] = [];
   available_ecosystem: string[] = [];
+}
+
+export enum Intent {
+  Hackathon = 'hackathon',
+}
+
+export class CustomQueryUsersReqDto {
+  @IsEnum(Intent)
+  intent: Intent = Intent.Hackathon;
+  @IsEmail()
+  submitter_email: string;
+  @IsArray()
+  @IsString({ each: true })
+  request_data: string[] = [];
+}
+
+export class CustomUploadResDto {
+  id: number = 0;
+  users: GithubUsersDto[] = [];
+}
+
+export class GithubUsersDto {
+  login: string;
+  id: number;
+  created_at: string;
+  updated_at: string;
 }
