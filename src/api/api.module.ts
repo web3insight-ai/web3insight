@@ -7,6 +7,7 @@ import { AdminController } from './controller/admin.controller';
 import { GithubController } from './controller/github.controller';
 import { GithubService } from './services/github.services';
 import { DBModule } from '@/app/db/db.module';
+import { CustomController } from './controller/custom.controller';
 
 @Module({
   controllers: [
@@ -14,6 +15,7 @@ import { DBModule } from '@/app/db/db.module';
     RankController,
     AdminController,
     GithubController,
+    CustomController,
   ],
   providers: [JwtService, GithubService],
   exports: [],
