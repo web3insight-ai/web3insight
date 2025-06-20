@@ -15,9 +15,8 @@ interface RawRepoData {
   tags: string[];
 }
 interface RepoData {
-  repo_name: string;
-  eco_names: string[];
-  eco_details: Record<string, { branch: string[]; tags: string[] }>;
+  upstream_repo_name: string;
+  upstream_marks: Record<string, { branch: string[]; tags: string[] }>;
 }
 
 @Injectable()
@@ -41,22 +40,17 @@ export class InitDataService {
         const { repo_url, eco_name, branch, tags } = item;
 
         const repo = this.repoMap.get(repo_url) || {
-          repo_name: repo_url,
-          eco_names: [],
-          eco_details: {},
+          upstream_repo_name: repo_url,
+          upstream_marks: {},
         };
 
-        if (!repo.eco_names.includes(eco_name)) {
-          repo.eco_names.push(eco_name);
-        }
-
-        if (!repo.eco_details[eco_name]) {
-          repo.eco_details[eco_name] = { branch, tags };
+        if (!repo.upstream_marks[eco_name]) {
+          repo.upstream_marks[eco_name] = { branch, tags };
         } else {
-          const existingBranches = repo.eco_details[eco_name].branch;
-          const existingTags = repo.eco_details[eco_name].tags;
+          const existingBranches = repo.upstream_marks[eco_name].branch;
+          const existingTags = repo.upstream_marks[eco_name].tags;
 
-          repo.eco_details[eco_name] = {
+          repo.upstream_marks[eco_name] = {
             branch: [...new Set([...existingBranches, ...branch])],
             tags: [...new Set([...existingTags, ...tags])],
           };
@@ -76,35 +70,16 @@ export class InitDataService {
 
     const repos = Array.from(this.repoMap.values()).map((repo) => ({
       ...repo,
-      repo_name: repo.repo_name?.replace(/^https:\/\/github\.com\//i, ''),
+      repo_name: repo.upstream_repo_name?.replace(
+        /^https:\/\/github\.com\//i,
+        '',
+      ),
     }));
 
-    const createTable = sql`
-CREATE UNLOGGED TABLE IF NOT EXISTS "web3"."ecos"
-(
-    "repo_name"   TEXT,
-    "eco_names"   TEXT[] DEFAULT ARRAY []::TEXT[],
-    "eco_details" JSONB  DEFAULT '{}'::JSONB
-);`;
-
-    await createTable.execute(this.db);
-
-    await this.db.deleteFrom('web3.ecos').execute();
-
     for (const batch of chunkArray(repos, 5000)) {
-      await this.db.insertInto('web3.ecos').values(batch).execute();
+      await this.db.insertInto('api.upstream_repos').values(batch).execute();
       console.log('Inserted batch of eco data:', batch.length);
     }
-    const updateTable = sql`
-UPDATE "web3"."repos" r
-SET "eco_names"   = e."eco_names",
-    "eco_details" = e."eco_details"
-FROM "web3"."ecos" e
-WHERE LOWER(r."repo_name") = LOWER(e."repo_name");`;
-
-    await updateTable.execute(this.db);
-
-    await sql`DROP TABLE IF EXISTS "web3"."ecos";`.execute(this.db);
   }
 
   @Command({

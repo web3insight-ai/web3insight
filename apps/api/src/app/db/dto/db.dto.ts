@@ -38,10 +38,15 @@ export interface Web3Actors {
   created_at: Timestamp;
 }
 
-export interface Web3Ecos {
-  eco_details: Generated<Json | null>;
-  eco_names: Generated<string[] | null>;
+export interface ApiUpstreamRepos {
+  abnormal: Generated<boolean>;
+  api: Generated<Json | null>;
+  created_at: Generated<Timestamp>;
+  id: Int8 | null;
   repo_name: string | null;
+  updated_at: Generated<Timestamp>;
+  upstream_marks: Generated<Json>;
+  upstream_repo_name: string;
 }
 
 export interface Web3Event {
@@ -102,10 +107,10 @@ export interface ApiAnalysisUsers {
 
 export interface DB {
   'web3.actors': Web3Actors;
-  'web3.ecos': Web3Ecos;
   'web3.event': Web3Event;
   'web3.repos': Web3Repos;
   'web3.caches': Web3Caches;
   'api.configs': ApiConfigs;
   'api.analysis_users': ApiAnalysisUsers;
+  'api.upstream_repos': ApiUpstreamRepos;
 }

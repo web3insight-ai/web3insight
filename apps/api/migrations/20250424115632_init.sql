@@ -7,3 +7,16 @@ CREATE TABLE IF NOT EXISTS "api"."configs"
     "body"      TEXT    NOT NULL DEFAULT '',
     "available" BOOLEAN NOT NULL DEFAULT false
 );
+
+
+CREATE TABLE IF NOT EXISTS "api"."upstream_repos"
+(
+    "upstream_repo_name" TEXT PRIMARY KEY,
+    "repo_name"          TEXT UNIQUE,
+    "id"                 BIGINT UNIQUE,
+    "api"                JSONB                             DEFAULT '{}'::JSONB,
+    "upstream_marks"     JSONB                    NOT NULL DEFAULT '{}'::JSONB,
+    "abnormal"           BOOLEAN                  NOT NULL DEFAULT false,
+    "created_at"         TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    "updated_at"         TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
