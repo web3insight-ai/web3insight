@@ -125,20 +125,17 @@ WITH user_ids AS (SELECT UNNEST($1::bigint[]) AS actor_id),
                           WHERE e.event_type IN ('PushEvent', 'PullRequestEvent')
                           GROUP BY e.actor_id, e.repo_id, r.repo_name),
 
-
      repo_scores AS (SELECT actor_id,
                             repo_id,
                             repo_name,
                             has_commit * 1 + pr_count * 2 AS total_score
                      FROM repo_base_scores),
 
-
-     repo_ecosystems AS (SELECT r.repo_id,
-                                jsonb_object_keys(r.upstream_marks) AS ecosystem_key
+     repo_ecosystems AS (SELECT DISTINCT ON (r.repo_id, ecosystem_key) r.repo_id,
+                                                                       jsonb_object_keys(r.upstream_marks) AS ecosystem_key
                          FROM web3.repos r
                                   JOIN repo_scores rs ON r.repo_id = rs.repo_id
                          WHERE r.upstream_marks != '{}'::jsonb),
-
 
      repo_ecosystem_scores AS (SELECT rs.actor_id,
                                       rs.repo_name,
@@ -148,6 +145,8 @@ WITH user_ids AS (SELECT UNNEST($1::bigint[]) AS actor_id),
                                         JOIN repo_ecosystems re ON rs.repo_id = re.repo_id
                                WHERE rs.total_score > 0),
 
+     unique_ecosystem_repos AS (SELECT DISTINCT actor_id, ecosystem_key, repo_name, total_score
+                                FROM repo_ecosystem_scores),
 
      ecosystem_repos AS (SELECT actor_id,
                                 ecosystem_key,
@@ -156,9 +155,8 @@ WITH user_ids AS (SELECT UNNEST($1::bigint[]) AS actor_id),
                                         ORDER BY total_score DESC
                                 )                AS repo_scores,
                                 SUM(total_score) AS ecosystem_total_score
-                         FROM repo_ecosystem_scores
+                         FROM unique_ecosystem_repos
                          GROUP BY actor_id, ecosystem_key)
-
 
 SELECT u.actor_id,
        COALESCE(
