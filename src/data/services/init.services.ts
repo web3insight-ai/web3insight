@@ -4,9 +4,14 @@ import * as fs from 'fs';
 import * as readline from 'readline';
 import { Command, Console } from 'nestjs-console';
 import { KYSELY } from '@/app/db/db.provider';
-import { Kysely, sql } from 'kysely';
+import { Kysely } from 'kysely';
 import { DB } from '@/app/db/dto/db.dto';
-import { chunkArray } from '@/helper';
+import {
+  askForConfirmation,
+  chunkArray,
+  convertGithubUrlToRepoName,
+} from '@/helper';
+import { isDeepStrictEqual } from 'util';
 
 interface RawRepoData {
   eco_name: string;
@@ -65,51 +70,110 @@ export class InitDataService {
     description: 'Update eco repos',
   })
   async testLoadEcoData() {
+    this.repoMap.clear();
+
     await this.loadData(this.dataPath);
+
     console.log('Load eco data len:', this.repoMap.size);
 
-    const repos = Array.from(this.repoMap.values()).map((repo) => ({
+    const localRepos = Array.from(this.repoMap.values()).map((repo) => ({
       ...repo,
-      repo_name: repo.upstream_repo_name?.replace(
-        /^https:\/\/github\.com\//i,
-        '',
+      upstream_repo_name: convertGithubUrlToRepoName(
+        repo.upstream_repo_name || '',
       ),
     }));
+    const localRepoNames = new Set(
+      localRepos.map((repo) => repo.upstream_repo_name),
+    );
 
-    for (const batch of chunkArray(repos, 5000)) {
-      await this.db.insertInto('api.upstream_repos').values(batch).execute();
-      console.log('Inserted batch of eco data:', batch.length);
+    const existingRepos = await this.db
+      .selectFrom('api.upstream_repos')
+      .select(['upstream_repo_name', 'upstream_marks'])
+      .execute();
+
+    const existingRepoMap = new Map(
+      existingRepos.map((repo) => [
+        repo.upstream_repo_name,
+        repo.upstream_marks as Record<
+          string,
+          { branch: string[]; tags: string[] }
+        >,
+      ]),
+    );
+
+    const reposToUpsert = localRepos.filter(
+      (repo) =>
+        !existingRepoMap.has(repo.upstream_repo_name) ||
+        !isDeepStrictEqual(
+          repo.upstream_marks,
+          existingRepoMap.get(repo.upstream_repo_name),
+        ),
+    );
+
+    console.log(`Found ${reposToUpsert.length} repos to insert or update`);
+
+    if (reposToUpsert.length > 0) {
+      const shouldInsert = await askForConfirmation(
+        'Do you want to insert/update these repos?',
+      );
+
+      if (shouldInsert) {
+        for (const batch of chunkArray(reposToUpsert, 5000)) {
+          await this.db
+            .insertInto('api.upstream_repos')
+            .values(batch)
+            .onConflict((oc) =>
+              oc.column('upstream_repo_name').doUpdateSet((eb) => ({
+                updated_at: new Date().toISOString(),
+                upstream_marks: eb.ref('excluded.upstream_marks'),
+              })),
+            )
+            .execute();
+          console.log('Inserted/updated batch of eco data:', batch.length);
+        }
+      } else {
+        console.log('Insert/update operation cancelled');
+      }
+    } else {
+      console.log('No repos need to be inserted or updated');
     }
-  }
 
-  @Command({
-    command: 'sync:db:repos:abnormal-direct',
-    description: '',
-  })
-  async updateAllReposAbnormalStatusDirectSQL() {
-    const updateQuery = sql`
-WITH "RepoStats" AS (
-    SELECT
-        "repo_id",
-        COUNT(CASE WHEN "event_type" = 'PushEvent' THEN 1 END) AS commit_count,
-        COUNT(DISTINCT "actor_id") FILTER (WHERE ("actor_login" NOT LIKE '%[bot]' AND "actor_login" NOT LIKE '%-ci')) AS developer_count
-    FROM
-        "web3"."event"
-    GROUP BY
-        "repo_id"
-)
-UPDATE
-    "web3"."repos" r
-SET
-    "is_abnormal" = CASE
-        WHEN rs.developer_count <= 2 AND rs.commit_count > 3000 THEN TRUE
-        ELSE FALSE
-    END
-FROM
-    "RepoStats" rs
-WHERE
-    r."repo_id" = rs."repo_id";`;
+    const updatedExistingRepos = await this.db
+      .selectFrom('api.upstream_repos')
+      .select(['upstream_repo_name'])
+      .execute();
 
-    await updateQuery.execute(this.db);
+    const updatedExistingRepoSet = new Set(
+      updatedExistingRepos.map((repo) => repo.upstream_repo_name),
+    );
+    const reposToDelete: string[] = [];
+
+    updatedExistingRepoSet.forEach((repoName) => {
+      if (!localRepoNames.has(repoName)) {
+        reposToDelete.push(repoName);
+      }
+    });
+
+    if (reposToDelete.length > 0) {
+      console.log(`Found ${reposToDelete.length} repos to delete`);
+      const shouldDelete = await askForConfirmation(
+        'Do you want to delete these repos?',
+      );
+
+      if (shouldDelete) {
+        for (const batch of chunkArray(reposToDelete, 1000)) {
+          await this.db
+            .deleteFrom('api.upstream_repos')
+            .where('upstream_repo_name', 'in', batch)
+            .execute();
+          console.log(`Deleted batch of ${batch.length} repos`);
+        }
+      } else {
+        console.log('Delete operation cancelled');
+      }
+    } else {
+      console.log('No repos to delete');
+    }
+    console.log('Sync completed');
   }
 }
