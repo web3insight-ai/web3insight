@@ -4,18 +4,19 @@ import {
   Textarea, Button,
 } from "@nextui-org/react";
 
+import type { GithubUser } from "../../typing";
 import { insertContestantList } from "../../repository";
 
-import type { ContestantDialogProps } from "./typing";
+import type { EventDialogProps } from "./typing";
 import { resolveContestants } from "./helper";
 
-function ContestantDialog({ managerId, visible, onClose }: ContestantDialogProps) {
+function EventDialog({ managerId, visible, onClose }: EventDialogProps) {
   const [userInput, setUserInput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const closeDialog = () => {
+  const closeDialog = (contestants?: GithubUser[]) => {
     setUserInput("");
-    onClose();
+    onClose(contestants);
   };
 
   const handleConfirm = () => {
@@ -29,10 +30,7 @@ function ContestantDialog({ managerId, visible, onClose }: ContestantDialogProps
     insertContestantList({ managerId, urls: contestants })
       .then(res => {
         if (res.success) {
-          const count = res.data.length;
-
-          alert(`${count} contestant${count > 1 ? "s" : ""} successfully added.`);
-          onClose(true);
+          onClose(res.data);
         } else {
           alert(res.message);
         }
@@ -68,7 +66,7 @@ function ContestantDialog({ managerId, visible, onClose }: ContestantDialogProps
             <ModalFooter>
               <Button
                 variant="bordered"
-                onClick={closeDialog}
+                onClick={() => closeDialog()}
                 isDisabled={loading}
               >
                 Cancel
@@ -88,4 +86,4 @@ function ContestantDialog({ managerId, visible, onClose }: ContestantDialogProps
   );
 }
 
-export default ContestantDialog;
+export default EventDialog;

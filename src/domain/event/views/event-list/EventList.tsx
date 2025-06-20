@@ -4,19 +4,25 @@ import { Card } from "@nextui-org/react";
 
 import TableViewWidget from "@/components/widget/view/table";
 
+import type { GithubUser } from "../../typing";
 import { fetchContestantList } from "../../repository";
 
-import type { ContestantListViewWidgetProps } from "./typing";
-import ContestantDialog from "./ContestantDialog";
+import type { EventListViewWidgetProps } from "./typing";
+import EventDialog from "./EventDialog";
+import ContestantListDialog from "./ContestantListDialog";
 
 const initTimestamp = Date.now();
 
-function ContestantListView({ className, managerId }: ContestantListViewWidgetProps) {
+function EventListView({ className, managerId }: EventListViewWidgetProps) {
   const [dataSource, setDataSource] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [visible, setVisible] = useState(false);
   const [refetchTimestamp, setRefetchTimestamp] = useState(initTimestamp);
+
+  const [visible, setVisible] = useState(false);
+
+  const [addedResult, setAddedResult] = useState<GithubUser[]>([]);
+  const [addedResultVisible, setAddedResultVisible] = useState(false);
 
   useEffect(() => {
     if (!managerId) {
@@ -32,12 +38,14 @@ function ContestantListView({ className, managerId }: ContestantListViewWidgetPr
       .finally(() => setLoading(false));
   }, [managerId, refetchTimestamp]);
 
-  const closeDialog = (needRefetch: boolean = false) => {
-    if (needRefetch) {
-      setRefetchTimestamp(Date.now());
-    }
-
+  const closeDialog = (contestants?: GithubUser[]) => {
     setVisible(false);
+
+    if (contestants) {
+      setRefetchTimestamp(Date.now());
+      setAddedResult(contestants);
+      setAddedResultVisible(true);
+    }
   };
 
   return (
@@ -52,7 +60,7 @@ function ContestantListView({ className, managerId }: ContestantListViewWidgetPr
         actions={[
           {
             text: "Add new",
-            name: "addNewContestants",
+            name: "addNewEvent",
             context: "free",
             execute: () => setVisible(true),
           },
@@ -60,13 +68,18 @@ function ContestantListView({ className, managerId }: ContestantListViewWidgetPr
         total={total}
         loading={loading}
       />
-      <ContestantDialog
+      <EventDialog
         managerId={managerId}
         visible={visible}
         onClose={closeDialog}
+      />
+      <ContestantListDialog
+        dataSource={addedResult}
+        visible={addedResultVisible}
+        onClose={() => setAddedResultVisible(false)}
       />
     </Card>
   );
 }
 
-export default ContestantListView;
+export default EventListView;
