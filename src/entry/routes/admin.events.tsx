@@ -2,7 +2,7 @@ import { type LoaderFunctionArgs, json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 
 import { fetchCurrentUser } from "~/auth/repository";
-import ContestantListViewWidget from "~/event/views/contestant-list";
+import EventListViewWidget from "~/event/views/event-list";
 
 import Section from "../components/section";
 
@@ -22,7 +22,7 @@ function AdminEventPage() {
       summary="Manage events"
       contentHeightFixed
     >
-      <ContestantListViewWidget managerId={manager.documentId} />
+      <EventListViewWidget managerId={manager.documentId} />
     </Section>
   );
 }
