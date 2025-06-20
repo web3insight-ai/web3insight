@@ -13,6 +13,7 @@ const menu: MenuItem[] = [
   {
     text: "Events",
     path: "/events",
+    childrenPrefix: "/events",
   },
 ].map(item => ({
   ...item,

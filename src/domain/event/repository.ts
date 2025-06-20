@@ -3,9 +3,12 @@ import { type NormalizedPagination, resolvePaginationParams, isServerSide } from
 import httpClient from "@/clients/http/default";
 
 import type { User as GithubUser } from "../github/typing";
-import { fetchAnalysisUserList, analyzeUserList } from "../api/repository";
+import { fetchAnalysisUserList, analyzeUserList, fetchAnalysisUser } from "../api/repository";
 
-async function fetchContestantList(
+import type { EventReport } from "./typing";
+import { resolveEventDetail } from "./helper";
+
+async function fetchList(
   params: NormalizedPagination & {
     managerId: string;
   },
@@ -30,7 +33,20 @@ async function fetchContestantList(
   };
 }
 
-async function insertContestantList(
+async function fetchOne(id: number): Promise<ResponseResult<EventReport>> {
+  if (!isServerSide()) {
+    return httpClient.get(`/api/event/contestants/${id}`);
+  }
+
+  const { data, ...others } = await fetchAnalysisUser(id);
+
+  return {
+    ...others,
+    data: resolveEventDetail(data),
+  };
+}
+
+async function insertOne(
   data: {
     managerId: string;
     urls: string[];
@@ -44,10 +60,10 @@ async function insertContestantList(
     submitter_id: data.managerId,
     request_data: data.urls,
     intent: "hackathon",
-    description: `${data.managerId} submmitted`,
+    description: `${data.managerId} submitted`,
   });
 
   return { ...others, data: resData.users };
 }
 
-export { fetchContestantList, insertContestantList };
+export { fetchList, fetchOne, insertOne };

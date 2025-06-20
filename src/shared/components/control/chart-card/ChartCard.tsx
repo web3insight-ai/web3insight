@@ -4,7 +4,7 @@ import ReactEcharts from "echarts-for-react";
 
 import type { ChartCardProps } from "./typing";
 
-function ChartCard({ className, title, style, option }: ChartCardProps) {
+function ChartCard({ className, title, style, option, chartContainerClassName }: ChartCardProps) {
   return (
     <Card className={clsx("bg-white dark:bg-gray-800 shadow-sm border-none", className)}>
       <CardHeader className="px-6 py-4">
@@ -12,7 +12,7 @@ function ChartCard({ className, title, style, option }: ChartCardProps) {
       </CardHeader>
       <Divider />
       <CardBody className="p-6">
-        <div className="h-64 w-full">
+        <div className={clsx("h-64 w-full", chartContainerClassName)}>
           <ReactEcharts style={style} option={option} />
         </div>
       </CardBody>

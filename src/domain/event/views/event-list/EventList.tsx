@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 import clsx from "clsx";
 import { Card } from "@nextui-org/react";
+import { useNavigate } from "@remix-run/react";
 
 import TableViewWidget from "@/components/widget/view/table";
 
 import type { GithubUser } from "../../typing";
-import { fetchContestantList } from "../../repository";
+import { fetchList } from "../../repository";
 
 import type { EventListViewWidgetProps } from "./typing";
+import CreatedTimeFieldWidget from "./CreatedTimeField";
 import EventDialog from "./EventDialog";
 import ContestantListDialog from "./ContestantListDialog";
 
@@ -24,13 +26,15 @@ function EventListView({ className, managerId }: EventListViewWidgetProps) {
   const [addedResult, setAddedResult] = useState<GithubUser[]>([]);
   const [addedResultVisible, setAddedResultVisible] = useState(false);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     if (!managerId) {
       return;
     }
 
     setLoading(true);
-    fetchContestantList({ managerId })
+    fetchList({ managerId })
       .then(res => {
         setDataSource(res.data);
         setTotal(res.extra?.total ?? 0);
@@ -54,8 +58,13 @@ function EventListView({ className, managerId }: EventListViewWidgetProps) {
         dataSource={dataSource}
         fields={[
           { label: "ID", name: "id" },
-          { label: "Description", name: "description", config: { span: 3 } },
-          { label: "Created Time", name: "created_at", config: { span: 3 } },
+          { label: "Description", name: "description", config: { span: 5 } },
+          {
+            label: "Created Time",
+            name: "created_at",
+            widget: CreatedTimeFieldWidget,
+            config: { span: 3 },
+          },
         ]}
         actions={[
           {
@@ -63,6 +72,11 @@ function EventListView({ className, managerId }: EventListViewWidgetProps) {
             name: "addNewEvent",
             context: "free",
             execute: () => setVisible(true),
+          },
+          {
+            text: "View",
+            name: "viewDetail",
+            execute: row => navigate(`/admin/events/${row.id}`),
           },
         ]}
         total={total}

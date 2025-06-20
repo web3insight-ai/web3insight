@@ -8,7 +8,7 @@ import type { Repository } from "../repository/typing";
 import { fetchListByDeveloper } from "../repository/repository";
 
 import type { Developer, DeveloperActivity, DeveloperContribution } from "./typing";
-import { resolveActivityFromGithubEvent } from "./helper";
+import { resolveActivityFromGithubEvent, resolveDeveloperFromGithubUser } from "./helper";
 
 async function fetchOne(idOrUsername: number | string): Promise<ResponseResult<Developer | null>> {
   const { data, ...others } = isNumeric(idOrUsername) ? await fetchUserById(idOrUsername) : await fetchUser(<string>idOrUsername);
@@ -30,23 +30,12 @@ async function fetchOne(idOrUsername: number | string): Promise<ResponseResult<D
   return {
     ...others,
     data: others.success? {
-      id: data.id,
-      username: data.login,
-      nickname: data.name,
-      description: data.bio,
-      avatar: data.avatar_url,
-      location: data.location,
-      social: {
-        github: data.html_url,
-        twitter: data.twitter_username,
-        website: data.blog,
-      },
+      ...resolveDeveloperFromGithubUser(data),
       statistics: {
         repository: data.public_repos,
         pullRequest: statistics[0].pull_requests,
         codeReview: statistics[0].code_reviews,
       },
-      joinedAt: data.created_at,
     } : null,
   };
 }
