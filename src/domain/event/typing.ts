@@ -1,3 +1,25 @@
 import type { User as GithubUser } from "../github/typing";
+import type { Developer } from "../developer/typing";
 
-export type { GithubUser };
+type EcosystemAnalytics = {
+  name: string;
+  score: number;
+  repos: {
+    fullName: string;
+    score: string;
+  }[];
+};
+
+type Contestant = Developer & {
+  analytics: EcosystemAnalytics[];
+};
+
+type EventReport = {
+  id: string;
+  type: "hackathon";
+  description: string;
+  submitter: string;
+  contestants: Contestant[];
+};
+
+export type { GithubUser, EcosystemAnalytics, EventReport };

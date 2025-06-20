@@ -12,7 +12,7 @@ async function loader({ request }: LoaderFunctionArgs) {
   return json({ manager: res.data });
 }
 
-function AdminEventPage() {
+function AdminEventListPage() {
   const { manager } = useLoaderData<typeof loader>();
 
   return (
@@ -28,4 +28,4 @@ function AdminEventPage() {
 }
 
 export { loader };
-export default AdminEventPage;
+export default AdminEventListPage;

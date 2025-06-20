@@ -5,7 +5,7 @@ import {
 } from "@nextui-org/react";
 
 import type { GithubUser } from "../../typing";
-import { insertContestantList } from "../../repository";
+import { insertOne } from "../../repository";
 
 import type { EventDialogProps } from "./typing";
 import { resolveContestants } from "./helper";
@@ -27,10 +27,10 @@ function EventDialog({ managerId, visible, onClose }: EventDialogProps) {
     }
 
     setLoading(true);
-    insertContestantList({ managerId, urls: contestants })
+    insertOne({ managerId, urls: contestants })
       .then(res => {
         if (res.success) {
-          onClose(res.data);
+          closeDialog(res.data);
         } else {
           alert(res.message);
         }

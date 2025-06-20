@@ -1,5 +1,5 @@
-import type { EventType, CreateEvent, DeleteEvent, PushEvent, IssuesEvent, IssueCommentEvent, PullRequestEvent, PullRequestReviewCommentEvent, Event as GithubEvent } from "../github/typing";
-import type { ActivityDescriptionResolver, DeveloperActivity } from "./typing";
+import type { EventType, CreateEvent, DeleteEvent, PushEvent, IssuesEvent, IssueCommentEvent, PullRequestEvent, PullRequestReviewCommentEvent, Event as GithubEvent, User as GithubUser } from "../github/typing";
+import type { ActivityDescriptionResolver, DeveloperActivity, Developer } from "./typing";
 
 const descriptionResolverMap: Record<EventType, ActivityDescriptionResolver> = {
   CreateEvent: event => `created a ${(event as CreateEvent).payload.ref_type} ${(event as CreateEvent).payload.ref} in ${event.repo.name}`,
@@ -26,4 +26,26 @@ function resolveActivityFromGithubEvent(event: GithubEvent): DeveloperActivity {
   };
 }
 
-export { resolveActivityFromGithubEvent };
+function resolveDeveloperFromGithubUser(user: GithubUser): Developer {
+  return {
+    id: user.id,
+    username: user.login,
+    nickname: user.name,
+    description: user.bio,
+    avatar: user.avatar_url,
+    location: user.location,
+    social: {
+      github: user.html_url,
+      twitter: user.twitter_username,
+      website: user.blog,
+    },
+    statistics: {
+      repository: user.public_repos,
+      pullRequest: 0,
+      codeReview: 0,
+    },
+    joinedAt: user.created_at,
+  };
+}
+
+export { resolveActivityFromGithubEvent, resolveDeveloperFromGithubUser };

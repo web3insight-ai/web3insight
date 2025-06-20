@@ -1,4 +1,4 @@
-import { type ActionFunctionArgs, json } from "@remix-run/node";
+import { type LoaderFunctionArgs, type ActionFunctionArgs, json } from "@remix-run/node";
 
 import type { DataValue } from "@/types";
 import { isString } from "@/utils";
@@ -9,9 +9,15 @@ import type { RequestMethod, AllowedMethods, RepositoryService, RepositoryServic
 const notAllowedMessage = "Method not allowed";
 const notAllowedStatus = 405;
 
+function resolveParams({ request }: LoaderFunctionArgs): DataValue {
+  const url = new URL(request.url);
+
+  return Object.fromEntries(url.searchParams.entries());
+}
+
 function createServerAction<
   ReturnType,
-  ActionContext extends ActionFunctionArgs = ActionFunctionArgs
+  ActionContext extends LoaderFunctionArgs | ActionFunctionArgs = LoaderFunctionArgs | ActionFunctionArgs
 >(
   allowedMethods: AllowedMethods,
   handler: (ctx: ActionContext) => ReturnType | Promise<ReturnType>,
@@ -50,11 +56,12 @@ function createPreflightAction(allowedMethods: AllowedMethods = ["POST", "OPTION
   return createServerAction("OPTIONS", generatePreflightResponse.bind(null, allowedMethods), normalize);
 }
 
-function createServiceAdapter(method: RequestMethod, service: RepositoryService): RepositoryServiceAdapter;
+function createServiceAdapter(method: RequestMethod, service: RepositoryService, paramsResolver?: (loaderFnArgs: LoaderFunctionArgs) => DataValue): RepositoryServiceAdapter;
 function createServiceAdapter(serviceMap: RepositoryServiceMap): RepositoryServiceAdapter;
 function createServiceAdapter(
   methodOrServices: RequestMethod | RepositoryServiceMap,
   service?: RepositoryService,
+  paramsResolver: (loaderFnArgs: LoaderFunctionArgs) => DataValue = resolveParams,
 ): RepositoryServiceAdapter {
   const resolvedMap = (isString(methodOrServices) ? {
     [methodOrServices as RequestMethod]: service!,
@@ -73,16 +80,14 @@ function createServiceAdapter(
   });
 
   const adapters: RepositoryServiceAdapter = {
-    loader: createServerAction(allMethods, async ({ request }) => {
-      const method = request.method as RequestMethod;
+    loader: createServerAction(allMethods, async (ctx: LoaderFunctionArgs) => {
+      const method = ctx.request.method as RequestMethod;
 
       if (method === "OPTIONS") {
         return generatePreflightResponse(allMethods);
       }
 
-      const url = new URL(request.url);
-      const params = Object.fromEntries(url.searchParams.entries());
-      const res = await resolvedMap[method]!(params as DataValue);
+      const res = await resolvedMap[method]!(paramsResolver(ctx));
     
       return json(res, { status: Number(res.code) });
     }, true),

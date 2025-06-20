@@ -6,6 +6,7 @@ type ChartCardProps = {
   style?: CSSProperties;
   title: string;
   option: EChartsOption;
+  chartContainerClassName?: string;
 }
 
 export type { ChartCardProps };
