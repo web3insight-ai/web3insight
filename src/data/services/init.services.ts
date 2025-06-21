@@ -185,6 +185,10 @@ export class InitDataService {
         .limit(100)
         .execute();
 
+      if (neeData.length === 0) {
+        break;
+      }
+
       for (const repo of neeData) {
         const client = await this.tokenPoolService.getClient(true);
         const [owner, name] = repo.upstream_repo_name.split('/');
@@ -203,8 +207,8 @@ export class InitDataService {
             .execute();
           console.log(`Updated ${repo.upstream_repo_name} with API data`);
         } catch (error) {
-          if (error.status == 404) {
-            const status = 404;
+          if (error.status == 404 || error.status < 500) {
+            const status = error.status as number;
             await this.db
               .updateTable('api.upstream_repos')
               .set({
@@ -219,7 +223,7 @@ export class InitDataService {
           console.error(`Error updating ${repo.upstream_repo_name}:`, error);
         }
       }
-      console.log('Sync completed');
     }
+    console.log('Sync completed');
   }
 }
