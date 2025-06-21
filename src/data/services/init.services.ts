@@ -218,6 +218,7 @@ export class InitDataService {
               .where('upstream_repo_name', '=', repo.upstream_repo_name)
               .execute();
           } else {
+            console.error(`Error updating ${repo.upstream_repo_name}:`, error);
             throw new Error('Unexpected error');
           }
           console.error(`Error updating ${repo.upstream_repo_name}:`, error);
