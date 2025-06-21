@@ -8,8 +8,8 @@ export class GithubService {
 
   constructor(private readonly tokenPool: TokenPoolService) {}
 
-  private createRequestHeaders() {
-    const token = this.tokenPool.getToken();
+  private async createRequestHeaders() {
+    const token = await this.tokenPool.getToken();
     return {
       token,
       headers: {
@@ -35,7 +35,7 @@ export class GithubService {
         req.query as Record<string, string>,
       ).toString();
 
-    const { token, headers } = this.createRequestHeaders();
+    const { token, headers } = await this.createRequestHeaders();
     const response = await fetch(url.toString(), {
       method: 'GET',
       headers,
