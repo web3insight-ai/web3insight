@@ -32,12 +32,11 @@ export class UsersService {
     for (let i = 0; i < usernames.length; i += 10) {
       const batch = usernames.slice(i, i + 10);
 
-      const octokit = this.tokenPoolService.getClient();
-
       const batchResults = await Promise.all(
         batch.map(async (username) => {
           try {
-            const response = await octokit.users.getByUsername({ username });
+            const clinet = await this.tokenPoolService.getClient();
+            const response = await clinet.users.getByUsername({ username });
             return { username, data: response.data };
           } catch (error) {
             console.error(`Failed to process user ${username}:`, error);
