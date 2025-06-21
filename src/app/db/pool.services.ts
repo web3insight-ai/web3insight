@@ -4,7 +4,7 @@ import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { Octokit } from '@octokit/rest';
 import { Kysely } from 'kysely';
 import { Command, Console } from 'nestjs-console';
-import { ResponseHeaders } from '@octokit/types';
+import { ResponseHeaders, RequestError } from '@octokit/types';
 
 class GitHubTokenInfo {
   token: string;
@@ -94,11 +94,17 @@ export class TokenPoolService implements OnModuleInit {
   async testGithubApi() {
     while (true) {
       const octokit = this.getClient();
-      const [owner, repo] = 'bitcoin/bitcoin'.split('/');
-      const _repoDetails = await octokit.rest.repos.get({
-        owner,
-        repo,
-      });
+      const [owner, repo] = 'bitcoin/bitxx'.split('/');
+      try {
+        const repoDetails = await octokit.rest.repos.get({
+          owner,
+          repo,
+        });
+        console.log(repoDetails);
+      } catch (error) {
+        const e = error as RequestError;
+        console.error(e.status);
+      }
     }
   }
 }
