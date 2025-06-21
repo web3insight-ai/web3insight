@@ -207,6 +207,12 @@ export class InitDataService {
             .execute();
           console.log(`Updated ${repo.upstream_repo_name} with API data`);
         } catch (error) {
+          const x = error as Error;
+          if (
+            x.message.includes('duplicate key value violates unique constraint')
+          ) {
+            error.status = 1000;
+          }
           if (error.status == 404 || error.status < 500) {
             const status = error.status as number;
             await this.db
