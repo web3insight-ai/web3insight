@@ -213,7 +213,11 @@ export class InitDataService {
           ) {
             error.status = 1000;
           }
-          if (error.status == 404 || error.status < 500) {
+          if (
+            error.status == 404 ||
+            error.status < 500 ||
+            error.status > 1000
+          ) {
             const status = error.status as number;
             await this.db
               .updateTable('api.upstream_repos')
