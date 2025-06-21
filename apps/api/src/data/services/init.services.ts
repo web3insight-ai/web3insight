@@ -186,7 +186,7 @@ export class InitDataService {
         .execute();
 
       for (const repo of neeData) {
-        const client = await this.tokenPoolService.getClient();
+        const client = await this.tokenPoolService.getClient(true);
         const [owner, name] = repo.upstream_repo_name.split('/');
         try {
           const repoData = await client.repos.get({
