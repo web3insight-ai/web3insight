@@ -39,8 +39,8 @@ export class TokenPoolService implements OnModuleInit {
     ).map((config) => new GitHubTokenInfo(config.body));
   }
 
-  public getClient(): Octokit {
-    const currentToken = this.getToken();
+  public async getClient(sleep: boolean = false): Promise<Octokit> {
+    const currentToken = await this.getToken(sleep);
     const client = new Octokit({
       auth: currentToken,
     });
@@ -50,19 +50,32 @@ export class TokenPoolService implements OnModuleInit {
     return client;
   }
 
-  getToken(): string {
-    const now = Math.floor(Date.now() / 1000);
+  async getToken(sleep = false): Promise<string> {
+    while (true) {
+      const now = Math.floor(Date.now() / 1000);
 
-    this.tokens.forEach((info) => {
-      if (now > info.resetTime) {
-        info.reset();
+      this.tokens.forEach((info) => {
+        if (now > info.resetTime) {
+          info.reset();
+        }
+      });
+      const sorted = this.tokens
+        .filter((info) => info.remaining > 0)
+        .sort((a, b) => b.remaining - a.remaining);
+
+      if (sorted.length > 0) {
+        if (sleep && sorted[0].remaining < 100) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          continue;
+        }
+        return sorted[0].token;
       }
-    });
-    const sorted = this.tokens
-      .filter((info) => info.remaining > 0)
-      .sort((a, b) => b.remaining - a.remaining);
 
-    return sorted[0]?.token || this.tokens[0]?.token;
+      if (!sleep) {
+        return this.tokens[0]?.token;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
   }
 
   updateToken(token: string, headers: ResponseHeaders) {
@@ -93,7 +106,7 @@ export class TokenPoolService implements OnModuleInit {
   })
   async testGithubApi() {
     while (true) {
-      const octokit = this.getClient();
+      const octokit = await this.getClient();
       const [owner, repo] = 'bitcoin/bitxx'.split('/');
       try {
         const repoDetails = await octokit.rest.repos.get({

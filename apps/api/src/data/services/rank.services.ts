@@ -230,12 +230,11 @@ ORDER BY ecosystem;`;
       const data: QueryTopStarRepo[] = await Promise.all(
         row.top_repositories.map(async (row) => {
           const [owner, repo] = row.repo_name.split('/');
-          const repoDetails = await this.tokenPoolService
-            .getClient()
-            .rest.repos.get({
-              owner,
-              repo,
-            });
+          const client = await this.tokenPoolService.getClient();
+          const repoDetails = await client.rest.repos.get({
+            owner,
+            repo,
+          });
           return {
             repo_id: Number(row.repo_id),
             repo_name: row.repo_name,

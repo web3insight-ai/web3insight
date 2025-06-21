@@ -73,107 +73,107 @@ export class InitDataService {
     description: 'Update eco repos',
   })
   async testLoadEcoData() {
-    // this.repoMap.clear();
+    this.repoMap.clear();
 
-    // await this.loadData(this.dataPath);
+    await this.loadData(this.dataPath);
 
-    // console.log('Load eco data len:', this.repoMap.size);
+    console.log('Load eco data len:', this.repoMap.size);
 
-    // const localRepos = Array.from(this.repoMap.values()).map((repo) => ({
-    //   ...repo,
-    //   upstream_repo_name: convertGithubUrlToRepoName(
-    //     repo.upstream_repo_name || '',
-    //   ),
-    // }));
-    // const localRepoNames = new Set(
-    //   localRepos.map((repo) => repo.upstream_repo_name),
-    // );
+    const localRepos = Array.from(this.repoMap.values()).map((repo) => ({
+      ...repo,
+      upstream_repo_name: convertGithubUrlToRepoName(
+        repo.upstream_repo_name || '',
+      ),
+    }));
+    const localRepoNames = new Set(
+      localRepos.map((repo) => repo.upstream_repo_name),
+    );
 
-    // const existingRepos = await this.db
-    //   .selectFrom('api.upstream_repos')
-    //   .select(['upstream_repo_name', 'upstream_marks'])
-    //   .execute();
+    const existingRepos = await this.db
+      .selectFrom('api.upstream_repos')
+      .select(['upstream_repo_name', 'upstream_marks'])
+      .execute();
 
-    // const existingRepoMap = new Map(
-    //   existingRepos.map((repo) => [
-    //     repo.upstream_repo_name,
-    //     repo.upstream_marks,
-    //   ]),
-    // );
+    const existingRepoMap = new Map(
+      existingRepos.map((repo) => [
+        repo.upstream_repo_name,
+        repo.upstream_marks,
+      ]),
+    );
 
-    // const reposToUpsert = localRepos.filter(
-    //   (repo) =>
-    //     !existingRepoMap.has(repo.upstream_repo_name) ||
-    //     !isDeepStrictEqual(
-    //       repo.upstream_marks,
-    //       existingRepoMap.get(repo.upstream_repo_name),
-    //     ),
-    // );
+    const reposToUpsert = localRepos.filter(
+      (repo) =>
+        !existingRepoMap.has(repo.upstream_repo_name) ||
+        !isDeepStrictEqual(
+          repo.upstream_marks,
+          existingRepoMap.get(repo.upstream_repo_name),
+        ),
+    );
 
-    // console.log(`Found ${reposToUpsert.length} repos to insert or update`);
+    console.log(`Found ${reposToUpsert.length} repos to insert or update`);
 
-    // if (reposToUpsert.length > 0) {
-    //   const shouldInsert = await askForConfirmation(
-    //     'Do you want to insert/update these repos?',
-    //   );
+    if (reposToUpsert.length > 0) {
+      const shouldInsert = await askForConfirmation(
+        'Do you want to insert/update these repos?',
+      );
 
-    //   if (shouldInsert) {
-    //     for (const batch of chunkArray(reposToUpsert, 5000)) {
-    //       await this.db
-    //         .insertInto('api.upstream_repos')
-    //         .values(batch)
-    //         .onConflict((oc) =>
-    //           oc.column('upstream_repo_name').doUpdateSet((eb) => ({
-    //             updated_at: new Date().toISOString(),
-    //             upstream_marks: eb.ref('excluded.upstream_marks'),
-    //           })),
-    //         )
-    //         .execute();
-    //       console.log('Inserted/updated batch of eco data:', batch.length);
-    //     }
-    //   } else {
-    //     console.log('Insert/update operation cancelled');
-    //   }
-    // } else {
-    //   console.log('No repos need to be inserted or updated');
-    // }
+      if (shouldInsert) {
+        for (const batch of chunkArray(reposToUpsert, 5000)) {
+          await this.db
+            .insertInto('api.upstream_repos')
+            .values(batch)
+            .onConflict((oc) =>
+              oc.column('upstream_repo_name').doUpdateSet((eb) => ({
+                updated_at: new Date().toISOString(),
+                upstream_marks: eb.ref('excluded.upstream_marks'),
+              })),
+            )
+            .execute();
+          console.log('Inserted/updated batch of eco data:', batch.length);
+        }
+      } else {
+        console.log('Insert/update operation cancelled');
+      }
+    } else {
+      console.log('No repos need to be inserted or updated');
+    }
 
-    // const updatedExistingRepos = await this.db
-    //   .selectFrom('api.upstream_repos')
-    //   .select(['upstream_repo_name'])
-    //   .execute();
+    const updatedExistingRepos = await this.db
+      .selectFrom('api.upstream_repos')
+      .select(['upstream_repo_name'])
+      .execute();
 
-    // const updatedExistingRepoSet = new Set(
-    //   updatedExistingRepos.map((repo) => repo.upstream_repo_name),
-    // );
-    // const reposToDelete: string[] = [];
+    const updatedExistingRepoSet = new Set(
+      updatedExistingRepos.map((repo) => repo.upstream_repo_name),
+    );
+    const reposToDelete: string[] = [];
 
-    // updatedExistingRepoSet.forEach((repoName) => {
-    //   if (!localRepoNames.has(repoName)) {
-    //     reposToDelete.push(repoName);
-    //   }
-    // });
+    updatedExistingRepoSet.forEach((repoName) => {
+      if (!localRepoNames.has(repoName)) {
+        reposToDelete.push(repoName);
+      }
+    });
 
-    // if (reposToDelete.length > 0) {
-    //   console.log(`Found ${reposToDelete.length} repos to delete`);
-    //   const shouldDelete = await askForConfirmation(
-    //     'Do you want to delete these repos?',
-    //   );
+    if (reposToDelete.length > 0) {
+      console.log(`Found ${reposToDelete.length} repos to delete`);
+      const shouldDelete = await askForConfirmation(
+        'Do you want to delete these repos?',
+      );
 
-    //   if (shouldDelete) {
-    //     for (const batch of chunkArray(reposToDelete, 1000)) {
-    //       await this.db
-    //         .deleteFrom('api.upstream_repos')
-    //         .where('upstream_repo_name', 'in', batch)
-    //         .execute();
-    //       console.log(`Deleted batch of ${batch.length} repos`);
-    //     }
-    //   } else {
-    //     console.log('Delete operation cancelled');
-    //   }
-    // } else {
-    //   console.log('No repos to delete');
-    // }
+      if (shouldDelete) {
+        for (const batch of chunkArray(reposToDelete, 1000)) {
+          await this.db
+            .deleteFrom('api.upstream_repos')
+            .where('upstream_repo_name', 'in', batch)
+            .execute();
+          console.log(`Deleted batch of ${batch.length} repos`);
+        }
+      } else {
+        console.log('Delete operation cancelled');
+      }
+    } else {
+      console.log('No repos to delete');
+    }
 
     while (true) {
       const neeData = await this.db
@@ -186,7 +186,7 @@ export class InitDataService {
         .execute();
 
       for (const repo of neeData) {
-        const client = this.tokenPoolService.getClient();
+        const client = await this.tokenPoolService.getClient();
         const [owner, name] = repo.upstream_repo_name.split('/');
         try {
           const repoData = await client.repos.get({
@@ -204,10 +204,12 @@ export class InitDataService {
           console.log(`Updated ${repo.upstream_repo_name} with API data`);
         } catch (error) {
           if (error.status == 404) {
+            const status = 404;
             await this.db
               .updateTable('api.upstream_repos')
               .set({
                 abnormal: true,
+                api: { status: status },
               })
               .where('upstream_repo_name', '=', repo.upstream_repo_name)
               .execute();
