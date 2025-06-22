@@ -112,58 +112,71 @@ export class UsersService {
 
     const sqlRawQuery = `
 WITH user_ids AS (SELECT UNNEST($1::bigint[]) AS actor_id),
-
      repo_base_scores AS (SELECT e.actor_id,
                                  e.repo_id,
                                  r.repo_name,
                                  MAX(CASE WHEN e.event_type = 'PushEvent' THEN 1 ELSE 0 END)          AS has_commit,
-                                 COUNT(CASE WHEN e.event_type = 'PullRequestEvent' THEN 1 ELSE 0 END) AS pr_count
+                                 COUNT(CASE WHEN e.event_type = 'PullRequestEvent' THEN 1 ELSE 0 END) AS pr_count,
+                                 MIN(e.created_at)                                                    AS first_activity_at,
+                                 MAX(e.created_at)                                                    AS last_activity_at
                           FROM web3.event e
                                    JOIN web3.repos r ON e.repo_id = r.repo_id
                                    JOIN user_ids u ON e.actor_id = u.actor_id
                           WHERE e.event_type IN ('PushEvent', 'PullRequestEvent')
                           GROUP BY e.actor_id, e.repo_id, r.repo_name),
-
      repo_scores AS (SELECT actor_id,
                             repo_id,
                             repo_name,
-                            has_commit * 1 + pr_count * 2 AS total_score
+                            has_commit * 1 + pr_count * 2 AS total_score,
+                            first_activity_at,
+                            last_activity_at
                      FROM repo_base_scores),
-
      repo_ecosystems AS (SELECT DISTINCT ON (r.repo_id, ecosystem_key) r.repo_id,
                                                                        jsonb_object_keys(r.upstream_marks) AS ecosystem_key
                          FROM web3.repos r
                                   JOIN repo_scores rs ON r.repo_id = rs.repo_id
                          WHERE r.upstream_marks != '{}'::jsonb),
-
      repo_ecosystem_scores AS (SELECT rs.actor_id,
                                       rs.repo_name,
                                       re.ecosystem_key,
-                                      rs.total_score
+                                      rs.total_score,
+                                      rs.first_activity_at,
+                                      rs.last_activity_at
                                FROM repo_scores rs
                                         JOIN repo_ecosystems re ON rs.repo_id = re.repo_id
                                WHERE rs.total_score > 0),
-
-     unique_ecosystem_repos AS (SELECT DISTINCT actor_id, ecosystem_key, repo_name, total_score
+     unique_ecosystem_repos AS (SELECT DISTINCT actor_id,
+                                                ecosystem_key,
+                                                repo_name,
+                                                total_score,
+                                                first_activity_at,
+                                                last_activity_at
                                 FROM repo_ecosystem_scores),
-
      ecosystem_repos AS (SELECT actor_id,
                                 ecosystem_key,
                                 jsonb_agg(
-                                        jsonb_build_object(repo_name, total_score)
+                                        jsonb_build_object(
+                                                'repo_name', repo_name,
+                                                'score', total_score,
+                                                'first_activity_at', first_activity_at,
+                                                'last_activity_at', last_activity_at
+                                        )
                                         ORDER BY total_score DESC
-                                )                AS repo_scores,
-                                SUM(total_score) AS ecosystem_total_score
+                                )                      AS repo_details,
+                                SUM(total_score)       AS ecosystem_total_score,
+                                MIN(first_activity_at) AS ecosystem_first_activity_at,
+                                MAX(last_activity_at)  AS ecosystem_last_activity_at
                          FROM unique_ecosystem_repos
                          GROUP BY actor_id, ecosystem_key)
-
 SELECT u.actor_id,
        COALESCE(
                (SELECT jsonb_agg(
                                jsonb_build_object(
                                        'ecosystem', ecosystem_key,
-                                       'repos', repo_scores,
-                                       'total_score', ecosystem_total_score
+                                       'repos', repo_details,
+                                       'total_score', ecosystem_total_score,
+                                       'first_activity_at', ecosystem_first_activity_at,
+                                       'last_activity_at', ecosystem_last_activity_at
                                )
                                ORDER BY ecosystem_total_score DESC
                        )
