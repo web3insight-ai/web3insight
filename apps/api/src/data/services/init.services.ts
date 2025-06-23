@@ -202,6 +202,7 @@ export class InitDataService {
             .set({
               id: repoData.data.id,
               api: JSON.stringify(repoData.data),
+              api_updated_at: new Date().toISOString(),
             })
             .where('upstream_repo_name', '=', repo.upstream_repo_name)
             .execute();
@@ -230,6 +231,7 @@ export class InitDataService {
               .set({
                 abnormal: true,
                 api: { status: status },
+                api_updated_at: new Date().toISOString(),
               })
               .where('upstream_repo_name', '=', repo.upstream_repo_name)
               .execute();
