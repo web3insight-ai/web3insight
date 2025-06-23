@@ -219,7 +219,7 @@ FROM (
     command: 'sync:eco:total',
     description: 'Test eco data',
   })
-  async test() {
+  async test(): Promise<void> {
     const ecoTypes = Object.values(EcoType);
     await this.reposTotal(ecoTypes);
     await this.actorsTotalNew(ecoTypes);

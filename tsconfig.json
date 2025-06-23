@@ -12,10 +12,8 @@
     "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
-    "strictNullChecks": false,
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": true,
-    "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
       "@/*": [
