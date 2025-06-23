@@ -47,8 +47,10 @@ export class InitDataService {
         const item = JSON.parse(line) as RawRepoData;
         const { repo_url, eco_name, branch, tags } = item;
 
-        const repo = this.repoMap.get(repo_url) || {
-          upstream_repo_name: repo_url,
+        const url = repo_url.toLowerCase();
+
+        const repo = this.repoMap.get(url) || {
+          upstream_repo_name: url,
           upstream_marks: {},
         };
 
@@ -63,7 +65,7 @@ export class InitDataService {
             tags: [...new Set([...existingTags, ...tags])],
           };
         }
-        this.repoMap.set(repo_url, repo);
+        this.repoMap.set(url, repo);
       }
     }
   }
@@ -124,6 +126,7 @@ export class InitDataService {
             .values(batch)
             .onConflict((oc) =>
               oc.column('upstream_repo_name').doUpdateSet((eb) => ({
+                abnormal: false,
                 updated_at: new Date().toISOString(),
                 upstream_marks: eb.ref('excluded.upstream_marks'),
               })),
@@ -259,7 +262,7 @@ export class InitDataService {
 
     const existingDataRepos = await this.db
       .selectFrom('data.repos')
-      .select(['repo_id', 'upstream_repo_name', 'upstream_marks'])
+      .select(['repo_id', 'upstream_marks'])
       .execute();
 
     const existingRepoMap = new Map(
@@ -271,13 +274,11 @@ export class InitDataService {
         const existing = existingRepoMap.get(repo.repo_id);
         return (
           !existing ||
-          repo.upstream_repo_name !== existing.upstream_repo_name ||
           !isDeepStrictEqual(repo.upstream_marks, existing.upstream_marks)
         );
       })
       .map((repo) => ({
         repo_id: repo.repo_id,
-        upstream_repo_name: repo.upstream_repo_name,
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error
         repo_name: repo.api.owner.name + '/' + repo.api.name,
@@ -288,7 +289,6 @@ export class InitDataService {
 
     console.log(`Found ${reposToUpsert.length} repos to insert/update`);
 
-    // Batch upsert
     if (reposToUpsert.length > 0) {
       const shouldUpsert = await askForConfirmation(
         'Do you want to insert/update these repos?',
@@ -302,7 +302,6 @@ export class InitDataService {
             .onConflict((oc) =>
               oc.column('repo_id').doUpdateSet((eb) => ({
                 upstream_marks: eb.ref('excluded.upstream_marks'),
-                upstream_repo_name: eb.ref('excluded.upstream_repo_name'),
               })),
             )
             .execute();
