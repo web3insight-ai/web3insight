@@ -44,6 +44,7 @@ export interface ApiUpstreamRepos {
   created_at: Generated<Timestamp>;
   id: Int8 | null;
   repo_name: string | null;
+  api_updated_at: Generated<Timestamp>;
   updated_at: Generated<Timestamp>;
   upstream_marks: Generated<Json>;
   upstream_repo_name: string;
