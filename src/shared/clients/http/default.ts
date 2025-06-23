@@ -1,5 +1,1 @@
-import HttpClient from "./HttpClient";
-
-const httpClient = new HttpClient({ baseUrl: "/" });
-
-export default httpClient;
+export { default } from "@handie/http/src/default";
