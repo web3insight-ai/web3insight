@@ -41,10 +41,9 @@ export interface Web3Actors {
 export interface ApiUpstreamRepos {
   abnormal: Generated<boolean>;
   api: Generated<Json | null>;
+  api_updated_at: Generated<Timestamp | null>;
   created_at: Generated<Timestamp>;
-  id: Int8 | null;
-  repo_name: string | null;
-  api_updated_at: Generated<Timestamp>;
+  repo_id: Int8 | null;
   updated_at: Generated<Timestamp>;
   upstream_marks: Generated<Json>;
   upstream_repo_name: string;
@@ -106,6 +105,18 @@ export interface ApiAnalysisUsers {
   updated_at: Generated<Timestamp>;
 }
 
+export interface DataRepos {
+  api_updated_at: Generated<Timestamp>;
+  created_at: Generated<Timestamp>;
+  custom_marks: Generated<Json>;
+  event_updated_at: Generated<Timestamp>;
+  indexed: Generated<boolean>;
+  repo_id: Int8;
+  repo_name: string;
+  upstream_marks: Generated<Json>;
+  upstream_repo_name: string;
+}
+
 export interface DB {
   'web3.actors': Web3Actors;
   'web3.event': Web3Event;
@@ -114,4 +125,5 @@ export interface DB {
   'api.configs': ApiConfigs;
   'api.analysis_users': ApiAnalysisUsers;
   'api.upstream_repos': ApiUpstreamRepos;
+  'data.repos': DataRepos;
 }

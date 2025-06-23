@@ -69,7 +69,7 @@ export class InitDataService {
   }
 
   @Command({
-    command: 'sync:db:eco::repos',
+    command: 'sync:db:eco::upstream_repos',
     description: 'Update eco repos',
   })
   async testLoadEcoData() {
@@ -200,7 +200,7 @@ export class InitDataService {
           await this.db
             .updateTable('api.upstream_repos')
             .set({
-              id: repoData.data.id,
+              repo_id: repoData.data.id,
               api: JSON.stringify(repoData.data),
               api_updated_at: new Date().toISOString(),
             })
@@ -244,5 +244,99 @@ export class InitDataService {
       }
     }
     console.log('Sync completed');
+  }
+
+  @Command({
+    command: 'sync:db:eco::repos',
+    description: 'Sync api.upstream_repos to data.repos',
+  })
+  async syncUpstreamToDataRepos() {
+    const upstreamRepos = await this.db
+      .selectFrom('api.upstream_repos')
+      .selectAll()
+      .where('abnormal', '=', false)
+      .execute();
+
+    const existingDataRepos = await this.db
+      .selectFrom('data.repos')
+      .select(['repo_id', 'upstream_repo_name', 'upstream_marks'])
+      .execute();
+
+    const existingRepoMap = new Map(
+      existingDataRepos.map((repo) => [repo.repo_id, repo]),
+    );
+
+    const reposToUpsert = upstreamRepos
+      .filter((repo) => {
+        const existing = existingRepoMap.get(repo.repo_id);
+        return (
+          !existing ||
+          repo.upstream_repo_name !== existing.upstream_repo_name ||
+          !isDeepStrictEqual(repo.upstream_marks, existing.upstream_marks)
+        );
+      })
+      .map((repo) => ({
+        repo_id: repo.repo_id,
+        upstream_repo_name: repo.upstream_repo_name,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        repo_name: repo.api.owner.name + '/' + repo.api.name,
+        upstream_marks: repo.upstream_marks,
+        api_updated_at: repo.api_updated_at,
+        event_updated_at: new Date('2015-01-01').toISOString(),
+      }));
+
+    console.log(`Found ${reposToUpsert.length} repos to insert/update`);
+
+    // Batch upsert
+    if (reposToUpsert.length > 0) {
+      const shouldUpsert = await askForConfirmation(
+        'Do you want to insert/update these repos?',
+      );
+
+      if (shouldUpsert) {
+        for (const batch of chunkArray(reposToUpsert, 5000)) {
+          await this.db
+            .insertInto('data.repos')
+            .values(batch)
+            .onConflict((oc) =>
+              oc.column('repo_id').doUpdateSet((eb) => ({
+                upstream_marks: eb.ref('excluded.upstream_marks'),
+                upstream_repo_name: eb.ref('excluded.upstream_repo_name'),
+              })),
+            )
+            .execute();
+          console.log('Upserted batch:', batch.length);
+        }
+      } else {
+        console.log('Insert/update operation cancelled');
+      }
+    }
+
+    const upstreamRepoNames = new Set(upstreamRepos.map((r) => r.repo_id));
+    const reposToDelete = existingDataRepos
+      .filter((repo) => !upstreamRepoNames.has(repo.repo_id))
+      .map((repo) => repo.repo_id);
+
+    console.log(`Found ${reposToDelete.length} repos to delete`);
+
+    if (reposToDelete.length > 0) {
+      const shouldDelete = await askForConfirmation(
+        'Do you want to delete these repos?',
+      );
+
+      if (shouldDelete) {
+        for (const batch of chunkArray(reposToDelete, 1000)) {
+          await this.db
+            .deleteFrom('data.repos')
+            .where('repo_id', 'in', batch)
+            .execute();
+          console.log('Deleted batch:', batch.length);
+        }
+      } else {
+        console.log('Delete operation cancelled');
+      }
+    }
+    console.log('Upstream to data sync completed');
   }
 }
