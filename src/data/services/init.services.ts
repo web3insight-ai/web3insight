@@ -207,7 +207,7 @@ export class InitDataService {
             .execute();
           console.log(`Updated ${repo.upstream_repo_name} with API data`);
         } catch (error) {
-          if (error.status && error.status == 503) {
+          if (error.status && (error.status == 503 || error.status == 500)) {
             await Promise.resolve(
               new Promise((resolve) => setTimeout(resolve, 5000)),
             );
