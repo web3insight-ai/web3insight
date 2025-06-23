@@ -48,7 +48,7 @@ export class CacheDataService {
     command: 'test:caches:update',
     description: 'Test eco repos',
   })
-  async test() {
+  async test(): Promise<void> {
     await this.updateCacheData(
       CacheKey.RepoTotal,
       { count: 0 },
