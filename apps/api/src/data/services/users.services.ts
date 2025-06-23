@@ -200,9 +200,10 @@ FROM user_ids u;`;
           data: JSON.stringify({ users: results.rows }),
         })
         .returningAll();
-      await this.db.executeQuery(update);
-      return { users: update };
+      const exec = await this.db.executeQuery(update);
+      return { users: exec.rows[0] };
     }
+    return { users: [] };
   }
 
   private extractUsername(url: string): string | null {
