@@ -3,7 +3,7 @@ CREATE SCHEMA IF NOT EXISTS "web3";
 
 CREATE EXTENSION IF NOT EXISTS pg_mooncake;
 
-CREATE TABLE "web3"."events"
+CREATE TABLE "data"."events"
 (
     "id"          BIGINT                   NOT NULL,
     "actor_id"    BIGINT                   NOT NULL,

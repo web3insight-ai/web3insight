@@ -1,6 +1,5 @@
 use anyhow::Result;
 use chrono::{DateTime, Utc};
-use duckdb::{Connection, params};
 use rust_decimal::prelude::ToPrimitive;
 use serde::{Deserialize, Serialize};
 use sqlx::Pool;
@@ -25,27 +24,6 @@ pub struct EventTableStruct {
     pub payload: String,
     pub body: Option<String>,
     pub created_at: DateTime<Utc>,
-}
-
-pub async fn init_duckdb() -> Result<Connection> {
-    let db_path = env::var("DUCKDB_PATH").unwrap_or_else(|_| "events.db".to_string());
-    let conn = Connection::open(&db_path)?;
-    conn.execute_batch(
-        "CREATE TABLE IF NOT EXISTS events (
-            id UBIGINT NOT NULL,
-            actor_id UBIGINT NOT NULL,
-            actor_login TEXT NOT NULL,
-            repo_id UBIGINT NOT NULL,
-            repo_name TEXT NOT NULL,
-            org_id UBIGINT,
-            org_login TEXT,
-            event_type TEXT NOT NULL,
-            payload JSON NOT NULL,
-            body TEXT,
-            created_at TIMESTAMP WITH TIME ZONE NOT NULL
-        )",
-    )?;
-    Ok(conn)
 }
 
 pub async fn init_pg() -> Result<()> {
@@ -73,34 +51,11 @@ pub async fn init_pg() -> Result<()> {
 }
 
 impl EventTableStruct {
-    #[tracing::instrument(skip(events))]
-    pub async fn batch_insert_events_duckdb(
-        conn: &mut Connection,
-        events: &Vec<EventTableStruct>,
-        _path: &String,
-    ) -> Result<()> {
-        if events.is_empty() {
-            return Ok(());
-        }
-        let mut app = conn.appender("events")?;
-
-        for event in events {
-            app.append_row(params![
-                event.id,
-                event.actor_id,
-                &event.actor_login,
-                event.repo_id,
-                &event.repo_name,
-                event.org_id,
-                event.org_login.as_ref(),
-                &event.event_type,
-                &event.payload,
-                event.body.as_ref(),
-                &event.created_at.to_rfc3339(),
-            ])?;
-        }
-
-        Ok(())
+    fn collect<T, F>(chunk: &[EventTableStruct], f: F) -> Vec<T>
+    where
+        F: Fn(&EventTableStruct) -> T,
+    {
+        chunk.iter().map(f).collect()
     }
 
     #[tracing::instrument(skip(events))]
@@ -108,47 +63,9 @@ impl EventTableStruct {
         events: Vec<EventTableStruct>,
         _path: &String,
     ) -> Result<()> {
-        if events.is_empty() {
-            return Ok(());
-        }
+        let chunk_size = events.len().min(100000);
 
-        let chunk_size = if events.len() > 20000 {
-            10000
-        } else {
-            events.len()
-        };
-
-        for chunk in events.chunks(chunk_size) {
-            if chunk.is_empty() {
-                continue;
-            }
-
-            let mut ids = Vec::with_capacity(chunk.len());
-            let mut actor_ids = Vec::with_capacity(chunk.len());
-            let mut actor_logins = Vec::with_capacity(chunk.len());
-            let mut repo_ids = Vec::with_capacity(chunk.len());
-            let mut repo_names = Vec::with_capacity(chunk.len());
-            let mut org_ids = Vec::with_capacity(chunk.len());
-            let mut org_logins = Vec::with_capacity(chunk.len());
-            let mut event_types = Vec::with_capacity(chunk.len());
-            let mut payloads = Vec::with_capacity(chunk.len());
-            let mut bodies = Vec::with_capacity(chunk.len());
-            let mut created_ats = Vec::with_capacity(chunk.len());
-
-            for data in chunk {
-                ids.push(data.id.to_i64());
-                actor_ids.push(data.actor_id.to_i64());
-                actor_logins.push(data.actor_login.clone());
-                repo_ids.push(data.repo_id.to_i64());
-                repo_names.push(data.repo_name.clone());
-                org_ids.push(data.org_id.map(|id| id as i64));
-                org_logins.push(data.org_login.clone());
-                event_types.push(data.event_type.clone());
-                payloads.push(data.payload.clone());
-                bodies.push(data.body.clone());
-                created_ats.push(data.created_at);
-            }
-
+        for chunk in events.chunks(chunk_size).filter(|c| !c.is_empty()) {
             let sql = "INSERT INTO web3.event (
                 id, actor_id, actor_login, repo_id, repo_name, org_id, org_login,
                 event_type, payload, body, created_at
@@ -164,17 +81,19 @@ impl EventTableStruct {
             ON CONFLICT (id, created_at) DO NOTHING";
 
             let _row = sqlx::query(sql)
-                .bind(&ids)
-                .bind(&actor_ids)
-                .bind(&actor_logins)
-                .bind(&repo_ids)
-                .bind(&repo_names)
-                .bind(&org_ids)
-                .bind(&org_logins)
-                .bind(&event_types)
-                .bind(&payloads)
-                .bind(&bodies)
-                .bind(&created_ats)
+                .bind(&Self::collect(chunk, |data| data.id.to_i64()))
+                .bind(&Self::collect(chunk, |data| data.actor_id.to_i64()))
+                .bind(&Self::collect(chunk, |data| data.actor_login.clone()))
+                .bind(&Self::collect(chunk, |data| data.repo_id.to_i64()))
+                .bind(&Self::collect(chunk, |data| data.repo_name.clone()))
+                .bind(&Self::collect(chunk, |data| {
+                    data.org_id.map(|id| id.to_i64())
+                }))
+                .bind(&Self::collect(chunk, |data| data.org_login.clone()))
+                .bind(&Self::collect(chunk, |data| data.event_type.clone()))
+                .bind(&Self::collect(chunk, |data| data.payload.clone()))
+                .bind(&Self::collect(chunk, |data| data.body.clone()))
+                .bind(&Self::collect(chunk, |data| data.created_at))
                 .execute(
                     DB_POOL
                         .get()

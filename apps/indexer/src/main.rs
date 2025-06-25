@@ -15,7 +15,7 @@ use tracing_subscriber::{
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    dotenv()?;
+    let _ = dotenv();
 
     let start = Instant::now();
 

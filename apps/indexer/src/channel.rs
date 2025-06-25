@@ -1,4 +1,4 @@
-use crate::db::{EventTableStruct, init_duckdb, init_pg};
+use crate::db::{EventTableStruct, init_pg};
 use anyhow::Result;
 use chrono::{DateTime, Duration, Utc};
 use flate2::read::GzDecoder;
@@ -31,46 +31,23 @@ pub async fn start_channel() -> Result<()> {
         .and_then(|v| v.parse().ok())
         .unwrap_or(4);
 
-    let duckdb = init_duckdb().await?;
-
-    duckdb.execute("CALL start_ui();", [])?;
-
     init_pg().await?;
 
     let mut consumers = JoinSet::new();
 
     for _ in 0..max_concurrent {
-        let mut db = duckdb.try_clone().unwrap();
         let rx = rx.clone();
 
         consumers.spawn(async move {
             loop {
                 match rx.recv().await {
                     Ok(Some((path, events))) => {
-                        let db_select = env::var("DB_SELECT")
-                            .unwrap_or("duckdb".to_string())
-                            .to_lowercase();
-
-                        if db_select == "both" || db_select == "duckdb" {
-                            EventTableStruct::batch_insert_events_duckdb(&mut db, &events, &path)
-                                .await
-                                .map_err(|_| {
-                                    tracing::error!("Error inserting into DuckDB, Path: {:?}", path)
-                                })
-                                .ok();
-                        }
-
-                        if db_select == "both" || db_select == "pg" {
-                            EventTableStruct::batch_insert_events_pg(events, &path)
-                                .await
-                                .map_err(|_| {
-                                    tracing::error!(
-                                        "Error inserting into PostgreSQL, Path: {:?}",
-                                        path
-                                    )
-                                })
-                                .ok();
-                        }
+                        EventTableStruct::batch_insert_events_pg(events, &path)
+                            .await
+                            .map_err(|_| {
+                                tracing::error!("Error inserting into PostgreSQL, Path: {:?}", path)
+                            })
+                            .ok();
                     }
                     Ok(None) => {
                         tracing::info!("DB Channel closed, exiting");
@@ -183,6 +160,10 @@ async fn load_gh_event(file_path: PathBuf) -> Vec<EventTableStruct> {
     let batch: Vec<EventTableStruct> = reader
         .lines()
         .filter_map(Result::ok)
+        .map(|line| {
+            let new_line = line.chars().filter(|&c| c != '\0').collect::<String>();
+            new_line.replace("\u{0000}", " ").replace("u0000", "uD83D")
+        })
         .filter_map(|line| match serde_json::from_str::<Event>(&line) {
             Ok(event) => Some(event),
             Err(e) => {
@@ -257,22 +238,6 @@ fn format_event_module(event: Event) -> Option<EventTableStruct> {
             _ => None,
         });
 
-    let body = if !get_env_bool("FILTER_OUT_BODY") {
-        body_raw.map(|b| {
-            b.chars()
-                .filter(|&c| !c.is_control() || c.is_whitespace())
-                .collect()
-        })
-    } else {
-        None
-    };
-
-    let payload = if !get_env_bool("FILTER_OUT_PAYLOAD") {
-        serde_json::to_string(&event.payload).unwrap_or_default()
-    } else {
-        "{}".to_string()
-    };
-
     Some(EventTableStruct {
         id: Decimal::from_str(&event.id)
             .unwrap_or_default()
@@ -285,8 +250,12 @@ fn format_event_module(event: Event) -> Option<EventTableStruct> {
         org_id: event.org.as_ref().map(|org| *org.id),
         org_login: event.org.as_ref().map(|org| org.login.clone()),
         event_type: event.r#type.to_string(),
-        body,
-        payload,
+        body: (!get_env_bool("FILTER_OUT_BODY"))
+            .then(|| body_raw.cloned())
+            .flatten(),
+        payload: (!get_env_bool("FILTER_OUT_PAYLOAD"))
+            .then(|| serde_json::to_string(&event.payload).unwrap_or_default())
+            .unwrap_or_else(|| "{}".to_string()),
         created_at: event.created_at,
     })
 }
