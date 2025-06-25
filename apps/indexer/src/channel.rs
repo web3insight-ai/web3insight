@@ -140,6 +140,11 @@ async fn try_open_file(file_path: &PathBuf) -> Option<File> {
         .unwrap_or(5);
 
     for i in 0..max_retries {
+        if (file_check_gzip(file_path).await).is_err() {
+            tracing::info!("Check file gzip error: {}", file_path.display());
+            continue;
+        };
+
         if let Ok(file) = File::open(file_path).await {
             return Some(file);
         }
@@ -154,11 +159,6 @@ async fn try_open_file(file_path: &PathBuf) -> Option<File> {
         if download_gh_archive(file_path).await.is_err() {
             continue;
         }
-
-        if (file_check_gzip(file_path).await).is_err() {
-            tracing::info!("Check file gzip error: {}", file_path.display());
-            continue;
-        };
     }
 
     tracing::error!(
@@ -169,7 +169,6 @@ async fn try_open_file(file_path: &PathBuf) -> Option<File> {
     None
 }
 
-#[tracing::instrument]
 async fn load_gh_event(file_path: PathBuf) -> Vec<EventTableStruct> {
     let file = match try_open_file(&file_path).await {
         Some(file) => file.into_std().await,
@@ -194,7 +193,7 @@ async fn load_gh_event(file_path: PathBuf) -> Vec<EventTableStruct> {
                 None
             }
         })
-        .filter(|event| full_mode || ECO_REPO.contains(&event.repo.name))
+        .filter(|event| full_mode || ECO_REPO.contains(&event.repo.id.to_string()))
         .filter_map(format_event_module)
         .collect();
     tracing::info!("Loaded {} {} events", file_path.display(), batch.len());
@@ -223,6 +222,7 @@ async fn file_check_gzip(file_path: &PathBuf) -> Result<()> {
     let verified_file_path = PathBuf::from(format!("{}.verified", file_path.display()));
 
     if fs::metadata(&verified_file_path).await.is_ok() {
+        tracing::info!("Already validated gzip file: {}", file_path.display());
         return Ok(());
     }
 

@@ -87,6 +87,10 @@ impl EventTableStruct {
         events: Vec<EventTableStruct>,
         _path: &String,
     ) -> Result<()> {
+        if events.len() == 0 {
+            return Ok(());
+        }
+
         let chunk_size = events.len().min(100000);
 
         for chunk in events.chunks(chunk_size).filter(|c| !c.is_empty()) {
@@ -127,6 +131,8 @@ impl ReposTableStruct {
     pub async fn init_repo_ids() -> Result<()> {
         let sql = "SELECT repo_id, indexed FROM data.repos;";
         let rows: Vec<ReposTableStruct> = sqlx::query_as(sql).fetch_all(&db_pool()?).await?;
+
+        tracing::info!("Loaded {} repo IDs", rows.len());
 
         for row in rows {
             ECO_REPO.insert(row.repo_id.to_string());
