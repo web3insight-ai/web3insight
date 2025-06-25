@@ -114,6 +114,7 @@ export interface DataRepos {
   repo_id: Int8;
   repo_name: string;
   upstream_marks: Generated<Json>;
+  api: Generated<Json | null>;
 }
 
 export interface DB {

@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS "data"."repos"
     "repo_name"          TEXT                     NOT NULL,
     "upstream_marks"     JSONB                    NOT NULL DEFAULT '{}',
     "custom_marks"       JSONB                    NOT NULL DEFAULT '{}',
+    "api"                JSONB                    NOT NULL DEFAULT '{}',
     "indexed"            BOOLEAN                  NOT NULL DEFAULT false,
     "created_at"         TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     "api_updated_at"     TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
