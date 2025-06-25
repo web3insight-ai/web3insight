@@ -24,8 +24,8 @@ importers:
         specifier: ^4.2.13
         version: 4.2.13(@remix-run/react@2.11.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4))(@remix-run/server-runtime@2.11.1(typescript@5.5.4))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@handie/http':
-        specifier: github:handiejs/http#01f1f8e
-        version: https://codeload.github.com/handiejs/http/tar.gz/01f1f8e(@handie/runtime-core@0.0.13(petals-ui@0.0.25))(@ntks/toolbox@0.0.6)
+        specifier: github:handiejs/http#5068829
+        version: https://codeload.github.com/handiejs/http/tar.gz/5068829(@handie/runtime-core@0.0.13(petals-ui@0.0.25))(@ntks/toolbox@0.0.6)
       '@handie/runtime-core':
         specifier: 0.0.13
         version: 0.0.13(petals-ui@0.0.25)
@@ -843,8 +843,8 @@ packages:
   '@formatjs/intl-localematcher@0.5.4':
     resolution: {integrity: sha512-zTwEpWOzZ2CiKcB93BLngUX59hQkuZjT2+SAQEscSm52peDW/getsawMcWF1rGRpMCX6D7nSJA3CzJ8gn13N/g==}
 
-  '@handie/http@https://codeload.github.com/handiejs/http/tar.gz/01f1f8e':
-    resolution: {tarball: https://codeload.github.com/handiejs/http/tar.gz/01f1f8e}
+  '@handie/http@https://codeload.github.com/handiejs/http/tar.gz/5068829':
+    resolution: {tarball: https://codeload.github.com/handiejs/http/tar.gz/5068829}
     version: 0.0.0
     engines: {node: '>=14.15.3'}
     peerDependencies:
@@ -6689,7 +6689,7 @@ snapshots:
     dependencies:
       tslib: 2.6.3
 
-  '@handie/http@https://codeload.github.com/handiejs/http/tar.gz/01f1f8e(@handie/runtime-core@0.0.13(petals-ui@0.0.25))(@ntks/toolbox@0.0.6)':
+  '@handie/http@https://codeload.github.com/handiejs/http/tar.gz/5068829(@handie/runtime-core@0.0.13(petals-ui@0.0.25))(@ntks/toolbox@0.0.6)':
     dependencies:
       '@handie/runtime-core': 0.0.13(petals-ui@0.0.25)
       '@ntks/toolbox': 0.0.6

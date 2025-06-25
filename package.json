@@ -22,7 +22,7 @@
     "@azure/identity": "^4.4.1",
     "@azure/openai": "2.0.0-beta.1",
     "@clerk/remix": "^4.2.13",
-    "@handie/http": "github:handiejs/http#01f1f8e",
+    "@handie/http": "github:handiejs/http#5068829",
     "@handie/runtime-core": "0.0.13",
     "@nextui-org/react": "^2.4.6",
     "@ntks/toolbox": "0.0.6",
