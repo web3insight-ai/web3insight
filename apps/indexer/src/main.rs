@@ -1,7 +1,7 @@
 mod channel;
 mod db;
 
-use crate::channel::start_channel;
+use crate::{channel::start_channel, db::init_pg};
 use anyhow::Result;
 use dotenvy::dotenv;
 use std::time::Instant;
@@ -26,6 +26,8 @@ async fn main() -> Result<()> {
         .with_filter(LevelFilter::INFO);
 
     tracing_subscriber::registry().with(console).init();
+
+    init_pg().await?;
 
     start_channel().await?;
 

@@ -1,4 +1,4 @@
-use crate::db::{EventTableStruct, init_pg};
+use crate::db::{ECO_REPO, EventTableStruct, ReposTableStruct};
 use anyhow::Result;
 use chrono::{DateTime, Duration, Utc};
 use flate2::read::GzDecoder;
@@ -18,7 +18,14 @@ use tokio::process::Command;
 use tokio::task::JoinSet;
 
 pub async fn start_channel() -> Result<()> {
-    let start = env::var("TIME_START").unwrap_or_else(|_| "2020-01-01T00:00:00Z".to_string());
+    let mut start = env::var("TIME_START").unwrap_or_else(|_| "2020-01-01T00:00:00Z".to_string());
+
+    if !get_env_bool("FULL_MODE") {
+        tracing::info!("Running in partial mode");
+        ReposTableStruct::init_repo_ids().await?;
+        start = ReposTableStruct::get_start_time().await?.time.to_rfc3339();
+    }
+
     let end = env::var("TIME_END").unwrap_or_else(|_| "2020-02-01T00:00:00Z".to_string());
     let file_path = env::var("GHARCHIVE_FILE_PATH").unwrap_or_else(|_| "./gharchive".to_string());
 
@@ -30,8 +37,6 @@ pub async fn start_channel() -> Result<()> {
         .ok()
         .and_then(|v| v.parse().ok())
         .unwrap_or(4);
-
-    init_pg().await?;
 
     let mut consumers = JoinSet::new();
 
@@ -66,6 +71,10 @@ pub async fn start_channel() -> Result<()> {
 
     while let Some(Ok(_)) = consumers.join_next().await {}
 
+    if !get_env_bool("FULL_MODE") {
+        ReposTableStruct::update_indexed().await?;
+    }
+
     Ok(())
 }
 
@@ -79,7 +88,7 @@ fn load_gh_path(base: &str, start: &str, end: &str) -> Result<Vec<PathBuf>> {
                 .format("%Y/%m/%Y-%m-%d-%-H.json.gz")
                 .to_string();
 
-            let file_name = time_format.split('/').last().unwrap_or_default();
+            let file_name = time_format.split('/').next_back().unwrap_or_default();
 
             if is_missing_url(file_name) {
                 None
@@ -146,7 +155,7 @@ async fn try_open_file(file_path: &PathBuf) -> Option<File> {
             continue;
         }
 
-        if let Err(_) = file_check_gzip(file_path).await {
+        if (file_check_gzip(file_path).await).is_err() {
             tracing::info!("Check file gzip error: {}", file_path.display());
             continue;
         };
@@ -169,9 +178,11 @@ async fn load_gh_event(file_path: PathBuf) -> Vec<EventTableStruct> {
     let decoder = GzDecoder::new(file);
     let reader = BufReader::with_capacity(10 * 1024 * 1024, decoder);
 
+    let full_mode = get_env_bool("FULL_MODE");
+
     let batch: Vec<EventTableStruct> = reader
         .lines()
-        .filter_map(Result::ok)
+        .map_while(Result::ok)
         .map(|line| {
             let new_line = line.chars().filter(|&c| c != '\0').collect::<String>();
             new_line.replace("\u{0000}", " ").replace("u0000", "u0020")
@@ -183,6 +194,7 @@ async fn load_gh_event(file_path: PathBuf) -> Vec<EventTableStruct> {
                 None
             }
         })
+        .filter(|event| full_mode || ECO_REPO.contains(&event.repo.name))
         .filter_map(format_event_module)
         .collect();
     tracing::info!("Loaded {} {} events", file_path.display(), batch.len());
@@ -209,7 +221,7 @@ async fn download_gh_archive(file_path: &PathBuf) -> Result<()> {
 
 async fn file_check_gzip(file_path: &PathBuf) -> Result<()> {
     let verified_file_path = PathBuf::from(format!("{}.verified", file_path.display()));
-    
+
     if fs::metadata(&verified_file_path).await.is_ok() {
         return Ok(());
     }
