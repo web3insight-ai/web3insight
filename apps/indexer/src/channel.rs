@@ -49,8 +49,12 @@ pub async fn start_channel() -> Result<()> {
                     Ok(Some((path, events))) => {
                         EventTableStruct::batch_insert_events_pg(events, &path)
                             .await
-                            .map_err(|_| {
-                                tracing::error!("Error inserting into PostgreSQL, Path: {:?}", path)
+                            .map_err(|e| {
+                                tracing::error!(
+                                    "Error inserting into PostgreSQL, Path: {:?}, Error: {:?}",
+                                    path,
+                                    e
+                                );
                             })
                             .ok();
                     }
@@ -258,7 +262,6 @@ fn get_env_bool(key: &str) -> bool {
 }
 
 fn format_event_module(event: Event) -> Option<EventTableStruct> {
-
     let check_bot = check_is_bot(&event.actor.login);
 
     if get_env_bool("FILTER_OUT_BOT") && check_bot {
