@@ -258,7 +258,10 @@ fn get_env_bool(key: &str) -> bool {
 }
 
 fn format_event_module(event: Event) -> Option<EventTableStruct> {
-    if get_env_bool("FILTER_OUT_BOT") && check_is_bot(&event.actor.login) {
+
+    let check_bot = check_is_bot(&event.actor.login);
+
+    if get_env_bool("FILTER_OUT_BOT") && check_bot {
         return None;
     }
 
@@ -293,6 +296,7 @@ fn format_event_module(event: Event) -> Option<EventTableStruct> {
         payload: (!get_env_bool("FILTER_OUT_PAYLOAD"))
             .then(|| serde_json::to_string(&event.payload).unwrap_or_default())
             .unwrap_or_else(|| "{}".to_string()),
+        abnormal: check_bot,
         created_at: event.created_at,
     })
 }

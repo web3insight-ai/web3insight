@@ -27,6 +27,7 @@ pub struct EventTableStruct {
     pub event_type: String,
     pub payload: String,
     pub body: Option<String>,
+    pub abnormal: bool,
     pub created_at: DateTime<Utc>,
 }
 
