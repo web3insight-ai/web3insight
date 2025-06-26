@@ -31,7 +31,7 @@ pub async fn start_channel() -> Result<()> {
 
     let files = load_gh_path(file_path.as_str(), start.as_str(), end.as_str())?;
 
-    let (tx, rx) = tokio_mpmc::channel(48);
+    let (tx, rx) = async_channel::bounded(48);
 
     let max_concurrent = env::var("MAX_DB_CONCURRENT")
         .ok()
@@ -46,7 +46,7 @@ pub async fn start_channel() -> Result<()> {
         consumers.spawn(async move {
             loop {
                 match rx.recv().await {
-                    Ok(Some((path, events))) => {
+                    Ok((path, events)) => {
                         EventTableStruct::batch_insert_events_pg(events, &path)
                             .await
                             .map_err(|e| {
@@ -57,10 +57,6 @@ pub async fn start_channel() -> Result<()> {
                                 );
                             })
                             .ok();
-                    }
-                    Ok(None) => {
-                        tracing::info!("DB Channel closed, exiting");
-                        break;
                     }
                     Err(e) => {
                         tracing::error!("DB Channel error receiving value: {:?}", e);
@@ -107,7 +103,7 @@ fn load_gh_path(base: &str, start: &str, end: &str) -> Result<Vec<PathBuf>> {
 
 pub async fn read_file_tx(
     files: Vec<PathBuf>,
-    tx: tokio_mpmc::Sender<(String, Vec<EventTableStruct>)>,
+    tx: async_channel::Sender<(String, Vec<EventTableStruct>)>,
 ) -> Result<()> {
     let mut tasks = JoinSet::new();
 
