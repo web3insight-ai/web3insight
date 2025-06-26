@@ -27,7 +27,7 @@ pub struct EventTableStruct {
     pub event_type: String,
     pub payload: String,
     pub body: Option<String>,
-    pub abnormal: bool,
+    pub abnormal: i32,
     pub created_at: DateTime<Utc>,
 }
 
@@ -97,15 +97,15 @@ impl EventTableStruct {
         for chunk in events.chunks(chunk_size).filter(|c| !c.is_empty()) {
             let sql = "INSERT INTO data.events (
                 id, actor_id, actor_login, repo_id, repo_name, org_id, org_login,
-                event_type, payload, body, created_at
+                event_type, payload, body, abnormal,created_at
             )
             SELECT * FROM unnest(
                 $1::bigint[], $2::bigint[], $3::text[], $4::bigint[], $5::text[],
                 $6::bigint[], $7::text[], $8::text[], $9::json[], $10::text[],
-                $11::timestamptz[]
+                $11::integer[], $12::timestamptz[]
             ) AS t(
                 id, actor_id, actor_login, repo_id, repo_name, org_id, org_login,
-                event_type, payload, body, created_at
+                event_type, payload, body, abnormal, created_at
             )
             ON CONFLICT (id, created_at) DO NOTHING";
 
@@ -120,6 +120,7 @@ impl EventTableStruct {
                 .bind(Self::vec(chunk, |data| data.event_type.clone()))
                 .bind(Self::vec(chunk, |data| data.payload.clone()))
                 .bind(Self::vec(chunk, |data| data.body.clone()))
+                .bind(Self::vec(chunk, |data| data.abnormal))
                 .bind(Self::vec(chunk, |data| data.created_at))
                 .execute(&db_pool()?)
                 .await?;
