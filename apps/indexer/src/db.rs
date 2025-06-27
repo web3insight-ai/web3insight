@@ -152,7 +152,7 @@ WHERE indexed = false;";
             sqlx::query_as(indexed_sql).fetch_one(&db_pool()?).await;
 
         let last_sql = "
-SELECT MAX(event_updated_at) as time
+SELECT MAX(created_at) as time
 FROM data.repos;";
 
         let last_row: TimeStruct = sqlx::query_as(last_sql).fetch_one(&db_pool()?).await?;

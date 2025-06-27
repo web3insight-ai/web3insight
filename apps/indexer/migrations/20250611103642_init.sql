@@ -3,7 +3,7 @@ CREATE SCHEMA IF NOT EXISTS "data";
 
 -- CREATE EXTENSION IF NOT EXISTS pg_mooncake;
 
-CREATE TABLE "data"."events"
+CREATE TABLE NOT EXISTS "data"."events"
 (
     "id"          BIGINT                   NOT NULL,
     "actor_id"    BIGINT                   NOT NULL,
@@ -18,6 +18,27 @@ CREATE TABLE "data"."events"
     "abnormal"    INTEGER                  NOT NULL DEFAULT 0,
     "created_at"  TIMESTAMP WITH TIME ZONE NOT NULL,
     PRIMARY KEY ("id", "created_at")
+);
+
+CREATE TABLE IF NOT EXISTS "data"."repos"
+(
+    "repo_id"            BIGINT PRIMARY KEY       NOT NULL,
+    "upstream_repo_name" TEXT                     NOT NULL,
+    "repo_name"          TEXT                     NOT NULL,
+    "upstream_marks"     JSONB                    NOT NULL DEFAULT '{}',
+    "custom_marks"       JSONB                    NOT NULL DEFAULT '{}',
+    "api"                JSONB                    NOT NULL DEFAULT '{}',
+    "indexed"            BOOLEAN                  NOT NULL DEFAULT false,
+    "created_at"         TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    "api_updated_at"     TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    "event_updated_at"   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE "data"."actors"
+(
+    "actor_id"    BIGINT PRIMARY KEY       NOT NULL,
+    "actor_login" TEXT,
+    "created_at"  TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
 
