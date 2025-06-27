@@ -1,6 +1,3 @@
-CREATE INDEX IF NOT EXISTS idx_events_repo_actor_created_desc
-    ON data.events (repo_id, actor_id, created_at DESC);
-
 CREATE OR REPLACE FUNCTION data.init_actors()
     RETURNS integer AS
 $$
@@ -38,8 +35,8 @@ BEGIN
                            FROM data.events
                            ORDER BY repo_id, created_at DESC)
     UPDATE data.repos
-    SET repo_name        = le.repo_name,
-        event_updated_at = le.created_at
+    SET repo_name  = le.repo_name,
+        created_at = le.created_at
     FROM latest_events le
     WHERE data.repos.repo_id = le.repo_id;
 

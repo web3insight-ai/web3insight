@@ -144,7 +144,7 @@ impl ReposTableStruct {
 
     pub async fn get_start_time() -> Result<TimeStruct> {
         let indexed_sql = "
-SELECT MIN((api ->> 'created_at')::timestamptz) as time
+SELECT date_trunc('hour', MIN((api ->> 'created_at')::timestamptz)) as time
 FROM data.repos
 WHERE indexed = false;";
 
@@ -152,7 +152,12 @@ WHERE indexed = false;";
             sqlx::query_as(indexed_sql).fetch_one(&db_pool()?).await;
 
         let last_sql = "
-SELECT MAX(created_at) as time
+SELECT date_trunc('hour', MAX(created_at)) +
+       CASE
+           WHEN date_trunc('hour', MAX(created_at)) = MAX(created_at)
+               THEN INTERVAL '0'
+           ELSE INTERVAL '1 hour'
+           END as time
 FROM data.repos;";
 
         let last_row: TimeStruct = sqlx::query_as(last_sql).fetch_one(&db_pool()?).await?;

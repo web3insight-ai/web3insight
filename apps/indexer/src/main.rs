@@ -1,5 +1,6 @@
 mod channel;
 mod db;
+mod helper;
 
 use crate::{channel::start_channel, db::init_pg};
 use anyhow::Result;

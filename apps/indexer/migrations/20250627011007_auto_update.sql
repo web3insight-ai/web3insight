@@ -1,27 +1,3 @@
-CREATE OR REPLACE FUNCTION data.init_repos()
-    RETURNS integer AS
-$$
-DECLARE
-    affected_rows integer;
-BEGIN
-    WITH latest_events AS (SELECT DISTINCT ON (repo_id) repo_id,
-                                                        repo_name,
-                                                        created_at
-                           FROM data.events
-                           ORDER BY repo_id, created_at DESC)
-    UPDATE data.repos
-    SET repo_name        = le.repo_name,
-        event_updated_at = le.created_at
-    FROM latest_events le
-    WHERE data.repos.repo_id = le.repo_id;
-
-    GET DIAGNOSTICS affected_rows = ROW_COUNT;
-
-    RETURN affected_rows;
-END;
-$$
-    LANGUAGE plpgsql;
-
 CREATE OR REPLACE FUNCTION data.update_repos_on_statement()
     RETURNS TRIGGER AS
 $$

@@ -30,8 +30,7 @@ CREATE TABLE IF NOT EXISTS "data"."repos"
     "api"                JSONB                    NOT NULL DEFAULT '{}',
     "indexed"            BOOLEAN                  NOT NULL DEFAULT false,
     "created_at"         TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    "api_updated_at"     TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    "event_updated_at"   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+    "api_updated_at"     TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE "data"."actors"
