@@ -191,7 +191,8 @@ FROM (
 
       query = query
         .innerJoin('data.repos', 'data.events.repo_id', 'data.repos.repo_id')
-        .where('upstream_marks', '?|', sql<string[]>`ARRAY[${ecoName}]`);
+        .where('upstream_marks', '?|', sql<string[]>`ARRAY[${ecoName}]`)
+        .where('data.events.event_type', '!=', 'WatchEvent');
 
       query = query.groupBy(aliasName).orderBy(aliasName, 'desc').limit(8);
 
