@@ -32,7 +32,7 @@ export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
-export interface Web3Actors {
+export interface DataActors {
   actor_id: Int8;
   actor_login: string | null;
   created_at: Timestamp;
@@ -49,7 +49,7 @@ export interface ApiUpstreamRepos {
   upstream_repo_name: string;
 }
 
-export interface Web3Event {
+export interface DataEvent {
   actor_id: Int8;
   actor_login: string;
   body: string | null;
@@ -64,16 +64,7 @@ export interface Web3Event {
   repo_name: string | null;
 }
 
-export interface Web3Repos {
-  created_at: Timestamp;
-  upstream_marks: Generated<Json | null>;
-  custom_marks: Generated<Json | null>;
-  eco_names: Generated<string[] | null>;
-  repo_id: Int8;
-  repo_name: string | null;
-}
-
-export interface Web3Caches {
+export interface APICaches {
   cache_data:
     | Generated<Json | null>
     | TotalDto
@@ -109,7 +100,6 @@ export interface DataRepos {
   api_updated_at: Generated<Timestamp>;
   created_at: Generated<Timestamp>;
   custom_marks: Generated<Json>;
-  event_updated_at: Generated<Timestamp>;
   indexed: Generated<boolean>;
   repo_id: Int8;
   repo_name: string;
@@ -118,12 +108,11 @@ export interface DataRepos {
 }
 
 export interface DB {
-  'web3.actors': Web3Actors;
-  'web3.event': Web3Event;
-  'web3.repos': Web3Repos;
-  'web3.caches': Web3Caches;
+  'data.actors': DataActors;
+  'data.events': DataEvent;
+  'data.repos': DataRepos;
+  'api.caches': APICaches;
   'api.configs': ApiConfigs;
   'api.analysis_users': ApiAnalysisUsers;
   'api.upstream_repos': ApiUpstreamRepos;
-  'data.repos': DataRepos;
 }

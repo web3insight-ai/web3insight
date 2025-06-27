@@ -95,14 +95,14 @@ export class RankService {
   async getTopScoreActors(ecoNames: string[]) {
     const sqlRawQuery = `
 WITH ecosystem_list AS (SELECT UNNEST($1::text[]) AS ecosystem_name),
-     filtered_events AS (SELECT event.actor_id,
-                                event.repo_id,
+     filtered_events AS (SELECT events.actor_id,
+                                events.repo_id,
                                 COUNT(*) AS score
-                         FROM web3.repos repos
-                                  JOIN web3.event event ON repos.repo_id = event.repo_id
-                         WHERE event.event_type = 'PullRequestEvent'
+                         FROM data.repos repos
+                                  JOIN data.events events ON repos.repo_id = events.repo_id
+                         WHERE events.event_type = 'PullRequestEvent'
                            AND repos.upstream_marks ?| (SELECT ARRAY_AGG(ecosystem_name) FROM ecosystem_list)
-                         GROUP BY event.actor_id, event.repo_id),
+                         GROUP BY events.actor_id, events.repo_id),
 
      ecosystem_scores AS (SELECT e.ecosystem_name AS ecosystem,
                                  fe.actor_id,
@@ -110,7 +110,7 @@ WITH ecosystem_list AS (SELECT UNNEST($1::text[]) AS ecosystem_name),
                                  repos.repo_name,
                                  fe.score
                           FROM filtered_events fe
-                                   JOIN web3.repos repos ON fe.repo_id = repos.repo_id
+                                   JOIN data.repos repos ON fe.repo_id = repos.repo_id
                                    CROSS JOIN ecosystem_list e
                           WHERE repos.upstream_marks ? e.ecosystem_name),
 
@@ -120,7 +120,7 @@ WITH ecosystem_list AS (SELECT UNNEST($1::text[]) AS ecosystem_name),
                              SUM(es.score)                                                             AS total_score,
                              ROW_NUMBER() OVER (PARTITION BY es.ecosystem ORDER BY SUM(es.score) DESC) AS rank
                       FROM ecosystem_scores es
-                               JOIN web3.actors a ON es.actor_id = a.actor_id
+                               JOIN data.actors a ON es.actor_id = a.actor_id
                       WHERE a.actor_login NOT ILIKE '%[bot]%'
                         AND a.actor_login NOT ILIKE 'bot-%'
                         AND a.actor_login NOT ILIKE '%-bot'
@@ -178,22 +178,22 @@ ORDER BY ecosystem;
   async repoStarRank(ecoNames: string[]) {
     const sqlRawQuery = `
 WITH ecosystem_list AS (SELECT UNNEST($1::text[]) AS ecosystem_name),
-     repo_stars AS (SELECT event.repo_id,
-                           COUNT(DISTINCT event.actor_id) star_count
-                    FROM web3.repos repos
-                             JOIN web3.event event ON repos.repo_id = event.repo_id
-                    WHERE event.event_type = 'WatchEvent'
+     repo_stars AS (SELECT events.repo_id,
+                           COUNT(DISTINCT events.actor_id) star_count
+                    FROM data.repos repos
+                             JOIN data.events events ON repos.repo_id = events.repo_id
+                    WHERE events.event_type = 'WatchEvent'
                       AND repos.upstream_marks ?| (SELECT ARRAY_AGG(ecosystem_name)
                                                    FROM ecosystem_list)
-                    GROUP BY event.repo_id),
-     repo_contributors AS (SELECT event.repo_id,
-                                  COUNT(DISTINCT event.actor_id) contributor_count
-                           FROM web3.repos repos
-                                    JOIN web3.event event ON repos.repo_id = event.repo_id
-                           WHERE event.event_type IN ('PushEvent', 'PullRequestEvent')
+                    GROUP BY events.repo_id),
+     repo_contributors AS (SELECT events.repo_id,
+                                  COUNT(DISTINCT events.actor_id) contributor_count
+                           FROM data.repos repos
+                                    JOIN data.events events ON repos.repo_id = events.repo_id
+                           WHERE events.event_type IN ('PushEvent', 'PullRequestEvent')
                              AND repos.upstream_marks ?| (SELECT ARRAY_AGG(ecosystem_name)
                                                           FROM ecosystem_list)
-                           GROUP BY event.repo_id),
+                           GROUP BY events.repo_id),
      top_ecosystem AS (SELECT ecosystem.ecosystem_name             ecosystem,
                               repo_stars.repo_id,
                               repos.repo_name,
@@ -204,7 +204,7 @@ WITH ecosystem_list AS (SELECT UNNEST($1::text[]) AS ecosystem_name),
                                   ORDER BY repo_stars.star_count DESC
                                   )                                ranking
                        FROM repo_stars
-                                JOIN web3.repos repos ON repo_stars.repo_id = repos.repo_id
+                                JOIN data.repos repos ON repo_stars.repo_id = repos.repo_id
                                 CROSS JOIN ecosystem_list ecosystem
                                 LEFT JOIN repo_contributors rc ON repo_stars.repo_id = rc.repo_id
                        WHERE repos.upstream_marks ? ecosystem.ecosystem_name)

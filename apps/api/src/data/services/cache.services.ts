@@ -17,7 +17,7 @@ export class CacheDataService {
     eco_name = 'ALL',
   ): Promise<void> {
     await this.db
-      .insertInto('web3.caches')
+      .insertInto('api.caches')
       .values({
         cache_key: key,
         eco_name: eco_name,
@@ -35,7 +35,7 @@ export class CacheDataService {
 
   async getCacheData(key: CacheKeyValue, eco_name = 'ALL') {
     const result = await this.db
-      .selectFrom('web3.caches')
+      .selectFrom('api.caches')
       .selectAll()
       .where('cache_key', '=', key)
       .where('eco_name', '=', eco_name)
