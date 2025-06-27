@@ -11,6 +11,8 @@ export enum EcoType {
   Mantle = 'Mantle',
   Nexus = 'Nexus',
   Hyperlane = 'Hyperlane',
+  Chainlink = 'Chainlink',
+  Base = 'Base',
 }
 
 export type EcoTypeValue = `${EcoType}`;

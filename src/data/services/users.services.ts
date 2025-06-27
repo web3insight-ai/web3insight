@@ -119,8 +119,8 @@ WITH user_ids AS (SELECT UNNEST($1::bigint[]) AS actor_id),
                                  COUNT(CASE WHEN e.event_type = 'PullRequestEvent' THEN 1 ELSE 0 END) AS pr_count,
                                  MIN(e.created_at)                                                    AS first_activity_at,
                                  MAX(e.created_at)                                                    AS last_activity_at
-                          FROM web3.event e
-                                   JOIN web3.repos r ON e.repo_id = r.repo_id
+                          FROM data.events e
+                                   JOIN data.repos r ON e.repo_id = r.repo_id
                                    JOIN user_ids u ON e.actor_id = u.actor_id
                           WHERE e.event_type IN ('PushEvent', 'PullRequestEvent')
                           GROUP BY e.actor_id, e.repo_id, r.repo_name),
@@ -133,7 +133,7 @@ WITH user_ids AS (SELECT UNNEST($1::bigint[]) AS actor_id),
                      FROM repo_base_scores),
      repo_ecosystems AS (SELECT DISTINCT ON (r.repo_id, ecosystem_key) r.repo_id,
                                                                        jsonb_object_keys(r.upstream_marks) AS ecosystem_key
-                         FROM web3.repos r
+                         FROM data.repos r
                                   JOIN repo_scores rs ON r.repo_id = rs.repo_id
                          WHERE r.upstream_marks != '{}'::jsonb),
      repo_ecosystem_scores AS (SELECT rs.actor_id,

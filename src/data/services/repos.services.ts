@@ -20,7 +20,7 @@ export class ReposService {
   @Inject(KYSELY) private readonly db!: Kysely<DB>;
 
   async getReposByEcoName(params: ReposOrderReqDto) {
-    let query = this.db.selectFrom('web3.repos');
+    let query = this.db.selectFrom('data.repos');
     if (params.eco_name !== EcoType.ALL) {
       query = query.where('upstream_marks', '?', params.eco_name);
     }
@@ -62,7 +62,7 @@ export class ReposService {
 
   async markRepo(param: BaseIdReqAndResDto, body: ReposCustomMarkReqDto) {
     const repo = await this.db
-      .selectFrom('web3.repos')
+      .selectFrom('data.repos')
       .selectAll()
       .where('repo_id', '=', String(param.id))
       .executeTakeFirst();
@@ -72,7 +72,7 @@ export class ReposService {
     const custom_marks = repo.custom_marks ?? {};
     custom_marks[body.eco_name] = body.mark;
     await this.db
-      .updateTable('web3.repos')
+      .updateTable('data.repos')
       .set({
         custom_marks: custom_marks,
       })

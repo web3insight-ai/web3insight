@@ -28,7 +28,7 @@ filtered_repos AS (
         repo_id,
         jsonb_object_keys(upstream_marks) AS ecosystem
     FROM 
-        web3.repos
+        data.repos
     WHERE 
         repos.upstream_marks ?| (SELECT ARRAY_AGG(ecosystem_name) FROM ecosystem_list)
 ),
@@ -73,19 +73,19 @@ WITH ecosystem_list AS (SELECT UNNEST($1::text[]) AS ecosystem_name),
                                 r.repo_id
                          FROM ecosystem_list e
                                   JOIN
-                              web3.repos r ON r.upstream_marks ? e.ecosystem_name),
+                              data.repos r ON r.upstream_marks ? e.ecosystem_name),
 
      actor_first_activity AS (SELECT er.ecosystem_name,
                                      ev.actor_id,
                                      MIN(ev.created_at) AS first_activity_time
                               FROM ecosystem_repos er
-                                       JOIN web3.event ev ON ev.repo_id = er.repo_id
+                                       JOIN data.events ev ON ev.repo_id = er.repo_id
                               GROUP BY er.ecosystem_name, ev.actor_id),
 
      active_dev_ids AS (SELECT er.ecosystem_name,
                                ev.actor_id
                         FROM ecosystem_repos er
-                                 JOIN web3.event ev ON ev.repo_id = er.repo_id
+                                 JOIN data.events ev ON ev.repo_id = er.repo_id
                         WHERE ev.event_type IN ('PullRequestEvent', 'PushEvent')
                           AND ev.created_at >= NOW() - INTERVAL '3 years'
                         GROUP BY er.ecosystem_name, ev.actor_id
@@ -146,7 +146,7 @@ FROM ecosystem_list el
 SELECT COUNT(DISTINCT ecosystem_name) AS ecosystem_count
 FROM (
     SELECT jsonb_object_keys(upstream_marks) AS ecosystem_name
-    FROM web3.repos
+    FROM data.repos
     WHERE upstream_marks != '{}'::jsonb
 ) AS ecosystems;`;
     const query = CompiledQuery.raw(sqlRawQuery);
@@ -181,16 +181,16 @@ FROM (
       }
 
       let query = this.db
-        .selectFrom('web3.event')
+        .selectFrom('data.events')
         .select([
-          sql<Date>`DATE_TRUNC(${dateTruncUnit}, "web3"."event"."created_at")`.as(
+          sql<Date>`DATE_TRUNC(${dateTruncUnit}, "data"."events"."created_at")`.as(
             aliasName,
           ),
-          this.db.fn.count('web3.event.actor_id').distinct().as('total'),
+          this.db.fn.count('data.events.actor_id').distinct().as('total'),
         ]);
 
       query = query
-        .innerJoin('web3.repos', 'web3.event.repo_id', 'web3.repos.repo_id')
+        .innerJoin('data.repos', 'data.events.repo_id', 'data.repos.repo_id')
         .where('upstream_marks', '?|', sql<string[]>`ARRAY[${ecoName}]`);
 
       query = query.groupBy(aliasName).orderBy(aliasName, 'desc').limit(8);

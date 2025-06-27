@@ -51,7 +51,9 @@ export class InitDataService {
 
         const repo = this.repoMap.get(url) || {
           upstream_repo_name: url,
-          upstream_marks: {},
+          upstream_marks: {
+            ALL: { branch: [], tags: [] },
+          },
         };
 
         if (!repo.upstream_marks[eco_name]) {
@@ -285,7 +287,6 @@ export class InitDataService {
         upstream_marks: repo.upstream_marks,
         api: repo.api,
         api_updated_at: repo.api_updated_at,
-        event_updated_at: new Date('2015-01-01').toISOString(),
       }));
 
     console.log(`Found ${reposToUpsert.length} repos to insert/update`);
