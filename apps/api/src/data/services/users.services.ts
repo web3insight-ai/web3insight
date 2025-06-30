@@ -11,6 +11,7 @@ import { KYSELY } from '@/app/db/db.provider';
 import { ApiAnalysisUsers, DB } from '@/app/db/dto/db.dto';
 import { TokenPoolService } from '@/app/db/pool.services';
 import { Inject, Injectable } from '@nestjs/common';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { CompiledQuery, Kysely } from 'kysely';
 import { Command, Console } from 'nestjs-console';
 
@@ -20,6 +21,7 @@ export class UsersService {
   constructor(
     @Inject(KYSELY) private readonly db: Kysely<DB>,
     private readonly tokenPoolService: TokenPoolService,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async uploadAndGetUsers(body: CustomQueryUsersReqDto) {
@@ -69,6 +71,9 @@ export class UsersService {
 
     res.id = Number(id.id);
 
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    this.eventEmitter.emitAsync('api.custom.analysis.created', res);
+
     return res;
   }
 
@@ -110,7 +115,26 @@ export class UsersService {
     if (analysis.data && Object.keys(analysis.data).length > 0) {
       return analysis;
     }
+    return analysis;
+  }
 
+  private extractUsername(url: string): string | null {
+    try {
+      const urlObj = new URL(url);
+      if (urlObj.hostname === 'github.com') {
+        const pathParts = urlObj.pathname.split('/').filter(Boolean);
+        if (pathParts.length >= 1) {
+          return pathParts[0];
+        }
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  @OnEvent('api.custom.analysis.created')
+  async handleOrderCreatedEvent(payload: CustomUploadResDto) {
     const sqlRawQuery = `
 WITH user_ids AS (SELECT UNNEST($1::bigint[]) AS actor_id),
      repo_base_scores AS (SELECT e.actor_id,
@@ -187,38 +211,19 @@ SELECT u.actor_id,
        ) AS ecosystem_scores
 FROM user_ids u;`;
 
-    const ids = (analysis.github as unknown as CustomUploadResDto).users.map(
-      (user) => user.id,
-    );
+    const ids = payload.users.map((user) => user.id);
     const query = CompiledQuery.raw(sqlRawQuery, [ids]);
     const results = await this.db.executeQuery(query);
 
     if (results.rows.length > 0) {
       const update = this.db
         .updateTable('api.analysis_users')
-        .where('id', '=', analysis.id)
+        .where('id', '=', String(payload.id))
         .set({
           data: JSON.stringify({ users: results.rows }),
         })
         .returningAll();
-      const exec = await this.db.executeQuery(update);
-      return { users: exec.rows[0] };
-    }
-    return { users: [] };
-  }
-
-  private extractUsername(url: string): string | null {
-    try {
-      const urlObj = new URL(url);
-      if (urlObj.hostname === 'github.com') {
-        const pathParts = urlObj.pathname.split('/').filter(Boolean);
-        if (pathParts.length >= 1) {
-          return pathParts[0];
-        }
-      }
-      return null;
-    } catch {
-      return null;
+      await this.db.executeQuery(update);
     }
   }
 

@@ -8,6 +8,7 @@ import { DataModule } from './data/data.module';
 import { ApiModule } from './api/api.module';
 import { AppAuthGuard } from './auth/app.auth.guard';
 import { AppConfigModule } from './app/config/config.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AppConfigModule } from './app/config/config.module';
     DataModule,
     ApiModule,
     AppConfigModule,
+    EventEmitterModule.forRoot(),
   ],
   controllers: [],
   providers: [AppAuthGuard, JwtService],
