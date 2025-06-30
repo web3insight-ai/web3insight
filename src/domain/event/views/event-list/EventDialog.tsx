@@ -4,10 +4,9 @@ import {
   Textarea, Button,
 } from "@nextui-org/react";
 
-import type { GithubUser } from "../../typing";
 import { insertOne } from "../../repository";
 
-import type { EventDialogProps } from "./typing";
+import type { EventDialogPayload, EventDialogProps } from "./typing";
 import { resolveContestants } from "./helper";
 
 function EventDialog({ managerId, visible, onClose }: EventDialogProps) {
@@ -15,9 +14,10 @@ function EventDialog({ managerId, visible, onClose }: EventDialogProps) {
   const [userInput, setUserInput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const closeDialog = (contestants?: GithubUser[]) => {
+  const closeDialog = (payload?: EventDialogPayload) => {
+    setDescription("");
     setUserInput("");
-    onClose(contestants);
+    onClose(payload);
   };
 
   const handleConfirm = () => {
@@ -37,7 +37,10 @@ function EventDialog({ managerId, visible, onClose }: EventDialogProps) {
     insertOne({ managerId, urls: contestants, description: resolvedDescription })
       .then(res => {
         if (res.success) {
-          closeDialog(res.data);
+          closeDialog({
+            eventId: res.extra!.eventId,
+            contestants: res.data,
+          });
         } else {
           alert(res.message);
         }

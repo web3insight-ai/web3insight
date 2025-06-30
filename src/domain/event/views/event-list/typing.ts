@@ -1,15 +1,21 @@
 import type { GithubUser } from "../../typing";
 
+type EventDialogPayload = {
+  eventId: number;
+  contestants: GithubUser[];
+};
+
 type EventDialogProps = {
   managerId: string;
   visible: boolean;
-  onClose: (contestants?: GithubUser[]) => void;
+  onClose: (payload?: EventDialogPayload) => void;
 };
 
 type ContestantListDialogProps = {
   dataSource: GithubUser[];
   visible: boolean;
   onClose: () => void;
+  onGoto: () => void;
 };
 
 type EventListViewWidgetProps = {
@@ -17,4 +23,4 @@ type EventListViewWidgetProps = {
   managerId: string;
 };
 
-export type { EventDialogProps, ContestantListDialogProps, EventListViewWidgetProps };
+export type { EventDialogPayload, EventDialogProps, ContestantListDialogProps, EventListViewWidgetProps };

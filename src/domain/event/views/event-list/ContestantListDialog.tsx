@@ -5,7 +5,7 @@ import {
 
 import type { ContestantListDialogProps } from "./typing";
 
-function ContestantListDialog({ dataSource, visible, onClose }: ContestantListDialogProps) {
+function ContestantListDialog({ dataSource, visible, onClose, onGoto }: ContestantListDialogProps) {
   return (
     <Modal
       size="xl"
@@ -41,12 +41,8 @@ function ContestantListDialog({ dataSource, visible, onClose }: ContestantListDi
               </div>
             </ModalBody>
             <ModalFooter>
-              <Button
-                color="primary"
-                onClick={onClose}
-              >
-                Confirm
-              </Button>
+              <Button variant="bordered" onClick={onClose}>Cancel</Button>
+              <Button color="primary" onClick={onGoto}>Confirm</Button>
             </ModalFooter>
           </>
         )}

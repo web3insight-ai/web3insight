@@ -57,14 +57,19 @@ async function insertOne(
     return httpClient.post("/api/event/contestants", data);
   }
 
-  const { data: resData, ...others } = await analyzeUserList({
+  const { data: resData, extra, ...others } = await analyzeUserList({
     submitter_id: data.managerId,
     request_data: data.urls,
     intent: "hackathon",
     description: data.description,
   });
+  const { id, users, ...rest } = resData;
 
-  return { ...others, data: resData.users };
+  return {
+    ...others,
+    data: users,
+    extra: { ...extra, eventId: id, ...rest },
+  };
 }
 
 export { fetchList, fetchOne, insertOne };

@@ -5,10 +5,9 @@ import { useNavigate } from "@remix-run/react";
 
 import TableViewWidget from "@/components/widget/view/table";
 
-import type { GithubUser } from "../../typing";
 import { fetchList } from "../../repository";
 
-import type { EventListViewWidgetProps } from "./typing";
+import type { EventDialogPayload, EventListViewWidgetProps } from "./typing";
 import CreatedTimeFieldWidget from "./CreatedTimeField";
 import EventDialog from "./EventDialog";
 import ContestantListDialog from "./ContestantListDialog";
@@ -23,7 +22,7 @@ function EventListView({ className, managerId }: EventListViewWidgetProps) {
 
   const [visible, setVisible] = useState(false);
 
-  const [addedResult, setAddedResult] = useState<GithubUser[]>([]);
+  const [addedResult, setAddedResult] = useState<EventDialogPayload>({ eventId: 0, contestants: [] });
   const [addedResultVisible, setAddedResultVisible] = useState(false);
 
   const navigate = useNavigate();
@@ -42,12 +41,14 @@ function EventListView({ className, managerId }: EventListViewWidgetProps) {
       .finally(() => setLoading(false));
   }, [managerId, refetchTimestamp]);
 
-  const closeDialog = (contestants?: GithubUser[]) => {
+  const gotoDetail = (id: number) => navigate(`/admin/events/${id}`);
+
+  const closeDialog = (payload?: EventDialogPayload) => {
     setVisible(false);
 
-    if (contestants) {
+    if (payload) {
       setRefetchTimestamp(Date.now());
-      setAddedResult(contestants);
+      setAddedResult(payload);
       setAddedResultVisible(true);
     }
   };
@@ -76,7 +77,7 @@ function EventListView({ className, managerId }: EventListViewWidgetProps) {
           {
             text: "View",
             name: "viewDetail",
-            execute: row => navigate(`/admin/events/${row.id}`),
+            execute: row => gotoDetail(row.id),
           },
         ]}
         total={total}
@@ -88,8 +89,9 @@ function EventListView({ className, managerId }: EventListViewWidgetProps) {
         onClose={closeDialog}
       />
       <ContestantListDialog
-        dataSource={addedResult}
+        dataSource={addedResult.contestants}
         visible={addedResultVisible}
+        onGoto={() => gotoDetail(addedResult.eventId)}
         onClose={() => setAddedResultVisible(false)}
       />
     </Card>
