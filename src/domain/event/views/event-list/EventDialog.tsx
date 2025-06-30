@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useRef, MouseEvent } from "react";
 import {
   Modal, ModalContent, ModalHeader, ModalBody, ModalFooter,
   Textarea, Button,
 } from "@nextui-org/react";
+
+import FileUpload from "@/components/control/file-upload";
 
 import { insertOne } from "../../repository";
 
@@ -13,6 +15,26 @@ function EventDialog({ managerId, visible, onClose }: EventDialogProps) {
   const [description, setDescription] = useState("");
   const [userInput, setUserInput] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const uploadRef = useRef<HTMLInputElement>(null);
+
+  const handleCsvUpload = (evt: MouseEvent) => {
+    evt.preventDefault();
+    evt.stopPropagation();
+    uploadRef.current?.click();
+  };
+
+  const handleFileChange = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setUserInput(e.target?.result as string);
+
+      if (uploadRef.current) {
+        uploadRef.current.value = "";
+      }
+    };
+    reader.readAsText(file);
+  };
 
   const closeDialog = (payload?: EventDialogPayload) => {
     setDescription("");
@@ -83,22 +105,20 @@ function EventDialog({ managerId, visible, onClose }: EventDialogProps) {
                 isRequired
                 onValueChange={setUserInput}
               />
+              <div>
+                <span className="text-sm">Input manually above or </span>
+                <FileUpload
+                  ref={uploadRef}
+                  type="csv"
+                  onChange={handleFileChange}
+                >
+                  <Button onClick={handleCsvUpload} size="sm">import from CSV file</Button>
+                </FileUpload>
+              </div>
             </ModalBody>
             <ModalFooter>
-              <Button
-                variant="bordered"
-                onClick={() => closeDialog()}
-                isDisabled={loading}
-              >
-                Cancel
-              </Button>
-              <Button
-                color="primary"
-                isLoading={loading}
-                onClick={handleConfirm}
-              >
-                Confirm
-              </Button>
+              <Button variant="bordered" onClick={() => closeDialog()} isDisabled={loading}>Cancel</Button>
+              <Button color="primary" isLoading={loading} onClick={handleConfirm}>Confirm</Button>
             </ModalFooter>
           </>
         )}
