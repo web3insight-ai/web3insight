@@ -80,6 +80,7 @@ WITH ecosystem_list AS (SELECT UNNEST($1::text[]) AS ecosystem_name),
                                      MIN(ev.created_at) AS first_activity_time
                               FROM ecosystem_repos er
                                        JOIN data.events ev ON ev.repo_id = er.repo_id
+                              WHERE ev.event_type != 'WatchEvent'
                               GROUP BY er.ecosystem_name, ev.actor_id),
 
      active_dev_ids AS (SELECT er.ecosystem_name,
@@ -87,7 +88,7 @@ WITH ecosystem_list AS (SELECT UNNEST($1::text[]) AS ecosystem_name),
                         FROM ecosystem_repos er
                                  JOIN data.events ev ON ev.repo_id = er.repo_id
                         WHERE ev.event_type IN ('PullRequestEvent', 'PushEvent')
-                          AND ev.created_at >= NOW() - INTERVAL '3 years'
+                          AND ev.created_at >= NOW() - INTERVAL '1 years'
                         GROUP BY er.ecosystem_name, ev.actor_id
                         HAVING COUNT(DISTINCT ev.event_type) = 2),
 

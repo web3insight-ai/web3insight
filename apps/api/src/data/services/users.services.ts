@@ -62,6 +62,7 @@ export class UsersService {
         github: JSON.stringify({ users: githubData }),
         intent: body.intent,
         submitter_id: body.submitter_id,
+        description: body.description,
       })
       .returning('id')
       .executeTakeFirstOrThrow();
