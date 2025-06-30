@@ -71,8 +71,7 @@ export class UsersService {
 
     res.id = Number(id.id);
 
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    this.eventEmitter.emitAsync('api.custom.analysis.created', res);
+    this.eventEmitter.emit('api.custom.analysis.created', res);
 
     return res;
   }
@@ -133,8 +132,9 @@ export class UsersService {
     }
   }
 
-  @OnEvent('api.custom.analysis.created')
+  @OnEvent('api.custom.analysis.created', { async: true })
   async handleOrderCreatedEvent(payload: CustomUploadResDto) {
+    await new Promise((resolve) => setTimeout(resolve, 20000));
     const sqlRawQuery = `
 WITH user_ids AS (SELECT UNNEST($1::bigint[]) AS actor_id),
      repo_base_scores AS (SELECT e.actor_id,
