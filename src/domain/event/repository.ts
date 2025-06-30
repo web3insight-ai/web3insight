@@ -50,6 +50,7 @@ async function insertOne(
   data: {
     managerId: string;
     urls: string[];
+    description: string;
   },
 ): Promise<ResponseResult<GithubUser[]>> {
   if (!isServerSide()) {
@@ -60,7 +61,7 @@ async function insertOne(
     submitter_id: data.managerId,
     request_data: data.urls,
     intent: "hackathon",
-    description: `${data.managerId} submitted`,
+    description: data.description,
   });
 
   return { ...others, data: resData.users };

@@ -11,6 +11,7 @@ import type { EventDialogProps } from "./typing";
 import { resolveContestants } from "./helper";
 
 function EventDialog({ managerId, visible, onClose }: EventDialogProps) {
+  const [description, setDescription] = useState("");
   const [userInput, setUserInput] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -20,6 +21,12 @@ function EventDialog({ managerId, visible, onClose }: EventDialogProps) {
   };
 
   const handleConfirm = () => {
+    const resolvedDescription = description && description.trim();
+
+    if (!resolvedDescription) {
+      return alert("Please enter description first.");
+    }
+
     const contestants = resolveContestants(userInput);
 
     if (contestants.length === 0) {
@@ -27,7 +34,7 @@ function EventDialog({ managerId, visible, onClose }: EventDialogProps) {
     }
 
     setLoading(true);
-    insertOne({ managerId, urls: contestants })
+    insertOne({ managerId, urls: contestants, description: resolvedDescription })
       .then(res => {
         if (res.success) {
           closeDialog(res.data);
@@ -52,14 +59,25 @@ function EventDialog({ managerId, visible, onClose }: EventDialogProps) {
         {() => (
           <>
             <ModalHeader className="flex flex-col gap-1">
-              <div>Add Contestant</div>
+              <div>Add Event</div>
             </ModalHeader>
             <ModalBody>
               <Textarea
+                value={description}
+                placeholder="Describe what this event is about"
+                label="Description"
+                labelPlacement="outside"
+                isRequired
+                onValueChange={setDescription}
+              />
+              <Textarea
                 value={userInput}
                 placeholder="Enter GitHub username of contestants, separated by comma"
+                label="Contestants"
+                labelPlacement="outside"
                 minRows={5}
                 maxRows={10}
+                isRequired
                 onValueChange={setUserInput}
               />
             </ModalBody>
