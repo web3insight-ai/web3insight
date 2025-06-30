@@ -102,6 +102,7 @@ WITH ecosystem_list AS (SELECT UNNEST($1::text[]) AS ecosystem_name),
                                   JOIN data.events events ON repos.repo_id = events.repo_id
                          WHERE events.event_type = 'PullRequestEvent'
                            AND repos.upstream_marks ?| (SELECT ARRAY_AGG(ecosystem_name) FROM ecosystem_list)
+                           AND events.created_at >= NOW() - INTERVAL '1 year'  
                          GROUP BY events.actor_id, events.repo_id),
 
      ecosystem_scores AS (SELECT e.ecosystem_name AS ecosystem,
