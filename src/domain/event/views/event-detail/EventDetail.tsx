@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
-import { Select, SelectItem, Spinner } from "@nextui-org/react";
+import { useState, useEffect } from "react";
+import { Spinner, Accordion, AccordionItem, Chip, Avatar } from "@nextui-org/react";
 
 import ChartCard from "@/components/control/chart-card";
 
@@ -13,25 +13,16 @@ import { resolveChartOptions } from "./helper";
 import RepoScoreListCard from "./RepoScoreListCard";
 
 function EventDetailView({ id }: EventDetailViewWidgetProps) {
-  const [dataSource, setDataSource] = useState<EventReport | null>(null);
   const [loading, setLoading] = useState(false);
 
   const [contestants, setContestants] = useState<EventReport["contestants"]>([]);
-  const [selectedContestant, setSelectedContestant] = useState("");
-
-  const contestantData = useMemo(() => contestants.find(contestant => `${contestant.id}` === selectedContestant), [contestants, selectedContestant]);
 
   useEffect(() => {
     setLoading(true);
     fetchOne(id)
       .then(res => {
         if (res.success) {
-          setDataSource(res.data);
           setContestants(res.data.contestants);
-
-          if (res.data.contestants.length === 1) {
-            setSelectedContestant(`${res.data.contestants[0].id}`);
-          }
         } else {
           alert(res.message);
         }
@@ -41,35 +32,43 @@ function EventDetailView({ id }: EventDetailViewWidgetProps) {
 
   return (
     <div className="relative min-h-80 flex flex-col gap-6">
-      <div className="flex items-center">
-        <Select
-          className="max-w-xs"
-          placeholder="Choose a contestant"
-          selectedKeys={[selectedContestant]}
-          isDisabled={!dataSource || contestants.length === 0}
-          onChange={e => {
-            setSelectedContestant(e.target.value);
-          }}
-        >
-          {contestants.map(contestant => (
-            <SelectItem key={contestant.id}>
-              {contestant.nickname}
-            </SelectItem>
-          ))}
-        </Select>
-      </div>
-      {contestantData && (
-        <div className="flex flex-col gap-6">
-          <ProfileCardWidget developer={contestantData} />
-          <ChartCard
-            title="Ecosystem Score"
-            style={{ height: "400px" }}
-            option={resolveChartOptions(contestantData.analytics)}
-            chartContainerClassName="h-[400px]"
-          />
-          <RepoScoreListCard dataSource={contestantData.analytics} />
-        </div>
-      )}
+      <Accordion variant="splitted" selectionMode="multiple">
+        {contestants.map(contestant => (
+          <AccordionItem
+            key={contestant.id}
+            classNames={{
+              titleWrapper: "gap-1",
+              content: "p-4 mb-4 bg-gray-100 rounded-xl",
+            }}
+            title={contestant.nickname}
+            subtitle={
+              <div className="flex gap-1">
+                {contestant.analytics.slice(0, 3).map(({ name, score }) => (
+                  <Chip key={name} size="sm">{name}: {score}</Chip>
+                ))}
+              </div>
+            }
+            startContent={
+              <Avatar
+                src={contestant.avatar}
+                fallback={contestant.nickname}
+                size="lg"
+              />
+            }
+          >
+            <div className="flex flex-col gap-6">
+              <ProfileCardWidget developer={contestant} />
+              <ChartCard
+                title="Ecosystem Score"
+                style={{ height: "400px" }}
+                option={resolveChartOptions(contestant.analytics)}
+                chartContainerClassName="h-[400px]"
+              />
+              <RepoScoreListCard dataSource={contestant.analytics} />
+            </div>
+          </AccordionItem>
+        ))}
+      </Accordion>
       {loading && (
         <div className="absolute top-0 left-0 z-10 w-full h-full flex items-center justify-center">
           <Spinner label="Loading" />
