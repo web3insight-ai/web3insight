@@ -1,4 +1,4 @@
-import type { ResponseResult } from "@/types";
+import type { DataValue, ResponseResult } from "@/types";
 import { type NormalizedPagination, resolvePaginationParams, isServerSide } from "@/clients/http";
 import httpClient from "@/clients/http/default";
 
@@ -38,11 +38,40 @@ async function fetchOne(id: number): Promise<ResponseResult<EventReport>> {
     return httpClient.get(`/api/event/contestants/${id}`);
   }
 
-  const { data, ...others } = await fetchAnalysisUser(id);
+  let res: ResponseResult<Record<string, DataValue>>;
+  let dataNotReady: boolean;
+  let retryCount = 0;
+
+  do {
+    res = await fetchAnalysisUser(id);
+
+    const delayed = new Promise<boolean>((resolve) => {
+      const ready = res.success && (Number(res.code) !== 200 || !res.data || !res.data.users);
+
+      if (retryCount === 0) {
+        resolve(ready);
+      } else {
+        setTimeout(() => {
+          resolve(ready);
+        }, 10000);
+      }
+    });
+
+    dataNotReady = await delayed;
+    retryCount += 1;
+  } while (dataNotReady && retryCount < 10);
+
+  if (dataNotReady) {
+    res.success = false;
+    res.code = "500";
+    res.message = "Failed to fetch analysis data, please try again later.";
+    
+    console.log("Raw analysis response data: ", res.data);
+  }
 
   return {
-    ...others,
-    data: resolveEventDetail(data),
+    ...res,
+    data: resolveEventDetail(res.data),
   };
 }
 
