@@ -46,13 +46,13 @@ async function fetchOne(id: number): Promise<ResponseResult<EventReport>> {
     res = await fetchAnalysisUser(id);
 
     const delayed = new Promise<boolean>((resolve) => {
-      const ready = res.success && (Number(res.code) !== 200 || !res.data || !res.data.users);
+      const notReady = res.success && (Number(res.code) !== 200 || !res.data || !res.data.data || !res.data.data.users);
 
       if (retryCount === 0) {
-        resolve(ready);
+        resolve(notReady);
       } else {
         setTimeout(() => {
-          resolve(ready);
+          resolve(notReady);
         }, 10000);
       }
     });
