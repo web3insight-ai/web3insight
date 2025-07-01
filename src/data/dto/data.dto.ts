@@ -25,3 +25,8 @@ export enum ActorsScopeType {
 export type ActorsScopeTypeValue = `${ActorsScopeType}`;
 
 export const EcoTypeArray: string[] = Object.values(EcoType);
+
+export enum StatsPeriod {
+  WEEK = 'week',
+  MONTH = 'month',
+}

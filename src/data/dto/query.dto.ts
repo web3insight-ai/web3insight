@@ -1,3 +1,5 @@
+import { StatsPeriod } from './data.dto';
+
 export class QueryTopStar {
   ecosystem: string;
   top_repositories: QueryTopStarRepo[];
@@ -46,4 +48,15 @@ export class QueryTopActorRepo {
   repo_name: string;
   commit_count: number = 0;
   score: number;
+}
+
+export class QueryActorDate {
+  ecosystem_name: string;
+  time_unit: StatsPeriod;
+  data: ActorDateItemDto[];
+}
+
+export class ActorDateItemDto {
+  date: Date = new Date();
+  total: number = 0;
 }

@@ -14,12 +14,11 @@ import {
   GetTotalReqDto,
   TotalDto,
   ActorDateListDto,
-  StatsPeriod,
 } from '../dto/api.dto';
 import { TotalService } from '@/data/services/total.services';
 import { CacheDataService } from '@/data/services/cache.services';
 import { CacheKey } from '@/data/dto/cache.dto';
-import { ActorsScopeType, EcoType } from '@/data/dto/data.dto';
+import { ActorsScopeType, EcoType, StatsPeriod } from '@/data/dto/data.dto';
 
 @Controller()
 @ApiTags('Total')
