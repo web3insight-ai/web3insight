@@ -11,9 +11,13 @@ import {
   ValidateIf,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ActorsScopeType, EcoType } from '@/data/dto/data.dto';
+import { ActorsScopeType, EcoType, StatsPeriod } from '@/data/dto/data.dto';
 import { Expose, Type } from 'class-transformer';
-import { QueryTopActor, QueryTopStarRepo } from '@/data/dto/query.dto';
+import {
+  ActorDateItemDto,
+  QueryTopActor,
+  QueryTopStarRepo,
+} from '@/data/dto/query.dto';
 import { ApiAnalysisUsers } from '@/app/db/dto/db.dto';
 
 export class GetTotalReqDto {
@@ -40,21 +44,12 @@ export class EcoRankDto {
   repos_total: number = 0;
 }
 
-export enum StatsPeriod {
-  WEEK = 'week',
-  MONTH = 'month',
-}
-
 export class GetActorDateReqDto extends GetTotalReqDto {
   @IsEnum(StatsPeriod)
   @IsOptional()
   period: StatsPeriod = StatsPeriod.MONTH;
 }
 
-export class ActorDateItemDto {
-  date: Date = new Date();
-  total: number = 0;
-}
 export class EcoRankListDto {
   list: EcoRankDto[] = [];
 }

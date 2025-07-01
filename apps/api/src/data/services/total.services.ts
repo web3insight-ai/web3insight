@@ -1,17 +1,18 @@
 import { KYSELY } from '@/app/db/db.provider';
 import { DB } from '@/app/db/dto/db.dto';
 import { Inject, Injectable } from '@nestjs/common';
-import { CompiledQuery, Kysely, sql } from 'kysely';
+import { CompiledQuery, Kysely } from 'kysely';
 import { Command, Console } from 'nestjs-console';
 import { CacheDataService } from './cache.services';
-import { CacheKey } from '../dto/cache.dto';
-import { EcoType } from '../dto/data.dto';
-import { ActorDateListDto, StatsPeriod } from '@/api/dto/api.dto';
+import { CacheKey, CacheKeyValue } from '../dto/cache.dto';
+import { EcoType, StatsPeriod } from '../dto/data.dto';
 import {
+  QueryActorDate,
   QueryActorsTotal,
   QueryEcoTotal,
   QueryReposTotal,
 } from '../dto/query.dto';
+import { ActorDateListDto } from '@/api/dto/api.dto';
 
 @Injectable()
 @Console()
@@ -164,55 +165,70 @@ FROM (
     }
   }
 
-  async getActorStats(ecoNames: string[], period: StatsPeriod) {
-    for (const ecoName of ecoNames) {
-      const cacheKey =
-        period == StatsPeriod.MONTH
-          ? CacheKey.ActorMonthTotal
-          : CacheKey.ActorWeekTotal;
+  async getActorDate(ecoNames: string[]) {
+    const sqlRawQuery = `
+WITH ecosystem_list AS (SELECT UNNEST($1::text[]) AS ecosystem_name),
 
-      let dateTruncUnit: string = StatsPeriod.WEEK;
+     time_unit_list AS (SELECT UNNEST($2::text[]) AS time_unit),
 
-      const aliasName = 'date';
+     repos_filtered AS (SELECT r.repo_id,
+                               el.ecosystem_name
+                        FROM ecosystem_list el
+                                 JOIN data.repos r ON r.upstream_marks ? el.ecosystem_name),
 
-      if (period === StatsPeriod.WEEK) {
-        dateTruncUnit = 'week';
-      } else if (period === StatsPeriod.MONTH) {
-        dateTruncUnit = 'month';
+     aggregated_data AS (SELECT rf.ecosystem_name,
+                                tul.time_unit,
+                                DATE_TRUNC(tul.time_unit, ev.created_at) AS date_period,
+                                COUNT(DISTINCT ev.actor_id)              AS total
+                         FROM repos_filtered rf
+                                  CROSS JOIN time_unit_list tul
+                                  JOIN data.events ev ON ev.repo_id = rf.repo_id
+                         WHERE ev.event_type != 'WatchEvent'
+                           AND ev.created_at >= NOW() - INTERVAL '8 months'
+                         GROUP BY rf.ecosystem_name, tul.time_unit, DATE_TRUNC(tul.time_unit, ev.created_at)),
+
+     ranked_data AS (SELECT ecosystem_name,
+                            time_unit,
+                            date_period,
+                            total,
+                            ROW_NUMBER() OVER (
+                                PARTITION BY ecosystem_name, time_unit
+                                ORDER BY date_period DESC
+                                ) AS rn
+                     FROM aggregated_data)
+
+SELECT ecosystem_name,
+       time_unit,
+       JSON_AGG(
+               JSON_BUILD_OBJECT(
+                       'date', date_period,
+                       'total', total
+               ) ORDER BY date_period DESC
+       ) AS data
+FROM ranked_data
+WHERE rn <= 8
+GROUP BY ecosystem_name, time_unit
+ORDER BY ecosystem_name, time_unit;
+`;
+    const query = CompiledQuery.raw(sqlRawQuery, [ecoNames, ['week', 'month']]);
+
+    const exec = await this.db.executeQuery(query);
+
+    const results = exec.rows as QueryActorDate[];
+
+    for (const result of results) {
+      let cacheKey: CacheKeyValue = CacheKey.ActorMonthTotal;
+      if (result.time_unit == StatsPeriod.WEEK) {
+        cacheKey = CacheKey.ActorWeekTotal;
       }
-
-      let query = this.db
-        .selectFrom('data.events')
-        .select([
-          sql<Date>`DATE_TRUNC(${dateTruncUnit}, "data"."events"."created_at")`.as(
-            aliasName,
-          ),
-          this.db.fn.count('data.events.actor_id').distinct().as('total'),
-        ]);
-
-      query = query
-        .innerJoin('data.repos', 'data.events.repo_id', 'data.repos.repo_id')
-        .where('upstream_marks', '?|', sql<string[]>`ARRAY[${ecoName}]`)
-        .where('data.events.event_type', '!=', 'WatchEvent');
-
-      query = query.groupBy(aliasName).orderBy(aliasName, 'desc').limit(8);
-
-      const results = await query.execute();
-
-      const data = results.map((row) => ({
-        date: row[aliasName],
-        total: Number(row.total),
-      }));
-
       const resData = new ActorDateListDto();
 
-      resData.list = data;
-
+      resData.list = result.data;
       await this.cacheDataService.updateCacheData(
         cacheKey,
         resData,
         new Date().toISOString(),
-        ecoName,
+        result.ecosystem_name,
       );
     }
   }
@@ -223,17 +239,10 @@ FROM (
   })
   async test(): Promise<void> {
     const ecoTypes = Object.values(EcoType);
+    await this.getActorDate(ecoTypes.filter((eco) => eco !== EcoType.ALL));
     await this.reposTotal(ecoTypes);
     await this.actorsTotalNew(ecoTypes);
     await this.ecoTotal();
-    await this.getActorStats(
-      ecoTypes.filter((eco) => eco !== EcoType.ALL),
-      StatsPeriod.MONTH,
-    );
-    await this.getActorStats(
-      ecoTypes.filter((eco) => eco !== EcoType.ALL),
-      StatsPeriod.WEEK,
-    );
     return null;
   }
 }
