@@ -73,7 +73,7 @@ export class InitDataService {
   }
 
   @Command({
-    command: 'sync:db:eco::upstream_repos',
+    command: 'sync:db:eco:upstream_repos',
     description: 'Update eco repos',
   })
   async testLoadEcoData() {
@@ -252,7 +252,7 @@ export class InitDataService {
   }
 
   @Command({
-    command: 'sync:db:eco::repos',
+    command: 'sync:db:eco:repos',
     description: 'Sync api.upstream_repos to data.repos',
   })
   async syncUpstreamToDataRepos() {

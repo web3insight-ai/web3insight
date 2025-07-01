@@ -208,7 +208,8 @@ WITH ecosystem_list AS (SELECT UNNEST($1::text[]) AS ecosystem_name),
                                 JOIN data.repos repos ON repo_stars.repo_id = repos.repo_id
                                 CROSS JOIN ecosystem_list ecosystem
                                 LEFT JOIN repo_contributors rc ON repo_stars.repo_id = rc.repo_id
-                       WHERE repos.upstream_marks ? ecosystem.ecosystem_name)
+                       WHERE repos.upstream_marks ? ecosystem.ecosystem_name
+                       AND NOT (repos.api->>'archived')::boolean)
 SELECT ecosystem,
        json_agg(
                json_build_object(
