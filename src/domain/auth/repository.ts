@@ -258,8 +258,8 @@ async function authWithGitHub(accessToken: string): Promise<ResponseResult> {
     // Call Strapi GitHub authentication service
     const authResult = await authWithGitHubAccessToken(accessToken);
 
-    if (!authResult.success) {
-      return authResult;
+    if (!authResult.success || !authResult.data) {
+      return authResult.success ? generateFailedResponse("Invalid GitHub authentication response") : authResult;
     }
 
     const { user } = authResult.data;

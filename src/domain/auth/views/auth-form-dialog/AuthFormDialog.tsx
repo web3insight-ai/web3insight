@@ -32,18 +32,6 @@ function AuthFormDialogView() {
   const actionData = useActionData<ResponseResult>();
   const submit = useSubmit();
 
-  // Handle successful login
-  useEffect(() => {
-    if (isLoginSuccess) {
-      // Fetch updated user data
-      fetchUserData();
-      // Reset state
-      setIsLoginSuccess(false);
-      // Close modal
-      setIsOpen(false);
-    }
-  }, [isLoginSuccess, fetchUserData, setIsOpen]);
-
   const fetchUserData = useCallback(async () => {
     try {
       const res = await fetchCurrentUser();
@@ -61,6 +49,18 @@ function AuthFormDialogView() {
       // Silent fail - errors will be handled by the UI gracefully
     }
   }, [setUser, revalidator]);
+
+  // Handle successful login
+  useEffect(() => {
+    if (isLoginSuccess) {
+      // Fetch updated user data
+      fetchUserData();
+      // Reset state
+      setIsLoginSuccess(false);
+      // Close modal
+      setIsOpen(false);
+    }
+  }, [isLoginSuccess, fetchUserData, setIsOpen]);
 
   const onClose = () => {
     setIsOpen(false);
