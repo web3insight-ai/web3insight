@@ -1,7 +1,7 @@
 import { KYSELY } from './db.provider';
 import { DB } from '@/app/db/dto/db.dto';
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
-import { Octokit } from '@octokit/rest';
+import { Octokit, RestEndpointMethodTypes } from '@octokit/rest';
 import { Kysely } from 'kysely';
 import { Command, Console } from 'nestjs-console';
 import { ResponseHeaders, RequestError } from '@octokit/types';
@@ -21,6 +21,9 @@ class GitHubTokenInfo {
     this.resetTime = Math.floor(Date.now() / 1000 + 3600);
   }
 }
+
+export type RepoInfo =
+  RestEndpointMethodTypes['repos']['get']['response']['data'];
 
 @Injectable()
 @Console()

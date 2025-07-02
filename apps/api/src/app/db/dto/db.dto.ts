@@ -6,6 +6,7 @@ import {
   TotalDto,
 } from '@/api/dto/api.dto';
 import type { ColumnType } from 'kysely';
+import { RepoInfo } from '../pool.services';
 
 export type Generated<T> =
   T extends ColumnType<infer S, infer I, infer U>
@@ -104,7 +105,7 @@ export interface DataRepos {
   repo_id: Int8;
   repo_name: string;
   upstream_marks: Generated<Json>;
-  api: Generated<Json | null>;
+  api: Generated<Json | null> | RepoInfo;
 }
 
 export interface DB {
