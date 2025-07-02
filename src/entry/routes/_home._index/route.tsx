@@ -1,13 +1,12 @@
-import { Button, Card, CardBody, Chip, Link as NextUILink, Input } from "@nextui-org/react";
+import { Button, Card, CardBody, Link as NextUILink, Input } from "@nextui-org/react";
 import {
   json,
-  LoaderFunctionArgs,
   // redirect,
   type ActionFunctionArgs,
   type MetaFunction,
 } from "@remix-run/node";
-import { Link, useLoaderData, useFetcher } from "@remix-run/react";
-import { ArrowRight, Hash, Search } from "lucide-react";
+import { useLoaderData, useFetcher } from "@remix-run/react";
+import { ArrowRight, Search } from "lucide-react";
 // import { getClientIPAddress } from "remix-utils/get-client-ip-address";
 import { useEffect, useState } from "react";
 import { useAtom } from "jotai";
@@ -17,9 +16,7 @@ import BrandLogo from "@/components/control/brand-logo";
 
 import { authModalOpenAtom, authModalTypeAtom } from "#/atoms";
 
-import { getUser } from "~/auth/repository";
 import { ErrorType } from "~/query/helper";
-import { fetchListForUser } from "~/query/repository";
 import { fetchStatisticsOverview, fetchStatisticsRank } from "~/statistics/repository";
 import EcosystemRankViewWidget from "~/ecosystem/views/ecosystem-rank";
 import RepositoryRankViewWidget from "~/repository/views/repository-rank";
@@ -48,13 +45,11 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export const loader = async (ctx: LoaderFunctionArgs) => {
-  const user = await getUser(ctx.request);
-  const { data } = await fetchListForUser({ user });
+export const loader = async () => {
   const { data: statisticOverview } = await fetchStatisticsOverview();
   const { data: statisticRank } = await fetchStatisticsRank();
 
-  return json({ ...data, statisticOverview, statisticRank });
+  return json({ statisticOverview, statisticRank });
 };
 
 export const action = async (ctx: ActionFunctionArgs) => {
@@ -88,7 +83,7 @@ export const action = async (ctx: ActionFunctionArgs) => {
 };
 
 export default function Index() {
-  const { pinned, statisticOverview, statisticRank } = useLoaderData<typeof loader>();
+  const { statisticOverview, statisticRank } = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof action>();
   const asking = fetcher.state === "submitting";
   const errorMessage = fetcher.data?.error || null;
@@ -239,42 +234,9 @@ export default function Index() {
               )}
             </fetcher.Form>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 text-center">
-              Try queries like &quot;ethereum ecosystem&quot;, &quot;OpenZeppelin/contracts&quot;, or &quot;openbuild community&quot;
+              Try queries like &quot;top ecosystems of web3&quot;, &quot;how many core devs of ethereum&quot;, or &quot;top contributor of solana&quot;
             </p>
           </div>
-          {/* Pinned Queries */}
-          {pinned && pinned.length > 0 ? (
-            <div className="mt-8">
-              <div className="flex gap-2 items-center justify-center flex-wrap">
-                {pinned.map((query) => (
-                  <Link to={`/query/${query.documentId}`} key={query.documentId}>
-                    <Chip
-                      variant="flat"
-                      color="default"
-                      className="text-xs px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors duration-200 cursor-pointer"
-                      startContent={<Hash size={12} />}
-                    >
-                      {query.query}
-                    </Chip>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          ) : (
-            // If you want to show something when there are no pinned queries
-            <div className="mt-8">
-              <Link to="/query/new">
-                <Button
-                  variant="flat"
-                  color="primary"
-                  size="sm"
-                  startContent={<Hash size={14} />}
-                >
-                  Start a new query
-                </Button>
-              </Link>
-            </div>
-          )}
           {output.length > 0 ? (
             <Card className="w-full max-w-[650px] mx-auto mt-8">
               <CardBody>

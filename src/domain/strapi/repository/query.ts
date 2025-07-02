@@ -36,17 +36,12 @@ async function fetchQuery(
 }
 
 async function createQuery(
-  { query, keyboard, userId }: {
+  { query, keyboard }: {
     query: string;
     keyboard?: string;
-    userId?: number;
   },
 ): Promise<ResponseResult<StrapiQuery>> {
   const data: QueryData = { query, keyboard, pin: false };
-
-  if (userId) {
-    data.user = userId;
-  }
 
   const { data: strapiData, ...others } = await httpClient.post(`/queries`, { data });
 
@@ -65,15 +60,6 @@ async function updateQuery(
   return { ...others, data: strapiData?.data };
 }
 
-// Query methods
-async function fetchUserQueries(userId: number, limit = 10): Promise<ResponseResult<StrapiQuery[]>> {
-  return fetchQueryList({
-    'filters[user][id][$eq]': userId,
-    'populate[]': 'user',
-    'sort[]': 'createdAt:desc',
-    'pagination[limit]': limit,
-  });
-}
 
 async function fetchPinnedQueries(): Promise<ResponseResult<StrapiQuery[]>> {
   return fetchQueryList({
@@ -83,4 +69,4 @@ async function fetchPinnedQueries(): Promise<ResponseResult<StrapiQuery[]>> {
   });
 }
 
-export { fetchQueryList, fetchQuery, createQuery, updateQuery, fetchUserQueries, fetchPinnedQueries };
+export { fetchQueryList, fetchQuery, createQuery, updateQuery, fetchPinnedQueries };

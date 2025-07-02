@@ -10,8 +10,6 @@ import { authModalOpenAtom, authModalTypeAtom } from "../atoms";
 import DefaultLayout from "../layouts/default";
 
 import { getUser } from "~/auth/repository";
-import type { Query } from "~/query/typing";
-import { fetchSearchedList } from "~/query/repository";
 
 export const meta: MetaFunction = () => {
   const title = getTitle();
@@ -30,18 +28,11 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     return redirect("/");
   }
 
-  let history: Query[] = [];
-
-  // Fetch user's query history from Strapi if user is logged in
-  if (user && user.id) {
-    history = (await fetchSearchedList({ userId: user.id })).data;
-  }
-
-  return json({ user, history });
+  return json({ user });
 };
 
 export default function ProfilePage() {
-  const { user, history } = useLoaderData<typeof loader>();
+  const { user } = useLoaderData<typeof loader>();
   const [, setAuthModalOpen] = useAtom(authModalOpenAtom);
   const [, setAuthModalType] = useAtom(authModalTypeAtom);
 
@@ -52,7 +43,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <DefaultLayout history={history} user={user}>
+    <DefaultLayout user={user}>
       <div className="flex flex-col items-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl w-full">
           <Card className="shadow-md border-none mb-6">

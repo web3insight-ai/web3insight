@@ -4,7 +4,6 @@ import { useEffect } from "react";
 
 import type { User } from "~/strapi/typing";
 import { getUser } from "~/auth/repository";
-import { fetchListForUser } from "~/query/repository";
 
 import DefaultLayout from "../layouts/default";
 
@@ -15,13 +14,12 @@ type RootContext<U = User | null> = {
 
 export const loader = async (ctx: LoaderFunctionArgs) => {
   const user = await getUser(ctx.request);
-  const { data } = await fetchListForUser({ user });
 
-  return json({ ...data, user });
+  return json({ user });
 };
 
 export default function HomeLayout() {
-  const { history, pinned, user } = useLoaderData<typeof loader>();
+  const { user } = useLoaderData<typeof loader>();
   const { setUser } = useOutletContext<RootContext>();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -40,12 +38,8 @@ export default function HomeLayout() {
     }
   }, [searchParams, setSearchParams]);
 
-  // Combine pinned and regular history for display
-  // This ensures we show both the user's history and pinned queries
-  const combinedHistory = [...(pinned || []), ...(history || [])];
-
   return (
-    <DefaultLayout history={combinedHistory} user={user}>
+    <DefaultLayout user={user}>
       <Outlet context={{ user, setUser }} />
     </DefaultLayout>
   );

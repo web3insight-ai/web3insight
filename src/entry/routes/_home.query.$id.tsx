@@ -30,10 +30,8 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import { getMetadata } from "@/utils/app";
 
-import { getUser } from "~/auth/repository";
-import type { Query } from "~/query/typing";
 import { ErrorType } from "~/query/helper";
-import { fetchSearchedList, fetchOneWithUser } from "~/query/repository";
+import { fetchOneWithUser } from "~/query/repository";
 import { fetchOne as fetchEcosystem, fetchRepoAnalysis } from "~/ecosystem/repository/legacy";
 
 const { title: appTitle, description } = getMetadata();
@@ -55,15 +53,6 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 };
 
 export const loader = async (ctx: LoaderFunctionArgs) => {
-  const user = await getUser(ctx.request);
-
-  let history: Query[] = [];
-
-  // Fetch user's query history from Strapi if user is logged in
-  if (user && user.id) {
-    history = (await fetchSearchedList({ userId: user.id })).data;
-  }
-
   const queryId = ctx.params.id as string;
 
   // Fetch query from Strapi
@@ -110,7 +99,6 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
       answer: query.answer,
       keyword,
       references: null, // This doesn't seem to be in the new schema
-      history,
       openRankData,
       attentionData,
       participantsData,

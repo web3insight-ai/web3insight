@@ -1,11 +1,11 @@
 import { type IRateLimiterRedisOptions, RateLimiterRedis } from "rate-limiter-flexible";
 
 import type { DataValue, ResponseResult } from "@/types";
-import { generateSuccessResponse, generateFailedResponse } from "@/clients/http";
+import { generateFailedResponse } from "@/clients/http";
 import redis from "@/clients/redis";
 
 import type { User as StrapiUser, StrapiQuery } from "../strapi";
-import { createQuery, updateQuery, fetchQueryList, fetchQuery, fetchUserQueries, fetchPinnedQueries } from "../strapi/repository";
+import { createQuery, updateQuery, fetchQueryList, fetchQuery, fetchPinnedQueries } from "../strapi/repository";
 import { getSearchKeyword } from "../ai/repository";
 
 import type { Query } from "./typing";
@@ -79,18 +79,12 @@ async function insertOne(
     };
   }
 
-  // Create the query in Strapi
+  // Create the query in Strapi without saving to user history
   try {
     const params: {
       query: string;
       keyboard?: string;
-      userId?: number;
     } = { query, keyboard: keyword };
-
-    // If the user is authenticated, link the query to their account
-    if (user) {
-      params.userId = user.id;
-    }
 
     return createQuery(params);
   } catch (error) {
@@ -115,35 +109,6 @@ async function fetchPinnedList(): Promise<ResponseResult<Query[]>> {
   return resolveQueryListResponseResult(await fetchPinnedQueries());
 }
 
-async function fetchSearchedList(
-  { userId, limit }: {
-    userId: number;
-    limit?: number;
-  },
-): Promise<ResponseResult<Query[]>> {
-  return resolveQueryListResponseResult(await fetchUserQueries(userId, limit));
-}
-
-async function fetchListForUser(
-  { user, limit }: {
-    user: StrapiUser | null;
-    limit?: number;
-  },
-): Promise<ResponseResult<{
-  pinned: Query[];
-  history: Query[];
-}>> {
-  const { data: pinned } = await fetchPinnedList();
-
-  let history: Query[] = [];
-
-  // Fetch user's query history from Strapi if user is logged in
-  if (user && user.id) {
-    history = (await fetchSearchedList({ userId: user.id, limit })).data;
-  }
-
-  return generateSuccessResponse({ pinned, history });
-}
 
 async function fetchOneWithUser(id: string): Promise<ResponseResult<StrapiQuery | null>> {
   return fetchOne(id, { populate: ['user'] });
@@ -151,6 +116,6 @@ async function fetchOneWithUser(id: string): Promise<ResponseResult<StrapiQuery 
 
 export {
   fetchList, fetchOne, insertOne, updateOne,
-  fetchPinnedList, fetchSearchedList, fetchListForUser,
+  fetchPinnedList,
   fetchOneWithUser,
 };
