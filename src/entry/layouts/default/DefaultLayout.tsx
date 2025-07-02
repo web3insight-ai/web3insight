@@ -1,7 +1,6 @@
 import AuthFormDialogViewWidget from "~/auth/views/auth-form-dialog";
 
 import Navbar from "../../components/navbar";
-import ToastContainer from "../../components/ToastContainer";
 
 import type { DefaultLayoutProps } from "./typing";
 import SearchHistory from "./SearchHistory";
@@ -24,9 +23,6 @@ function DefaultLayout({ children, history, user }: DefaultLayoutProps) {
 
       {/* Auth Modal for login/register/password reset */}
       <AuthFormDialogViewWidget />
-      
-      {/* Toast Notifications */}
-      <ToastContainer />
     </div>
   );
 }

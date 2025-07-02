@@ -10,18 +10,17 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   // Handle OAuth errors
   if (error) {
-    const errorMsg = errorDescription || "GitHub authentication failed";
     console.error("GitHub OAuth error:", error, errorDescription);
-    
-    // Redirect to home with error message in URL params
-    return redirect(`/?auth_error=${encodeURIComponent(errorMsg)}`);
+
+    // Redirect to home page
+    return redirect("/");
   }
 
   // Handle missing access token
   if (!accessToken) {
     const errorMsg = "No access token received from GitHub";
     console.error("GitHub OAuth error:", errorMsg);
-    return redirect(`/?auth_error=${encodeURIComponent(errorMsg)}`);
+    return redirect("/");
   }
 
   try {
@@ -30,7 +29,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
     if (!authResult.success) {
       console.error("GitHub authentication failed:", authResult.message);
-      return redirect(`/?auth_error=${encodeURIComponent(authResult.message || "Authentication failed")}`);
+      return redirect("/");
     }
 
     const { jwt, user } = authResult.data;
@@ -42,16 +41,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
       userId: user.id,
     });
 
-    // Check if this is a new GitHub user
-    const isNewUser = authResult.extra?.isNewGitHubUser;
-    const successParam = isNewUser ? "github_new" : "github";
-
-    // Redirect to home page with success
-    return redirect(`/?auth_success=${successParam}`, sessionOpts);
+    // Redirect to home page after successful authentication
+    return redirect("/", sessionOpts);
   } catch (error) {
     console.error("GitHub OAuth callback error:", error);
-    const errorMsg = "An unexpected error occurred during authentication";
-    return redirect(`/?auth_error=${encodeURIComponent(errorMsg)}`);
+    return redirect("/");
   }
 }
 
