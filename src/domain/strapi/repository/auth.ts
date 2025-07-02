@@ -154,4 +154,58 @@ async function changePassword(
   }
 }
 
-export { registerUser, loginUser, sendPasswordResetEmail, resetPassword, confirmEmail, changePassword };
+// GitHub OAuth authentication
+async function authWithGitHubAccessToken(accessToken: string): Promise<ResponseResult<StrapiAuthResponse | undefined>> {
+  try {
+    const res = await httpClient.get(`/auth/github/callback?access_token=${accessToken}`);
+
+    if (!res.success) {
+      return res;
+    }
+
+    const resData = res.data as StrapiAuthResponse;
+
+    // Verify we got the expected data structure
+    if (!resData.jwt || !resData.user) {
+      return generateFailedResponse("Invalid response from GitHub authentication");
+    }
+
+    // Additional validation for GitHub OAuth users similar to email login
+    const user = resData.user;
+
+    // Check if user account is blocked
+    if (user.blocked) {
+      return generateFailedResponse("Your account has been blocked. Please contact support.");
+    }
+
+    // For GitHub OAuth users, we typically don't require email confirmation
+    // since GitHub handles email verification, but we can add custom logic here
+    if (!user.confirmed) {
+      // Auto-confirm GitHub OAuth users since GitHub has already verified the email
+      console.log("GitHub OAuth user not confirmed, but GitHub handles email verification");
+    }
+
+    // Ensure the user has the correct provider set
+    if (user.provider !== "github") {
+      console.warn("GitHub OAuth user does not have 'github' provider set correctly");
+    }
+
+    // Log successful GitHub authentication
+    console.log(`GitHub OAuth successful for user: ${user.username} (${user.email})`);
+
+    return {
+      ...res,
+      message: "GitHub authentication successful",
+      extra: {
+        ...res.extra,
+        authMethod: "github",
+        provider: "github",
+      },
+    };
+  } catch (error) {
+    console.error("GitHub OAuth error:", error);
+    return generateFailedResponse("An error occurred during GitHub authentication");
+  }
+}
+
+export { registerUser, loginUser, sendPasswordResetEmail, resetPassword, confirmEmail, changePassword, authWithGitHubAccessToken };

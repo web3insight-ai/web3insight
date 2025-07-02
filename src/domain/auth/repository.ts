@@ -7,7 +7,13 @@ import {
   changePassword as changePasswordViaStrapi,
   sendPasswordResetEmail as sendPasswordResetEmailViaStrapi,
   resetPassword as resetPasswordViaStrapi,
+  authWithGitHubAccessToken,
 } from "../strapi/repository";
+import {
+  syncGitHubUserProfile,
+  findUserByEmail,
+  ensureUserRole,
+} from "../strapi/repository/user";
 import { getSession, clearSession } from "./helper/server-only";
 
 import type { StrapiUser } from "./typing";
@@ -242,8 +248,81 @@ async function resetPassword(
   }
 }
 
+// GitHub OAuth authentication with complete user management
+async function authWithGitHub(accessToken: string): Promise<ResponseResult> {
+  try {
+    if (!accessToken) {
+      return generateFailedResponse("GitHub access token is required", 400);
+    }
+
+    // Call Strapi GitHub authentication service
+    const authResult = await authWithGitHubAccessToken(accessToken);
+
+    if (!authResult.success) {
+      return authResult;
+    }
+
+    const { user } = authResult.data;
+
+    // Ensure GitHub user has proper setup similar to email registration
+    try {
+      // 1. Ensure user has proper role assignment
+      await ensureUserRole(user.id, "authenticated");
+
+      // 2. Sync GitHub profile data if needed
+      if (user.provider !== "github" || !user.confirmed) {
+        await syncGitHubUserProfile(user.id, {
+          provider: "github",
+          confirmed: true,
+          username: user.username,
+          email: user.email,
+        });
+      }
+
+      // 3. Check for existing accounts with same email (for potential linking)
+      if (user.email) {
+        const existingUser = await findUserByEmail(user.email);
+        if (existingUser.success && existingUser.data && existingUser.data.id !== user.id) {
+          console.log(`Found existing user with email ${user.email}, potential account linking needed`);
+          // Future enhancement: implement account linking logic here
+        }
+      }
+
+      console.log(`GitHub OAuth user ${user.username} (${user.email}) successfully processed`);
+    } catch (userManagementError) {
+      // Don't fail the auth if user management has issues, but log them
+      console.warn("GitHub user management warning:", userManagementError);
+    }
+
+    // Clear any existing user cache entries since we have a new user
+    // This prevents stale data from being served
+    Object.keys(userCache).forEach(key => {
+      delete userCache[key];
+    });
+
+    return {
+      ...authResult,
+      message: "GitHub authentication successful",
+      extra: {
+        ...authResult.extra,
+        isNewGitHubUser: authResult.extra?.authMethod === "github",
+      },
+    };
+  } catch (error) {
+    console.error("GitHub authentication error:", error);
+    return generateFailedResponse("An error occurred during GitHub authentication");
+  }
+}
+
+// Get GitHub OAuth URL
+function getGitHubAuthUrl(): string {
+  const strapiUrl = process.env.STRAPI_API_URL || "http://localhost:1337";
+  return `${strapiUrl}/api/connect/github`;
+}
+
 export {
   signUp, signIn, signOut,
   fetchCurrentUser, getUser,
   changePassword, sendPasswordResetEmail, resetPassword,
+  authWithGitHub, getGitHubAuthUrl,
 };

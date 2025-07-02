@@ -14,12 +14,14 @@ try {
 const vars: Record<string, any> = { // eslint-disable-line @typescript-eslint/no-explicit-any
   API_BASE_URL: process.env.API_BASE_URL || "",
   // Strapi configuration
-  STRAPI_API_URL: process.env.STRAPI_API_URL || "https://api.web3insights.app",
+  STRAPI_API_URL: process.env.STRAPI_API_URL || "https://cms.web3insights.app",
   STRAPI_API_TOKEN: process.env.STRAPI_API_TOKEN || "",
   // Session configuration
   SESSION_SECRET: process.env.SESSION_SECRET || "default-secret-change-me",
   // Database configuration
   DATABASE_URL: process.env.DATABASE_URL || "",
+  // Development environment detection
+  NODE_ENV: process.env.NODE_ENV || "development",
 };
 
 function getVar(key: string) {
