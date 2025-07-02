@@ -316,7 +316,7 @@ async function authWithGitHub(accessToken: string): Promise<ResponseResult> {
 
 // Get GitHub OAuth URL
 function getGitHubAuthUrl(): string {
-  const strapiUrl = process.env.STRAPI_API_URL || "http://localhost:1337";
+  const strapiUrl = process.env.STRAPI_API_URL || "https://cms.web3insights.app";
   return `${strapiUrl}/api/connect/github`;
 }
 

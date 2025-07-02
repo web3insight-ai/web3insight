@@ -11,17 +11,21 @@ try {
   window.process = { env: {} } as DataValue;
 }
 
+// Determine if we're in development mode
+const isDevelopment = process.env.NODE_ENV === "development";
+
 const vars: Record<string, any> = { // eslint-disable-line @typescript-eslint/no-explicit-any
   API_BASE_URL: process.env.API_BASE_URL || "",
-  // Strapi configuration
+  // Strapi configuration - always use production URL unless explicitly overridden
   STRAPI_API_URL: process.env.STRAPI_API_URL || "https://cms.web3insights.app",
   STRAPI_API_TOKEN: process.env.STRAPI_API_TOKEN || "",
   // Session configuration
   SESSION_SECRET: process.env.SESSION_SECRET || "default-secret-change-me",
   // Database configuration
   DATABASE_URL: process.env.DATABASE_URL || "",
-  // Development environment detection
+  // Environment detection
   NODE_ENV: process.env.NODE_ENV || "development",
+  IS_DEVELOPMENT: isDevelopment,
 };
 
 function getVar(key: string) {
@@ -37,6 +41,16 @@ function validateEnvironment(): boolean {
   for (const { name, value } of requiredVars) {
     if (!value) {
       console.error(`Environment variable ${name} is not set!`);
+      valid = false;
+    }
+  }
+
+  // Additional validation for production environment
+  if (!isDevelopment) {
+    const strapiUrl = getVar("STRAPI_API_URL");
+    if (strapiUrl.includes("localhost")) {
+      console.error("Production environment should not use localhost URLs!");
+      console.error(`STRAPI_API_URL is set to: ${strapiUrl}`);
       valid = false;
     }
   }
