@@ -18,7 +18,7 @@ import {
   QueryTopStar,
   QueryTopStarRepo,
 } from '../dto/query.dto';
-import { TokenPoolService } from '@/app/db/pool.services';
+import { ReposService } from './repos.services';
 
 @Injectable()
 @Console()
@@ -27,7 +27,7 @@ export class RankService {
 
   constructor(
     private cacheDataService: CacheDataService,
-    private tokenPoolService: TokenPoolService,
+    private reposService: ReposService,
   ) {}
 
   async ecoRankTotal(ecoName: EcoType, cache: boolean = true) {
@@ -220,7 +220,7 @@ SELECT ecosystem,
                )
        ) top_repositories
 FROM top_ecosystem
-WHERE ranking <= 10
+WHERE ranking <= 20
 GROUP BY ecosystem
 ORDER BY ecosystem;`;
 
@@ -229,24 +229,38 @@ ORDER BY ecosystem;`;
     const results = await this.db.executeQuery(query);
 
     for (const row of results.rows as QueryTopStar[]) {
-      const data: QueryTopStarRepo[] = await Promise.all(
-        row.top_repositories.map(async (row) => {
-          const [owner, repo] = row.repo_name.split('/');
-          const client = await this.tokenPoolService.getClient();
-          const repoDetails = await client.rest.repos.get({
-            owner,
-            repo,
-          });
-          return {
-            repo_id: Number(row.repo_id),
-            repo_name: row.repo_name,
-            star_count: repoDetails.data.stargazers_count,
-            forks_count: repoDetails.data.forks_count,
-            contributor_count: row.contributor_count,
-            open_issues_count: repoDetails.data.open_issues_count,
-          };
-        }),
-      );
+      const ids = row.top_repositories.map((repo) => repo.repo_id);
+
+      const res = await this.reposService.getRepoInfo(ids);
+
+      const data: QueryTopStarRepo[] = row.top_repositories.map((row) => {
+        const api = res.find((r) => r.id === row.repo_id);
+        return {
+          ...row,
+          star_count: api.stargazers_count,
+          forks_count: api.forks_count,
+          open_issues_count: api.open_issues_count,
+        };
+      });
+
+      // const data: QueryTopStarRepo[] = await Promise.all(
+      //   row.top_repositories.map(async (row) => {
+      //     const [owner, repo] = row.repo_name.split('/');
+      //     const client = await this.tokenPoolService.getClient();
+      //     const repoDetails = await client.rest.repos.get({
+      //       owner,
+      //       repo,
+      //     });
+      //     return {
+      //       repo_id: Number(row.repo_id),
+      //       repo_name: row.repo_name,
+      //       star_count: repoDetails.data.stargazers_count,
+      //       forks_count: repoDetails.data.forks_count,
+      //       contributor_count: row.contributor_count,
+      //       open_issues_count: repoDetails.data.open_issues_count,
+      //     };
+      //   }),
+      // );
       data.sort((a, b) => b.star_count - a.star_count);
       const cacheData = new RepoRankListDto();
       cacheData.list = data;
