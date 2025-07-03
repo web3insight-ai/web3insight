@@ -99,7 +99,10 @@ export class ReposService {
       .execute();
 
     for (const repo of db) {
-      if (repo.api_updated_at > new Date(Date.now() - 24 * 60 * 60 * 1000)) {
+      if (
+        repo.api_updated_at > new Date(Date.now() - 24 * 60 * 60 * 1000) ||
+        repo.created_at < repo.api_updated_at
+      ) {
         results.push([repo.api as RepoInfo]);
       } else {
         repoIdentifiers.push(Number(repo.repo_id));
