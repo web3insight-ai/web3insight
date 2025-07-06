@@ -1,4 +1,4 @@
-import { generateSuccessResponse } from "@/clients/http";
+import { generateSuccessResponse, generateFailedResponse } from "@/clients/http";
 
 import {
   fetchEcosystemCount, fetchEcosystemRankList,
@@ -6,13 +6,33 @@ import {
   fetchActorCount, fetchActorRankList,
 } from "../api/repository";
 
+// Helper function to safely execute API calls with error handling
+async function safeApiCall<T>(apiCall: () => Promise<T>): Promise<T> {
+  try {
+    return await apiCall();
+  } catch (error) {
+    console.error("API call failed with exception:", error);
+
+    // Check if it's a timeout error
+    const isTimeoutError = error instanceof Error &&
+      (error.message.includes('timeout') ||
+       (error as Error & { cause?: { code?: string } })?.cause?.code === 'UND_ERR_CONNECT_TIMEOUT');
+
+    return generateFailedResponse(
+      error instanceof Error ? error.message : "Network request failed",
+      isTimeoutError ? 408 : 500
+    ) as T;
+  }
+}
+
 async function fetchStatisticsOverview() {
   const responses = await Promise.all([
-    fetchEcosystemCount(),
-    fetchRepoCount(),
-    fetchActorCount(),
-    fetchActorCount({ scope: "Core" }),
+    safeApiCall(() => fetchEcosystemCount()),
+    safeApiCall(() => fetchRepoCount()),
+    safeApiCall(() => fetchActorCount()),
+    safeApiCall(() => fetchActorCount({ scope: "Core" })),
   ]);
+
   const failedIndex = responses.findIndex(res => !res.success);
 
   if (failedIndex > -1) {
@@ -41,10 +61,11 @@ async function fetchStatisticsOverview() {
 
 async function fetchStatisticsRank() {
   const responses = await Promise.all([
-    fetchEcosystemRankList(),
-    fetchRepoRankList(),
-    fetchActorRankList(),
+    safeApiCall(() => fetchEcosystemRankList()),
+    safeApiCall(() => fetchRepoRankList()),
+    safeApiCall(() => fetchActorRankList()),
   ]);
+
   const failed = responses.find(res => !res.success);
 
   return failed ? {

@@ -46,10 +46,52 @@ export const meta: MetaFunction = () => {
 };
 
 export const loader = async () => {
-  const { data: statisticOverview } = await fetchStatisticsOverview();
-  const { data: statisticRank } = await fetchStatisticsRank();
+  try {
+    const statisticsResult = await fetchStatisticsOverview();
+    const rankResult = await fetchStatisticsRank();
 
-  return json({ statisticOverview, statisticRank });
+    // Use fallback data if statistics fetch failed
+    const statisticOverview = statisticsResult.success ? statisticsResult.data : {
+      ecosystem: 0,
+      repository: 0,
+      developer: 0,
+      coreDeveloper: 0,
+    };
+
+    // Use fallback data if rank fetch failed
+    const statisticRank = rankResult.success ? rankResult.data : {
+      ecosystem: [],
+      repository: [],
+      developer: [],
+    };
+
+    // Log any failures for debugging
+    if (!statisticsResult.success) {
+      console.warn("Statistics overview fetch failed:", statisticsResult.message);
+    }
+    if (!rankResult.success) {
+      console.warn("Statistics rank fetch failed:", rankResult.message);
+    }
+
+    return json({ statisticOverview, statisticRank });
+  } catch (error) {
+    // Extra safety net - if something else goes wrong, provide fallback data
+    console.error("Loader error in home route:", error);
+
+    return json({
+      statisticOverview: {
+        ecosystem: 0,
+        repository: 0,
+        developer: 0,
+        coreDeveloper: 0,
+      },
+      statisticRank: {
+        ecosystem: [],
+        repository: [],
+        developer: [],
+      },
+    });
+  }
 };
 
 export const action = async (ctx: ActionFunctionArgs) => {

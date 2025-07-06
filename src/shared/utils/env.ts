@@ -26,10 +26,16 @@ const vars: Record<string, any> = { // eslint-disable-line @typescript-eslint/no
   // Environment detection
   NODE_ENV: process.env.NODE_ENV || "development",
   IS_DEVELOPMENT: isDevelopment,
+  // HTTP timeout configuration (in milliseconds)
+  HTTP_TIMEOUT: parseInt(process.env.HTTP_TIMEOUT || "30000", 10), // Default: 30 seconds
 };
 
 function getVar(key: string) {
   return vars[key] || "";
+}
+
+function getHttpTimeout() {
+  return vars.HTTP_TIMEOUT;
 }
 
 // Check if important environment variables are set
@@ -58,4 +64,4 @@ function validateEnvironment(): boolean {
   return valid;
 }
 
-export { getVar, validateEnvironment };
+export { getVar, getHttpTimeout, validateEnvironment };
