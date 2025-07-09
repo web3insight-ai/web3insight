@@ -77,30 +77,40 @@ export default function DeveloperPage() {
   const { developer, contributions, repositories, recentActivity } = useLoaderData<typeof loader>();
 
   return (
-    <div className="min-h-dvh bg-gray-50 dark:bg-gray-900 py-10">
-      <div className="w-full max-w-[1200px] mx-auto px-4 sm:px-6">
-        <ProfileCardWidget className="mb-6" developer={developer!} />
-        <MetricOverviewWidget className="mb-6" dataSource={developer!.statistics} />
-        <ClientOnly>
-          <ChartCard
-            className="mb-6"
-            title="Contribution Activity"
-            style={{ height: "250px" }}
-            option={resolveChartOptions(contributions)}
+    <div className="min-h-dvh bg-background dark:bg-background-dark py-8">
+      <div className="w-full max-w-content mx-auto px-6">
+        <div className="animate-fade-in">
+          <ProfileCardWidget className="mb-8" developer={developer!} />
+        </div>
+        <div className="animate-slide-up" style={{ animationDelay: "100ms" }}>
+          <MetricOverviewWidget className="mb-8" dataSource={developer!.statistics} />
+        </div>
+        <div className="animate-slide-up" style={{ animationDelay: "200ms" }}>
+          <ClientOnly>
+            <ChartCard
+              className="mb-8"
+              title="Contribution Activity"
+              style={{ height: "280px" }}
+              option={resolveChartOptions(contributions)}
+            />
+          </ClientOnly>
+        </div>
+        <div className="animate-slide-up" style={{ animationDelay: "300ms" }}>
+          <RepositoryRankView
+            className="mb-8"
+            dataSource={repositories.map(repo => ({
+              repo_id: repo.id,
+              repo_name: repo.fullName,
+              star_count: repo.statistics.star,
+              forks_count: repo.statistics.fork,
+              open_issues_count: repo.statistics.openIssue,
+              contributor_count: repo.statistics.contributor || 0,
+            }))}
           />
-        </ClientOnly>
-        <RepositoryRankView
-          className="mb-6"
-          dataSource={repositories.map(repo => ({
-            repo_id: repo.id,
-            repo_name: repo.fullName,
-            star_count: repo.statistics.star,
-            forks_count: repo.statistics.fork,
-            open_issues_count: repo.statistics.openIssue,
-            contributor_count: repo.statistics.contributor || 0,
-          }))}
-        />
-        <ActivityListViewWidget className="mb-6" dataSource={recentActivity} title="Activity Feed" />
+        </div>
+        <div className="animate-slide-up" style={{ animationDelay: "400ms" }}>
+          <ActivityListViewWidget dataSource={recentActivity} title="Activity Feed" />
+        </div>
       </div>
     </div>
   );

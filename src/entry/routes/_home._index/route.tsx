@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, Link as NextUILink, Input } from "@nextui-org/react";
+import { Card, CardBody, Link as NextUILink, Input } from "@nextui-org/react";
 import {
   json,
   // redirect,
@@ -12,7 +12,6 @@ import { useEffect, useState } from "react";
 import { useAtom } from "jotai";
 
 import { getMetadata } from "@/utils/app";
-import BrandLogo from "@/components/control/brand-logo";
 
 import { authModalOpenAtom, authModalTypeAtom } from "#/atoms";
 
@@ -146,10 +145,10 @@ export default function Index() {
   }, [fetcher.state, errorMessage, errorType, setAuthModalOpen, setAuthModalType]);
 
   // Function to handle signup click
-  const handleSignupClick = () => {
-    setAuthModalType("signup");
-    setAuthModalOpen(true);
-  };
+  // const handleSignupClick = () => {
+  //   setAuthModalType("signup");
+  //   setAuthModalOpen(true);
+  // };
 
   const onClickHandle = () => {
     setOutput("");
@@ -199,49 +198,38 @@ export default function Index() {
   };
 
   return (
-    <div className="min-h-dvh flex flex-col bg-gray-50 dark:bg-gray-900">
-      {/* Hero Section */}
-      <div className="bg-slate-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-        <div className="w-full max-w-[1200px] mx-auto px-4 sm:px-6 py-16 md:py-24">
-          <div className="flex flex-col items-center justify-center text-center">
-            <div className="mb-6 transform hover:scale-105 transition-transform duration-300">
-              <BrandLogo className="drop-shadow-md" width={120} />
-            </div>
-            <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl">
-              {description}
-            </p>
-          </div>
-        </div>
+    <div className="min-h-dvh flex flex-col">
+      <div className="w-full max-w-content mx-auto px-6 pt-8 pb-4">
+        <MetricOverview dataSource={statisticOverview} />
       </div>
 
-      <div className="w-full max-w-[1200px] mx-auto px-4 sm:px-6 py-12">
-        <MetricOverview dataSource={statisticOverview} />
+      <div className="w-full max-w-content mx-auto px-6 pb-16">
 
         <Section
-          className="mt-10"
+          className="mt-12"
           title="Web3 Ecosystem Analytics"
           summary="Comprehensive insights about major blockchain ecosystems"
         >
           <EcosystemRankViewWidget dataSource={statisticRank.ecosystem} />
         </Section>
         <Section
-          className="mt-10"
+          className="mt-16"
           title="Repository Activity"
           summary="Top repositories by developer engagement and contributions"
         >
           <RepositoryRankViewWidget dataSource={statisticRank.repository} />
         </Section>
         <Section
-          className="mt-10"
+          className="mt-16"
           title="Top Developer Activity"
           summary="Leading contributors across Web3 ecosystems"
         >
           <DeveloperRankViewWidget dataSource={statisticRank.developer} view="grid" />
         </Section>
 
-        <div className="mt-16">
-          {/* Search Section - Prominently placed in hero section */}
-          <div className="w-full max-w-[650px] mx-auto">
+        <div className="mt-12">
+          {/* Search Section */}
+          <div className="w-full max-w-2xl mx-auto">
             <fetcher.Form method="POST" action="?index">
               <div className="relative">
                 <Input
@@ -251,18 +239,18 @@ export default function Index() {
                   required
                   fullWidth
                   size="lg"
-                  placeholder="Search ecosystem, repository, community..."
+                  placeholder="Ask anything about ecosystem, community..."
                   classNames={{
-                    input: "h-12 text-base",
-                    inputWrapper: "h-12 shadow-sm bg-white dark:bg-gray-800 pr-12 border border-gray-200 dark:border-gray-700",
+                    input: "h-14 text-base font-normal",
+                    inputWrapper: "h-14 shadow-subtle bg-white dark:bg-surface-dark pr-14 border border-border dark:border-border-dark hover:shadow-card transition-shadow",
                   }}
-                  startContent={<Search size={18} className="text-gray-400" />}
+                  startContent={<Search size={20} className="text-gray-400" />}
                 />
                 <button
                   type="submit"
                   disabled={asking}
                   onClick={onClickHandle}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-md flex items-center justify-center"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-primary hover:bg-primary/90 text-white rounded-lg flex items-center justify-center transition-colors"
                 >
                   {asking ? (
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -275,60 +263,35 @@ export default function Index() {
                 <p className="text-sm text-danger mt-2 text-center">{errorMessage}</p>
               )}
             </fetcher.Form>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 text-center">
+            <p className="text-sm text-gray-500 dark:text-gray-500 mt-4 text-center">
               Try queries like &quot;top ecosystems of web3&quot;, &quot;how many core devs of ethereum&quot;, or &quot;top contributor of solana&quot;
             </p>
           </div>
           {output.length > 0 ? (
-            <Card className="w-full max-w-[650px] mx-auto mt-8">
-              <CardBody>
-                <p className="text-gray-500 dark:text-gray-400 "><Markdown>{output}</Markdown></p>
+            <Card className="w-full max-w-2xl mx-auto mt-8 shadow-card border border-border dark:border-border-dark animate-fade-in">
+              <CardBody className="p-8">
+                <div className="prose prose-gray dark:prose-invert max-w-none">
+                  <Markdown>{output}</Markdown>
+                </div>
               </CardBody>
             </Card>
           ) : null}
         </div>
 
-        {/* Call to Action */}
-        <div className="mt-16">
-          <Card className="bg-white dark:bg-gray-800 shadow-md border-none">
-            <CardBody className="p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Ready to explore deeper insights?</h2>
-                <p className="text-gray-600 dark:text-gray-300">Sign up to access advanced analytics and custom reports.</p>
-              </div>
-              <div className="flex gap-3">
-                <Button color="primary" size="lg" className="font-medium" onClick={handleSignupClick}>
-                  Sign up free
-                </Button>
-                <Button variant="bordered" size="lg" className="font-medium text-gray-500 dark:text-white">
-                  Learn more
-                </Button>
-              </div>
-            </CardBody>
-          </Card>
-        </div>
-
         {/* Footer */}
-        <footer className="mt-20 pt-8 border-t border-gray-200 dark:border-gray-800">
+        <footer className="mt-16 pt-8 border-t border-border dark:border-border-dark">
           <div className="text-center">
-            <p className="font-medium text-gray-600 dark:text-gray-300 mb-3">
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
               Supported by{" "}
-              <NextUILink href="https://openbuild.xyz/" className="text-primary hover:underline">
+              <NextUILink href="https://openbuild.xyz/" className="text-foreground dark:text-foreground font-medium hover:text-primary transition-colors">
                 OpenBuild
               </NextUILink>{" "}
               &{" "}
-              <NextUILink href="https://rss3.io/" className="text-primary hover:underline">
+              <NextUILink href="https://rss3.io/" className="text-foreground dark:text-foreground font-medium hover:text-primary transition-colors">
                 RSS3
               </NextUILink>
             </p>
-            <div className="flex flex-wrap justify-center gap-5 text-gray-600 dark:text-gray-400 mt-4 text-sm">
-              <NextUILink href="#" className="hover:text-primary transition-colors">About</NextUILink>
-              <NextUILink href="#" className="hover:text-primary transition-colors">Documentation</NextUILink>
-              <NextUILink href="#" className="hover:text-primary transition-colors">API</NextUILink>
-              <NextUILink href="#" className="hover:text-primary transition-colors">Privacy</NextUILink>
-              <NextUILink href="#" className="hover:text-primary transition-colors">Terms</NextUILink>
-            </div>
-            <p className="text-xs text-gray-500 dark:text-gray-500 mt-6">© 2024 {title}. All rights reserved.</p>
+            <p className="text-xs text-gray-400 dark:text-gray-600">© 2024 {title}. All rights reserved.</p>
           </div>
         </footer>
       </div>

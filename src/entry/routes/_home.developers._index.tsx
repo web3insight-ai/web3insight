@@ -2,91 +2,93 @@ import { json, MetaFunction } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import {
   Card, CardBody, CardHeader, Input, Dropdown, DropdownTrigger,
-  DropdownMenu, DropdownItem, Button, Pagination,
+  DropdownMenu, DropdownItem, Button, Pagination, Modal, ModalContent, ModalHeader, ModalBody,
 } from "@nextui-org/react";
-import { Filter, SortAsc, SortDesc, Search, Warehouse, Database, Users } from "lucide-react";
+import { Filter, SortAsc, SortDesc, Search, Users, GitCommit, Code, Trophy } from "lucide-react";
 import { useState, useMemo } from "react";
 import { fetchStatisticsRank } from "~/statistics/repository";
-import type { EcoRankRecord } from "~/api/typing";
+import type { ActorRankRecord } from "~/api/typing";
+import RepoLinkWidget from "~/repository/widgets/repo-link";
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "All Ecosystems | Web3 Insights" },
-    { property: "og:title", content: "All Ecosystems | Web3 Insights" },
-    { name: "description", content: "Comprehensive overview of all blockchain and Web3 ecosystems with analytics and insights" },
+    { title: "All Developers | Web3 Insights" },
+    { property: "og:title", content: "All Developers | Web3 Insights" },
+    { name: "description", content: "Top contributors and developers across Web3 ecosystems with activity metrics and contributions" },
   ];
 };
 
 export const loader = async () => {
   try {
     const rankResult = await fetchStatisticsRank();
-
-    const ecosystems = rankResult.success ? rankResult.data.ecosystem : [];
-
+    
+    const developers = rankResult.success ? rankResult.data.developer : [];
+    
     if (!rankResult.success) {
       console.warn("Statistics rank fetch failed:", rankResult.message);
     }
 
     // Calculate totals from the real data
-    const totalRepositories = ecosystems.reduce((acc, eco) => acc + Number(eco.repos_total), 0);
-    const totalDevelopers = ecosystems.reduce((acc, eco) => acc + Number(eco.actors_total), 0);
-    const totalCoreDevelopers = ecosystems.reduce((acc, eco) => acc + Number(eco.actors_core_total), 0);
-    const totalNewDevelopers = ecosystems.reduce((acc, eco) => acc + Number(eco.actors_new_total), 0);
+    const totalCommits = developers.reduce((acc, dev) => acc + Number(dev.total_commit_count), 0);
+    const coreDevelopers = developers.filter(dev => Number(dev.total_commit_count) > 100).length;
+    const activeDevelopers = developers.filter(dev => Number(dev.total_commit_count) > 10).length;
 
     return json({
-      ecosystems,
-      totalEcosystems: ecosystems.length,
-      totalRepositories,
-      totalDevelopers,
-      totalCoreDevelopers,
-      totalNewDevelopers,
+      developers,
+      totalDevelopers: developers.length,
+      totalCommits,
+      coreDevelopers,
+      activeDevelopers,
     });
   } catch (error) {
-    console.error("Loader error in ecosystems route:", error);
-
+    console.error("Loader error in developers route:", error);
+    
     return json({
-      ecosystems: [],
-      totalEcosystems: 0,
-      totalRepositories: 0,
+      developers: [],
       totalDevelopers: 0,
-      totalCoreDevelopers: 0,
-      totalNewDevelopers: 0,
+      totalCommits: 0,
+      coreDevelopers: 0,
+      activeDevelopers: 0,
     });
   }
 };
 
-export default function AllEcosystemsPage() {
-  const { ecosystems, totalEcosystems, totalRepositories, totalDevelopers, totalCoreDevelopers } = useLoaderData<typeof loader>();
+export default function AllDevelopersPage() {
+  const { developers, totalDevelopers, totalCommits, coreDevelopers, activeDevelopers } = useLoaderData<typeof loader>();
 
   // Pagination state
   const [page, setPage] = useState(1);
   const rowsPerPage = 25;
 
+  // Modal state for showing all repos
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDeveloper, setSelectedDeveloper] = useState<ActorRankRecord | null>(null);
+
   // Filtering and sorting state
   const [filterValue, setFilterValue] = useState("");
   const [sortDescriptor, setSortDescriptor] = useState({
-    column: "repos_total",
+    column: "total_commit_count",
     direction: "descending",
   });
 
-  // Filter ecosystems based on search query
+  // Filter developers based on search query
   const filteredItems = useMemo(() => {
-    let filtered = [...ecosystems];
+    let filtered = [...developers];
 
     if (filterValue) {
-      filtered = filtered.filter(ecosystem =>
-        ecosystem.eco_name.toLowerCase().includes(filterValue.toLowerCase()),
+      filtered = filtered.filter(developer =>
+        developer.actor_login.toLowerCase().includes(filterValue.toLowerCase()),
       );
     }
 
     return filtered;
-  }, [ecosystems, filterValue]);
+  }, [developers, filterValue]);
 
-  // Sort filtered ecosystems
+  // Sort filtered developers
   const sortedItems = useMemo(() => {
     return [...filteredItems].sort((a, b) => {
-      const first = a[sortDescriptor.column as keyof EcoRankRecord];
-      const second = b[sortDescriptor.column as keyof EcoRankRecord];
+      const first = a[sortDescriptor.column as keyof ActorRankRecord];
+      const second = b[sortDescriptor.column as keyof ActorRankRecord];
 
       if (first === undefined || second === undefined) return 0;
 
@@ -115,6 +117,12 @@ export default function AllEcosystemsPage() {
     }));
   };
 
+  // Handle showing all repos
+  const handleShowAllRepos = (developer: ActorRankRecord) => {
+    setSelectedDeveloper(developer);
+    setIsModalOpen(true);
+  };
+
   return (
     <div className="min-h-dvh bg-background dark:bg-background-dark pb-24">
       <div className="w-full max-w-content mx-auto px-6 pt-8">
@@ -122,12 +130,12 @@ export default function AllEcosystemsPage() {
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-3">
             <div className="p-2 rounded-lg bg-primary/10">
-              <Warehouse size={20} className="text-primary" />
+              <Users size={20} className="text-primary" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">All Ecosystems</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">All Developers</h1>
           </div>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
-            Compare metrics across all blockchain and Web3 ecosystems
+            Top contributors and developers across Web3 ecosystems
           </p>
         </div>
 
@@ -137,39 +145,7 @@ export default function AllEcosystemsPage() {
             <CardBody className="p-6">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-primary/10 rounded-xl flex-shrink-0">
-                  <Warehouse size={20} className="text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">Ecosystems</p>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {totalEcosystems.toLocaleString()}
-                  </h2>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-            <CardBody className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-secondary/10 rounded-xl flex-shrink-0">
-                  <Database size={20} className="text-secondary" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">Repositories</p>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {totalRepositories.toLocaleString()}
-                  </h2>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-            <CardBody className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-success/10 rounded-xl flex-shrink-0">
-                  <Users size={20} className="text-success" />
+                  <Users size={20} className="text-primary" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-500">Total Developers</p>
@@ -185,12 +161,44 @@ export default function AllEcosystemsPage() {
             <CardBody className="p-6">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-warning/10 rounded-xl flex-shrink-0">
-                  <Users size={20} className="text-warning" />
+                  <Trophy size={20} className="text-warning" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-500">Core Developers</p>
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {totalCoreDevelopers.toLocaleString()}
+                    {coreDevelopers.toLocaleString()}
+                  </h2>
+                </div>
+              </div>
+            </CardBody>
+          </Card>
+
+          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
+            <CardBody className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-success/10 rounded-xl flex-shrink-0">
+                  <Code size={20} className="text-success" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 dark:text-gray-500">Active Developers</p>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {activeDevelopers.toLocaleString()}
+                  </h2>
+                </div>
+              </div>
+            </CardBody>
+          </Card>
+
+          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
+            <CardBody className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-secondary/10 rounded-xl flex-shrink-0">
+                  <GitCommit size={20} className="text-secondary" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 dark:text-gray-500">Total Commits</p>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {totalCommits.toLocaleString()}
                   </h2>
                 </div>
               </div>
@@ -202,7 +210,7 @@ export default function AllEcosystemsPage() {
         <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
           <div className="w-full sm:w-72">
             <Input
-              placeholder="Search ecosystems..."
+              placeholder="Search developers..."
               value={filterValue}
               onChange={(e) => setFilterValue(e.target.value)}
               startContent={<Search size={18} className="text-gray-400" />}
@@ -220,42 +228,18 @@ export default function AllEcosystemsPage() {
                 </Button>
               </DropdownTrigger>
               <DropdownMenu aria-label="Sort options">
-                <DropdownItem key="eco_name" onClick={() => handleSortChange("eco_name")}>
+                <DropdownItem key="actor_login" onClick={() => handleSortChange("actor_login")}>
                   <div className="flex items-center justify-between w-full">
-                    <span>Ecosystem Name</span>
-                    {sortDescriptor.column === "eco_name" && (
+                    <span>Developer Name</span>
+                    {sortDescriptor.column === "actor_login" && (
                       sortDescriptor.direction === "ascending" ? <SortAsc size={16} /> : <SortDesc size={16} />
                     )}
                   </div>
                 </DropdownItem>
-                <DropdownItem key="repos_total" onClick={() => handleSortChange("repos_total")}>
+                <DropdownItem key="total_commit_count" onClick={() => handleSortChange("total_commit_count")}>
                   <div className="flex items-center justify-between w-full">
-                    <span>Repositories</span>
-                    {sortDescriptor.column === "repos_total" && (
-                      sortDescriptor.direction === "ascending" ? <SortAsc size={16} /> : <SortDesc size={16} />
-                    )}
-                  </div>
-                </DropdownItem>
-                <DropdownItem key="actors_total" onClick={() => handleSortChange("actors_total")}>
-                  <div className="flex items-center justify-between w-full">
-                    <span>Developers</span>
-                    {sortDescriptor.column === "actors_total" && (
-                      sortDescriptor.direction === "ascending" ? <SortAsc size={16} /> : <SortDesc size={16} />
-                    )}
-                  </div>
-                </DropdownItem>
-                <DropdownItem key="actors_core_total" onClick={() => handleSortChange("actors_core_total")}>
-                  <div className="flex items-center justify-between w-full">
-                    <span>Core Developers</span>
-                    {sortDescriptor.column === "actors_core_total" && (
-                      sortDescriptor.direction === "ascending" ? <SortAsc size={16} /> : <SortDesc size={16} />
-                    )}
-                  </div>
-                </DropdownItem>
-                <DropdownItem key="actors_new_total" onClick={() => handleSortChange("actors_new_total")}>
-                  <div className="flex items-center justify-between w-full">
-                    <span>New Developers</span>
-                    {sortDescriptor.column === "actors_new_total" && (
+                    <span>Commits</span>
+                    {sortDescriptor.column === "total_commit_count" && (
                       sortDescriptor.direction === "ascending" ? <SortAsc size={16} /> : <SortDesc size={16} />
                     )}
                   </div>
@@ -265,35 +249,33 @@ export default function AllEcosystemsPage() {
           </div>
         </div>
 
-        {/* Ecosystems Table */}
+        {/* Developers Table */}
         <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">
           <CardHeader className="px-6 py-5">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-primary/10">
-                <Warehouse size={18} className="text-primary" />
+                <Users size={18} className="text-primary" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">Ecosystem Analytics</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">Developer Analytics</h3>
             </div>
           </CardHeader>
-
+          
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-t border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider w-12">#</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Ecosystem</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Repos</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Devs</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Core</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">New</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Developer</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Commits</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Top Repos</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border dark:divide-border-dark">
-                {paginatedItems.map((ecosystem, index) => {
+                {paginatedItems.map((developer, index) => {
                   const absoluteIndex = (page - 1) * rowsPerPage + index + 1;
                   return (
-                    <tr
-                      key={ecosystem.eco_name}
+                    <tr 
+                      key={developer.actor_id} 
                       className="hover:bg-surface dark:hover:bg-surface-dark transition-colors duration-200 group animate-fade-in"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
@@ -309,32 +291,41 @@ export default function AllEcosystemsPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <Link
-                          to={`/ecosystems/${encodeURIComponent(ecosystem.eco_name)}`}
+                        <Link 
+                          to={`/developers/${developer.actor_id}`} 
                           className="font-medium text-gray-900 dark:text-white hover:text-primary transition-colors duration-200"
                         >
-                          {ecosystem.eco_name}
+                          @{developer.actor_login}
                         </Link>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
-                          {Number(ecosystem.repos_total).toLocaleString()}
+                          {Number(developer.total_commit_count).toLocaleString()}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
-                          {Number(ecosystem.actors_total).toLocaleString()}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
-                          {Number(ecosystem.actors_core_total).toLocaleString()}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
-                          {Number(ecosystem.actors_new_total).toLocaleString()}
-                        </span>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-wrap gap-2">
+                          {developer.top_repos.slice(0, 3).map((repo) => (
+                            <div
+                              key={repo.repo_id}
+                              className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-800"
+                            >
+                              <RepoLinkWidget
+                                repo={repo.repo_name}
+                                className="text-gray-700 dark:text-gray-300 hover:text-primary"
+                              />
+                              <span className="ml-1 text-gray-500 dark:text-gray-500">{repo.commit_count}</span>
+                            </div>
+                          ))}
+                          {developer.top_repos.length > 3 && (
+                            <button
+                              onClick={() => handleShowAllRepos(developer)}
+                              className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium text-primary hover:bg-primary/10 transition-colors cursor-pointer"
+                            >
+                              +{developer.top_repos.length - 3} more
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -342,7 +333,7 @@ export default function AllEcosystemsPage() {
               </tbody>
             </table>
           </div>
-
+          
           {pages > 1 && (
             <div className="px-6 py-4 border-t border-border dark:border-border-dark flex justify-center">
               <Pagination
@@ -354,6 +345,37 @@ export default function AllEcosystemsPage() {
           )}
         </Card>
       </div>
+
+      {/* Modal for showing all repositories */}
+      <Modal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)}
+        size="md"
+      >
+        <ModalContent>
+          <ModalHeader className="flex flex-col gap-1">
+            <h3 className="text-lg font-semibold">All Repositories</h3>
+            {selectedDeveloper && (
+              <p className="text-sm text-gray-500">@{selectedDeveloper.actor_login}</p>
+            )}
+          </ModalHeader>
+          <ModalBody className="pb-6">
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {selectedDeveloper?.top_repos.map((repo) => (
+                <div
+                  key={repo.repo_id}
+                  className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <RepoLinkWidget
+                    repo={repo.repo_name}
+                    className="text-sm font-medium text-gray-900 dark:text-white hover:text-primary"
+                  />
+                </div>
+              ))}
+            </div>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

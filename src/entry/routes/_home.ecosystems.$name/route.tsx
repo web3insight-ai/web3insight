@@ -45,30 +45,43 @@ export default function EcosystemPage() {
   const { ecosystem, statistics } = useLoaderData<typeof loader>();
 
   return (
-    <div className="min-h-dvh bg-gray-50 dark:bg-gray-900 py-10">
-      <div className="w-full max-w-[1200px] mx-auto px-4 sm:px-6">
+    <div className="min-h-dvh bg-background dark:bg-background-dark py-8">
+      <div className="w-full max-w-content mx-auto px-6">
         {/* Header and Overview */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-3">
-            <Warehouse size={24} className="text-primary" />
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{ecosystem} Ecosystem</h1>
+        <div className="mb-12 animate-fade-in">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="p-3 rounded-xl bg-primary/10">
+              <Warehouse size={28} className="text-primary" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">{ecosystem}</h1>
+              <p className="text-lg text-gray-500 dark:text-gray-400">Ecosystem Analytics</p>
+            </div>
           </div>
-          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
+          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl leading-relaxed">
             Comprehensive developer analytics and insights for the {ecosystem} ecosystem.
           </p>
         </div>
 
-        <MetricOverview className="mb-10" dataSource={statistics} />
-        <ClientOnly>
-          <ChartCard
-            className="mb-10"
-            style={{ height: "250px" }}
-            title="Developer Activity Trend"
-            option={resolveChartOptions(statistics.trend)}
-          />
-        </ClientOnly>
-        <RepositoryRankViewWidget className="mb-10" dataSource={statistics.repositories} />
-        <DeveloperRankViewWidget dataSource={statistics.developers} />
+        <div className="animate-slide-up" style={{ animationDelay: "100ms" }}>
+          <MetricOverview className="mb-12" dataSource={statistics} />
+        </div>
+        <div className="animate-slide-up" style={{ animationDelay: "200ms" }}>
+          <ClientOnly>
+            <ChartCard
+              className="mb-10"
+              style={{ height: "320px" }}
+              title="Developer Activity Trend"
+              option={resolveChartOptions(statistics.trend)}
+            />
+          </ClientOnly>
+        </div>
+        <div className="animate-slide-up" style={{ animationDelay: "300ms" }}>
+          <RepositoryRankViewWidget className="mb-10" dataSource={statistics.repositories} />
+        </div>
+        <div className="animate-slide-up" style={{ animationDelay: "400ms" }}>
+          <DeveloperRankViewWidget dataSource={statistics.developers} />
+        </div>
       </div>
     </div>
   );

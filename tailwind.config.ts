@@ -1,5 +1,5 @@
 import type { Config } from "tailwindcss";
-const { nextui } = require("@nextui-org/react");
+import { nextui } from "@nextui-org/react";
 
 export default {
   content: [
@@ -9,10 +9,92 @@ export default {
     "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: [
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Inter",
+          "SF Pro Display",
+          "Segoe UI",
+          "Roboto",
+          "sans-serif",
+        ],
+      },
+      colors: {
+        background: {
+          DEFAULT: "#FFFFFF",
+          dark: "#000000",
+        },
+        surface: {
+          DEFAULT: "#FAFAFA",
+          dark: "#0A0A0A",
+        },
+        border: {
+          DEFAULT: "rgba(0, 0, 0, 0.06)",
+          dark: "rgba(255, 255, 255, 0.06)",
+        },
+      },
+      spacing: {
+        18: "4.5rem",
+        88: "22rem",
+        120: "30rem",
+      },
+      maxWidth: {
+        "8xl": "88rem",
+        "content": "1024px",
+      },
+      boxShadow: {
+        "subtle": "0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06)",
+        "card": "0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06)",
+        "hover": "0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04)",
+      },
+      transitionDuration: {
+        DEFAULT: "200ms",
+      },
+      animation: {
+        "fade-in": "fadeIn 400ms ease-in-out",
+        "slide-up": "slideUp 400ms ease-out",
+      },
+      keyframes: {
+        fadeIn: {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        slideUp: {
+          "0%": { transform: "translateY(10px)", opacity: "0" },
+          "100%": { transform: "translateY(0)", opacity: "1" },
+        },
+      },
+    },
   },
   darkMode: "class",
   plugins: [
-    nextui(),
+    nextui({
+      themes: {
+        light: {
+          colors: {
+            background: "#FFFFFF",
+            foreground: "#000000",
+            primary: {
+              DEFAULT: "#006FEE",
+              foreground: "#FFFFFF",
+            },
+            focus: "#006FEE",
+          },
+        },
+        dark: {
+          colors: {
+            background: "#000000",
+            foreground: "#FFFFFF",
+            primary: {
+              DEFAULT: "#338EF7",
+              foreground: "#FFFFFF",
+            },
+            focus: "#338EF7",
+          },
+        },
+      },
+    }),
   ],
 } satisfies Config;

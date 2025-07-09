@@ -20,7 +20,7 @@ async function safeApiCall<T>(apiCall: () => Promise<T>): Promise<T> {
 
     return generateFailedResponse(
       error instanceof Error ? error.message : "Network request failed",
-      isTimeoutError ? 408 : 500
+      isTimeoutError ? 408 : 500,
     ) as T;
   }
 }

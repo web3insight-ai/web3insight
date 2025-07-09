@@ -4,59 +4,56 @@ import {
   Card, CardBody, CardHeader, Input, Dropdown, DropdownTrigger,
   DropdownMenu, DropdownItem, Button, Pagination,
 } from "@nextui-org/react";
-import { Filter, SortAsc, SortDesc, Search, Warehouse, Database, Users } from "lucide-react";
+import { Database, Filter, SortAsc, SortDesc, Search, Star, GitFork, Users } from "lucide-react";
 import { useState, useMemo } from "react";
 import { fetchStatisticsRank } from "~/statistics/repository";
-import type { EcoRankRecord } from "~/api/typing";
+import type { RepoRankRecord } from "~/api/typing";
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "All Ecosystems | Web3 Insights" },
-    { property: "og:title", content: "All Ecosystems | Web3 Insights" },
-    { name: "description", content: "Comprehensive overview of all blockchain and Web3 ecosystems with analytics and insights" },
+    { title: "All Repositories | Web3 Insights" },
+    { property: "og:title", content: "All Repositories | Web3 Insights" },
+    { name: "description", content: "Comprehensive analytics for all Web3 repositories including developer activity, stars, forks and contributions" },
   ];
 };
 
 export const loader = async () => {
   try {
     const rankResult = await fetchStatisticsRank();
-
-    const ecosystems = rankResult.success ? rankResult.data.ecosystem : [];
-
+    
+    const repositories = rankResult.success ? rankResult.data.repository : [];
+    
     if (!rankResult.success) {
       console.warn("Statistics rank fetch failed:", rankResult.message);
     }
 
     // Calculate totals from the real data
-    const totalRepositories = ecosystems.reduce((acc, eco) => acc + Number(eco.repos_total), 0);
-    const totalDevelopers = ecosystems.reduce((acc, eco) => acc + Number(eco.actors_total), 0);
-    const totalCoreDevelopers = ecosystems.reduce((acc, eco) => acc + Number(eco.actors_core_total), 0);
-    const totalNewDevelopers = ecosystems.reduce((acc, eco) => acc + Number(eco.actors_new_total), 0);
+    const totalStars = repositories.reduce((acc, repo) => acc + Number(repo.star_count), 0);
+    const totalForks = repositories.reduce((acc, repo) => acc + Number(repo.forks_count), 0);
+    const totalContributors = repositories.reduce((acc, repo) => acc + Number(repo.contributor_count), 0);
 
     return json({
-      ecosystems,
-      totalEcosystems: ecosystems.length,
-      totalRepositories,
-      totalDevelopers,
-      totalCoreDevelopers,
-      totalNewDevelopers,
+      repositories,
+      totalRepositories: repositories.length,
+      totalStars,
+      totalForks,
+      totalContributors,
     });
   } catch (error) {
-    console.error("Loader error in ecosystems route:", error);
-
+    console.error("Loader error in repositories route:", error);
+    
     return json({
-      ecosystems: [],
-      totalEcosystems: 0,
+      repositories: [],
       totalRepositories: 0,
-      totalDevelopers: 0,
-      totalCoreDevelopers: 0,
-      totalNewDevelopers: 0,
+      totalStars: 0,
+      totalForks: 0,
+      totalContributors: 0,
     });
   }
 };
 
-export default function AllEcosystemsPage() {
-  const { ecosystems, totalEcosystems, totalRepositories, totalDevelopers, totalCoreDevelopers } = useLoaderData<typeof loader>();
+export default function AllRepositoriesPage() {
+  const { repositories, totalRepositories, totalStars, totalForks, totalContributors } = useLoaderData<typeof loader>();
 
   // Pagination state
   const [page, setPage] = useState(1);
@@ -65,28 +62,28 @@ export default function AllEcosystemsPage() {
   // Filtering and sorting state
   const [filterValue, setFilterValue] = useState("");
   const [sortDescriptor, setSortDescriptor] = useState({
-    column: "repos_total",
+    column: "star_count",
     direction: "descending",
   });
 
-  // Filter ecosystems based on search query
+  // Filter repositories based on search query
   const filteredItems = useMemo(() => {
-    let filtered = [...ecosystems];
+    let filtered = [...repositories];
 
     if (filterValue) {
-      filtered = filtered.filter(ecosystem =>
-        ecosystem.eco_name.toLowerCase().includes(filterValue.toLowerCase()),
+      filtered = filtered.filter(repo =>
+        repo.repo_name.toLowerCase().includes(filterValue.toLowerCase()),
       );
     }
 
     return filtered;
-  }, [ecosystems, filterValue]);
+  }, [repositories, filterValue]);
 
-  // Sort filtered ecosystems
+  // Sort filtered repositories
   const sortedItems = useMemo(() => {
     return [...filteredItems].sort((a, b) => {
-      const first = a[sortDescriptor.column as keyof EcoRankRecord];
-      const second = b[sortDescriptor.column as keyof EcoRankRecord];
+      const first = a[sortDescriptor.column as keyof RepoRankRecord];
+      const second = b[sortDescriptor.column as keyof RepoRankRecord];
 
       if (first === undefined || second === undefined) return 0;
 
@@ -122,12 +119,12 @@ export default function AllEcosystemsPage() {
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-3">
             <div className="p-2 rounded-lg bg-primary/10">
-              <Warehouse size={20} className="text-primary" />
+              <Database size={20} className="text-primary" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">All Ecosystems</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">All Repositories</h1>
           </div>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
-            Compare metrics across all blockchain and Web3 ecosystems
+            Comprehensive analytics and insights across Web3 repositories
           </p>
         </div>
 
@@ -137,23 +134,7 @@ export default function AllEcosystemsPage() {
             <CardBody className="p-6">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-primary/10 rounded-xl flex-shrink-0">
-                  <Warehouse size={20} className="text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">Ecosystems</p>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {totalEcosystems.toLocaleString()}
-                  </h2>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-            <CardBody className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-secondary/10 rounded-xl flex-shrink-0">
-                  <Database size={20} className="text-secondary" />
+                  <Database size={20} className="text-primary" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-500">Repositories</p>
@@ -168,13 +149,29 @@ export default function AllEcosystemsPage() {
           <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
             <CardBody className="p-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-success/10 rounded-xl flex-shrink-0">
-                  <Users size={20} className="text-success" />
+                <div className="p-3 bg-secondary/10 rounded-xl flex-shrink-0">
+                  <Star size={20} className="text-secondary" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">Total Developers</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500">Total Stars</p>
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {totalDevelopers.toLocaleString()}
+                    {totalStars.toLocaleString()}
+                  </h2>
+                </div>
+              </div>
+            </CardBody>
+          </Card>
+
+          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
+            <CardBody className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-success/10 rounded-xl flex-shrink-0">
+                  <GitFork size={20} className="text-success" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 dark:text-gray-500">Total Forks</p>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {totalForks.toLocaleString()}
                   </h2>
                 </div>
               </div>
@@ -188,9 +185,9 @@ export default function AllEcosystemsPage() {
                   <Users size={20} className="text-warning" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">Core Developers</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500">Contributors</p>
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {totalCoreDevelopers.toLocaleString()}
+                    {totalContributors.toLocaleString()}
                   </h2>
                 </div>
               </div>
@@ -202,7 +199,7 @@ export default function AllEcosystemsPage() {
         <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
           <div className="w-full sm:w-72">
             <Input
-              placeholder="Search ecosystems..."
+              placeholder="Search repositories..."
               value={filterValue}
               onChange={(e) => setFilterValue(e.target.value)}
               startContent={<Search size={18} className="text-gray-400" />}
@@ -220,42 +217,42 @@ export default function AllEcosystemsPage() {
                 </Button>
               </DropdownTrigger>
               <DropdownMenu aria-label="Sort options">
-                <DropdownItem key="eco_name" onClick={() => handleSortChange("eco_name")}>
+                <DropdownItem key="repo_name" onClick={() => handleSortChange("repo_name")}>
                   <div className="flex items-center justify-between w-full">
-                    <span>Ecosystem Name</span>
-                    {sortDescriptor.column === "eco_name" && (
+                    <span>Repository Name</span>
+                    {sortDescriptor.column === "repo_name" && (
                       sortDescriptor.direction === "ascending" ? <SortAsc size={16} /> : <SortDesc size={16} />
                     )}
                   </div>
                 </DropdownItem>
-                <DropdownItem key="repos_total" onClick={() => handleSortChange("repos_total")}>
+                <DropdownItem key="star_count" onClick={() => handleSortChange("star_count")}>
                   <div className="flex items-center justify-between w-full">
-                    <span>Repositories</span>
-                    {sortDescriptor.column === "repos_total" && (
+                    <span>Stars</span>
+                    {sortDescriptor.column === "star_count" && (
                       sortDescriptor.direction === "ascending" ? <SortAsc size={16} /> : <SortDesc size={16} />
                     )}
                   </div>
                 </DropdownItem>
-                <DropdownItem key="actors_total" onClick={() => handleSortChange("actors_total")}>
+                <DropdownItem key="forks_count" onClick={() => handleSortChange("forks_count")}>
                   <div className="flex items-center justify-between w-full">
-                    <span>Developers</span>
-                    {sortDescriptor.column === "actors_total" && (
+                    <span>Forks</span>
+                    {sortDescriptor.column === "forks_count" && (
                       sortDescriptor.direction === "ascending" ? <SortAsc size={16} /> : <SortDesc size={16} />
                     )}
                   </div>
                 </DropdownItem>
-                <DropdownItem key="actors_core_total" onClick={() => handleSortChange("actors_core_total")}>
+                <DropdownItem key="open_issues_count" onClick={() => handleSortChange("open_issues_count")}>
                   <div className="flex items-center justify-between w-full">
-                    <span>Core Developers</span>
-                    {sortDescriptor.column === "actors_core_total" && (
+                    <span>Open Issues</span>
+                    {sortDescriptor.column === "open_issues_count" && (
                       sortDescriptor.direction === "ascending" ? <SortAsc size={16} /> : <SortDesc size={16} />
                     )}
                   </div>
                 </DropdownItem>
-                <DropdownItem key="actors_new_total" onClick={() => handleSortChange("actors_new_total")}>
+                <DropdownItem key="contributor_count" onClick={() => handleSortChange("contributor_count")}>
                   <div className="flex items-center justify-between w-full">
-                    <span>New Developers</span>
-                    {sortDescriptor.column === "actors_new_total" && (
+                    <span>Contributors</span>
+                    {sortDescriptor.column === "contributor_count" && (
                       sortDescriptor.direction === "ascending" ? <SortAsc size={16} /> : <SortDesc size={16} />
                     )}
                   </div>
@@ -265,35 +262,35 @@ export default function AllEcosystemsPage() {
           </div>
         </div>
 
-        {/* Ecosystems Table */}
+        {/* Repositories Table */}
         <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">
           <CardHeader className="px-6 py-5">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-primary/10">
-                <Warehouse size={18} className="text-primary" />
+                <Database size={18} className="text-primary" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">Ecosystem Analytics</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">Repository Analytics</h3>
             </div>
           </CardHeader>
-
+          
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-t border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider w-12">#</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Ecosystem</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Repos</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Devs</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Core</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">New</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Repository</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Stars</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Forks</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Issues</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Contributors</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border dark:divide-border-dark">
-                {paginatedItems.map((ecosystem, index) => {
+                {paginatedItems.map((repo, index) => {
                   const absoluteIndex = (page - 1) * rowsPerPage + index + 1;
                   return (
-                    <tr
-                      key={ecosystem.eco_name}
+                    <tr 
+                      key={repo.repo_id} 
                       className="hover:bg-surface dark:hover:bg-surface-dark transition-colors duration-200 group animate-fade-in"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
@@ -309,31 +306,31 @@ export default function AllEcosystemsPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <Link
-                          to={`/ecosystems/${encodeURIComponent(ecosystem.eco_name)}`}
+                        <Link 
+                          to={`/repositories/${repo.repo_id}`} 
                           className="font-medium text-gray-900 dark:text-white hover:text-primary transition-colors duration-200"
                         >
-                          {ecosystem.eco_name}
+                          {repo.repo_name}
                         </Link>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
-                          {Number(ecosystem.repos_total).toLocaleString()}
+                          {Number(repo.star_count).toLocaleString()}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
-                          {Number(ecosystem.actors_total).toLocaleString()}
+                          {Number(repo.forks_count).toLocaleString()}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
-                          {Number(ecosystem.actors_core_total).toLocaleString()}
+                          {Number(repo.open_issues_count).toLocaleString()}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
-                          {Number(ecosystem.actors_new_total).toLocaleString()}
+                          {Number(repo.contributor_count).toLocaleString()}
                         </span>
                       </td>
                     </tr>
@@ -342,7 +339,7 @@ export default function AllEcosystemsPage() {
               </tbody>
             </table>
           </div>
-
+          
           {pages > 1 && (
             <div className="px-6 py-4 border-t border-border dark:border-border-dark flex justify-center">
               <Pagination

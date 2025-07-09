@@ -1,63 +1,93 @@
 import { Link } from "@remix-run/react";
-import { Card, CardHeader, CardBody, Divider } from "@nextui-org/react";
-import { Warehouse } from "lucide-react";
+import { Card, CardHeader } from "@nextui-org/react";
+import { Warehouse, ArrowRight } from "lucide-react";
 
 import type { EcosystemRankViewWidgetProps } from "./typing";
 
 function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
   return (
-    <Card className="bg-white dark:bg-gray-800 shadow-sm border-none hover:shadow-md transition-all duration-300">
+    <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">
       <CardHeader className="px-6 py-5">
-        <div className="flex items-center gap-2">
-          <Warehouse size={18} className="text-primary" />
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Top Ecosystems</h3>
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-primary/10">
+            <Warehouse size={18} className="text-primary" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Top Ecosystems</h3>
         </div>
       </CardHeader>
-      <Divider />
-
-      {/* Ecosystem header row */}
-      <div className="px-6 py-3 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-800 grid grid-cols-12 gap-2">
-        <div className="col-span-1 text-xs font-medium text-gray-500 dark:text-gray-400">#</div>
-        <div className="col-span-3 text-xs font-medium text-gray-500 dark:text-gray-400">Ecosystem</div>
-        <div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400 text-right">Total Repos</div>
-        <div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400 text-right">Total Devs</div>
-        <div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400 text-right">Core Devs</div>
-        <div className="col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400 text-right">New Devs</div>
+      
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="border-t border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider w-12">#</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Ecosystem</th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Repos</th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Devs</th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Core</th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">New</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border dark:divide-border-dark">
+            {dataSource.slice(0, 10).map((ecosystem, index) => (
+              <tr 
+                key={index} 
+                className="hover:bg-surface dark:hover:bg-surface-dark transition-colors duration-200 group animate-fade-in"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="flex items-center">
+                    <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-medium transition-all duration-200 group-hover:scale-110
+                      ${index === 0 ? 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400' :
+                index === 1 ? 'bg-gray-100 dark:bg-gray-900/20 text-gray-700 dark:text-gray-400' :
+                  index === 2 ? 'bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400' :
+                    'bg-gray-50 dark:bg-gray-900/10 text-gray-500 dark:text-gray-500'}`}>
+                      {index + 1}
+                    </span>
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <Link 
+                    to={`/ecosystems/${encodeURIComponent(ecosystem.eco_name)}`} 
+                    className="font-medium text-gray-900 dark:text-white hover:text-primary transition-colors duration-200"
+                  >
+                    {ecosystem.eco_name}
+                  </Link>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-right">
+                  <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
+                    {Number(ecosystem.repos_total).toLocaleString()}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-right">
+                  <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
+                    {Number(ecosystem.actors_total).toLocaleString()}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-right">
+                  <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
+                    {Number(ecosystem.actors_core_total).toLocaleString()}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-right">
+                  <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
+                    {Number(ecosystem.actors_new_total).toLocaleString()}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-
-      <CardBody className="p-0">
-        <div className="divide-y divide-gray-100 dark:divide-gray-800">
-          {dataSource.map((ecosystem, index) => (
-            <div key={index} className="px-6 py-4 grid grid-cols-12 gap-2 items-center hover:bg-gray-50 dark:hover:bg-gray-500 transition-colors duration-200">
-              {/* Rank indicator */}
-              <div className="col-span-1">
-                <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full
-                  ${index === 0 ? 'bg-primary/10 text-primary' :
-              index === 1 ? 'bg-secondary/10 text-secondary' :
-                'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}
-                  text-xs font-medium`}>{index + 1}</span>
-              </div>
-              <div className="col-span-3 flex items-center gap-2 ">
-                <Link to={`/ecosystems/${encodeURIComponent(ecosystem.eco_name)}`} className="font-medium text-gray-900 dark:text-gray-300 hover:text-primary hover:underline">
-                  {ecosystem.eco_name}
-                </Link>
-              </div>
-              <div className="col-span-2 font-medium text-gray-700 dark:text-gray-300 text-right">
-                {Number(ecosystem.repos_total).toLocaleString()}
-              </div>
-              <div className="col-span-2 font-medium text-gray-700 dark:text-gray-300 text-right">
-                {Number(ecosystem.actors_total).toLocaleString()}
-              </div>
-              <div className="col-span-2 font-medium text-gray-700 dark:text-gray-300 text-right">
-                {Number(ecosystem.actors_core_total).toLocaleString()}
-              </div>
-              <div className="col-span-2 font-medium text-gray-700 dark:text-gray-300 text-right">
-                {Number(ecosystem.actors_new_total).toLocaleString()}
-              </div>
-            </div>
-          ))}
-        </div>
-      </CardBody>
+      <div className="px-6 py-4 border-t border-border dark:border-border-dark">
+        <Link 
+          to="/ecosystems" 
+          className="flex items-center justify-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200"
+        >
+          View All Ecosystems
+          <ArrowRight size={16} />
+        </Link>
+      </div>
     </Card>
   );
 }
