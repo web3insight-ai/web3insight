@@ -2,7 +2,7 @@ import type { ResponseResult } from "@/types";
 import { isServerSide, generateSuccessResponse } from "@/clients/http";
 import httpClient from "@/clients/http/default";
 
-import type { RepoRankRecord, ActorRankRecord, ActorTrendRecord } from "../../api/typing";
+import type { RepoRankRecord, ActorRankRecord, ActorTrendRecord, EcoRequestParams } from "../../api/typing";
 import {
   fetchRepoCount, fetchRepoRankList,
   fetchActorCount, fetchActorGrowthCount, fetchActorRankList, fetchActorTrendList,
@@ -77,7 +77,7 @@ async function fetchManageableRepositoryList(params: RepositoryListParams): Prom
   return fetchManageableRepoListByEco(params);
 }
 
-async function updateManageableRepositoryMark(data) {
+async function updateManageableRepositoryMark(data: EcoRequestParams & { id: number; mark: number }) {
   if (!isServerSide()) {
     return httpClient.put("/api/ecosystem/repos/mark", data);
   }

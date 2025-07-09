@@ -22,7 +22,7 @@ For instance, communities like OpenBuild face challenges in efficiently evaluati
 
 5. **Identity Correlation**: Continuously build a reliable database correlating GitHub users, email addresses, and wallet addresses within the Web3 space.
 
-6. **Reward Distribution Platform**:
+6. **Reward Distribution Platform**: (Currently in development)
    - Direct reward distribution to contributors who are platform users
    - Smart contract-generated Bounties/Grants for non-platform users, allowing them to claim rewards
    - User database matching and email notifications with authentication via GitHub handles
@@ -31,16 +31,15 @@ For instance, communities like OpenBuild face challenges in efficiently evaluati
 
 Web3Insights utilizes Remix.js as its frontend framework, interacting with a dedicated Strapi backend for API services, data management, and user authentication.
 
-1. **Frontend (Remix):** A React-based user interface built with Remix and TypeScript, styled using Tailwind CSS. Handles user interactions, client-side routing, and displays data fetched from the Strapi backend. Remix's server functions primarily handle Server-Side Rendering (SSR) and routing logic.
-2. **Backend API & Authentication (Strapi):** A Node.js Strapi application serves as the core backend, providing RESTful or GraphQL APIs for data operations and handling user authentication (signup, login, session management).
+1. **Frontend (Remix):** A React-based user interface built with Remix and TypeScript, styled using Tailwind CSS and NextUI components. Handles user interactions, client-side routing, and displays data fetched from the Strapi backend. Remix's server functions primarily handle Server-Side Rendering (SSR) and routing logic.
+2. **Backend API & Authentication (Strapi):** A Node.js Strapi application serves as the core backend, providing RESTful APIs for data operations and handling user authentication (local auth and GitHub OAuth).
 3. **Database:** PostgreSQL serves as the primary relational database, managed by Strapi. Redis is used for caching to improve performance.
-4. **Blockchain Service:** Interacts with Ethereum-compatible blockchains using `viem` for tasks like reading data and potentially triggering transactions (e.g., reward distribution via smart contracts like `Web3InsightsBadge.sol`).
-5. **AI Service:** Leverages the OpenAI and other compatible API providers for generating insights and analysis reports.
-6. **External Data Sources:** Fetches data from APIs like OpenDigger, OSS Insight, and RSS3 to gather metrics on repositories, developers, and ecosystems.
+4. **AI Service:** Leverages OpenAI and Azure OpenAI API providers for generating insights and analysis reports.
+5. **External Data Sources:** Fetches data from APIs like OpenDigger, OSS Insight, and RSS3 to gather metrics on repositories, developers, and ecosystems.
 
 **Data Flow:**
 
-User interactions trigger requests within the Remix frontend. Remix handles routing and SSR, making API calls to the Strapi backend for data fetching, mutations, and authentication. Strapi processes these requests, interacts with the database (PostgreSQL), cache (Redis), blockchain services, AI engine, or external APIs as needed, and returns data to the Remix frontend for rendering.
+User interactions trigger requests within the Remix frontend. Remix handles routing and SSR, making API calls to the Strapi backend for data fetching, mutations, and authentication. Strapi processes these requests, interacts with the database (PostgreSQL), cache (Redis), AI services, or external APIs as needed, and returns data to the Remix frontend for rendering.
 
 ## Roadmap
 

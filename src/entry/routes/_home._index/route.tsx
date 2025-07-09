@@ -15,7 +15,6 @@ import { getMetadata } from "@/utils/app";
 
 import { authModalOpenAtom, authModalTypeAtom } from "#/atoms";
 
-import { ErrorType } from "~/query/helper";
 import { fetchStatisticsOverview, fetchStatisticsRank } from "~/statistics/repository";
 import EcosystemRankViewWidget from "~/ecosystem/views/ecosystem-rank";
 import RepositoryRankViewWidget from "~/repository/views/repository-rank";
@@ -128,7 +127,6 @@ export default function Index() {
   const fetcher = useFetcher<typeof action>();
   const asking = fetcher.state === "submitting";
   const errorMessage = fetcher.data?.error || null;
-  const errorType = fetcher.data?.type || null;
   const [, setAuthModalOpen] = useAtom(authModalOpenAtom);
   const [, setAuthModalType] = useAtom(authModalTypeAtom);
   const [input, setInput] = useState("");
@@ -140,13 +138,11 @@ export default function Index() {
 
   useEffect(() => {
     if (fetcher.state === "idle" && errorMessage) {
-      if (errorType === ErrorType.SigninNeeded) {
-        // Open the sign-in modal when unauthorized
-        setAuthModalType("signin");
-        setAuthModalOpen(true);
-      }
+      // Open the sign-in modal when unauthorized
+      setAuthModalType("signin");
+      setAuthModalOpen(true);
     }
-  }, [fetcher.state, errorMessage, errorType, setAuthModalOpen, setAuthModalType]);
+  }, [fetcher.state, errorMessage, setAuthModalOpen, setAuthModalType]);
 
   // Function to handle signup click
   // const handleSignupClick = () => {
