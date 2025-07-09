@@ -5,3 +5,144 @@
 html {
   @apply antialiased;
 }
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent;
+  }
+
+  .bg-gradient-radial {
+    background: radial-gradient(
+      ellipse at center,
+      rgba(0, 111, 238, 0.15) 0%,
+      transparent 70%
+    );
+  }
+
+  .answer-card-bg {
+    background: linear-gradient(135deg, #f8f9fa 0%, #f3f4f6 50%, #fafbfc 100%);
+  }
+
+  .answer-card-bg-dark {
+    background: linear-gradient(135deg, #0a0a0a 0%, #111111 50%, #0f0f0f 100%);
+  }
+
+  .answer-card-pattern {
+    background-image: 
+      radial-gradient(circle at 1px 1px, rgba(0, 111, 238, 0.03) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  .search-glow {
+    box-shadow: 
+      0 0 0 1px rgba(0, 111, 238, 0.1),
+      0 2px 4px rgba(0, 111, 238, 0.05),
+      0 4px 8px rgba(0, 111, 238, 0.05),
+      0 8px 16px rgba(0, 111, 238, 0.05);
+  }
+
+  .search-glow-focus {
+    box-shadow: 
+      0 0 0 2px rgba(0, 111, 238, 0.2),
+      0 2px 4px rgba(0, 111, 238, 0.1),
+      0 4px 8px rgba(0, 111, 238, 0.1),
+      0 8px 16px rgba(0, 111, 238, 0.1),
+      0 16px 32px rgba(0, 111, 238, 0.1);
+  }
+
+  .card-glow {
+    box-shadow: 
+      0 0 0 1px rgba(0, 111, 238, 0.1),
+      0 10px 40px -10px rgba(0, 111, 238, 0.3);
+  }
+
+  .typewriter-cursor::after {
+    content: '|';
+    @apply text-primary animate-blink ml-1;
+  }
+
+  .shimmer-bg {
+    background: linear-gradient(
+      105deg,
+      transparent 40%,
+      rgba(255, 255, 255, 0.7) 50%,
+      transparent 60%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s ease-in-out infinite;
+  }
+
+  .glass-morphism {
+    @apply backdrop-blur-xl bg-white/80 dark:bg-black/80;
+  }
+
+  .gradient-border {
+    position: relative;
+    background: linear-gradient(to right, #006FEE, #338EF7);
+    padding: 1px;
+    border-radius: 0.75rem;
+  }
+
+  .gradient-border > * {
+    @apply bg-white dark:bg-black rounded-xl;
+  }
+
+  .prose-enhanced {
+    @apply text-gray-700 dark:text-gray-300;
+  }
+
+  .prose-enhanced h1, 
+  .prose-enhanced h2, 
+  .prose-enhanced h3 {
+    @apply font-semibold text-gray-900 dark:text-gray-100 mb-4;
+  }
+
+  .prose-enhanced h1 {
+    @apply text-2xl;
+  }
+
+  .prose-enhanced h2 {
+    @apply text-xl;
+  }
+
+  .prose-enhanced h3 {
+    @apply text-lg;
+  }
+
+  .prose-enhanced p {
+    @apply leading-relaxed mb-4;
+  }
+
+  .prose-enhanced strong {
+    @apply font-semibold text-gray-900 dark:text-gray-100;
+  }
+
+  .prose-enhanced ul, 
+  .prose-enhanced ol {
+    @apply ml-6 mb-4 space-y-2;
+  }
+
+  .prose-enhanced li {
+    @apply leading-relaxed;
+  }
+}
+
+@layer components {
+  .prose pre {
+    @apply bg-surface dark:bg-surface-dark rounded-lg overflow-x-auto;
+  }
+
+  .prose code {
+    @apply bg-primary/10 text-primary px-1 py-0.5 rounded text-sm;
+  }
+
+  .prose pre code {
+    @apply bg-transparent p-0;
+  }
+
+  .loading-skeleton {
+    @apply bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800;
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+}

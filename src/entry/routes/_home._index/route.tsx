@@ -1,4 +1,4 @@
-import { Card, CardBody, Link as NextUILink, Input } from "@nextui-org/react";
+import { Link as NextUILink, Input, Skeleton, Modal, ModalContent, ModalHeader, ModalBody } from "@nextui-org/react";
 import {
   json,
   // redirect,
@@ -6,9 +6,9 @@ import {
   type MetaFunction,
 } from "@remix-run/node";
 import { useLoaderData, useFetcher } from "@remix-run/react";
-import { ArrowRight, Search } from "lucide-react";
+import { ArrowRight, Search, Sparkles } from "lucide-react";
 // import { getClientIPAddress } from "remix-utils/get-client-ip-address";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAtom } from "jotai";
 
 import { getMetadata } from "@/utils/app";
@@ -133,6 +133,10 @@ export default function Index() {
   const [, setAuthModalType] = useAtom(authModalTypeAtom);
   const [input, setInput] = useState("");
   const [output, setOutput] = useState<string>("");
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const outputRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     if (fetcher.state === "idle" && errorMessage) {
@@ -152,6 +156,8 @@ export default function Index() {
 
   const onClickHandle = () => {
     setOutput("");
+    setIsStreaming(true);
+    setIsModalOpen(true);
     const controller = new AbortController();
 
     fetch("/api/ai/query", {
@@ -179,12 +185,19 @@ export default function Index() {
           line = line.trim();
           if (!line.startsWith("data:")) continue;
           const jsonStr = line.replace(/^data:\s*/, "");
-          if (jsonStr === "[DONE]") return;
+          if (jsonStr === "[DONE]") {
+            setIsStreaming(false);
+            return;
+          }
 
           try {
             const parsed = JSON.parse(jsonStr);
             const piece = parsed?.data?.answer || "";
             setOutput((prev) => prev + piece);
+            // Auto-scroll to bottom
+            if (outputRef.current) {
+              outputRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+            }
           } catch (e) {
             console.log(e);
           }
@@ -192,19 +205,104 @@ export default function Index() {
 
         buffer = lines[lines.length - 1];
       }
+    }).catch(() => {
+      setIsStreaming(false);
     });
 
     return () => controller.abort();
   };
 
+  const handleExampleClick = (example: string) => {
+    setInput(example);
+    // Use setTimeout to ensure input is set before submitting
+    setTimeout(() => {
+      if (formRef.current) {
+        const submitButton = formRef.current.querySelector('button[type="submit"]') as HTMLButtonElement;
+        submitButton?.click();
+      }
+    }, 0);
+  };
+
   return (
     <div className="min-h-dvh flex flex-col">
-      <div className="w-full max-w-content mx-auto px-6 pt-8 pb-4">
+      <div className="w-full max-w-content mx-auto px-6 py-8">
+        {/* Search Section */}
+        <div className="mb-12">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium mb-3">
+              <Sparkles size={14} />
+              <span>AI-Powered Insights</span>
+            </div>
+            <h2 className="text-2xl font-bold mb-2">Ask Anything About Web3</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
+              Get instant insights about ecosystems, developers, repositories, and more
+            </p>
+          </div>
+
+          <div className="relative max-w-xl mx-auto">
+            {/* Gradient background effect */}
+            <div className="absolute inset-0 bg-gradient-radial opacity-30 blur-2xl" />
+
+            <div className="relative">
+              <fetcher.Form ref={formRef} method="POST" action="?index">
+                <div className="relative">
+                  <Input
+                    name="query"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    required
+                    fullWidth
+                    size="md"
+                    placeholder="Ask about ecosystems, developers, or repositories..."
+                    classNames={{
+                      input: "h-12 text-sm font-normal pr-12",
+                      inputWrapper: "h-12 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-primary focus-within:border-primary transition-colors shadow-sm",
+                    }}
+                    startContent={<Search size={18} className="text-gray-400" />}
+                  />
+                  <button
+                    type="submit"
+                    disabled={asking || !input.trim()}
+                    onClick={onClickHandle}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-primary hover:bg-primary/90 text-white rounded-md flex items-center justify-center transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {asking ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <ArrowRight size={16} />
+                    )}
+                  </button>
+                </div>
+                {errorMessage && (
+                  <p className="text-xs text-danger mt-2 text-center animate-fade-in">{errorMessage}</p>
+                )}
+              </fetcher.Form>
+
+              {/* Example queries */}
+              <div className="flex flex-wrap justify-center gap-2 mt-4">
+                {[
+                  "top ecosystems of web3",
+                  "how many core devs of ethereum",
+                  "top contributor of solana",
+                ].map((example) => (
+                  <button
+                    key={example}
+                    type="button"
+                    onClick={() => handleExampleClick(example)}
+                    className="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition-colors duration-200"
+                  >
+                    {example}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
         <MetricOverview dataSource={statisticOverview} />
       </div>
 
-      <div className="w-full max-w-content mx-auto px-6 pb-16">
-
+      <div className="w-full max-w-content mx-auto px-6 pb-12">
         <Section
           className="mt-12"
           title="Web3 Ecosystem Analytics"
@@ -227,57 +325,6 @@ export default function Index() {
           <DeveloperRankViewWidget dataSource={statisticRank.developer} view="grid" />
         </Section>
 
-        <div className="mt-12">
-          {/* Search Section */}
-          <div className="w-full max-w-2xl mx-auto">
-            <fetcher.Form method="POST" action="?index">
-              <div className="relative">
-                <Input
-                  name="query"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  required
-                  fullWidth
-                  size="lg"
-                  placeholder="Ask anything about ecosystem, community..."
-                  classNames={{
-                    input: "h-14 text-base font-normal",
-                    inputWrapper: "h-14 shadow-subtle bg-white dark:bg-surface-dark pr-14 border border-border dark:border-border-dark hover:shadow-card transition-shadow",
-                  }}
-                  startContent={<Search size={20} className="text-gray-400" />}
-                />
-                <button
-                  type="submit"
-                  disabled={asking}
-                  onClick={onClickHandle}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-primary hover:bg-primary/90 text-white rounded-lg flex items-center justify-center transition-colors"
-                >
-                  {asking ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <ArrowRight size={18} />
-                  )}
-                </button>
-              </div>
-              {errorMessage && (
-                <p className="text-sm text-danger mt-2 text-center">{errorMessage}</p>
-              )}
-            </fetcher.Form>
-            <p className="text-sm text-gray-500 dark:text-gray-500 mt-4 text-center">
-              Try queries like &quot;top ecosystems of web3&quot;, &quot;how many core devs of ethereum&quot;, or &quot;top contributor of solana&quot;
-            </p>
-          </div>
-          {output.length > 0 ? (
-            <Card className="w-full max-w-2xl mx-auto mt-8 shadow-card border border-border dark:border-border-dark animate-fade-in">
-              <CardBody className="p-8">
-                <div className="prose prose-gray dark:prose-invert max-w-none">
-                  <Markdown>{output}</Markdown>
-                </div>
-              </CardBody>
-            </Card>
-          ) : null}
-        </div>
-
         {/* Footer */}
         <footer className="mt-16 pt-8 border-t border-border dark:border-border-dark">
           <div className="text-center">
@@ -295,6 +342,71 @@ export default function Index() {
           </div>
         </footer>
       </div>
+
+      {/* Answer Display Modal */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setIsStreaming(false);
+        }}
+        size="3xl"
+        scrollBehavior="inside"
+        classNames={{
+          base: "max-h-[90vh]",
+          wrapper: "overflow-visible",
+          backdrop: "bg-black/50",
+          header: "border-b border-gray-200 dark:border-gray-800",
+          body: "p-0 overflow-visible",
+          closeButton: "hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",
+        }}
+      >
+        <ModalContent>
+          <ModalHeader className="flex items-center gap-2 px-6 py-4">
+            <Sparkles size={20} className="text-primary" />
+            <span className="text-lg font-semibold">Web3Insights</span>
+          </ModalHeader>
+          <ModalBody className="overflow-visible">
+            <div className="answer-card-bg dark:answer-card-bg-dark relative rounded-b-lg overflow-hidden">
+              {/* Subtle pattern overlay */}
+              <div className="absolute inset-0 answer-card-pattern opacity-50" />
+
+              <div className="p-8 relative z-10">
+                {isStreaming && output.length === 0 && (
+                  <div className="space-y-3">
+                    <Skeleton className="h-4 w-3/4 rounded-lg" />
+                    <Skeleton className="h-4 w-full rounded-lg" />
+                    <Skeleton className="h-4 w-5/6 rounded-lg" />
+                  </div>
+                )}
+                {output.length > 0 && (
+                  <div className="prose-enhanced animate-fade-in">
+                    <div className={isStreaming ? "typewriter-cursor" : ""}>
+                      <Markdown
+                        components={{
+                          h1: ({ children }) => <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">{children}</h1>,
+                          h2: ({ children }) => <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3 mt-6">{children}</h2>,
+                          h3: ({ children }) => <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 mt-4">{children}</h3>,
+                          p: ({ children }) => <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">{children}</p>,
+                          strong: ({ children }) => <strong className="font-semibold text-gray-900 dark:text-gray-100">{children}</strong>,
+                          ul: ({ children }) => <ul className="list-disc ml-6 mb-4 space-y-2 text-gray-700 dark:text-gray-300">{children}</ul>,
+                          ol: ({ children }) => <ol className="list-decimal ml-6 mb-4 space-y-2 text-gray-700 dark:text-gray-300">{children}</ol>,
+                          li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+                          code: ({ children }) => <code className="bg-gray-100 dark:bg-gray-800 text-primary px-1.5 py-0.5 rounded text-sm font-mono">{children}</code>,
+                          pre: ({ children }) => <pre className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 overflow-x-auto mb-4">{children}</pre>,
+                        }}
+                      >
+                        {output}
+                      </Markdown>
+                    </div>
+                  </div>
+                )}
+                <div ref={outputRef} />
+              </div>
+            </div>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

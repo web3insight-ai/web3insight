@@ -10,7 +10,7 @@ async function fetchRepoList(login: string): Promise<ResponseResult<Repo[]>> {
 async function fetchPublicEventList(login: string): Promise<ResponseResult<Event[]>> {
   return httpClient.get(`/users/${login}/events/public`, {
     params: {
-      per_page: 50,
+      per_page: 20,
     },
   });
 }
