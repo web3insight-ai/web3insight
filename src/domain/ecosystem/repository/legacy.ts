@@ -81,30 +81,53 @@ async function getInfo(query: string) {
 }
 
 async function fetchRepoAnalysis(repo: string) {
-  const [
-    { data: openrank },
-    communityOpenrankRes,
-    { data: attention },
-    { data: participants },
-    { data: newContributors },
-    { data: inactiveContributors },
-  ] = await Promise.all([
-    fetchRepoOpenrank(repo),
-    fetchRepoCommunityOpenrank(repo),
-    fetchRepoAttention(repo),
-    fetchRepoParticipants(repo),
-    fetchRepoNewContributors(repo),
-    fetchRepoInactiveContributors(repo),
-  ]);
+  try {
+    const [
+      openrankRes,
+      communityOpenrankRes,
+      attentionRes,
+      participantsRes,
+      newContributorsRes,
+      inactiveContributorsRes,
+    ] = await Promise.allSettled([
+      fetchRepoOpenrank(repo),
+      fetchRepoCommunityOpenrank(repo),
+      fetchRepoAttention(repo),
+      fetchRepoParticipants(repo),
+      fetchRepoNewContributors(repo),
+      fetchRepoInactiveContributors(repo),
+    ]);
 
-  return generateSuccessResponse({
-    openrank,
-    communityOpenrank: { data: communityOpenrankRes.data, ...communityOpenrankRes.extra },
-    attention,
-    participants,
-    newContributors,
-    inactiveContributors,
-  });
+    // Extract data from settled promises, use null for failed requests
+    const openrank = openrankRes.status === 'fulfilled' ? openrankRes.value.data : null;
+    const communityOpenrank = communityOpenrankRes.status === 'fulfilled' 
+      ? { data: communityOpenrankRes.value.data, ...communityOpenrankRes.value.extra }
+      : null;
+    const attention = attentionRes.status === 'fulfilled' ? attentionRes.value.data : null;
+    const participants = participantsRes.status === 'fulfilled' ? participantsRes.value.data : null;
+    const newContributors = newContributorsRes.status === 'fulfilled' ? newContributorsRes.value.data : null;
+    const inactiveContributors = inactiveContributorsRes.status === 'fulfilled' ? inactiveContributorsRes.value.data : null;
+
+    return generateSuccessResponse({
+      openrank,
+      communityOpenrank,
+      attention,
+      participants,
+      newContributors,
+      inactiveContributors,
+    });
+  } catch (error) {
+    console.error("Error in fetchRepoAnalysis:", error);
+    // Return empty data if all requests fail
+    return generateSuccessResponse({
+      openrank: null,
+      communityOpenrank: null,
+      attention: null,
+      participants: null,
+      newContributors: null,
+      inactiveContributors: null,
+    });
+  }
 }
 
 export { fetchOne, getInfo, fetchRepoAnalysis };

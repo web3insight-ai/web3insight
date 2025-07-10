@@ -53,7 +53,7 @@ function RepositoryRankView({ className, dataSource }: RepositoryRankViewWidgetP
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <Link 
-                    to={`/repositories/${repo.fullName}`} 
+                    to={`/repositories/${repo.id}`} 
                     className="font-medium text-gray-900 dark:text-white hover:text-primary transition-colors duration-200"
                   >
                     {repo.fullName}

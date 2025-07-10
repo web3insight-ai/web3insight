@@ -376,7 +376,7 @@ export default function Index() {
                 RSS3
               </NextUILink>
             </p>
-            <p className="text-xs text-gray-400 dark:text-gray-600">© 2024 {title}. All rights reserved.</p>
+            <p className="text-xs text-gray-400 dark:text-gray-600">© {new Date().getFullYear()} {title}. All rights reserved.</p>
           </div>
         </footer>
       </div>
