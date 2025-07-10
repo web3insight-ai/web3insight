@@ -1,7 +1,6 @@
 import ChartCard from "@/components/control/chart-card";
 
 import RepositoryHeaderWidget from "~/repository/widgets/repository-header";
-import CommunityContributorsWidget from "~/repository/widgets/community-contributors";
 import ClientOnly from "#/components/ClientOnly";
 
 import type { RepositoryDetailProps } from "./typing";
@@ -76,88 +75,84 @@ function RepositoryDetail({ repository, analysis }: RepositoryDetailProps) {
               </div>
             )}
 
-            {/* Community OpenRank */}
-            {analysis.communityOpenrank?.data && (
-              <div className="animate-slide-up mb-8" style={{ animationDelay: "200ms" }}>
-                <CommunityContributorsWidget data={analysis.communityOpenrank.data} />
-              </div>
-            )}
-
             {/* Activity Metrics */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-slide-up" style={{ animationDelay: "300ms" }}>
-              {/* Participants */}
-              {analysis.participants && Object.keys(analysis.participants).length > 0 && (
-                <ClientOnly>
-                  <ChartCard
-                    title="Active Participants"
-                    style={{ height: "280px" }}
-                    option={{
-                      tooltip: {
-                        trigger: 'axis',
-                      },
-                      xAxis: {
-                        type: 'category',
-                        data: Object.keys(analysis.participants).slice(-12),
-                        axisLabel: {
-                          rotate: 45,
-                          formatter: function(value: string) {
-                            return value.slice(0, 7);
+            <div className="animate-slide-up" style={{ animationDelay: "300ms" }}>
+              {/* Participants and New Contributors in 2 columns */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                {/* Participants */}
+                {analysis.participants && Object.keys(analysis.participants).length > 0 && (
+                  <ClientOnly>
+                    <ChartCard
+                      title="Active Participants"
+                      style={{ height: "280px" }}
+                      option={{
+                        tooltip: {
+                          trigger: 'axis',
+                        },
+                        xAxis: {
+                          type: 'category',
+                          data: Object.keys(analysis.participants).slice(-12),
+                          axisLabel: {
+                            rotate: 45,
+                            formatter: function(value: string) {
+                              return value.slice(0, 7);
+                            },
                           },
                         },
-                      },
-                      yAxis: {
-                        type: 'value',
-                        name: 'Count',
-                      },
-                      series: [{
-                        data: Object.values(analysis.participants).slice(-12),
-                        type: 'bar',
-                        itemStyle: {
-                          color: '#10B981',
+                        yAxis: {
+                          type: 'value',
+                          name: 'Count',
                         },
-                      }],
-                    }}
-                  />
-                </ClientOnly>
-              )}
+                        series: [{
+                          data: Object.values(analysis.participants).slice(-12),
+                          type: 'bar',
+                          itemStyle: {
+                            color: '#10B981',
+                          },
+                        }],
+                      }}
+                    />
+                  </ClientOnly>
+                )}
 
-              {/* New Contributors */}
-              {analysis.newContributors && Object.keys(analysis.newContributors).length > 0 && (
-                <ClientOnly>
-                  <ChartCard
-                    title="New Contributors"
-                    style={{ height: "280px" }}
-                    option={{
-                      tooltip: {
-                        trigger: 'axis',
-                      },
-                      xAxis: {
-                        type: 'category',
-                        data: Object.keys(analysis.newContributors).slice(-12),
-                        axisLabel: {
-                          rotate: 45,
-                          formatter: function(value: string) {
-                            return value.slice(0, 7);
+                {/* New Contributors */}
+                {analysis.newContributors && Object.keys(analysis.newContributors).length > 0 && (
+                  <ClientOnly>
+                    <ChartCard
+                      title="New Contributors"
+                      style={{ height: "280px" }}
+                      option={{
+                        tooltip: {
+                          trigger: 'axis',
+                        },
+                        xAxis: {
+                          type: 'category',
+                          data: Object.keys(analysis.newContributors).slice(-12),
+                          axisLabel: {
+                            rotate: 45,
+                            formatter: function(value: string) {
+                              return value.slice(0, 7);
+                            },
                           },
                         },
-                      },
-                      yAxis: {
-                        type: 'value',
-                        name: 'Count',
-                      },
-                      series: [{
-                        data: Object.values(analysis.newContributors).slice(-12),
-                        type: 'bar',
-                        itemStyle: {
-                          color: '#8B5CF6',
+                        yAxis: {
+                          type: 'value',
+                          name: 'Count',
                         },
-                      }],
-                    }}
-                  />
-                </ClientOnly>
-              )}
+                        series: [{
+                          data: Object.values(analysis.newContributors).slice(-12),
+                          type: 'bar',
+                          itemStyle: {
+                            color: '#8B5CF6',
+                          },
+                        }],
+                      }}
+                    />
+                  </ClientOnly>
+                )}
+              </div>
 
-              {/* Attention */}
+              {/* Attention - Full Width */}
               {analysis.attention && Object.keys(analysis.attention).length > 0 && (
                 <ClientOnly>
                   <ChartCard
