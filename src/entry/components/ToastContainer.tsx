@@ -35,7 +35,7 @@ function ToastItem({ toast }: { toast: Toast }) {
 
   return (
     <Card
-      className={`mb-2 shadow-lg border-l-4 border-l-${getToastColor(type)} animate-in slide-in-from-right duration-300`}
+      className={`mb-2 shadow-lg border-l-4 border-l-${getToastColor(toast.type)} animate-in slide-in-from-right duration-300`}
     >
       <CardBody className="flex flex-row items-start justify-between p-4">
         <div className="flex items-start space-x-3">

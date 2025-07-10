@@ -12,12 +12,4 @@ function getTitle() {
   return metadata.title;
 }
 
-function getTagline() {
-  return metadata.tagline;
-}
-
-function getDescription() {
-  return metadata.description;
-}
-
-export { getMetadata, getTitle, getTagline, getDescription };
+export { getMetadata, getTitle };

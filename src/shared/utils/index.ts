@@ -1,6 +1,6 @@
 export {
   noop,
-  isBoolean, isNumber, isString, isNumeric, isFunction, isArray, isPlainObject,
+  isNumber, isString, isNumeric, isArray, isPlainObject,
   capitalize,
   pick, omit,
 } from "@ntks/toolbox";
