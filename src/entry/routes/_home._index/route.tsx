@@ -133,8 +133,10 @@ export default function Index() {
   const [output, setOutput] = useState<string>("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const outputRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const modalBodyRef = useRef<HTMLDivElement>(null);
+  const [userHasScrolled, setUserHasScrolled] = useState(false);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
     if (fetcher.state === "idle" && errorMessage) {
@@ -150,10 +152,54 @@ export default function Index() {
   //   setAuthModalOpen(true);
   // };
 
+  // Check if user is at the bottom of the scrollable area
+  const isAtBottom = (element: HTMLElement) => {
+    const threshold = 50; // pixels from bottom
+    return element.scrollHeight - element.scrollTop - element.clientHeight < threshold;
+  };
+
+  // Smart auto-scroll function
+  const autoScroll = () => {
+    if (!modalBodyRef.current || userHasScrolled) return;
+
+    const modalBody = modalBodyRef.current;
+    const shouldScroll = isAtBottom(modalBody);
+
+    if (shouldScroll) {
+      // Clear any pending scroll
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+
+      // Use requestAnimationFrame for smooth scrolling
+      requestAnimationFrame(() => {
+        modalBody.scrollTo({
+          top: modalBody.scrollHeight,
+          behavior: 'smooth',
+        });
+      });
+    }
+  };
+
+  // Handle scroll events to detect user interaction
+  const handleScroll = () => {
+    if (!modalBodyRef.current) return;
+
+    const isNearBottom = isAtBottom(modalBodyRef.current);
+
+    // User has scrolled up if not at bottom
+    if (!isNearBottom && isStreaming) {
+      setUserHasScrolled(true);
+    } else if (isNearBottom) {
+      setUserHasScrolled(false);
+    }
+  };
+
   const onClickHandle = () => {
     setOutput("");
     setIsStreaming(true);
     setIsModalOpen(true);
+    setUserHasScrolled(false);
     const controller = new AbortController();
 
     fetch("/api/ai/query", {
@@ -190,10 +236,8 @@ export default function Index() {
             const parsed = JSON.parse(jsonStr);
             const piece = parsed?.data?.answer || "";
             setOutput((prev) => prev + piece);
-            // Auto-scroll to bottom
-            if (outputRef.current) {
-              outputRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
-            }
+            // Use our smart auto-scroll
+            autoScroll();
           } catch (e) {
             console.log(e);
           }
@@ -353,7 +397,7 @@ export default function Index() {
           wrapper: "overflow-visible",
           backdrop: "bg-black/50",
           header: "border-b border-gray-200 dark:border-gray-800",
-          body: "p-0 overflow-visible",
+          body: "p-0",
           closeButton: "hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",
         }}
       >
@@ -362,42 +406,47 @@ export default function Index() {
             <Sparkles size={20} className="text-primary" />
             <span className="text-lg font-semibold">Web3Insights</span>
           </ModalHeader>
-          <ModalBody className="overflow-visible">
-            <div className="answer-card-bg dark:answer-card-bg-dark relative rounded-b-lg overflow-hidden">
-              {/* Subtle pattern overlay */}
-              <div className="absolute inset-0 answer-card-pattern opacity-50" />
+          <ModalBody className="p-0">
+            <div
+              className="overflow-y-auto max-h-[calc(90vh-80px)]"
+              ref={modalBodyRef}
+              onScroll={handleScroll}
+            >
+              <div className="answer-card-bg dark:answer-card-bg-dark relative rounded-b-lg">
+                {/* Subtle pattern overlay */}
+                <div className="absolute inset-0 answer-card-pattern opacity-50" />
 
-              <div className="p-8 relative z-10">
-                {isStreaming && output.length === 0 && (
-                  <div className="space-y-3">
-                    <Skeleton className="h-4 w-3/4 rounded-lg" />
-                    <Skeleton className="h-4 w-full rounded-lg" />
-                    <Skeleton className="h-4 w-5/6 rounded-lg" />
-                  </div>
-                )}
-                {output.length > 0 && (
-                  <div className="prose-enhanced animate-fade-in">
-                    <div className={isStreaming ? "typewriter-cursor" : ""}>
-                      <Markdown
-                        components={{
-                          h1: ({ children }) => <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">{children}</h1>,
-                          h2: ({ children }) => <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3 mt-6">{children}</h2>,
-                          h3: ({ children }) => <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 mt-4">{children}</h3>,
-                          p: ({ children }) => <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">{children}</p>,
-                          strong: ({ children }) => <strong className="font-semibold text-gray-900 dark:text-gray-100">{children}</strong>,
-                          ul: ({ children }) => <ul className="list-disc ml-6 mb-4 space-y-2 text-gray-700 dark:text-gray-300">{children}</ul>,
-                          ol: ({ children }) => <ol className="list-decimal ml-6 mb-4 space-y-2 text-gray-700 dark:text-gray-300">{children}</ol>,
-                          li: ({ children }) => <li className="leading-relaxed">{children}</li>,
-                          code: ({ children }) => <code className="bg-gray-100 dark:bg-gray-800 text-primary px-1.5 py-0.5 rounded text-sm font-mono">{children}</code>,
-                          pre: ({ children }) => <pre className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 overflow-x-auto mb-4">{children}</pre>,
-                        }}
-                      >
-                        {output}
-                      </Markdown>
+                <div className="p-8 relative z-10">
+                  {isStreaming && output.length === 0 && (
+                    <div className="space-y-3">
+                      <Skeleton className="h-4 w-3/4 rounded-lg" />
+                      <Skeleton className="h-4 w-full rounded-lg" />
+                      <Skeleton className="h-4 w-5/6 rounded-lg" />
                     </div>
-                  </div>
-                )}
-                <div ref={outputRef} />
+                  )}
+                  {output.length > 0 && (
+                    <div className="prose-enhanced animate-fade-in">
+                      <div className={isStreaming ? "typewriter-cursor" : ""}>
+                        <Markdown
+                          components={{
+                            h1: ({ children }) => <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">{children}</h1>,
+                            h2: ({ children }) => <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3 mt-6">{children}</h2>,
+                            h3: ({ children }) => <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 mt-4">{children}</h3>,
+                            p: ({ children }) => <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">{children}</p>,
+                            strong: ({ children }) => <strong className="font-semibold text-gray-900 dark:text-gray-100">{children}</strong>,
+                            ul: ({ children }) => <ul className="list-disc ml-6 mb-4 space-y-2 text-gray-700 dark:text-gray-300">{children}</ul>,
+                            ol: ({ children }) => <ol className="list-decimal ml-6 mb-4 space-y-2 text-gray-700 dark:text-gray-300">{children}</ol>,
+                            li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+                            code: ({ children }) => <code className="bg-gray-100 dark:bg-gray-800 text-primary px-1.5 py-0.5 rounded text-sm font-mono">{children}</code>,
+                            pre: ({ children }) => <pre className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 overflow-x-auto mb-4">{children}</pre>,
+                          }}
+                        >
+                          {output}
+                        </Markdown>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </ModalBody>
