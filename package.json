@@ -11,7 +11,7 @@
     "build": "remix vite:build",
     "predev": "npm run env",
     "dev": "remix vite:dev",
-    "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint src --ext .ts,.tsx",
+    "lint": "eslint --ignore-path .gitignore src --ext .ts,.tsx",
     "start": "remix-serve ./build/server/index.js",
     "typecheck": "tsc",
     "prepare": "husky"

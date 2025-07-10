@@ -15,6 +15,7 @@ import { getUser } from "~/auth/repository";
 import { LoaderFunction } from "@remix-run/node";
 import { validateEnvironment } from "@/utils/env";
 import type { User } from "~/strapi/typing";
+import NavigationProgress from "./components/NavigationProgress";
 
 import { getTitle } from "@/utils/app";
 
@@ -58,6 +59,7 @@ function App() {
       </head>
       <body>
         <NextUIProvider>
+          <NavigationProgress />
           <Outlet context={{ user, setUser }} />
           <ScrollRestoration />
           <Scripts />

@@ -4,10 +4,11 @@ import {
   MetaFunction,
 } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import { Warehouse } from "lucide-react";
+import { Warehouse, Github, Users } from "lucide-react";
 
 import { getTitle } from "@/utils/app";
 import ChartCard from "@/components/control/chart-card";
+import { CardSkeleton, ChartSkeleton, TableSkeleton } from "@/components/loading";
 
 import { fetchStatistics } from "~/ecosystem/repository";
 import RepositoryRankViewWidget from "~/repository/views/repository-rank";
@@ -43,6 +44,9 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
 
 export default function EcosystemPage() {
   const { ecosystem, statistics } = useLoaderData<typeof loader>();
+  
+  // Show loading skeleton while data is being fetched
+  const isLoading = !statistics || !statistics.developers || !statistics.repositories;
 
   return (
     <div className="min-h-dvh bg-background dark:bg-background-dark py-8">
@@ -64,23 +68,49 @@ export default function EcosystemPage() {
         </div>
 
         <div className="animate-slide-up" style={{ animationDelay: "100ms" }}>
-          <MetricOverview className="mb-12" dataSource={statistics} />
+          {isLoading ? (
+            <CardSkeleton count={4} />
+          ) : (
+            <MetricOverview className="mb-12" dataSource={statistics} />
+          )}
         </div>
         <div className="animate-slide-up" style={{ animationDelay: "200ms" }}>
           <ClientOnly>
-            <ChartCard
-              className="mb-10"
-              style={{ height: "320px" }}
-              title="Developer Activity Trend"
-              option={resolveChartOptions(statistics.trend)}
-            />
+            {isLoading ? (
+              <ChartSkeleton title="Developer Activity Trend" height="320px" />
+            ) : (
+              <ChartCard
+                className="mb-10"
+                style={{ height: "320px" }}
+                title="Developer Activity Trend"
+                option={resolveChartOptions(statistics.trend)}
+              />
+            )}
           </ClientOnly>
         </div>
         <div className="animate-slide-up" style={{ animationDelay: "300ms" }}>
-          <RepositoryRankViewWidget className="mb-10" dataSource={statistics.repositories} />
+          {isLoading ? (
+            <TableSkeleton 
+              title="Top Repositories" 
+              icon={<Github size={18} className="text-primary" />}
+              rows={10}
+              columns={6}
+            />
+          ) : (
+            <RepositoryRankViewWidget className="mb-10" dataSource={statistics.repositories} />
+          )}
         </div>
         <div className="animate-slide-up" style={{ animationDelay: "400ms" }}>
-          <DeveloperRankViewWidget dataSource={statistics.developers} />
+          {isLoading ? (
+            <TableSkeleton 
+              title="Top Contributors" 
+              icon={<Users size={18} className="text-secondary" />}
+              rows={10}
+              columns={4}
+            />
+          ) : (
+            <DeveloperRankViewWidget dataSource={statistics.developers} />
+          )}
         </div>
       </div>
     </div>

@@ -1,8 +1,11 @@
 import { json, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
+import { Skeleton } from "@nextui-org/react";
+import { Github } from "lucide-react";
 
 import { getTitle } from "@/utils/app";
 import ChartCard from "@/components/control/chart-card";
+import { CardSkeleton, ChartSkeleton, TableSkeleton } from "@/components/loading";
 
 import type { Repository } from "~/repository/typing";
 import RepositoryRankView from "~/repository/views/repository-rank";
@@ -75,6 +78,43 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 
 export default function DeveloperPage() {
   const { developer, contributions, repositories, recentActivity } = useLoaderData<typeof loader>();
+
+  // Show loading skeleton while data is being fetched
+  if (!developer) {
+    return (
+      <div className="min-h-dvh bg-background dark:bg-background-dark py-8">
+        <div className="w-full max-w-content mx-auto px-6">
+          {/* Profile card skeleton */}
+          <div className="mb-8">
+            <Skeleton className="h-32 w-full rounded-xl" />
+          </div>
+          
+          {/* Metrics skeleton */}
+          <CardSkeleton count={4} />
+          
+          {/* Contribution chart skeleton */}
+          <div className="mt-8">
+            <ChartSkeleton title="Contribution Activity" height="280px" />
+          </div>
+          
+          {/* Repositories skeleton */}
+          <div className="mt-8">
+            <TableSkeleton 
+              title="Top Repositories" 
+              icon={<Github size={18} className="text-primary" />}
+              rows={10}
+              columns={6}
+            />
+          </div>
+          
+          {/* Activity feed skeleton */}
+          <div className="mt-8">
+            <Skeleton className="h-96 w-full rounded-xl" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-dvh bg-background dark:bg-background-dark py-8">
