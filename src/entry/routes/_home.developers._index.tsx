@@ -132,7 +132,7 @@ export default function AllDevelopersPage() {
             <div className="p-2 rounded-lg bg-primary/10">
               <Users size={20} className="text-primary" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">All Developers</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white whitespace-nowrap">All Developers</h1>
           </div>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
             Top contributors and developers across Web3 ecosystems
@@ -148,7 +148,7 @@ export default function AllDevelopersPage() {
                   <Users size={20} className="text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">Total Developers</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500 whitespace-nowrap">Total Developers</p>
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                     {totalDevelopers.toLocaleString()}
                   </h2>
@@ -164,7 +164,7 @@ export default function AllDevelopersPage() {
                   <Trophy size={20} className="text-warning" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">Core Developers</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500 whitespace-nowrap">Core Developers</p>
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                     {coreDevelopers.toLocaleString()}
                   </h2>
@@ -180,7 +180,7 @@ export default function AllDevelopersPage() {
                   <Code size={20} className="text-success" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">Active Developers</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500 whitespace-nowrap">Active Developers</p>
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                     {activeDevelopers.toLocaleString()}
                   </h2>
@@ -196,7 +196,7 @@ export default function AllDevelopersPage() {
                   <GitCommit size={20} className="text-secondary" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">Total Commits</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500 whitespace-nowrap">Total Commits</p>
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                     {totalCommits.toLocaleString()}
                   </h2>

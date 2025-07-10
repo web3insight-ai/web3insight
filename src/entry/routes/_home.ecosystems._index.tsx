@@ -1,13 +1,11 @@
 import { json, MetaFunction } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import {
-  Card, CardBody, CardHeader, Input, Dropdown, DropdownTrigger,
-  DropdownMenu, DropdownItem, Button, Pagination,
+  Card, CardBody, CardHeader, Input, Pagination,
 } from "@nextui-org/react";
-import { Filter, SortAsc, SortDesc, Search, Warehouse, Database, Users } from "lucide-react";
+import { Search, Warehouse, Database, Users } from "lucide-react";
 import { useState, useMemo } from "react";
 import { fetchStatisticsRank } from "~/statistics/repository";
-import type { EcoRankRecord } from "~/api/typing";
 
 export const meta: MetaFunction = () => {
   return [
@@ -62,12 +60,8 @@ export default function AllEcosystemsPage() {
   const [page, setPage] = useState(1);
   const rowsPerPage = 25;
 
-  // Filtering and sorting state
+  // Filtering state
   const [filterValue, setFilterValue] = useState("");
-  const [sortDescriptor, setSortDescriptor] = useState({
-    column: "repos_total",
-    direction: "descending",
-  });
 
   // Filter ecosystems based on search query
   const filteredItems = useMemo(() => {
@@ -82,19 +76,12 @@ export default function AllEcosystemsPage() {
     return filtered;
   }, [ecosystems, filterValue]);
 
-  // Sort filtered ecosystems
+  // Sort filtered ecosystems by actors_total (descending)
   const sortedItems = useMemo(() => {
     return [...filteredItems].sort((a, b) => {
-      const first = a[sortDescriptor.column as keyof EcoRankRecord];
-      const second = b[sortDescriptor.column as keyof EcoRankRecord];
-
-      if (first === undefined || second === undefined) return 0;
-
-      const cmp = first < second ? -1 : first > second ? 1 : 0;
-
-      return sortDescriptor.direction === "descending" ? -cmp : cmp;
+      return Number(b.actors_total) - Number(a.actors_total);
     });
-  }, [filteredItems, sortDescriptor]);
+  }, [filteredItems]);
 
   // Calculate pagination
   const paginatedItems = useMemo(() => {
@@ -104,16 +91,6 @@ export default function AllEcosystemsPage() {
   }, [sortedItems, page, rowsPerPage]);
 
   const pages = Math.ceil(sortedItems.length / rowsPerPage);
-
-  // Handle sorting change
-  const handleSortChange = (column: string) => {
-    setSortDescriptor(prev => ({
-      column,
-      direction: prev.column === column && prev.direction === "ascending"
-        ? "descending"
-        : "ascending",
-    }));
-  };
 
   return (
     <div className="min-h-dvh bg-background dark:bg-background-dark pb-24">
@@ -199,7 +176,7 @@ export default function AllEcosystemsPage() {
         </div>
 
         {/* Filters and Search */}
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+        <div className="mb-6">
           <div className="w-full sm:w-72">
             <Input
               placeholder="Search ecosystems..."
@@ -208,60 +185,6 @@ export default function AllEcosystemsPage() {
               startContent={<Search size={18} className="text-gray-400" />}
               className="w-full"
             />
-          </div>
-          <div className="flex gap-2">
-            <Dropdown>
-              <DropdownTrigger>
-                <Button
-                  variant="flat"
-                  startContent={<Filter size={18} />}
-                >
-                  Sort By
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu aria-label="Sort options">
-                <DropdownItem key="eco_name" onClick={() => handleSortChange("eco_name")}>
-                  <div className="flex items-center justify-between w-full">
-                    <span>Ecosystem Name</span>
-                    {sortDescriptor.column === "eco_name" && (
-                      sortDescriptor.direction === "ascending" ? <SortAsc size={16} /> : <SortDesc size={16} />
-                    )}
-                  </div>
-                </DropdownItem>
-                <DropdownItem key="repos_total" onClick={() => handleSortChange("repos_total")}>
-                  <div className="flex items-center justify-between w-full">
-                    <span>Repositories</span>
-                    {sortDescriptor.column === "repos_total" && (
-                      sortDescriptor.direction === "ascending" ? <SortAsc size={16} /> : <SortDesc size={16} />
-                    )}
-                  </div>
-                </DropdownItem>
-                <DropdownItem key="actors_total" onClick={() => handleSortChange("actors_total")}>
-                  <div className="flex items-center justify-between w-full">
-                    <span>Developers</span>
-                    {sortDescriptor.column === "actors_total" && (
-                      sortDescriptor.direction === "ascending" ? <SortAsc size={16} /> : <SortDesc size={16} />
-                    )}
-                  </div>
-                </DropdownItem>
-                <DropdownItem key="actors_core_total" onClick={() => handleSortChange("actors_core_total")}>
-                  <div className="flex items-center justify-between w-full">
-                    <span>Core Developers</span>
-                    {sortDescriptor.column === "actors_core_total" && (
-                      sortDescriptor.direction === "ascending" ? <SortAsc size={16} /> : <SortDesc size={16} />
-                    )}
-                  </div>
-                </DropdownItem>
-                <DropdownItem key="actors_new_total" onClick={() => handleSortChange("actors_new_total")}>
-                  <div className="flex items-center justify-between w-full">
-                    <span>New Developers</span>
-                    {sortDescriptor.column === "actors_new_total" && (
-                      sortDescriptor.direction === "ascending" ? <SortAsc size={16} /> : <SortDesc size={16} />
-                    )}
-                  </div>
-                </DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
           </div>
         </div>
 

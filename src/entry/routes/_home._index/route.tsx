@@ -1,13 +1,11 @@
 import { Link as NextUILink, Input, Skeleton, Modal, ModalContent, ModalHeader, ModalBody } from "@nextui-org/react";
 import {
   json,
-  // redirect,
   type ActionFunctionArgs,
   type MetaFunction,
 } from "@remix-run/node";
 import { useLoaderData, useFetcher } from "@remix-run/react";
 import { ArrowRight, Search, Sparkles } from "lucide-react";
-// import { getClientIPAddress } from "remix-utils/get-client-ip-address";
 import { useEffect, useState, useRef } from "react";
 import { useAtom } from "jotai";
 
