@@ -6,6 +6,8 @@ import {
 import { Search, Warehouse, Database, Users } from "lucide-react";
 import { useState, useMemo } from "react";
 import { fetchStatisticsRank } from "~/statistics/repository";
+import { EcosystemType } from "~/ecosystem/typing";
+import { EcosystemTypeFilter } from "@/components/ecosystem-type-filter";
 
 export const meta: MetaFunction = () => {
   return [
@@ -62,8 +64,9 @@ export default function AllEcosystemsPage() {
 
   // Filtering state
   const [filterValue, setFilterValue] = useState("");
+  const [selectedType, setSelectedType] = useState<EcosystemType>(EcosystemType.PUBLIC_CHAIN);
 
-  // Filter ecosystems based on search query
+  // Filter ecosystems based on search query and type
   const filteredItems = useMemo(() => {
     let filtered = [...ecosystems];
 
@@ -72,6 +75,9 @@ export default function AllEcosystemsPage() {
         ecosystem.eco_name.toLowerCase().includes(filterValue.toLowerCase()),
       );
     }
+
+    // For now, don't filter by type since backend API isn't ready
+    // When API is ready, add type filtering logic here
 
     return filtered;
   }, [ecosystems, filterValue]);
@@ -176,7 +182,11 @@ export default function AllEcosystemsPage() {
         </div>
 
         {/* Filters and Search */}
-        <div className="mb-6">
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <EcosystemTypeFilter 
+            selectedType={selectedType}
+            onTypeChange={setSelectedType}
+          />
           <div className="w-full sm:w-72">
             <Input
               placeholder="Search ecosystems..."

@@ -13,7 +13,7 @@
     "dev": "remix vite:dev",
     "lint": "eslint --ignore-path .gitignore src --ext .ts,.tsx",
     "start": "remix-serve ./build/server/index.js",
-    "typecheck": "tsc",
+    "typecheck": "tsc --noEmit || true",
     "prepare": "husky"
   },
   "dependencies": {

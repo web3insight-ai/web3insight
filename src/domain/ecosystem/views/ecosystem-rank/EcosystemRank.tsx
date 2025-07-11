@@ -1,10 +1,18 @@
 import { Link } from "@remix-run/react";
 import { Card, CardHeader } from "@nextui-org/react";
 import { Warehouse, ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { EcosystemType } from "~/ecosystem/typing";
+import { EcosystemTypeFilter } from "@/components/ecosystem-type-filter";
 
 import type { EcosystemRankViewWidgetProps } from "./typing";
 
 function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
+  const [selectedType, setSelectedType] = useState<EcosystemType>(EcosystemType.PUBLIC_CHAIN);
+
+  // For now, show all ecosystems regardless of type since backend API isn't ready
+  const filteredData = dataSource;
+
   return (
     <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">
       <CardHeader className="px-6 py-5">
@@ -15,6 +23,13 @@ function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
           <h3 className="text-lg font-medium text-gray-900 dark:text-white">Top Ecosystems</h3>
         </div>
       </CardHeader>
+      
+      <div className="px-6 pb-3">
+        <EcosystemTypeFilter 
+          selectedType={selectedType}
+          onTypeChange={setSelectedType}
+        />
+      </div>
       
       <div className="overflow-x-auto">
         <table className="w-full">
@@ -29,7 +44,7 @@ function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
             </tr>
           </thead>
           <tbody className="divide-y divide-border dark:divide-border-dark">
-            {dataSource.slice(0, 10).map((ecosystem, index) => (
+            {filteredData.slice(0, 10).map((ecosystem, index) => (
               <tr 
                 key={index} 
                 className="hover:bg-surface dark:hover:bg-surface-dark transition-colors duration-200 group animate-fade-in"
