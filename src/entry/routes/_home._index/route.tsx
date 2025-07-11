@@ -371,10 +371,6 @@ export default function Index() {
               <NextUILink href="https://openbuild.xyz/" className="text-foreground dark:text-foreground font-medium hover:text-primary transition-colors">
                 OpenBuild
               </NextUILink>{" "}
-              &{" "}
-              <NextUILink href="https://rss3.io/" className="text-foreground dark:text-foreground font-medium hover:text-primary transition-colors">
-                RSS3
-              </NextUILink>
             </p>
             <p className="text-xs text-gray-400 dark:text-gray-600">© {new Date().getFullYear()} {title}. All rights reserved.</p>
           </div>
