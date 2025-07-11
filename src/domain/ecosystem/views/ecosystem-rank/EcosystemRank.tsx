@@ -1,5 +1,5 @@
 import { Link } from "@remix-run/react";
-import { Card, CardHeader } from "@nextui-org/react";
+import { Card } from "@nextui-org/react";
 import { Warehouse, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { EcosystemType } from "~/ecosystem/typing";
@@ -15,16 +15,13 @@ function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
 
   return (
     <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">
-      <CardHeader className="px-6 py-5">
+      <div className="px-6 pt-5 pb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-primary/10">
             <Warehouse size={18} className="text-primary" />
           </div>
           <h3 className="text-lg font-medium text-gray-900 dark:text-white">Top Ecosystems</h3>
         </div>
-      </CardHeader>
-      
-      <div className="px-6 pb-3">
         <EcosystemTypeFilter 
           selectedType={selectedType}
           onTypeChange={setSelectedType}
