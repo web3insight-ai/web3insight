@@ -312,6 +312,7 @@ export default function AllDevelopersPage() {
                             >
                               <RepoLinkWidget
                                 repo={repo.repo_name}
+                                repoId={repo.repo_id}
                                 className="text-gray-700 dark:text-gray-300 hover:text-primary"
                               />
                               <span className="ml-1 text-gray-500 dark:text-gray-500">{repo.commit_count}</span>
@@ -368,6 +369,7 @@ export default function AllDevelopersPage() {
                 >
                   <RepoLinkWidget
                     repo={repo.repo_name}
+                    repoId={repo.repo_id}
                     className="text-sm font-medium text-gray-900 dark:text-white hover:text-primary"
                   />
                 </div>

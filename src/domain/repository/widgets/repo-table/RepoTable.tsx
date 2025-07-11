@@ -55,6 +55,7 @@ function RepoTable({ className, dataSource, title, icon }: RepoTableProps ) {
                   <RepoLinkWidget
                     className="font-medium text-gray-900 dark:text-white hover:text-primary transition-colors"
                     repo={repo.fullName}
+                    repoId={repo.id}
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right">

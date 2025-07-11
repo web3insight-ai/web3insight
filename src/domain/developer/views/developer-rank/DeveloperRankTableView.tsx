@@ -64,6 +64,7 @@ function DeveloperRankTableView({ dataSource }: Pick<DeveloperRankViewWidgetProp
                         key={`${developer.actor_id}-${project.repo_id}`}
                         className="text-xs text-gray-600 dark:text-gray-400 hover:text-primary transition-colors"
                         repo={project.repo_name}
+                        repoId={project.repo_id}
                       />
                     ))}
                     {developer.top_repos.length > 2 && (

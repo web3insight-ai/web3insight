@@ -307,7 +307,7 @@ export default function AllRepositoriesPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Link 
-                          to={`/repositories/${repo.repo_id}`} 
+                          to={`/repositories/${repo.repo_id}?name=${encodeURIComponent(repo.repo_name)}`} 
                           className="font-medium text-gray-900 dark:text-white hover:text-primary transition-colors duration-200"
                         >
                           {repo.repo_name}

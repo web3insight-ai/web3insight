@@ -8,11 +8,14 @@ import { fetchRepoRankList } from "~/api/repository";
 import { fetchRepo } from "~/ossinsight/repository";
 import { fetchRepoAnalysis } from "~/ecosystem/repository/legacy";
 import RepositoryDetailView from "~/repository/views/repository-detail";
+import type { RepoRankRecord } from "~/api/typing";
 
 import ClientOnly from "../components/ClientOnly";
 
 export const loader = async (ctx: LoaderFunctionArgs) => {
   const repoId = ctx.params.id;
+  const url = new URL(ctx.request.url);
+  const repoNameFromQuery = url.searchParams.get("name");
 
   if (!repoId) {
     throw new Response("Repository ID is required", {
@@ -21,27 +24,43 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
     });
   }
 
-  // First, fetch the repository rank list to find the repository by ID
-  const rankListRes = await fetchRepoRankList();
-  
-  if (!rankListRes.success || !rankListRes.data) {
-    throw new Response("Failed to fetch repository data", {
-      status: 500,
-      statusText: "Internal Server Error",
-    });
-  }
+  let repoName: string;
+  let repoRankData: RepoRankRecord | null = null;
 
-  const repoRankData = rankListRes.data.list.find(repo => repo.repo_id === parseInt(repoId));
-  
-  if (!repoRankData) {
-    throw new Response(`Repository with ID \`${repoId}\` doesn't exist.`, {
-      status: 404,
-      statusText: "Not Found",
-    });
-  }
+  // If repo name is provided in query params, use it directly
+  if (repoNameFromQuery) {
+    repoName = repoNameFromQuery;
+    // Create a minimal rank data object for consistency
+    repoRankData = {
+      repo_id: parseInt(repoId),
+      repo_name: repoName,
+      star_count: 0,
+      forks_count: 0,
+      open_issues_count: 0,
+      contributor_count: 0,
+    };
+  } else {
+    // Otherwise, try to fetch from rank list
+    const rankListRes = await fetchRepoRankList();
+    
+    if (!rankListRes.success || !rankListRes.data) {
+      throw new Response("Failed to fetch repository data", {
+        status: 500,
+        statusText: "Internal Server Error",
+      });
+    }
 
-  // Use the repository name to fetch detailed data
-  const repoName = repoRankData.repo_name;
+    repoRankData = rankListRes.data.list.find(repo => repo.repo_id === parseInt(repoId)) || null;
+    
+    if (!repoRankData) {
+      throw new Response(`Repository with ID \`${repoId}\` doesn't exist.`, {
+        status: 404,
+        statusText: "Not Found",
+      });
+    }
+
+    repoName = repoRankData.repo_name;
+  }
 
   try {
     const [repoDetailsRes, analysisRes] = await Promise.all([
