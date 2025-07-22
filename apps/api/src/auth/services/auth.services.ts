@@ -78,24 +78,24 @@ export class AuthService {
     return { token: await this.generateOAuthServerToken(uid, 'github') };
   }
 
-  async getUserInfo(uid: string) {
+  async getUserInfo(data: JwtPayload) {
     const user = await this.db
       .selectFrom('api.auth_users')
       .selectAll()
-      .where('user_id', '=', uid)
+      .where('user_id', '=', data.uid)
       .executeTakeFirst();
 
     const binds = await this.db
       .selectFrom('api.auth_users_binds')
       .select(['bind_key', 'bind_type'])
-      .where('bind_uid', '=', uid)
+      .where('bind_uid', '=', data.uid)
       .execute();
 
     if (!user) {
       throw new Error('User not found');
     }
 
-    return { profile: user, binds: binds };
+    return { profile: user, binds: binds, role: data.extra };
   }
 
   async generateOAuthServerToken(uid: string, type: string) {
