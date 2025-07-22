@@ -52,7 +52,7 @@ export class AuthService {
         .insertInto('api.auth_users_binds')
         .values([
           {
-            bind_key: newUser.user_id,
+            bind_key: res.data.login,
             bind_openid: String(res.data.id),
             bind_secret: res.token.access_token,
             bind_type: 'github',
@@ -85,11 +85,17 @@ export class AuthService {
       .where('user_id', '=', uid)
       .executeTakeFirst();
 
+    const binds = await this.db
+      .selectFrom('api.auth_users_binds')
+      .select(['bind_key', 'bind_type'])
+      .where('bind_uid', '=', uid)
+      .execute();
+
     if (!user) {
       throw new Error('User not found');
     }
 
-    return user;
+    return { profile: user, binds: binds };
   }
 
   async generateOAuthServerToken(uid: string, type: string) {
