@@ -9,7 +9,7 @@ import { RequestWithUser } from '@/auth/auth.jwt.dto';
 export class AuthController {
   constructor(private readonly authServices: AuthService) {}
 
-  @Post('login/oauth/code')
+  @Post('login/oauth')
   @ApiOperation({
     summary: 'Use oauth code to login',
     description: '',
