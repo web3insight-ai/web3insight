@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS "api"."upstream_repos"
     "api_updated_at"     TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE "api"."caches"
+CREATE TABLE IF NOT EXISTS "api"."caches"
 (
     "cache_key"  TEXT                     NOT NULL,
     "cache_data" JSONB DEFAULT '{}'::JSONB,
@@ -29,3 +29,4 @@ CREATE TABLE "api"."caches"
     "created_at" TIMESTAMP WITH TIME ZONE NOT NULL,
     PRIMARY KEY ("cache_key", "eco_name")
 );
+

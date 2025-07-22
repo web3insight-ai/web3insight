@@ -108,6 +108,25 @@ export interface DataRepos {
   api: Generated<Json | null> | RepoInfo;
 }
 
+export interface ApiAuthUsers {
+  created_at: Generated<Timestamp>;
+  updated_at: Generated<Timestamp>;
+  user_avatar: Generated<string>;
+  user_id: Generated<Int8>;
+  user_nick_name: Generated<string>;
+}
+
+export interface ApiAuthUsersBinds {
+  bind_id: Generated<Int8>;
+  bind_key: Generated<string>;
+  bind_openid: Generated<string>;
+  bind_secret: Generated<string>;
+  bind_type: Generated<string>;
+  bind_uid: Int8;
+  created_at: Generated<Timestamp>;
+  updated_at: Generated<Timestamp>;
+}
+
 export interface DB {
   'data.actors': DataActors;
   'data.events': DataEvent;
@@ -116,4 +135,6 @@ export interface DB {
   'api.configs': ApiConfigs;
   'api.analysis_users': ApiAnalysisUsers;
   'api.upstream_repos': ApiUpstreamRepos;
+  'api.auth_users': ApiAuthUsers;
+  'api.auth_users_binds': ApiAuthUsersBinds;
 }

@@ -217,3 +217,7 @@ export enum StatsPeriod {
   WEEK = 'week',
   MONTH = 'month',
 }
+
+// const METHOD = {} as const;
+
+// type METHOD_TYPE = (typeof METHOD)[keyof typeof METHOD];

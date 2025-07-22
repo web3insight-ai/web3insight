@@ -12,13 +12,14 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
     ConsoleModule,
     DBModule,
     AuthModule,
     DataModule,
     ApiModule,
     AppConfigModule,
+    AuthModule,
     EventEmitterModule.forRoot(),
   ],
   controllers: [],

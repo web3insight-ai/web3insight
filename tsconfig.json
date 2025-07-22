@@ -7,16 +7,14 @@
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "target": "ES2023",
+    "strict": false,
+    "noImplicitAny": false,
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
     "incremental": true,
-    "skipLibCheck": true,
-    "strictNullChecks": false,
     "forceConsistentCasingInFileNames": true,
-    "noImplicitAny": false,
-    "strictBindCallApply": false,
-    "noFallthroughCasesInSwitch": false,
+    "skipLibCheck": true,
     "paths": {
       "@/*": ["./src/*"]
     }

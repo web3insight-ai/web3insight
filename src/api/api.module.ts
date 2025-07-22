@@ -8,6 +8,7 @@ import { GithubController } from './controller/github.controller';
 import { GithubService } from './services/github.services';
 import { DBModule } from '@/app/db/db.module';
 import { CustomController } from './controller/custom.controller';
+import { AuthModule } from '@/auth/auth.module';
 
 @Module({
   controllers: [
@@ -19,6 +20,6 @@ import { CustomController } from './controller/custom.controller';
   ],
   providers: [JwtService, GithubService],
   exports: [],
-  imports: [DataModule, DBModule],
+  imports: [DataModule, DBModule, AuthModule],
 })
 export class ApiModule {}
