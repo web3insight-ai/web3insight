@@ -17,7 +17,7 @@ interface GitHubTokenResponse {
 
 @Injectable()
 @Console()
-export class OAuthService {
+export class AuthService {
   @Inject(KYSELY) private readonly db!: Kysely<DB>;
 
   constructor(
@@ -65,6 +65,20 @@ export class OAuthService {
     }
 
     return { token: this.generateOAuthServerToken(uid, 'github') };
+  }
+
+  async getUserInfo(uid: string) {
+    const user = await this.db
+      .selectFrom('api.auth_users')
+      .selectAll()
+      .where('user_id', '=', uid)
+      .executeTakeFirst();
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return user;
   }
 
   async generateOAuthServerToken(uid: string, type: string) {
