@@ -64,7 +64,7 @@ export class AuthService {
       uid = newUser.user_id;
     }
 
-    return { token: this.generateOAuthServerToken(uid, 'github') };
+    return { token: await this.generateOAuthServerToken(uid, 'github') };
   }
 
   async getUserInfo(uid: string) {
