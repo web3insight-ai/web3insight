@@ -26,6 +26,6 @@ export class AuthController {
   @ApiBearerAuth()
   @UseGuards(AppAuthGuard)
   async getUser(@Req() req: RequestWithUser) {
-    return this.authServices.getUserInfo(req.user.uid);
+    return this.authServices.getUserInfo(req.user);
   }
 }
