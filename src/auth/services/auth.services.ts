@@ -96,7 +96,7 @@ export class AuthService {
     };
 
     const jwt = await this.jwtService.signAsync(JSON.stringify(claims), {
-      secret: this.configService.get<string>('JWT_OAUTH_SERVER_SECRET'),
+      secret: this.configService.get<string>('JWT_SECRET'),
     });
 
     return jwt;
