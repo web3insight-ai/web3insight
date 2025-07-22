@@ -1,9 +1,9 @@
 import { Request } from 'express';
 
-interface ExtraClaims {
-  'x-app-allowed-roles': string[];
-  'x-app-default-role': string;
-  'x-app-user-id': string;
+export class ExtraClaims {
+  'allowed_roles': string[];
+  'default_role': string;
+  'user_id': string;
 }
 
 export class Extra {
