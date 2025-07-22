@@ -95,7 +95,7 @@ export class AuthService {
       throw new Error('User not found');
     }
 
-    return { profile: user, binds: binds, role: data.extra };
+    return { profile: user, binds: binds, role: data.extra.claims };
   }
 
   async generateOAuthServerToken(uid: string, type: string) {
@@ -106,9 +106,9 @@ export class AuthService {
     claims.type = type;
     claims.extra = {
       claims: {
-        'x-app-allowed-roles': ['user'],
-        'x-app-default-role': 'user',
-        'x-app-user-id': uid,
+        allowed_roles: ['user'],
+        default_role: 'user',
+        user_id: uid,
       },
     };
 
