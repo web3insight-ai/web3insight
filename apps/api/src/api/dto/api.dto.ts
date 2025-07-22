@@ -110,6 +110,13 @@ export class GetReposMarkResDto {
   total: number = 0;
 }
 
+export class LoginReqDto {
+  @IsString()
+  type: string = 'github';
+  @IsString()
+  code: string = '';
+}
+
 export class ReposCustomMarkReqDto {
   @IsEnum(EcoType)
   @IsOptional()

@@ -6,14 +6,15 @@ interface ExtraClaims {
   'x-app-user-id': string;
 }
 
-interface Extra {
+export class Extra {
   claims: ExtraClaims;
 }
 
-export interface JwtPayload {
+export class JwtPayload {
   uid: string;
   iss: string;
   exp: number;
+  type: string;
   extra: Extra;
 }
 
