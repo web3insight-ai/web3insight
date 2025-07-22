@@ -50,15 +50,26 @@ export class AuthService {
 
       await this.db
         .insertInto('api.auth_users_binds')
-        .values({
-          bind_key: 'github',
-          bind_openid: String(res.data.id),
-          bind_secret: res.token.access_token,
-          bind_type: 'github',
-          bind_uid: newUser.user_id,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
+        .values([
+          {
+            bind_key: newUser.user_id,
+            bind_openid: String(res.data.id),
+            bind_secret: res.token.access_token,
+            bind_type: 'github',
+            bind_uid: newUser.user_id,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+          {
+            bind_key: res.data.email,
+            bind_openid: String(res.data.id),
+            bind_secret: '',
+            bind_type: 'email',
+            bind_uid: newUser.user_id,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+        ])
         .execute();
 
       uid = newUser.user_id;
