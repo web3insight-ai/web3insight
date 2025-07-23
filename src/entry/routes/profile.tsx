@@ -1,15 +1,27 @@
-import { Button, Card, CardBody, CardHeader, Avatar, Divider } from "@nextui-org/react";
+import { Card, CardBody, Avatar, Chip, Button, Divider } from "@nextui-org/react";
 import { LoaderFunctionArgs, MetaFunction, json, redirect } from "@remix-run/node";
-import { Link, useLoaderData } from "@remix-run/react";
-import { Activity, KeyRound } from "lucide-react";
+import { useLoaderData } from "@remix-run/react";
+import { 
+  User as UserIcon, 
+  Calendar, 
+  Clock, 
+  Shield, 
+  Github, 
+  Mail, 
+  ExternalLink,
+  AlertTriangle,
+  CheckCircle,
+} from "lucide-react";
 import { useAtom } from "jotai";
+import { useEffect } from "react";
 
 import { getTitle } from "@/utils/app";
 
-import { authModalOpenAtom, authModalTypeAtom } from "../atoms";
+import { authModalOpenAtom } from "../atoms";
 import DefaultLayout from "../layouts/default";
+import Section from "../components/section";
 
-import { getUser } from "~/auth/repository";
+import { fetchCurrentUser } from "~/auth/repository";
 
 export const meta: MetaFunction = () => {
   const title = getTitle();
@@ -21,108 +33,350 @@ export const meta: MetaFunction = () => {
 };
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  // Get user data
-  const user = await getUser(request);
+  // Get user data with proper error handling
+  const userResult = await fetchCurrentUser(request);
+  
+  // Handle expired token (401)
+  if (!userResult.success && userResult.code === "401") {
+    return json({ 
+      user: null, 
+      error: userResult.message,
+      expired: true, 
+    });
+  }
 
-  if (!user) {
+  // Handle no user (redirect to home)
+  if (!userResult.data) {
     return redirect("/");
   }
 
-  return json({ user });
+  return json({ 
+    user: userResult.data, 
+    error: null,
+    expired: false, 
+  });
 };
 
-export default function ProfilePage() {
-  const { user } = useLoaderData<typeof loader>();
-  const [, setAuthModalOpen] = useAtom(authModalOpenAtom);
-  const [, setAuthModalType] = useAtom(authModalTypeAtom);
+function formatDate(dateString: string): string {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
 
-  // Function to open auth modal with 'resetPassword' type
-  const openChangePasswordModal = () => {
-    setAuthModalType('resetPassword');
-    setAuthModalOpen(true);
-  };
+function getRoleColor(role: string) {
+  switch (role.toLowerCase()) {
+  case 'admin':
+    return 'danger';
+  case 'services':
+    return 'warning';
+  case 'user':
+  default:
+    return 'primary';
+  }
+}
+
+function getRoleName(role: string) {
+  switch (role.toLowerCase()) {
+  case 'admin':
+    return 'Administrator';
+  case 'services':
+    return 'Service Access';
+  case 'user':
+  default:
+    return 'Standard User';
+  }
+}
+
+export default function ProfilePage() {
+  const { user, error, expired } = useLoaderData<typeof loader>();
+  const [, setAuthModalOpen] = useAtom(authModalOpenAtom);
+
+  // Handle expired token
+  useEffect(() => {
+    if (expired) {
+      // Show auth modal after a short delay
+      setTimeout(() => {
+        setAuthModalOpen(true);
+      }, 100);
+    }
+  }, [expired, setAuthModalOpen]);
+
+  // If token expired, show error state
+  if (expired || !user) {
+    return (
+      <DefaultLayout user={null}>
+        <div className="min-h-dvh flex flex-col">
+          <div className="w-full max-w-content mx-auto px-6 py-8">
+            <Section
+              title="Profile"
+              summary="Manage your account information and settings"
+            >
+              <div className="max-w-2xl mx-auto">
+                <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
+                  <CardBody className="text-center py-12">
+                    <AlertTriangle 
+                      size={48} 
+                      className="text-warning mx-auto mb-4" 
+                    />
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                      Session Expired
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-6">
+                      {error || "Your session has expired. Please sign in again to access your profile."}
+                    </p>
+                    <Button 
+                      color="primary" 
+                      onClick={() => setAuthModalOpen(true)}
+                      className="font-medium"
+                    >
+                      Sign In Again
+                    </Button>
+                  </CardBody>
+                </Card>
+              </div>
+            </Section>
+          </div>
+        </div>
+      </DefaultLayout>
+    );
+  }
+
+  const githubBind = user.binds?.find(bind => bind.bind_type === 'github');
+  const emailBind = user.binds?.find(bind => bind.bind_type === 'email');
 
   return (
     <DefaultLayout user={user}>
-      <div className="flex flex-col items-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl w-full">
-          <Card className="shadow-md border-none mb-6">
-            <CardHeader className="flex gap-4 items-center">
-              <Avatar
-                name={user.username?.substring(0, 1).toUpperCase() || "U"}
-                size="lg"
-                color="primary"
-                isBordered
-              />
-              <div className="flex flex-col">
-                <p className="text-lg font-bold">{user.username || "User"}</p>
-                <p className="text-sm text-gray-500">{user.email || "No email provided"}</p>
-                <div className="flex items-center mt-1">
-                  <span className={`inline-block h-2 w-2 rounded-full mr-2 ${user.confirmed ? 'bg-success' : 'bg-warning'}`} />
-                  <span className="text-xs text-gray-500">{user.confirmed ? 'Verified' : 'Pending verification'}</span>
-                </div>
-              </div>
-            </CardHeader>
-            <Divider />
-            <CardBody className="py-5">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Button
-                  as={Link}
-                  to="/profile/activity"
-                  variant="flat"
-                  color="secondary"
-                  startContent={<Activity size={18} />}
-                  className="justify-start"
-                >
-                  Activity History
-                </Button>
-
-                <Button
-                  variant="flat"
-                  color="warning"
-                  startContent={<KeyRound size={18} />}
-                  className="justify-start"
-                  onPress={openChangePasswordModal}
-                >
-                  Change Password
-                </Button>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="shadow-md border-none">
-            <CardHeader>
-              <h2 className="text-xl font-bold">Account Summary</h2>
-            </CardHeader>
-            <Divider />
-            <CardBody className="py-5">
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-md font-semibold text-gray-700">Account Details</h3>
-                  <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
-                    <div className="text-sm">
-                      <span className="text-gray-500">Username:</span> {user.username || "N/A"}
+      <div className="min-h-dvh flex flex-col">
+        <div className="w-full max-w-content mx-auto px-6 py-8">
+          <Section
+            title="Profile"
+            summary="Manage your account information and settings"
+          >
+            <div className="max-w-4xl mx-auto space-y-8">
+              
+              {/* Profile Header Card */}
+              <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">
+                <CardBody className="p-8">
+                  <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+                    <div className="flex-shrink-0">
+                      <Avatar
+                        src={user.avatar_url || user.profile?.user_avatar}
+                        name={user.username?.substring(0, 1).toUpperCase() || 'U'}
+                        size="lg"
+                        className="w-24 h-24 text-large"
+                        isBordered
+                      />
                     </div>
-                    <div className="text-sm">
-                      <span className="text-gray-500">Email:</span> {user.email || "N/A"}
+                    
+                    <div className="flex-1 text-center md:text-left">
+                      <div className="flex flex-col md:flex-row md:items-center gap-3 mb-4">
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                          {user.profile?.user_nick_name || user.username || 'User'}
+                        </h1>
+                        <Chip
+                          color={getRoleColor(user.role?.default_role || 'user')}
+                          variant="flat"
+                          size="sm"
+                          startContent={<Shield size={12} />}
+                        >
+                          {getRoleName(user.role?.default_role || 'user')}
+                        </Chip>
+                      </div>
+                      
+                      <div className="flex flex-col sm:flex-row gap-4 text-sm text-gray-600 dark:text-gray-400">
+                        <div className="flex items-center justify-center md:justify-start gap-2">
+                          <Calendar size={16} />
+                          <span>
+                            Joined {formatDate(user.profile?.created_at || new Date().toISOString())}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-center md:justify-start gap-2">
+                          <Clock size={16} />
+                          <span>
+                            Last active {formatDate(user.profile?.updated_at || new Date().toISOString())}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    {user.createdAt && (
-                      <div className="text-sm">
-                        <span className="text-gray-500">Account Created:</span> {new Date(user.createdAt).toLocaleDateString()}
-                      </div>
-                    )}
-                    {user.updatedAt && (
-                      <div className="text-sm">
-                        <span className="text-gray-500">Last Updated:</span> {new Date(user.updatedAt).toLocaleDateString()}
-                      </div>
-                    )}
                   </div>
-                </div>
+                </CardBody>
+              </Card>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                {/* Account Information */}
+                <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
+                  <CardBody className="p-6">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="p-2 bg-primary/10 rounded-lg">
+                        <UserIcon size={20} className="text-primary" />
+                      </div>
+                      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        Account Information
+                      </h2>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">
+                          User ID
+                        </p>
+                        <p className="text-sm text-gray-900 dark:text-white font-mono bg-gray-50 dark:bg-gray-900 px-3 py-2 rounded-lg">
+                          {user.profile?.user_id || user.id}
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">
+                          Username
+                        </p>
+                        <p className="text-sm text-gray-900 dark:text-white">
+                          {user.profile?.user_nick_name || user.username || 'Not set'}
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">
+                          Account Status
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle size={16} className="text-success" />
+                          <span className="text-sm text-success font-medium">Active</span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardBody>
+                </Card>
+
+                {/* Connected Accounts */}
+                <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
+                  <CardBody className="p-6">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="p-2 bg-primary/10 rounded-lg">
+                        <ExternalLink size={20} className="text-primary" />
+                      </div>
+                      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        Connected Accounts
+                      </h2>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      {githubBind && (
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Github size={20} className="text-gray-700 dark:text-gray-300" />
+                            <div>
+                              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                GitHub
+                              </p>
+                              <p className="text-xs text-gray-600 dark:text-gray-400">
+                                @{githubBind.bind_key}
+                              </p>
+                            </div>
+                          </div>
+                          <Chip color="success" variant="flat" size="sm">
+                            Connected
+                          </Chip>
+                        </div>
+                      )}
+                      
+                      {emailBind && (
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Mail size={20} className="text-gray-700 dark:text-gray-300" />
+                            <div>
+                              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                Email
+                              </p>
+                              <p className="text-xs text-gray-600 dark:text-gray-400">
+                                {emailBind.bind_key}
+                              </p>
+                            </div>
+                          </div>
+                          <Chip color="success" variant="flat" size="sm">
+                            Verified
+                          </Chip>
+                        </div>
+                      )}
+                      
+                      {(!githubBind && !emailBind) && (
+                        <p className="text-sm text-gray-600 dark:text-gray-400 text-center py-4">
+                          No connected accounts
+                        </p>
+                      )}
+                    </div>
+                  </CardBody>
+                </Card>
               </div>
-            </CardBody>
-          </Card>
+
+              {/* Roles & Permissions */}
+              <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
+                <CardBody className="p-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <Shield size={20} className="text-primary" />
+                    </div>
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      Roles & Permissions
+                    </h2>
+                  </div>
+                  
+                  <div className="space-y-6">
+                    <div>
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-3">
+                        Current Role
+                      </p>
+                      <Chip
+                        color={getRoleColor(user.role?.default_role || 'user')}
+                        variant="flat"
+                        size="lg"
+                        startContent={<Shield size={16} />}
+                      >
+                        {getRoleName(user.role?.default_role || 'user')}
+                      </Chip>
+                    </div>
+                    
+                    <Divider />
+                    
+                    <div>
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-3">
+                        Available Roles
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {user.role?.allowed_roles?.map((role) => (
+                          <Chip
+                            key={role}
+                            color={getRoleColor(role)}
+                            variant="bordered"
+                            size="sm"
+                          >
+                            {getRoleName(role)}
+                          </Chip>
+                        )) || (
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            No additional roles available
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <p className="text-sm text-blue-800 dark:text-blue-300">
+                        <strong>Role Information:</strong> Your current role determines your access level to different features and APIs within Web3Insights.
+                      </p>
+                    </div>
+                  </div>
+                </CardBody>
+              </Card>
+            </div>
+          </Section>
         </div>
       </div>
     </DefaultLayout>
   );
 }
+

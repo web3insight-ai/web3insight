@@ -1,39 +1,32 @@
 import type { ResponseResult } from "@/types";
-import { isServerSide } from "@/clients/http";
-import httpClient from "@/clients/http/default";
-
-import type { User } from "../strapi/typing";
-import { fetchUserList, fetchUser, updateUser } from "../strapi/repository";
 
 import type { Manager } from "./typing";
-import { isRoleManageable, resolveManager } from "./helper";
 
+// TODO: Implement admin functions using the new API
 async function fetchManagerList(): Promise<ResponseResult<Manager[]>> {
-  const { data, ...rest } = await fetchUserList({ populate: "role" });
-
   return {
-    ...rest,
-    data: data
-      .filter(user => isRoleManageable(user.role.type))
-      .map(resolveManager),
+    success: false,
+    code: "501",
+    data: [],
+    message: "Admin functions not yet implemented with new API",
   };
 }
 
 async function fetchManager(id: Manager["id"]): Promise<ResponseResult<Manager | undefined>> {
-  const { data, ...rest } = await fetchUser(id, { populate: "role" });
-
   return {
-    ...rest,
-    data: data ? resolveManager(data) : undefined,
+    success: false,
+    code: "501", 
+    data: undefined,
+    message: `Admin functions not yet implemented with new API (id: ${id})`,
   };
 }
 
 async function updateManager(manager: Manager): Promise<ResponseResult> {
-  if (!isServerSide()) {
-    return httpClient.put("/api/admin/manager", manager);
-  }
-
-  return updateUser({ id: manager.id, ecosystem: manager.ecosystems.join(",") } as User);
+  return {
+    success: false,
+    code: "501",
+    message: `Admin functions not yet implemented with new API (manager: ${manager.username})`,
+  };
 }
 
 export { fetchManagerList, fetchManager, updateManager };

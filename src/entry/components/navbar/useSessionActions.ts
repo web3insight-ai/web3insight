@@ -2,9 +2,9 @@ import { useNavigate, useOutletContext } from "@remix-run/react";
 import { useAtom } from "jotai";
 import { authModalOpenAtom, authModalTypeAtom } from "#/atoms";
 
-import type { StrapiUser } from "~/auth/typing";
+import type { ApiUser } from "~/auth/typing";
 
-function useSessionActions<U = StrapiUser | null>() {
+function useSessionActions<U = ApiUser | null>() {
   const [, setAuthModalOpen] = useAtom(authModalOpenAtom);
   const [, setAuthModalType] = useAtom(authModalTypeAtom);
 

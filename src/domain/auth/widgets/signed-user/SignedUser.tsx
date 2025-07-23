@@ -1,5 +1,5 @@
-import { Popover, PopoverContent, PopoverTrigger, Button, Avatar } from "@nextui-org/react";
-import { LogIn, LogOut, User as UserIcon, Key, Shield, Settings } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger, Avatar } from "@nextui-org/react";
+import { LogIn, LogOut, User as UserIcon, Shield, Settings } from "lucide-react";
 
 import { isManageable, isAdmin } from "../../helper";
 import { signOut } from "../../repository";
@@ -7,7 +7,7 @@ import { signOut } from "../../repository";
 import type { SignedUserProps } from "./typing";
 import ActionItem from "./ActionItem";
 
-function SignedUser({ user, onSignIn, onSignOut, onResetPassword }: SignedUserProps) {
+function SignedUser({ user, onSignIn, onSignOut }: SignedUserProps) {
   const handleLogout = async (e: React.MouseEvent) => {
     e.preventDefault();
 
@@ -27,34 +27,35 @@ function SignedUser({ user, onSignIn, onSignOut, onResetPassword }: SignedUserPr
   // More robust check for user data
   if (user && typeof user === 'object' && user.id) {
     const firstLetter = user.username ? user.username.substring(0, 1).toUpperCase() : '?';
+    const avatarUrl = user.avatar_url || '';
 
     return (
       <Popover placement="bottom-end">
         <PopoverTrigger>
           <Avatar
-            name={firstLetter}
+            src={avatarUrl}
+            name={avatarUrl ? undefined : firstLetter}
             size="sm"
             className="cursor-pointer"
             color="primary"
             isBordered
           />
         </PopoverTrigger>
-        <PopoverContent className="p-0 rounded-lg shadow-md" style={{ width: "220px" }}>
+        <PopoverContent className="p-0 rounded-lg bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark" style={{ width: "220px" }}>
           <div className="flex flex-col">
             {/* User info section */}
-            <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 rounded-t-lg">
-              <p className="font-medium text-sm">{user.username || 'User'}</p>
-              <p className="text-xs text-gray-500 truncate">{user.email || ''}</p>
+            <div className="px-4 py-3 border-b border-border dark:border-border-dark bg-gray-50 dark:bg-gray-900/50 rounded-t-lg">
+              <p className="font-medium text-sm text-gray-900 dark:text-white">{user.username || 'User'}</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{user.email || ''}</p>
             </div>
 
             {/* Menu items */}
             <div className="py-1">
               <ActionItem text="Profile" icon={UserIcon} action="/profile" />
-              <ActionItem text="Change Password" icon={Key} renderType="button" action={() => onResetPassword()} />
             </div>
 
             {isManageable(user) && (
-              <div className="py-1 border-t border-gray-100">
+              <div className="py-1 border-t border-border dark:border-border-dark">
                 <ActionItem text="Manage" icon={Shield} action="/admin" />
                 {isAdmin(user) && (
                   <ActionItem text="Settings" icon={Settings} action="/settings" />
@@ -63,7 +64,7 @@ function SignedUser({ user, onSignIn, onSignOut, onResetPassword }: SignedUserPr
             )}
 
             {/* Logout section */}
-            <div className="py-1 border-t border-gray-100">
+            <div className="py-1 border-t border-border dark:border-border-dark">
               <ActionItem text="Logout" icon={LogOut} renderType="button" action={handleLogout} danger />
             </div>
           </div>
@@ -73,15 +74,13 @@ function SignedUser({ user, onSignIn, onSignOut, onResetPassword }: SignedUserPr
   }
 
   return (
-    <Button
-      variant="flat"
-      size="sm"
-      color="primary"
-      startContent={<LogIn size={16} />}
-      onPress={() => onSignIn()}
+    <button
+      onClick={() => onSignIn()}
+      className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-200"
     >
+      <LogIn size={16} />
       Sign In
-    </Button>
+    </button>
   );
 }
 

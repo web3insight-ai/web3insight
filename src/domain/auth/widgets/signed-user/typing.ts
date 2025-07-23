@@ -1,7 +1,7 @@
 import type { JSXElementConstructor } from "react";
 import type { DataValue } from "@/types";
 
-import type { User } from "../../../strapi/typing";
+import type { ApiUser } from "../../typing";
 
 type ActionBase = {
   text: string;
@@ -21,11 +21,10 @@ type ButtonAction = {
 
 type ActionItemProps = ActionBase & (LinkAction | ButtonAction);
 
-type SignedUserProps<U = User | null> = {
+type SignedUserProps<U = ApiUser | null> = {
   user: U;
   onSignIn: () => void;
   onSignOut: (user: U) => void;
-  onResetPassword: () => void;
 };
 
 export type { ActionItemProps, SignedUserProps };

@@ -1,4 +1,4 @@
-import type { User } from "~/strapi/typing";
+import type { ApiUser } from "~/auth/typing";
 
 type MenuItem = {
   text: string;
@@ -7,7 +7,7 @@ type MenuItem = {
 };
 
 type AdminLayoutProps = {
-  user: User | null;
+  user: ApiUser | null;
   settings?: boolean;
 };
 

@@ -11,10 +11,14 @@ import {
   fetchRepoAttention,
   fetchRepoParticipants, fetchRepoNewContributors, fetchRepoInactiveContributors,
 } from "../../opendigger/repository";
-import { fetchEcosystem } from "../../strapi/repository";
-
+// TODO: Replace with new API implementation
 async function fetchOne(keyword?: string): Promise<ResponseResult<Record<string, DataValue> | null>> {
-  return fetchEcosystem(keyword);
+  return {
+    success: false,
+    code: "501",
+    data: null,
+    message: `Ecosystem fetch not yet implemented with new API (keyword: ${keyword || "none"})`,
+  };
 }
 
 async function getEVMInfo(address: string) {

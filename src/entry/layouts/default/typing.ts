@@ -1,8 +1,8 @@
-import type { User } from "~/strapi/typing";
+import type { ApiUser } from "~/auth/typing";
 
 type DefaultLayoutProps = {
   children: React.ReactNode;
-  user: User | null;
+  user: ApiUser | null;
 };
 
 export type { DefaultLayoutProps };

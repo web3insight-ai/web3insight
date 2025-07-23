@@ -16,9 +16,9 @@ const isDevelopment = process.env.NODE_ENV === "development";
 
 const vars: Record<string, any> = { // eslint-disable-line @typescript-eslint/no-explicit-any
   API_BASE_URL: process.env.API_BASE_URL || "",
-  // Strapi configuration - always use production URL unless explicitly overridden
-  STRAPI_API_URL: process.env.STRAPI_API_URL || "https://cms.web3insights.app",
-  STRAPI_API_TOKEN: process.env.STRAPI_API_TOKEN || "",
+  // Data API configuration  
+  DATA_API_URL: process.env.DATA_API_URL || "https://api.web3insights.app",
+  DATA_API_TOKEN: process.env.DATA_API_TOKEN || "",
   // Session configuration
   SESSION_SECRET: process.env.SESSION_SECRET || "default-secret-change-me",
   // Database configuration
@@ -40,7 +40,7 @@ function getHttpTimeout() {
 
 // Check if important environment variables are set
 function validateEnvironment(): boolean {
-  const requiredVars = ["STRAPI_API_URL", "STRAPI_API_TOKEN", "DATABASE_URL"].map(name => ({ name, value: getVar(name) }));
+  const requiredVars = ["DATA_API_URL", "DATABASE_URL"].map(name => ({ name, value: getVar(name) }));
 
   let valid = true;
 
@@ -53,10 +53,10 @@ function validateEnvironment(): boolean {
 
   // Additional validation for production environment
   if (!isDevelopment) {
-    const strapiUrl = getVar("STRAPI_API_URL");
-    if (strapiUrl.includes("localhost")) {
+    const dataApiUrl = getVar("DATA_API_URL");
+    if (dataApiUrl.includes("localhost")) {
       console.error("Production environment should not use localhost URLs!");
-      console.error(`STRAPI_API_URL is set to: ${strapiUrl}`);
+      console.error(`DATA_API_URL is set to: ${dataApiUrl}`);
       valid = false;
     }
   }

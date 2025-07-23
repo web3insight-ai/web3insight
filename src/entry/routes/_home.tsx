@@ -2,12 +2,12 @@ import { json, LoaderFunctionArgs } from "@remix-run/node";
 import { Outlet, useLoaderData, useOutletContext, useSearchParams } from "@remix-run/react";
 import { useEffect } from "react";
 
-import type { User } from "~/strapi/typing";
+import type { ApiUser } from "~/auth/typing";
 import { getUser } from "~/auth/repository";
 
 import DefaultLayout from "../layouts/default";
 
-type RootContext<U = User | null> = {
+type RootContext<U = ApiUser | null> = {
   user: U;
   setUser: (user: U) => void;
 };

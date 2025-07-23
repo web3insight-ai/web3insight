@@ -19,7 +19,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const resolved = { ...others, data, extra: { ...extra, authenticated: !!data } };
 
   if (data) {
-    resolved.data = pick(data, ["id", "username", "email", "confirmed"]);
+    resolved.data = pick(data, ["id", "username", "email", "confirmed", "avatar_url"]);
   } else {
     resolved.code = "401";
   }

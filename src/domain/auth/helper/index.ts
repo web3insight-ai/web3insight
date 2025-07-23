@@ -1,12 +1,20 @@
-import type { User } from "../../strapi/typing";
-import { isRoleManageable } from "../../admin/helper";
+import type { ApiUser } from "../typing";
 
-function isManageable(user: User | null): boolean {
-  return !!user && isRoleManageable(user.role.type);
+function hasRole(user: ApiUser | null, role: string): boolean {
+  if (!user || !user.role) return false;
+  return user.role.allowed_roles.includes(role) || user.role.default_role === role;
 }
 
-function isAdmin(user: User | null): boolean {
-  return !!user && user.role.type === "admin";
+function isServices(user: ApiUser | null): boolean {
+  return hasRole(user, "services");
 }
 
-export { isManageable, isAdmin };
+function isAdmin(user: ApiUser | null): boolean {
+  return hasRole(user, "admin");
+}
+
+function isManageable(user: ApiUser | null): boolean {
+  return isServices(user) || isAdmin(user);
+}
+
+export { hasRole, isServices, isAdmin, isManageable };

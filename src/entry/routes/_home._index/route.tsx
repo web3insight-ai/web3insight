@@ -1,8 +1,10 @@
 import { Link as NextUILink, Input, Skeleton, Modal, ModalContent, ModalHeader, ModalBody } from "@nextui-org/react";
 import {
   json,
+  redirect,
   type ActionFunctionArgs,
   type MetaFunction,
+  type LoaderFunctionArgs,
 } from "@remix-run/node";
 import { useLoaderData, useFetcher } from "@remix-run/react";
 import { ArrowRight, Search, Sparkles } from "lucide-react";
@@ -41,7 +43,22 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export const loader = async () => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const url = new URL(request.url);
+  const code = url.searchParams.get("code");
+  const error = url.searchParams.get("error");
+
+  // If this is a GitHub OAuth callback, redirect to the proper handler
+  if (code || error) {
+    const callbackUrl = new URL("/connect/github/redirect", request.url);
+    if (code) callbackUrl.searchParams.set("code", code);
+    if (error) {
+      callbackUrl.searchParams.set("error", error);
+      const errorDescription = url.searchParams.get("error_description");
+      if (errorDescription) callbackUrl.searchParams.set("error_description", errorDescription);
+    }
+    return redirect(callbackUrl.toString());
+  }
   try {
     const statisticsResult = await fetchStatisticsOverview();
     const rankResult = await fetchStatisticsRank();

@@ -1,32 +1,36 @@
-import type { User as StrapiUser } from "../strapi/typing";
+import type { ApiUser } from "../auth/typing";
 
 import type { Manager } from "./typing";
 
 function isRoleManageable(role: Manager["role"]): boolean {
-  return ["manager", "admin"].includes(role);
+  return ["services", "admin"].includes(role);
 }
 
-function resolveEcosystems(raw: string): string[] {
-  const ecosystems: string[] = [];
+// Currently unused but may be needed for future ecosystem management
+// function resolveEcosystems(raw: string): string[] {
+//   const ecosystems: string[] = [];
 
-  raw.trim().split(",").forEach(partial => {
-    const eco = partial.trim();
+//   raw.trim().split(",").forEach(partial => {
+//     const eco = partial.trim();
 
-    if (eco) {
-      ecosystems.push(eco);
-    }
-  });
+//     if (eco) {
+//       ecosystems.push(eco);
+//     }
+//   });
 
-  return ecosystems;
-}
+//   return ecosystems;
+// }
 
-function resolveManager(user: StrapiUser): Manager {
+function resolveManager(user: ApiUser): Manager {
+  // For now, we'll use default role as the primary role
+  const primaryRole = user.role.default_role as Manager["role"];
+  
   return {
     id: user.id,
     username: user.username,
     email: user.email,
-    role: user.role.type,
-    ecosystems: resolveEcosystems(user.ecosystem || ""),
+    role: primaryRole,
+    ecosystems: [], // TODO: Extract from user profile if needed
   };
 }
 

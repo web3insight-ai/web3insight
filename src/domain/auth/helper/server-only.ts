@@ -37,15 +37,15 @@ async function clearSession(session: DataValue) {
 // Store user data in session
 async function createUserSession({
   request,
-  userJwt,
+  userToken,
   userId,
 }: {
   request: Request;
-  userJwt: string;
-  userId: number;
+  userToken: string;
+  userId: string;
 }) {
   const session = await getSession(request);
-  session.set("userJwt", userJwt);
+  session.set("userToken", userToken);
   session.set("userId", userId);
 
   const cookieHeader = await sessionStorage.commitSession(session);

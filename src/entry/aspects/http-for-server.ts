@@ -1,12 +1,11 @@
 import type { DataValue } from "@/types";
 import { type ResponseResult, isServerSide } from "@/clients/http";
 
-import strapiClient from "~/strapi/repository/client";
 import selfBuildClient from "~/api/repository/client";
 import githubClient from "~/github/repository/client";
 import ossinsightClient from "~/ossinsight/repository/client";
 
-const serverAvailableHttpClients = [strapiClient, selfBuildClient, githubClient, ossinsightClient];
+const serverAvailableHttpClients = [selfBuildClient, githubClient, ossinsightClient];
 
 let alreadySet = false;
 
