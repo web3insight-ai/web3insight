@@ -99,6 +99,17 @@ export class AuthService {
   }
 
   async generateOAuthServerToken(uid: string, type: string) {
+    const roles = await this.db
+      .selectFrom('api.auth_users_roles')
+      .select(['user_role_name'])
+      .where('user_role_uid', '=', uid)
+      .execute();
+
+    const allowedRoles: string[] = [
+      'user',
+      ...roles.map((role) => role.user_role_name),
+    ];
+
     const claims = new JwtPayload();
     claims.uid = uid;
     claims.iss = 'web3insights.app';
@@ -106,7 +117,7 @@ export class AuthService {
     claims.type = type;
     claims.extra = {
       claims: {
-        allowed_roles: ['user'],
+        allowed_roles: allowedRoles,
         default_role: 'user',
         user_id: uid,
       },
