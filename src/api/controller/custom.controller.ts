@@ -34,7 +34,7 @@ export class CustomController {
 
   @Get('custom/analysis/users')
   @ApiOperation({
-    summary: 'Get users from github api',
+    summary: 'Get analysis history list',
     description: '',
   })
   @ApiBearerAuth()
