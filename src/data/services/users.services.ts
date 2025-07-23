@@ -24,7 +24,7 @@ export class UsersService {
     private eventEmitter: EventEmitter2,
   ) {}
 
-  async uploadAndGetUsers(body: CustomQueryUsersReqDto) {
+  async uploadAndGetUsers(body: CustomQueryUsersReqDto, uid: string) {
     const usernames = body.request_data
       .map((url) => this.extractUsername(url))
       .filter((username): username is string => username !== null);
@@ -63,7 +63,7 @@ export class UsersService {
         request_data: { urls: body.request_data },
         github: JSON.stringify({ users: githubData }),
         intent: body.intent,
-        submitter_id: body.submitter_id,
+        submitter_id: uid,
         description: body.description,
       })
       .returning('id')
@@ -76,10 +76,10 @@ export class UsersService {
     return res;
   }
 
-  async getList(params: CustomQueryUsersOrderReqDto) {
+  async getList(params: CustomQueryUsersOrderReqDto, uid: string) {
     let query = this.db
       .selectFrom('api.analysis_users')
-      .where('submitter_id', '=', params.submitter_id);
+      .where('submitter_id', '=', uid);
 
     const total = await query
       .select(this.db.fn.count('id').as('total'))
@@ -235,8 +235,7 @@ FROM user_ids u;`;
     const data = new CustomQueryUsersReqDto();
     data.request_data = urls;
     data.intent = Intent.Hackathon;
-    data.submitter_id = 'user_id';
-    const res = await this.uploadAndGetUsers(data);
+    const res = await this.uploadAndGetUsers(data, '2');
 
     const id = new BaseIdReqAndResDto();
     id.id = res.id;

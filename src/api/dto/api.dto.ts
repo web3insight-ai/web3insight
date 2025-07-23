@@ -153,8 +153,6 @@ export enum Intent {
 export class CustomQueryUsersReqDto {
   @IsEnum(Intent)
   intent: Intent = Intent.Hackathon;
-  @IsString()
-  submitter_id: string;
   @IsArray()
   @IsString({ each: true })
   @ApiProperty({
@@ -166,8 +164,6 @@ export class CustomQueryUsersReqDto {
 }
 
 export class CustomQueryUsersOrderReqDto {
-  @IsString()
-  submitter_id: string;
   @IsNumber()
   skip: number = 0;
   @IsNumber()
