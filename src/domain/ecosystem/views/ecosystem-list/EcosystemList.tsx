@@ -9,9 +9,11 @@ function EcosystemListView({ dataSource }: EcosystemListViewWidgetProps) {
       {dataSource.map(eco => (
         <li key={eco.name.replaceAll(" ", "")}>
           <Link to={`/admin/ecosystems/${encodeURIComponent(eco.name)}`}>
-            <Card>
-              <CardBody className="min-h-40 items-center justify-center">
-                {eco.name}
+            <Card className="hover:shadow-hover hover:scale-[1.02] transition-all duration-200 border border-border dark:border-border-dark">
+              <CardBody className="min-h-40 items-center justify-center bg-surface dark:bg-surface-dark">
+                <span className="text-sm font-medium text-gray-900 dark:text-gray-100 text-center">
+                  {eco.name}
+                </span>
               </CardBody>
             </Card>
           </Link>
@@ -19,8 +21,8 @@ function EcosystemListView({ dataSource }: EcosystemListViewWidgetProps) {
       ))}
     </ul>
   ) : (
-    <div className="p-16 text-center rounded-2xl bg-slate-100">
-      <p className="text-gray-500">No ecosystems available.</p>
+    <div className="p-16 text-center rounded-2xl bg-surface dark:bg-surface-dark border border-border dark:border-border-dark">
+      <p className="text-gray-500 dark:text-gray-400">No ecosystems available.</p>
     </div>
   );
 }

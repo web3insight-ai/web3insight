@@ -16,6 +16,7 @@ import { useAtom } from "jotai";
 import { useEffect } from "react";
 
 import { getTitle } from "@/utils/app";
+import { getRoleName, getRoleColor, getEffectiveRole } from "@/utils/role";
 
 import { authModalOpenAtom } from "../atoms";
 import DefaultLayout from "../layouts/default";
@@ -67,37 +68,12 @@ function formatDate(dateString: string): string {
   });
 }
 
-function getRoleColor(role: string) {
-  switch (role.toLowerCase()) {
-  case 'admin':
-    return 'danger';
-  case 'services':
-    return 'warning';
-  case 'editor':
-    return 'secondary';
-  case 'user':
-  default:
-    return 'primary';
-  }
-}
-
-function getRoleName(role: string) {
-  switch (role.toLowerCase()) {
-  case 'admin':
-    return 'Administrator';
-  case 'services':
-    return 'Service Access';
-  case 'editor':
-    return 'Content Editor';
-  case 'user':
-  default:
-    return 'Standard User';
-  }
-}
-
 export default function ProfilePage() {
   const { user, error, expired } = useLoaderData<typeof loader>();
   const [, setAuthModalOpen] = useAtom(authModalOpenAtom);
+
+  // Get effective role (highest priority role from allowed roles)
+  const effectiveRole = user?.role ? getEffectiveRole(user.role.default_role, user.role.allowed_roles) : 'user';
 
   // Handle expired token
   useEffect(() => {
@@ -182,12 +158,12 @@ export default function ProfilePage() {
                           {user.profile?.user_nick_name || user.username || 'User'}
                         </h1>
                         <Chip
-                          color={getRoleColor(user.role?.default_role || 'user')}
+                          color={getRoleColor(effectiveRole)}
                           variant="flat"
                           size="sm"
                           startContent={<Shield size={12} />}
                         >
-                          {getRoleName(user.role?.default_role || 'user')}
+                          {getRoleName(effectiveRole)}
                         </Chip>
                       </div>
                       
@@ -335,12 +311,12 @@ export default function ProfilePage() {
                         Current Role
                       </p>
                       <Chip
-                        color={getRoleColor(user.role?.default_role || 'user')}
+                        color={getRoleColor(effectiveRole)}
                         variant="flat"
                         size="lg"
                         startContent={<Shield size={16} />}
                       >
-                        {getRoleName(user.role?.default_role || 'user')}
+                        {getRoleName(effectiveRole)}
                       </Chip>
                     </div>
                     

@@ -85,12 +85,24 @@ async function insertOne(
     return httpClient.post("/api/event/contestants", data);
   }
 
-  const { data: resData, extra, ...others } = await analyzeUserList({
+  const response = await analyzeUserList({
     submitter_id: data.managerId,
     request_data: data.urls,
     intent: "hackathon",
     description: data.description,
   });
+
+  // Handle API error response
+  if (!response.success || !response.data) {
+    return {
+      success: response.success,
+      code: response.code,
+      message: response.message,
+      data: [] as GithubUser[],
+    };
+  }
+
+  const { data: resData, extra, ...others } = response;
   const { id, users, ...rest } = resData;
 
   return {
