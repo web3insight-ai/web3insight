@@ -14,7 +14,16 @@ function resolveEventDetail(raw: Record<string, DataValue>): EventReport {
     const analytics = u.ecosystem_scores
       .filter((eco: Record<string, DataValue>) => eco.ecosystem !== "ALL")
       .map((eco: Record<string, DataValue>) => {
-        const repos = eco.repos.map((repo: Record<string, DataValue>) => {
+        const repos = (eco.repos as Record<string, DataValue>[]).map((repo: Record<string, DataValue>) => {
+          // Handle new API format: { repo_name: "owner/repo", score: 123, ... }
+          if (repo.repo_name && repo.score !== undefined) {
+            return {
+              fullName: String(repo.repo_name),
+              score: String(repo.score)
+            };
+          }
+
+          // Fallback for old format or unexpected structures
           const entries = Object.entries(repo);
           if (entries.length === 0) {
             return { fullName: "unknown", score: "0" };

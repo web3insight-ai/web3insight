@@ -9,7 +9,15 @@ function RepoScoreListCard({ dataSource }: RepoScoreListCardProps) {
 
   // Helper function to safely extract repository info
   const extractRepoInfo = (repo: unknown) => {
-    // Case 1: Standard structure { fullName: "owner/repo", score: "123" }
+    // Case 1: New API format { repo_name: "owner/repo", score: 123, ... }
+    if (repo && typeof repo === 'object' && repo !== null && 'repo_name' in repo && 'score' in repo) {
+      return {
+        fullName: String((repo as { repo_name: unknown }).repo_name),
+        score: String((repo as { score: unknown }).score)
+      };
+    }
+
+    // Case 2: Standard structure { fullName: "owner/repo", score: "123" }
     if (repo && typeof repo === 'object' && repo !== null && 'fullName' in repo && 'score' in repo) {
       return {
         fullName: String((repo as { fullName: unknown }).fullName),
@@ -17,7 +25,7 @@ function RepoScoreListCard({ dataSource }: RepoScoreListCardProps) {
       };
     }
 
-    // Case 2: Direct key-value pair { "owner/repo": "123" }
+    // Case 3: Direct key-value pair { "owner/repo": "123" }
     if (repo && typeof repo === 'object' && repo !== null) {
       const entries = Object.entries(repo);
       if (entries.length > 0) {
@@ -29,7 +37,7 @@ function RepoScoreListCard({ dataSource }: RepoScoreListCardProps) {
       }
     }
 
-    // Case 3: Fallback for unexpected structures
+    // Case 4: Fallback for unexpected structures
     return {
       fullName: "unknown/repository",
       score: "0"

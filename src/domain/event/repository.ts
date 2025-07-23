@@ -63,14 +63,27 @@ async function fetchOne(id: number): Promise<ResponseResult<EventReport>> {
     }
 
     const delayed = new Promise<boolean>((resolve) => {
-      const notReady = res.success && (Number(res.code) !== 200 || !res.data || !res.data.data || !res.data.data.users);
+      // Check if the response is successful and has the expected data structure
+      const hasCompleteData = res.success &&
+        Number(res.code) === 200 &&
+        res.data &&
+        res.data.data &&
+        res.data.data.users &&
+        Array.isArray(res.data.data.users) &&
+        res.data.data.users.length > 0 &&
+        res.data.data.users[0].ecosystem_scores &&
+        Array.isArray(res.data.data.users[0].ecosystem_scores) &&
+        res.data.data.users[0].ecosystem_scores.length > 0;
+
+      const notReady = !hasCompleteData;
 
       if (retryCount === 0) {
         resolve(notReady);
       } else {
+        console.log(`[Event Repository] Polling attempt ${retryCount + 1}, data ready: ${hasCompleteData}`);
         setTimeout(() => {
           resolve(notReady);
-        }, 10000);
+        }, 10000); // Poll every 10 seconds
       }
     });
 
