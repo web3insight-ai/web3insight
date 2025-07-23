@@ -27,3 +27,4 @@ CREATE TABLE IF NOT EXISTS "api"."auth_user_roles"
     created_at     TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at     TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
+

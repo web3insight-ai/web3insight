@@ -135,10 +135,21 @@ export interface ApiAuthUserRoles {
   user_role_uid: Int8;
 }
 
+export interface DataEcosystems {
+  active: Generated<boolean>;
+  created_at: Generated<Timestamp>;
+  description: Generated<string>;
+  icon: Generated<string>;
+  id: Generated<Int8>;
+  name: string;
+  updated_at: Generated<Timestamp>;
+}
+
 export interface DB {
   'data.actors': DataActors;
   'data.events': DataEvent;
   'data.repos': DataRepos;
+  'data.ecosystems': DataEcosystems;
   'api.caches': APICaches;
   'api.configs': ApiConfigs;
   'api.analysis_users': ApiAnalysisUsers;
