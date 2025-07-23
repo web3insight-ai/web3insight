@@ -3,7 +3,7 @@ import type { ApiUser } from "../auth/typing";
 import type { Manager } from "./typing";
 
 function isRoleManageable(role: Manager["role"]): boolean {
-  return ["services", "admin"].includes(role);
+  return ["editor", "services", "admin"].includes(role);
 }
 
 // Currently unused but may be needed for future ecosystem management

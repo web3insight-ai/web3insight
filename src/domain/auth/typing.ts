@@ -40,6 +40,6 @@ interface GitHubOAuthRequest {
   code: string;
 }
 
-type RoleType = "user" | "services" | "admin";
+type RoleType = "user" | "editor" | "services" | "admin";
 
 export type { ApiUser, ApiAuthResponse, GitHubOAuthRequest, UserProfile, UserBind, UserRole, RoleType };

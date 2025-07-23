@@ -1,7 +1,7 @@
 import { Popover, PopoverContent, PopoverTrigger, Avatar } from "@nextui-org/react";
 import { LogIn, LogOut, User as UserIcon, Shield, Settings } from "lucide-react";
 
-import { isManageable, isAdmin } from "../../helper";
+import { isContentManager, isAdmin } from "../../helper";
 import { signOut } from "../../repository";
 
 import type { SignedUserProps } from "./typing";
@@ -54,7 +54,7 @@ function SignedUser({ user, onSignIn, onSignOut }: SignedUserProps) {
               <ActionItem text="Profile" icon={UserIcon} action="/profile" />
             </div>
 
-            {isManageable(user) && (
+            {isContentManager(user) && (
               <div className="py-1 border-t border-border dark:border-border-dark">
                 <ActionItem text="Manage" icon={Shield} action="/admin" />
                 {isAdmin(user) && (

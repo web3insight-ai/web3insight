@@ -73,6 +73,8 @@ function getRoleColor(role: string) {
     return 'danger';
   case 'services':
     return 'warning';
+  case 'editor':
+    return 'secondary';
   case 'user':
   default:
     return 'primary';
@@ -85,6 +87,8 @@ function getRoleName(role: string) {
     return 'Administrator';
   case 'services':
     return 'Service Access';
+  case 'editor':
+    return 'Content Editor';
   case 'user':
   default:
     return 'Standard User';

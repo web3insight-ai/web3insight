@@ -13,8 +13,16 @@ function isAdmin(user: ApiUser | null): boolean {
   return hasRole(user, "admin");
 }
 
+function isEditor(user: ApiUser | null): boolean {
+  return hasRole(user, "editor");
+}
+
 function isManageable(user: ApiUser | null): boolean {
   return isServices(user) || isAdmin(user);
 }
 
-export { hasRole, isServices, isAdmin, isManageable };
+function isContentManager(user: ApiUser | null): boolean {
+  return isEditor(user) || isServices(user) || isAdmin(user);
+}
+
+export { hasRole, isServices, isAdmin, isEditor, isManageable, isContentManager };
