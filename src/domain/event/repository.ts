@@ -18,19 +18,25 @@ async function fetchList(
   }
 
   const { managerId, pageSize, pageNum } = params;
-  const { data, extra, ...others } = await fetchAnalysisUserList({
-    ...resolvePaginationParams({ pageSize, pageNum }),
-    submitter_id: managerId,
-  });
 
-  return {
-    ...others,
-    data: data.list,
-    extra: {
-      ...extra,
-      total: data?.total ? Number(data.total) : 0,
-    },
-  };
+  try {
+    const { data, extra, ...others } = await fetchAnalysisUserList({
+      ...resolvePaginationParams({ pageSize, pageNum }),
+      submitter_id: managerId,
+    });
+
+    return {
+      ...others,
+      data: data.list,
+      extra: {
+        ...extra,
+        total: data?.total ? Number(data.total) : 0,
+      },
+    };
+  } catch (error) {
+    console.error(`[Event Repository] fetchList error:`, error);
+    throw error;
+  }
 }
 
 async function fetchOne(id: number): Promise<ResponseResult<EventReport>> {
@@ -41,9 +47,20 @@ async function fetchOne(id: number): Promise<ResponseResult<EventReport>> {
   let res: ResponseResult<Record<string, DataValue>>;
   let dataNotReady: boolean;
   let retryCount = 0;
+  const maxRetries = 10;
 
   do {
-    res = await fetchAnalysisUser(id);
+    try {
+      res = await fetchAnalysisUser(id);
+    } catch (error) {
+      console.error(`[Event Repository] fetchAnalysisUser attempt ${retryCount + 1} error:`, error);
+      res = {
+        success: false,
+        code: "500",
+        message: `API call failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        data: {}
+      };
+    }
 
     const delayed = new Promise<boolean>((resolve) => {
       const notReady = res.success && (Number(res.code) !== 200 || !res.data || !res.data.data || !res.data.data.users);
@@ -59,19 +76,26 @@ async function fetchOne(id: number): Promise<ResponseResult<EventReport>> {
 
     dataNotReady = await delayed;
     retryCount += 1;
-  } while (dataNotReady && retryCount < 10);
+  } while (dataNotReady && retryCount < maxRetries);
 
   if (dataNotReady) {
+    console.error(`[Event Repository] Failed to fetch analysis data after ${maxRetries} attempts`);
     res.success = false;
     res.code = "500";
     res.message = "Failed to fetch analysis data, please try again later.";
-    
   }
 
-  return {
-    ...res,
-    data: resolveEventDetail(res.data),
-  };
+  try {
+    const eventReport = resolveEventDetail(res.data);
+
+    return {
+      ...res,
+      data: eventReport,
+    };
+  } catch (error) {
+    console.error(`[Event Repository] Error resolving event detail:`, error);
+    throw error;
+  }
 }
 
 async function insertOne(
@@ -85,31 +109,37 @@ async function insertOne(
     return httpClient.post("/api/event/contestants", data);
   }
 
-  const response = await analyzeUserList({
-    submitter_id: data.managerId,
-    request_data: data.urls,
-    intent: "hackathon",
-    description: data.description,
-  });
+  try {
+    const response = await analyzeUserList({
+      submitter_id: data.managerId,
+      request_data: data.urls,
+      intent: "hackathon",
+      description: data.description,
+    });
 
-  // Handle API error response
-  if (!response.success || !response.data) {
+    // Handle API error response
+    if (!response.success || !response.data) {
+      console.error(`[Event Repository] analyzeUserList failed:`, response);
+      return {
+        success: response.success,
+        code: response.code,
+        message: response.message,
+        data: [] as GithubUser[],
+      };
+    }
+
+    const { data: resData, extra, ...others } = response;
+    const { id, users, ...rest } = resData;
+
     return {
-      success: response.success,
-      code: response.code,
-      message: response.message,
-      data: [] as GithubUser[],
+      ...others,
+      data: users,
+      extra: { ...extra, eventId: id, ...rest },
     };
+  } catch (error) {
+    console.error(`[Event Repository] insertOne error:`, error);
+    throw error;
   }
-
-  const { data: resData, extra, ...others } = response;
-  const { id, users, ...rest } = resData;
-
-  return {
-    ...others,
-    data: users,
-    extra: { ...extra, eventId: id, ...rest },
-  };
 }
 
 export { fetchList, fetchOne, insertOne };

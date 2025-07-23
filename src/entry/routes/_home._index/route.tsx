@@ -254,7 +254,7 @@ export default function Index() {
             // Use our smart auto-scroll
             autoScroll();
           } catch (e) {
-            console.log(e);
+            // Ignore JSON parsing errors during streaming
           }
         }
 

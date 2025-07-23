@@ -100,7 +100,7 @@ function EventDialog({ managerId, visible, onClose }: EventDialogProps) {
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                   Add Event
                 </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Create a new event to track contestants and their activities
                 </p>
               </div>
@@ -134,7 +134,7 @@ function EventDialog({ managerId, visible, onClose }: EventDialogProps) {
                       input: "bg-white dark:bg-surface-dark border-border dark:border-border-dark",
                     }}
                   />
-                  
+
                   <Textarea
                     value={userInput}
                     placeholder="Enter GitHub username of contestants, separated by comma"
@@ -150,7 +150,7 @@ function EventDialog({ managerId, visible, onClose }: EventDialogProps) {
                       input: "bg-white dark:bg-surface-dark border-border dark:border-border-dark",
                     }}
                   />
-                  
+
                   <div className="flex items-center gap-3 pt-2">
                     <span className="text-sm text-gray-500 dark:text-gray-400">
                       Input manually above or
@@ -160,8 +160,8 @@ function EventDialog({ managerId, visible, onClose }: EventDialogProps) {
                       type="csv"
                       onChange={handleFileChange}
                     >
-                      <Button 
-                        onClick={handleCsvUpload} 
+                      <Button
+                        onClick={handleCsvUpload}
                         size="sm"
                         variant="bordered"
                         className="border-border dark:border-border-dark hover:bg-gray-50 dark:hover:bg-white/10"
@@ -173,20 +173,20 @@ function EventDialog({ managerId, visible, onClose }: EventDialogProps) {
                 </div>
               </div>
             </ModalBody>
-            
+
             <ModalFooter className="border-t border-border dark:border-border-dark px-6 py-4">
               <div className="flex gap-3 w-full sm:w-auto sm:ml-auto">
-                <Button 
-                  variant="bordered" 
-                  onClick={() => closeDialog()} 
+                <Button
+                  variant="bordered"
+                  onClick={() => closeDialog()}
                   isDisabled={loading}
                   className="flex-1 sm:flex-none border-border dark:border-border-dark hover:bg-gray-50 dark:hover:bg-white/10"
                 >
                   Cancel
                 </Button>
-                <Button 
-                  color="primary" 
-                  isLoading={loading} 
+                <Button
+                  color="primary"
+                  isLoading={loading}
                   onClick={handleConfirm}
                   className="flex-1 sm:flex-none"
                 >
