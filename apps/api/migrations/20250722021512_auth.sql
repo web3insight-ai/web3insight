@@ -18,3 +18,12 @@ CREATE TABLE IF NOT EXISTS "api"."auth_users_binds"
     created_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 )
+
+CREATE TABLE IF NOT EXISTS "api"."auth_user_roles"
+(
+    user_role_id   BIGSERIAL PRIMARY KEY,
+    user_role_uid  BIGINT                   NOT NULL,
+    user_role_name TEXT                     NOT NULL DEFAULT '',
+    created_at     TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    updated_at     TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);

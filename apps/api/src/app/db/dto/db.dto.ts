@@ -127,6 +127,14 @@ export interface ApiAuthUsersBinds {
   updated_at: Generated<Timestamp>;
 }
 
+export interface ApiAuthUserRoles {
+  created_at: Generated<Timestamp>;
+  updated_at: Generated<Timestamp>;
+  user_role_id: Generated<Int8>;
+  user_role_name: Generated<string>;
+  user_role_uid: Int8;
+}
+
 export interface DB {
   'data.actors': DataActors;
   'data.events': DataEvent;
@@ -137,4 +145,5 @@ export interface DB {
   'api.upstream_repos': ApiUpstreamRepos;
   'api.auth_users': ApiAuthUsers;
   'api.auth_users_binds': ApiAuthUsersBinds;
+  'api.auth_users_roles': ApiAuthUserRoles;
 }
