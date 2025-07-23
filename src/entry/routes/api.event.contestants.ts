@@ -1,10 +1,34 @@
+import { type LoaderFunctionArgs, type ActionFunctionArgs, json } from "@remix-run/node";
+
+import { fetchCurrentUser } from "~/auth/repository";
+import { canManageEvents } from "~/auth/helper";
 import { fetchList, insertOne } from "~/event/repository";
 
-import { createServiceAdapter } from "../utils";
+async function protectedLoader(args: LoaderFunctionArgs) {
+  const res = await fetchCurrentUser(args.request);
+  
+  if (!canManageEvents(res.data)) {
+    return json({ success: false, message: "Access denied", code: "404" }, { status: 404 });
+  }
 
-const { loader, action } = createServiceAdapter({
-  GET: fetchList,
-  POST: insertOne,
-});
+  const url = new URL(args.request.url);
+  const params = Object.fromEntries(url.searchParams.entries());
+  const result = await fetchList(params);
+  
+  return json(result, { status: Number(result.code) });
+}
 
-export { loader, action };
+async function protectedAction(args: ActionFunctionArgs) {
+  const res = await fetchCurrentUser(args.request);
+  
+  if (!canManageEvents(res.data)) {
+    return json({ success: false, message: "Access denied", code: "404" }, { status: 404 });
+  }
+
+  const data = await args.request.json();
+  const result = await insertOne(data);
+  
+  return json(result, { status: Number(result.code) });
+}
+
+export { protectedLoader as loader, protectedAction as action };

@@ -5,6 +5,7 @@ import { useLoaderData } from "@remix-run/react";
 import type { DataValue } from '@/types';
 
 import { fetchCurrentUser } from "~/auth/repository";
+import { canManageEcosystems } from "~/auth/helper";
 import { getPageSize } from "~/ecosystem/helper";
 import { fetchManageableList, fetchManageableRepositoryList, updateManageableRepositoryMark } from "~/ecosystem/repository";
 import RepositoryListViewWidget from "~/repository/views/repository-list";
@@ -15,6 +16,11 @@ async function loader({ request, params }: LoaderFunctionArgs) {
   const name = decodeURIComponent(params.name!);
 
   const res = await fetchCurrentUser(request);
+  
+  if (!canManageEcosystems(res.data)) {
+    throw new Response(null, { status: 404, statusText: "Not Found" });
+  }
+
   const { data: ecosystems } = await fetchManageableList(res.data.id);
 
   if (!ecosystems.find(eco => eco.name === name)) {

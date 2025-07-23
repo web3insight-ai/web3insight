@@ -39,7 +39,7 @@ function AdminLayout({ user, settings = false }: AdminLayoutProps) {
         {/* Sidebar */}
         <aside className="flex-shrink-0 w-64 bg-white dark:bg-surface-dark border-r border-border dark:border-border-dark hidden md:block">
           <div className="h-full p-4 overflow-y-auto">
-            <NavMenu settings={settings} />
+            <NavMenu settings={settings} user={user} />
           </div>
         </aside>
         

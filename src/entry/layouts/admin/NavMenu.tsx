@@ -12,9 +12,9 @@ const iconMap = {
   "Managers": Settings,
 };
 
-function NavMenu({ settings = false }: NavMenuProps) {
+function NavMenu({ settings = false, user }: NavMenuProps) {
   const { pathname } = useLocation();
-  const menuItems = getMenu(settings);
+  const menuItems = getMenu(settings, user);
 
   return (
     <div className="space-y-6">

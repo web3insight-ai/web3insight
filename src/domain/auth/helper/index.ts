@@ -21,8 +21,35 @@ function isManageable(user: ApiUser | null): boolean {
   return isServices(user) || isAdmin(user);
 }
 
+function isEcosystemManager(user: ApiUser | null): boolean {
+  return hasRole(user, "ecosystem");
+}
+
+function isHackathonManager(user: ApiUser | null): boolean {
+  return hasRole(user, "hackathon");
+}
+
+function canManageEcosystems(user: ApiUser | null): boolean {
+  return isEcosystemManager(user) || isServices(user) || isAdmin(user);
+}
+
+function canManageEvents(user: ApiUser | null): boolean {
+  return isHackathonManager(user) || isServices(user) || isAdmin(user);
+}
+
 function isContentManager(user: ApiUser | null): boolean {
   return isEditor(user) || isServices(user) || isAdmin(user);
 }
 
-export { hasRole, isServices, isAdmin, isEditor, isManageable, isContentManager };
+export { 
+  hasRole, 
+  isServices, 
+  isAdmin, 
+  isEditor, 
+  isEcosystemManager, 
+  isHackathonManager,
+  canManageEcosystems,
+  canManageEvents,
+  isManageable, 
+  isContentManager, 
+};

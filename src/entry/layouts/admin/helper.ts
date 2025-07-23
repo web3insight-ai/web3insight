@@ -1,25 +1,37 @@
+import { canManageEcosystems, canManageEvents } from "~/auth/helper";
+import type { ApiUser } from "~/auth/typing";
+
 import type { MenuItem } from "./typing";
 
 function prefixPath(partOfPath: string): string {
   return `/admin${partOfPath}`;
 }
 
-const menu: MenuItem[] = [
-  {
-    text: "Ecosystems",
-    path: "",
-    childrenPrefix: "/ecosystems",
-  },
-  {
-    text: "Events",
-    path: "/events",
-    childrenPrefix: "/events",
-  },
-].map(item => ({
-  ...item,
-  path: prefixPath(item.path),
-  childrenPrefix: item.childrenPrefix ? prefixPath(item.childrenPrefix) : undefined,
-}));
+function buildMenu(user: ApiUser | null): MenuItem[] {
+  const menuItems: MenuItem[] = [];
+
+  if (canManageEcosystems(user)) {
+    menuItems.push({
+      text: "Ecosystems",
+      path: "",
+      childrenPrefix: "/ecosystems",
+    });
+  }
+
+  if (canManageEvents(user)) {
+    menuItems.push({
+      text: "Events", 
+      path: "/events",
+      childrenPrefix: "/events",
+    });
+  }
+
+  return menuItems.map(item => ({
+    ...item,
+    path: prefixPath(item.path),
+    childrenPrefix: item.childrenPrefix ? prefixPath(item.childrenPrefix) : undefined,
+  }));
+}
 
 const settingsMenu: MenuItem[] = [
   {
@@ -28,8 +40,8 @@ const settingsMenu: MenuItem[] = [
   },
 ];
 
-function getMenu(settings: boolean) {
-  return settings ? settingsMenu : menu;
+function getMenu(settings: boolean, user?: ApiUser | null) {
+  return settings ? settingsMenu : buildMenu(user || null);
 }
 
 function isMenuItemActive(path: string, item: MenuItem): boolean {

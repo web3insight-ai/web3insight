@@ -1,7 +1,19 @@
+import { type LoaderFunctionArgs, json } from "@remix-run/node";
+
+import { fetchCurrentUser } from "~/auth/repository";
+import { canManageEvents } from "~/auth/helper";
 import { fetchOne } from "~/event/repository";
 
-import { createServiceAdapter } from "../utils";
+async function protectedLoader(args: LoaderFunctionArgs) {
+  const res = await fetchCurrentUser(args.request);
+  
+  if (!canManageEvents(res.data)) {
+    return json({ success: false, message: "Access denied", code: "404" }, { status: 404 });
+  }
 
-const { loader } = createServiceAdapter("GET", fetchOne, ({ params }) => params.id);
+  const result = await fetchOne(args.params.id);
+  
+  return json(result, { status: Number(result.code) });
+}
 
-export { loader };
+export { protectedLoader as loader };
