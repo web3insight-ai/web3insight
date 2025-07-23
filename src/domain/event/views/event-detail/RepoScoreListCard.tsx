@@ -13,7 +13,7 @@ function RepoScoreListCard({ dataSource }: RepoScoreListCardProps) {
     if (repo && typeof repo === 'object' && repo !== null && 'repo_name' in repo && 'score' in repo) {
       return {
         fullName: String((repo as { repo_name: unknown }).repo_name),
-        score: String((repo as { score: unknown }).score)
+        score: String((repo as { score: unknown }).score),
       };
     }
 
@@ -21,7 +21,7 @@ function RepoScoreListCard({ dataSource }: RepoScoreListCardProps) {
     if (repo && typeof repo === 'object' && repo !== null && 'fullName' in repo && 'score' in repo) {
       return {
         fullName: String((repo as { fullName: unknown }).fullName),
-        score: String((repo as { score: unknown }).score)
+        score: String((repo as { score: unknown }).score),
       };
     }
 
@@ -32,7 +32,7 @@ function RepoScoreListCard({ dataSource }: RepoScoreListCardProps) {
         const [fullName, score] = entries[0];
         return {
           fullName: String(fullName),
-          score: String(score)
+          score: String(score),
         };
       }
     }
@@ -40,7 +40,7 @@ function RepoScoreListCard({ dataSource }: RepoScoreListCardProps) {
     // Case 4: Fallback for unexpected structures
     return {
       fullName: "unknown/repository",
-      score: "0"
+      score: "0",
     };
   };
 

@@ -19,7 +19,7 @@ function resolveEventDetail(raw: Record<string, DataValue>): EventReport {
           if (repo.repo_name && repo.score !== undefined) {
             return {
               fullName: String(repo.repo_name),
-              score: String(repo.score)
+              score: String(repo.score),
             };
           }
 
@@ -50,7 +50,6 @@ function resolveEventDetail(raw: Record<string, DataValue>): EventReport {
     id: raw.id,
     type: raw.intent,
     description: raw.description,
-    submitter: raw.submitter_id,
     contestants,
   };
 

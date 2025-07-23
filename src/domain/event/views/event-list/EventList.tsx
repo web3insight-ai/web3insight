@@ -36,18 +36,14 @@ function EventListView({ className, managerId }: EventListViewWidgetProps) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!managerId) {
-      return;
-    }
-
     setLoading(true);
-    fetchList({ managerId })
+    fetchList({})
       .then(res => {
         setDataSource(res.data);
         setTotal(res.extra?.total ?? 0);
       })
       .finally(() => setLoading(false));
-  }, [managerId, refetchTimestamp]);
+  }, [refetchTimestamp]);
 
   const gotoDetail = (id: number) => navigate(`/admin/events/${id}`);
 

@@ -8,7 +8,6 @@ import httpClient from "./client";
 
 async function fetchAnalysisUserList(
   params: Partial<SqlStylePagination> & {
-    submitter_id: string;
     direction?: string;
   },
 ): Promise<ResponseResult<ListResponseData & TotalResponseData>> {
@@ -17,7 +16,6 @@ async function fetchAnalysisUserList(
 
 async function analyzeUserList(
   data: {
-    submitter_id: string;
     request_data: string[];
     intent: string;
     description?: string;

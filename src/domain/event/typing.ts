@@ -18,7 +18,6 @@ type EventReport = {
   id: string;
   type: "hackathon";
   description: string;
-  submitter: string;
   contestants: Contestant[];
 };
 

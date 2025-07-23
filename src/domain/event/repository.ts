@@ -9,20 +9,17 @@ import type { EventReport } from "./typing";
 import { resolveEventDetail } from "./helper";
 
 async function fetchList(
-  params: NormalizedPagination & {
-    managerId: string;
-  },
+  params: NormalizedPagination,
 ): Promise<ResponseResult> {
   if (!isServerSide()) {
     return httpClient.get("/api/event/contestants", { params });
   }
 
-  const { managerId, pageSize, pageNum } = params;
+  const { pageSize, pageNum } = params;
 
   try {
     const { data, extra, ...others } = await fetchAnalysisUserList({
       ...resolvePaginationParams({ pageSize, pageNum }),
-      submitter_id: managerId,
     });
 
     return {
@@ -58,7 +55,7 @@ async function fetchOne(id: number): Promise<ResponseResult<EventReport>> {
         success: false,
         code: "500",
         message: `API call failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        data: {}
+        data: {},
       };
     }
 
@@ -124,7 +121,6 @@ async function insertOne(
 
   try {
     const response = await analyzeUserList({
-      submitter_id: data.managerId,
       request_data: data.urls,
       intent: "hackathon",
       description: data.description,
