@@ -13,10 +13,9 @@ function handleResponse(res: ResponseResult, _: DataValue, rawRes: Response) {
   if (isServerSide()) {
     const outputText = `[HTTP] ${rawRes.status} ${rawRes.url}`;
 
-    if (res.success) {
-      console.log(outputText);
-    } else {
-      console.error(`${outputText}: ${res.message}`);
+    // Only log errors (4xx, 5xx) or non-success responses
+    if (!res.success || rawRes.status >= 400) {
+      console.error(`${outputText}: ${res.message || 'Request failed'}`);
     }
   }
 

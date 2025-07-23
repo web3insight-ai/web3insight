@@ -66,7 +66,6 @@ async function fetchOne(id: number): Promise<ResponseResult<EventReport>> {
     res.code = "500";
     res.message = "Failed to fetch analysis data, please try again later.";
     
-    console.log("Raw analysis response data: ", res.data);
   }
 
   return {

@@ -38,7 +38,7 @@ async function fetchStatisticsOverview() {
   if (failedIndex > -1) {
     const failed = responses[failedIndex];
 
-    console.log("request failed while fetching statistics overview", failedIndex, failed?.code, failed?.message);
+    console.error("request failed while fetching statistics overview", failedIndex, failed?.code, failed?.message);
 
     return {
       ...failed,
