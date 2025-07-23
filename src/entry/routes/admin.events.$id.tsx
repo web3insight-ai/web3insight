@@ -4,6 +4,7 @@ import { Calendar } from "lucide-react";
 
 import { fetchCurrentUser } from "~/auth/repository";
 import { canManageEvents } from "~/auth/helper";
+import { fetchOne } from "~/event/repository";
 import EventDetailViewWidget from "~/event/views/event-detail";
 
 async function loader({ request, params }: LoaderFunctionArgs) {
@@ -13,11 +14,23 @@ async function loader({ request, params }: LoaderFunctionArgs) {
     throw new Response(null, { status: 404, statusText: "Not Found" });
   }
 
-  return json({ eventId: Number(params.id!) });
+  const eventId = Number(params.id!);
+
+  // Fetch event data to get the description/name
+  const eventRes = await fetchOne(request, eventId);
+
+  if (!eventRes.success) {
+    throw new Response(null, { status: 404, statusText: "Event Not Found" });
+  }
+
+  return json({
+    eventId,
+    eventName: eventRes.data.description || "Unknown Event"
+  });
 }
 
 function AdminEventDetailPage() {
-  const { eventId } = useLoaderData<typeof loader>();
+  const { eventId, eventName } = useLoaderData<typeof loader>();
 
   return (
     <div className="min-h-dvh bg-background dark:bg-background-dark py-8">
@@ -29,7 +42,7 @@ function AdminEventDetailPage() {
               <Calendar size={28} className="text-primary" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">Event #{eventId}</h1>
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">{eventName} (#{eventId})</h1>
               <p className="text-lg text-gray-500 dark:text-gray-400">Event Details & Analytics</p>
             </div>
           </div>

@@ -47,7 +47,7 @@ function EventDialog({ visible, onClose }: EventDialogProps) {
     const resolvedDescription = description && description.trim();
 
     if (!resolvedDescription) {
-      return alert("Please enter description first.");
+      return alert("Please enter event name first.");
     }
 
     const contestants = resolveContestants(userInput);
@@ -123,8 +123,8 @@ function EventDialog({ visible, onClose }: EventDialogProps) {
                 <div className="space-y-4">
                   <Textarea
                     value={description}
-                    placeholder="Describe what this event is about"
-                    label="Description"
+                    placeholder="Enter event name (e.g., OpenBuild Hackathon)"
+                    label="Event Name"
                     labelPlacement="outside"
                     isRequired
                     onValueChange={setDescription}

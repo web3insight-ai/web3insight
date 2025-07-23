@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Card, CardHeader, CardBody, Divider, Link, Chip, Button } from "@nextui-org/react";
-import { Github, Star, ChevronDown, ChevronUp } from "lucide-react";
+import { Github, Trophy, ChevronDown, ChevronUp } from "lucide-react";
 
 import type { RepoScoreListCardProps } from "./typing";
 
@@ -121,20 +121,21 @@ function RepoScoreListCard({ dataSource }: RepoScoreListCardProps) {
                         return (
                           <Card
                             key={`${fullName}-${i}`}
-                            className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border border-border dark:border-border-dark hover:shadow-md transition-all duration-200 group animate-fade-in"
+                            className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark hover:shadow-card transition-all duration-200 hover:scale-[1.02] group animate-fade-in"
                             style={{ animationDelay: `${i * 50}ms` }}
                           >
-                            <CardBody className="p-4">
+                            <CardBody className="p-5">
                               <div className="flex flex-col gap-3">
                                 {/* Repository Info */}
                                 <div className="flex-1">
                                   <Link
                                     href={`https://github.com/${fullName}`}
                                     isExternal
-                                    className="text-sm font-medium text-gray-900 dark:text-white hover:text-primary group-hover:text-primary transition-colors line-clamp-2"
+                                    className="text-xs font-mono leading-relaxed text-gray-900 dark:text-white hover:text-primary group-hover:text-primary transition-colors line-clamp-3 break-all"
+                                    title={fullName}
                                   >
-                                    <span className="text-gray-500 dark:text-gray-400">{owner}/</span>
-                                    <span className="font-semibold">{shortName}</span>
+                                    <span className="text-gray-500 dark:text-gray-400 font-normal">{owner}/</span>
+                                    <span className="font-medium">{shortName}</span>
                                   </Link>
                                 </div>
 
@@ -143,7 +144,7 @@ function RepoScoreListCard({ dataSource }: RepoScoreListCardProps) {
                                   <Chip
                                     size="sm"
                                     variant="flat"
-                                    startContent={<Star size={12} />}
+                                    startContent={<Trophy size={12} />}
                                     className="bg-primary/10 text-primary"
                                   >
                                     {score}
