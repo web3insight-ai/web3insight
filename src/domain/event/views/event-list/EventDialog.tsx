@@ -12,7 +12,7 @@ import { insertOne } from "../../repository";
 import type { EventDialogPayload, EventDialogProps } from "./typing";
 import { resolveContestants } from "./helper";
 
-function EventDialog({ managerId, visible, onClose }: EventDialogProps) {
+function EventDialog({ visible, onClose }: EventDialogProps) {
   const [description, setDescription] = useState("");
   const [userInput, setUserInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -57,7 +57,7 @@ function EventDialog({ managerId, visible, onClose }: EventDialogProps) {
     }
 
     setLoading(true);
-    insertOne({ managerId, urls: contestants, description: resolvedDescription })
+    insertOne({ urls: contestants, description: resolvedDescription })
       .then(res => {
         if (res.success) {
           closeDialog({

@@ -26,7 +26,7 @@ function AdminEventListPage() {
     );
   }
 
-  return <EventListViewWidget managerId={manager.id} />;
+  return <EventListViewWidget />;
 }
 
 export { loader };

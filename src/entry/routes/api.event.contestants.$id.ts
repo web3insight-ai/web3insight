@@ -11,7 +11,7 @@ async function protectedLoader(args: LoaderFunctionArgs) {
     return json({ success: false, message: "Access denied", code: "404" }, { status: 404 });
   }
 
-  const result = await fetchOne(args.params.id);
+  const result = await fetchOne(args.request, Number(args.params.id));
   
   return json(result, { status: Number(result.code) });
 }

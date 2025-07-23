@@ -13,7 +13,7 @@ async function protectedLoader(args: LoaderFunctionArgs) {
 
   const url = new URL(args.request.url);
   const params = Object.fromEntries(url.searchParams.entries());
-  const result = await fetchList(params);
+  const result = await fetchList(args.request, params);
   
   return json(result, { status: Number(result.code) });
 }
@@ -26,7 +26,7 @@ async function protectedAction(args: ActionFunctionArgs) {
   }
 
   const data = await args.request.json();
-  const result = await insertOne(data);
+  const result = await insertOne(args.request, data);
   
   return json(result, { status: Number(result.code) });
 }

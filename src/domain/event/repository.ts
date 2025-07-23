@@ -4,21 +4,42 @@ import httpClient from "@/clients/http/default";
 
 import type { User as GithubUser } from "../github/typing";
 import { fetchAnalysisUserList, analyzeUserList, fetchAnalysisUser } from "../api/repository";
+import { getSession } from "../auth/helper/server-only";
 
 import type { EventReport } from "./typing";
 import { resolveEventDetail } from "./helper";
 
 async function fetchList(
-  params: NormalizedPagination,
+  requestOrParams: Request | NormalizedPagination,
+  params?: NormalizedPagination,
 ): Promise<ResponseResult> {
+  // Handle client-side calls (first parameter is params object)
   if (!isServerSide()) {
-    return httpClient.get("/api/event/contestants", { params });
+    const clientParams = requestOrParams as NormalizedPagination;
+    return httpClient.get("/api/event/contestants", { params: clientParams });
   }
 
-  const { pageSize, pageNum } = params;
+  // Handle server-side calls (first parameter is request, second is params)
+  const request = requestOrParams as Request;
+  const serverParams = params!;
+
+  // Get user token from session
+  const session = await getSession(request);
+  const userToken = session.get("userToken");
+
+  if (!userToken) {
+    return {
+      success: false,
+      code: "401",
+      message: "Authentication required",
+      data: [],
+    };
+  }
+
+  const { pageSize, pageNum } = serverParams;
 
   try {
-    const { data, extra, ...others } = await fetchAnalysisUserList({
+    const { data, extra, ...others } = await fetchAnalysisUserList(userToken, {
       ...resolvePaginationParams({ pageSize, pageNum }),
     });
 
@@ -36,9 +57,28 @@ async function fetchList(
   }
 }
 
-async function fetchOne(id: number): Promise<ResponseResult<EventReport>> {
+async function fetchOne(requestOrId: Request | number, id?: number): Promise<ResponseResult<EventReport>> {
+  // Handle client-side calls (first parameter is id)
   if (!isServerSide()) {
-    return httpClient.get(`/api/event/contestants/${id}`);
+    const clientId = requestOrId as number;
+    return httpClient.get(`/api/event/contestants/${clientId}`);
+  }
+
+  // Handle server-side calls (first parameter is request, second is id)
+  const request = requestOrId as Request;
+  const serverId = id!;
+
+  // Get user token from session
+  const session = await getSession(request);
+  const userToken = session.get("userToken");
+
+  if (!userToken) {
+    return {
+      success: false,
+      code: "401",
+      message: "Authentication required",
+      data: {} as EventReport,
+    };
   }
 
   let res: ResponseResult<Record<string, DataValue>>;
@@ -48,7 +88,7 @@ async function fetchOne(id: number): Promise<ResponseResult<EventReport>> {
 
   do {
     try {
-      res = await fetchAnalysisUser(id);
+      res = await fetchAnalysisUser(userToken, serverId);
     } catch (error) {
       console.error(`[Event Repository] fetchAnalysisUser attempt ${retryCount + 1} error:`, error);
       res = {
@@ -109,21 +149,37 @@ async function fetchOne(id: number): Promise<ResponseResult<EventReport>> {
 }
 
 async function insertOne(
-  data: {
-    managerId: string;
-    urls: string[];
-    description: string;
-  },
+  requestOrData: Request | { urls: string[]; description: string },
+  data?: { urls: string[]; description: string },
 ): Promise<ResponseResult<GithubUser[]>> {
+  // Handle client-side calls (first parameter is data)
   if (!isServerSide()) {
-    return httpClient.post("/api/event/contestants", data);
+    const clientData = requestOrData as { urls: string[]; description: string };
+    return httpClient.post("/api/event/contestants", clientData);
+  }
+
+  // Handle server-side calls (first parameter is request, second is data)
+  const request = requestOrData as Request;
+  const serverData = data!;
+
+  // Get user token from session
+  const session = await getSession(request);
+  const userToken = session.get("userToken");
+
+  if (!userToken) {
+    return {
+      success: false,
+      code: "401",
+      message: "Authentication required",
+      data: [] as GithubUser[],
+    };
   }
 
   try {
-    const response = await analyzeUserList({
-      request_data: data.urls,
+    const response = await analyzeUserList(userToken, {
+      request_data: serverData.urls,
       intent: "hackathon",
-      description: data.description,
+      description: serverData.description,
     });
 
     // Handle API error response

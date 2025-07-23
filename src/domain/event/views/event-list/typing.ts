@@ -6,7 +6,6 @@ type EventDialogPayload = {
 };
 
 type EventDialogProps = {
-  managerId: string;
   visible: boolean;
   onClose: (payload?: EventDialogPayload) => void;
 };
@@ -20,7 +19,6 @@ type ContestantListDialogProps = {
 
 type EventListViewWidgetProps = {
   className?: string;
-  managerId: string;
 };
 
 export type { EventDialogPayload, EventDialogProps, ContestantListDialogProps, EventListViewWidgetProps };

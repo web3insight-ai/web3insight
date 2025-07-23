@@ -21,7 +21,7 @@ interface EventData {
 
 const initTimestamp = Date.now();
 
-function EventListView({ className, managerId }: EventListViewWidgetProps) {
+function EventListView({ className }: EventListViewWidgetProps) {
   const [dataSource, setDataSource] = useState<EventData[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -242,7 +242,6 @@ function EventListView({ className, managerId }: EventListViewWidgetProps) {
 
       {/* Dialogs */}
       <EventDialog
-        managerId={managerId}
         visible={visible}
         onClose={closeDialog}
       />
