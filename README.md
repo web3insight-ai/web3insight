@@ -29,17 +29,17 @@ For instance, communities like OpenBuild face challenges in efficiently evaluati
 
 ## Technology Stack & Architecture
 
-Web3Insights utilizes Remix.js as its frontend framework, interacting with a dedicated Strapi backend for API services, data management, and user authentication.
+Web3Insights utilizes Remix.js as its frontend framework, interacting with a custom backend API for data management and user authentication.
 
-1. **Frontend (Remix):** A React-based user interface built with Remix and TypeScript, styled using Tailwind CSS and NextUI components. Handles user interactions, client-side routing, and displays data fetched from the Strapi backend. Remix's server functions primarily handle Server-Side Rendering (SSR) and routing logic.
-2. **Backend API & Authentication (Strapi):** A Node.js Strapi application serves as the core backend, providing RESTful APIs for data operations and handling user authentication (local auth and GitHub OAuth).
-3. **Database:** PostgreSQL serves as the primary relational database, managed by Strapi. Redis is used for caching to improve performance.
+1. **Frontend (Remix):** A React-based user interface built with Remix and TypeScript, styled using Tailwind CSS and NextUI components. Handles user interactions, client-side routing, and displays data fetched from the backend API. Remix's server functions primarily handle Server-Side Rendering (SSR) and routing logic.
+2. **Backend API & Authentication:** A custom REST API serves as the core backend, providing data operations and handling user authentication (GitHub OAuth).
+3. **Database:** PostgreSQL serves as the primary relational database. Redis is used for caching to improve performance.
 4. **AI Service:** Leverages OpenAI and Azure OpenAI API providers for generating insights and analysis reports.
 5. **External Data Sources:** Fetches data from APIs like OpenDigger, OSS Insight, and RSS3 to gather metrics on repositories, developers, and ecosystems.
 
 **Data Flow:**
 
-User interactions trigger requests within the Remix frontend. Remix handles routing and SSR, making API calls to the Strapi backend for data fetching, mutations, and authentication. Strapi processes these requests, interacts with the database (PostgreSQL), cache (Redis), AI services, or external APIs as needed, and returns data to the Remix frontend for rendering.
+User interactions trigger requests within the Remix frontend. Remix handles routing and SSR, making API calls to the custom backend API for data fetching, mutations, and authentication. The backend processes these requests, interacts with the database (PostgreSQL), cache (Redis), AI services, or external APIs as needed, and returns data to the Remix frontend for rendering.
 
 ## Roadmap
 
@@ -54,7 +54,7 @@ User interactions trigger requests within the Remix frontend. Remix handles rout
    1. Launch of Web3Insights Reward Distribution System for Starknet and Mantle
 4. Q1 2025
    1. Implementation of Web3Insights Ecosystem and Developer Profile Page
-   2. Refactor the backend to be more efficient and scalable using Strapi v5
+   2. Refactor the backend to be more efficient and scalable (completed - migrated from Strapi to custom API)
 5. Q2 2025
    1. Get rid of OpenDigger and turn to gharchive and BigQuery for data api
    2. Implementation of Web3Insights Developer Data Platform
@@ -66,9 +66,9 @@ User interactions trigger requests within the Remix frontend. Remix handles rout
 
 ## Project Links
 
-| Item      | Link                                         |
-| --------- | -------------------------------------------- |
-| Live Demo | [web3insights.app](https://web3insights.app) |
+| Item           | Link                                         |
+| -------------- | -------------------------------------------- |
+| Online Service | [web3insights.app](https://web3insights.app) |
 
 ## Contact Information
 
