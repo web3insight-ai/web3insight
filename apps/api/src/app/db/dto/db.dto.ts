@@ -92,7 +92,7 @@ export interface ApiAnalysisUsers {
   id: Generated<Int8>;
   intent: Generated<string>;
   request_data: Generated<Json>;
-  submitter_id: Generated<string>;
+  submitter_id: Generated<Int8>;
   description: Generated<string>;
   updated_at: Generated<Timestamp>;
 }

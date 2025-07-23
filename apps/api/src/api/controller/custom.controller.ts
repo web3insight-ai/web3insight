@@ -7,6 +7,7 @@ import {
   Param,
   Post,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -15,6 +16,7 @@ import {
   CustomQueryUsersOrderReqDto,
   CustomQueryUsersReqDto,
 } from '../dto/api.dto';
+import { RequestWithUser } from '@/auth/auth.jwt.dto';
 
 @Controller()
 @ApiTags('Custom')
@@ -28,8 +30,11 @@ export class CustomController {
   })
   @ApiBearerAuth()
   @UseGuards(AppAuthGuard)
-  async upload(@Body() body: CustomQueryUsersReqDto) {
-    return await this.userServices.uploadAndGetUsers(body);
+  async upload(
+    @Body() body: CustomQueryUsersReqDto,
+    @Req() req: RequestWithUser,
+  ) {
+    return await this.userServices.uploadAndGetUsers(body, req.user.uid);
   }
 
   @Get('custom/analysis/users')
@@ -39,8 +44,11 @@ export class CustomController {
   })
   @ApiBearerAuth()
   @UseGuards(AppAuthGuard)
-  async get(@Query() query: CustomQueryUsersOrderReqDto) {
-    return await this.userServices.getList(query);
+  async get(
+    @Query() query: CustomQueryUsersOrderReqDto,
+    @Req() req: RequestWithUser,
+  ) {
+    return await this.userServices.getList(query, req.user.uid);
   }
 
   @Get('custom/analysis/users/:id')
