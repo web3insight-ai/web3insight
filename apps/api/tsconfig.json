@@ -9,6 +9,7 @@
     "target": "ES2023",
     "strict": false,
     "noImplicitAny": false,
+    "noUncheckedIndexedAccess": false,
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",

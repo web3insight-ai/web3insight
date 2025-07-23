@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as readline from 'readline';
 import { Command, Console } from 'nestjs-console';
 import { KYSELY } from '@/app/db/db.provider';
-import { Kysely } from 'kysely';
+import { CompiledQuery, Kysely } from 'kysely';
 import { DB } from '@/app/db/dto/db.dto';
 import {
   askForConfirmation,
@@ -23,6 +23,10 @@ interface RawRepoData {
 interface RepoData {
   upstream_repo_name: string;
   upstream_marks: Record<string, { branch: string[]; tags: string[] }>;
+}
+
+interface QueryEcosystem {
+  ecosystem_name: string;
 }
 
 @Injectable()
@@ -339,5 +343,82 @@ export class InitDataService {
       }
     }
     console.log('Upstream to data sync completed');
+  }
+
+  @Command({
+    command: 'sync:db:eco:ecosystems',
+    description: 'Sync api.upstream_repos to data.repos',
+  })
+  async syncEcosystems() {
+    const sqlRawQuery = `
+SELECT DISTINCT jsonb_object_keys(upstream_marks) AS ecosystem_name
+FROM data.repos
+ORDER BY ecosystem_name;`;
+    const query = CompiledQuery.raw(sqlRawQuery);
+    const results = await this.db.executeQuery(query);
+    const upstream_ecosystems = results.rows.map(
+      (row: QueryEcosystem) => row.ecosystem_name,
+    );
+    const existingQuery = await this.db
+      .selectFrom('data.ecosystems')
+      .select(['name'])
+      .execute();
+
+    const existingEcosystems = existingQuery.map((eco) => eco.name);
+
+    const ecosystemsToInsert = upstream_ecosystems.filter(
+      (eco) => !existingEcosystems.includes(eco),
+    );
+
+    if (ecosystemsToInsert.length > 0) {
+      const shouldInsert = await askForConfirmation(
+        `Found ${ecosystemsToInsert.length} new ecosystems. Do you want to insert them?`,
+      );
+
+      if (shouldInsert) {
+        const ecoValues = ecosystemsToInsert.map((eco) => ({
+          name: eco,
+          active: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          description: '',
+          icon: '',
+        }));
+
+        for (const batch of chunkArray(ecoValues, 1000)) {
+          await this.db.insertInto('data.ecosystems').values(batch).execute();
+          console.log(`Inserted batch of ecosystems: ${batch.length}`);
+        }
+      } else {
+        console.log('Ecosystem insert operation cancelled');
+      }
+    } else {
+      console.log('No new ecosystems to insert');
+    }
+
+    const ecosystemsToDelete = existingEcosystems.filter(
+      (eco) => !upstream_ecosystems.includes(eco),
+    );
+
+    if (ecosystemsToDelete.length > 0) {
+      const shouldDelete = await askForConfirmation(
+        `Found ${ecosystemsToDelete.length} ecosystems to delete. Do you want to proceed?`,
+      );
+
+      if (shouldDelete) {
+        for (const batch of chunkArray(ecosystemsToDelete, 1000)) {
+          await this.db
+            .deleteFrom('data.ecosystems')
+            .where('name', 'in', batch)
+            .execute();
+          console.log(`Deleted batch of ecosystems: ${batch.length}`);
+        }
+      } else {
+        console.log('Ecosystem delete operation cancelled');
+      }
+    } else {
+      console.log('No ecosystems to delete');
+    }
+    return '';
   }
 }
