@@ -114,7 +114,7 @@ export class ReposService {
       const batchResults = await Promise.all(
         batch.map(async (repoIdentifier) => {
           const client = await this.tokenPoolService.getClient();
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
           const { data } = await client.request('GET /repositories/{repo_id}', {
             repo_id: repoIdentifier,
           });
