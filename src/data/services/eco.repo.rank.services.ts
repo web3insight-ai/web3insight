@@ -7,7 +7,7 @@ import { CacheDataService } from './cache.services';
 import { CacheKey } from '../dto/cache.dto';
 import { EcoType } from '../dto/data.dto';
 
-// 定义返回数据结构
+// Define return data structure
 export class EcoRankItem {
   eco_name: string;
   repo_name: string;
@@ -29,19 +29,19 @@ export class EcoRankService {
   ) {}
 
   /**
-   * 获取生态系统仓库排名数据
-   * @param ecoNames 生态系统名称列表
+   * Get ecosystem repository ranking data
+   * @param ecoNames List of ecosystem names
    */
   async getEcoRank(ecoNames: string[]) {
-    // 原始SQL查询逻辑
+    // Original SQL query logic
     const sqlRawQuery = `
       WITH
-      -- 需要分析的生态
+      -- Ecosystems to analyze
       eco_list as (
           select distinct
               unnest($1::text[]) as eco_name
       ),
-      -- 活跃开发者：近 1 年内 PR 提交月数大于等于 9 个月的开发者
+      -- Active developers: developers who have submitted PRs in at least 9 months within the past 1 year
       active_actor as (
           select
               actor_id
@@ -58,7 +58,8 @@ export class EcoRankService {
           having
               count(distinct to_char(created_at, 'YYYY-MM')) >= 9
       ),
-      -- 统计仓库近 1 年的事件：活跃开发者人数、非活跃开发者人数、活跃开发者提交次数、非活跃开发者提交次数、star 数、fork 数
+      -- Statistics of repository events in the past 1 year: active developer count, inactive developer count, 
+      -- active developer submission count, inactive developer submission count, star count, fork count
       repo_metric as (
           select
               t1.repo_id,
@@ -115,7 +116,7 @@ export class EcoRankService {
           group by
               t1.repo_id
       ),
-      -- 聚合仓库所属生态和所属生态数量
+      -- Aggregate repository's ecosystems and ecosystem count
       repo_eco as (
           select
               repo_id,
@@ -187,10 +188,10 @@ export class EcoRankService {
               t1.eco_name,
               t1.repo_id
       ),
-      -- 计算仓库得分：
-      -- - 使用饱和函数对统计量进行处理
-      -- - 仓库连接数和开发者数量的权重大于行为的权重
-      -- - 如果一个项目属于多个生态，则对其进行指数衰减：$e^{-0.3 * (eco\_num - 1)}$
+      -- Calculate repository score:
+      -- - Use saturation function to process statistics
+      -- - Weight of repository connections and developer count is greater than behavior weight
+      -- - If a project belongs to multiple ecosystems, apply exponential decay: $e^{-0.3 * (eco\_num - 1)}$
       eco_metric as (
           select
               eco_name,
@@ -240,7 +241,7 @@ export class EcoRankService {
     const query = CompiledQuery.raw(sqlRawQuery, [ecoNames]);
     const results = await this.db.executeQuery(query);
 
-    // 按生态系统分组结果
+    // Group results by ecosystem
     const groupedResults: { [key: string]: EcoRankItem[] } = {};
     
     for (const row of results.rows as any[]) {
@@ -256,7 +257,7 @@ export class EcoRankService {
       });
     }
 
-    // 为每个生态系统缓存结果
+    // Cache results for each ecosystem
     for (const [ecoName, list] of Object.entries(groupedResults)) {
       const cacheData = new EcoRankResult();
       cacheData.list = list;
@@ -274,10 +275,10 @@ export class EcoRankService {
 
   @Command({
     command: 'sync:eco:rank:new',
-    description: '同步生态系统仓库排名数据',
+    description: 'Synchronize ecosystem repository ranking data',
   })
   async syncEcoRank() {
-    // 获取所有生态系统类型（排除ALL）
+    // Get all ecosystem types (excluding ALL)
     const ecoTypes = Object.values(EcoType).filter(
       (eco) => eco !== EcoType.ALL,
     );
