@@ -263,7 +263,7 @@ export class EcoRankService {
       cacheData.list = list;
       
       await this.cacheDataService.updateCacheData(
-        CacheKey.EcoRank,
+        CacheKey.EcoRepoRank,
         cacheData,
         new Date().toISOString(),
         ecoName
