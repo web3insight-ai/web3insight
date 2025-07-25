@@ -1,4 +1,4 @@
-const defaultPageSize = 100;
+const defaultPageSize = 25;
 
 function getPageSize(): number {
   return defaultPageSize;
