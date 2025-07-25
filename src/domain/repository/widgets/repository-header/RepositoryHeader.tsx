@@ -1,4 +1,4 @@
-import { Github, Globe, Star, GitFork, AlertCircle, Users } from "lucide-react";
+import { Github, Globe, Star, GitFork, AlertCircle } from "lucide-react";
 
 import type { RepositoryHeaderProps } from "./typing";
 
@@ -65,7 +65,7 @@ function RepositoryHeader({ className, repository }: RepositoryHeaderProps) {
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8 pt-8 border-t border-border dark:border-border-dark">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 pt-8 border-t border-border dark:border-border-dark">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-yellow-100 dark:bg-yellow-900/20">
             <Star size={18} className="text-yellow-600 dark:text-yellow-400" />
@@ -102,17 +102,6 @@ function RepositoryHeader({ className, repository }: RepositoryHeaderProps) {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/20">
-            <Users size={18} className="text-green-600 dark:text-green-400" />
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">
-              {repository.contributorCount.toLocaleString()}
-            </div>
-            <div className="text-sm text-gray-500 dark:text-gray-500">Contributors</div>
-          </div>
-        </div>
       </div>
     </div>
   );

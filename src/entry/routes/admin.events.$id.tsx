@@ -25,7 +25,7 @@ async function loader({ request, params }: LoaderFunctionArgs) {
 
   return json({
     eventId,
-    eventName: eventRes.data.description || "Unknown Event"
+    eventName: eventRes.data.description || "Unknown Event",
   });
 }
 

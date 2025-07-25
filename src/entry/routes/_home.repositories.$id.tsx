@@ -5,7 +5,7 @@ import { getTitle } from "@/utils/app";
 import { ChartSkeleton } from "@/components/loading";
 
 import { fetchRepoRankList } from "~/api/repository";
-import { fetchRepo } from "~/ossinsight/repository";
+import { fetchRepoByName } from "~/github/repository";
 import { fetchRepoAnalysis } from "~/ecosystem/repository/legacy";
 import RepositoryDetailView from "~/repository/views/repository-detail";
 import type { RepoRankRecord } from "~/api/typing";
@@ -64,20 +64,37 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
 
   try {
     const [repoDetailsRes, analysisRes] = await Promise.all([
-      fetchRepo(repoName),
+      fetchRepoByName(repoName),
       fetchRepoAnalysis(repoName),
     ]);
 
+    // Use GitHub API data as primary source for repository metrics
+    let repositoryData = {
+      id: repoRankData.repo_id,
+      name: repoName,
+      starCount: repoRankData.star_count,
+      forksCount: repoRankData.forks_count,
+      openIssuesCount: repoRankData.open_issues_count,
+      contributorCount: 0, // Not displayed in UI
+      details: null,
+    };
+
+    // If GitHub API call succeeded, use its data for metrics and details
+    if (repoDetailsRes.success && repoDetailsRes.data) {
+      const githubRepo = repoDetailsRes.data;
+      repositoryData = {
+        id: githubRepo.id,
+        name: githubRepo.full_name,
+        starCount: githubRepo.stargazers_count,
+        forksCount: githubRepo.forks_count,
+        openIssuesCount: githubRepo.open_issues_count,
+        contributorCount: 0, // Not displayed in UI
+        details: githubRepo, // Pass the entire GitHub repo object as details
+      };
+    }
+
     return json({
-      repository: {
-        id: repoRankData.repo_id,
-        name: repoName,
-        starCount: repoRankData.star_count,
-        forksCount: repoRankData.forks_count,
-        openIssuesCount: repoRankData.open_issues_count,
-        contributorCount: repoRankData.contributor_count,
-        details: repoDetailsRes.success ? repoDetailsRes.data : null,
-      },
+      repository: repositoryData,
       analysis: analysisRes.success ? analysisRes.data : null,
     });
   } catch (error) {
@@ -90,7 +107,7 @@ export const loader = async (ctx: LoaderFunctionArgs) => {
         starCount: repoRankData.star_count,
         forksCount: repoRankData.forks_count,
         openIssuesCount: repoRankData.open_issues_count,
-        contributorCount: repoRankData.contributor_count,
+        contributorCount: 0, // Not displayed in UI
         details: null,
       },
       analysis: null,
