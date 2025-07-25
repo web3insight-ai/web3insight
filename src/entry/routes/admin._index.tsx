@@ -1,19 +1,25 @@
-import type { LoaderFunctionArgs } from "@remix-run/node";
+import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 
 import { fetchCurrentUser } from "~/auth/repository";
-import { fetchManageableList } from "~/ecosystem/repository";
-import EcosystemListViewWidget from "~/ecosystem/views/ecosystem-list";
+import { canManageEcosystems } from "~/auth/helper";
+import { fetchManageableEcosystemsWithStats } from "~/ecosystem/repository";
+import EcosystemManagementTable from "~/ecosystem/widgets/EcosystemManagementTable";
 
 import Section from "../components/section";
 
 async function loader({ request }: LoaderFunctionArgs) {
   const res = await fetchCurrentUser(request);
-  const { data } = await fetchManageableList(res.data.id);
+  
+  if (!canManageEcosystems(res.data)) {
+    throw new Response(null, { status: 404, statusText: "Not Found" });
+  }
 
-  return {
-    ecosystems: data,
-  };
+  const { data: ecosystems } = await fetchManageableEcosystemsWithStats();
+
+  return json({
+    ecosystems,
+  });
 }
 
 function AdminHomepage() {
@@ -23,8 +29,11 @@ function AdminHomepage() {
     <Section
       title="Ecosystems"
       summary="You can manage the ecosystems listed below"
+      contentHeightFixed
     >
-      <EcosystemListViewWidget dataSource={ecosystems} />
+      <EcosystemManagementTable 
+        ecosystems={ecosystems} 
+      />
     </Section>
   );
 }

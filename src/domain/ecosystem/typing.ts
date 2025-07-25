@@ -1,8 +1,11 @@
 import type { ManageableListParams } from "../repository/typing";
+import type { EcoRankRecord } from "../api/typing";
 
 type Ecosystem = {
   name: string;
 };
+
+type EcosystemWithStats = EcoRankRecord;
 
 enum EcosystemType {
   ALL = "all",
@@ -18,5 +21,5 @@ const EcosystemTypeLabels: Record<EcosystemType, string> = {
   [EcosystemType.COMMUNITY]: "Community",
 };
 
-export type { Ecosystem, ManageableListParams as RepositoryListParams };
+export type { Ecosystem, EcosystemWithStats, ManageableListParams as RepositoryListParams };
 export { EcosystemType, EcosystemTypeLabels };

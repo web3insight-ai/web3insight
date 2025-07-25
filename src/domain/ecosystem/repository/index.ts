@@ -7,15 +7,15 @@ import {
   fetchRepoCount, fetchRepoRankList,
   fetchActorCount, fetchActorGrowthCount, fetchActorRankList, fetchActorTrendList,
   updateRepoCustomMark,
+  fetchEcosystemRankList,
 } from "../../api/repository";
 
 import type { Repository } from "../../repository/typing";
 import { fetchManageableList as fetchManageableRepoListByEco } from "../../repository/repository";
 
 import type { Manager } from "../../admin/typing";
-import { fetchManager } from "../../admin/repository";
 
-import type { Ecosystem, RepositoryListParams } from "../typing";
+import type { Ecosystem, EcosystemWithStats, RepositoryListParams } from "../typing";
 
 async function fetchStatistics(name: string): Promise<ResponseResult<{
   developerTotalCount: number | string;
@@ -60,12 +60,13 @@ async function fetchStatistics(name: string): Promise<ResponseResult<{
   });
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function fetchManageableList(managerId: Manager["id"]): Promise<ResponseResult<Ecosystem[]>> {
-  const { data, ...others } = await fetchManager(managerId);
+  const { data, ...others } = await fetchManageableEcosystemsWithStats();
 
   return {
     ...others,
-    data: data?.ecosystems.map(eco => ({ name: eco })) || [],
+    data: data?.map(eco => ({ name: eco.eco_name })) || [],
   };
 }
 
@@ -85,4 +86,19 @@ async function updateManageableRepositoryMark(data: EcoRequestParams & { id: num
   return updateRepoCustomMark(data);
 }
 
-export { fetchStatistics, fetchManageableList, fetchManageableRepositoryList, updateManageableRepositoryMark };
+async function fetchManageableEcosystemsWithStats(): Promise<ResponseResult<EcosystemWithStats[]>> {
+  const { data, ...others } = await fetchEcosystemRankList();
+  
+  return {
+    ...others,
+    data: data?.list || [],
+  };
+}
+
+export { 
+  fetchStatistics, 
+  fetchManageableList, 
+  fetchManageableRepositoryList, 
+  updateManageableRepositoryMark,
+  fetchManageableEcosystemsWithStats,
+};

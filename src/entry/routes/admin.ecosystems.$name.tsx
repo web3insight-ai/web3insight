@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { type LoaderFunctionArgs, json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
+import { Database } from "lucide-react";
 
 import type { DataValue } from '@/types';
 
@@ -9,8 +10,6 @@ import { canManageEcosystems } from "~/auth/helper";
 import { getPageSize } from "~/ecosystem/helper";
 import { fetchManageableList, fetchManageableRepositoryList, updateManageableRepositoryMark } from "~/ecosystem/repository";
 import RepositoryListViewWidget from "~/repository/views/repository-list";
-
-import Section from "../components/section";
 
 async function loader({ request, params }: LoaderFunctionArgs) {
   const name = decodeURIComponent(params.name!);
@@ -86,21 +85,31 @@ function AdminEcosystemDetailPage() {
   };
 
   return (
-    <Section
-      className="h-full"
-      title={ecosystem.name}
-      summary={`Manage stuff of ${ecosystem.name} ecosystem`}
-      contentHeightFixed
-    >
-      <RepositoryListViewWidget
-        dataSource={dataSource}
-        pagination={page}
-        loading={loading}
-        onCurrentChange={handlePageChange}
-        onSearch={handleSearch}
-        onMark={handleMark}
-      />
-    </Section>
+    <div className="min-h-dvh bg-background dark:bg-background-dark pb-24">
+      <div className="w-full max-w-content mx-auto px-6 pt-8">
+        {/* Header and Overview */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <Database size={20} className="text-primary" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{ecosystem.name}</h1>
+          </div>
+          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
+            Manage and mark repositories within the {ecosystem.name} ecosystem
+          </p>
+        </div>
+
+        <RepositoryListViewWidget
+          dataSource={dataSource}
+          pagination={page}
+          loading={loading}
+          onCurrentChange={handlePageChange}
+          onSearch={handleSearch}
+          onMark={handleMark}
+        />
+      </div>
+    </div>
   );
 }
 
