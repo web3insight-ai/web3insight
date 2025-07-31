@@ -1,12 +1,12 @@
-# Web3Insights
+# Web3Insight
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Web3Insights/Web3Insights)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Web3Insight/Web3Insight)
 
 > A comprehensive metrics platform focused on Web3 ecosystems, communities, repositories, and developers
 
 ## Project Overview
 
-While Web3 ecosystems share similarities with traditional open-source communities, standard metric systems often fall short in providing a holistic understanding, trend tracking, and project evaluation specific to Web3 initiatives. Web3Insights aims to bridge this gap by offering tailored analytics and insights for the unique landscape of Web3 projects.
+While Web3 ecosystems share similarities with traditional open-source communities, standard metric systems often fall short in providing a holistic understanding, trend tracking, and project evaluation specific to Web3 initiatives. Web3Insight aims to bridge this gap by offering tailored analytics and insights for the unique landscape of Web3 projects.
 
 For instance, communities like OpenBuild face challenges in efficiently evaluating active contributors and participants in projects such as their Bootcamp. Manual statistical management is time-consuming, and even with tools like OSS Insight, obtaining detailed performance metrics for individual developers remains difficult. Additionally, there's a lack of standardization in reward distribution within these ecosystems.
 
@@ -29,7 +29,7 @@ For instance, communities like OpenBuild face challenges in efficiently evaluati
 
 ## Technology Stack & Architecture
 
-Web3Insights utilizes Remix.js as its frontend framework, interacting with a custom backend API for data management and user authentication.
+Web3Insight utilizes Remix.js as its frontend framework, interacting with a custom backend API for data management and user authentication.
 
 1. **Frontend (Remix):** A React-based user interface built with Remix and TypeScript, styled using Tailwind CSS and NextUI components. Handles user interactions, client-side routing, and displays data fetched from the backend API. Remix's server functions primarily handle Server-Side Rendering (SSR) and routing logic.
 2. **Backend API & Authentication:** A custom REST API serves as the core backend, providing data operations and handling user authentication (GitHub OAuth).
@@ -51,13 +51,13 @@ User interactions trigger requests within the Remix frontend. Remix handles rout
    1. Implementation of reward distribution system
    2. Launch of advanced ecosystem-specific metrics and analysis tools
 3. Q4 2024
-   1. Launch of Web3Insights Reward Distribution System for Starknet and Mantle
+   1. Launch of Web3Insight Reward Distribution System for Starknet and Mantle
 4. Q1 2025
-   1. Implementation of Web3Insights Ecosystem and Developer Profile Page
+   1. Implementation of Web3Insight Ecosystem and Developer Profile Page
    2. Refactor the backend to be more efficient and scalable (completed - migrated from Strapi to custom API)
 5. Q2 2025
    1. Get rid of OpenDigger and turn to gharchive and BigQuery for data api
-   2. Implementation of Web3Insights Developer Data Platform
+   2. Implementation of Web3Insight Developer Data Platform
    3. Launch of Web3 social data AI agent using RSSHub & n8n
 
 ## Project Team
@@ -68,7 +68,7 @@ User interactions trigger requests within the Remix frontend. Remix handles rout
 
 | Item           | Link                                         |
 | -------------- | -------------------------------------------- |
-| Online Service | [web3insights.app](https://web3insights.app) |
+| Online Service | [web3insight.ai](https://web3insight.ai) |
 
 ## Contact Information
 

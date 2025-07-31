@@ -17,7 +17,7 @@ const isDevelopment = process.env.NODE_ENV === "development";
 const vars: Record<string, any> = { // eslint-disable-line @typescript-eslint/no-explicit-any
   API_BASE_URL: process.env.API_BASE_URL || "",
   // Data API configuration  
-  DATA_API_URL: process.env.DATA_API_URL || "https://api.web3insights.app",
+  DATA_API_URL: process.env.DATA_API_URL || "https://api.web3insight.ai",
   DATA_API_TOKEN: process.env.DATA_API_TOKEN || "",
   // Session configuration
   SESSION_SECRET: process.env.SESSION_SECRET || "default-secret-change-me",

@@ -1,6 +1,6 @@
 const metadata = {
-  title: "Web3Insights",
-  tagline: "Developer Report",
+  title: "Web3Insight",
+  tagline: "Web3 Analytics Platform",
   description: "A comprehensive metric system for evaluating Web3 Ecosystems, Communities and Repos.",
 };
 

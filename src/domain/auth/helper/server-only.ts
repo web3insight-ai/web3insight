@@ -5,7 +5,7 @@ import { getVar } from "@/utils/env";
 
 const sessionOptions: Record<string, DataValue> = {
   cookie: {
-    name: "web3insights_session",
+    name: "web3insight_session",
     httpOnly: true,
     path: "/",
     sameSite: "lax",
