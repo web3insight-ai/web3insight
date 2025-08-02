@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS "api"."analysis_users"
     "github"          JSONB                    NOT NULL DEFAULT '{}',
     "submitter_id"    TEXT                     NOT NULL DEFAULT '',
     "data"            JSONB                    NOT NULL DEFAULT '{}',
+    "ai"              JSONB                    NOT NULL DEFAULT '{}',
     "created_at"      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     "updated_at"      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
