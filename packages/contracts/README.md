@@ -1,3 +1,17 @@
+# Web3Insight - Monad NFT Project
+
+## Deployed Contract Information
+
+**Contract Address**: `0xA1E2C9721322150eE2042097cd7E32f12720F139`  
+**Network**: Monad Testnet (Chain ID: 10143)  
+**Initial Owner**: `0xd559c7e581233F19cD4E3F2Ce969ddE01D3dEEC4`  
+**Verification Status**: ✅ Verified on Sourcify  
+**Explorer**: [View on Monad Explorer](https://testnet.monadexplorer.com/address/0xA1E2C9721322150eE2042097cd7E32f12720F139)
+
+## Project Overview
+
+Web3Insight is an ERC721 NFT contract that allows developers to mint unique profiles linked to their GitHub usernames, storing their Web3 skills, ecosystem involvement, and calculated Web3 scores.
+
 ## Monad-flavored Foundry
 
 > [!NOTE]
@@ -54,37 +68,54 @@ forge snapshot
 anvil
 ```
 
-### Deploy to Monad Testnet
+### Deploy Web3Insight to Monad Testnet
 
-First, you need to create a keystore file. Do not forget to remember the password! You will need it to deploy your contract.
-
-```shell
-cast wallet import monad-deployer --private-key $(cast wallet new | grep 'Private key:' | awk '{print $3}')
-```
-
-After creating the keystore, you can read its address using:
+The Web3Insight contract has been deployed using the following command:
 
 ```shell
-cast wallet address --account monad-deployer
+forge script script/DeployWeb3Insight.s.sol --private-key <PRIVATE_KEY> --broadcast --rpc-url https://testnet-rpc.monad.xyz
 ```
 
-The command above will create a keystore file named `monad-deployer` in the `~/.foundry/keystores` directory.
-
-Then, you can deploy your contract to the Monad Testnet using the keystore file you created.
+For future deployments, you can create a keystore file:
 
 ```shell
-forge create src/Counter.sol:Counter --account monad-deployer --broadcast
+cast wallet import monad-deployer --private-key <YOUR_PRIVATE_KEY>
 ```
 
-### Verify Contract
+Then deploy using:
+
+```shell
+forge script script/DeployWeb3Insight.s.sol --account monad-deployer --broadcast --rpc-url https://testnet-rpc.monad.xyz
+```
+
+### Verify Web3Insight Contract
+
+The Web3Insight contract has been verified on Sourcify using:
+
+```shell
+# First, encode constructor arguments
+cast abi-encode "constructor(address)" 0xd559c7e581233F19cD4E3F2Ce969ddE01D3dEEC4
+
+# Then verify the contract
+forge verify-contract \
+  0xA1E2C9721322150eE2042097cd7E32f12720F139 \
+  src/Web3Insight.sol:Web3Insight \
+  --chain 10143 \
+  --verifier sourcify \
+  --verifier-url https://sourcify-api-monad.blockvision.org \
+  --constructor-args 0x000000000000000000000000d559c7e581233f19cd4e3f2ce969dde01d3deec4
+```
+
+For future contract verifications:
 
 ```shell
 forge verify-contract \
   <contract_address> \
-  src/Counter.sol:Counter \
+  src/Web3Insight.sol:Web3Insight \
   --chain 10143 \
   --verifier sourcify \
-  --verifier-url https://sourcify-api-monad.blockvision.org
+  --verifier-url https://sourcify-api-monad.blockvision.org \
+  --constructor-args <abi_encoded_constructor_arguments>
 ```
 
 ### Cast
