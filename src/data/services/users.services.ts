@@ -12,6 +12,7 @@ import { ApiAnalysisUsers, DB } from '@/app/db/dto/db.dto';
 import { TokenPoolService } from '@/app/db/pool.services';
 import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
+import { throws } from 'assert';
 import { CompiledQuery, Kysely } from 'kysely';
 import { Command, Console } from 'nestjs-console';
 
@@ -214,16 +215,50 @@ FROM user_ids u;`;
     const query = CompiledQuery.raw(sqlRawQuery, [ids]);
     const results = await this.db.executeQuery(query);
 
+    const body = JSON.stringify({ users: results.rows });
+
     if (results.rows.length > 0) {
       const update = this.db
         .updateTable('api.analysis_users')
         .where('id', '=', String(payload.id))
         .set({
-          data: JSON.stringify({ users: results.rows }),
+          data: body,
         })
         .returningAll();
       await this.db.executeQuery(update);
     }
+
+    const newData = await this.db
+      .selectFrom('api.analysis_users')
+      .selectAll()
+      .where('id', '=', String(payload.id))
+      .executeTakeFirstOrThrow();
+
+    const ai = await fetch(
+      'https://n8n.pseudoyu.com/webhook/developer/profile',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newData),
+      },
+    );
+
+    const aiData = await ai.json();
+
+    console.log('Test', newData);
+
+    console.log(aiData);
+
+    const update = this.db
+      .updateTable('api.analysis_users')
+      .where('id', '=', String(payload.id))
+      .set({
+        ai: JSON.stringify(aiData),
+      })
+      .returningAll();
+    await this.db.executeQuery(update);
   }
 
   @Command({

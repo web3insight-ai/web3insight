@@ -89,6 +89,7 @@ export interface ApiAnalysisUsers {
   created_at: Generated<Timestamp>;
   data: Generated<Json>;
   github: Generated<Json>;
+  ai: Generated<Json>;
   id: Generated<Int8>;
   intent: Generated<string>;
   request_data: Generated<Json>;
