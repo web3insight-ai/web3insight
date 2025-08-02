@@ -30,7 +30,7 @@ async function bootstrap() {
     .setDescription('')
     .setVersion('1.0')
     .addBearerAuth()
-    .addServer('https://api.web3insights.app')
+    .addServer('https://api.web3insight.ai')
     .addServer('http://localhost:3010')
     .build();
 
