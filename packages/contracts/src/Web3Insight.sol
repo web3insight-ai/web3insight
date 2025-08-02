@@ -22,7 +22,6 @@ contract Web3Insight is ERC721, ERC721URIStorage, Ownable {
     // Mapping from GitHub username to token ID
     mapping(string => uint256) public githubToTokenId;
     mapping(uint256 => string) public tokenIdToGithub;
-    mapping(string => bool) public githubMinted;
 
     // Profile data struct
     struct ProfileData {
@@ -65,11 +64,6 @@ contract Web3Insight is ERC721, ERC721URIStorage, Ownable {
         string[] memory ecosystems,
         string memory metadataURI
     ) external payable {
-        require(bytes(githubUsername).length > 0, "GitHub username required");
-        require(!githubMinted[githubUsername], "Profile already minted for this GitHub user");
-        require(_nextTokenId <= MAX_SUPPLY, "Max supply reached");
-        require(msg.value >= mintPrice, "Insufficient payment");
-        require(web3Score <= 100, "Web3 score must be 0-100");
 
         uint256 tokenId = _nextTokenId++;
 
@@ -87,7 +81,6 @@ contract Web3Insight is ERC721, ERC721URIStorage, Ownable {
         // Create mappings
         githubToTokenId[githubUsername] = tokenId;
         tokenIdToGithub[tokenId] = githubUsername;
-        githubMinted[githubUsername] = true;
 
         // Mint the NFT to msg.sender (user mints to their own address)
         _safeMint(msg.sender, tokenId);
@@ -109,11 +102,6 @@ contract Web3Insight is ERC721, ERC721URIStorage, Ownable {
         string[] memory ecosystems,
         string memory metadataURI
     ) external onlyOwner {
-        require(to != address(0), "Cannot mint to zero address");
-        require(bytes(githubUsername).length > 0, "GitHub username required");
-        require(!githubMinted[githubUsername], "Profile already minted for this GitHub user");
-        require(_nextTokenId <= MAX_SUPPLY, "Max supply reached");
-        require(web3Score <= 100, "Web3 score must be 0-100");
 
         uint256 tokenId = _nextTokenId++;
 
@@ -131,7 +119,6 @@ contract Web3Insight is ERC721, ERC721URIStorage, Ownable {
         // Create mappings
         githubToTokenId[githubUsername] = tokenId;
         tokenIdToGithub[tokenId] = githubUsername;
-        githubMinted[githubUsername] = true;
 
         // Mint the NFT to specified address
         _safeMint(to, tokenId);
@@ -152,7 +139,6 @@ contract Web3Insight is ERC721, ERC721URIStorage, Ownable {
      * @dev Get token ID by GitHub username
      */
     function getTokenByGithub(string memory githubUsername) external view returns (uint256) {
-        require(githubMinted[githubUsername], "No token minted for this GitHub user");
         return githubToTokenId[githubUsername];
     }
 
@@ -211,7 +197,7 @@ contract Web3Insight is ERC721, ERC721URIStorage, Ownable {
      * @dev Check if a GitHub username has already minted
      */
     function isGithubMinted(string memory githubUsername) external view returns (bool) {
-        return githubMinted[githubUsername];
+        return githubToTokenId[githubUsername] != 0;
     }
 
     /**
