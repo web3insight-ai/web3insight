@@ -146,6 +146,15 @@ export interface DataEcosystems {
   updated_at: Generated<Timestamp>;
 }
 
+export interface ApiAuthMagic {
+  created_at: Generated<Timestamp>;
+  id: Generated<Int8>;
+  magic: string;
+  status: Generated<number>;
+  type: Generated<string>;
+  uid: Int8;
+}
+
 export interface DB {
   'data.actors': DataActors;
   'data.events': DataEvent;
@@ -158,4 +167,5 @@ export interface DB {
   'api.auth_users': ApiAuthUsers;
   'api.auth_users_binds': ApiAuthUsersBinds;
   'api.auth_users_roles': ApiAuthUserRoles;
+  'api.auth_magic': ApiAuthMagic;
 }

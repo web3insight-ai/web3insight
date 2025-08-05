@@ -117,6 +117,15 @@ export class LoginReqDto {
   code: string = '';
 }
 
+export class AuthBindWalletReqDto {
+  @IsString()
+  address: string;
+  @IsString()
+  magic: string;
+  @IsString()
+  signature: string;
+}
+
 export class ReposCustomMarkReqDto {
   @IsEnum(EcoType)
   @IsOptional()

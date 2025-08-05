@@ -1,4 +1,4 @@
-import { LoginReqDto } from '@/api/dto/api.dto';
+import { AuthBindWalletReqDto, LoginReqDto } from '@/api/dto/api.dto';
 import { KYSELY } from '@/app/db/db.provider';
 import { DB } from '@/app/db/dto/db.dto';
 import { Inject, Injectable } from '@nestjs/common';
@@ -8,6 +8,7 @@ import { Kysely } from 'kysely';
 import { Command, Console } from 'nestjs-console';
 import { JwtPayload } from '../auth.jwt.dto';
 import { JwtService } from '@nestjs/jwt';
+import { ethers } from 'ethers';
 
 interface GitHubTokenResponse {
   access_token: string;
@@ -128,6 +129,73 @@ export class AuthService {
     });
 
     return jwt;
+  }
+
+  async bindWallet(uid: string, body: AuthBindWalletReqDto) {
+    const maigcCheck = await this.db
+      .selectFrom('api.auth_magic')
+      .select(['id', 'magic'])
+      .where('uid', '=', uid)
+      .where('magic', '=', body.magic)
+      .where('created_at', '>', new Date(Date.now() - 3600000))
+      .where('status', '=', 0)
+      .limit(1)
+      .orderBy('created_at', 'desc')
+      .executeTakeFirst();
+
+    if (maigcCheck) {
+      await this.db
+        .updateTable('api.auth_magic')
+        .set({ status: 1 })
+        .where('id', '=', maigcCheck.id)
+        .execute();
+    } else {
+      throw new Error('Magic number not found or expired');
+    }
+
+    const decodedAddress = ethers.verifyMessage(
+      body.magic,
+      body.signature.toString(),
+    );
+
+    if (decodedAddress.toLowerCase() !== body.address.toLowerCase()) {
+      throw new Error('Signature verification failed');
+    }
+
+    const bindCheck = await this.db
+      .selectFrom('api.auth_users_binds')
+      .select(['api.auth_users_binds.bind_key'])
+      .where('bind_openid', '=', body.address.toLowerCase())
+      .where('bind_type', '=', 'wallet')
+      .executeTakeFirst();
+    if (bindCheck) {
+      throw new Error('Wallet already bound');
+    }
+    await this.db
+      .insertInto('api.auth_users_binds')
+      .values({
+        bind_key: body.address.toLowerCase(),
+        bind_type: 'wallet',
+        bind_uid: uid,
+      })
+      .execute();
+    return { success: true };
+  }
+
+  async genMagicNumber(uid: string) {
+    const number =
+      'Web3Insight: ' +
+      String(Math.floor(10000000 + Math.random() * 90000000).toString());
+    const set = await this.db
+      .insertInto('api.auth_magic')
+      .values({
+        uid: uid,
+        magic: number,
+        created_at: new Date().toISOString(),
+      })
+      .returning('magic')
+      .executeTakeFirst();
+    return set;
   }
 
   async getInfoFormGithubOAuth(code: string) {
