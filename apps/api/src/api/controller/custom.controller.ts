@@ -56,13 +56,8 @@ export class CustomController {
     summary: 'Get analysis public list',
     description: '',
   })
-  @ApiBearerAuth()
-  @UseGuards(AppAuthGuard)
-  async getPublic(
-    @Query() query: CustomQueryUsersOrderReqDto,
-    @Req() req: RequestWithUser,
-  ) {
-    return await this.userServices.getList(query, req.user.uid);
+  async getPublic(@Query() query: CustomQueryUsersOrderReqDto) {
+    return await this.userServices.getPublicList(query);
   }
 
   @Get('custom/analysis/users/:id')
