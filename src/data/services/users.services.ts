@@ -12,7 +12,6 @@ import { ApiAnalysisUsers, DB } from '@/app/db/dto/db.dto';
 import { TokenPoolService } from '@/app/db/pool.services';
 import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
-import { throws } from 'assert';
 import { CompiledQuery, Kysely } from 'kysely';
 import { Command, Console } from 'nestjs-console';
 
