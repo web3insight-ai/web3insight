@@ -1,6 +1,6 @@
 import { AuthService } from '@/auth/services/auth.services';
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
-import { LoginReqDto } from '../dto/api.dto';
+import { AuthBindWalletReqDto, LoginReqDto } from '../dto/api.dto';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { AppAuthGuard } from '@/auth/app.auth.guard';
 import { RequestWithUser } from '@/auth/auth.jwt.dto';
@@ -27,5 +27,30 @@ export class AuthController {
   @UseGuards(AppAuthGuard)
   async getUser(@Req() req: RequestWithUser) {
     return this.authServices.getUserInfo(req.user);
+  }
+
+  @Get('magic')
+  @ApiOperation({
+    summary: 'Get magic number',
+    description: '',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AppAuthGuard)
+  async getMagic(@Req() req: RequestWithUser) {
+    return this.authServices.genMagicNumber(req.user.uid);
+  }
+
+  @Post('bind/wallet')
+  @ApiOperation({
+    summary: 'Bind wallet address to user',
+    description: '',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AppAuthGuard)
+  async bindWallet(
+    @Req() req: RequestWithUser,
+    @Body() body: AuthBindWalletReqDto,
+  ) {
+    return this.authServices.bindWallet(req.user.uid, body);
   }
 }
