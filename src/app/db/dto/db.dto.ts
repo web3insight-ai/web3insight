@@ -91,6 +91,7 @@ export interface ApiAnalysisUsers {
   github: Generated<Json>;
   ai: Generated<Json>;
   id: Generated<Int8>;
+  public: Generated<boolean>;
   intent: Generated<string>;
   request_data: Generated<Json>;
   submitter_id: Generated<Int8>;

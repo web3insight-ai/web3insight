@@ -39,12 +39,26 @@ export class CustomController {
 
   @Get('custom/analysis/users')
   @ApiOperation({
-    summary: 'Get analysis history list',
+    summary: 'Get analysis history list, only for user',
     description: '',
   })
   @ApiBearerAuth()
   @UseGuards(AppAuthGuard)
   async get(
+    @Query() query: CustomQueryUsersOrderReqDto,
+    @Req() req: RequestWithUser,
+  ) {
+    return await this.userServices.getList(query, req.user.uid);
+  }
+
+  @Get('custom/analysis/users/public')
+  @ApiOperation({
+    summary: 'Get analysis public list',
+    description: '',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AppAuthGuard)
+  async getPublic(
     @Query() query: CustomQueryUsersOrderReqDto,
     @Req() req: RequestWithUser,
   ) {

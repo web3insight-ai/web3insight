@@ -100,6 +100,31 @@ export class UsersService {
     return res;
   }
 
+  async getPublicList(params: CustomQueryUsersOrderReqDto) {
+    let query = this.db
+      .selectFrom('api.analysis_users')
+      .where('public', '=', true)
+      .where('intent', '=', 'hackathon');
+
+    const total = await query
+      .select(this.db.fn.count('id').as('total'))
+      .execute();
+
+    query = query.orderBy('id', params.direction);
+    query = query.offset(params.skip);
+    query = query.limit(params.take);
+
+    const find = await query
+      .select(['id', 'description', 'created_at'])
+      .execute();
+
+    const res = new CustomQueryUsersResDto();
+    res.list = find as unknown as ApiAnalysisUsers[];
+    res.total = total[0].total as number;
+
+    return res;
+  }
+
   async analysisUsers(params: BaseIdReqAndResDto) {
     const analysis = await this.db
       .selectFrom('api.analysis_users')
