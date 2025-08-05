@@ -137,7 +137,7 @@ export class AuthService {
       .select(['id', 'magic'])
       .where('uid', '=', uid)
       .where('magic', '=', body.magic)
-      .where('created_at', '>', new Date(Date.now() - 3600000))
+      .where('created_at', '>', new Date(Date.now() - 120 * 1000))
       .where('status', '=', 0)
       .limit(1)
       .orderBy('created_at', 'desc')
