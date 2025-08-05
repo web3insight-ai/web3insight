@@ -283,15 +283,18 @@ export class InitDataService {
           !isDeepStrictEqual(repo.upstream_marks, existing.upstream_marks)
         );
       })
-      .map((repo) => ({
-        repo_id: repo.repo_id,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
-        repo_name: repo.api.owner.name + '/' + repo.api.name,
-        upstream_marks: repo.upstream_marks,
-        api: repo.api,
-        api_updated_at: repo.api_updated_at,
-      }));
+      .map((repo) => {
+        console.log(`Processing repo: ${repo.repo_id}`);
+        return {
+          repo_id: repo.repo_id,
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-expect-error
+          repo_name: repo.api.owner.name + '/' + repo.api.name,
+          upstream_marks: repo.upstream_marks,
+          api: repo.api,
+          api_updated_at: repo.api_updated_at,
+        };
+      });
 
     console.log(`Found ${reposToUpsert.length} repos to insert/update`);
 
