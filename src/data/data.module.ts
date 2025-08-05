@@ -6,7 +6,6 @@ import { CacheDataService } from './services/cache.services';
 import { RankService } from './services/rank.services';
 import { ReposService } from './services/repos.services';
 import { UsersService } from './services/users.services';
-import { EcoRepoRankService } from './services/eco.repo.rank.services';
 
 @Module({
   imports: [DBModule],
@@ -17,7 +16,6 @@ import { EcoRepoRankService } from './services/eco.repo.rank.services';
     RankService,
     ReposService,
     UsersService,
-    EcoRepoRankService,
   ],
   exports: [
     InitDataService,
@@ -26,7 +24,6 @@ import { EcoRepoRankService } from './services/eco.repo.rank.services';
     ReposService,
     CacheDataService,
     UsersService,
-    EcoRepoRankService,
   ],
 })
 export class DataModule {}
