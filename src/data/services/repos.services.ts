@@ -113,12 +113,29 @@ export class ReposService {
     for (const batch of repoBatches) {
       const batchResults = await Promise.all(
         batch.map(async (repoIdentifier) => {
-          const client = await this.tokenPoolService.getClient();
-
-          const { data } = await client.request('GET /repositories/{repo_id}', {
-            repo_id: repoIdentifier,
-          });
-          return data as RepoInfo;
+          try {
+            const client = await this.tokenPoolService.getClient();
+            const { data } = await client.request(
+              'GET /repositories/{repo_id}',
+              {
+                repo_id: repoIdentifier,
+              },
+            );
+            return data as RepoInfo;
+          } catch (e) {
+            console.log(`Failed to fetch repo ${repoIdentifier}:`, e);
+            const api = await this.db
+              .selectFrom('data.repos')
+              .select('api')
+              .where('repo_id', '=', String(repoIdentifier))
+              .executeTakeFirst();
+            if (api && api.api) {
+              return api.api as RepoInfo;
+            }
+            throw new NotFoundException(
+              `Repo with id ${repoIdentifier} not found in API or database`,
+            );
+          }
         }),
       );
       results.push(batchResults);
