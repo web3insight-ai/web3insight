@@ -289,7 +289,7 @@ export class InitDataService {
           repo_id: repo.repo_id,
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-expect-error
-          repo_name: repo.api.owner.name + '/' + repo.api.name,
+          repo_name: repo.api.owner.login + '/' + repo.api.name,
           upstream_marks: repo.upstream_marks,
           api: repo.api,
           api_updated_at: repo.api_updated_at,
