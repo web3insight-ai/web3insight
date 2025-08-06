@@ -144,6 +144,7 @@ export interface DataEcosystems {
   icon: Generated<string>;
   id: Generated<Int8>;
   name: string;
+  score: Generated<number>;
   updated_at: Generated<Timestamp>;
 }
 
