@@ -132,6 +132,17 @@ export class AuthService {
   }
 
   async bindWallet(uid: string, body: AuthBindWalletReqDto) {
+    const checkUser = await this.db
+      .selectFrom('api.auth_users_binds')
+      .select(['bind_id'])
+      .where('bind_uid', '=', uid)
+      .where('bind_type', '=', 'wallet')
+      .executeTakeFirst();
+
+    if (checkUser) {
+      throw new Error('Wallet already bound');
+    }
+
     const maigcCheck = await this.db
       .selectFrom('api.auth_magic')
       .select(['id', 'magic'])
@@ -168,6 +179,7 @@ export class AuthService {
       .where('bind_openid', '=', body.address.toLowerCase())
       .where('bind_type', '=', 'wallet')
       .executeTakeFirst();
+
     if (bindCheck) {
       throw new Error('Wallet already bound');
     }
