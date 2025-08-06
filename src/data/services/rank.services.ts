@@ -526,6 +526,33 @@ ORDER BY ecosystem;`;
     return groupedResults;
   }
 
+  async EcoRank() {
+    const sqlRawQuery = `
+WITH repo_eco AS (
+    SELECT r.repo_id,
+           e.key AS ecosystem_name
+    FROM data.repos r,
+         LATERAL jsonb_object_keys(r.upstream_marks) AS e(key)),
+     dev_per_eco AS (
+         SELECT re.ecosystem_name,
+                COUNT(DISTINCT e.actor_id) AS dev_cnt
+         FROM repo_eco re
+                  JOIN data.events e
+                       ON e.repo_id = re.repo_id
+                           AND e.created_at >= NOW() - INTERVAL '3 years'
+                           AND e.event_type <> 'WatchEvent'
+         GROUP BY re.ecosystem_name)
+UPDATE data.ecosystems AS eco
+SET score = dpe.dev_cnt
+FROM dev_per_eco dpe
+WHERE eco.name = dpe.ecosystem_name;`;
+    const query = CompiledQuery.raw(sqlRawQuery);
+    const results = await this.db.executeQuery(query);
+
+    console.log('Ecosystem rank updated:', results);
+    return results;
+  }
+
   @Command({
     command: 'sync:eco:rank',
     description: 'Test eco data',
