@@ -252,6 +252,10 @@ FROM user_ids u;`;
       await this.db.executeQuery(update);
     }
 
+    if (ids.length > 1) {
+      return;
+    }
+
     const newData = await this.db
       .selectFrom('api.analysis_users')
       .selectAll()
@@ -270,10 +274,6 @@ FROM user_ids u;`;
     );
 
     const aiData = await ai.json();
-
-    console.log('Test', newData);
-
-    console.log(aiData);
 
     const update = this.db
       .updateTable('api.analysis_users')
