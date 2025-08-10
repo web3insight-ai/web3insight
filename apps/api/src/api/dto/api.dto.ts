@@ -176,6 +176,8 @@ export class CustomQueryUsersReqDto {
 export class CustomQueryUsersOrderReqDto {
   @IsNumber()
   skip: number = 0;
+  @IsEnum(Intent)
+  intent: Intent = Intent.Hackathon;
   @IsNumber()
   @Min(1)
   @Max(100)
