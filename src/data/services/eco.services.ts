@@ -2,7 +2,7 @@ import { KYSELY } from '@/app/db/db.provider';
 import { DB } from '@/app/db/dto/db.dto';
 import { Inject, Injectable } from '@nestjs/common';
 import { Kysely } from 'kysely';
-import { Console } from 'nestjs-console';
+import { Command, Console } from 'nestjs-console';
 import { CacheDataService } from './cache.services';
 
 @Injectable()
@@ -18,6 +18,7 @@ export class EcoService {
       .selectAll()
       .where('active', '=', true)
       .orderBy('score', 'desc')
+      .orderBy('name', 'asc')
       .limit(300)
       .execute();
     return data;
@@ -28,10 +29,18 @@ export class EcoService {
     const text = data
       .map((eco) => {
         return `
-  ${eco.name} = '${eco.name}',`;
+  ${eco.name.replaceAll(' ', '_').replaceAll('.', '_').replaceAll('(', '').replaceAll(')', '').replaceAll('-', '')} = '${eco.name}'`;
       })
-      .join('\n');
+      .join();
     console.log(`export enum EcoType {${text}}`);
     return text;
+  }
+
+  @Command({
+    command: 'eco:print',
+    description: 'Synchronize ecosystem repository ranking data',
+  })
+  async printEco() {
+    await this.printEcoTop300();
   }
 }

@@ -42,6 +42,7 @@ export class EcoRankDto {
   actors_new_total: number = 0;
   actors_core_total: number = 0;
   repos_total: number = 0;
+  kind: string = '';
 }
 
 export class GetActorDateReqDto extends GetTotalReqDto {
@@ -130,7 +131,7 @@ export class ReposCustomMarkReqDto {
   @IsEnum(EcoType)
   @IsOptional()
   @ValidateIf((o: ReposCustomMarkReqDto) => o.eco_name !== EcoType.ALL)
-  eco_name: EcoType = EcoType.Bitcoin;
+  eco_name: EcoType = EcoType.ALL;
   @IsNumber()
   @Min(0)
   @Max(10)

@@ -146,6 +146,7 @@ export interface DataEcosystems {
   name: string;
   score: Generated<number>;
   updated_at: Generated<Timestamp>;
+  kind: Generated<string>;
 }
 
 export interface ApiAuthMagic {
