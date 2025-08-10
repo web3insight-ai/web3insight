@@ -87,10 +87,29 @@ export class RankService {
         actors_core_total: (actorsTotalCoreScopeResult?.cache_data as TotalDto)
           .total,
         repos_total: (totalRepos?.cache_data as TotalDto).total,
+        kind: '',
       });
     }
 
     data.sort((a, b) => b.actors_total - a.actors_total);
+
+    const ecoNames = data.map((item) => item.eco_name);
+
+    const kind = await this.db
+      .selectFrom('data.ecosystems')
+      .select(['name', 'kind'])
+      .where('active', '=', true)
+      .where('name', 'in', ecoNames)
+      .orderBy('score', 'desc')
+      .orderBy('name', 'asc')
+      .execute();
+
+    data.forEach((item) => {
+      const ecoKind = kind.find((k) => k.name === item.eco_name);
+      if (ecoKind) {
+        item.kind = ecoKind.kind;
+      }
+    });
 
     const cacheData = new EcoRankListDto();
     cacheData.list = data;
@@ -253,25 +272,6 @@ ORDER BY ecosystem;`;
           open_issues_count: api.open_issues_count,
         };
       });
-
-      // const data: QueryTopStarRepo[] = await Promise.all(
-      //   row.top_repositories.map(async (row) => {
-      //     const [owner, repo] = row.repo_name.split('/');
-      //     const client = await this.tokenPoolService.getClient();
-      //     const repoDetails = await client.rest.repos.get({
-      //       owner,
-      //       repo,
-      //     });
-      //     return {
-      //       repo_id: Number(row.repo_id),
-      //       repo_name: row.repo_name,
-      //       star_count: repoDetails.data.stargazers_count,
-      //       forks_count: repoDetails.data.forks_count,
-      //       contributor_count: row.contributor_count,
-      //       open_issues_count: repoDetails.data.open_issues_count,
-      //     };
-      //   }),
-      // );
       data.sort((a, b) => b.star_count - a.star_count);
       const cacheData = new RepoRankListDto();
       cacheData.list = data;
