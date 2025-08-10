@@ -29,6 +29,18 @@ export class UsersService {
       .map((url) => this.extractUsername(url))
       .filter((username): username is string => username !== null);
 
+    if (body.intent === Intent.Profile) {
+      const existing = await this.db
+        .selectFrom('api.analysis_users')
+        .select(['id'])
+        .where('submitter_id', '=', uid)
+        .where('intent', '=', body.intent)
+        .executeTakeFirst();
+      if (existing) {
+        throw new Error('You have already uploaded a profile analysis.');
+      }
+    }
+
     const githubData = [] as GithubUsersDto[];
 
     for (let i = 0; i < usernames.length; i += 10) {
