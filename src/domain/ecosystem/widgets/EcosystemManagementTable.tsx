@@ -1,9 +1,9 @@
 import { useState, useMemo } from "react";
 import { Link } from "@remix-run/react";
 import {
-  Card, CardBody, CardHeader, Input, Pagination, Button,
+  Card, CardHeader, Input, Pagination, Button,
 } from "@nextui-org/react";
-import { Search, Warehouse, Database, Users, Settings } from "lucide-react";
+import { Search, Warehouse, Settings } from "lucide-react";
 
 import { EcosystemType } from "../typing";
 import type { EcosystemWithStats } from "../typing";
@@ -20,11 +20,6 @@ function EcosystemManagementTable({ ecosystems }: EcosystemManagementTableProps)
   const [filterValue, setFilterValue] = useState("");
   const [selectedType, setSelectedType] = useState<EcosystemType>(EcosystemType.PUBLIC_CHAIN);
 
-  // Calculate totals
-  const totalEcosystems = ecosystems.length;
-  const totalRepositories = ecosystems.reduce((acc, eco) => acc + Number(eco.repos_total), 0);
-  const totalDevelopers = ecosystems.reduce((acc, eco) => acc + Number(eco.actors_total), 0);
-  const totalCoreDevelopers = ecosystems.reduce((acc, eco) => acc + Number(eco.actors_core_total), 0);
 
   // Filter ecosystems based on search query and type
   const filteredItems = useMemo(() => {
@@ -62,72 +57,6 @@ function EcosystemManagementTable({ ecosystems }: EcosystemManagementTableProps)
 
   return (
     <div className="space-y-6">
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
-        <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-          <CardBody className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-primary/10 rounded-xl flex-shrink-0">
-                <Warehouse size={20} className="text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-500">Ecosystems</p>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {totalEcosystems.toLocaleString()}
-                </h2>
-              </div>
-            </div>
-          </CardBody>
-        </Card>
-
-        <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-          <CardBody className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-secondary/10 rounded-xl flex-shrink-0">
-                <Database size={20} className="text-secondary" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-500">Repositories</p>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {totalRepositories.toLocaleString()}
-                </h2>
-              </div>
-            </div>
-          </CardBody>
-        </Card>
-
-        <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-          <CardBody className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-success/10 rounded-xl flex-shrink-0">
-                <Users size={20} className="text-success" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-500">Total Developers</p>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {totalDevelopers.toLocaleString()}
-                </h2>
-              </div>
-            </div>
-          </CardBody>
-        </Card>
-
-        <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-          <CardBody className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-warning/10 rounded-xl flex-shrink-0">
-                <Users size={20} className="text-warning" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-500">Core Developers</p>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {totalCoreDevelopers.toLocaleString()}
-                </h2>
-              </div>
-            </div>
-          </CardBody>
-        </Card>
-      </div>
 
       {/* Filters and Search */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

@@ -6,6 +6,7 @@ import {
 import { Search, Warehouse, Database, Users } from "lucide-react";
 import { useState, useMemo } from "react";
 import { fetchStatisticsRank } from "~/statistics/repository";
+import { fetchEcosystemCount } from "~/api/repository";
 import { EcosystemType } from "~/ecosystem/typing";
 import { getFilterForType } from "~/ecosystem/helper";
 import { EcosystemTypeFilter } from "@/components/ecosystem-type-filter";
@@ -20,13 +21,19 @@ export const meta: MetaFunction = () => {
 
 export const loader = async () => {
   try {
-    const rankResult = await fetchStatisticsRank();
+    const [rankResult, countResult] = await Promise.all([
+      fetchStatisticsRank(),
+      fetchEcosystemCount(),
+    ]);
 
     const ecosystems = rankResult.success ? rankResult.data.ecosystem : [];
 
     if (!rankResult.success) {
       console.warn("Statistics rank fetch failed:", rankResult.message);
     }
+
+    // Get true ecosystem count from API, fallback to array length if API fails
+    const totalEcosystems = countResult.success ? countResult.data.total : ecosystems.length;
 
     // Calculate totals from the real data
     const totalRepositories = ecosystems.reduce((acc, eco) => acc + Number(eco.repos_total), 0);
@@ -36,7 +43,7 @@ export const loader = async () => {
 
     return json({
       ecosystems,
-      totalEcosystems: ecosystems.length,
+      totalEcosystems,
       totalRepositories,
       totalDevelopers,
       totalCoreDevelopers,
