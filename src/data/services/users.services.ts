@@ -103,7 +103,8 @@ export class UsersService {
   async getList(params: CustomQueryUsersOrderReqDto, uid: string) {
     let query = this.db
       .selectFrom('api.analysis_users')
-      .where('submitter_id', '=', uid);
+      .where('submitter_id', '=', uid)
+      .where('intent', '=', params.intent);
 
     const total = await query
       .select(this.db.fn.count('id').as('total'))
