@@ -25,31 +25,35 @@ export class UsersService {
   ) {}
 
   async uploadAndGetUsers(body: CustomQueryUsersReqDto, uid: string) {
-    const usernames = body.request_data
+    let usernames = body.request_data
       .map((url) => this.extractUsername(url))
       .filter((username): username is string => username !== null);
 
     if (body.intent === Intent.Profile) {
       const existing = await this.db
         .selectFrom('api.analysis_users')
-        .select(['id'])
+        .select(['id', 'github'])
         .where('submitter_id', '=', uid)
         .where('intent', '=', body.intent)
         .executeTakeFirst();
+
       if (existing) {
-        throw new Error('You have already uploaded a profile analysis.');
+        const res = new CustomUploadResDto();
+        res.users = existing.github as any[];
+        res.id = Number(existing.id);
+        return res;
       }
 
-      if (usernames.length === 0) {
-        const user = await this.db
-          .selectFrom('api.auth_users_binds')
-          .select(['bind_key'])
-          .where('bind_uid', '=', uid)
-          .where('bind_type', '=', 'github')
-          .executeTakeFirstOrThrow();
-        usernames.push(user.bind_key);
-      } else if (usernames.length >= 1) {
-        throw new Error('Not support other users for profile analysis.');
+      const githubName = await this.db
+        .selectFrom('api.auth_users_binds')
+        .select(['bind_key', 'bind_uid', 'bind_id'])
+        .where('bind_uid', '=', uid)
+        .where('bind_type', '=', 'github')
+        .executeTakeFirst();
+
+      if (githubName) {
+        usernames = [];
+        usernames.push(githubName.bind_key);
       }
     }
 
