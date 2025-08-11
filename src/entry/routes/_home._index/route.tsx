@@ -6,7 +6,7 @@ import {
   type MetaFunction,
   type LoaderFunctionArgs,
 } from "@remix-run/node";
-import { useLoaderData, useFetcher } from "@remix-run/react";
+import { useLoaderData, useFetcher, useOutletContext } from "@remix-run/react";
 import { ArrowRight, Search, Sparkles } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { useAtom } from "jotai";
@@ -14,11 +14,14 @@ import { useAtom } from "jotai";
 import { getMetadata } from "@/utils/app";
 
 import { authModalOpenAtom, authModalTypeAtom } from "#/atoms";
+import type { ApiUser } from "~/auth/typing";
 
 import { fetchStatisticsOverview, fetchStatisticsRank } from "~/statistics/repository";
+import { fetchPublicEventInsights } from "~/event/repository/public";
 import EcosystemRankViewWidget from "~/ecosystem/views/ecosystem-rank";
 import RepositoryRankViewWidget from "~/repository/views/repository-rank";
 import DeveloperRankViewWidget from "~/developer/views/developer-rank";
+import EventInsightsWidget from "~/event/widgets/event-insights";
 
 import Section from "../../components/section";
 import MetricOverview from "./MetricOverview";
@@ -26,6 +29,11 @@ import { fetchAnalyzedStatistics } from "~/ai/repository";
 import Markdown from "react-markdown";
 
 const { title, tagline, description } = getMetadata();
+
+type HomeContext = {
+  user: ApiUser | null;
+  setUser: (user: ApiUser | null) => void;
+};
 
 export const meta: MetaFunction = () => {
   const pageTitle = `${title} - ${tagline}`;
@@ -62,6 +70,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   try {
     const statisticsResult = await fetchStatisticsOverview();
     const rankResult = await fetchStatisticsRank();
+    const eventInsightsResult = await fetchPublicEventInsights({
+      take: 5,
+      intent: "hackathon",
+    });
 
     // Use fallback data if statistics fetch failed
     const statisticOverview = statisticsResult.success ? statisticsResult.data : {
@@ -78,6 +90,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       developer: [],
     };
 
+    // Use fallback data if event insights fetch failed
+    const eventInsights = eventInsightsResult.success ? eventInsightsResult.data : [];
+
     // Log any failures for debugging
     if (!statisticsResult.success) {
       console.warn("Statistics overview fetch failed:", statisticsResult.message);
@@ -85,8 +100,11 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     if (!rankResult.success) {
       console.warn("Statistics rank fetch failed:", rankResult.message);
     }
+    if (!eventInsightsResult.success) {
+      console.warn("Event insights fetch failed:", eventInsightsResult.message);
+    }
 
-    return json({ statisticOverview, statisticRank });
+    return json({ statisticOverview, statisticRank, eventInsights });
   } catch (error) {
     // Extra safety net - if something else goes wrong, provide fallback data
     console.error("Loader error in home route:", error);
@@ -103,6 +121,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
         repository: [],
         developer: [],
       },
+      eventInsights: [],
     });
   }
 };
@@ -138,7 +157,8 @@ export const action = async (ctx: ActionFunctionArgs) => {
 };
 
 export default function Index() {
-  const { statisticOverview, statisticRank } = useLoaderData<typeof loader>();
+  const { statisticOverview, statisticRank, eventInsights } = useLoaderData<typeof loader>();
+  const { user } = useOutletContext<HomeContext>();
   const fetcher = useFetcher<typeof action>();
   const asking = fetcher.state === "submitting";
   const errorMessage = fetcher.data?.error || null;
@@ -355,6 +375,15 @@ export default function Index() {
         </div>
 
         <MetricOverview dataSource={statisticOverview} />
+
+        {/* Event Insights Section */}
+        <Section
+          className="mt-12"
+          title="EventInsight"
+          summary="Recent Web3 development events"
+        >
+          <EventInsightsWidget dataSource={eventInsights} user={user} />
+        </Section>
       </div>
 
       <div className="w-full max-w-content mx-auto px-6 pb-12">

@@ -50,6 +50,12 @@ type PartialEventReport = {
   analysisComplete: boolean;
 };
 
+type EventInsight = {
+  id: string;
+  description: string;
+  created_at: string;
+};
+
 export type { 
   GithubUser, 
   AnalysisStatus,
@@ -58,5 +64,6 @@ export type {
   Contestant,
   PartialContestant,
   EventReport, 
-  PartialEventReport, 
+  PartialEventReport,
+  EventInsight,
 };
