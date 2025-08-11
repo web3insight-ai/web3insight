@@ -165,6 +165,7 @@ export class CustomQueryUsersReqDto {
   intent: Intent = Intent.Hackathon;
   @IsArray()
   @IsString({ each: true })
+  @IsOptional()
   @ApiProperty({
     example: ['https://github.com/zhang-wenchao'],
   })

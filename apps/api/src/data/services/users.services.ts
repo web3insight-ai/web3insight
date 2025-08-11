@@ -39,6 +39,18 @@ export class UsersService {
       if (existing) {
         throw new Error('You have already uploaded a profile analysis.');
       }
+
+      if (usernames.length === 0) {
+        const user = await this.db
+          .selectFrom('api.auth_users_binds')
+          .select(['bind_key'])
+          .where('bind_uid', '=', uid)
+          .where('bind_type', '=', 'github')
+          .executeTakeFirstOrThrow();
+        usernames.push(user.bind_key);
+      } else if (usernames.length >= 1) {
+        throw new Error('Not support other users for profile analysis.');
+      }
     }
 
     const githubData = [] as GithubUsersDto[];
