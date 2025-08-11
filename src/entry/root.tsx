@@ -16,6 +16,7 @@ import { LoaderFunction } from "@remix-run/node";
 import { validateEnvironment } from "@/utils/env";
 import type { ApiUser } from "~/auth/typing";
 import NavigationProgress from "./components/NavigationProgress";
+import { WalletProvider } from "@/providers/WalletProvider";
 
 import { getTitle } from "@/utils/app";
 
@@ -59,10 +60,12 @@ function App() {
       </head>
       <body>
         <NextUIProvider>
-          <NavigationProgress />
-          <Outlet context={{ user, setUser }} />
-          <ScrollRestoration />
-          <Scripts />
+          <WalletProvider>
+            <NavigationProgress />
+            <Outlet context={{ user, setUser }} />
+            <ScrollRestoration />
+            <Scripts />
+          </WalletProvider>
         </NextUIProvider>
       </body>
     </html>

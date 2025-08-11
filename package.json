@@ -25,9 +25,11 @@
     "@handie/runtime-core": "0.0.13",
     "@nextui-org/react": "^2.4.6",
     "@ntks/toolbox": "0.0.6",
+    "@rainbow-me/rainbowkit": "^2.2.8",
     "@remix-run/node": "^2.16.8",
     "@remix-run/react": "^2.16.8",
     "@remix-run/serve": "^2.16.8",
+    "@tanstack/react-query": "^5.84.1",
     "ai": "^3.3.6",
     "clsx": "^2.1.1",
     "dayjs": "1.10.8",
@@ -47,7 +49,8 @@
     "react-responsive": "^10.0.0",
     "remix-utils": "^7.6.0",
     "tailwind-merge": "^3.2.0",
-    "viem": "^2.19.4",
+    "viem": "^2.33.3",
+    "wagmi": "^2.16.1",
     "zod": "3.23.8"
   },
   "devDependencies": {

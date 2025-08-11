@@ -5,7 +5,7 @@ import { getVar } from "@/utils/env";
 
 import { getSession, clearSession } from "./helper/server-only";
 
-import type { ApiUser, ApiAuthResponse, GitHubOAuthRequest } from "./typing";
+import type { ApiUser, ApiAuthResponse, GitHubOAuthRequest, MagicResponse, WalletBindRequest, WalletBindResponse } from "./typing";
 
 const userCache: Record<string, { user: ApiUser; timestamp: number }> = {};
 const CACHE_TTL = 60 * 1000; // 60 seconds cache TTL
@@ -247,12 +247,104 @@ function isManageable(user: ApiUser | null): boolean {
   return isServices(user) || isAdmin(user);
 }
 
+// Get magic string for wallet binding
+async function fetchMagic(request?: Request): Promise<ResponseResult<MagicResponse>> {
+  if (!isServerSide()) {
+    return httpClient.get("/api/auth/magic");
+  }
+
+  const session = await getSession(request!);
+  const userToken = session.get("userToken");
+
+  if (!userToken) {
+    return generateFailedResponse("Not authenticated", 401);
+  }
+
+  try {
+    const response = await fetch(`${DATA_API_URL}/v1/auth/magic`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${userToken}`,
+        "accept": "*/*",
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      console.error("Failed to fetch magic string:", error);
+      return generateFailedResponse("Failed to fetch magic string", response.status);
+    }
+
+    const data = await response.json();
+    return {
+      success: true,
+      code: "200",
+      message: "Magic string fetched successfully",
+      data,
+    };
+  } catch (error) {
+    console.error("Magic fetch error:", error);
+    return generateFailedResponse("An error occurred while fetching magic string");
+  }
+}
+
+// Bind wallet address to user account
+async function bindWallet(walletBindData: WalletBindRequest, request?: Request): Promise<ResponseResult<WalletBindResponse>> {
+  if (!isServerSide()) {
+    return httpClient.post("/api/auth/bind/wallet", walletBindData);
+  }
+
+  const session = await getSession(request!);
+  const userToken = session.get("userToken");
+
+  if (!userToken) {
+    return generateFailedResponse("Not authenticated", 401);
+  }
+
+  try {
+    const response = await fetch(`${DATA_API_URL}/v1/auth/bind/wallet`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${userToken}`,
+        "accept": "*/*",
+      },
+      body: JSON.stringify(walletBindData),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      console.error("Wallet binding failed:", error);
+      return generateFailedResponse("Failed to bind wallet", response.status);
+    }
+
+    const data = await response.json();
+    
+    // Invalidate user cache after successful binding
+    if (userToken && userCache[userToken]) {
+      delete userCache[userToken];
+    }
+
+    return {
+      success: true,
+      code: "200",
+      message: "Wallet bound successfully",
+      data,
+    };
+  } catch (error) {
+    console.error("Wallet binding error:", error);
+    return generateFailedResponse("An error occurred while binding wallet");
+  }
+}
+
 export {
   signInWithGitHub,
   signOut,
   fetchCurrentUser,
   getUser,
   getGitHubAuthUrl,
+  fetchMagic,
+  bindWallet,
   hasRole,
   isServices,
   isAdmin,

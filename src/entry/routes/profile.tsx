@@ -1,17 +1,18 @@
 import { Card, CardBody, Avatar, Chip, Button, Divider } from "@nextui-org/react";
 import { LoaderFunctionArgs, MetaFunction, json, redirect } from "@remix-run/node";
 import { useLoaderData, Link } from "@remix-run/react";
-import { 
-  User as UserIcon, 
-  Calendar, 
-  Clock, 
-  Shield, 
-  Github, 
-  Mail, 
+import {
+  User as UserIcon,
+  Calendar,
+  Clock,
+  Shield,
+  Github,
+  Mail,
   ExternalLink,
   AlertTriangle,
   CheckCircle,
   Brain,
+  Wallet,
 } from "lucide-react";
 import { useAtom } from "jotai";
 import { useEffect } from "react";
@@ -23,6 +24,7 @@ import { getGitHubHandle } from "~/profile-analysis/helper";
 import { authModalOpenAtom } from "../atoms";
 import DefaultLayout from "../layouts/default";
 import Section from "../components/section";
+import { WalletBindWidget } from "~/auth/widgets/wallet-bind";
 
 import { fetchCurrentUser } from "~/auth/repository";
 
@@ -38,13 +40,13 @@ export const meta: MetaFunction = () => {
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   // Get user data with proper error handling
   const userResult = await fetchCurrentUser(request);
-  
+
   // Handle expired token (401)
   if (!userResult.success && userResult.code === "401") {
-    return json({ 
-      user: null, 
+    return json({
+      user: null,
       error: userResult.message,
-      expired: true, 
+      expired: true,
     });
   }
 
@@ -53,10 +55,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     return redirect("/");
   }
 
-  return json({ 
-    user: userResult.data, 
+  return json({
+    user: userResult.data,
     error: null,
-    expired: false, 
+    expired: false,
   });
 };
 
@@ -76,7 +78,7 @@ export default function ProfilePage() {
 
   // Get effective role (highest priority role from allowed roles)
   const effectiveRole = user?.role ? getEffectiveRole(user.role.default_role, user.role.allowed_roles) : 'user';
-  
+
   // Get GitHub handle for AI analysis
   const githubHandle = user ? getGitHubHandle(user) : null;
 
@@ -103,9 +105,9 @@ export default function ProfilePage() {
               <div className="max-w-2xl mx-auto">
                 <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
                   <CardBody className="text-center py-12">
-                    <AlertTriangle 
-                      size={48} 
-                      className="text-warning mx-auto mb-4" 
+                    <AlertTriangle
+                      size={48}
+                      className="text-warning mx-auto mb-4"
                     />
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                       Session Expired
@@ -113,8 +115,8 @@ export default function ProfilePage() {
                     <p className="text-gray-600 dark:text-gray-400 mb-6">
                       {error || "Your session has expired. Please sign in again to access your profile."}
                     </p>
-                    <Button 
-                      color="primary" 
+                    <Button
+                      color="primary"
                       onClick={() => setAuthModalOpen(true)}
                       className="font-medium"
                     >
@@ -132,6 +134,7 @@ export default function ProfilePage() {
 
   const githubBind = user.binds?.find(bind => bind.bind_type === 'github');
   const emailBind = user.binds?.find(bind => bind.bind_type === 'email');
+  const walletBinds = user.binds?.filter(bind => bind.bind_type === 'wallet') || [];
 
   return (
     <DefaultLayout user={user}>
@@ -142,7 +145,7 @@ export default function ProfilePage() {
             summary="Manage your account information and settings"
           >
             <div className="max-w-4xl mx-auto space-y-8">
-              
+
               {/* Profile Header Card */}
               <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">
                 <CardBody className="p-8">
@@ -156,21 +159,21 @@ export default function ProfilePage() {
                         isBordered
                       />
                     </div>
-                    
+
                     <div className="flex-1 text-center md:text-left">
                       <div className="flex flex-col md:flex-row md:items-center gap-3 mb-4">
                         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                           {user.profile?.user_nick_name || user.username || 'User'}
                         </h1>
                         {githubBind && githubHandle && (
-                          <Link 
+                          <Link
                             to={`/analyze/${githubHandle}`}
                             target="_blank"
                             rel="noopener noreferrer"
                           >
-                            <Button 
+                            <Button
                               variant="light"
-                              color="primary" 
+                              color="primary"
                               size="sm"
                               startContent={<Brain size={14} />}
                               className="font-medium hover:bg-primary/10 px-3 py-1.5 h-auto min-h-0 rounded-full bg-primary/5 border border-primary/20"
@@ -180,7 +183,7 @@ export default function ProfilePage() {
                           </Link>
                         )}
                       </div>
-                      
+
                       <div className="flex flex-col sm:flex-row gap-4 text-sm text-gray-600 dark:text-gray-400">
                         <div className="flex items-center justify-center md:justify-start gap-2">
                           <Calendar size={16} />
@@ -201,7 +204,7 @@ export default function ProfilePage() {
               </Card>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                
+
                 {/* Account Information */}
                 <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
                   <CardBody className="p-6">
@@ -213,7 +216,7 @@ export default function ProfilePage() {
                         Account Information
                       </h2>
                     </div>
-                    
+
                     <div className="space-y-4">
                       <div>
                         <p className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">
@@ -223,7 +226,7 @@ export default function ProfilePage() {
                           {user.profile?.user_id || user.id}
                         </p>
                       </div>
-                      
+
                       <div>
                         <p className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">
                           Username
@@ -232,7 +235,7 @@ export default function ProfilePage() {
                           {user.profile?.user_nick_name || user.username || 'Not set'}
                         </p>
                       </div>
-                      
+
                       <div>
                         <p className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">
                           Account Status
@@ -257,7 +260,7 @@ export default function ProfilePage() {
                         Connected Accounts
                       </h2>
                     </div>
-                    
+
                     <div className="space-y-4">
                       {githubBind && (
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
@@ -277,7 +280,7 @@ export default function ProfilePage() {
                           </Chip>
                         </div>
                       )}
-                      
+
                       {emailBind && (
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                           <div className="flex items-center gap-3">
@@ -296,8 +299,27 @@ export default function ProfilePage() {
                           </Chip>
                         </div>
                       )}
-                      
-                      {(!githubBind && !emailBind) && (
+
+                      {walletBinds.map((bind, index) => (
+                        <div key={`wallet-${index}`} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Wallet size={20} className="text-gray-700 dark:text-gray-300" />
+                            <div>
+                              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                Wallet
+                              </p>
+                              <p className="text-xs text-gray-600 dark:text-gray-400 font-mono">
+                                {bind.bind_key.slice(0, 6)}...{bind.bind_key.slice(-4)}
+                              </p>
+                            </div>
+                          </div>
+                          <Chip color="success" variant="flat" size="sm">
+                            Connected
+                          </Chip>
+                        </div>
+                      ))}
+
+                      {(!githubBind && !emailBind && walletBinds.length === 0) && (
                         <p className="text-sm text-gray-600 dark:text-gray-400 text-center py-4">
                           No connected accounts
                         </p>
@@ -306,6 +328,9 @@ export default function ProfilePage() {
                   </CardBody>
                 </Card>
               </div>
+
+              {/* Wallet Binding Widget */}
+              <WalletBindWidget user={user} className="mb-8" />
 
               {/* Roles & Permissions */}
               <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
@@ -318,7 +343,7 @@ export default function ProfilePage() {
                       Roles & Permissions
                     </h2>
                   </div>
-                  
+
                   <div className="space-y-6">
                     <div>
                       <p className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-3">
@@ -333,9 +358,9 @@ export default function ProfilePage() {
                         {getRoleName(effectiveRole)}
                       </Chip>
                     </div>
-                    
+
                     <Divider />
-                    
+
                     <div>
                       <p className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-3">
                         Available Roles
@@ -357,7 +382,7 @@ export default function ProfilePage() {
                         )}
                       </div>
                     </div>
-                    
+
                     <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                       <p className="text-sm text-blue-800 dark:text-blue-300">
                         <strong>Role Information:</strong> Your current role determines your access level to different features and APIs within Web3Insights.

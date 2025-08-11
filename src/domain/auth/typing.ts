@@ -8,7 +8,7 @@ interface UserProfile {
 
 interface UserBind {
   bind_key: string;
-  bind_type: "github" | "email";
+  bind_type: "github" | "email" | "wallet";
 }
 
 interface UserRole {
@@ -42,4 +42,31 @@ interface GitHubOAuthRequest {
 
 type RoleType = "user" | "ecosystem" | "hackathon" | "services" | "admin";
 
-export type { ApiUser, ApiAuthResponse, GitHubOAuthRequest, UserProfile, UserBind, UserRole, RoleType };
+// Wallet binding related types
+interface MagicResponse {
+  magic: string;
+}
+
+interface WalletBindRequest {
+  address: string;
+  magic: string;
+  signature: string;
+}
+
+interface WalletBindResponse {
+  success: boolean;
+  message?: string;
+}
+
+export type { 
+  ApiUser, 
+  ApiAuthResponse, 
+  GitHubOAuthRequest, 
+  UserProfile, 
+  UserBind, 
+  UserRole, 
+  RoleType,
+  MagicResponse,
+  WalletBindRequest,
+  WalletBindResponse,
+};
