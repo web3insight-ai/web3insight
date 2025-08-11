@@ -7,6 +7,7 @@ import { Search, Warehouse, Database, Users, Settings } from "lucide-react";
 
 import { EcosystemType } from "../typing";
 import type { EcosystemWithStats } from "../typing";
+import { getFilterForType } from "../helper";
 import { EcosystemTypeFilter } from "@/components/ecosystem-type-filter";
 
 interface EcosystemManagementTableProps {
@@ -17,7 +18,7 @@ function EcosystemManagementTable({ ecosystems }: EcosystemManagementTableProps)
   const [page, setPage] = useState(1);
   const rowsPerPage = 25;
   const [filterValue, setFilterValue] = useState("");
-  const [selectedType, setSelectedType] = useState<EcosystemType>(EcosystemType.ALL);
+  const [selectedType, setSelectedType] = useState<EcosystemType>(EcosystemType.PUBLIC_CHAIN);
 
   // Calculate totals
   const totalEcosystems = ecosystems.length;
@@ -25,7 +26,7 @@ function EcosystemManagementTable({ ecosystems }: EcosystemManagementTableProps)
   const totalDevelopers = ecosystems.reduce((acc, eco) => acc + Number(eco.actors_total), 0);
   const totalCoreDevelopers = ecosystems.reduce((acc, eco) => acc + Number(eco.actors_core_total), 0);
 
-  // Filter ecosystems based on search query
+  // Filter ecosystems based on search query and type
   const filteredItems = useMemo(() => {
     let filtered = [...ecosystems];
 
@@ -35,8 +36,13 @@ function EcosystemManagementTable({ ecosystems }: EcosystemManagementTableProps)
       );
     }
 
+    // Filter by ecosystem type using the kind field
+    filtered = filtered.filter(ecosystem =>
+      getFilterForType(selectedType, ecosystem.kind),
+    );
+
     return filtered;
-  }, [ecosystems, filterValue]);
+  }, [ecosystems, filterValue, selectedType]);
 
   // Sort filtered ecosystems by actors_total (descending)
   const sortedItems = useMemo(() => {

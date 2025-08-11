@@ -7,6 +7,7 @@ import { Search, Warehouse, Database, Users } from "lucide-react";
 import { useState, useMemo } from "react";
 import { fetchStatisticsRank } from "~/statistics/repository";
 import { EcosystemType } from "~/ecosystem/typing";
+import { getFilterForType } from "~/ecosystem/helper";
 import { EcosystemTypeFilter } from "@/components/ecosystem-type-filter";
 
 export const meta: MetaFunction = () => {
@@ -76,11 +77,13 @@ export default function AllEcosystemsPage() {
       );
     }
 
-    // For now, don't filter by type since backend API isn't ready
-    // When API is ready, add type filtering logic here
+    // Filter by ecosystem type using the kind field
+    filtered = filtered.filter(ecosystem =>
+      getFilterForType(selectedType, ecosystem.kind),
+    );
 
     return filtered;
-  }, [ecosystems, filterValue]);
+  }, [ecosystems, filterValue, selectedType]);
 
   // Sort filtered ecosystems by actors_total (descending)
   const sortedItems = useMemo(() => {
