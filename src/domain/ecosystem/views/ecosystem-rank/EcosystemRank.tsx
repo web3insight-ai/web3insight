@@ -10,8 +10,22 @@ import type { EcosystemRankViewWidgetProps } from "./typing";
 function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
   const [selectedType, setSelectedType] = useState<EcosystemType>(EcosystemType.PUBLIC_CHAIN);
 
-  // For now, show all ecosystems regardless of type since backend API isn't ready
-  const filteredData = dataSource;
+  // Filter ecosystems based on selected type
+  const filteredData = dataSource.filter(ecosystem => {
+    if (selectedType === EcosystemType.ALL) {
+      return true;
+    }
+    
+    // Map API kind values to EcosystemType enum
+    const kindMapping: Record<string, EcosystemType> = {
+      'Public Chain': EcosystemType.PUBLIC_CHAIN,
+      'Infrastructure': EcosystemType.INFRASTRUCTURE,
+      'Community': EcosystemType.COMMUNITY,
+    };
+
+    const ecosystemType = ecosystem.kind ? kindMapping[ecosystem.kind] : undefined;
+    return ecosystemType === selectedType;
+  });
 
   return (
     <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">

@@ -25,6 +25,7 @@ type EcoRankRecord = {
   actors_core_total: number;
   actors_new_total: number;
   repos_total: number;
+  kind?: string;
 }
 
 type RepoBasic = {
