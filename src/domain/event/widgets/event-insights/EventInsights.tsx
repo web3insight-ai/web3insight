@@ -18,9 +18,9 @@ function EventInsightsWidget({ dataSource, loading = false, user }: EventInsight
   const [, addToast] = useAtom(addToastAtom);
   const navigate = useNavigate();
 
-  const handleViewDetailsClick = () => {
+  const handleViewDetailsClick = (eventId: string) => {
     if (canManageEvents(user)) {
-      navigate("/admin/events");
+      navigate(`/admin/events/${eventId}`);
     } else {
       addToast({
         type: 'warning',
@@ -115,7 +115,7 @@ function EventInsightsWidget({ dataSource, loading = false, user }: EventInsight
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     {canManageEvents(user) ? (
                       <button 
-                        onClick={handleViewDetailsClick}
+                        onClick={() => handleViewDetailsClick(event.id)}
                         className="inline-flex items-center gap-1 text-sm font-medium text-gray-900 dark:text-white hover:text-primary dark:hover:text-primary transition-colors"
                       >
                         View Details
@@ -123,7 +123,7 @@ function EventInsightsWidget({ dataSource, loading = false, user }: EventInsight
                       </button>
                     ) : (
                       <button 
-                        onClick={handleViewDetailsClick}
+                        onClick={() => handleViewDetailsClick(event.id)}
                         className="inline-flex items-center gap-1 text-sm font-medium text-gray-400 dark:text-gray-500 cursor-not-allowed"
                       >
                         <Lock size={12} />
