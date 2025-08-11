@@ -1,4 +1,4 @@
-import { Card, CardBody, Avatar, Chip, Button, Divider } from "@nextui-org/react";
+import { Card, CardBody, Avatar, Button, Divider } from "@nextui-org/react";
 import { LoaderFunctionArgs, MetaFunction, json, redirect } from "@remix-run/node";
 import { useLoaderData, Link } from "@remix-run/react";
 import {
@@ -12,13 +12,12 @@ import {
   AlertTriangle,
   CheckCircle,
   Brain,
-  Wallet,
 } from "lucide-react";
 import { useAtom } from "jotai";
 import { useEffect } from "react";
 
 import { getTitle } from "@/utils/app";
-import { getRoleName, getRoleColor, getEffectiveRole } from "@/utils/role";
+import { getRoleName, getEffectiveRole } from "@/utils/role";
 import { getGitHubHandle } from "~/profile-analysis/helper";
 
 import { authModalOpenAtom } from "../atoms";
@@ -241,8 +240,10 @@ export default function ProfilePage() {
                           Account Status
                         </p>
                         <div className="flex items-center gap-2">
-                          <CheckCircle size={16} className="text-success" />
-                          <span className="text-sm text-success font-medium">Active</span>
+                          <div className="flex items-center justify-center w-5 h-5 bg-green-100 dark:bg-green-900/30 rounded-full">
+                            <CheckCircle size={12} className="text-green-600 dark:text-green-400" />
+                          </div>
+                          <span className="text-sm text-green-700 dark:text-green-400 font-medium">Active</span>
                         </div>
                       </div>
                     </div>
@@ -275,9 +276,9 @@ export default function ProfilePage() {
                               </p>
                             </div>
                           </div>
-                          <Chip color="success" variant="flat" size="sm">
-                            Connected
-                          </Chip>
+                          <div className="px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-medium rounded-full border border-blue-200 dark:border-blue-700">
+                            Verified
+                          </div>
                         </div>
                       )}
 
@@ -294,31 +295,15 @@ export default function ProfilePage() {
                               </p>
                             </div>
                           </div>
-                          <Chip color="success" variant="flat" size="sm">
+                          <div className="px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-medium rounded-full border border-blue-200 dark:border-blue-700">
                             Verified
-                          </Chip>
+                          </div>
                         </div>
                       )}
 
-                      {walletBinds.map((bind, index) => (
-                        <div key={`wallet-${index}`} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <Wallet size={20} className="text-gray-700 dark:text-gray-300" />
-                            <div>
-                              <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                Wallet
-                              </p>
-                              <p className="text-xs text-gray-600 dark:text-gray-400 font-mono">
-                                {bind.bind_key.slice(0, 6)}...{bind.bind_key.slice(-4)}
-                              </p>
-                            </div>
-                          </div>
-                          <Chip color="success" variant="flat" size="sm">
-                            Connected
-                          </Chip>
-                        </div>
-                      ))}
-
+                      {/* Wallet Binding Widget - replaces individual wallet entries */}
+                      <WalletBindWidget user={user} />
+                      
                       {(!githubBind && !emailBind && walletBinds.length === 0) && (
                         <p className="text-sm text-gray-600 dark:text-gray-400 text-center py-4">
                           No connected accounts
@@ -329,8 +314,6 @@ export default function ProfilePage() {
                 </Card>
               </div>
 
-              {/* Wallet Binding Widget */}
-              <WalletBindWidget user={user} className="mb-8" />
 
               {/* Roles & Permissions */}
               <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
@@ -349,14 +332,14 @@ export default function ProfilePage() {
                       <p className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-3">
                         Current Role
                       </p>
-                      <Chip
-                        color={getRoleColor(effectiveRole)}
-                        variant="flat"
-                        size="lg"
-                        startContent={<Shield size={16} />}
-                      >
-                        {getRoleName(effectiveRole)}
-                      </Chip>
+                      <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 text-emerald-700 dark:text-emerald-300 rounded-full border border-emerald-200 dark:border-emerald-700">
+                        <div className="flex items-center justify-center w-5 h-5 bg-emerald-100 dark:bg-emerald-800/40 rounded-full">
+                          <Shield size={12} className="text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <span className="font-medium text-sm">
+                          {getRoleName(effectiveRole)}
+                        </span>
+                      </div>
                     </div>
 
                     <Divider />
@@ -365,17 +348,22 @@ export default function ProfilePage() {
                       <p className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-3">
                         Available Roles
                       </p>
-                      <div className="flex flex-wrap gap-2">
-                        {user.role?.allowed_roles?.map((role) => (
-                          <Chip
-                            key={role}
-                            color={getRoleColor(role)}
-                            variant="bordered"
-                            size="sm"
-                          >
-                            {getRoleName(role)}
-                          </Chip>
-                        )) || (
+                      <div className="flex flex-wrap gap-3">
+                        {user.role?.allowed_roles?.map((role) => {
+                          const isCurrentRole = role === effectiveRole;
+                          return (
+                            <div
+                              key={role}
+                              className={`inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full border ${
+                                isCurrentRole
+                                  ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700'
+                                  : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700'
+                              }`}
+                            >
+                              {getRoleName(role)}
+                            </div>
+                          );
+                        }) || (
                           <p className="text-sm text-gray-600 dark:text-gray-400">
                             No additional roles available
                           </p>
