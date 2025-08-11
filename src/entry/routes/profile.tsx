@@ -1,6 +1,6 @@
 import { Card, CardBody, Avatar, Chip, Button, Divider } from "@nextui-org/react";
 import { LoaderFunctionArgs, MetaFunction, json, redirect } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { useLoaderData, Link } from "@remix-run/react";
 import { 
   User as UserIcon, 
   Calendar, 
@@ -11,12 +11,14 @@ import {
   ExternalLink,
   AlertTriangle,
   CheckCircle,
+  Brain,
 } from "lucide-react";
 import { useAtom } from "jotai";
 import { useEffect } from "react";
 
 import { getTitle } from "@/utils/app";
 import { getRoleName, getRoleColor, getEffectiveRole } from "@/utils/role";
+import { getGitHubHandle } from "~/profile-analysis/helper";
 
 import { authModalOpenAtom } from "../atoms";
 import DefaultLayout from "../layouts/default";
@@ -74,6 +76,9 @@ export default function ProfilePage() {
 
   // Get effective role (highest priority role from allowed roles)
   const effectiveRole = user?.role ? getEffectiveRole(user.role.default_role, user.role.allowed_roles) : 'user';
+  
+  // Get GitHub handle for AI analysis
+  const githubHandle = user ? getGitHubHandle(user) : null;
 
   // Handle expired token
   useEffect(() => {
@@ -157,14 +162,23 @@ export default function ProfilePage() {
                         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                           {user.profile?.user_nick_name || user.username || 'User'}
                         </h1>
-                        <Chip
-                          color={getRoleColor(effectiveRole)}
-                          variant="flat"
-                          size="sm"
-                          startContent={<Shield size={12} />}
-                        >
-                          {getRoleName(effectiveRole)}
-                        </Chip>
+                        {githubBind && githubHandle && (
+                          <Link 
+                            to={`/analyze/${githubHandle}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <Button 
+                              variant="light"
+                              color="primary" 
+                              size="sm"
+                              startContent={<Brain size={14} />}
+                              className="font-medium hover:bg-primary/10 px-3 py-1.5 h-auto min-h-0 rounded-full bg-primary/5 border border-primary/20"
+                            >
+                              AI Analysis
+                            </Button>
+                          </Link>
+                        )}
                       </div>
                       
                       <div className="flex flex-col sm:flex-row gap-4 text-sm text-gray-600 dark:text-gray-400">

@@ -125,6 +125,14 @@ html {
   .prose-enhanced li {
     @apply leading-relaxed;
   }
+
+  /* Chinese content support for AI roast reports */
+  .chinese-content {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 
+                 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, 
+                 Arial, sans-serif;
+    @apply leading-relaxed;
+  }
 }
 
 @layer components {
