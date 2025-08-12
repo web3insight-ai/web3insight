@@ -2,9 +2,7 @@ import { useState, useEffect } from "react";
 import clsx from "clsx";
 import { Card, Button, Input } from "@nextui-org/react";
 import { useNavigate } from "@remix-run/react";
-import { Calendar, Plus, Users, Clock, Activity, Search, Eye } from "lucide-react";
-
-import MetricCard from "@/components/control/metric-card";
+import { Calendar, Plus, Search, Eye } from "lucide-react";
 
 import { fetchList } from "../../repository";
 
@@ -23,7 +21,6 @@ const initTimestamp = Date.now();
 
 function EventListView({ className }: EventListViewWidgetProps) {
   const [dataSource, setDataSource] = useState<EventData[]>([]);
-  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [refetchTimestamp, setRefetchTimestamp] = useState(initTimestamp);
   const [searchTerm, setSearchTerm] = useState("");
@@ -40,7 +37,6 @@ function EventListView({ className }: EventListViewWidgetProps) {
     fetchList({})
       .then(res => {
         setDataSource(res.data);
-        setTotal(res.extra?.total ?? 0);
       })
       .finally(() => setLoading(false));
   }, [refetchTimestamp]);
@@ -62,56 +58,9 @@ function EventListView({ className }: EventListViewWidgetProps) {
     event.description?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  // Calculate statistics
-  const recentEventsCount = dataSource.filter((event: EventData) => {
-    const eventDate = new Date(event.created_at);
-    const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    return eventDate > weekAgo;
-  }).length;
-
-  const metrics = [
-    {
-      label: "Total Events",
-      value: total.toLocaleString(),
-      icon: <Calendar size={20} className="text-primary" />,
-      iconBgClassName: "bg-primary/10",
-    },
-    {
-      label: "Active Events",
-      value: dataSource.length.toLocaleString(),
-      icon: <Activity size={20} className="text-success" />,
-      iconBgClassName: "bg-success/10",
-    },
-    {
-      label: "Recent Events",
-      value: recentEventsCount.toLocaleString(),
-      icon: <Clock size={20} className="text-warning" />,
-      iconBgClassName: "bg-warning/10",
-    },
-    {
-      label: "Total Contestants",
-      value: (dataSource.length).toLocaleString(), // Placeholder calculation
-      icon: <Users size={20} className="text-secondary" />,
-      iconBgClassName: "bg-secondary/10",
-    },
-  ];
 
   return (
     <div className={clsx("space-y-6", className)}>
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-        {metrics.map((metric, index) => (
-          <div
-            key={metric.label.replaceAll(" ", "")}
-            className="animate-slide-up"
-            style={{ animationDelay: `${index * 100}ms` }}
-          >
-            <MetricCard {...metric} />
-          </div>
-        ))}
-      </div>
-
       {/* Main Events Table */}
       <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">
         {/* Header with Search and Actions */}

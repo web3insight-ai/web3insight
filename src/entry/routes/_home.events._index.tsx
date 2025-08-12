@@ -1,9 +1,9 @@
 import { json, MetaFunction } from "@remix-run/node";
 import { useLoaderData, useOutletContext } from "@remix-run/react";
 import {
-  Card, CardBody, Input, Pagination,
+  Input, Pagination,
 } from "@nextui-org/react";
-import { Search, Calendar, Activity, Clock, Users } from "lucide-react";
+import { Search, Calendar } from "lucide-react";
 import { useState, useMemo } from "react";
 
 import type { ApiUser } from "~/auth/typing";
@@ -32,15 +32,6 @@ export const loader = async () => {
     });
 
     const eventInsights = eventInsightsResult.success ? eventInsightsResult.data : [];
-    const totalEvents = eventInsightsResult.extra?.total || eventInsights.length;
-
-    // Calculate additional metrics
-    const recentEventsCount = eventInsights.filter(event => {
-      const eventDate = new Date(event.created_at);
-      const weekAgo = new Date();
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      return eventDate > weekAgo;
-    }).length;
 
     if (!eventInsightsResult.success) {
       console.warn("Event insights fetch failed:", eventInsightsResult.message);
@@ -48,24 +39,18 @@ export const loader = async () => {
 
     return json({
       eventInsights,
-      totalEvents,
-      recentEventsCount,
-      activeEvents: eventInsights.length,
     });
   } catch (error) {
     console.error("Loader error in events route:", error);
 
     return json({
       eventInsights: [],
-      totalEvents: 0,
-      recentEventsCount: 0,
-      activeEvents: 0,
     });
   }
 };
 
 export default function AllEventsPage() {
-  const { eventInsights, totalEvents, recentEventsCount, activeEvents } = useLoaderData<typeof loader>();
+  const { eventInsights } = useLoaderData<typeof loader>();
   const { user } = useOutletContext<HomeContext>();
 
   // Pagination state
@@ -118,73 +103,6 @@ export default function AllEventsPage() {
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
             Browse and explore Web3 development events, hackathons, and community activities
           </p>
-        </div>
-
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mb-10">
-          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-            <CardBody className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-primary/10 rounded-xl flex-shrink-0">
-                  <Calendar size={20} className="text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">Total Events</p>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {totalEvents.toLocaleString()}
-                  </h2>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-            <CardBody className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-success/10 rounded-xl flex-shrink-0">
-                  <Activity size={20} className="text-success" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">Active Events</p>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {activeEvents.toLocaleString()}
-                  </h2>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-            <CardBody className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-warning/10 rounded-xl flex-shrink-0">
-                  <Clock size={20} className="text-warning" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">Recent Events</p>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {recentEventsCount.toLocaleString()}
-                  </h2>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-            <CardBody className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-secondary/10 rounded-xl flex-shrink-0">
-                  <Users size={20} className="text-secondary" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">Hackathons</p>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {eventInsights.filter(e => e.description.toLowerCase().includes('hackathon')).length.toLocaleString()}
-                  </h2>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
         </div>
 
         {/* Search */}
