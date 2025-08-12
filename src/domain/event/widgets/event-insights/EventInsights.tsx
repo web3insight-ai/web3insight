@@ -1,7 +1,7 @@
 import { Card, Skeleton } from "@nextui-org/react";
 import { Calendar, ArrowRight, Lock } from "lucide-react";
 import { useAtom } from "jotai";
-import { useNavigate } from "@remix-run/react";
+import { useNavigate, Link } from "@remix-run/react";
 
 import { addToastAtom } from "#/atoms";
 import { canManageEvents } from "~/auth/helper";
@@ -11,7 +11,7 @@ import type { EventInsight } from "../../typing";
 type EventInsightsProps = {
   dataSource: EventInsight[];
   loading?: boolean;
-  user?: ApiUser | null;
+  user?: ApiUser | null | undefined;
 };
 
 function EventInsightsWidget({ dataSource, loading = false, user }: EventInsightsProps) {
@@ -137,6 +137,15 @@ function EventInsightsWidget({ dataSource, loading = false, user }: EventInsight
             })}
           </tbody>
         </table>
+      </div>
+      <div className="px-6 py-4 border-t border-border dark:border-border-dark">
+        <Link 
+          to="/events" 
+          className="flex items-center justify-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200"
+        >
+          View All Events
+          <ArrowRight size={16} />
+        </Link>
       </div>
     </Card>
   );

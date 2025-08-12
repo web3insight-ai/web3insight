@@ -18,8 +18,9 @@ function Navbar({ className, children, user, extra }: NavbarProps) {
   const { signIn, signOut, resetPassword } = useSessionActions();
 
   return (
-    <div className={clsx("flex items-center justify-between w-full px-6 py-4", className)}>
-      <div className="flex item-center gap-6">
+    <div className={clsx("flex items-center w-full px-6 py-4", className)}>
+      {/* Left side - Logo */}
+      <div className="flex items-center gap-3 flex-1">
         <Link className="flex items-center gap-3 group" title="Back to home" to="/">
           <BrandLogo width={isDesktop ? 28 : 24} />
           {!isMobile && (
@@ -28,9 +29,15 @@ function Navbar({ className, children, user, extra }: NavbarProps) {
             </span>
           )}
         </Link>
+      </div>
+      
+      {/* Center - Navigation Menu */}
+      <div className="flex items-center justify-center flex-1">
         {extra}
       </div>
-      <div className="flex items-center gap-3">
+      
+      {/* Right side - User controls */}
+      <div className="flex items-center gap-3 flex-1 justify-end">
         {children}
         <SignedUserWidget
           user={user}
