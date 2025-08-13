@@ -87,9 +87,12 @@ export function OriginAuthWidget({ className }: OriginAuthWidgetProps) {
   if (loading) {
     return (
       <Card className={className}>
-        <CardBody className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">Loading Camp authentication...</p>
+        <CardBody className="flex items-center justify-center py-12">
+          <div className="relative">
+            <div className="animate-spin rounded-full h-10 w-10 border-3 border-orange-200 dark:border-orange-800">
+              <div className="absolute top-0 left-0 h-10 w-10 rounded-full border-3 border-transparent border-t-orange-500 dark:border-t-orange-400 animate-spin" />
+            </div>
+          </div>
         </CardBody>
       </Card>
     );
