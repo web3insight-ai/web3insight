@@ -151,24 +151,10 @@ export default function AllDevelopersPage() {
           <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
             <CardBody className="p-6">
               <div className="text-center">
-                <div className="p-3 bg-primary/10 rounded-xl inline-flex mb-3">
-                  <Users size={20} className="text-primary" />
-                </div>
-                <p className="text-xs text-gray-500 dark:text-gray-500 uppercase tracking-wider mb-1">Active Developers</p>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">
-                  {Number(activeDevelopers).toLocaleString()}
-                </h2>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-            <CardBody className="p-6">
-              <div className="text-center">
                 <div className="p-3 bg-secondary/10 rounded-xl inline-flex mb-3">
                   <Code2 size={20} className="text-secondary" />
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-500 uppercase tracking-wider mb-1">Core Developers</p>
+                <p className="text-xs text-gray-500 dark:text-gray-500 uppercase tracking-wider mb-1">Developers</p>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">
                   {Number(coreDevelopers).toLocaleString()}
                 </h2>
@@ -179,12 +165,12 @@ export default function AllDevelopersPage() {
           <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
             <CardBody className="p-6">
               <div className="text-center">
-                <div className="p-3 bg-success/10 rounded-xl inline-flex mb-3">
-                  <Zap size={20} className="text-success" />
+                <div className="p-3 bg-primary/10 rounded-xl inline-flex mb-3">
+                  <Users size={20} className="text-primary" />
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-500 uppercase tracking-wider mb-1">Repositories</p>
+                <p className="text-xs text-gray-500 dark:text-gray-500 uppercase tracking-wider mb-1">ECO Contributors</p>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">
-                  {Number(totalRepositories).toLocaleString()}
+                  {Number(activeDevelopers).toLocaleString()}
                 </h2>
               </div>
             </CardBody>
@@ -199,6 +185,20 @@ export default function AllDevelopersPage() {
                 <p className="text-xs text-gray-500 dark:text-gray-500 uppercase tracking-wider mb-1">Ecosystems</p>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">
                   {Number(totalEcosystems).toLocaleString()}
+                </h2>
+              </div>
+            </CardBody>
+          </Card>
+
+          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
+            <CardBody className="p-6">
+              <div className="text-center">
+                <div className="p-3 bg-success/10 rounded-xl inline-flex mb-3">
+                  <Zap size={20} className="text-success" />
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-500 uppercase tracking-wider mb-1">Repositories</p>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">
+                  {Number(totalRepositories).toLocaleString()}
                 </h2>
               </div>
             </CardBody>

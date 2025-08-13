@@ -3,7 +3,7 @@ import { Link, useLoaderData } from "@remix-run/react";
 import {
   Card, CardBody, CardHeader, Input, Pagination,
 } from "@nextui-org/react";
-import { Search, Warehouse, Database, Users } from "lucide-react";
+import { Search, Warehouse, Database, Users, Code2, Zap } from "lucide-react";
 import { useState, useMemo } from "react";
 import { fetchStatisticsRank } from "~/statistics/repository";
 import { fetchEcosystemCount } from "~/api/repository";
@@ -129,8 +129,40 @@ export default function AllEcosystemsPage() {
           <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
             <CardBody className="p-6">
               <div className="flex items-center gap-4">
+                <div className="p-3 bg-secondary/10 rounded-xl flex-shrink-0">
+                  <Code2 size={20} className="text-secondary" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 dark:text-gray-500">Developers</p>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {totalCoreDevelopers.toLocaleString()}
+                  </h2>
+                </div>
+              </div>
+            </CardBody>
+          </Card>
+
+          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
+            <CardBody className="p-6">
+              <div className="flex items-center gap-4">
                 <div className="p-3 bg-primary/10 rounded-xl flex-shrink-0">
-                  <Warehouse size={20} className="text-primary" />
+                  <Users size={20} className="text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 dark:text-gray-500">ECO Contributors</p>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {totalDevelopers.toLocaleString()}
+                  </h2>
+                </div>
+              </div>
+            </CardBody>
+          </Card>
+
+          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
+            <CardBody className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-warning/10 rounded-xl flex-shrink-0">
+                  <Database size={20} className="text-warning" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-500">Ecosystems</p>
@@ -145,45 +177,13 @@ export default function AllEcosystemsPage() {
           <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
             <CardBody className="p-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-secondary/10 rounded-xl flex-shrink-0">
-                  <Database size={20} className="text-secondary" />
+                <div className="p-3 bg-success/10 rounded-xl flex-shrink-0">
+                  <Zap size={20} className="text-success" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-500">Repositories</p>
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                     {totalRepositories.toLocaleString()}
-                  </h2>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-            <CardBody className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-success/10 rounded-xl flex-shrink-0">
-                  <Users size={20} className="text-success" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">Total Developers</p>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {totalDevelopers.toLocaleString()}
-                  </h2>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-            <CardBody className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-warning/10 rounded-xl flex-shrink-0">
-                  <Users size={20} className="text-warning" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">Core Developers</p>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {totalCoreDevelopers.toLocaleString()}
                   </h2>
                 </div>
               </div>
@@ -225,10 +225,10 @@ export default function AllEcosystemsPage() {
                 <tr className="border-t border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider w-12">#</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Ecosystem</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Repos</th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Devs</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Core</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Contributors</th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">New</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Repos</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border dark:divide-border-dark">
@@ -261,7 +261,7 @@ export default function AllEcosystemsPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
-                          {Number(ecosystem.repos_total).toLocaleString()}
+                          {Number(ecosystem.actors_core_total).toLocaleString()}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
@@ -271,12 +271,12 @@ export default function AllEcosystemsPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
-                          {Number(ecosystem.actors_core_total).toLocaleString()}
+                          {Number(ecosystem.actors_new_total).toLocaleString()}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
-                          {Number(ecosystem.actors_new_total).toLocaleString()}
+                          {Number(ecosystem.repos_total).toLocaleString()}
                         </span>
                       </td>
                     </tr>

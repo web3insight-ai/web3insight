@@ -1,10 +1,10 @@
 import { json, MetaFunction } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import {
-  Card, CardBody, CardHeader, Input, Dropdown, DropdownTrigger,
+  Card, CardHeader, Input, Dropdown, DropdownTrigger,
   DropdownMenu, DropdownItem, Button, Pagination,
 } from "@nextui-org/react";
-import { Database, Filter, SortAsc, SortDesc, Search, Star, GitFork, Users } from "lucide-react";
+import { Database, Filter, SortAsc, SortDesc, Search } from "lucide-react";
 import { useState, useMemo } from "react";
 import { fetchStatisticsRank } from "~/statistics/repository";
 import type { RepoRankRecord } from "~/api/typing";
@@ -27,33 +27,20 @@ export const loader = async () => {
       console.warn("Statistics rank fetch failed:", rankResult.message);
     }
 
-    // Calculate totals from the real data
-    const totalStars = repositories.reduce((acc, repo) => acc + Number(repo.star_count), 0);
-    const totalForks = repositories.reduce((acc, repo) => acc + Number(repo.forks_count), 0);
-    const totalContributors = repositories.reduce((acc, repo) => acc + Number(repo.contributor_count), 0);
-
     return json({
       repositories,
-      totalRepositories: repositories.length,
-      totalStars,
-      totalForks,
-      totalContributors,
     });
   } catch (error) {
     console.error("Loader error in repositories route:", error);
     
     return json({
       repositories: [],
-      totalRepositories: 0,
-      totalStars: 0,
-      totalForks: 0,
-      totalContributors: 0,
     });
   }
 };
 
 export default function AllRepositoriesPage() {
-  const { repositories, totalRepositories, totalStars, totalForks, totalContributors } = useLoaderData<typeof loader>();
+  const { repositories } = useLoaderData<typeof loader>();
 
   // Pagination state
   const [page, setPage] = useState(1);
@@ -126,73 +113,6 @@ export default function AllRepositoriesPage() {
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
             Comprehensive analytics and insights across Web3 repositories
           </p>
-        </div>
-
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mb-10">
-          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-            <CardBody className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-primary/10 rounded-xl flex-shrink-0">
-                  <Database size={20} className="text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">Repositories</p>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {totalRepositories.toLocaleString()}
-                  </h2>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-            <CardBody className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-secondary/10 rounded-xl flex-shrink-0">
-                  <Star size={20} className="text-secondary" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">Total Stars</p>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {totalStars.toLocaleString()}
-                  </h2>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-            <CardBody className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-success/10 rounded-xl flex-shrink-0">
-                  <GitFork size={20} className="text-success" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">Total Forks</p>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {totalForks.toLocaleString()}
-                  </h2>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-            <CardBody className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-warning/10 rounded-xl flex-shrink-0">
-                  <Users size={20} className="text-warning" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">Contributors</p>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {totalContributors.toLocaleString()}
-                  </h2>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
         </div>
 
         {/* Filters and Search */}

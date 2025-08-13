@@ -48,10 +48,10 @@ function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
             <tr className="border-t border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider w-12">#</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Ecosystem</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Repos</th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Devs</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Core</th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Contributors</th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">New</th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Repos</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border dark:divide-border-dark">
@@ -82,7 +82,7 @@ function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right">
                   <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
-                    {Number(ecosystem.repos_total).toLocaleString()}
+                    {Number(ecosystem.actors_core_total).toLocaleString()}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right">
@@ -92,12 +92,12 @@ function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right">
                   <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
-                    {Number(ecosystem.actors_core_total).toLocaleString()}
+                    {Number(ecosystem.actors_new_total).toLocaleString()}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right">
                   <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
-                    {Number(ecosystem.actors_new_total).toLocaleString()}
+                    {Number(ecosystem.repos_total).toLocaleString()}
                   </span>
                 </td>
               </tr>

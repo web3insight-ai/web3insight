@@ -7,28 +7,28 @@ import type { MetricOverviewProps } from "./typing";
 function resolveMetrics(dataSource: MetricOverviewProps["dataSource"]): MetricCardProps[] {
   return [
     {
-      label: "Active Developers",
-      value: Number(dataSource.developer).toLocaleString(),
-      icon: <Users size={20} className="text-primary" />,
-      iconBgClassName: "bg-primary/10",
-    },
-    {
-      label: "Core Developers",
+      label: "Developers",
       value: Number(dataSource.coreDeveloper).toLocaleString(),
       icon: <Code2 size={20} className="text-secondary" />,
       iconBgClassName: "bg-secondary/10",
     },
     {
-      label: "Repositories",
-      value: Number(dataSource.repository).toLocaleString(),
-      icon: <Zap size={20} className="text-success" />,
-      iconBgClassName: "bg-success/10",
+      label: "ECO Contributors",
+      value: Number(dataSource.developer).toLocaleString(),
+      icon: <Users size={20} className="text-primary" />,
+      iconBgClassName: "bg-primary/10",
     },
     {
       label: "Ecosystems",
       value: Number(dataSource.ecosystem).toLocaleString(),
       icon: <Database size={20} className="text-warning" />,
       iconBgClassName: "bg-warning/10",
+    },
+    {
+      label: "Repositories",
+      value: Number(dataSource.repository).toLocaleString(),
+      icon: <Zap size={20} className="text-success" />,
+      iconBgClassName: "bg-success/10",
     },
   ];
 }
