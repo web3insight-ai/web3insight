@@ -6,7 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { Octokit } from '@octokit/rest';
 import { Kysely } from 'kysely';
 import { Command, Console } from 'nestjs-console';
-import { JwtPayload } from '../auth.jwt.dto';
+import { ExtraClaims, JwtPayload } from '../auth.jwt.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ethers } from 'ethers';
 
@@ -96,7 +96,23 @@ export class AuthService {
       throw new Error('User not found');
     }
 
-    return { profile: user, binds: binds, role: data.extra.claims };
+    const role = await this.db
+      .selectFrom('api.auth_users_roles')
+      .select(['user_role_name'])
+      .where('user_role_uid', '=', data.uid)
+      .execute();
+
+    const extraClaims: ExtraClaims = {
+      allowed_roles: ['user', ...role.map((r) => r.user_role_name)],
+      default_role: 'user',
+      user_id: data.uid,
+    };
+
+    return {
+      profile: user,
+      binds: binds,
+      role: extraClaims,
+    };
   }
 
   async generateOAuthServerToken(uid: string, type: string) {
