@@ -7,6 +7,7 @@ type ActionBase = {
   text: string;
   icon: JSXElementConstructor<DataValue>;
   danger?: boolean;
+  disabled?: boolean;
 };
 
 type LinkAction = {

@@ -1,5 +1,5 @@
 import { Popover, PopoverContent, PopoverTrigger, Avatar } from "@nextui-org/react";
-import { LogIn, LogOut, User as UserIcon, Shield, Settings } from "lucide-react";
+import { LogIn, LogOut, User as UserIcon, Settings, Warehouse, Calendar } from "lucide-react";
 
 import { canManageEcosystems, canManageEvents, isAdmin } from "../../helper";
 import { signOut } from "../../repository";
@@ -56,7 +56,18 @@ function SignedUser({ user, onSignIn, onSignOut }: SignedUserProps) {
 
             {(canManageEcosystems(user) || canManageEvents(user)) && (
               <div className="py-1 border-t border-border dark:border-border-dark">
-                <ActionItem text="Manage" icon={Shield} action="/admin" />
+                <ActionItem 
+                  text="Ecosystems" 
+                  icon={Warehouse} 
+                  action="/admin"
+                  disabled={!canManageEcosystems(user)}
+                />
+                <ActionItem 
+                  text="Events" 
+                  icon={Calendar} 
+                  action="/admin/events"
+                  disabled={!canManageEvents(user)}
+                />
                 {isAdmin(user) && (
                   <ActionItem text="Settings" icon={Settings} action="/settings" />
                 )}
