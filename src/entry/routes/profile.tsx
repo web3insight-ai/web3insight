@@ -24,6 +24,7 @@ import { authModalOpenAtom } from "../atoms";
 import DefaultLayout from "../layouts/default";
 import Section from "../components/section";
 import { WalletBindWidget } from "~/auth/widgets/wallet-bind";
+import { OriginAuthWidget } from "~/origin/widgets/OriginAuthWidget";
 
 import { fetchCurrentUser } from "~/auth/repository";
 
@@ -202,14 +203,14 @@ export default function ProfilePage() {
                 </CardBody>
               </Card>
 
+              {/* First Row: Account Information | Roles & Permissions */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
                 {/* Account Information */}
                 <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
                   <CardBody className="p-6">
                     <div className="flex items-center gap-3 mb-6">
-                      <div className="p-2 bg-primary/10 rounded-lg">
-                        <UserIcon size={20} className="text-primary" />
+                      <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+                        <UserIcon size={20} className="text-blue-600 dark:text-blue-400" />
                       </div>
                       <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                         Account Information
@@ -240,22 +241,84 @@ export default function ProfilePage() {
                           Account Status
                         </p>
                         <div className="flex items-center gap-2">
-                          <div className="flex items-center justify-center w-5 h-5 bg-green-100 dark:bg-green-900/30 rounded-full">
-                            <CheckCircle size={12} className="text-green-600 dark:text-green-400" />
+                          <div className="flex items-center justify-center w-5 h-5 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                            <CheckCircle size={12} className="text-blue-600 dark:text-blue-400" />
                           </div>
-                          <span className="text-sm text-green-700 dark:text-green-400 font-medium">Active</span>
+                          <span className="text-sm text-blue-700 dark:text-blue-400 font-medium">Active</span>
                         </div>
                       </div>
                     </div>
                   </CardBody>
                 </Card>
 
+                {/* Roles & Permissions */}
+                <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
+                  <CardBody className="p-6">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="p-2 bg-indigo-100 dark:bg-indigo-900/20 rounded-lg">
+                        <Shield size={20} className="text-indigo-600 dark:text-indigo-400" />
+                      </div>
+                      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        Roles & Permissions
+                      </h2>
+                    </div>
+
+                    <div className="space-y-6">
+                      <div>
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-3">
+                          Current Role
+                        </p>
+                        <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 rounded-full border border-indigo-200 dark:border-indigo-700">
+                          <div className="flex items-center justify-center w-5 h-5 bg-indigo-100 dark:bg-indigo-800/40 rounded-full">
+                            <Shield size={12} className="text-indigo-600 dark:text-indigo-400" />
+                          </div>
+                          <span className="font-medium text-sm">
+                            {getRoleName(effectiveRole)}
+                          </span>
+                        </div>
+                      </div>
+
+                      <Divider />
+
+                      <div>
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-3">
+                          Available Roles
+                        </p>
+                        <div className="flex flex-wrap gap-3">
+                          {user.role?.allowed_roles?.map((role) => {
+                            const isCurrentRole = role === effectiveRole;
+                            return (
+                              <div
+                                key={role}
+                                className={`inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full border ${
+                                  isCurrentRole
+                                    ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-700'
+                                    : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700'
+                                }`}
+                              >
+                                {getRoleName(role)}
+                              </div>
+                            );
+                          }) || (
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              No additional roles available
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </CardBody>
+                </Card>
+              </div>
+
+              {/* Second Row: Connected Accounts | Camp Network */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Connected Accounts */}
                 <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
                   <CardBody className="p-6">
                     <div className="flex items-center gap-3 mb-6">
-                      <div className="p-2 bg-primary/10 rounded-lg">
-                        <ExternalLink size={20} className="text-primary" />
+                      <div className="p-2 bg-slate-100 dark:bg-slate-800/50 rounded-lg">
+                        <ExternalLink size={20} className="text-slate-600 dark:text-slate-400" />
                       </div>
                       <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                         Connected Accounts
@@ -276,7 +339,7 @@ export default function ProfilePage() {
                               </p>
                             </div>
                           </div>
-                          <div className="px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-medium rounded-full border border-blue-200 dark:border-blue-700">
+                          <div className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 text-xs font-medium rounded-full border border-slate-200 dark:border-slate-700">
                             Verified
                           </div>
                         </div>
@@ -295,7 +358,7 @@ export default function ProfilePage() {
                               </p>
                             </div>
                           </div>
-                          <div className="px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-medium rounded-full border border-blue-200 dark:border-blue-700">
+                          <div className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 text-xs font-medium rounded-full border border-slate-200 dark:border-slate-700">
                             Verified
                           </div>
                         </div>
@@ -303,7 +366,7 @@ export default function ProfilePage() {
 
                       {/* Wallet Binding Widget - replaces individual wallet entries */}
                       <WalletBindWidget user={user} />
-                      
+
                       {(!githubBind && !emailBind && walletBinds.length === 0) && (
                         <p className="text-sm text-gray-600 dark:text-gray-400 text-center py-4">
                           No connected accounts
@@ -312,73 +375,10 @@ export default function ProfilePage() {
                     </div>
                   </CardBody>
                 </Card>
+
+                {/* Camp Network (Origin Network Integration) */}
+                <OriginAuthWidget className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark" />
               </div>
-
-
-              {/* Roles & Permissions */}
-              <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-                <CardBody className="p-6">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <Shield size={20} className="text-primary" />
-                    </div>
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      Roles & Permissions
-                    </h2>
-                  </div>
-
-                  <div className="space-y-6">
-                    <div>
-                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-3">
-                        Current Role
-                      </p>
-                      <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 text-emerald-700 dark:text-emerald-300 rounded-full border border-emerald-200 dark:border-emerald-700">
-                        <div className="flex items-center justify-center w-5 h-5 bg-emerald-100 dark:bg-emerald-800/40 rounded-full">
-                          <Shield size={12} className="text-emerald-600 dark:text-emerald-400" />
-                        </div>
-                        <span className="font-medium text-sm">
-                          {getRoleName(effectiveRole)}
-                        </span>
-                      </div>
-                    </div>
-
-                    <Divider />
-
-                    <div>
-                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-3">
-                        Available Roles
-                      </p>
-                      <div className="flex flex-wrap gap-3">
-                        {user.role?.allowed_roles?.map((role) => {
-                          const isCurrentRole = role === effectiveRole;
-                          return (
-                            <div
-                              key={role}
-                              className={`inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full border ${
-                                isCurrentRole
-                                  ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700'
-                                  : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700'
-                              }`}
-                            >
-                              {getRoleName(role)}
-                            </div>
-                          );
-                        }) || (
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            No additional roles available
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                      <p className="text-sm text-blue-800 dark:text-blue-300">
-                        <strong>Role Information:</strong> Your current role determines your access level to different features and APIs within Web3Insights.
-                      </p>
-                    </div>
-                  </div>
-                </CardBody>
-              </Card>
             </div>
           </Section>
         </div>

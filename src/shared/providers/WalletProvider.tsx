@@ -7,6 +7,7 @@ import { RainbowKitProvider, darkTheme, lightTheme } from '@rainbow-me/rainbowki
 import { useTheme } from 'next-themes';
 
 import { wagmiConfig } from '@/config/wagmi';
+import { OriginProvider } from './OriginProvider';
 
 // Import RainbowKit styles
 import '@rainbow-me/rainbowkit/styles.css';
@@ -28,8 +29,8 @@ interface WalletProviderProps {
 
 export function WalletProvider({ children }: WalletProviderProps) {
   const { resolvedTheme } = useTheme();
-  
-  const rainbowKitTheme = resolvedTheme === 'dark' 
+
+  const rainbowKitTheme = resolvedTheme === 'dark'
     ? darkTheme({
       accentColor: '#007cee', // Primary blue from NextUI theme
       accentColorForeground: 'white',
@@ -53,7 +54,9 @@ export function WalletProvider({ children }: WalletProviderProps) {
           modalSize="compact"
           showRecentTransactions={true}
         >
-          {children}
+          <OriginProvider>
+            {children}
+          </OriginProvider>
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>

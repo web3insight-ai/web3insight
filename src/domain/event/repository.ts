@@ -117,7 +117,6 @@ async function fetchOne(requestOrId: Request | number, id?: number): Promise<Res
       if (retryCount === 0) {
         resolve(notReady);
       } else {
-        console.log(`[Event Repository] Polling attempt ${retryCount + 1}, data ready: ${hasCompleteData}`);
         setTimeout(() => {
           resolve(notReady);
         }, 10000); // Poll every 10 seconds
