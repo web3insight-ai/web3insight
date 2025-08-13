@@ -4,9 +4,9 @@ import {
   Card, CardBody, CardHeader, Input, Dropdown, DropdownTrigger,
   DropdownMenu, DropdownItem, Button, Pagination, Modal, ModalContent, ModalHeader, ModalBody,
 } from "@nextui-org/react";
-import { Filter, SortAsc, SortDesc, Search, Users, GitCommit, Code, Trophy } from "lucide-react";
+import { Filter, SortAsc, SortDesc, Search, Users, Code2, Zap, Database } from "lucide-react";
 import { useState, useMemo } from "react";
-import { fetchStatisticsRank } from "~/statistics/repository";
+import { fetchStatisticsRank, fetchStatisticsOverview } from "~/statistics/repository";
 import type { ActorRankRecord } from "~/api/typing";
 import RepoLinkWidget from "~/repository/widgets/repo-link";
 
@@ -20,41 +20,48 @@ export const meta: MetaFunction = () => {
 
 export const loader = async () => {
   try {
-    const rankResult = await fetchStatisticsRank();
+    const [statisticsResult, rankResult] = await Promise.all([
+      fetchStatisticsOverview(),
+      fetchStatisticsRank(),
+    ]);
     
     const developers = rankResult.success ? rankResult.data.developer : [];
+    const statisticOverview = statisticsResult.success ? statisticsResult.data : {
+      ecosystem: 0,
+      repository: 0,
+      developer: 0,
+      coreDeveloper: 0,
+    };
     
+    if (!statisticsResult.success) {
+      console.warn("Statistics overview fetch failed:", statisticsResult.message);
+    }
     if (!rankResult.success) {
       console.warn("Statistics rank fetch failed:", rankResult.message);
     }
 
-    // Calculate totals from the real data
-    const totalCommits = developers.reduce((acc, dev) => acc + Number(dev.total_commit_count), 0);
-    const coreDevelopers = developers.filter(dev => Number(dev.total_commit_count) > 100).length;
-    const activeDevelopers = developers.filter(dev => Number(dev.total_commit_count) > 10).length;
-
     return json({
       developers,
-      totalDevelopers: developers.length,
-      totalCommits,
-      coreDevelopers,
-      activeDevelopers,
+      activeDevelopers: Number(statisticOverview.developer),
+      coreDevelopers: Number(statisticOverview.coreDeveloper),
+      totalRepositories: Number(statisticOverview.repository),
+      totalEcosystems: Number(statisticOverview.ecosystem),
     });
   } catch (error) {
     console.error("Loader error in developers route:", error);
     
     return json({
       developers: [],
-      totalDevelopers: 0,
-      totalCommits: 0,
-      coreDevelopers: 0,
       activeDevelopers: 0,
+      coreDevelopers: 0,
+      totalRepositories: 0,
+      totalEcosystems: 0,
     });
   }
 };
 
 export default function AllDevelopersPage() {
-  const { developers, totalDevelopers, totalCommits, coreDevelopers, activeDevelopers } = useLoaderData<typeof loader>();
+  const { developers, coreDevelopers, activeDevelopers, totalRepositories, totalEcosystems } = useLoaderData<typeof loader>();
 
   // Pagination state
   const [page, setPage] = useState(1);
@@ -140,67 +147,59 @@ export default function AllDevelopersPage() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mb-10">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-10">
           <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
             <CardBody className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-primary/10 rounded-xl flex-shrink-0">
+              <div className="text-center">
+                <div className="p-3 bg-primary/10 rounded-xl inline-flex mb-3">
                   <Users size={20} className="text-primary" />
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500 whitespace-nowrap">Total Developers</p>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {totalDevelopers.toLocaleString()}
-                  </h2>
-                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-500 uppercase tracking-wider mb-1">Active Developers</p>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">
+                  {Number(activeDevelopers).toLocaleString()}
+                </h2>
               </div>
             </CardBody>
           </Card>
 
           <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
             <CardBody className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-warning/10 rounded-xl flex-shrink-0">
-                  <Trophy size={20} className="text-warning" />
+              <div className="text-center">
+                <div className="p-3 bg-secondary/10 rounded-xl inline-flex mb-3">
+                  <Code2 size={20} className="text-secondary" />
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500 whitespace-nowrap">Core Developers</p>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {coreDevelopers.toLocaleString()}
-                  </h2>
-                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-500 uppercase tracking-wider mb-1">Core Developers</p>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">
+                  {Number(coreDevelopers).toLocaleString()}
+                </h2>
               </div>
             </CardBody>
           </Card>
 
           <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
             <CardBody className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-success/10 rounded-xl flex-shrink-0">
-                  <Code size={20} className="text-success" />
+              <div className="text-center">
+                <div className="p-3 bg-success/10 rounded-xl inline-flex mb-3">
+                  <Zap size={20} className="text-success" />
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500 whitespace-nowrap">Active Developers</p>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {activeDevelopers.toLocaleString()}
-                  </h2>
-                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-500 uppercase tracking-wider mb-1">Repositories</p>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">
+                  {Number(totalRepositories).toLocaleString()}
+                </h2>
               </div>
             </CardBody>
           </Card>
 
           <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
             <CardBody className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-secondary/10 rounded-xl flex-shrink-0">
-                  <GitCommit size={20} className="text-secondary" />
+              <div className="text-center">
+                <div className="p-3 bg-warning/10 rounded-xl inline-flex mb-3">
+                  <Database size={20} className="text-warning" />
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500 whitespace-nowrap">Total Commits</p>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {totalCommits.toLocaleString()}
-                  </h2>
-                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-500 uppercase tracking-wider mb-1">Ecosystems</p>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">
+                  {Number(totalEcosystems).toLocaleString()}
+                </h2>
               </div>
             </CardBody>
           </Card>
