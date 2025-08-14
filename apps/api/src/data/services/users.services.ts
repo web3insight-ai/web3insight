@@ -24,7 +24,11 @@ export class UsersService {
     private eventEmitter: EventEmitter2,
   ) {}
 
-  async uploadAndGetUsers(body: CustomQueryUsersReqDto, uid: string) {
+  async uploadAndGetUsers(
+    body: CustomQueryUsersReqDto,
+    uid: string,
+    ref: string = '',
+  ) {
     let usernames = body.request_data
       .map((url) => this.extractUsername(url))
       .filter((username): username is string => username !== null);
@@ -85,19 +89,35 @@ export class UsersService {
     const res = new CustomUploadResDto();
     res.users = githubData;
 
-    const id = await this.db
-      .insertInto('api.analysis_users')
-      .values({
-        request_data: { urls: body.request_data },
-        github: JSON.stringify({ users: githubData }),
-        intent: body.intent,
-        submitter_id: uid,
-        description: body.description,
-      })
-      .returning('id')
-      .executeTakeFirstOrThrow();
+    if (ref === '') {
+      const id = await this.db
+        .insertInto('api.analysis_users')
+        .values({
+          request_data: { urls: body.request_data },
+          github: JSON.stringify({ users: githubData }),
+          intent: body.intent,
+          submitter_id: uid,
+          description: body.description,
+        })
+        .returning('id')
+        .executeTakeFirstOrThrow();
 
-    res.id = Number(id.id);
+      res.id = Number(id.id);
+    } else {
+      res.id = Number(ref);
+      await this.db
+        .updateTable('api.analysis_users')
+        .set({
+          request_data: { urls: body.request_data },
+          github: JSON.stringify({ users: githubData }),
+          intent: body.intent,
+          description: body.description,
+          data: JSON.stringify({}),
+          ai: JSON.stringify({}),
+        })
+        .where('id', '=', String(ref))
+        .execute();
+    }
 
     this.eventEmitter.emit('api.custom.analysis.created', res);
 
@@ -264,13 +284,41 @@ SELECT u.actor_id,
        ) AS ecosystem_scores
 FROM user_ids u;`;
 
-    const ids = payload.users.map((user) => user.id);
+    const ids = payload.users.map((user: { id: any }) => user.id);
     const query = CompiledQuery.raw(sqlRawQuery, [ids]);
     const results = await this.db.executeQuery(query);
 
-    const body = JSON.stringify({ users: results.rows });
+    const ecosystems = results.rows.flatMap((item: any) => {
+      return item.ecosystem_scores.map((ecosystem: any) => ecosystem.ecosystem);
+    });
 
-    if (results.rows.length > 0) {
+    const uniqueEcosystems = Array.from(new Set(ecosystems));
+
+    const ecosystemDB = await this.db
+      .selectFrom('data.ecosystems')
+      .where('name', 'in', uniqueEcosystems)
+      .selectAll()
+      .execute();
+
+    const rows = results.rows.filter((item: any) => {
+      item.ecosystem_scores = item.ecosystem_scores.filter((ecosystem: any) => {
+        const dbEcosystem = ecosystemDB.find(
+          (dbItem) => dbItem.name === ecosystem.ecosystem,
+        );
+        return dbEcosystem && dbEcosystem.active;
+      });
+      return item.ecosystem_scores.length > 0;
+    });
+
+    rows.sort((item: any) => {
+      return item.ecosystem_scores.reduce((sum: number, ecosystem: any) => {
+        return sum + ecosystem.total_score;
+      }, 0);
+    });
+
+    const body = JSON.stringify({ users: rows });
+
+    if (rows.length > 0) {
       const update = this.db
         .updateTable('api.analysis_users')
         .where('id', '=', String(payload.id))
