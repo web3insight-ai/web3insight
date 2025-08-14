@@ -196,6 +196,7 @@ export class CustomQueryUsersResDto {
 export class CustomUploadResDto {
   id: number = 0;
   users: GithubUsersDto[] | any[] = [];
+  fail: string[] = [];
 }
 
 export class GithubUsersDto {

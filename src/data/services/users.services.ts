@@ -63,6 +63,8 @@ export class UsersService {
 
     const githubData = [] as GithubUsersDto[];
 
+    const fail = [] as string[];
+
     for (let i = 0; i < usernames.length; i += 10) {
       const batch = usernames.slice(i, i + 10);
 
@@ -73,6 +75,7 @@ export class UsersService {
             const response = await clinet.users.getByUsername({ username });
             return { username, data: response.data };
           } catch (error) {
+            fail.push(username);
             console.error(`Failed to process user ${username}:`, error);
             return null;
           }
@@ -88,6 +91,7 @@ export class UsersService {
 
     const res = new CustomUploadResDto();
     res.users = githubData;
+    res.fail = fail;
 
     if (ref === '') {
       const id = await this.db
@@ -307,7 +311,7 @@ FROM user_ids u;`;
         );
         return dbEcosystem && dbEcosystem.active;
       });
-      return item.ecosystem_scores.length > 0;
+      return true;
     });
 
     rows.sort((item: any) => {
