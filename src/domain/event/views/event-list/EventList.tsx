@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import clsx from "clsx";
-import { Card, Button, Input } from "@nextui-org/react";
+import { Card, Button, Input, Pagination } from "@nextui-org/react";
 import { useNavigate } from "@remix-run/react";
 import { Calendar, Plus, Search, Eye } from "lucide-react";
 
@@ -24,6 +24,9 @@ function EventListView({ className }: EventListViewWidgetProps) {
   const [loading, setLoading] = useState(false);
   const [refetchTimestamp, setRefetchTimestamp] = useState(initTimestamp);
   const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const rowsPerPage = 25;
 
   const [visible, setVisible] = useState(false);
 
@@ -34,16 +37,14 @@ function EventListView({ className }: EventListViewWidgetProps) {
 
   useEffect(() => {
     setLoading(true);
-    fetchList({})
+    fetchList({ pageNum: page, pageSize: rowsPerPage })
       .then(res => {
-        // Sort events by created_at in descending order (newest first)
-        const sortedData = res.data.sort((a: EventData, b: EventData) => 
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
-        setDataSource(sortedData);
+        // API already returns data sorted globally in descending order (newest first)
+        setDataSource(res.data);
+        setTotal(Number(res.extra?.total || 0));
       })
       .finally(() => setLoading(false));
-  }, [refetchTimestamp]);
+  }, [page, refetchTimestamp]);
 
   const gotoDetail = (id: number) => navigate(`/admin/events/${id}`);
 
@@ -61,6 +62,9 @@ function EventListView({ className }: EventListViewWidgetProps) {
   const filteredData = dataSource.filter((event: EventData) =>
     event.description?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
+
+  // Calculate pagination based on API total
+  const pages = Math.ceil(total / rowsPerPage);
 
 
   return (
@@ -185,6 +189,16 @@ function EventListView({ className }: EventListViewWidgetProps) {
             </>
           )}
         </div>
+
+        {pages > 1 && (
+          <div className="px-6 py-4 border-t border-border dark:border-border-dark flex justify-center">
+            <Pagination
+              page={page}
+              total={pages}
+              onChange={setPage}
+            />
+          </div>
+        )}
       </Card>
 
       {/* Dialogs */}

@@ -41,6 +41,7 @@ async function fetchList(
   try {
     const { data, extra, ...others } = await fetchAnalysisUserList(userToken, {
       ...resolvePaginationParams({ pageSize, pageNum }),
+      direction: "desc",
     });
 
     return {
