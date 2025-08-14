@@ -195,19 +195,25 @@ export class UsersService {
     return analysis;
   }
 
-  private extractUsername(url: string): string | null {
+  private extractUsername(input: string): string | null {
+    const s = input.trim();
+    if (!s) return null;
+
+    if (!s.includes('/') && !s.startsWith('@')) return s;
+
+    if (s.startsWith('@')) return s.slice(1) || null;
+
     try {
-      const urlObj = new URL(url);
-      if (urlObj.hostname === 'github.com') {
-        const pathParts = urlObj.pathname.split('/').filter(Boolean);
-        if (pathParts.length >= 1) {
-          return pathParts[0];
-        }
+      const url = new URL(s.includes('://') ? s : 'https://' + s);
+      if (url.hostname === 'github.com' || url.hostname === 'www.github.com') {
+        const p = url.pathname.split('/')[1];
+        return p || null;
       }
-      return null;
     } catch {
-      return null;
+      /* ignore */
     }
+
+    return null;
   }
 
   @OnEvent('api.custom.analysis.created', { async: true })
