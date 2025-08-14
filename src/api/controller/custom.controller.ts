@@ -37,6 +37,25 @@ export class CustomController {
     return await this.userServices.uploadAndGetUsers(body, req.user.uid);
   }
 
+  @Post('custom/analysis/users/:id')
+  @ApiOperation({
+    summary: 'Refresh exists analysis data',
+    description: '',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AppAuthGuard)
+  async uploadReload(
+    @Body() body: CustomQueryUsersReqDto,
+    @Req() req: RequestWithUser,
+    @Param() params: BaseIdReqAndResDto,
+  ) {
+    return await this.userServices.uploadAndGetUsers(
+      body,
+      req.user.uid,
+      String(params.id),
+    );
+  }
+
   @Get('custom/analysis/users')
   @ApiOperation({
     summary: 'Get analysis history list, only for user',
