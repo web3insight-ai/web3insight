@@ -148,7 +148,7 @@ function EventDetailView({ id }: EventDetailViewWidgetProps) {
                     {/* Avatar */}
                     <Avatar
                       src={contestant.avatar}
-                      fallback={contestant.nickname || "?"}
+                      fallback={contestant.username || "?"}
                       size="md"
                       className="border-2 border-white dark:border-gray-700 shadow-sm flex-shrink-0"
                     />
@@ -158,7 +158,7 @@ function EventDetailView({ id }: EventDetailViewWidgetProps) {
                       <div className="flex items-center justify-between">
                         <div>
                           <h4 className="text-base font-semibold text-gray-900 dark:text-white">
-                            {contestant.nickname || "Unknown User"}
+                            {contestant.username || "Unknown User"}
                           </h4>
                           <p className="text-xs text-gray-500 dark:text-gray-400">
                             Rank #{index + 1} • {contestant.analytics.length} ecosystems

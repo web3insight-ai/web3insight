@@ -36,7 +36,11 @@ function EventListView({ className }: EventListViewWidgetProps) {
     setLoading(true);
     fetchList({})
       .then(res => {
-        setDataSource(res.data);
+        // Sort events by created_at in descending order (newest first)
+        const sortedData = res.data.sort((a: EventData, b: EventData) => 
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+        setDataSource(sortedData);
       })
       .finally(() => setLoading(false));
   }, [refetchTimestamp]);
