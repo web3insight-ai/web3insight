@@ -29,9 +29,7 @@ export class UsersService {
     uid: string,
     ref: string = '',
   ) {
-    let usernames = body.request_data
-      .map((url) => this.extractUsername(url))
-      .filter((username): username is string => username !== null);
+    let usernames = body.request_data.map((url) => this.extractUsername(url));
 
     if (body.intent === Intent.Profile) {
       const existing = await this.db
@@ -71,6 +69,10 @@ export class UsersService {
       const batchResults = await Promise.all(
         batch.map(async (username) => {
           try {
+            if (!username) {
+              fail.push(username);
+              return null;
+            }
             const clinet = await this.tokenPoolService.getClient();
             const response = await clinet.users.getByUsername({ username });
             return { username, data: response.data };
@@ -213,7 +215,7 @@ export class UsersService {
       /* ignore */
     }
 
-    return null;
+    return s;
   }
 
   @OnEvent('api.custom.analysis.created', { async: true })
@@ -320,10 +322,16 @@ FROM user_ids u;`;
       return true;
     });
 
-    rows.sort((item: any) => {
-      return item.ecosystem_scores.reduce((sum: number, ecosystem: any) => {
-        return sum + ecosystem.total_score;
-      }, 0);
+    rows.sort((a: any, b: any) => {
+      const scoreA = a.ecosystem_scores.reduce(
+        (s: any, e: { total_score: any }) => s + e.total_score,
+        0,
+      );
+      const scoreB = b.ecosystem_scores.reduce(
+        (s: any, e: { total_score: any }) => s + e.total_score,
+        0,
+      );
+      return scoreB - scoreA;
     });
 
     const body = JSON.stringify({ users: rows });
