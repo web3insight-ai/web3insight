@@ -22,6 +22,20 @@ function EventDetailView({ id }: EventDetailViewWidgetProps) {
   const [eventData, setEventData] = useState<EventReport | null>(null);
   const [loadingEventData, setLoadingEventData] = useState(false);
 
+  const formatDisplayName = (contestant: typeof contestants[0]) => {
+    if (!contestant.nickname || contestant.nickname === contestant.username) {
+      return contestant.username || "Unknown User";
+    }
+    return (
+      <>
+        {contestant.nickname}{" "}
+        <span className="text-xs text-gray-400 dark:text-gray-500 font-normal">
+          ({contestant.username})
+        </span>
+      </>
+    );
+  };
+
   useEffect(() => {
     setLoading(true);
 
@@ -204,7 +218,7 @@ function EventDetailView({ id }: EventDetailViewWidgetProps) {
                       <div className="flex items-center justify-between">
                         <div>
                           <h4 className="text-base font-semibold text-gray-900 dark:text-white">
-                            {contestant.username || "Unknown User"}
+                            {formatDisplayName(contestant)}
                           </h4>
                           <p className="text-xs text-gray-500 dark:text-gray-400">
                             Rank #{index + 1} • {contestant.analytics.length} ecosystems

@@ -146,25 +146,21 @@ function EventListView({ className }: EventListViewWidgetProps) {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border dark:divide-border-dark">
-                  {filteredData.map((event: EventData, index) => (
+                  {filteredData.map((event: EventData) => (
                     <tr
                       key={event.id}
                       className="hover:bg-surface dark:hover:bg-surface-dark transition-colors duration-200 group"
                     >
                       <td className="px-6 py-4 whitespace-nowrap text-center">
                         <div className="flex items-center justify-center">
-                          <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-medium transition-all duration-200 group-hover:scale-110
-                            ${index === 0 ? 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400' :
-                      index === 1 ? 'bg-gray-100 dark:bg-surface-elevated text-gray-700 dark:text-gray-400' :
-                        index === 2 ? 'bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-300' :
-                          'bg-gray-50 dark:bg-surface-dark text-gray-500 dark:text-gray-500'}`}>
-                            {index + 1}
+                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-medium transition-all duration-200 group-hover:scale-110 bg-gray-50 dark:bg-surface-dark text-gray-500 dark:text-gray-500">
+                            {event.id}
                           </span>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900 dark:text-white">
-                          {event.description} (#{event.id})
+                          {event.description}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-center">
