@@ -31,12 +31,12 @@ export function KeyMetrics({ user, className = "" }: KeyMetricsProps) {
     value: eco.score,
     percentage: eco.percentage,
     color: [
-      "#374151", // gray-700
-      "#4B5563", // gray-600
-      "#6B7280", // gray-500
-      "#9CA3AF", // gray-400
-      "#D1D5DB", // gray-300
-    ][index] || "#9CA3AF",
+      "#134E4A", // teal-800 - darkest, coldest
+      "#0F766E", // teal-700 - dark cool
+      "#115E59", // teal-800 variant - cold mid-tone
+      "#0D9488", // teal-600 - deeper cool
+      "#047857", // emerald-700 - cold dark green-teal
+    ][index] || "#0F766E",
   }));
 
   const totalScore = rankings.reduce((sum, eco) => sum + eco.score, 0);
