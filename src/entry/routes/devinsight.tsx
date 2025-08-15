@@ -1,14 +1,16 @@
 import { Button, Card, CardBody } from "@nextui-org/react";
-import { LoaderFunctionArgs, MetaFunction, json, redirect } from "@remix-run/node";
+import { LoaderFunctionArgs, MetaFunction, json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { Brain, AlertCircle, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useAtom } from "jotai";
 import { getTitle } from "@/utils/app";
 import { getGitHubHandle } from "~/profile-analysis/helper";
+import { authModalOpenAtom } from "#/atoms";
 import DefaultLayout from "../layouts/default";
 
 import { fetchCurrentUser } from "~/auth/repository";
-import { 
+import {
   analyzeGitHubUser,
   type AnalysisResult,
   type BasicAnalysisResult,
@@ -35,17 +37,21 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   // Get authenticated user data - required for DevInsight
   const userResult = await fetchCurrentUser(request);
-  
-  // Redirect to home if not authenticated - user will see login modal
+
+  // If not authenticated, return null user to trigger login modal
   if (!userResult.success || !userResult.data) {
-    return redirect("/");
+    return json({
+      user: null,
+      githubHandle: null,
+      requiresAuth: true,
+    });
   }
 
   const user = userResult.data;
-  
+
   // Get GitHub handle from authenticated user
   const githubHandle = getGitHubHandle(user);
-  
+
   if (!githubHandle) {
     throw new Response("GitHub account must be connected to use DevInsight", { status: 400 });
   }
@@ -55,15 +61,17 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     throw new Response("Invalid GitHub handle format", { status: 400 });
   }
 
-  return json({ 
+  return json({
     user,
     githubHandle,
+    requiresAuth: false,
   });
 };
 
 export default function DevInsightPage() {
-  const { user, githubHandle } = useLoaderData<typeof loader>();
-  
+  const { user, githubHandle, requiresAuth } = useLoaderData<typeof loader>();
+  const [, setAuthModalOpen] = useAtom(authModalOpenAtom);
+
   // Analysis state
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisStatus, setAnalysisStatus] = useState<AnalysisStatus>("pending");
@@ -73,7 +81,14 @@ export default function DevInsightPage() {
   const [results, setResults] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState("");
 
-  // Auto-start analysis on component mount
+  // Auto-trigger login modal for unauthenticated users
+  useEffect(() => {
+    if (requiresAuth) {
+      setAuthModalOpen(true);
+    }
+  }, [requiresAuth, setAuthModalOpen]);
+
+  // Auto-start analysis on component mount for authenticated users
   useEffect(() => {
     if (githubHandle && !isAnalyzing && analysisStatus === "pending") {
       handleAnalyze();
@@ -125,6 +140,47 @@ export default function DevInsightPage() {
   // Get the current user data for display
   const currentUser = results?.data.users[0] || basicInfo?.users[0];
 
+  // For unauthenticated users, show a simple message and let the modal handle login
+  if (requiresAuth) {
+    return (
+      <DefaultLayout user={user}>
+        <div className="min-h-dvh bg-background dark:bg-background-dark pb-24">
+          <div className="w-full max-w-content mx-auto px-6 pt-8">
+            {/* Header and Overview */}
+            <div className="mb-8">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <Brain size={20} className="text-primary" />
+                </div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">DevInsight</h1>
+              </div>
+              <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
+                AI-powered Web3 development insights and analysis
+              </p>
+            </div>
+
+            {/* Simple message - modal will handle the login */}
+            <div className="text-center py-12">
+              <div className="space-y-4">
+                <div className="p-3 rounded-full bg-primary/10 w-fit mx-auto">
+                  <Brain size={32} className="text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                    Sign in to access DevInsight
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Connect your GitHub account to unlock AI-powered Web3 development insights
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </DefaultLayout>
+    );
+  }
+
   return (
     <DefaultLayout user={user}>
       <div className="min-h-dvh bg-background dark:bg-background-dark pb-24">
@@ -162,9 +218,9 @@ export default function DevInsightPage() {
                     <div>
                       <h3 className="font-semibold text-danger mb-1">Analysis Failed</h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{error}</p>
-                      <Button 
-                        color="danger" 
-                        variant="light" 
+                      <Button
+                        color="danger"
+                        variant="light"
                         size="sm"
                         onClick={handleAnalyze}
                         isLoading={isAnalyzing}
