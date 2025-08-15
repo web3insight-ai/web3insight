@@ -66,4 +66,20 @@ async function fetchAnalysisUser(userToken: string, id: number): Promise<Respons
   return client.get(`/v1/custom/analysis/users/${id}`);
 }
 
-export { fetchAnalysisUserList, analyzeUserList, fetchAnalysisUser };
+async function updateAnalysisUser(
+  userToken: string,
+  id: number,
+  data: {
+    request_data: string[];
+    intent: string;
+    description?: string;
+  },
+): Promise<ResponseResult<{
+  id: number;
+  users: GithubUser[];
+}>> {
+  const client = createAuthenticatedClient(userToken);
+  return client.post(`/v1/custom/analysis/users/${id}`, data);
+}
+
+export { fetchAnalysisUserList, analyzeUserList, fetchAnalysisUser, updateAnalysisUser };

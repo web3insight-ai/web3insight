@@ -3,7 +3,7 @@ import { type NormalizedPagination, resolvePaginationParams, isServerSide } from
 import httpClient from "@/clients/http/default";
 
 import type { User as GithubUser } from "../github/typing";
-import { fetchAnalysisUserList, analyzeUserList, fetchAnalysisUser } from "../api/repository";
+import { fetchAnalysisUserList, analyzeUserList, fetchAnalysisUser, updateAnalysisUser } from "../api/repository";
 import { getSession } from "../auth/helper/server-only";
 
 import type { EventReport } from "./typing";
@@ -207,4 +207,66 @@ async function insertOne(
   }
 }
 
-export { fetchList, fetchOne, insertOne };
+async function updateOne(
+  requestOrData: Request | { id: number; urls: string[]; description: string },
+  data?: { id: number; urls: string[]; description: string },
+): Promise<ResponseResult<GithubUser[]>> {
+  // Handle client-side calls (first parameter is data)
+  if (!isServerSide()) {
+    const clientData = requestOrData as { id: number; urls: string[]; description: string };
+    return httpClient.post(`/api/event/contestants/${clientData.id}`, {
+      urls: clientData.urls,
+      description: clientData.description,
+    });
+  }
+
+  // Handle server-side calls (first parameter is request, second is data)
+  const request = requestOrData as Request;
+  const serverData = data!;
+
+  // Get user token from session
+  const session = await getSession(request);
+  const userToken = session.get("userToken");
+
+  if (!userToken) {
+    return {
+      success: false,
+      code: "401",
+      message: "Authentication required",
+      data: [] as GithubUser[],
+    };
+  }
+
+  try {
+    const response = await updateAnalysisUser(userToken, serverData.id, {
+      request_data: serverData.urls,
+      intent: "hackathon",
+      description: serverData.description,
+    });
+
+    // Handle API error response
+    if (!response.success || !response.data) {
+      console.error(`[Event Repository] updateAnalysisUser failed:`, response);
+      return {
+        success: response.success,
+        code: response.code,
+        message: response.message,
+        data: [] as GithubUser[],
+      };
+    }
+
+    const { data: resData, extra, ...others } = response;
+    const { id, users, ...rest } = resData;
+
+    return {
+      ...others,
+      data: users,
+      extra: { ...extra, eventId: id, ...rest },
+    };
+  } catch (error) {
+    console.error(`[Event Repository] updateOne error:`, error);
+    throw error;
+  }
+}
+
+export { fetchList, fetchOne, insertOne, updateOne };

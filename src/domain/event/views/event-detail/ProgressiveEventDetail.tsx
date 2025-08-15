@@ -1,18 +1,20 @@
 import { useState, useEffect, useCallback } from "react";
 import { Card, CardHeader, Avatar, Badge, Button } from "@nextui-org/react";
-import { Users, Trophy, Medal, Award, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
+import { Users, Trophy, Medal, Award, ChevronDown, ChevronUp, RefreshCw, Edit3 } from "lucide-react";
 
 import AnalysisProgress from "@/components/loading/AnalysisProgress";
 import AnalysisSkeleton from "@/components/loading/AnalysisSkeleton";
 
-import type { PartialContestant } from "../../typing";
+import type { PartialContestant, EventReport } from "../../typing";
 import { 
   createPartialContestants, 
   isAnalysisComplete,
   calculateOverallProgress, 
 } from "../../helper/progressive";
+import { fetchOne } from "../../repository";
 
 import type { EventDetailViewWidgetProps } from "./typing";
+import EventEditDialog from "./EventEditDialog";
 
 function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
   const [loading, setLoading] = useState(true);
@@ -21,6 +23,9 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
   const [expandedContestants, setExpandedContestants] = useState<Set<string>>(new Set());
   const [overallProgress, setOverallProgress] = useState(0);
   const [pollingActive, setPollingActive] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [eventData, setEventData] = useState<EventReport | null>(null);
+  const [loadingEventData, setLoadingEventData] = useState(false);
 
   // Simulate progressive analysis updates
   const simulateProgressUpdates = useCallback(() => {
@@ -70,6 +75,33 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
       return updatedContestants;
     });
   }, [analysisComplete]);
+
+  // Fetch event data for editing
+  const fetchEventData = async () => {
+    setLoadingEventData(true);
+    try {
+      const result = await fetchOne(id);
+      if (result.success) {
+        setEventData(result.data);
+      }
+    } catch (error) {
+      console.error('[ProgressiveEventDetail] Error fetching event data:', error);
+    } finally {
+      setLoadingEventData(false);
+    }
+  };
+
+  const handleEditClick = () => {
+    if (!eventData) {
+      fetchEventData();
+    }
+    setShowEditDialog(true);
+  };
+
+  const handleEditSuccess = () => {
+    // Refresh the page to show updated data
+    window.location.reload();
+  };
 
   // Initial fetch - get basic GitHub user data immediately
   useEffect(() => {
@@ -166,7 +198,7 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
       <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
         <CardHeader className="px-6 py-5">
           <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-1">
               <div className="p-2 rounded-lg bg-primary/10">
                 <Users size={18} className="text-primary" />
               </div>
@@ -178,7 +210,7 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
               </div>
             </div>
             
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 justify-end">
               {!analysisComplete && (
                 <AnalysisProgress 
                   status="analyzing" 
@@ -192,6 +224,18 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
                   ✓ Complete
                 </Badge>
               )}
+
+              <Button
+                size="sm"
+                color="primary"
+                variant="flat"
+                startContent={<Edit3 size={16} />}
+                onClick={handleEditClick}
+                isLoading={loadingEventData}
+                className="text-sm font-medium px-4 h-9"
+              >
+                Edit Event
+              </Button>
             </div>
           </div>
         </CardHeader>
@@ -304,6 +348,14 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
           })}
         </div>
       </Card>
+
+      {/* Edit Dialog */}
+      <EventEditDialog
+        visible={showEditDialog}
+        onClose={() => setShowEditDialog(false)}
+        onSuccess={handleEditSuccess}
+        event={eventData}
+      />
     </div>
   );
 }

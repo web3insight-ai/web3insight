@@ -46,14 +46,24 @@ function resolveEventDetail(raw: Record<string, DataValue>): EventReport {
     };
   });
 
-  const result = {
+  // Try to find request_data in different possible locations
+  let requestData: string[] | undefined;
+  
+  if (raw.request_data && Array.isArray(raw.request_data)) {
+    requestData = raw.request_data as string[];
+  } else if (raw.data?.request_data && Array.isArray(raw.data.request_data)) {
+    requestData = raw.data.request_data as string[];
+  } else if (raw.urls && Array.isArray(raw.urls)) {
+    requestData = raw.urls as string[];
+  }
+
+  return {
     id: raw.id,
     type: raw.intent,
     description: raw.description,
     contestants,
+    request_data: requestData,
   };
-
-  return result;
 }
 
 export { resolveEventDetail };

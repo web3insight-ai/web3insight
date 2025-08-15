@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Card, CardHeader, Avatar } from "@nextui-org/react";
-import { Calendar, Users, Trophy, Medal, Award, ChevronDown, ChevronUp } from "lucide-react";
+import { Card, CardHeader, Avatar, Button } from "@nextui-org/react";
+import { Calendar, Users, Trophy, Medal, Award, ChevronDown, ChevronUp, Edit3 } from "lucide-react";
 
 import ChartCard from "@/components/control/chart-card";
 
@@ -12,11 +12,15 @@ import { fetchOne } from "../../repository";
 import type { EventDetailViewWidgetProps } from "./typing";
 import { resolveChartOptions } from "./helper";
 import RepoScoreListCard from "./RepoScoreListCard";
+import EventEditDialog from "./EventEditDialog";
 
 function EventDetailView({ id }: EventDetailViewWidgetProps) {
   const [loading, setLoading] = useState(false);
   const [contestants, setContestants] = useState<EventReport["contestants"]>([]);
   const [expandedContestants, setExpandedContestants] = useState<Set<string>>(new Set());
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [eventData, setEventData] = useState<EventReport | null>(null);
+  const [loadingEventData, setLoadingEventData] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -38,6 +42,33 @@ function EventDetailView({ id }: EventDetailViewWidgetProps) {
         setLoading(false);
       });
   }, [id]);
+
+  // Fetch event data for editing
+  const fetchEventData = async () => {
+    setLoadingEventData(true);
+    try {
+      const result = await fetchOne(id);
+      if (result.success) {
+        setEventData(result.data);
+      }
+    } catch (error) {
+      console.error('[EventDetailView] Error fetching event data:', error);
+    } finally {
+      setLoadingEventData(false);
+    }
+  };
+
+  const handleEditClick = () => {
+    if (!eventData) {
+      fetchEventData();
+    }
+    setShowEditDialog(true);
+  };
+
+  const handleEditSuccess = () => {
+    // Refresh the page to show updated data
+    window.location.reload();
+  };
 
   if (loading) {
     return (
@@ -103,13 +134,28 @@ function EventDetailView({ id }: EventDetailViewWidgetProps) {
       {/* Event Overview */}
       <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
         <CardHeader className="px-6 py-5">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Users size={18} className="text-primary" />
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-3 flex-1">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Users size={18} className="text-primary" />
+              </div>
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Event Overview</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{contestants.length} contestants participating</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">Event Overview</h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400">{contestants.length} contestants participating</p>
+            <div className="flex justify-end">
+              <Button
+                size="sm"
+                color="primary"
+                variant="flat"
+                startContent={<Edit3 size={16} />}
+                onClick={handleEditClick}
+                isLoading={loadingEventData}
+                className="text-sm font-medium px-4 h-9"
+              >
+                Edit Event
+              </Button>
             </div>
           </div>
         </CardHeader>
@@ -278,6 +324,14 @@ function EventDetailView({ id }: EventDetailViewWidgetProps) {
           })}
         </div>
       </Card>
+
+      {/* Edit Dialog */}
+      <EventEditDialog
+        visible={showEditDialog}
+        onClose={() => setShowEditDialog(false)}
+        onSuccess={handleEditSuccess}
+        event={eventData}
+      />
     </div>
   );
 }

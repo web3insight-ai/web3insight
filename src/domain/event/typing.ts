@@ -40,6 +40,7 @@ type EventReport = {
   type: "hackathon";
   description: string; // Event name/title
   contestants: Contestant[];
+  request_data?: string[]; // Original participant URLs
 };
 
 type PartialEventReport = {
