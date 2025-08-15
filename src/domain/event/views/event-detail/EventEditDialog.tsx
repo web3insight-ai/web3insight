@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, MouseEvent } from "react";
 import {
   Modal, ModalContent, ModalHeader, ModalBody, ModalFooter,
-  Textarea, Button, Chip, Card, CardBody,
+  Textarea, Button, Chip,
 } from "@nextui-org/react";
-import { Calendar, Plus, X, AlertTriangle } from "lucide-react";
+import { Calendar, AlertTriangle, X } from "lucide-react";
 import { useNavigate } from "@remix-run/react";
 import { useAtom } from "jotai";
 
@@ -26,7 +26,7 @@ function EventEditDialog({ visible, onClose, event }: EventEditDialogProps) {
   const navigate = useNavigate();
   const [, addToast] = useAtom(addToastAtom);
   const [description, setDescription] = useState("");
-  const [participants, setParticipants] = useState<string[]>([]);
+  const [currentParticipants, setCurrentParticipants] = useState<string[]>([]);
   const [userInput, setUserInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
@@ -40,16 +40,16 @@ function EventEditDialog({ visible, onClose, event }: EventEditDialogProps) {
       setDescription(event.description || "");
       
       // Load original request_data if available, otherwise try to derive from contestants
-      let participantUrls: string[] = [];
+      let participantList: string[] = [];
       
       if (event.request_data && event.request_data.length > 0) {
-        participantUrls = event.request_data;
+        participantList = event.request_data;
       } else if (event.contestants && event.contestants.length > 0) {
         // Fallback: extract GitHub usernames from contestants
-        participantUrls = event.contestants.map(contestant => contestant.username);
+        participantList = event.contestants.map(contestant => contestant.username);
       }
       
-      setParticipants(participantUrls);
+      setCurrentParticipants(participantList);
       setUserInput("");
     }
   }, [event, visible]);
@@ -63,13 +63,7 @@ function EventEditDialog({ visible, onClose, event }: EventEditDialogProps) {
   const handleFileChange = (file: File) => {
     const reader = new FileReader();
     reader.onload = (e) => {
-      const csvContent = e.target?.result as string;
-      
-      // Parse CSV and add to existing participants
-      const newParticipants = resolveContestants(csvContent);
-      const allParticipants = [...new Set([...participants, ...newParticipants])];
-      
-      setParticipants(allParticipants);
+      setUserInput(e.target?.result as string);
 
       if (uploadRef.current) {
         uploadRef.current.value = "";
@@ -78,31 +72,18 @@ function EventEditDialog({ visible, onClose, event }: EventEditDialogProps) {
     reader.readAsText(file);
   };
 
-  const addParticipants = () => {
-    if (!userInput.trim()) return;
-
-    // Use the same resolveContestants helper as the creation dialog
-    const newParticipants = resolveContestants(userInput);
-    
-    // Merge with existing participants using Set to avoid duplicates
-    const allParticipants = [...new Set([...participants, ...newParticipants])];
-    
-    setParticipants(allParticipants);
-    setUserInput("");
-  };
-
-  const removeParticipant = (participantToRemove: string) => {
-    setParticipants(participants.filter(p => p !== participantToRemove));
-  };
-
   const closeDialog = () => {
     setDescription("");
-    setParticipants([]);
+    setCurrentParticipants([]);
     setUserInput("");
     setLoading(false);
     setIsAnalyzing(false);
     setAnalysisProgress(0);
     onClose();
+  };
+
+  const removeParticipant = (index: number) => {
+    setCurrentParticipants(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleConfirm = async () => {
@@ -119,7 +100,11 @@ function EventEditDialog({ visible, onClose, event }: EventEditDialogProps) {
       return;
     }
 
-    if (participants.length === 0) {
+    // Combine current participants with new additions
+    const newParticipants = resolveContestants(userInput);
+    const allParticipants = [...currentParticipants, ...newParticipants];
+
+    if (allParticipants.length === 0) {
       addToast({
         type: 'error',
         title: 'Validation Error',
@@ -136,7 +121,7 @@ function EventEditDialog({ visible, onClose, event }: EventEditDialogProps) {
       // Step 1: Update the event
       const result = await updateOne({
         id: Number(event.id),
-        urls: participants,
+        urls: allParticipants,
         description: resolvedDescription,
       });
 
@@ -266,15 +251,15 @@ function EventEditDialog({ visible, onClose, event }: EventEditDialogProps) {
       isDismissable={true}
       isKeyboardDismissDisabled={false}
       classNames={{
-        base: "max-w-2xl mx-4",
+        base: "max-w-2xl mx-4 max-h-[80vh] my-8",
         wrapper: "overflow-visible",
         backdrop: "bg-black/50",
         header: "border-b border-border dark:border-border-dark",
-        body: "p-0",
+        body: "p-0 overflow-hidden",
         closeButton: "hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",
       }}
     >
-      <ModalContent className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
+      <ModalContent className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark flex flex-col max-h-full">
         {() => (
           <>
             <ModalHeader className="flex items-center gap-3 px-6 py-5">
@@ -295,124 +280,102 @@ function EventEditDialog({ visible, onClose, event }: EventEditDialogProps) {
                 </p>
               </div>
             </ModalHeader>
-            
-            <ModalBody>
-              {loading ? (
-                <div className="px-6 py-8 flex items-center justify-center min-h-96">
-                  <div className="text-center space-y-3">
-                    {isAnalyzing ? (
-                      <AnalysisProgress
-                        progress={analysisProgress}
-                        status="analyzing"
-                        message={analysisProgress < 20 ? "Updating event..." :
-                          analysisProgress < 90 ? "Re-analyzing participants..." :
-                            "Finalizing analysis..."}
-                        estimatedTime="This may take several minutes"
-                      />
-                    ) : (
-                      <>
-                        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Updating event...
-                        </p>
-                      </>
-                    )}
+
+            <ModalBody className="flex-1 overflow-y-auto">
+              <div className="px-6 py-6 space-y-6 relative">
+                {/* Loading Overlay */}
+                {loading && (
+                  <div className="absolute inset-0 bg-white/80 dark:bg-surface-dark/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-b-lg">
+                    <div className="text-center space-y-3">
+                      {isAnalyzing ? (
+                        <AnalysisProgress
+                          progress={analysisProgress}
+                          status="analyzing"
+                          message={analysisProgress < 20 ? "Updating event..." :
+                            analysisProgress < 90 ? "Re-analyzing participants..." :
+                              "Finalizing analysis..."}
+                          estimatedTime="This may take several minutes"
+                        />
+                      ) : (
+                        <>
+                          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Updating event...
+                          </p>
+                        </>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="px-6 py-6 space-y-4">
-                  {/* Event Name - Compact */}
+                )}
+
+                <div className="space-y-6">
                   <Textarea
                     value={description}
                     placeholder="Enter event name (e.g., OpenBuild Hackathon)"
                     label="Event Name"
                     labelPlacement="outside"
                     isRequired
-                    minRows={1}
-                    maxRows={2}
                     onValueChange={setDescription}
                     classNames={{
                       base: "w-full",
-                      label: "text-sm font-medium text-gray-700 dark:text-gray-300 mb-1",
+                      label: "text-sm font-medium text-gray-700 dark:text-gray-300 mb-2",
                       input: "bg-white dark:bg-surface-dark border-border dark:border-border-dark",
                     }}
                   />
 
-                  {/* Current Participants - Extended */}
                   <div>
-                    <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Current Participants ({participants.length})
-                    </div>
-                    {participants.length > 0 ? (
-                      <Card className="border border-border dark:border-border-dark">
-                        <CardBody className="p-3">
-                          <div className="max-h-48 overflow-y-auto">
-                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-                              {participants.map((participant, index) => (
-                                <div key={index} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-900/20 rounded border border-border dark:border-border-dark group hover:bg-gray-100 dark:hover:bg-gray-900/40 transition-colors">
-                                  <span className="text-xs text-gray-700 dark:text-gray-300 truncate flex-1 pr-1" title={participant}>
-                                    {participant}
-                                  </span>
-                                  <Button
-                                    size="sm"
-                                    variant="light"
-                                    color="danger"
-                                    onClick={() => removeParticipant(participant)}
-                                    isIconOnly
-                                    className="ml-1 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 min-w-6"
-                                  >
-                                    <X size={12} />
-                                  </Button>
-                                </div>
-                              ))}
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                      Current Participants ({currentParticipants.length})
+                    </label>
+                    {currentParticipants.length > 0 ? (
+                      <div className="max-h-64 overflow-y-auto bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-border dark:border-border-dark">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-2 p-4">
+                          {currentParticipants.map((participant, index) => (
+                            <div
+                              key={index}
+                              className="relative bg-white dark:bg-surface-dark border border-border dark:border-border-dark rounded-md px-3 py-2 group hover:border-gray-300 dark:hover:border-gray-600 transition-colors text-center"
+                            >
+                              <span className="text-sm text-gray-700 dark:text-gray-300 truncate block">
+                                {participant}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => removeParticipant(index)}
+                                className="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all duration-200 w-5 h-5 bg-white dark:bg-surface-dark hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full border border-border dark:border-border-dark flex items-center justify-center"
+                                title="Remove participant"
+                              >
+                                <X size={10} />
+                              </button>
                             </div>
-                          </div>
-                        </CardBody>
-                      </Card>
+                          ))}
+                        </div>
+                      </div>
                     ) : (
-                      <Card className="border border-border dark:border-border-dark">
-                        <CardBody className="p-3 text-center">
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            No participants found. Add participants below.
-                          </p>
-                        </CardBody>
-                      </Card>
+                      <div className="p-4 text-center text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-border dark:border-border-dark">
+                        No current participants
+                      </div>
                     )}
                   </div>
 
-                  {/* Add Participants - Compact */}
                   <Textarea
                     value={userInput}
-                    placeholder="Enter GitHub username of contestants, separated by comma"
-                    label="Add Participants"
+                    placeholder="Enter GitHub username of new contestants, separated by comma"
+                    label="Add New Participants"
                     labelPlacement="outside"
-                    minRows={2}
-                    maxRows={3}
+                    minRows={5}
+                    maxRows={10}
                     onValueChange={setUserInput}
                     classNames={{
                       base: "w-full",
-                      label: "text-sm font-medium text-gray-700 dark:text-gray-300 mb-1",
+                      label: "text-sm font-medium text-gray-700 dark:text-gray-300 mb-2",
                       input: "bg-white dark:bg-surface-dark border-border dark:border-border-dark",
                     }}
                   />
 
-                  {/* Add Button and CSV Upload - Compact */}
-                  <div className="flex items-center gap-2">
-                    <Button
-                      onClick={addParticipants}
-                      isDisabled={!userInput.trim() || loading}
-                      color="primary"
-                      variant="bordered"
-                      size="sm"
-                      startContent={<Plus size={14} />}
-                    >
-                      Add Participants
-                    </Button>
-                    
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                      or
+                  <div className="flex items-center gap-3 pt-2">
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      Input manually above or
                     </span>
-                    
                     <FileUpload
                       ref={uploadRef}
                       type="csv"
@@ -424,25 +387,26 @@ function EventEditDialog({ visible, onClose, event }: EventEditDialogProps) {
                         variant="bordered"
                         className="border-border dark:border-border-dark hover:bg-gray-50 dark:hover:bg-white/10"
                       >
-                        import CSV
+                        import from CSV file
                       </Button>
                     </FileUpload>
                   </div>
 
-                  {/* Warning Notice - Compact */}
-                  <div className="bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800 rounded-lg p-3">
+                  {/* Warning Notice */}
+                  <div className="bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800 rounded-lg p-4">
                     <div className="flex items-start gap-2">
-                      <AlertTriangle size={14} className="text-warning-600 dark:text-warning-400 mt-0.5 shrink-0" />
-                      <div className="text-xs text-warning-700 dark:text-warning-300">
+                      <AlertTriangle size={16} className="text-warning-600 dark:text-warning-400 mt-0.5 shrink-0" />
+                      <div className="text-sm text-warning-700 dark:text-warning-300">
                         <p className="font-medium mb-1">Analysis Re-run Notice</p>
                         <p>
-                          Updating will trigger complete re-analysis of all participants.
+                          Updating this event will trigger a complete re-analysis of all participants. 
+                          This process may take several minutes to complete.
                         </p>
                       </div>
                     </div>
                   </div>
                 </div>
-              )}
+              </div>
             </ModalBody>
 
             <ModalFooter className="border-t border-border dark:border-border-dark px-6 py-4">
