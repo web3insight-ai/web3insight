@@ -311,7 +311,7 @@ export default function Index() {
                     placeholder="Ask about ecosystems, developers, or repositories..."
                     classNames={{
                       input: "h-12 text-sm font-normal pr-12",
-                      inputWrapper: "h-12 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-primary focus-within:border-primary transition-colors shadow-sm",
+                      inputWrapper: "h-12 bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark hover:border-primary focus-within:border-primary transition-colors shadow-sm",
                     }}
                     startContent={<Search size={18} className="text-gray-400" />}
                   />
@@ -344,7 +344,7 @@ export default function Index() {
                     key={example}
                     type="button"
                     onClick={() => handleExampleClick(example)}
-                    className="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition-colors duration-200"
+                    className="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-surface-elevated hover:bg-gray-200 dark:hover:bg-surface-dark rounded-md transition-colors duration-200"
                   >
                     {example}
                   </button>
@@ -406,7 +406,7 @@ export default function Index() {
         classNames={{
           base: "max-h-[90vh]",
           wrapper: "overflow-visible",
-          backdrop: "bg-black/50",
+          backdrop: "bg-background-dark/50",
           header: "border-b border-gray-200 dark:border-gray-800",
           body: "p-0",
           closeButton: "hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",

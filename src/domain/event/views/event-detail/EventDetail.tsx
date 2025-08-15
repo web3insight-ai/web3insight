@@ -121,11 +121,11 @@ function EventDetailView({ id }: EventDetailViewWidgetProps) {
     case 0:
       return "bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-900/30 dark:to-yellow-800/30 text-yellow-700 dark:text-yellow-400 border-yellow-300 dark:border-yellow-700";
     case 1:
-      return "bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900/30 dark:to-gray-800/30 text-gray-700 dark:text-gray-400 border-gray-300 dark:border-gray-700";
+      return "bg-gradient-to-br from-gray-100 to-gray-200 dark:from-surface-elevated dark:to-surface-dark text-gray-700 dark:text-gray-400 border-gray-300 dark:border-border-dark";
     case 2:
-      return "bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30 text-orange-700 dark:text-orange-400 border-orange-300 dark:border-orange-700";
+      return "bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-500/20 dark:to-orange-500/30 text-orange-700 dark:text-orange-300 border-orange-300 dark:border-orange-500/30";
     default:
-      return "bg-gray-50 dark:bg-gray-900/20 text-gray-600 dark:text-gray-500 border-gray-200 dark:border-gray-800";
+      return "bg-gray-50 dark:bg-surface-dark text-gray-600 dark:text-gray-500 border-gray-200 dark:border-border-dark";
     }
   };
 
@@ -291,7 +291,7 @@ function EventDetailView({ id }: EventDetailViewWidgetProps) {
                 {isExpanded && (
                   <div
                     id={`contestant-details-${String(contestant.id)}`}
-                    className="animate-slide-up px-6 pb-6 bg-gray-50 dark:bg-gray-900/30"
+                    className="animate-slide-up px-6 pb-6 bg-gray-50 dark:bg-surface-elevated"
                   >
                     <div className="space-y-6 pt-6">
                       {/* Profile Section */}

@@ -58,8 +58,8 @@ export function OriginAuthWidget({ className }: OriginAuthWidgetProps) {
       <Card className={className}>
         <CardBody className="p-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-orange-100 dark:bg-orange-900/20 rounded-lg">
-              <Settings size={20} className="text-orange-600 dark:text-orange-400" />
+            <div className="p-2 bg-gray-100 dark:bg-surface-elevated rounded-lg">
+              <Settings size={20} className="text-gray-600 dark:text-gray-400" />
             </div>
             <div>
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -71,12 +71,12 @@ export function OriginAuthWidget({ className }: OriginAuthWidgetProps) {
             </div>
           </div>
 
-          <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
-            <p className="text-sm text-orange-800 dark:text-orange-300 mb-2">
+          <div className="p-4 bg-gray-50 dark:bg-surface-elevated rounded-lg border border-gray-200 dark:border-border-dark">
+            <p className="text-sm text-gray-800 dark:text-gray-300 mb-2">
               <strong>Camp SDK Not Configured</strong>
             </p>
-            <p className="text-sm text-orange-700 dark:text-orange-400">
-              Set the <code className="bg-orange-100 dark:bg-orange-800 px-1 rounded">VITE_ORIGIN_CLIENT_ID</code> environment variable to enable Camp Network features.
+            <p className="text-sm text-gray-700 dark:text-gray-400">
+              Set the <code className="bg-gray-100 dark:bg-surface-dark px-1 rounded">VITE_ORIGIN_CLIENT_ID</code> environment variable to enable Camp Network features.
             </p>
           </div>
         </CardBody>
@@ -89,8 +89,8 @@ export function OriginAuthWidget({ className }: OriginAuthWidgetProps) {
       <Card className={className}>
         <CardBody className="flex items-center justify-center py-12">
           <div className="relative">
-            <div className="animate-spin rounded-full h-10 w-10 border-3 border-orange-200 dark:border-orange-800">
-              <div className="absolute top-0 left-0 h-10 w-10 rounded-full border-3 border-transparent border-t-orange-500 dark:border-t-orange-400 animate-spin" />
+            <div className="animate-spin rounded-full h-10 w-10 border-3 border-gray-200 dark:border-gray-600">
+              <div className="absolute top-0 left-0 h-10 w-10 rounded-full border-3 border-transparent border-t-gray-500 dark:border-t-gray-400 animate-spin" />
             </div>
           </div>
         </CardBody>
@@ -102,8 +102,8 @@ export function OriginAuthWidget({ className }: OriginAuthWidgetProps) {
     <Card className={className}>
       <CardBody className="p-6">
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 bg-orange-100 dark:bg-orange-900/20 rounded-lg">
-            <GraduationCap size={20} className="text-orange-600 dark:text-orange-400" />
+          <div className="p-2 bg-gray-100 dark:bg-surface-elevated rounded-lg">
+            <GraduationCap size={20} className="text-gray-600 dark:text-gray-400" />
           </div>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
             Camp Network
@@ -120,16 +120,16 @@ export function OriginAuthWidget({ className }: OriginAuthWidgetProps) {
               <CampModal />
             </div>
 
-            <div className="p-4 bg-gradient-to-r from-orange-50 to-orange-100/50 dark:from-orange-900/10 dark:to-orange-800/10 rounded-xl border border-orange-200/50 dark:border-orange-700/30">
+            <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-surface-dark dark:to-surface-elevated rounded-xl border border-gray-200/50 dark:border-border-dark">
               <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 p-1.5 bg-orange-100 dark:bg-orange-800/30 rounded-lg">
-                  <ExternalLink size={16} className="text-orange-600 dark:text-orange-400" />
+                <div className="flex-shrink-0 p-1.5 bg-gray-100 dark:bg-surface-elevated rounded-lg">
+                  <ExternalLink size={16} className="text-gray-600 dark:text-gray-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-orange-900 dark:text-orange-100 mb-1">
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
                     Own Your Digital IP
                   </p>
-                  <p className="text-xs text-orange-700 dark:text-orange-300 leading-relaxed">
+                  <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
                     Connect to Camp Network&apos;s AI-native blockchain to tokenize and monetize your IP with provenance tracking
                   </p>
                 </div>
@@ -140,8 +140,8 @@ export function OriginAuthWidget({ className }: OriginAuthWidgetProps) {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <CheckCircle size={16} className="text-orange-600 dark:text-orange-400" />
-                <span className="text-sm font-medium text-orange-700 dark:text-orange-400">
+                <CheckCircle size={16} className="text-gray-600 dark:text-gray-400" />
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   Connected to Camp
                 </span>
               </div>
@@ -149,7 +149,7 @@ export function OriginAuthWidget({ className }: OriginAuthWidgetProps) {
                 variant="light"
                 size="sm"
                 onClick={disconnect}
-                className="text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 h-auto min-h-0 px-3 py-1.5 text-xs font-medium"
+                className="text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-surface-elevated h-auto min-h-0 px-3 py-1.5 text-xs font-medium"
               >
                 Disconnect
               </Button>
@@ -165,7 +165,7 @@ export function OriginAuthWidget({ className }: OriginAuthWidgetProps) {
               {socialsLoading ? (
                 <div className="space-y-4">
                   {[...Array(2)].map((_, i) => (
-                    <div key={i} className="animate-pulse flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <div key={i} className="animate-pulse flex items-center justify-between p-4 bg-gray-50 dark:bg-surface-dark rounded-lg">
                       <div className="flex items-center gap-3">
                         <div className="w-5 h-5 bg-gray-300 dark:bg-gray-600 rounded" />
                         <div className="w-20 h-4 bg-gray-300 dark:bg-gray-600 rounded" />
@@ -181,7 +181,7 @@ export function OriginAuthWidget({ className }: OriginAuthWidgetProps) {
                     return (
                       <div
                         key={platform.key}
-                        className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg"
+                        className="flex items-center justify-between p-4 bg-gray-50 dark:bg-surface-dark rounded-lg"
                       >
                         <div className="flex items-center gap-3">
                           <IconComponent
@@ -196,7 +196,7 @@ export function OriginAuthWidget({ className }: OriginAuthWidgetProps) {
                         </div>
 
                         {platform.isLinked ? (
-                          <div className="px-3 py-1.5 bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-xs font-medium rounded-full border border-orange-200 dark:border-orange-700">
+                          <div className="px-3 py-1.5 bg-gray-100 dark:bg-surface-elevated text-gray-700 dark:text-gray-300 text-xs font-medium rounded-full border border-gray-200 dark:border-border-dark">
                             Connected
                           </div>
                         ) : (
@@ -204,7 +204,7 @@ export function OriginAuthWidget({ className }: OriginAuthWidgetProps) {
                             size="sm"
                             variant="light"
                             onClick={platform.linkAction}
-                            className="h-auto min-h-0 px-3 py-1.5 text-xs font-medium text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                            className="h-auto min-h-0 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-surface-elevated"
                           >
                             Connect
                           </Button>

@@ -17,15 +17,15 @@ function EcosystemTypeFilter({ selectedType, onTypeChange, className = "" }: Eco
   return (
     <div className={`inline-flex items-center ${className}`}>
       {/* Desktop: Horizontal tabs */}
-      <div className="hidden sm:inline-flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
+      <div className="hidden sm:inline-flex items-center gap-2 bg-gray-100 dark:bg-surface-elevated border dark:border-border-dark rounded-xl p-1">
         {options.map(({ key, label }) => (
           <button
             key={key}
             onClick={() => onTypeChange(key)}
             className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 whitespace-nowrap ${
               selectedType === key 
-                ? 'bg-primary text-white shadow-md' 
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-200/50 dark:hover:bg-gray-700/50'
+                ? 'bg-white dark:bg-surface-dark text-gray-900 dark:text-white shadow-sm' 
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-200/50 dark:hover:bg-surface-dark/50'
             }`}
           >
             {label}

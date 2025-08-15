@@ -20,11 +20,11 @@ function Pagination({
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2 text-sm">
           <span className="text-gray-500 dark:text-gray-400">Showing</span>
-          <span className="font-medium text-gray-900 dark:text-gray-100 px-2 py-1 bg-white dark:bg-black/20 rounded-md border border-border dark:border-border-dark">
+          <span className="font-medium text-gray-900 dark:text-gray-100 px-2 py-1 bg-white dark:bg-surface-elevated rounded-md border border-border dark:border-border-dark">
             {startCount}-{endCount}
           </span>
           <span className="text-gray-500 dark:text-gray-400">of</span>
-          <span className="font-medium text-gray-900 dark:text-gray-100 px-2 py-1 bg-white dark:bg-black/20 rounded-md border border-border dark:border-border-dark">
+          <span className="font-medium text-gray-900 dark:text-gray-100 px-2 py-1 bg-white dark:bg-surface-elevated rounded-md border border-border dark:border-border-dark">
             {total}
           </span>
           <span className="text-gray-500 dark:text-gray-400">results</span>

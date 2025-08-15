@@ -42,9 +42,9 @@ function DeveloperRankTableView({ dataSource }: Pick<DeveloperRankViewWidgetProp
                   <div className="flex items-center">
                     <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-medium transition-all duration-200 group-hover:scale-110
                       ${index === 0 ? 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400' :
-                index === 1 ? 'bg-gray-100 dark:bg-gray-900/20 text-gray-700 dark:text-gray-400' :
+                index === 1 ? 'bg-gray-100 dark:bg-surface-elevated text-gray-700 dark:text-gray-400' :
                   index === 2 ? 'bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400' :
-                    'bg-gray-50 dark:bg-gray-900/10 text-gray-500 dark:text-gray-500'}`}>
+                    'bg-gray-50 dark:bg-surface-dark text-gray-500 dark:text-gray-500'}`}>
                       {index + 1}
                     </span>
                   </div>

@@ -84,7 +84,7 @@ function EventDialog({ visible, onClose }: EventDialogProps) {
       classNames={{
         base: "max-w-2xl mx-4",
         wrapper: "overflow-visible",
-        backdrop: "bg-black/50",
+        backdrop: "bg-background-dark/50",
         header: "border-b border-border dark:border-border-dark",
         body: "p-0",
         closeButton: "hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",

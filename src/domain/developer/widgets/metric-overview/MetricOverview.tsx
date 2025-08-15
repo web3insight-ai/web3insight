@@ -14,7 +14,7 @@ function MetricOverview({ className, dataSource }: MetricOverviewWidgetProps) {
       {metrics.map(metric => (
         <Card
           key={metric.label.replaceAll(" ", "")}
-          className="bg-white dark:bg-gray-800 shadow-sm border-none"
+          className="bg-white dark:bg-surface-dark shadow-sm border-none"
         >
           <CardBody className="p-4">
             <div className="flex flex-col items-center text-center">

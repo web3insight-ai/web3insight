@@ -62,7 +62,7 @@ function DeveloperRankGridView({ dataSource }: Pick<DeveloperRankViewWidgetProps
             {displayedData.map((dev, index) => (
               <div 
                 key={dev.actor_id} 
-                className="group relative bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-xl p-5 hover:shadow-lg hover:border-primary/30 dark:hover:border-primary/30 transition-all duration-200 animate-fade-in"
+                className="group relative bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark rounded-xl p-5 hover:shadow-lg hover:border-primary/30 dark:hover:border-primary/30 transition-all duration-200 animate-fade-in"
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 {/* Rank Badge */}
@@ -157,7 +157,7 @@ function DeveloperRankGridView({ dataSource }: Pick<DeveloperRankViewWidgetProps
               {selectedDeveloper?.top_repos.map((repo) => (
                 <div
                   key={repo.repo_id}
-                  className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  className="p-3 rounded-lg bg-gray-50 dark:bg-surface-elevated hover:bg-gray-100 dark:hover:bg-surface-dark transition-colors"
                 >
                   <RepoLinkWidget
                     repo={repo.repo_name}

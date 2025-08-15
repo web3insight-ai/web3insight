@@ -115,7 +115,7 @@ export function WalletBindWidget({ user, onBindSuccess, className = '' }: Wallet
           const isBoundAddressConnected = isConnected && address && walletBind.bind_key.toLowerCase() === address.toLowerCase();
           
           return (
-            <div key={index} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+            <div key={index} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-surface-elevated rounded-lg">
               <div className="flex items-center gap-3">
                 <Wallet size={20} className="text-gray-700 dark:text-gray-300" />
                 <div>
@@ -126,12 +126,12 @@ export function WalletBindWidget({ user, onBindSuccess, className = '' }: Wallet
                     <p className="text-xs font-mono text-gray-600 dark:text-gray-400">
                       {walletBind.bind_key.slice(0, 6)}...{walletBind.bind_key.slice(-4)}
                     </p>
-                    <CheckCircle size={14} className="text-blue-500 dark:text-blue-400" />
+                    <CheckCircle size={14} className="text-gray-600 dark:text-gray-400" />
                   </div>
                 </div>
               </div>
               {isBoundAddressConnected ? (
-                <div className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-medium rounded-full border border-gray-200 dark:border-gray-700">
+                <div className="px-3 py-1.5 bg-gray-100 dark:bg-surface-elevated text-gray-700 dark:text-gray-300 text-xs font-medium rounded-full border border-gray-200 dark:border-border-dark">
                   Connected
                 </div>
               ) : (
@@ -195,7 +195,7 @@ export function WalletBindWidget({ user, onBindSuccess, className = '' }: Wallet
   return (
     <div className={`${className}`}>
       {!isConnected ? (
-        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-surface-elevated rounded-lg">
           <div className="flex items-center gap-3">
             <Wallet size={20} className="text-gray-700 dark:text-gray-300" />
             <div>
@@ -211,9 +211,9 @@ export function WalletBindWidget({ user, onBindSuccess, className = '' }: Wallet
         </div>
       ) : (
         <div className="space-y-3">
-          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-surface-elevated rounded-lg">
             <div className="flex items-center gap-3">
-              <Check size={20} className="text-blue-600" />
+              <Check size={20} className="text-gray-600 dark:text-gray-400" />
               <div>
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
                   Wallet Connected

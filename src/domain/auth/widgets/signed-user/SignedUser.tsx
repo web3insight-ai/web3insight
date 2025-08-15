@@ -44,7 +44,7 @@ function SignedUser({ user, onSignIn, onSignOut }: SignedUserProps) {
         <PopoverContent className="p-0 rounded-lg bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark" style={{ width: "220px" }}>
           <div className="flex flex-col">
             {/* User info section */}
-            <div className="px-4 py-3 border-b border-border dark:border-border-dark bg-gray-50 dark:bg-gray-900/50 rounded-t-lg">
+            <div className="px-4 py-3 border-b border-border dark:border-border-dark bg-gray-50 dark:bg-surface-elevated rounded-t-lg">
               <p className="font-medium text-sm text-gray-900 dark:text-white">{user.username || 'User'}</p>
               <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{user.email || ''}</p>
             </div>

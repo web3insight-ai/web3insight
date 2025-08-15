@@ -24,15 +24,16 @@ export default {
       colors: {
         background: {
           DEFAULT: "#FFFFFF",
-          dark: "#000000",
+          dark: "#0F0F0F",
         },
         surface: {
           DEFAULT: "#FAFAFA",
-          dark: "#0A0A0A",
+          dark: "#1A1A1A",
+          elevated: "#252525",
         },
         border: {
           DEFAULT: "rgba(0, 0, 0, 0.06)",
-          dark: "rgba(255, 255, 255, 0.06)",
+          dark: "rgba(255, 255, 255, 0.08)",
         },
       },
       spacing: {
@@ -121,7 +122,7 @@ export default {
         },
         dark: {
           colors: {
-            background: "#000000",
+            background: "#0F0F0F",
             foreground: "#FFFFFF",
             primary: {
               DEFAULT: "#338EF7",

@@ -173,10 +173,9 @@ export default function ProfilePage() {
                           >
                             <Button
                               variant="light"
-                              color="primary"
                               size="sm"
                               startContent={<Brain size={14} />}
-                              className="font-medium hover:bg-primary/10 px-3 py-1.5 h-auto min-h-0 rounded-full bg-primary/5 border border-primary/20"
+                              className="font-medium hover:bg-gray-100 dark:hover:bg-surface-elevated px-3 py-1.5 h-auto min-h-0 rounded-full bg-gray-50 dark:bg-surface-dark border border-gray-200 dark:border-border-dark text-gray-700 dark:text-gray-300"
                             >
                               AI Analysis
                             </Button>
@@ -209,8 +208,8 @@ export default function ProfilePage() {
                 <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
                   <CardBody className="p-6">
                     <div className="flex items-center gap-3 mb-6">
-                      <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-                        <UserIcon size={20} className="text-blue-600 dark:text-blue-400" />
+                      <div className="p-2 bg-gray-100 dark:bg-surface-elevated rounded-lg">
+                        <UserIcon size={20} className="text-gray-600 dark:text-gray-400" />
                       </div>
                       <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                         Account Information
@@ -222,7 +221,7 @@ export default function ProfilePage() {
                         <p className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">
                           User ID
                         </p>
-                        <p className="text-sm text-gray-900 dark:text-white font-mono bg-gray-50 dark:bg-gray-900 px-3 py-2 rounded-lg">
+                        <p className="text-sm text-gray-900 dark:text-white font-mono bg-gray-50 dark:bg-surface-elevated px-3 py-2 rounded-lg">
                           {user.profile?.user_id || user.id}
                         </p>
                       </div>
@@ -241,10 +240,10 @@ export default function ProfilePage() {
                           Account Status
                         </p>
                         <div className="flex items-center gap-2">
-                          <div className="flex items-center justify-center w-5 h-5 bg-blue-100 dark:bg-blue-900/30 rounded-full">
-                            <CheckCircle size={12} className="text-blue-600 dark:text-blue-400" />
+                          <div className="flex items-center justify-center w-5 h-5 bg-gray-100 dark:bg-surface-elevated rounded-full">
+                            <CheckCircle size={12} className="text-gray-600 dark:text-gray-400" />
                           </div>
-                          <span className="text-sm text-blue-700 dark:text-blue-400 font-medium">Active</span>
+                          <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">Active</span>
                         </div>
                       </div>
                     </div>
@@ -255,8 +254,8 @@ export default function ProfilePage() {
                 <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
                   <CardBody className="p-6">
                     <div className="flex items-center gap-3 mb-6">
-                      <div className="p-2 bg-indigo-100 dark:bg-indigo-900/20 rounded-lg">
-                        <Shield size={20} className="text-indigo-600 dark:text-indigo-400" />
+                      <div className="p-2 bg-gray-100 dark:bg-surface-elevated rounded-lg">
+                        <Shield size={20} className="text-gray-600 dark:text-gray-400" />
                       </div>
                       <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                         Roles & Permissions
@@ -268,9 +267,9 @@ export default function ProfilePage() {
                         <p className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-3">
                           Current Role
                         </p>
-                        <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 rounded-full border border-indigo-200 dark:border-indigo-700">
-                          <div className="flex items-center justify-center w-5 h-5 bg-indigo-100 dark:bg-indigo-800/40 rounded-full">
-                            <Shield size={12} className="text-indigo-600 dark:text-indigo-400" />
+                        <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-100 dark:bg-slate-500/20 text-slate-700 dark:text-slate-300 rounded-full border border-slate-200 dark:border-slate-500/30">
+                          <div className="flex items-center justify-center w-5 h-5 bg-slate-200 dark:bg-slate-500/30 rounded-full">
+                            <Shield size={12} className="text-slate-600 dark:text-slate-400" />
                           </div>
                           <span className="font-medium text-sm">
                             {getRoleName(effectiveRole)}
@@ -292,8 +291,8 @@ export default function ProfilePage() {
                                 key={role}
                                 className={`inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full border ${
                                   isCurrentRole
-                                    ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-700'
-                                    : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700'
+                                    ? 'bg-slate-100 dark:bg-slate-500/20 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-500/30'
+                                    : 'bg-gray-50 dark:bg-surface-elevated text-gray-600 dark:text-gray-400 border-gray-200 dark:border-border-dark'
                                 }`}
                               >
                                 {getRoleName(role)}
@@ -317,8 +316,8 @@ export default function ProfilePage() {
                 <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
                   <CardBody className="p-6">
                     <div className="flex items-center gap-3 mb-6">
-                      <div className="p-2 bg-slate-100 dark:bg-slate-800/50 rounded-lg">
-                        <ExternalLink size={20} className="text-slate-600 dark:text-slate-400" />
+                      <div className="p-2 bg-gray-100 dark:bg-surface-elevated rounded-lg">
+                        <ExternalLink size={20} className="text-gray-600 dark:text-gray-400" />
                       </div>
                       <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                         Connected Accounts
@@ -327,7 +326,7 @@ export default function ProfilePage() {
 
                     <div className="space-y-4">
                       {githubBind && (
-                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-surface-elevated rounded-lg">
                           <div className="flex items-center gap-3">
                             <Github size={20} className="text-gray-700 dark:text-gray-300" />
                             <div>
@@ -339,14 +338,14 @@ export default function ProfilePage() {
                               </p>
                             </div>
                           </div>
-                          <div className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 text-xs font-medium rounded-full border border-slate-200 dark:border-slate-700">
+                          <div className="px-3 py-1.5 bg-gray-100 dark:bg-surface-elevated text-gray-700 dark:text-gray-300 text-xs font-medium rounded-full border border-gray-200 dark:border-border-dark">
                             Verified
                           </div>
                         </div>
                       )}
 
                       {emailBind && (
-                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-surface-elevated rounded-lg">
                           <div className="flex items-center gap-3">
                             <Mail size={20} className="text-gray-700 dark:text-gray-300" />
                             <div>
@@ -358,7 +357,7 @@ export default function ProfilePage() {
                               </p>
                             </div>
                           </div>
-                          <div className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 text-xs font-medium rounded-full border border-slate-200 dark:border-slate-700">
+                          <div className="px-3 py-1.5 bg-gray-100 dark:bg-surface-elevated text-gray-700 dark:text-gray-300 text-xs font-medium rounded-full border border-gray-200 dark:border-border-dark">
                             Verified
                           </div>
                         </div>
