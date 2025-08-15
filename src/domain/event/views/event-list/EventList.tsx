@@ -30,7 +30,7 @@ function EventListView({ className }: EventListViewWidgetProps) {
 
   const [visible, setVisible] = useState(false);
 
-  const [addedResult, setAddedResult] = useState<EventDialogPayload>({ eventId: 0, contestants: [] });
+  const [addedResult, setAddedResult] = useState<EventDialogPayload>({ eventId: 0, contestants: [], failedAccounts: [] });
   const [addedResultVisible, setAddedResultVisible] = useState(false);
 
   const navigate = useNavigate();
@@ -208,6 +208,8 @@ function EventListView({ className }: EventListViewWidgetProps) {
       />
       <ContestantListDialog
         dataSource={addedResult.contestants}
+        eventId={addedResult.eventId}
+        failedAccounts={addedResult.failedAccounts}
         visible={addedResultVisible}
         onGoto={() => gotoDetail(addedResult.eventId)}
         onClose={() => setAddedResultVisible(false)}

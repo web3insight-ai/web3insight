@@ -63,6 +63,7 @@ function EventDialog({ visible, onClose }: EventDialogProps) {
           closeDialog({
             eventId: res.extra!.eventId,
             contestants: res.data,
+            failedAccounts: res.extra?.fail || [],
           });
         } else {
           alert(res.message);
