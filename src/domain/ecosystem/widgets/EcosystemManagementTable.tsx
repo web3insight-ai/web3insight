@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link } from "@remix-run/react";
 import {
   Card, CardHeader, Input, Pagination, Button,
@@ -19,6 +19,11 @@ function EcosystemManagementTable({ ecosystems }: EcosystemManagementTableProps)
   const rowsPerPage = 25;
   const [filterValue, setFilterValue] = useState("");
   const [selectedType, setSelectedType] = useState<EcosystemType>(EcosystemType.PUBLIC_CHAIN);
+
+  // Reset page when ecosystem type changes
+  useEffect(() => {
+    setPage(1);
+  }, [selectedType]);
 
 
   // Filter ecosystems based on search query and type

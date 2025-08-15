@@ -4,7 +4,7 @@ import {
   Card, CardBody, CardHeader, Input, Pagination,
 } from "@nextui-org/react";
 import { Search, Warehouse, Database, Users, Code2, Zap } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { fetchStatisticsRank } from "~/statistics/repository";
 import { fetchEcosystemCount } from "~/api/repository";
 import { EcosystemType } from "~/ecosystem/typing";
@@ -73,6 +73,11 @@ export default function AllEcosystemsPage() {
   // Filtering state
   const [filterValue, setFilterValue] = useState("");
   const [selectedType, setSelectedType] = useState<EcosystemType>(EcosystemType.PUBLIC_CHAIN);
+
+  // Reset page when ecosystem type changes
+  useEffect(() => {
+    setPage(1);
+  }, [selectedType]);
 
   // Filter ecosystems based on search query and type
   const filteredItems = useMemo(() => {
