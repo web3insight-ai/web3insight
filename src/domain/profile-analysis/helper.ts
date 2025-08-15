@@ -16,7 +16,7 @@ export function getGitHubHandle(user: ApiUser | null): string | null {
 export function formatAnalysisDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
-    month: 'long', 
+    month: 'long',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
@@ -88,7 +88,7 @@ export function getTopSkills(aiProfile: AIProfile, limit: number = 6): string[] 
  */
 export function getEcosystemChartData(aiProfile: AIProfile) {
   const ecosystems = aiProfile.web3Ecosystems?.top3 || [];
-  
+
   return ecosystems.map(eco => ({
     name: eco.name,
     value: eco.score,
@@ -117,7 +117,7 @@ export function getTotalScore(user: GitHubUser): number {
   if (user.ai?.web3_involvement?.score) {
     return user.ai.web3_involvement.score;
   }
-  
+
   if (user.ai?.profileCard?.stats?.totalScore) {
     // Convert from raw total score to 0-100 scale
     return Math.min(Math.round((user.ai.profileCard.stats.totalScore / 400) * 100), 100);
@@ -134,7 +134,9 @@ export function hasAIData(user: GitHubUser): boolean {
     user.ai.summary ||
     user.ai.skills?.length ||
     user.ai.highlights?.length ||
-    user.ai.web3_involvement
+    user.ai.web3_involvement ||
+    user.ai.profileCard ||
+    user.ai.roast_report
   ));
 }
 
@@ -143,7 +145,7 @@ export function hasAIData(user: GitHubUser): boolean {
  */
 export function getSkillColor(skill: string): "primary" | "secondary" | "success" | "warning" | "danger" {
   const skillLower = skill.toLowerCase();
-  
+
   if (skillLower.includes('javascript') || skillLower.includes('typescript') || skillLower.includes('react')) {
     return "primary";
   }
@@ -156,7 +158,7 @@ export function getSkillColor(skill: string): "primary" | "secondary" | "success
   if (skillLower.includes('go') || skillLower.includes('java')) {
     return "secondary";
   }
-  
+
   return "primary";
 }
 
@@ -225,7 +227,7 @@ export function processEcosystemData(ecosystemScores: EcosystemScore[]) {
 export function getTopRepositories(ecosystemScores: EcosystemScore[], limit: number = 10) {
   if (!ecosystemScores?.length) return [];
 
-  const allRepos = ecosystemScores.flatMap(eco => 
+  const allRepos = ecosystemScores.flatMap(eco =>
     eco.repos.map(repo => ({
       ...repo,
       ecosystem: eco.ecosystem,
@@ -257,10 +259,10 @@ export function calculateActivityTimeline(ecosystemScores: EcosystemScore[]) {
   const lastActivity = sortedDates[sortedDates.length - 1];
 
   const daysDifference = Math.floor((lastActivity.getTime() - firstActivity.getTime()) / (1000 * 60 * 60 * 24));
-  
+
   // Create yearly activity breakdown
   const activityByYear = new Map<number, { ecosystems: Set<string>; repos: number; totalScore: number }>();
-  
+
   ecosystemScores.forEach(eco => {
     eco.repos.forEach(repo => {
       const year = new Date(repo.first_activity_at).getFullYear();
@@ -311,7 +313,7 @@ export function inferTechnicalStack(ecosystemScores: EcosystemScore[]) {
 
     eco.repos.forEach(repo => {
       const repoName = repo.repo_name.toLowerCase();
-      
+
       // Infer languages from common patterns
       if (repoName.includes('solidity') || repoName.includes('contracts')) {
         languages.add('Solidity');

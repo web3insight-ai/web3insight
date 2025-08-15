@@ -185,30 +185,39 @@ export interface RawAnalysisResult {
     success?: boolean;
     data?: {
       profile: {
-        output: {
-          highlights?: string[];
-          profileCard?: AIProfile['profileCard'];
-          technicalStack?: AIProfile['technicalStack'];
-          web3Ecosystems?: AIProfile['web3Ecosystems'];
-          activityTimeline?: AIProfile['activityTimeline'];
+        bio: string;
+        blog: string;
+        name: string;
+        stats: {
+          followers: string;
+          following: string;
+          totalScore: string;
+          publicRepos: string;
         };
+        twitter: string;
+        location: string;
+        username: string;
+        avatar_url: string;
+        created_at: string;
       };
-      roastReport?: {
-        output: {
-          title: string;
-          overallRoast: string;
-          activityRoast: string;
-          ecosystemRoast: string;
-          technicalRoast: string;
-          finalVerdict: string;
-          constructiveSarcasm: string[];
-          roastScore: {
-            spicyLevel: string;
-            truthLevel: string;
-            helpfulLevel: string;
-          };
+      roastReport: {
+        title: string;
+        roastScore: {
+          spicyLevel: string;
+          truthLevel: string;
+          helpfulLevel: string;
         };
+        finalVerdict: string;
+        overallRoast: string;
+        activityRoast: string;
+        ecosystemRoast: string;
+        technicalRoast: string;
+        constructiveSarcasm: string[];
       };
+    };
+    metadata?: {
+      includesRoast: boolean;
+      analysisVersion: string;
     };
     timestamp?: string;
   };

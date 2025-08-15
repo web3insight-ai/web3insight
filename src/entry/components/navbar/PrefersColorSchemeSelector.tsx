@@ -65,41 +65,20 @@ function PrefersColorSchemeSelector() {
   return (
     <button
       onClick={toggleTheme}
-      className={`
-        relative flex items-center justify-center size-8 rounded-full cursor-pointer
-        transition-all duration-300 ease-in-out
-        bg-gradient-to-r from-teal-100 to-cyan-100 dark:from-teal-800 dark:to-cyan-800
-        border border-teal-200 dark:border-teal-600
-        hover:scale-110 hover:shadow-lg hover:shadow-teal-200 dark:hover:shadow-teal-800/50
-        active:scale-95
-        group
-      `}
+      className="
+        flex items-center justify-center w-6 h-6 rounded-md
+        bg-gray-100 dark:bg-gray-800 
+        border border-gray-200 dark:border-gray-700
+        hover:bg-gray-200 dark:hover:bg-gray-700
+        transition-colors duration-200
+      "
       aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
     >
-      <div className="relative size-4">
-        <Sun 
-          className={`
-            absolute size-4 transition-all duration-300 ease-in-out
-            text-teal-600 dark:text-teal-400
-            ${isDark ? 'opacity-0 rotate-90 scale-0' : 'opacity-100 rotate-0 scale-100'}
-          `}
-        />
-        <Moon 
-          className={`
-            absolute size-4 transition-all duration-300 ease-in-out
-            text-teal-600 dark:text-teal-400
-            ${isDark ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-0'}
-          `}
-        />
-      </div>
-      
-      {/* Subtle glow effect */}
-      <div className={`
-        absolute inset-0 rounded-full opacity-0 group-hover:opacity-100
-        transition-opacity duration-300
-        bg-gradient-to-r from-teal-400/20 to-cyan-400/20
-        blur-sm -z-10
-      `} />
+      {isDark ? (
+        <Moon className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" />
+      ) : (
+        <Sun className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" />
+      )}
     </button>
   );
 }

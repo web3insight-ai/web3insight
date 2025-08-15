@@ -63,6 +63,11 @@ export default {
         "gradient-x": "gradientX 3s ease infinite",
         "scale-in": "scaleIn 300ms ease-out",
       },
+      gridColumn: {
+        "span-2": "span 2 / span 2",
+        "span-3": "span 3 / span 3", 
+        "span-4": "span 4 / span 4",
+      },
       keyframes: {
         fadeIn: {
           "0%": { opacity: "0" },

@@ -7,18 +7,19 @@ import type {
   AnalysisResult,
   ProgressCallback,
   BasicDataCallback,
-  EcosystemItem,
 } from "./typing";
 
 /**
- * Initiate user analysis for profile intent (no GitHub URLs needed)
+ * Initiate user analysis for profile intent with GitHub handle
  * Uses local API route which handles server-side authentication
  */
 async function analyzeUser(
+  githubHandle: string,
   description: string = "Profile analysis",
 ): Promise<ApiResponse<AnalysisResponse>> {
   
   const requestData: AnalysisRequest = {
+    request_data: [githubHandle],
     intent: "profile",
     description,
   };
@@ -46,7 +47,19 @@ async function analyzeUser(
       };
     }
 
-    const result = await response.json() as ApiResponse<AnalysisResponse>;
+    // Now the API returns the raw response directly, not wrapped
+    const rawResult = await response.json();
+    
+    // Wrap in our expected format
+    const result: ApiResponse<AnalysisResponse> = {
+      success: true,
+      code: "SUCCESS", 
+      message: "Analysis started successfully",
+      data: {
+        id: rawResult.id,
+        users: { users: rawResult.users || [] },
+      },
+    };
     
     return result;
   } catch (error) {
@@ -76,7 +89,16 @@ async function fetchAnalysisResult(
       },
     });
 
-    const result = await response.json() as ApiResponse<RawAnalysisResult>;
+    // Now the API returns the raw response directly, not wrapped
+    const rawResult = await response.json() as RawAnalysisResult;
+    
+    // Wrap in our expected format
+    const result: ApiResponse<RawAnalysisResult> = {
+      success: true,
+      code: "SUCCESS",
+      message: "Data retrieved successfully",
+      data: rawResult,
+    };
     
     return result;
   } catch (error) {
@@ -120,7 +142,7 @@ async function pollAnalysisResult(
       }
 
 
-      // Check if analysis is complete with AI field
+      // Check if analysis is complete - response.data IS the actual API response now
       if (response.success && response.data) {
         const hasGithubData =
           response.data.github &&
@@ -134,13 +156,11 @@ async function pollAnalysisResult(
           Array.isArray(response.data.data.users) &&
           response.data.data.users.length > 0;
 
-        // Check if AI analysis is complete - AI data is at root level
-        const hasAIData = !!(response.data.ai &&
-          response.data.ai.success &&
-          response.data.ai.data);
-
+        // Check if AI analysis is complete - verify actual AI data content
+        const hasAIData = !!(response.data.ai?.data?.profile && response.data.ai?.data?.roastReport);
 
         if (hasGithubData && hasAnalyticsData && hasAIData) {
+          
           // Process AI data and merge with GitHub users
           const mergedUsers = response.data.github.users.map((githubUser) => {
             // Find matching analytics data
@@ -157,11 +177,13 @@ async function pollAnalysisResult(
             // Process AI data if available
             if (response.data.ai && response.data.ai.success && response.data.ai.data) {
               const aiData = response.data.ai.data;
-              const aiProfile = aiData.profile?.output;
+              const aiProfile = aiData.profile; // Direct access, no .output
+              const roastReport = aiData.roastReport;
+              
 
               if (aiProfile) {
-                // Calculate Web3 involvement score from total score or top ecosystem
-                const totalScore = aiProfile.profileCard?.stats?.totalScore || 0;
+                // Calculate Web3 involvement score from total score
+                const totalScore = parseInt(aiProfile.stats?.totalScore || "0");
                 const web3Score = Math.min(Math.round((totalScore / 400) * 100), 100); // Normalize to 0-100
 
                 // Determine involvement level
@@ -170,43 +192,52 @@ async function pollAnalysisResult(
                 else if (web3Score >= 60) level = "Advanced";
                 else if (web3Score >= 30) level = "Intermediate";
 
-                // Map AI data to expected format including rich visualization data
+                // Map AI data to expected format
                 userWithScores.ai = {
-                  summary: aiProfile.highlights?.join('. ') || "AI analysis completed successfully.",
+                  summary: "AI analysis completed successfully.",
                   web3_involvement: {
                     score: web3Score,
                     level: level,
-                    evidence: aiProfile.highlights || [],
+                    evidence: [`Total Web3 score: ${totalScore}`, `Active in ${analyticsUser?.ecosystem_scores?.length || 0} ecosystems`],
                   },
-                  skills: aiProfile.technicalStack?.skills || [],
-                  expertise_areas: aiProfile.web3Ecosystems?.top3?.map((eco: EcosystemItem) => eco.name) || [],
-                  recommendation: aiProfile.technicalStack?.mainFocus ?
-                    `Focus on ${aiProfile.technicalStack.mainFocus} to maximize your impact in the Web3 ecosystem.` :
-                    "Continue developing your Web3 skills across multiple ecosystems.",
+                  skills: [], // Will be populated from ecosystem data
+                  expertise_areas: [], // Will be populated from ecosystem data
+                  recommendation: "Continue developing your Web3 skills across multiple ecosystems.",
                   analysis_date: response.data.ai?.timestamp,
 
-                  // Rich visualization data
-                  highlights: aiProfile.highlights,
-                  profileCard: aiProfile.profileCard,
-                  technicalStack: aiProfile.technicalStack,
-                  web3Ecosystems: aiProfile.web3Ecosystems,
-                  activityTimeline: aiProfile.activityTimeline,
+                  // Store original profile data for display
+                  profileCard: {
+                    bio: aiProfile.bio,
+                    blog: aiProfile.blog,
+                    name: aiProfile.name,
+                    stats: {
+                      followers: parseInt(aiProfile.stats.followers),
+                      following: parseInt(aiProfile.stats.following),
+                      totalScore: parseInt(aiProfile.stats.totalScore),
+                      publicRepos: parseInt(aiProfile.stats.publicRepos),
+                    },
+                    twitter: aiProfile.twitter,
+                    location: aiProfile.location,
+                    username: aiProfile.username,
+                    avatar_url: aiProfile.avatar_url,
+                    created_at: aiProfile.created_at,
+                  },
                 };
 
                 // Add roast report processing if available
-                if (aiData.roastReport?.output) {
+                if (roastReport) {
                   userWithScores.ai.roast_report = {
-                    title: aiData.roastReport.output.title,
-                    overall_roast: aiData.roastReport.output.overallRoast,
-                    activity_roast: aiData.roastReport.output.activityRoast,
-                    ecosystem_roast: aiData.roastReport.output.ecosystemRoast,
-                    technical_roast: aiData.roastReport.output.technicalRoast,
-                    final_verdict: aiData.roastReport.output.finalVerdict,
-                    constructive_sarcasm: aiData.roastReport.output.constructiveSarcasm,
+                    title: roastReport.title,
+                    overall_roast: roastReport.overallRoast,
+                    activity_roast: roastReport.activityRoast,
+                    ecosystem_roast: roastReport.ecosystemRoast,
+                    technical_roast: roastReport.technicalRoast,
+                    final_verdict: roastReport.finalVerdict,
+                    constructive_sarcasm: roastReport.constructiveSarcasm,
                     roast_score: {
-                      spicyLevel: aiData.roastReport.output.roastScore.spicyLevel,
-                      truthLevel: aiData.roastReport.output.roastScore.truthLevel,
-                      helpfulLevel: aiData.roastReport.output.roastScore.helpfulLevel,
+                      spicyLevel: roastReport.roastScore.spicyLevel,
+                      truthLevel: roastReport.roastScore.truthLevel,
+                      helpfulLevel: roastReport.roastScore.helpfulLevel,
                     },
                   };
                 }
@@ -230,7 +261,6 @@ async function pollAnalysisResult(
 
         // If we have GitHub + Analytics data but no AI yet, return partial result with ecosystem data
         if (hasGithubData && hasAnalyticsData && !hasAIData) {
-          
           // Process basic data and merge with GitHub users to show ecosystem visualizations
           const mergedUsers = response.data.github.users.map((githubUser) => {
             // Find matching analytics data
@@ -239,12 +269,10 @@ async function pollAnalysisResult(
             );
             
             // Attach ecosystem scores to GitHub user for visualization
-            const userWithScores = {
+            return {
               ...githubUser,
               ecosystem_scores: analyticsUser?.ecosystem_scores || [],
             };
-
-            return userWithScores;
           });
 
           return {
@@ -300,8 +328,8 @@ export async function analyzeGitHubUser(
       onProgress("Initiating profile analysis...", 0);
     }
 
-    // Step 1: Start analysis using profile intent (GitHub handle determined from auth context)
-    const analysisResponse = await analyzeUser(`Profile analysis for GitHub user: ${githubHandle}`);
+    // Step 1: Start analysis using profile intent with GitHub handle
+    const analysisResponse = await analyzeUser(githubHandle, `Profile analysis for GitHub user: ${githubHandle}`);
 
 
     if (!analysisResponse.success) {
@@ -331,8 +359,8 @@ export async function analyzeGitHubUser(
 
     const analysisId = analysisResponse.data.id;
     
-    // Extract users from nested structure { users: { users: [...] } }
-    const actualUsers = analysisResponse.data.users.users || [];
+    // Extract users from POST response structure - { users: { users: [...] } }
+    const actualUsers = analysisResponse.data.users?.users || [];
 
     // Step 2: Show basic info immediately
     if (onBasicInfo && actualUsers.length > 0) {
