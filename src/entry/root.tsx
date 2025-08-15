@@ -57,6 +57,7 @@ function App() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
+        <script defer src="https://umami.web3insight.ai/script.js" data-website-id="b036732f-4406-4778-90cc-2e4002b5e13b" />
       </head>
       <body>
         <NextUIProvider>

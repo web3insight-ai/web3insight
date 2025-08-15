@@ -30,7 +30,7 @@ function NavMenu({ settings = false, user }: NavMenuProps) {
         {menuItems.map(item => {
           const isActive = isMenuItemActive(pathname, item);
           const IconComponent = iconMap[item.text as keyof typeof iconMap];
-          
+
           return (
             <Link
               key={item.text}
@@ -57,9 +57,9 @@ function NavMenu({ settings = false, user }: NavMenuProps) {
                 </div>
                 <span className="font-medium">{item.text}</span>
               </div>
-              
-              <ArrowRight 
-                size={14} 
+
+              <ArrowRight
+                size={14}
                 className={clsx(
                   "transition-all duration-200 opacity-0 group-hover:opacity-100 group-hover:translate-x-1",
                   {
@@ -79,7 +79,7 @@ function NavMenu({ settings = false, user }: NavMenuProps) {
           Admin Panel
         </p>
         <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-          Manage your Web3 insights
+          Manage your Web3Insight
         </p>
       </div>
     </div>
