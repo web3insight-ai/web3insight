@@ -46,7 +46,7 @@ export function KeyMetrics({ user, className = "" }: KeyMetricsProps) {
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
         <Globe size={16} className="text-gray-500 dark:text-gray-400" />
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Web3 生态分析</h3>
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Web3 Ecosystem Analysis</h3>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
@@ -69,7 +69,7 @@ export function KeyMetrics({ user, className = "" }: KeyMetricsProps) {
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value: number) => [formatNumber(value), "分数"]}
+                  formatter={(value: number) => [formatNumber(value), "Score"]}
                   contentStyle={{
                     backgroundColor: "rgba(255, 255, 255, 0.95)",
                     border: "1px solid rgba(0, 0, 0, 0.1)",
@@ -91,17 +91,17 @@ export function KeyMetrics({ user, className = "" }: KeyMetricsProps) {
               <div className="text-xl font-bold text-primary">
                 {formatNumber(totalScore)}
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Web3 生态活跃度总分</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">Total Web3 Ecosystem Activity Score</div>
             </div>
             <div className="text-xs text-gray-600 dark:text-gray-400">
-              覆盖 <strong className="text-gray-900 dark:text-white">{rankings.length}</strong> 个生态
+              Covering <strong className="text-gray-900 dark:text-white">{rankings.length}</strong> ecosystems
             </div>
           </div>
 
           {/* Top Ecosystems */}
           <div className="space-y-1">
             <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
-              主要生态:
+              Primary Ecosystems:
             </div>
             {pieData.slice(0, 5).map((item, index) => (
               <div key={index} className="flex items-center justify-between text-xs">

@@ -55,13 +55,13 @@ export function ProfileHeader({ user, className = "" }: ProfileHeaderProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4 text-xs">
               <span className="text-gray-600 dark:text-gray-400">
-                <strong className="text-gray-900 dark:text-white text-sm">{formatNumber(user.public_repos)}</strong> 项目
+                <strong className="text-gray-900 dark:text-white text-sm">{formatNumber(user.public_repos)}</strong> Repositories
               </span>
               <span className="text-gray-600 dark:text-gray-400">
-                <strong className="text-gray-900 dark:text-white text-sm">{formatNumber(user.followers)}</strong> 关注者
+                <strong className="text-gray-900 dark:text-white text-sm">{formatNumber(user.followers)}</strong> Followers
               </span>
               <span className="text-gray-600 dark:text-gray-400">
-                <strong className="text-gray-900 dark:text-white text-sm">{formatNumber(user.following)}</strong> 关注
+                <strong className="text-gray-900 dark:text-white text-sm">{formatNumber(user.following)}</strong> Following
               </span>
             </div>
             {user.company && (

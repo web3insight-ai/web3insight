@@ -38,23 +38,23 @@ export function AnalysisTabs({ user, className = "" }: AnalysisTabsProps) {
   const tabItems = [
     {
       key: "overview",
-      title: "生态概览",
+      title: "Ecosystem Overview",
       icon: Globe,
-      subtitle: "详细生态分析",
+      subtitle: "Detailed ecosystem analysis",
       content: <EcosystemInsights ecosystemScores={user.ecosystem_scores!} />,
     },
     {
       key: "technical",
-      title: "技术详情",
+      title: "Technical Details",
       icon: Code,
-      subtitle: "技术栈分析",
+      subtitle: "Tech stack analysis",
       content: <TechnicalBreakdown ecosystemScores={user.ecosystem_scores!} />,
     },
     {
       key: "activity",
-      title: "活跃度",
+      title: "Activity",
       icon: Activity,
-      subtitle: "时间线分析",
+      subtitle: "Timeline analysis",
       content: <ActivityAnalytics ecosystemScores={user.ecosystem_scores!} />,
     },
   ];

@@ -33,8 +33,8 @@ export function AIInsights({ user, className = "" }: AIInsightsProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Brain size={16} className="text-primary" />
-                <h2 className="text-sm font-semibold text-gray-900 dark:text-white chinese-content">
-                  AI 分析报告
+                <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
+                  AI Analysis Report
                 </h2>
               </div>
               {/* Scores - With Labels */}
@@ -44,7 +44,7 @@ export function AIInsights({ user, className = "" }: AIInsightsProps) {
                     {aiProfile.roast_report?.roast_score.spicyLevel}/10
                   </div>
                   <div className="text-gray-500 dark:text-gray-400 text-[10px]">
-                    辛辣度
+                    Spiciness
                   </div>
                 </div>
                 <div className="text-center">
@@ -52,7 +52,7 @@ export function AIInsights({ user, className = "" }: AIInsightsProps) {
                     {aiProfile.roast_report?.roast_score.truthLevel}/10
                   </div>
                   <div className="text-gray-500 dark:text-gray-400 text-[10px]">
-                    真实度
+                    Truthfulness
                   </div>
                 </div>
                 <div className="text-center">
@@ -60,7 +60,7 @@ export function AIInsights({ user, className = "" }: AIInsightsProps) {
                     {aiProfile.roast_report?.roast_score.helpfulLevel}/10
                   </div>
                   <div className="text-gray-500 dark:text-gray-400 text-[10px]">
-                    有用度
+                    Helpfulness
                   </div>
                 </div>
               </div>
@@ -76,28 +76,28 @@ export function AIInsights({ user, className = "" }: AIInsightsProps) {
             {/* Analysis Content - Compact */}
             <div className="space-y-3 text-sm">
               <div className="border-l-2 border-l-gray-200 dark:border-l-gray-700 pl-3">
-                <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">整体表现</h4>
+                <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Overall Performance</h4>
                 <p className="chinese-content leading-relaxed text-gray-700 dark:text-gray-300">
                   {aiProfile.roast_report?.overall_roast}
                 </p>
               </div>
 
               <div className="border-l-2 border-l-gray-200 dark:border-l-gray-700 pl-3">
-                <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">活跃程度</h4>
+                <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Activity Level</h4>
                 <p className="chinese-content leading-relaxed text-gray-700 dark:text-gray-300">
                   {aiProfile.roast_report?.activity_roast}
                 </p>
               </div>
 
               <div className="border-l-2 border-l-gray-200 dark:border-l-gray-700 pl-3">
-                <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">生态选择</h4>
+                <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Ecosystem Choice</h4>
                 <p className="chinese-content leading-relaxed text-gray-700 dark:text-gray-300">
                   {aiProfile.roast_report?.ecosystem_roast}
                 </p>
               </div>
 
               <div className="border-l-2 border-l-gray-200 dark:border-l-gray-700 pl-3">
-                <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">技术能力</h4>
+                <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Technical Skills</h4>
                 <p className="chinese-content leading-relaxed text-gray-700 dark:text-gray-300">
                   {aiProfile.roast_report?.technical_roast}
                 </p>
@@ -106,7 +106,7 @@ export function AIInsights({ user, className = "" }: AIInsightsProps) {
 
             {/* Summary */}
             <div className="bg-gray-100 dark:bg-gray-700/50 rounded-lg p-3 mt-4 border dark:border-gray-600">
-              <h4 className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-2">总结</h4>
+              <h4 className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-2">Summary</h4>
               <p className="chinese-content text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                 {aiProfile.roast_report?.final_verdict}
               </p>
@@ -115,7 +115,7 @@ export function AIInsights({ user, className = "" }: AIInsightsProps) {
             {/* Suggestions */}
             {aiProfile.roast_report?.constructive_sarcasm && aiProfile.roast_report.constructive_sarcasm.length > 0 && (
               <div className="mt-4">
-                <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">改进建议</h4>
+                <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Improvement Suggestions</h4>
                 <div className="space-y-2">
                   {aiProfile.roast_report?.constructive_sarcasm.slice(0, 2).map((suggestion, index) => (
                     <div key={index} className="flex items-start gap-2">

@@ -261,11 +261,11 @@ export default function DevInsightPage() {
                       <div className="flex items-center justify-center gap-2">
                         <Loader2 size={14} className="animate-spin text-gray-400" />
                         <span className="text-sm text-gray-600 dark:text-gray-400">
-                        分析处理中...
+                        Analysis in progress...
                         </span>
                       </div>
                       <p className="text-xs text-gray-500 dark:text-gray-500">
-                      通常需要 2-3 分钟
+                      Usually takes 2-3 minutes
                       </p>
                     </div>
                   </div>

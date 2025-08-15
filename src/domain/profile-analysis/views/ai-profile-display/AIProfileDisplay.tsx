@@ -83,7 +83,7 @@ export function AIProfileDisplay({ aiProfile, className = "" }: AIProfileDisplay
             <CardBody className="p-6">
               <div className="flex items-center gap-3 mb-4 pb-2 border-b-2 border-danger-200 dark:border-danger-700">
                 <div className="text-lg">🔥</div>
-                <h3 className="text-sm font-bold text-danger">AI 毒舌吐槽报告</h3>
+                <h3 className="text-sm font-bold text-danger">AI Roast Report</h3>
                 <div className="ml-auto flex gap-2">
                   <Chip color="danger" variant="flat" size="sm">
                     🌶️ {aiProfile.roast_report.roast_score.spicyLevel}/10
@@ -110,7 +110,7 @@ export function AIProfileDisplay({ aiProfile, className = "" }: AIProfileDisplay
               <CardBody className="p-4">
                 <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
                   <div className="text-sm">😈</div>
-                  <h5 className="font-medium text-xs">整体吐槽</h5>
+                  <h5 className="font-medium text-xs">Overall Roast</h5>
                 </div>
                 <div className="bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-lg">
                   <p className="chinese-content text-xs leading-relaxed">
@@ -125,7 +125,7 @@ export function AIProfileDisplay({ aiProfile, className = "" }: AIProfileDisplay
               <CardBody className="p-4">
                 <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
                   <div className="text-sm">📊</div>
-                  <h5 className="font-medium text-xs">活跃度吐槽</h5>
+                  <h5 className="font-medium text-xs">Activity Roast</h5>
                 </div>
                 <div className="bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-lg">
                   <p className="chinese-content text-xs leading-relaxed">
@@ -140,7 +140,7 @@ export function AIProfileDisplay({ aiProfile, className = "" }: AIProfileDisplay
               <CardBody className="p-4">
                 <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
                   <div className="text-sm">🌐</div>
-                  <h5 className="font-medium text-xs">生态选择吐槽</h5>
+                  <h5 className="font-medium text-xs">Ecosystem Choice Roast</h5>
                 </div>
                 <div className="bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-lg">
                   <p className="chinese-content text-xs leading-relaxed">
@@ -155,7 +155,7 @@ export function AIProfileDisplay({ aiProfile, className = "" }: AIProfileDisplay
               <CardBody className="p-4">
                 <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
                   <div className="text-sm">💻</div>
-                  <h5 className="font-medium text-xs">技术栈吐槽</h5>
+                  <h5 className="font-medium text-xs">Tech Stack Roast</h5>
                 </div>
                 <div className="bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-lg">
                   <p className="chinese-content text-xs leading-relaxed">
@@ -171,7 +171,7 @@ export function AIProfileDisplay({ aiProfile, className = "" }: AIProfileDisplay
             <CardBody className="p-6">
               <div className="flex items-center gap-3 mb-4 pb-2 border-b-2 border-success-200 dark:border-success-700">
                 <div className="text-lg">💡</div>
-                <h4 className="text-sm font-bold text-success">建设性吐槽建议</h4>
+                <h4 className="text-sm font-bold text-success">Constructive Suggestions</h4>
               </div>
               <div className="space-y-3">
                 {aiProfile.roast_report.constructive_sarcasm.map((suggestion, index) => (
@@ -195,7 +195,7 @@ export function AIProfileDisplay({ aiProfile, className = "" }: AIProfileDisplay
             <CardBody className="p-6">
               <div className="flex items-center gap-3 mb-4 pb-2 border-b-2 border-secondary-200 dark:border-secondary-700">
                 <div className="text-lg">⚖️</div>
-                <h4 className="text-sm font-bold text-secondary">最终裁决</h4>
+                <h4 className="text-sm font-bold text-secondary">Final Verdict</h4>
               </div>
               <div className="bg-secondary-100 dark:bg-secondary-900/30 border-2 border-secondary-300 dark:border-secondary-600 p-4 rounded-lg text-center">
                 <p className="chinese-content text-sm font-bold">
