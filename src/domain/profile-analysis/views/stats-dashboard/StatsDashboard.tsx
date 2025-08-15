@@ -28,7 +28,7 @@ export function StatsDashboard({ aiProfile, className = "" }: StatsDashboardProp
       value: aiProfile.profileCard?.stats?.totalScore || 0,
       max: 400,
       color: "primary" as const,
-      rawColor: "#3b82f6", // blue-500
+      rawColor: "#0F766E", // teal-700
     },
     {
       icon: Users,

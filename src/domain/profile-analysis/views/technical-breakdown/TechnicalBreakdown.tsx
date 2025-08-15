@@ -26,7 +26,7 @@ export function TechnicalBreakdown({ ecosystemScores, className = "" }: Technica
               <Target className="text-purple-600 dark:text-purple-400" size={16} />
               <h3 className="text-sm font-semibold text-purple-900 dark:text-purple-100">TECHNICAL FOCUS</h3>
             </div>
-            <div className="bg-white dark:bg-gray-800 border border-purple-200 dark:border-purple-700 rounded-lg p-4">
+            <div className="bg-white dark:bg-gray-800 border border-teal-200 dark:border-teal-700 rounded-lg p-4">
               <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
                 {mainFocus}
               </p>
@@ -238,15 +238,15 @@ export function TechnicalBreakdown({ ecosystemScores, className = "" }: Technica
       )}
 
       {/* Technical Summary */}
-      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800">
+      <Card className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 border border-teal-200 dark:border-teal-800">
         <CardBody className="p-6">
           <div className="flex items-center gap-3 mb-4">
-            <Target size={20} className="text-blue-600 dark:text-blue-400" />
-            <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-100">TECHNICAL PROFILE SUMMARY</h3>
+            <Target size={20} className="text-teal-600 dark:text-teal-400" />
+            <h3 className="text-sm font-semibold text-teal-900 dark:text-teal-100">TECHNICAL PROFILE SUMMARY</h3>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-700 rounded-lg">
+            <div className="text-center p-4 bg-white dark:bg-gray-800 border border-teal-200 dark:border-teal-700 rounded-lg">
               <div className="text-2xl font-bold text-success mb-2">
                 {languages.length}
               </div>
@@ -258,7 +258,7 @@ export function TechnicalBreakdown({ ecosystemScores, className = "" }: Technica
               </div>
             </div>
             
-            <div className="text-center p-4 bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-700 rounded-lg">
+            <div className="text-center p-4 bg-white dark:bg-gray-800 border border-teal-200 dark:border-teal-700 rounded-lg">
               <div className="text-2xl font-bold text-primary mb-2">
                 {skills.length}
               </div>
@@ -270,7 +270,7 @@ export function TechnicalBreakdown({ ecosystemScores, className = "" }: Technica
               </div>
             </div>
             
-            <div className="text-center p-4 bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-700 rounded-lg">
+            <div className="text-center p-4 bg-white dark:bg-gray-800 border border-teal-200 dark:border-teal-700 rounded-lg">
               <div className="text-2xl font-bold text-warning mb-2">
                 {frameworks.length}
               </div>

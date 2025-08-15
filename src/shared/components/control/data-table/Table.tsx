@@ -40,8 +40,8 @@ function Table(
                 {showSerialNumber && (
                   <div className="col-span-1">
                     <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full
-                      ${index === 0 ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' :
-                    index === 1 ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400' :
+                      ${index === 0 ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-600 dark:text-teal-400' :
+                    index === 1 ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-600 dark:text-teal-400' :
                       'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}
                       text-xs font-medium`}>{index + 1}</span>
                   </div>

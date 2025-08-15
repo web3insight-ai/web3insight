@@ -79,8 +79,8 @@ function RepositoryHeader({ className, repository }: RepositoryHeaderProps) {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/20">
-            <GitFork size={18} className="text-blue-600 dark:text-blue-400" />
+          <div className="p-2 rounded-lg bg-teal-100 dark:bg-teal-900/20">
+            <GitFork size={18} className="text-teal-600 dark:text-teal-400" />
           </div>
           <div>
             <div className="text-2xl font-bold text-gray-900 dark:text-white">

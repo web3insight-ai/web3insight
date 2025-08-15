@@ -317,16 +317,16 @@ export default function ProfileAnalyzePublicPage() {
 
         {/* Recommendation */}
         {aiProfile.recommendation && (
-          <Card className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+          <Card className="bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800">
             <CardBody className="p-6">
               <div className="flex items-center gap-3 mb-4">
-                <Target size={20} className="text-blue-600" />
-                <h4 className="font-semibold text-blue-900 dark:text-blue-100">
+                <Target size={20} className="text-teal-600" />
+                <h4 className="font-semibold text-teal-900 dark:text-teal-100">
                   Recommendations
                 </h4>
               </div>
               
-              <p className="text-blue-800 dark:text-blue-200 leading-relaxed">
+              <p className="text-teal-800 dark:text-teal-200 leading-relaxed">
                 {aiProfile.recommendation}
               </p>
             </CardBody>
@@ -467,15 +467,15 @@ export default function ProfileAnalyzePublicPage() {
 
                       {/* AI Analysis in Progress Notice (when ecosystem data exists but AI is not ready) */}
                       {hasEcosystemData(user) && !hasAIData(user) && (
-                        <Card className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                        <Card className="bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800">
                           <CardBody className="p-6">
                             <div className="flex items-center gap-3 mb-2">
-                              <Brain size={20} className="text-blue-600" />
-                              <h4 className="font-semibold text-blue-900 dark:text-blue-100">
+                              <Brain size={20} className="text-teal-600" />
+                              <h4 className="font-semibold text-teal-900 dark:text-teal-100">
                                 AI Analysis in Progress
                               </h4>
                             </div>
-                            <p className="text-sm text-blue-800 dark:text-blue-200">
+                            <p className="text-sm text-teal-800 dark:text-teal-200">
                               AI-powered insights are being generated. The analysis above shows your current Web3 ecosystem data.
                             </p>
                           </CardBody>
@@ -558,15 +558,15 @@ export default function ProfileAnalyzePublicPage() {
                           </div>
 
                           {/* AI Analysis in Progress Notice */}
-                          <Card className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                          <Card className="bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800">
                             <CardBody className="p-6">
                               <div className="flex items-center gap-3 mb-2">
-                                <Brain size={20} className="text-blue-600" />
-                                <h4 className="font-semibold text-blue-900 dark:text-blue-100">
+                                <Brain size={20} className="text-teal-600" />
+                                <h4 className="font-semibold text-teal-900 dark:text-teal-100">
                                   AI Analysis in Progress
                                 </h4>
                               </div>
-                              <p className="text-sm text-blue-800 dark:text-blue-200">
+                              <p className="text-sm text-teal-800 dark:text-teal-200">
                                 AI-powered insights are being generated. The analysis above shows your current Web3 ecosystem data.
                               </p>
                             </CardBody>

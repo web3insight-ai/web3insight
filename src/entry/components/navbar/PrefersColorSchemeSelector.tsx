@@ -1,84 +1,106 @@
 import { useEffect, useState } from "react";
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@nextui-org/react";
-import { Sun, Moon, Monitor } from "lucide-react";
+import { Sun, Moon } from "lucide-react";
 
 import type { Theme } from "./typing";
 
 const storageKey = "w3i:perfersColorScheme";
 
-const options = [
-  { label: "Light", value: "light", iconCtor: Sun },
-  { label: "Dark", value: "dark", iconCtor: Moon },
-  { label: "System", value: "system", iconCtor: Monitor },
-];
-const optionsMap = options.reduce((acc, cur) => ({ ...acc, [cur.value]: cur }), {} as Record<Theme, (typeof options)[number]>);
-
 function PrefersColorSchemeSelector() {
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window === "undefined") return "system";
-
-    return (
-      (localStorage.getItem(storageKey) as Theme) || "system"
-    );
+    return (localStorage.getItem(storageKey) as Theme) || "system";
   });
+
+  const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
     const root = document.documentElement;
 
     const applyTheme = (t: Theme) => {
+      let shouldBeDark = false;
+      
       if (t === "dark") {
-        root.classList.add("dark");
+        shouldBeDark = true;
       } else if (t === "light") {
-        root.classList.remove("dark");
+        shouldBeDark = false;
       } else {
+        // system
         const media = window.matchMedia("(prefers-color-scheme: dark)");
-
-        if (media.matches) {
-          root.classList.add("dark");
-        } else {
-          root.classList.remove("dark");
-        }
+        shouldBeDark = media.matches;
       }
+
+      if (shouldBeDark) {
+        root.classList.add("dark");
+      } else {
+        root.classList.remove("dark");
+      }
+      
+      setIsDark(shouldBeDark);
     };
 
     applyTheme(theme);
 
     if (theme === "system") {
       const media = window.matchMedia("(prefers-color-scheme: dark)");
-      const handler = () => {
-        applyTheme("system");
-      };
+      const handler = () => applyTheme("system");
       media.addEventListener("change", handler);
       return () => media.removeEventListener("change", handler);
     }
   }, [theme]);
 
-  const changeTheme = (value: Theme) => {
-    setTheme(value);
-    localStorage.setItem(storageKey, value);
+  const toggleTheme = () => {
+    if (theme === "system") {
+      // If system, switch to opposite of current appearance
+      const newTheme = isDark ? "light" : "dark";
+      setTheme(newTheme);
+      localStorage.setItem(storageKey, newTheme);
+    } else {
+      // If manual theme, toggle between light and dark
+      const newTheme = theme === "light" ? "dark" : "light";
+      setTheme(newTheme);
+      localStorage.setItem(storageKey, newTheme);
+    }
   };
 
-  const ChosenIcon = optionsMap[theme].iconCtor;
-
   return (
-    <Dropdown placement="bottom-end">
-      <DropdownTrigger>
-        <div className="flex items-center justify-center size-8 border bg-slate-200 rounded-full cursor-pointer dark:bg-slate-400">
-          {<ChosenIcon className="size-4" />}
-        </div>
-      </DropdownTrigger>
-      <DropdownMenu items={options} onAction={k => changeTheme(k as Theme)}>
-        {item => {
-          const ItemIcon = item.iconCtor;
-
-          return (
-            <DropdownItem key={item.value} startContent={<ItemIcon className="size-4" />}>
-              {item.label}
-            </DropdownItem>
-          );
-        }}
-      </DropdownMenu>
-    </Dropdown>
+    <button
+      onClick={toggleTheme}
+      className={`
+        relative flex items-center justify-center size-8 rounded-full cursor-pointer
+        transition-all duration-300 ease-in-out
+        bg-gradient-to-r from-teal-100 to-cyan-100 dark:from-teal-800 dark:to-cyan-800
+        border border-teal-200 dark:border-teal-600
+        hover:scale-110 hover:shadow-lg hover:shadow-teal-200 dark:hover:shadow-teal-800/50
+        active:scale-95
+        group
+      `}
+      aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+    >
+      <div className="relative size-4">
+        <Sun 
+          className={`
+            absolute size-4 transition-all duration-300 ease-in-out
+            text-teal-600 dark:text-teal-400
+            ${isDark ? 'opacity-0 rotate-90 scale-0' : 'opacity-100 rotate-0 scale-100'}
+          `}
+        />
+        <Moon 
+          className={`
+            absolute size-4 transition-all duration-300 ease-in-out
+            text-teal-600 dark:text-teal-400
+            ${isDark ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-0'}
+          `}
+        />
+      </div>
+      
+      {/* Subtle glow effect */}
+      <div className={`
+        absolute inset-0 rounded-full opacity-0 group-hover:opacity-100
+        transition-opacity duration-300
+        bg-gradient-to-r from-teal-400/20 to-cyan-400/20
+        blur-sm -z-10
+      `} />
+    </button>
   );
 }
 

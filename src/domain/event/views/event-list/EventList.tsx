@@ -157,7 +157,7 @@ function EventListView({ className }: EventListViewWidgetProps) {
                           index === 0 ? "bg-gradient-to-r from-yellow-400 to-yellow-500" :
                             index === 1 ? "bg-gradient-to-r from-gray-400 to-gray-500" :
                               index === 2 ? "bg-gradient-to-r from-amber-600 to-amber-700" :
-                                "bg-gradient-to-r from-primary to-blue-600",
+                                "bg-gradient-to-r from-primary to-teal-600",
                         )}>
                           {index + 1}
                         </div>

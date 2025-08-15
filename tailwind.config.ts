@@ -83,11 +83,11 @@ export default {
         pulseGlow: {
           "0%, 100%": { 
             opacity: "1",
-            boxShadow: "0 0 20px rgba(0, 111, 238, 0.5), 0 0 40px rgba(0, 111, 238, 0.3)",
+            boxShadow: "0 0 20px rgba(15, 118, 110, 0.5), 0 0 40px rgba(15, 118, 110, 0.3)",
           },
           "50%": { 
             opacity: "0.8",
-            boxShadow: "0 0 30px rgba(0, 111, 238, 0.8), 0 0 60px rgba(0, 111, 238, 0.4)",
+            boxShadow: "0 0 30px rgba(15, 118, 110, 0.8), 0 0 60px rgba(15, 118, 110, 0.4)",
           },
         },
         shimmer: {
@@ -114,10 +114,14 @@ export default {
             background: "#FFFFFF",
             foreground: "#000000",
             primary: {
-              DEFAULT: "#006FEE",
+              DEFAULT: "#0F766E",
               foreground: "#FFFFFF",
             },
-            focus: "#006FEE",
+            focus: "#0F766E",
+            success: "#059669",
+            warning: "#D97706",
+            danger: "#DC2626",
+            secondary: "#6366F1",
           },
         },
         dark: {
@@ -125,10 +129,14 @@ export default {
             background: "#0F0F0F",
             foreground: "#FFFFFF",
             primary: {
-              DEFAULT: "#338EF7",
+              DEFAULT: "#14B8A6",
               foreground: "#FFFFFF",
             },
-            focus: "#338EF7",
+            focus: "#14B8A6",
+            success: "#10B981",
+            warning: "#F59E0B",
+            danger: "#EF4444",
+            secondary: "#818CF8",
           },
         },
       },

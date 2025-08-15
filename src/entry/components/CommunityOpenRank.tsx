@@ -172,7 +172,7 @@ const CommunityOpenRank: FC<CommunityOpenRankProps> = ({
                       href={`https://github.com/${user.login}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:text-blue-600 hover:underline"
+                      className="hover:text-teal-600 hover:underline"
                     >
                       {user.login}
                     </a>

@@ -36,7 +36,7 @@ const getActivityIcon = (description: string): ReactNode => {
 };
 
 const getActivityColor = (description: string): string => {
-  if (description.includes("pushed to")) return "bg-blue-500";
+  if (description.includes("pushed to")) return "bg-indigo-500";
   if (description.includes("merged a pull request")) return "bg-purple-500";
   if (description.includes("pull request")) return "bg-green-500";
   if (description.includes("issue")) return "bg-orange-500";
