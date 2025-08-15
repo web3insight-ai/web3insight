@@ -13,7 +13,7 @@ interface KeyMetricsProps {
 export function KeyMetrics({ user, className = "" }: KeyMetricsProps) {
   if (!hasEcosystemData(user)) {
     return (
-      <div className={`glass-card dark:glass-card-dark compact-card text-center ${className}`}>
+      <div className={`bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark compact-card text-center ${className}`}>
         <div className="space-y-2">
           <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto" />
           <p className="text-xs text-gray-500 dark:text-gray-400">Loading metrics...</p>
@@ -27,7 +27,7 @@ export function KeyMetrics({ user, className = "" }: KeyMetricsProps) {
 
   // Prepare pie chart data from top ecosystems
   const pieData = rankings.slice(0, 5).map((eco, index) => ({
-    name: eco.ecosystem.length > 10 ? eco.ecosystem.slice(0, 10) + "..." : eco.ecosystem,
+    name: eco.ecosystem, // Show full name
     value: eco.score,
     percentage: eco.percentage,
     color: [
@@ -42,26 +42,26 @@ export function KeyMetrics({ user, className = "" }: KeyMetricsProps) {
   const totalScore = rankings.reduce((sum, eco) => sum + eco.score, 0);
 
   return (
-    <div className={`glass-card dark:glass-card-dark p-4 ${className}`}>
+    <div className={`bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark p-4 ${className}`}>
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
         <Globe size={16} className="text-gray-500 dark:text-gray-400" />
         <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Web3 生态分析</h3>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Pie Chart - Left */}
-        <div className="md:col-span-2">
-          <div className="h-40">
+        <div className="lg:col-span-3">
+          <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={pieData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={25}
-                  outerRadius={50}
-                  paddingAngle={1}
+                  innerRadius={40}
+                  outerRadius={85}
+                  paddingAngle={2}
                   dataKey="value"
                 >
                   {pieData.map((entry, index) => (
@@ -76,6 +76,7 @@ export function KeyMetrics({ user, className = "" }: KeyMetricsProps) {
                     borderRadius: "6px",
                     fontSize: "11px",
                   }}
+                  wrapperClassName="dark:[&_.recharts-tooltip-wrapper]:!bg-gray-800 dark:[&_.recharts-tooltip-wrapper]:!border-gray-600 dark:[&_.recharts-tooltip-wrapper]:!text-gray-200"
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -83,14 +84,14 @@ export function KeyMetrics({ user, className = "" }: KeyMetricsProps) {
         </div>
 
         {/* Stats & Legend - Right */}
-        <div className="space-y-3">
+        <div className="lg:col-span-2 space-y-3">
           {/* Key Numbers */}
           <div className="text-center space-y-2">
             <div>
               <div className="text-xl font-bold text-primary">
                 {formatNumber(totalScore)}
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">总分</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">Web3 生态活跃度总分</div>
             </div>
             <div className="text-xs text-gray-600 dark:text-gray-400">
               覆盖 <strong className="text-gray-900 dark:text-white">{rankings.length}</strong> 个生态
@@ -102,14 +103,14 @@ export function KeyMetrics({ user, className = "" }: KeyMetricsProps) {
             <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
               主要生态:
             </div>
-            {pieData.slice(0, 3).map((item, index) => (
+            {pieData.slice(0, 5).map((item, index) => (
               <div key={index} className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-1">
                   <div
                     className="w-2 h-2 rounded-full"
                     style={{ backgroundColor: item.color }}
                   />
-                  <span className="text-gray-600 dark:text-gray-400 truncate">
+                  <span className="text-gray-600 dark:text-gray-400">
                     {item.name}
                   </span>
                 </div>

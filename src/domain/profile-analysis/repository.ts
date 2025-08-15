@@ -10,16 +10,15 @@ import type {
 } from "./typing";
 
 /**
- * Initiate user analysis for profile intent with GitHub handle
+ * Initiate user analysis for profile intent using authenticated user
  * Uses local API route which handles server-side authentication
  */
 async function analyzeUser(
-  githubHandle: string,
-  description: string = "Profile analysis",
+  description: string = "DevInsight profile analysis",
 ): Promise<ApiResponse<AnalysisResponse>> {
   
   const requestData: AnalysisRequest = {
-    request_data: [githubHandle],
+    request_data: [], // API will derive from user token
     intent: "profile",
     description,
   };
@@ -316,9 +315,10 @@ async function pollAnalysisResult(
 
 /**
  * Two-phase analysis function: first show basic info, then poll for AI results
+ * Uses authenticated user's GitHub handle from token
  */
 export async function analyzeGitHubUser(
-  githubHandle: string,
+  githubHandle: string, // Still kept for display purposes, but API derives from token
   onProgress?: ProgressCallback,
   onBasicInfo?: BasicDataCallback,
 ): Promise<ApiResponse<AnalysisResult>> {
@@ -328,8 +328,8 @@ export async function analyzeGitHubUser(
       onProgress("Initiating profile analysis...", 0);
     }
 
-    // Step 1: Start analysis using profile intent with GitHub handle
-    const analysisResponse = await analyzeUser(githubHandle, `Profile analysis for GitHub user: ${githubHandle}`);
+    // Step 1: Start analysis using profile intent for authenticated user
+    const analysisResponse = await analyzeUser(`DevInsight profile analysis for GitHub user: ${githubHandle}`);
 
 
     if (!analysisResponse.success) {

@@ -17,7 +17,7 @@ export function AnalysisTabs({ user, className = "" }: AnalysisTabsProps) {
 
   if (!hasEcosystemData(user)) {
     return (
-      <div className={`glass-card dark:glass-card-dark compact-card text-center ${className}`}>
+      <div className={`bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark compact-card text-center ${className}`}>
         <div className="space-y-3">
           <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto flex items-center justify-center">
             <BarChart3 size={16} className="text-gray-400" />
@@ -69,7 +69,7 @@ export function AnalysisTabs({ user, className = "" }: AnalysisTabsProps) {
             className={`analysis-tab cursor-pointer rounded-xl border p-4 ${
               selectedTab === tab.key
                 ? "analysis-tab-selected border-primary/30 dark:border-primary/40"
-                : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50"
+                : "border-border dark:border-border-dark bg-white dark:bg-surface-dark"
             }`}
             onClick={() => setSelectedTab(tab.key)}
             onKeyDown={(e) => {
@@ -114,7 +114,7 @@ export function AnalysisTabs({ user, className = "" }: AnalysisTabsProps) {
       </div>
 
       {/* Selected Content */}
-      <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 bg-white dark:bg-gray-800/50">
+      <div className="border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle">
         <div className="animate-fade-in">
           {tabItems.find(tab => tab.key === selectedTab)?.content}
         </div>

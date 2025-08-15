@@ -22,7 +22,7 @@ export function EcosystemInsights({ ecosystemScores, className = "" }: Ecosystem
   return (
     <div className={`space-y-4 ${className}`}>
       {/* Header with Stats Overview */}
-      <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 bg-white dark:bg-gray-800/50">
+      <div className="border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle">
         <div className="flex items-center gap-2 mb-3">
           <BarChart3 size={16} className="text-gray-600 dark:text-gray-400" />
           <h3 className="text-sm font-medium text-gray-900 dark:text-white">
@@ -51,7 +51,7 @@ export function EcosystemInsights({ ecosystemScores, className = "" }: Ecosystem
       </div>
 
       {/* Top 5 Ecosystems Chart */}
-      <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 bg-white dark:bg-gray-800/50">
+      <div className="border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle">
         <div className="flex items-center gap-2 mb-4">
           <Trophy size={14} className="text-gray-600 dark:text-gray-400" />
           <h3 className="text-sm font-medium text-gray-900 dark:text-white">Top 5 Ecosystem Impact</h3>
@@ -93,9 +93,9 @@ export function EcosystemInsights({ ecosystemScores, className = "" }: Ecosystem
                 </div>
 
                 {/* Visual Bar Chart */}
-                <div className="relative h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                <div className="relative h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
                   <div
-                    className="h-full transition-all duration-500 ease-out bg-gray-600 dark:bg-gray-400 rounded-full"
+                    className="h-full transition-all duration-500 ease-out bg-primary dark:bg-primary rounded-full"
                     style={{
                       width: `${barWidth}%`,
                       minWidth: barWidth > 0 ? '8px' : '0px',
@@ -121,7 +121,7 @@ export function EcosystemInsights({ ecosystemScores, className = "" }: Ecosystem
       </div>
 
       {/* Ecosystem Distribution Grid */}
-      <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 bg-white dark:bg-gray-800/50">
+      <div className="border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle">
         <div className="flex items-center gap-2 mb-4">
           <Target size={14} className="text-gray-600 dark:text-gray-400" />
           <h3 className="text-sm font-medium text-gray-900 dark:text-white">Ecosystem Distribution</h3>

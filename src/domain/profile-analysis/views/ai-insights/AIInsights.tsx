@@ -26,8 +26,8 @@ export function AIInsights({ user, className = "" }: AIInsightsProps) {
     <div className={`space-y-4 ${className}`}>
       {/* AI Roast Report - Hero Section */}
       {hasRoastReport ? (
-        // AI Analysis - Simple & Clean
-        <div className="glass-card dark:glass-card-dark compact-card">
+        // DevInsight - Simple & Clean
+        <div className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark compact-card">
           <div className="space-y-3">
             {/* Header */}
             <div className="flex items-center justify-between">
@@ -37,17 +37,32 @@ export function AIInsights({ user, className = "" }: AIInsightsProps) {
                   AI 分析报告
                 </h2>
               </div>
-              {/* Scores - Inline */}
-              <div className="flex items-center gap-3 text-xs">
-                <span className="text-gray-600 dark:text-gray-400">
-                  {aiProfile.roast_report?.roast_score.spicyLevel}/10
-                </span>
-                <span className="text-gray-600 dark:text-gray-400">
-                  {aiProfile.roast_report?.roast_score.truthLevel}/10
-                </span>
-                <span className="text-gray-600 dark:text-gray-400">
-                  {aiProfile.roast_report?.roast_score.helpfulLevel}/10
-                </span>
+              {/* Scores - With Labels */}
+              <div className="flex items-center gap-4 text-xs">
+                <div className="text-center">
+                  <div className="text-gray-900 dark:text-white font-semibold">
+                    {aiProfile.roast_report?.roast_score.spicyLevel}/10
+                  </div>
+                  <div className="text-gray-500 dark:text-gray-400 text-[10px]">
+                    辛辣度
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-gray-900 dark:text-white font-semibold">
+                    {aiProfile.roast_report?.roast_score.truthLevel}/10
+                  </div>
+                  <div className="text-gray-500 dark:text-gray-400 text-[10px]">
+                    真实度
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-gray-900 dark:text-white font-semibold">
+                    {aiProfile.roast_report?.roast_score.helpfulLevel}/10
+                  </div>
+                  <div className="text-gray-500 dark:text-gray-400 text-[10px]">
+                    有用度
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -90,8 +105,8 @@ export function AIInsights({ user, className = "" }: AIInsightsProps) {
             </div>
 
             {/* Summary */}
-            <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-3 mt-4">
-              <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">总结</h4>
+            <div className="bg-gray-100 dark:bg-gray-700/50 rounded-lg p-3 mt-4 border dark:border-gray-600">
+              <h4 className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-2">总结</h4>
               <p className="chinese-content text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                 {aiProfile.roast_report?.final_verdict}
               </p>
@@ -120,7 +135,7 @@ export function AIInsights({ user, className = "" }: AIInsightsProps) {
         <div className="space-y-4">
           {/* Web3 Involvement Score - Primary KPI */}
           {aiProfile.web3_involvement && (
-            <div className="glass-card dark:glass-card-dark compact-card">
+            <div className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark compact-card">
               <div className="flex items-center justify-between">
                 <div className="space-y-2">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -149,11 +164,11 @@ export function AIInsights({ user, className = "" }: AIInsightsProps) {
 
           {/* AI Summary - Progressive Disclosure */}
           {aiProfile.summary && (
-            <div className="glass-card dark:glass-card-dark compact-card">
+            <div className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark compact-card">
               <div className="flex items-center gap-3 mb-4">
                 <Sparkles size={18} className="text-secondary" />
                 <h3 className="font-semibold text-gray-900 dark:text-white">
-                  AI Analysis Summary
+                  DevInsight Analysis Summary
                 </h3>
               </div>
 
@@ -178,7 +193,7 @@ export function AIInsights({ user, className = "" }: AIInsightsProps) {
 
           {/* Skills - Simplified Display */}
           {aiProfile.skills && aiProfile.skills.length > 0 && (
-            <div className="glass-card dark:glass-card-dark compact-card">
+            <div className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark compact-card">
               <div className="flex items-center gap-3 mb-4">
                 <Brain size={18} className="text-primary" />
                 <h3 className="font-semibold text-gray-900 dark:text-white">
@@ -209,7 +224,7 @@ export function AIInsights({ user, className = "" }: AIInsightsProps) {
 
           {/* Recommendation */}
           {aiProfile.recommendation && (
-            <div className="glass-card dark:glass-card-dark compact-card border-l-4 border-l-success">
+            <div className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark compact-card border-l-4 border-l-success">
               <div className="flex items-start gap-3">
                 <div className="p-2 bg-success/10 rounded-lg flex-shrink-0 mt-1">
                   <Target size={18} className="text-success" />

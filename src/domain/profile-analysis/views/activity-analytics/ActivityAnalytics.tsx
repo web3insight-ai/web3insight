@@ -35,7 +35,7 @@ export function ActivityAnalytics({ ecosystemScores, className = "" }: ActivityA
   return (
     <div className={`space-y-4 ${className}`}>
       {/* Activity Overview */}
-      <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 bg-white dark:bg-gray-800/50">
+      <div className="border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle">
         <div className="flex items-center gap-2 mb-3">
           <Activity size={16} className="text-gray-600 dark:text-gray-400" />
           <h3 className="text-sm font-medium text-gray-900 dark:text-white">
@@ -92,7 +92,7 @@ export function ActivityAnalytics({ ecosystemScores, className = "" }: ActivityA
       </div>
 
       {/* Activity Timeline Chart */}
-      <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 bg-white dark:bg-gray-800/50">
+      <div className="border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle">
         <div className="flex items-center gap-2 mb-4">
           <BarChart size={14} className="text-gray-600 dark:text-gray-400" />
           <h3 className="text-sm font-medium text-gray-900 dark:text-white">Yearly Activity Breakdown</h3>
@@ -116,16 +116,16 @@ export function ActivityAnalytics({ ecosystemScores, className = "" }: ActivityA
                       {year.year}
                     </span>
                     {isCurrentYear && (
-                      <span className="text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                      <span className="text-xs text-gray-700 dark:text-gray-200 bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded border dark:border-blue-600/50">
                         Current
                       </span>
                     )}
                     {year.year === mostActiveYear.year && (
-                      <span className="text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                      <span className="text-xs text-gray-700 dark:text-gray-200 bg-yellow-100 dark:bg-yellow-900/30 px-2 py-1 rounded border dark:border-yellow-600/50">
                         🏆 Peak
                       </span>
                     )}
-                    <span className="text-xs text-gray-500 dark:text-gray-500 bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded">
+                    <span className="text-xs text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded border dark:border-gray-600">
                       {activityInfo.level}
                     </span>
                   </div>
@@ -163,9 +163,9 @@ export function ActivityAnalytics({ ecosystemScores, className = "" }: ActivityA
                 </div>
 
                 {/* Visual Activity Bar */}
-                <div className="relative h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                <div className="relative h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
                   <div
-                    className="h-full transition-all duration-500 ease-out bg-gray-600 dark:bg-gray-400 rounded-full"
+                    className="h-full transition-all duration-500 ease-out bg-primary dark:bg-primary rounded-full"
                     style={{
                       width: `${scorePercentage}%`,
                       minWidth: scorePercentage > 0 ? '8px' : '0px',
@@ -181,7 +181,7 @@ export function ActivityAnalytics({ ecosystemScores, className = "" }: ActivityA
       {/* Activity Insights */}
       <div className="grid gap-4 md:grid-cols-2">
         {/* Journey Timeline */}
-        <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 bg-white dark:bg-gray-800/50">
+        <div className="border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle">
           <div className="flex items-center gap-2 mb-4">
             <Clock size={14} className="text-gray-600 dark:text-gray-400" />
             <h3 className="text-sm font-medium text-gray-900 dark:text-white">Development Journey</h3>
@@ -223,7 +223,7 @@ export function ActivityAnalytics({ ecosystemScores, className = "" }: ActivityA
                 <Activity size={12} className="text-gray-500 dark:text-gray-400" />
                 <span className="text-sm font-medium text-gray-900 dark:text-white">Status</span>
               </div>
-              <span className="text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+              <span className="text-xs text-gray-600 dark:text-gray-400 bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded">
                 {recentActivity ? "🔥 Active Developer" : "📚 Historical Contributor"}
               </span>
             </div>
@@ -231,7 +231,7 @@ export function ActivityAnalytics({ ecosystemScores, className = "" }: ActivityA
         </div>
 
         {/* Activity Patterns */}
-        <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 bg-white dark:bg-gray-800/50">
+        <div className="border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle">
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp size={14} className="text-gray-600 dark:text-gray-400" />
             <h3 className="text-sm font-medium text-gray-900 dark:text-white">Contribution Patterns</h3>

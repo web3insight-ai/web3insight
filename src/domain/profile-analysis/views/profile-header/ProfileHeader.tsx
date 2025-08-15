@@ -23,7 +23,7 @@ function formatNumber(num: number): string {
 
 export function ProfileHeader({ user, className = "" }: ProfileHeaderProps) {
   return (
-    <div className={`glass-card dark:glass-card-dark p-3 ${className}`}>
+    <div className={`bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark p-3 ${className}`}>
       <div className="flex items-center gap-3">
         {/* Avatar - Prominent */}
         <Avatar

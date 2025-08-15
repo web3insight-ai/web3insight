@@ -20,7 +20,7 @@ export function TechnicalBreakdown({ ecosystemScores, className = "" }: Technica
     <div className={`space-y-4 ${className}`}>
       {/* Main Focus */}
       {mainFocus && (
-        <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 bg-white dark:bg-gray-800/50">
+        <div className="border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle">
           <div className="flex items-center gap-2 mb-3">
             <Target size={14} className="text-gray-600 dark:text-gray-400" />
             <h3 className="text-sm font-medium text-gray-900 dark:text-white">Technical Focus</h3>
@@ -35,7 +35,7 @@ export function TechnicalBreakdown({ ecosystemScores, className = "" }: Technica
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Programming Languages */}
         {languages && languages.length > 0 && (
-          <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 bg-white dark:bg-gray-800/50">
+          <div className="border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle">
             <div className="flex items-center gap-2 mb-4">
               <Code2 size={14} className="text-gray-600 dark:text-gray-400" />
               <h4 className="text-sm font-medium text-gray-900 dark:text-white">Programming Languages</h4>
@@ -60,7 +60,7 @@ export function TechnicalBreakdown({ ecosystemScores, className = "" }: Technica
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                        <span className="text-xs text-gray-700 dark:text-gray-200 bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded border dark:border-gray-600">
                           {skillLevel}
                         </span>
                         <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -69,9 +69,9 @@ export function TechnicalBreakdown({ ecosystemScores, className = "" }: Technica
                       </div>
                     </div>
 
-                    <div className="relative h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div className="relative h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
                       <div
-                        className="h-full transition-all duration-500 ease-out bg-gray-600 dark:bg-gray-400 rounded-full"
+                        className="h-full transition-all duration-500 ease-out bg-primary dark:bg-primary rounded-full"
                         style={{
                           width: `${proficiency}%`,
                         }}
@@ -86,7 +86,7 @@ export function TechnicalBreakdown({ ecosystemScores, className = "" }: Technica
 
         {/* Core Skills */}
         {skills && skills.length > 0 && (
-          <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 bg-white dark:bg-gray-800/50">
+          <div className="border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle">
             <div className="flex items-center gap-2 mb-4">
               <Layers size={14} className="text-gray-600 dark:text-gray-400" />
               <h4 className="text-sm font-medium text-gray-900 dark:text-white">Web3 Expertise</h4>
@@ -111,7 +111,7 @@ export function TechnicalBreakdown({ ecosystemScores, className = "" }: Technica
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                        <span className="text-xs text-gray-700 dark:text-gray-200 bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded border dark:border-gray-600">
                           {expertise}
                         </span>
                         <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -120,9 +120,9 @@ export function TechnicalBreakdown({ ecosystemScores, className = "" }: Technica
                       </div>
                     </div>
 
-                    <div className="relative h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div className="relative h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
                       <div
-                        className="h-full transition-all duration-500 ease-out bg-gray-600 dark:bg-gray-400 rounded-full"
+                        className="h-full transition-all duration-500 ease-out bg-primary dark:bg-primary rounded-full"
                         style={{
                           width: `${skillLevel}%`,
                         }}
@@ -138,7 +138,7 @@ export function TechnicalBreakdown({ ecosystemScores, className = "" }: Technica
 
       {/* Frameworks & Tools */}
       {frameworks && frameworks.length > 0 && (
-        <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 bg-white dark:bg-gray-800/50">
+        <div className="border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle">
           <div className="flex items-center gap-2 mb-4">
             <Wrench size={14} className="text-gray-600 dark:text-gray-400" />
             <h4 className="text-sm font-medium text-gray-900 dark:text-white">Frameworks & Tools</h4>
@@ -161,7 +161,7 @@ export function TechnicalBreakdown({ ecosystemScores, className = "" }: Technica
                     </span>
                   </div>
 
-                  <span className="text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                  <span className="text-xs text-gray-700 dark:text-gray-200 bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded border dark:border-gray-600">
                     {index < 3 ? "Core" : index < 6 ? "Used" : "Familiar"}
                   </span>
                 </div>
@@ -172,7 +172,7 @@ export function TechnicalBreakdown({ ecosystemScores, className = "" }: Technica
       )}
 
       {/* Technical Summary */}
-      <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 bg-white dark:bg-gray-800/50">
+      <div className="border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle">
         <div className="flex items-center gap-2 mb-4">
           <Target size={14} className="text-gray-600 dark:text-gray-400" />
           <h3 className="text-sm font-medium text-gray-900 dark:text-white">Technical Profile Summary</h3>

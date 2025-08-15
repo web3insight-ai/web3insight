@@ -24,7 +24,7 @@ export function StatsDashboard({ aiProfile, className = "" }: StatsDashboardProp
     },
     {
       icon: GitBranch,
-      label: "TOTAL SCORE", 
+      label: "TOTAL SCORE",
       value: aiProfile.profileCard?.stats?.totalScore || 0,
       max: 400,
       color: "primary" as const,
@@ -80,9 +80,9 @@ export function StatsDashboard({ aiProfile, className = "" }: StatsDashboardProp
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-3">
           {stats.map((stat) => {
             const percentage = Math.min((stat.value / stat.max) * 100, 100);
-            
+
             return (
-              <div key={stat.label} className="bg-gray-50 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 p-4 rounded-lg">
+              <div key={stat.label} className="bg-gray-50 dark:bg-surface-dark border-2 border-border dark:border-border-dark p-4 rounded-lg">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-3">
                   <stat.icon size={16} style={{ color: stat.rawColor }} />
@@ -102,7 +102,8 @@ export function StatsDashboard({ aiProfile, className = "" }: StatsDashboardProp
                       cy="32"
                       r="28"
                       fill="none"
-                      stroke="rgb(156, 163, 175)" // gray-400
+                      stroke="rgb(156, 163, 175)"
+                      className="dark:stroke-gray-600"
                       strokeWidth="4"
                     />
                     {/* Progress circle */}

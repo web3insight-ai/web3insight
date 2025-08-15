@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@remix-run/react";
-import { Calendar, Database, Warehouse, Users } from "lucide-react";
+import { Calendar, Database, Warehouse, Users, Brain } from "lucide-react";
 import clsx from "clsx";
 
 const navigationItems = [
@@ -22,6 +22,11 @@ const navigationItems = [
     name: "EventInsight",
     href: "/events",
     icon: Calendar,
+  },
+  {
+    name: "DevInsight",
+    href: "/devinsight",
+    icon: Brain,
   },
 ];
 

@@ -11,7 +11,7 @@ interface RepositoryBreakdownProps {
 
 export function RepositoryBreakdown({ ecosystemScores, className = "" }: RepositoryBreakdownProps) {
   const topRepos = getTopRepositories(ecosystemScores, 12);
-  
+
   if (!topRepos.length) return null;
 
   const maxScore = Math.max(...topRepos.map(repo => repo.score));
@@ -39,7 +39,7 @@ export function RepositoryBreakdown({ ecosystemScores, className = "" }: Reposit
       {/* Top Repositories */}
       <Card className="bg-white dark:bg-surface-dark shadow-subtle">
         <CardBody className="p-6">
-          <div className="flex items-center gap-3 mb-6 pb-2 border-b-2 border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-3 mb-6 pb-2 border-b-2 border-border dark:border-border-dark">
             <GitBranch className="text-success" size={16} />
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white">TOP REPOSITORY CONTRIBUTIONS</h3>
             <div className="ml-auto">
@@ -56,7 +56,7 @@ export function RepositoryBreakdown({ ecosystemScores, className = "" }: Reposit
               const repoDisplayName = repo.repo_name.split('/').pop() || repo.repo_name;
 
               return (
-                <div key={`${repo.ecosystem}-${repo.repo_name}`} className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                <div key={`${repo.ecosystem}-${repo.repo_name}`} className="bg-gray-50 dark:bg-surface-dark border border-border dark:border-border-dark rounded-lg p-4">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2">
@@ -72,7 +72,7 @@ export function RepositoryBreakdown({ ecosystemScores, className = "" }: Reposit
                         >
                           <span className="text-xs font-bold">#{index + 1}</span>
                         </Chip>
-                        
+
                         <Chip
                           color="secondary"
                           variant="bordered"
@@ -87,7 +87,7 @@ export function RepositoryBreakdown({ ecosystemScores, className = "" }: Reposit
                           </Chip>
                         )}
                       </div>
-                      
+
                       <h4 className="font-semibold text-sm text-gray-900 dark:text-white mb-1 truncate">
                         {repoDisplayName}
                       </h4>
@@ -107,16 +107,16 @@ export function RepositoryBreakdown({ ecosystemScores, className = "" }: Reposit
                   </div>
 
                   {/* Score Progress Bar */}
-                  <div className="relative h-3 bg-gray-100 dark:bg-gray-900 rounded-full mb-3 overflow-hidden">
+                  <div className="relative h-3 bg-gray-100 dark:bg-surface-dark rounded-full mb-3 overflow-hidden">
                     <div
                       className="h-full transition-all duration-1000 ease-out relative"
                       style={{
                         width: `${scorePercentage}%`,
-                        background: scorePercentage > 80 ? 
+                        background: scorePercentage > 80 ?
                           'linear-gradient(90deg, #22c55e, #16a34a)' :
-                          scorePercentage > 60 ? 
+                          scorePercentage > 60 ?
                             'linear-gradient(90deg, #3b82f6, #2563eb)' :
-                            scorePercentage > 40 ? 
+                            scorePercentage > 40 ?
                               'linear-gradient(90deg, #f59e0b, #d97706)' :
                               'linear-gradient(90deg, #8b5cf6, #7c3aed)',
                       }}
@@ -147,7 +147,7 @@ export function RepositoryBreakdown({ ecosystemScores, className = "" }: Reposit
       {/* Repository Distribution by Ecosystem */}
       <Card className="bg-white dark:bg-surface-dark shadow-subtle">
         <CardBody className="p-6">
-          <div className="flex items-center gap-3 mb-6 pb-2 border-b-2 border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-3 mb-6 pb-2 border-b-2 border-border dark:border-border-dark">
             <Package className="text-primary" size={16} />
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white">ECOSYSTEM REPOSITORY DISTRIBUTION</h3>
           </div>
@@ -158,13 +158,13 @@ export function RepositoryBreakdown({ ecosystemScores, className = "" }: Reposit
               .slice(0, 9)
               .map(([ecosystem, data]) => {
                 const isHighContribution = data.avgScore > 100;
-                
+
                 return (
-                  <div key={ecosystem} className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                  <div key={ecosystem} className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-surface-dark dark:to-surface-dark border border-border dark:border-border-dark rounded-lg p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <Chip 
+                      <Chip
                         color={isHighContribution ? "success" : "default"}
-                        variant="flat" 
+                        variant="flat"
                         size="sm"
                       >
                         <span className="text-xs font-bold">{data.count}</span>
@@ -178,11 +178,11 @@ export function RepositoryBreakdown({ ecosystemScores, className = "" }: Reposit
                         </div>
                       </div>
                     </div>
-                    
+
                     <h4 className="font-medium text-sm text-gray-900 dark:text-white mb-3 line-clamp-2 min-h-[2.5rem]">
                       {ecosystem}
                     </h4>
-                    
+
                     <div className="space-y-2">
                       <div className="flex justify-between items-center text-xs">
                         <span className="text-gray-600 dark:text-gray-400">Avg Score:</span>
@@ -190,10 +190,10 @@ export function RepositoryBreakdown({ ecosystemScores, className = "" }: Reposit
                           {Math.round(data.avgScore)}
                         </span>
                       </div>
-                      
+
                       <div className="space-y-1">
                         <div className="text-xs text-gray-600 dark:text-gray-400">Top Repository:</div>
-                        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded p-2">
+                        <div className="bg-white dark:bg-surface-dark border border-border dark:border-border-dark rounded p-2">
                           <div className="flex items-center gap-1 mb-1">
                             <Star size={8} className="text-warning" />
                             <span className="text-xs font-medium text-gray-900 dark:text-white truncate">
@@ -228,7 +228,7 @@ export function RepositoryBreakdown({ ecosystemScores, className = "" }: Reposit
             <Code2 size={20} className="text-success" />
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white">REPOSITORY INSIGHTS</h3>
           </div>
-          
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-success mb-1">
@@ -238,7 +238,7 @@ export function RepositoryBreakdown({ ecosystemScores, className = "" }: Reposit
                 Total Repositories
               </div>
             </div>
-            
+
             <div className="text-center">
               <div className="text-2xl font-bold text-primary mb-1">
                 {Object.keys(reposByEcosystem).length}
@@ -247,10 +247,10 @@ export function RepositoryBreakdown({ ecosystemScores, className = "" }: Reposit
                 Ecosystems
               </div>
             </div>
-            
+
             <div className="text-center">
               <div className="text-2xl font-bold text-warning mb-1">
-                {topRepos.filter(repo => 
+                {topRepos.filter(repo =>
                   new Date(repo.last_activity_at) > new Date(Date.now() - 365 * 24 * 60 * 60 * 1000),
                 ).length}
               </div>
@@ -258,7 +258,7 @@ export function RepositoryBreakdown({ ecosystemScores, className = "" }: Reposit
                 Active Repos
               </div>
             </div>
-            
+
             <div className="text-center">
               <div className="text-2xl font-bold text-secondary mb-1">
                 {formatNumber(topRepos.reduce((sum, repo) => sum + repo.score, 0))}

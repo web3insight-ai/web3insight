@@ -19,7 +19,7 @@ export function EcosystemChart({ aiProfile, className = "" }: EcosystemChartProp
   return (
     <Card className={`bg-white dark:bg-surface-dark shadow-subtle ${className}`}>
       <CardBody className="p-6">
-        <div className="flex items-center gap-3 mb-4 pb-2 border-b-2 border-gray-200 dark:border-gray-700">
+        <div className="flex items-center gap-3 mb-4 pb-2 border-b-2 border-border dark:border-border-dark">
           <Trophy className="text-warning" size={16} />
           <h3 className="text-sm font-semibold text-gray-900 dark:text-white">ECOSYSTEM IMPACT</h3>
           <div className="ml-auto">
@@ -52,7 +52,7 @@ export function EcosystemChart({ aiProfile, className = "" }: EcosystemChartProp
                 </div>
 
                 {/* Visual Bar Chart */}
-                <div className="relative h-8 bg-gray-50 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                <div className="relative h-8 bg-gray-50 dark:bg-surface-dark border-2 border-border dark:border-border-dark rounded-lg overflow-hidden">
                   <div
                     className="h-full transition-all duration-1000 ease-out flex items-center justify-center relative"
                     style={{
@@ -101,7 +101,7 @@ export function EcosystemChart({ aiProfile, className = "" }: EcosystemChartProp
 
         {/* Additional Ecosystems Summary */}
         {aiProfile.web3Ecosystems?.otherEcosystems && aiProfile.web3Ecosystems.otherEcosystems.length > 0 && (
-          <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="mt-6 pt-4 border-t border-border dark:border-border-dark">
             <div className="flex items-center gap-2 mb-3">
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Other Ecosystems
@@ -110,7 +110,7 @@ export function EcosystemChart({ aiProfile, className = "" }: EcosystemChartProp
                 {aiProfile.web3Ecosystems.otherEcosystems.length}
               </Chip>
             </div>
-            
+
             <div className="flex flex-wrap gap-2">
               {aiProfile.web3Ecosystems.otherEcosystems.slice(0, 6).map((eco) => (
                 <Chip

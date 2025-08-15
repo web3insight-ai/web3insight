@@ -60,7 +60,7 @@ export function SkillRadarChart({ aiProfile, className = "" }: SkillRadarChartPr
   return (
     <Card className={`bg-white dark:bg-surface-dark shadow-subtle ${className}`}>
       <CardBody className="p-6">
-        <div className="flex items-center gap-3 mb-4 pb-2 border-b-2 border-gray-200 dark:border-gray-700">
+        <div className="flex items-center gap-3 mb-4 pb-2 border-b-2 border-border dark:border-border-dark">
           <Code className="text-primary" size={16} />
           <h3 className="text-sm font-semibold text-gray-900 dark:text-white">SKILL RADAR</h3>
           <div className="ml-auto">
@@ -80,7 +80,7 @@ export function SkillRadarChart({ aiProfile, className = "" }: SkillRadarChartPr
                 {[1, 2, 3, 4, 5].map((ring) => (
                   <div
                     key={ring}
-                    className="absolute border border-gray-300 dark:border-gray-600"
+                    className="absolute border border-gray-300 dark:border-gray-500"
                     style={{
                       width: `${ring * 20}px`,
                       height: `${ring * 20}px`,
@@ -133,7 +133,7 @@ export function SkillRadarChart({ aiProfile, className = "" }: SkillRadarChartPr
             })}
 
             {/* Center point */}
-            <div className="absolute w-4 h-4 bg-white dark:bg-gray-800 border-2 border-gray-800 dark:border-white left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full" />
+            <div className="absolute w-4 h-4 bg-white dark:bg-surface-dark border-2 border-gray-800 dark:border-white left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full" />
           </div>
 
           {/* Legend */}

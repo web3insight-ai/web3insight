@@ -167,9 +167,7 @@ export default function ProfilePage() {
                         </h1>
                         {githubBind && githubHandle && (
                           <Link
-                            to={`/analyze/${githubHandle}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                            to="/devinsight"
                           >
                             <Button
                               variant="light"
@@ -177,7 +175,7 @@ export default function ProfilePage() {
                               startContent={<Brain size={14} />}
                               className="font-medium hover:bg-gray-100 dark:hover:bg-surface-elevated px-3 py-1.5 h-auto min-h-0 rounded-full bg-gray-50 dark:bg-surface-dark border border-gray-200 dark:border-border-dark text-gray-700 dark:text-gray-300"
                             >
-                              AI Analysis
+                              DevInsight
                             </Button>
                           </Link>
                         )}
