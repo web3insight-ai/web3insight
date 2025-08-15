@@ -306,33 +306,39 @@ FROM user_ids u;`;
 
     const uniqueEcosystems = Array.from(new Set(ecosystems));
 
-    const ecosystemDB = await this.db
-      .selectFrom('data.ecosystems')
-      .where('name', 'in', uniqueEcosystems)
-      .selectAll()
-      .execute();
+    let rows = results.rows;
 
-    const rows = results.rows.filter((item: any) => {
-      item.ecosystem_scores = item.ecosystem_scores.filter((ecosystem: any) => {
-        const dbEcosystem = ecosystemDB.find(
-          (dbItem) => dbItem.name === ecosystem.ecosystem,
+    if (uniqueEcosystems.length > 0) {
+      const ecosystemDB = await this.db
+        .selectFrom('data.ecosystems')
+        .where('name', 'in', uniqueEcosystems)
+        .selectAll()
+        .execute();
+
+      rows = results.rows.filter((item: any) => {
+        item.ecosystem_scores = item.ecosystem_scores.filter(
+          (ecosystem: any) => {
+            const dbEcosystem = ecosystemDB.find(
+              (dbItem) => dbItem.name === ecosystem.ecosystem,
+            );
+            return dbEcosystem && dbEcosystem.active;
+          },
         );
-        return dbEcosystem && dbEcosystem.active;
+        return true;
       });
-      return true;
-    });
 
-    rows.sort((a: any, b: any) => {
-      const scoreA = a.ecosystem_scores.reduce(
-        (s: any, e: { total_score: any }) => s + e.total_score,
-        0,
-      );
-      const scoreB = b.ecosystem_scores.reduce(
-        (s: any, e: { total_score: any }) => s + e.total_score,
-        0,
-      );
-      return scoreB - scoreA;
-    });
+      rows.sort((a: any, b: any) => {
+        const scoreA = a.ecosystem_scores.reduce(
+          (s: any, e: { total_score: any }) => s + e.total_score,
+          0,
+        );
+        const scoreB = b.ecosystem_scores.reduce(
+          (s: any, e: { total_score: any }) => s + e.total_score,
+          0,
+        );
+        return scoreB - scoreA;
+      });
+    }
 
     const body = JSON.stringify({ users: rows });
 
