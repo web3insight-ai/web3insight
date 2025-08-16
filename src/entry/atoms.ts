@@ -50,3 +50,9 @@ export const removeToastAtom = atom(
     set(toastsAtom, get(toastsAtom).filter(toast => toast.id !== id));
   },
 );
+
+// Language preference for roast reports  
+export type Language = 'english' | 'chinese';
+
+// Language atom - will be initialized on client-side with browser detection
+export const languageAtom = atom<Language>('english');

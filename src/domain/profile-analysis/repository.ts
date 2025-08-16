@@ -226,18 +226,24 @@ async function pollAnalysisResult(
                 // Add roast report processing if available
                 if (roastReport) {
                   userWithScores.ai.roast_report = {
-                    title: roastReport.title,
-                    overall_roast: roastReport.overallRoast,
-                    activity_roast: roastReport.activityRoast,
-                    ecosystem_roast: roastReport.ecosystemRoast,
-                    technical_roast: roastReport.technicalRoast,
-                    final_verdict: roastReport.finalVerdict,
-                    constructive_sarcasm: roastReport.constructiveSarcasm,
+                    title: "AI Analysis Report", // Default title since structure changed
+                    overall_roast: roastReport.english || roastReport.chinese || "",
+                    activity_roast: "",
+                    ecosystem_roast: "",
+                    technical_roast: "",
+                    final_verdict: "",
+                    constructive_sarcasm: [],
                     roast_score: {
-                      spicyLevel: roastReport.roastScore.spicyLevel,
-                      truthLevel: roastReport.roastScore.truthLevel,
-                      helpfulLevel: roastReport.roastScore.helpfulLevel,
+                      spicyLevel: "8",
+                      truthLevel: "9", 
+                      helpfulLevel: "7",
                     },
+                  };
+
+                  // Store the new language-specific content
+                  userWithScores.ai.roastReport = {
+                    english: roastReport.english,
+                    chinese: roastReport.chinese,
                   };
                 }
 

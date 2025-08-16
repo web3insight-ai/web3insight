@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { Button, Chip } from "@nextui-org/react";
 import { Brain, Sparkles, Target } from "lucide-react";
+import { useAtom } from "jotai";
 
 import type { GitHubUser } from "../../typing";
 import { hasAIData, getInvolvementLevelColor } from "../../helper";
+import { languageAtom } from "#/atoms";
+import { LanguageToggle } from "@/components/control/language-toggle";
 
 interface AIInsightsProps {
   user: GitHubUser;
@@ -12,6 +15,7 @@ interface AIInsightsProps {
 
 export function AIInsights({ user, className = "" }: AIInsightsProps) {
   const [showFullSummary, setShowFullSummary] = useState(false);
+  const [language] = useAtom(languageAtom);
 
   if (!hasAIData(user) || !user.ai) {
     return null;
@@ -19,8 +23,10 @@ export function AIInsights({ user, className = "" }: AIInsightsProps) {
 
   const aiProfile = user.ai;
 
-  // Prioritize roast report if available, otherwise show other AI insights
-  const hasRoastReport = aiProfile.roast_report;
+  // Check for new roastReport structure first, then fall back to old structure
+  const hasNewRoastReport = aiProfile.roastReport;
+  const hasOldRoastReport = aiProfile.roast_report;
+  const hasRoastReport = hasNewRoastReport || hasOldRoastReport;
 
   return (
     <div className={`space-y-4 ${className}`}>
@@ -29,7 +35,7 @@ export function AIInsights({ user, className = "" }: AIInsightsProps) {
         // DevInsight - Simple & Clean
         <div className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark compact-card">
           <div className="space-y-3">
-            {/* Header */}
+            {/* Header with Language Toggle */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Brain size={16} className="text-primary" />
@@ -37,96 +43,116 @@ export function AIInsights({ user, className = "" }: AIInsightsProps) {
                   AI Analysis Report
                 </h2>
               </div>
-              {/* Scores - With Labels */}
-              <div className="flex items-center gap-4 text-xs">
-                <div className="text-center">
-                  <div className="text-gray-900 dark:text-white font-semibold">
-                    {aiProfile.roast_report?.roast_score.spicyLevel}/10
-                  </div>
-                  <div className="text-gray-500 dark:text-gray-400 text-[10px]">
-                    Spiciness
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="text-gray-900 dark:text-white font-semibold">
-                    {aiProfile.roast_report?.roast_score.truthLevel}/10
-                  </div>
-                  <div className="text-gray-500 dark:text-gray-400 text-[10px]">
-                    Truthfulness
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="text-gray-900 dark:text-white font-semibold">
-                    {aiProfile.roast_report?.roast_score.helpfulLevel}/10
-                  </div>
-                  <div className="text-gray-500 dark:text-gray-400 text-[10px]">
-                    Helpfulness
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Title */}
-            <div className="border-l-3 border-l-primary pl-3">
-              <p className="chinese-content text-sm font-medium text-gray-900 dark:text-white">
-                {aiProfile.roast_report?.title}
-              </p>
-            </div>
-
-            {/* Analysis Content - Compact */}
-            <div className="space-y-3 text-sm">
-              <div className="border-l-2 border-l-gray-200 dark:border-l-gray-700 pl-3">
-                <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Overall Performance</h4>
-                <p className="chinese-content leading-relaxed text-gray-700 dark:text-gray-300">
-                  {aiProfile.roast_report?.overall_roast}
-                </p>
-              </div>
-
-              <div className="border-l-2 border-l-gray-200 dark:border-l-gray-700 pl-3">
-                <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Activity Level</h4>
-                <p className="chinese-content leading-relaxed text-gray-700 dark:text-gray-300">
-                  {aiProfile.roast_report?.activity_roast}
-                </p>
-              </div>
-
-              <div className="border-l-2 border-l-gray-200 dark:border-l-gray-700 pl-3">
-                <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Ecosystem Choice</h4>
-                <p className="chinese-content leading-relaxed text-gray-700 dark:text-gray-300">
-                  {aiProfile.roast_report?.ecosystem_roast}
-                </p>
-              </div>
-
-              <div className="border-l-2 border-l-gray-200 dark:border-l-gray-700 pl-3">
-                <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Technical Skills</h4>
-                <p className="chinese-content leading-relaxed text-gray-700 dark:text-gray-300">
-                  {aiProfile.roast_report?.technical_roast}
-                </p>
-              </div>
-            </div>
-
-            {/* Summary */}
-            <div className="bg-gray-100 dark:bg-gray-700/50 rounded-lg p-3 mt-4 border dark:border-gray-600">
-              <h4 className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-2">Summary</h4>
-              <p className="chinese-content text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                {aiProfile.roast_report?.final_verdict}
-              </p>
-            </div>
-
-            {/* Suggestions */}
-            {aiProfile.roast_report?.constructive_sarcasm && aiProfile.roast_report.constructive_sarcasm.length > 0 && (
-              <div className="mt-4">
-                <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Improvement Suggestions</h4>
-                <div className="space-y-2">
-                  {aiProfile.roast_report?.constructive_sarcasm.slice(0, 2).map((suggestion, index) => (
-                    <div key={index} className="flex items-start gap-2">
-                      <span className="text-xs text-gray-400 mt-0.5">{index + 1}.</span>
-                      <p className="chinese-content text-xs leading-relaxed text-gray-600 dark:text-gray-400">
-                        {suggestion}
-                      </p>
+              <div className="flex items-center gap-3">
+                {/* Language Toggle - only show for new structure */}
+                {hasNewRoastReport && <LanguageToggle />}
+                {/* Scores - With Labels - only show for old structure */}
+                {hasOldRoastReport && (
+                  <div className="flex items-center gap-4 text-xs">
+                    <div className="text-center">
+                      <div className="text-gray-900 dark:text-white font-semibold">
+                        {aiProfile.roast_report?.roast_score.spicyLevel}/10
+                      </div>
+                      <div className="text-gray-500 dark:text-gray-400 text-[10px]">
+                        Spiciness
+                      </div>
                     </div>
-                  ))}
-                </div>
+                    <div className="text-center">
+                      <div className="text-gray-900 dark:text-white font-semibold">
+                        {aiProfile.roast_report?.roast_score.truthLevel}/10
+                      </div>
+                      <div className="text-gray-500 dark:text-gray-400 text-[10px]">
+                        Truthfulness
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-gray-900 dark:text-white font-semibold">
+                        {aiProfile.roast_report?.roast_score.helpfulLevel}/10
+                      </div>
+                      <div className="text-gray-500 dark:text-gray-400 text-[10px]">
+                        Helpfulness
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
+            </div>
+
+            {/* Content - New Structure */}
+            {hasNewRoastReport && (
+              <div className="border-l-3 border-l-primary pl-3">
+                <p className="chinese-content text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                  {aiProfile.roastReport?.[language]}
+                </p>
+              </div>
+            )}
+
+            {/* Content - Old Structure */}
+            {hasOldRoastReport && !hasNewRoastReport && (
+              <>
+                {/* Title */}
+                <div className="border-l-3 border-l-primary pl-3">
+                  <p className="chinese-content text-sm font-medium text-gray-900 dark:text-white">
+                    {aiProfile.roast_report?.title}
+                  </p>
+                </div>
+
+                {/* Analysis Content - Compact */}
+                <div className="space-y-3 text-sm">
+                  <div className="border-l-2 border-l-gray-200 dark:border-l-gray-700 pl-3">
+                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Overall Performance</h4>
+                    <p className="chinese-content leading-relaxed text-gray-700 dark:text-gray-300">
+                      {aiProfile.roast_report?.overall_roast}
+                    </p>
+                  </div>
+
+                  <div className="border-l-2 border-l-gray-200 dark:border-l-gray-700 pl-3">
+                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Activity Level</h4>
+                    <p className="chinese-content leading-relaxed text-gray-700 dark:text-gray-300">
+                      {aiProfile.roast_report?.activity_roast}
+                    </p>
+                  </div>
+
+                  <div className="border-l-2 border-l-gray-200 dark:border-l-gray-700 pl-3">
+                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Ecosystem Choice</h4>
+                    <p className="chinese-content leading-relaxed text-gray-700 dark:text-gray-300">
+                      {aiProfile.roast_report?.ecosystem_roast}
+                    </p>
+                  </div>
+
+                  <div className="border-l-2 border-l-gray-200 dark:border-l-gray-700 pl-3">
+                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Technical Skills</h4>
+                    <p className="chinese-content leading-relaxed text-gray-700 dark:text-gray-300">
+                      {aiProfile.roast_report?.technical_roast}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Summary */}
+                <div className="bg-gray-100 dark:bg-gray-700/50 rounded-lg p-3 mt-4 border dark:border-gray-600">
+                  <h4 className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-2">Summary</h4>
+                  <p className="chinese-content text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                    {aiProfile.roast_report?.final_verdict}
+                  </p>
+                </div>
+
+                {/* Suggestions */}
+                {aiProfile.roast_report?.constructive_sarcasm && aiProfile.roast_report.constructive_sarcasm.length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Improvement Suggestions</h4>
+                    <div className="space-y-2">
+                      {aiProfile.roast_report?.constructive_sarcasm.slice(0, 2).map((suggestion, index) => (
+                        <div key={index} className="flex items-start gap-2">
+                          <span className="text-xs text-gray-400 mt-0.5">{index + 1}.</span>
+                          <p className="chinese-content text-xs leading-relaxed text-gray-600 dark:text-gray-400">
+                            {suggestion}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

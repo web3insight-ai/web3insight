@@ -162,6 +162,12 @@ export interface AIProfile {
       helpfulLevel: string;
     };
   };
+
+  // New language-specific roast report
+  roastReport?: {
+    english: string;
+    chinese: string;
+  };
 }
 
 // Raw API response structure from GET /v1/custom/analysis/users/{id}
@@ -201,18 +207,8 @@ export interface RawAnalysisResult {
         created_at: string;
       };
       roastReport: {
-        title: string;
-        roastScore: {
-          spicyLevel: string;
-          truthLevel: string;
-          helpfulLevel: string;
-        };
-        finalVerdict: string;
-        overallRoast: string;
-        activityRoast: string;
-        ecosystemRoast: string;
-        technicalRoast: string;
-        constructiveSarcasm: string[];
+        english: string;
+        chinese: string;
       };
     };
     metadata?: {

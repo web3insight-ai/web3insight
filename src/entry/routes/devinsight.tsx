@@ -96,6 +96,14 @@ export default function DevInsightPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [githubHandle]);
 
+  // Force re-render when results change to ensure AI insights appear
+  useEffect(() => {
+    if (results?.data?.users?.[0]?.ai) {
+      // Force a small state update to trigger re-render
+      setProgress(prev => prev === 100 ? 100 : 100);
+    }
+  }, [results]);
+
   const handleAnalyze = async () => {
     if (!githubHandle) {
       setError("No GitHub handle found");

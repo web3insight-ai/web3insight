@@ -19,6 +19,7 @@ import NavigationProgress from "./components/NavigationProgress";
 import { WalletProvider } from "@/providers/WalletProvider";
 
 import { getTitle } from "@/utils/app";
+import { useLanguageInit } from "@/utils/useLanguageInit";
 
 export const meta: MetaFunction = () => {
   return [
@@ -49,6 +50,9 @@ export const loader: LoaderFunction = async ({ request }) => {
 function App() {
   const { user: initialUser } = useLoaderData<typeof loader>();
   const [user, setUser] = useState<ApiUser | null>(initialUser);
+  
+  // Initialize language preference based on browser locale
+  useLanguageInit();
 
   return (
     <html lang="en">

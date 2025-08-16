@@ -136,7 +136,8 @@ export function hasAIData(user: GitHubUser): boolean {
     user.ai.highlights?.length ||
     user.ai.web3_involvement ||
     user.ai.profileCard ||
-    user.ai.roast_report
+    user.ai.roast_report ||
+    user.ai.roastReport
   ));
 }
 
