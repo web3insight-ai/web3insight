@@ -1,70 +1,33 @@
-import { useEffect, useState } from "react";
-import { Sun, Moon } from "lucide-react";
+import { Moon, Sun } from 'lucide-react';
 
-import type { Theme } from "./typing";
+import { useTheme } from 'next-themes';
 
-const storageKey = "w3i:perfersColorScheme";
+const useIsDark = () => {
+  const { theme, systemTheme } = useTheme();
+  return theme === 'system' ? systemTheme === 'dark' : theme === 'dark';
+};
 
 function PrefersColorSchemeSelector() {
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window === "undefined") return "system";
-    return (localStorage.getItem(storageKey) as Theme) || "system";
-  });
-
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    const root = document.documentElement;
-
-    const applyTheme = (t: Theme) => {
-      let shouldBeDark = false;
-      
-      if (t === "dark") {
-        shouldBeDark = true;
-      } else if (t === "light") {
-        shouldBeDark = false;
-      } else {
-        // system
-        const media = window.matchMedia("(prefers-color-scheme: dark)");
-        shouldBeDark = media.matches;
-      }
-
-      if (shouldBeDark) {
-        root.classList.add("dark");
-      } else {
-        root.classList.remove("dark");
-      }
-      
-      setIsDark(shouldBeDark);
-    };
-
-    applyTheme(theme);
-
-    if (theme === "system") {
-      const media = window.matchMedia("(prefers-color-scheme: dark)");
-      const handler = () => applyTheme("system");
-      media.addEventListener("change", handler);
-      return () => media.removeEventListener("change", handler);
-    }
-  }, [theme]);
-
-  const toggleTheme = () => {
-    if (theme === "system") {
-      // If system, switch to opposite of current appearance
-      const newTheme = isDark ? "light" : "dark";
-      setTheme(newTheme);
-      localStorage.setItem(storageKey, newTheme);
-    } else {
-      // If manual theme, toggle between light and dark
-      const newTheme = theme === "light" ? "dark" : "light";
-      setTheme(newTheme);
-      localStorage.setItem(storageKey, newTheme);
-    }
-  };
+  const { setTheme, theme, systemTheme } = useTheme();
+  const isDark = useIsDark();
 
   return (
     <button
-      onClick={toggleTheme}
+      onClick={() => {
+        setTheme(
+          theme === 'system'
+            ? systemTheme === 'dark'
+              ? 'light'
+              : 'dark'
+            : theme === 'dark'
+              ? systemTheme === 'light'
+                ? 'system'
+                : 'light'
+              : systemTheme === 'dark'
+                ? 'system'
+                : 'dark',
+        );
+      }}
       className="
         flex items-center justify-center w-6 h-6 rounded-md
         bg-gray-100 dark:bg-gray-800 
