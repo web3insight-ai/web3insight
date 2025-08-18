@@ -43,12 +43,12 @@ export default {
       },
       maxWidth: {
         "8xl": "88rem",
-        "content": "1024px",
+        content: "1024px",
       },
       boxShadow: {
-        "subtle": "0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06)",
-        "card": "0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06)",
-        "hover": "0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04)",
+        subtle: "0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06)",
+        card: "0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06)",
+        hover: "0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04)",
       },
       transitionDuration: {
         DEFAULT: "200ms",
@@ -56,16 +56,16 @@ export default {
       animation: {
         "fade-in": "fadeIn 400ms ease-in-out",
         "slide-up": "slideUp 400ms ease-out",
-        "typewriter": "typewriter 2s steps(40) 1s forwards",
-        "blink": "blink 1s infinite",
+        typewriter: "typewriter 2s steps(40) 1s forwards",
+        blink: "blink 1s infinite",
         "pulse-glow": "pulseGlow 2s ease-in-out infinite",
-        "shimmer": "shimmer 2s ease-in-out infinite",
+        shimmer: "shimmer 2s ease-in-out infinite",
         "gradient-x": "gradientX 3s ease infinite",
         "scale-in": "scaleIn 300ms ease-out",
       },
       gridColumn: {
         "span-2": "span 2 / span 2",
-        "span-3": "span 3 / span 3", 
+        "span-3": "span 3 / span 3",
         "span-4": "span 4 / span 4",
       },
       keyframes: {
@@ -86,13 +86,15 @@ export default {
           "51%, 100%": { opacity: "0" },
         },
         pulseGlow: {
-          "0%, 100%": { 
+          "0%, 100%": {
             opacity: "1",
-            boxShadow: "0 0 20px rgba(15, 118, 110, 0.5), 0 0 40px rgba(15, 118, 110, 0.3)",
+            boxShadow:
+              "0 0 20px rgba(15, 118, 110, 0.5), 0 0 40px rgba(15, 118, 110, 0.3)",
           },
-          "50%": { 
+          "50%": {
             opacity: "0.8",
-            boxShadow: "0 0 30px rgba(15, 118, 110, 0.8), 0 0 60px rgba(15, 118, 110, 0.4)",
+            boxShadow:
+              "0 0 30px rgba(15, 118, 110, 0.8), 0 0 60px rgba(15, 118, 110, 0.4)",
           },
         },
         shimmer: {
@@ -110,7 +112,7 @@ export default {
       },
     },
   },
-  darkMode: "class",
+  darkMode: ["selector", '[data-theme="dark"]'],
   plugins: [
     nextui({
       themes: {
