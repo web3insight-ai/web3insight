@@ -3,9 +3,9 @@
 import { Skeleton } from "@nextui-org/react";
 import { Github } from "lucide-react";
 
-import ChartCard from "@/components/control/chart-card";
-import { CardSkeleton, ChartSkeleton, TableSkeleton } from "@/components/loading";
-import ClientOnly from "../../../src/components/ClientOnly";
+import ChartCard from "$/control/chart-card";
+import { CardSkeleton, ChartSkeleton, TableSkeleton } from "$/loading";
+import ClientOnly from "$/ClientOnly";
 
 import type { Repository } from "~/repository/typing";
 import RepositoryRankView from "~/repository/views/repository-rank";

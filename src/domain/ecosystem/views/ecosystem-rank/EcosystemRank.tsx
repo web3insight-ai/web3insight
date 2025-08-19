@@ -5,7 +5,7 @@ import { Card } from "@nextui-org/react";
 import { Warehouse, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { EcosystemType } from "~/ecosystem/typing";
-import { EcosystemTypeFilter } from "@/components/ecosystem-type-filter";
+import { EcosystemTypeFilter } from "$/ecosystem-type-filter";
 
 import type { EcosystemRankViewWidgetProps } from "./typing";
 

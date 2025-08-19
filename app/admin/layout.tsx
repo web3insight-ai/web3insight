@@ -4,7 +4,7 @@ import { Chip } from "@nextui-org/react";
 
 import { canManageEcosystems, canManageEvents } from "~/auth/helper";
 import { getUser } from "~/auth/repository";
-import Navbar from "../../src/components/navbar";
+import Navbar from "$/navbar";
 import { getRoleName, getRoleColor, getEffectiveRole } from "@/utils/role";
 import AdminNavMenu from './AdminNavMenu';
 

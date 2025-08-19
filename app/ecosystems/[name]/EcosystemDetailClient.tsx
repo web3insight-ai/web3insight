@@ -2,13 +2,13 @@
 
 import { Warehouse, Github, Users } from "lucide-react";
 
-import ChartCard from "@/components/control/chart-card";
-import { CardSkeleton, ChartSkeleton, TableSkeleton } from "@/components/loading";
+import ChartCard from "$/control/chart-card";
+import { CardSkeleton, ChartSkeleton, TableSkeleton } from "$/loading";
 
 import RepositoryRankViewWidget from "~/repository/views/repository-rank";
 import DeveloperRankViewWidget from "~/developer/views/developer-rank";
 
-import ClientOnly from "../../../src/components/ClientOnly";
+import ClientOnly from "$/ClientOnly";
 
 import { resolveChartOptions } from "./helper";
 import MetricOverview from "./MetricOverview";

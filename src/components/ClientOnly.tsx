@@ -2,17 +2,21 @@
 
 import { type PropsWithChildren, useState, useEffect } from "react";
 
-let hydrating = true;
-
 function ClientOnly({ children }: PropsWithChildren) {
-  const [hydrated, setHydrated] = useState(!hydrating);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    hydrating = false;
+    // Only set hydrated to true after the component has mounted
+    // This ensures we're definitely on the client side
     setHydrated(true);
   }, []);
 
-  return hydrated ? children : null;
+  // During SSR, return null to avoid indexedDB issues
+  if (typeof window === 'undefined' || !hydrated) {
+    return null;
+  }
+
+  return <>{children}</>;
 }
 
 export default ClientOnly;

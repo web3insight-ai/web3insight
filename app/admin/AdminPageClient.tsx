@@ -1,7 +1,7 @@
 'use client';
 
 import EcosystemManagementTable from "~/ecosystem/widgets/EcosystemManagementTable";
-import Section from "../../src/entry/components/section";
+import Section from "$/section";
 
 interface AdminPageProps {
   ecosystems: Array<{ id: string; name: string; [key: string]: unknown }>;

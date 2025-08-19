@@ -21,7 +21,7 @@ import { getRoleName, getEffectiveRole } from "@/utils/role";
 import { getGitHubHandle } from "~/profile-analysis/helper";
 
 import { authModalOpenAtom } from "../atoms";
-import Section from "../../src/components/section";
+import Section from "$/section";
 import { WalletBindWidget } from "~/auth/widgets/wallet-bind";
 import { OriginAuthWidget } from "~/origin/widgets/OriginAuthWidget";
 

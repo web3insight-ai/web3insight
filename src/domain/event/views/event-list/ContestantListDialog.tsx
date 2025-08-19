@@ -7,7 +7,7 @@ import {
 } from "@nextui-org/react";
 import { MapPin, Calendar, ExternalLink, Users, AlertTriangle, Copy, ChevronDown, ChevronUp } from "lucide-react";
 
-import AnalysisProgress from "@/components/loading/AnalysisProgress";
+import AnalysisProgress from "$/loading/AnalysisProgress";
 import { fetchOne } from "../../repository/client";
 
 import type { ContestantListDialogProps } from "./typing";

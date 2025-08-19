@@ -1,8 +1,8 @@
 'use client';
 
 import AuthFormDialogViewWidget from "~/auth/views/auth-form-dialog";
-import Navbar from "../src/components/navbar";
-import NavigationMenu from "../src/components/navbar/NavigationMenu";
+import Navbar from "$/navbar";
+import NavigationMenu from "$/navbar/NavigationMenu";
 import type { ApiUser } from "~/auth/typing";
 
 interface DefaultLayoutWrapperProps {

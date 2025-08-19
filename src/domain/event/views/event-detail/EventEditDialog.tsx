@@ -10,8 +10,8 @@ import { useRouter } from "next/navigation";
 import { useAtom } from "jotai";
 
 import { addToastAtom } from "#/atoms";
-import FileUpload from "@/components/control/file-upload";
-import AnalysisProgress from "@/components/loading/AnalysisProgress";
+import FileUpload from "$/control/file-upload";
+import AnalysisProgress from "$/loading/AnalysisProgress";
 import { updateOne, fetchOne } from "../../repository/client";
 import { resolveContestants } from "../event-list/helper";
 

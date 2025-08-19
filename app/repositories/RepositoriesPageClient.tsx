@@ -1,13 +1,14 @@
 'use client';
 
 import {
-  Card, CardBody, CardHeader, Input, Dropdown, DropdownTrigger,
+  Card, CardHeader, Input, Dropdown, DropdownTrigger,
   DropdownMenu, DropdownItem, Button, Pagination,
 } from "@nextui-org/react";
 import { Database, Filter, SortAsc, SortDesc, Search, Users, Code2, Zap, Star, GitFork } from "lucide-react";
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import type { RepoRankRecord } from "~/api/typing";
+import MetricCard, { type MetricCardProps } from "$/control/metric-card";
 
 interface RepositoriesPageProps {
   repositories: RepoRankRecord[];
@@ -15,6 +16,40 @@ interface RepositoriesPageProps {
   totalDevelopers: number;
   totalCoreDevelopers: number;
   totalEcosystems: number;
+}
+
+function resolveMetrics(dataSource: {
+  totalCoreDevelopers: number;
+  totalDevelopers: number;
+  totalEcosystems: number;
+  totalRepositories: number;
+}): MetricCardProps[] {
+  return [
+    {
+      label: "Developers",
+      value: Number(dataSource.totalCoreDevelopers).toLocaleString(),
+      icon: <Code2 size={20} className="text-secondary" />,
+      iconBgClassName: "bg-secondary/10",
+    },
+    {
+      label: "ECO Contributors",
+      value: Number(dataSource.totalDevelopers).toLocaleString(),
+      icon: <Users size={20} className="text-primary" />,
+      iconBgClassName: "bg-primary/10",
+    },
+    {
+      label: "Ecosystems",
+      value: Number(dataSource.totalEcosystems).toLocaleString(),
+      icon: <Database size={20} className="text-warning" />,
+      iconBgClassName: "bg-warning/10",
+    },
+    {
+      label: "Repositories",
+      value: Number(dataSource.totalRepositories).toLocaleString(),
+      icon: <Zap size={20} className="text-success" />,
+      iconBgClassName: "bg-success/10",
+    },
+  ];
 }
 
 export default function RepositoriesPageClient({
@@ -98,62 +133,16 @@ export default function RepositoriesPageClient({
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-10">
-          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-            <CardBody className="p-6">
-              <div className="text-center">
-                <div className="p-3 bg-secondary/10 rounded-xl inline-flex mb-3">
-                  <Code2 size={20} className="text-secondary" />
-                </div>
-                <p className="text-xs text-gray-500 dark:text-gray-500 uppercase tracking-wider mb-1">Developers</p>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">
-                  {Number(totalCoreDevelopers).toLocaleString()}
-                </h2>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-            <CardBody className="p-6">
-              <div className="text-center">
-                <div className="p-3 bg-primary/10 rounded-xl inline-flex mb-3">
-                  <Users size={20} className="text-primary" />
-                </div>
-                <p className="text-xs text-gray-500 dark:text-gray-500 uppercase tracking-wider mb-1">ECO Contributors</p>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">
-                  {Number(totalDevelopers).toLocaleString()}
-                </h2>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-            <CardBody className="p-6">
-              <div className="text-center">
-                <div className="p-3 bg-warning/10 rounded-xl inline-flex mb-3">
-                  <Database size={20} className="text-warning" />
-                </div>
-                <p className="text-xs text-gray-500 dark:text-gray-500 uppercase tracking-wider mb-1">Ecosystems</p>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">
-                  {Number(totalEcosystems).toLocaleString()}
-                </h2>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-            <CardBody className="p-6">
-              <div className="text-center">
-                <div className="p-3 bg-success/10 rounded-xl inline-flex mb-3">
-                  <Zap size={20} className="text-success" />
-                </div>
-                <p className="text-xs text-gray-500 dark:text-gray-500 uppercase tracking-wider mb-1">Repositories</p>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">
-                  {Number(totalRepositories).toLocaleString()}
-                </h2>
-              </div>
-            </CardBody>
-          </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10">
+          {resolveMetrics({ totalCoreDevelopers, totalDevelopers, totalEcosystems, totalRepositories }).map((metric, index) => (
+            <div
+              key={metric.label.replaceAll(" ", "")}
+              className="animate-slide-up"
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
+              <MetricCard {...metric} />
+            </div>
+          ))}
         </div>
 
         {/* Filters and Search */}

@@ -10,7 +10,7 @@ import { Search, Warehouse, Settings } from "lucide-react";
 import { EcosystemType } from "../typing";
 import type { EcosystemWithStats } from "../typing";
 import { getFilterForType } from "../helper";
-import { EcosystemTypeFilter } from "@/components/ecosystem-type-filter";
+import { EcosystemTypeFilter } from "$/ecosystem-type-filter";
 
 interface EcosystemManagementTableProps {
   ecosystems: EcosystemWithStats[];

@@ -7,7 +7,7 @@ import {
 } from "@nextui-org/react";
 import { Calendar } from "lucide-react";
 
-import FileUpload from "@/components/control/file-upload";
+import FileUpload from "$/control/file-upload";
 
 import { insertOne } from "../../repository/client";
 

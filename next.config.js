@@ -13,11 +13,32 @@ const nextConfig = {
   // Ensure proper bundling for server-side dependencies
   serverExternalPackages: ['@remix-run/node'],
   // Handle problematic dependencies
-  webpack: (config) => {
+  webpack: (config, { isServer, webpack }) => {
     config.resolve.fallback = {
       ...config.resolve.fallback,
       fs: false,
+      net: false,
+      tls: false,
+      crypto: false,
     };
+
+    // Externalize server-only packages that shouldn't be bundled for client
+    if (!isServer) {
+      config.externals = config.externals || [];
+      config.externals.push({
+        'pino-pretty': 'pino-pretty',
+        'encoding': 'encoding',
+      });
+    }
+
+    // Ignore optional dependencies that cause build issues
+    config.plugins = config.plugins || [];
+    config.plugins.push(
+      new webpack.IgnorePlugin({
+        resourceRegExp: /^(pino-pretty|encoding)$/,
+      })
+    );
+
     return config;
   },
   // Images domain configuration if needed

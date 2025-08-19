@@ -1,15 +1,16 @@
 'use client';
 
 import {
-  Card, CardBody, CardHeader, Input, Pagination,
+  Card, CardHeader, Input, Pagination,
 } from "@nextui-org/react";
 import { Search, Warehouse, Database, Users, Code2, Zap } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { EcosystemType } from "~/ecosystem/typing";
 import { getFilterForType } from "~/ecosystem/helper";
-import { EcosystemTypeFilter } from "@/components/ecosystem-type-filter";
+import { EcosystemTypeFilter } from "$/ecosystem-type-filter";
 import type { EcoRankRecord } from "~/api/typing";
+import MetricCard, { type MetricCardProps } from "$/control/metric-card";
 
 interface EcosystemsPageProps {
   ecosystems: EcoRankRecord[];
@@ -18,6 +19,40 @@ interface EcosystemsPageProps {
   totalDevelopers: number;
   totalCoreDevelopers: number;
   totalNewDevelopers: number;
+}
+
+function resolveMetrics(dataSource: {
+  totalCoreDevelopers: number;
+  totalDevelopers: number;
+  totalEcosystems: number;
+  totalRepositories: number;
+}): MetricCardProps[] {
+  return [
+    {
+      label: "Developers",
+      value: Number(dataSource.totalCoreDevelopers).toLocaleString(),
+      icon: <Code2 size={20} className="text-secondary" />,
+      iconBgClassName: "bg-secondary/10",
+    },
+    {
+      label: "ECO Contributors",
+      value: Number(dataSource.totalDevelopers).toLocaleString(),
+      icon: <Users size={20} className="text-primary" />,
+      iconBgClassName: "bg-primary/10",
+    },
+    {
+      label: "Ecosystems",
+      value: Number(dataSource.totalEcosystems).toLocaleString(),
+      icon: <Database size={20} className="text-warning" />,
+      iconBgClassName: "bg-warning/10",
+    },
+    {
+      label: "Repositories",
+      value: Number(dataSource.totalRepositories).toLocaleString(),
+      icon: <Zap size={20} className="text-success" />,
+      iconBgClassName: "bg-success/10",
+    },
+  ];
 }
 
 export default function EcosystemsPageClient({
@@ -91,70 +126,16 @@ export default function EcosystemsPageClient({
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mb-10">
-          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-            <CardBody className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-secondary/10 rounded-xl flex-shrink-0">
-                  <Code2 size={20} className="text-secondary" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">Developers</p>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {totalCoreDevelopers.toLocaleString()}
-                  </h2>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-            <CardBody className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-primary/10 rounded-xl flex-shrink-0">
-                  <Users size={20} className="text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">ECO Contributors</p>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {totalDevelopers.toLocaleString()}
-                  </h2>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-            <CardBody className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-warning/10 rounded-xl flex-shrink-0">
-                  <Database size={20} className="text-warning" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">Ecosystems</p>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {totalEcosystems.toLocaleString()}
-                  </h2>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-            <CardBody className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-success/10 rounded-xl flex-shrink-0">
-                  <Zap size={20} className="text-success" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">Repositories</p>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {totalRepositories.toLocaleString()}
-                  </h2>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10">
+          {resolveMetrics({ totalCoreDevelopers, totalDevelopers, totalEcosystems, totalRepositories }).map((metric, index) => (
+            <div
+              key={metric.label.replaceAll(" ", "")}
+              className="animate-slide-up"
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
+              <MetricCard {...metric} />
+            </div>
+          ))}
         </div>
 
         {/* Filters and Search */}

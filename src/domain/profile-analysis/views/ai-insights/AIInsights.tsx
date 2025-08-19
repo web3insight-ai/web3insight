@@ -6,7 +6,7 @@ import { useAtom } from "jotai";
 import type { GitHubUser } from "../../typing";
 import { hasAIData, getInvolvementLevelColor } from "../../helper";
 import { languageAtom } from "#/atoms";
-import { LanguageToggle } from "@/components/control/language-toggle";
+import { LanguageToggle } from "$/control/language-toggle";
 
 interface AIInsightsProps {
   user: GitHubUser;

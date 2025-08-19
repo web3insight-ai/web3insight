@@ -1,7 +1,7 @@
-import ChartCard from "@/components/control/chart-card";
+import ChartCard from "$/control/chart-card";
 
 import RepositoryHeaderWidget from "~/repository/widgets/repository-header";
-import ClientOnly from "../../../../entry/components/ClientOnly";
+import ClientOnly from "$/ClientOnly";
 
 import type { RepositoryDetailProps } from "./typing";
 

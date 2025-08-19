@@ -6,8 +6,7 @@ import { useEffect, useState, useRef } from "react";
 import { useAtom } from "jotai";
 import Markdown from "react-markdown";
 import { authModalOpenAtom, authModalTypeAtom } from "./atoms";
-// Remove server-side import - will use API route instead
-import MetricOverview from "../src/entry/routes/_home._index/MetricOverview";
+import { MetricOverview } from "$/index";
 
 export default function HomePageClient() {
   const [, setAuthModalOpen] = useAtom(authModalOpenAtom);

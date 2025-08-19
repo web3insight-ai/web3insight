@@ -3,7 +3,7 @@ import { Button } from '@nextui-org/react';
 import { useAccount, useSignMessage } from 'wagmi';
 import { Wallet, Check, AlertCircle, Loader2, Plus, AlertTriangle, CheckCircle } from 'lucide-react';
 
-import { ConnectButton } from '@/components/wallet/ConnectButton';
+import { ConnectButton } from '$/wallet/ConnectButton';
 import type { ApiUser } from '~/auth/typing';
 
 interface WalletBindWidgetProps {

@@ -4,8 +4,8 @@ import { NextUIProvider } from '@nextui-org/react';
 import { ThemeProvider } from 'next-themes';
 import { Provider as JotaiProvider } from 'jotai';
 import { WalletProvider } from '@/providers/WalletProvider';
-import NavigationProgress from '../src/components/NavigationProgress';
-import ClientOnly from '../src/components/ClientOnly';
+import NavigationProgress from '$/NavigationProgress';
+import ClientOnly from '$/ClientOnly';
 
 export function ClientProviders({
   children,

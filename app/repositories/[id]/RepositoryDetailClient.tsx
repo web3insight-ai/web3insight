@@ -1,8 +1,8 @@
 'use client';
 
-import { ChartSkeleton } from "@/components/loading";
+import { ChartSkeleton } from "$/loading";
 import RepositoryDetailView from "~/repository/views/repository-detail";
-import ClientOnly from "../../../src/components/ClientOnly";
+import ClientOnly from "$/ClientOnly";
 
 interface RepositoryDetailProps {
   repository: {

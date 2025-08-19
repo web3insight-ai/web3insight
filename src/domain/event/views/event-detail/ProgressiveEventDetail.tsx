@@ -4,8 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { Card, CardHeader, Avatar, Badge, Button } from "@nextui-org/react";
 import { Users, Trophy, Medal, Award, ChevronDown, ChevronUp, RefreshCw, Edit3 } from "lucide-react";
 
-import AnalysisProgress from "@/components/loading/AnalysisProgress";
-import AnalysisSkeleton from "@/components/loading/AnalysisSkeleton";
+import AnalysisProgress from "$/loading/AnalysisProgress";
+import AnalysisSkeleton from "$/loading/AnalysisSkeleton";
 
 import type { PartialContestant, EventReport } from "../../typing";
 import {

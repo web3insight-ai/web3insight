@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 
 export default async function EcosystemsPage() {
   // Get current user from session
-  const headersList = headers();
+  const headersList = await headers();
   const host = headersList.get('host') || 'localhost:3000';
   const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
   const url = `${protocol}://${host}/ecosystems`;

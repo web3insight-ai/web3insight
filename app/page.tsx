@@ -6,7 +6,7 @@ import { headers } from 'next/headers';
 import EcosystemRankViewWidget from "~/ecosystem/views/ecosystem-rank";
 import RepositoryRankViewWidget from "~/repository/views/repository-rank";
 import DeveloperRankViewWidget from "~/developer/views/developer-rank";
-import Section from "../src/components/section";
+import Section from "$/section";
 import DefaultLayoutWrapper from "./DefaultLayoutWrapper";
 import HomePageClient from "./HomePageClient";
 
