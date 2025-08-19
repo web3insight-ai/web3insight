@@ -1,4 +1,5 @@
-import { Link, useLocation } from "@remix-run/react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Calendar, Database, Warehouse, Users, Brain } from "lucide-react";
 import clsx from "clsx";
 
@@ -9,13 +10,13 @@ const navigationItems = [
     icon: Warehouse,
   },
   {
-    name: "Repositories", 
+    name: "Repositories",
     href: "/repositories",
     icon: Database,
   },
   {
     name: "Developers",
-    href: "/developers", 
+    href: "/developers",
     icon: Users,
   },
   {
@@ -31,18 +32,18 @@ const navigationItems = [
 ];
 
 function NavigationMenu() {
-  const location = useLocation();
+  const pathname = usePathname();
 
   return (
     <nav className="flex items-center justify-center gap-0.5">
       {navigationItems.map((item) => {
         const Icon = item.icon;
-        const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + "/");
-        
+        const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+
         return (
           <Link
             key={item.name}
-            to={item.href}
+            href={item.href}
             className={clsx(
               "flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-200",
               isActive

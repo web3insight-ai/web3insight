@@ -1,15 +1,38 @@
-import HttpClient from "@/clients/http/HttpClient";
-import { getHttpTimeout } from "@/utils/env";
-import type { DataValue } from "@/types";
+import HttpClient, { type RequestConfigWithTimeout } from "@/clients/http/HttpClient";
+import { getHttpTimeout, getVar } from "@/utils/env";
+import type { DataValue, ResponseResult } from "@/types";
+
+// OSS Insight API returns data in a specific structure, so we need to normalize it
+function normalizeResponse<VT extends DataValue = DataValue>(apiResponse: unknown): ResponseResult<VT> {
+  // OSS Insight API returns: { data: actualData, requestedAt, finishedAt, etc. }
+  if (apiResponse && apiResponse.data !== undefined && apiResponse.data !== null) {
+    return {
+      success: true,
+      code: "200",
+      message: "OSS Insight data retrieved successfully",
+      data: apiResponse.data as VT,
+      extra: {
+        requestedAt: apiResponse.requestedAt,
+        finishedAt: apiResponse.finishedAt,
+        expiresAt: apiResponse.expiresAt,
+      },
+    };
+  }
+
+  return {
+    success: false,
+    code: "404",
+    message: apiResponse?.message || "No data received from OSS Insight API",
+    data: undefined as VT,
+    extra: {},
+  };
+}
 
 // Create base HTTP client
-const baseHttpClient = new HttpClient({ baseUrl: process.env.OSSINSIGHT_URL });
-
-// Type definitions for the wrapper
-interface RequestConfigWithTimeout {
-  signal?: AbortSignal;
-  [key: string]: unknown;
-}
+const baseHttpClient = new HttpClient({
+  baseURL: getVar("OSSINSIGHT_URL"),
+  normalizer: normalizeResponse,
+});
 
 // Get centralized timeout value
 const httpTimeout = getHttpTimeout();

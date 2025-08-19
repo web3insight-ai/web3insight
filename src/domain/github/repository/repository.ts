@@ -18,6 +18,8 @@ async function fetchRepoByName(repoName: string): Promise<ResponseResult<Repo>> 
     return {
       success: false,
       data: null as unknown as Repo,
+      message: error instanceof Error ? error.message : "Unknown error occurred",
+      code: "500",
     };
   }
 }

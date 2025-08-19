@@ -11,9 +11,9 @@ import type { TotalResponseData, ListResponseData } from "../typing";
 // Create authenticated HTTP client factory
 function createAuthenticatedClient(userToken: string) {
   const httpTimeout = getHttpTimeout();
-  
+
   const baseClient = new HttpClient({
-    baseUrl: process.env.DATA_API_URL,
+    baseURL: process.env.DATA_API_URL,
     headers: {
       Authorization: `Bearer ${userToken}`,
     },

@@ -1,6 +1,6 @@
 import { Avatar } from "@nextui-org/react";
 import { Github, Building, ExternalLink } from "lucide-react";
-import { Link } from "@remix-run/react";
+import Link from "next/link";
 
 import type { GitHubUser } from "../../typing";
 
@@ -40,7 +40,7 @@ export function ProfileHeader({ user, className = "" }: ProfileHeaderProps) {
               {user.name || user.login}
             </h1>
             <Link
-              to={user.html_url}
+              href={user.html_url}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"

@@ -16,7 +16,7 @@ async function fetchOne(idOrUsername: number | string): Promise<ResponseResult<D
   if (!others.success) {
     return {
       ...others,
-      code: others.message.toLowerCase().indexOf("not found") > -1 ? "404" : others.code,
+      code: others.message && others.message.toLowerCase().indexOf("not found") > -1 ? "404" : others.code,
       data: null,
     };
   }

@@ -1,4 +1,6 @@
-import { Link } from "@remix-run/react";
+'use client';
+
+import Link from "next/link";
 import { Card, CardHeader } from "@nextui-org/react";
 import { Github, ArrowRight } from "lucide-react";
 
@@ -53,7 +55,7 @@ function RepositoryRankView({ className, dataSource }: RepositoryRankViewWidgetP
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <Link 
-                    to={`/repositories/${repo.id}?name=${encodeURIComponent(repo.fullName)}`} 
+                    href={`/repositories/${repo.id}?name=${encodeURIComponent(repo.fullName)}`} 
                     className="font-medium text-gray-900 dark:text-white hover:text-primary transition-colors duration-200"
                     target="_blank"
                     rel="noreferrer"
@@ -88,7 +90,7 @@ function RepositoryRankView({ className, dataSource }: RepositoryRankViewWidgetP
       </div>
       <div className="px-6 py-4 border-t border-border dark:border-border-dark">
         <Link 
-          to="/repositories" 
+          href="/repositories" 
           className="flex items-center justify-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200"
         >
           View All Repositories

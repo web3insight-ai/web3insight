@@ -1,6 +1,8 @@
+'use client';
+
 import { Card, CardHeader } from "@nextui-org/react";
 import { Users, ArrowRight } from "lucide-react";
-import { Link } from "@remix-run/react";
+import Link from "next/link";
 
 import RepoLinkWidget from "../../../repository/widgets/repo-link";
 
@@ -79,7 +81,7 @@ function DeveloperRankTableView({ dataSource }: Pick<DeveloperRankViewWidgetProp
       </div>
       <div className="px-6 py-4 border-t border-border dark:border-border-dark">
         <Link 
-          to="/developers" 
+          href="/developers" 
           className="flex items-center justify-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200"
         >
           View All Developers

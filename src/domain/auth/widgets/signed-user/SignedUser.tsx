@@ -1,8 +1,10 @@
+'use client';
+
 import { Popover, PopoverContent, PopoverTrigger, Avatar } from "@nextui-org/react";
 import { LogIn, LogOut, User as UserIcon, Settings, Warehouse, Calendar } from "lucide-react";
 
 import { canManageEcosystems, canManageEvents, isAdmin } from "../../helper";
-import { signOut } from "../../repository";
+import { signOut } from "../../client-repository";
 
 import type { SignedUserProps } from "./typing";
 import ActionItem from "./ActionItem";
@@ -56,15 +58,15 @@ function SignedUser({ user, onSignIn, onSignOut }: SignedUserProps) {
 
             {(canManageEcosystems(user) || canManageEvents(user)) && (
               <div className="py-1 border-t border-border dark:border-border-dark">
-                <ActionItem 
-                  text="Ecosystems" 
-                  icon={Warehouse} 
+                <ActionItem
+                  text="Ecosystems"
+                  icon={Warehouse}
                   action="/admin"
                   disabled={!canManageEcosystems(user)}
                 />
-                <ActionItem 
-                  text="Events" 
-                  icon={Calendar} 
+                <ActionItem
+                  text="Events"
+                  icon={Calendar}
                   action="/admin/events"
                   disabled={!canManageEvents(user)}
                 />

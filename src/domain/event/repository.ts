@@ -4,7 +4,7 @@ import httpClient from "@/clients/http/default";
 
 import type { User as GithubUser } from "../github/typing";
 import { fetchAnalysisUserList, analyzeUserList, fetchAnalysisUser, updateAnalysisUser } from "../api/repository";
-import { getSession } from "../auth/helper/server-only";
+import { getSession } from "../auth/helper/server";
 
 import type { EventReport } from "./typing";
 import { resolveEventDetail } from "./helper";

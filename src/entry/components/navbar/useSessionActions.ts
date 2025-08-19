@@ -1,15 +1,14 @@
-import { useNavigate, useOutletContext } from "@remix-run/react";
+import { useRouter } from "next/navigation";
 import { useAtom } from "jotai";
 import { authModalOpenAtom, authModalTypeAtom } from "#/atoms";
 
-import type { ApiUser } from "~/auth/typing";
-
-function useSessionActions<U = ApiUser | null>() {
+function useSessionActions() {
   const [, setAuthModalOpen] = useAtom(authModalOpenAtom);
   const [, setAuthModalType] = useAtom(authModalTypeAtom);
 
-  const navigate = useNavigate();
-  const { setUser } = useOutletContext<{ setUser: (user: U) => void; }>();
+  const router = useRouter();
+  // Note: In Next.js, we'll manage user state differently
+  // For now, we'll remove the setUser dependency
 
   // Function to open auth modal with specified type
   const openAuthModal = (type: 'signin' | 'signup' | 'forgotPassword' | 'resetPassword') => {
@@ -17,11 +16,9 @@ function useSessionActions<U = ApiUser | null>() {
     setAuthModalOpen(true);
   };
 
-  const signOut = (user: U) => {
-    // Immediately update the UI
-    setUser(user);
-    // Navigate to home page
-    navigate('/', { replace: true });
+  const signOut = () => {
+    // Navigate to home page - user state will be managed by parent component
+    router.push('/');
   };
 
   return {

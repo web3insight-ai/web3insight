@@ -1,5 +1,7 @@
+'use client';
+
 import clsx from "clsx";
-import { Link } from "@remix-run/react";
+import Link from "next/link";
 
 import type { DeveloperLinkProps } from "./typing";
 
@@ -7,7 +9,7 @@ function DeveloperLink({ className, developer: { actor_id, actor_login } }: Deve
   return (
     <Link
       className={clsx("text-gray-900 dark:text-gray-300 hover:text-primary hover:underline", className)}
-      to={`/developers/${actor_id}`}
+      href={`/developers/${actor_id}`}
     >
       @{actor_login}
     </Link>

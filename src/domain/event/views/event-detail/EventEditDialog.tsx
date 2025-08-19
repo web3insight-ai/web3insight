@@ -4,7 +4,7 @@ import {
   Textarea, Button, Chip,
 } from "@nextui-org/react";
 import { Calendar, AlertTriangle, X } from "lucide-react";
-import { useNavigate } from "@remix-run/react";
+import { useRouter } from "next/navigation";
 import { useAtom } from "jotai";
 
 import { addToastAtom } from "#/atoms";
@@ -23,7 +23,7 @@ type EventEditDialogProps = {
 };
 
 function EventEditDialog({ visible, onClose, event }: EventEditDialogProps) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [, addToast] = useAtom(addToastAtom);
   const [description, setDescription] = useState("");
   const [currentParticipants, setCurrentParticipants] = useState<string[]>([]);
@@ -38,17 +38,17 @@ function EventEditDialog({ visible, onClose, event }: EventEditDialogProps) {
   useEffect(() => {
     if (event && visible) {
       setDescription(event.description || "");
-      
+
       // Load original request_data if available, otherwise try to derive from contestants
       let participantList: string[] = [];
-      
+
       if (event.request_data && event.request_data.length > 0) {
         participantList = event.request_data;
       } else if (event.contestants && event.contestants.length > 0) {
         // Fallback: extract GitHub usernames from contestants
         participantList = event.contestants.map(contestant => contestant.username);
       }
-      
+
       setCurrentParticipants(participantList);
       setUserInput("");
     }
@@ -127,7 +127,7 @@ function EventEditDialog({ visible, onClose, event }: EventEditDialogProps) {
 
       if (result.success) {
         setAnalysisProgress(20);
-        
+
         addToast({
           type: 'success',
           title: 'Event Updated',
@@ -142,7 +142,7 @@ function EventEditDialog({ visible, onClose, event }: EventEditDialogProps) {
     } catch (error) {
       setIsAnalyzing(false);
       setLoading(false);
-      
+
       addToast({
         type: 'error',
         title: 'Update Failed',
@@ -158,18 +158,18 @@ function EventEditDialog({ visible, onClose, event }: EventEditDialogProps) {
     const poll = async (): Promise<void> => {
       try {
         attempts++;
-        
+
         // Update progress based on attempts (20% to 90%)
         const progressIncrement = Math.min(70 / maxAttempts * attempts, 70);
         setAnalysisProgress(20 + progressIncrement);
 
         const response = await fetchOne(eventId);
-        
+
         if (response.success && response.data && response.data.contestants && response.data.contestants.length > 0) {
           // Check if analysis is complete by looking for analytics data
-          const hasCompleteData = response.data.contestants.some(contestant => 
-            contestant.analytics && 
-            Array.isArray(contestant.analytics) && 
+          const hasCompleteData = response.data.contestants.some(contestant =>
+            contestant.analytics &&
+            Array.isArray(contestant.analytics) &&
             contestant.analytics.length > 0 &&
             contestant.analytics.some(analytics => analytics.score !== undefined && analytics.score !== null),
           );
@@ -177,7 +177,7 @@ function EventEditDialog({ visible, onClose, event }: EventEditDialogProps) {
           if (hasCompleteData) {
             // Analysis complete!
             setAnalysisProgress(100);
-            
+
             addToast({
               type: 'success',
               title: 'Analysis Complete',
@@ -186,12 +186,12 @@ function EventEditDialog({ visible, onClose, event }: EventEditDialogProps) {
 
             // Wait a moment to show completion, then navigate and refresh
             setTimeout(() => {
-              navigate(`/admin/events/${eventId}`, { replace: true });
+              router.push(`/admin/events/${eventId}`);
               closeDialog();
               // Trigger page refresh to get latest data
               window.location.reload();
             }, 1500);
-            
+
             return;
           }
         }
@@ -204,7 +204,7 @@ function EventEditDialog({ visible, onClose, event }: EventEditDialogProps) {
         } else {
           // Max attempts reached, but still navigate to show partial results
           setAnalysisProgress(100);
-          
+
           addToast({
             type: 'warning',
             title: 'Analysis Taking Longer',
@@ -212,7 +212,7 @@ function EventEditDialog({ visible, onClose, event }: EventEditDialogProps) {
           });
 
           setTimeout(() => {
-            navigate(`/admin/events/${eventId}`, { replace: true });
+            router.push(`/admin/events/${eventId}`);
             closeDialog();
             // Trigger page refresh to get latest data
             window.location.reload();
@@ -227,7 +227,7 @@ function EventEditDialog({ visible, onClose, event }: EventEditDialogProps) {
         });
 
         setTimeout(() => {
-          navigate(`/admin/events/${eventId}`, { replace: true });
+          router.push(`/admin/events/${eventId}`);
           closeDialog();
           // Trigger page refresh to get latest data
           window.location.reload();
@@ -399,7 +399,7 @@ function EventEditDialog({ visible, onClose, event }: EventEditDialogProps) {
                       <div className="text-sm text-warning-700 dark:text-warning-300">
                         <p className="font-medium mb-1">Analysis Re-run Notice</p>
                         <p>
-                          Updating this event will trigger a complete re-analysis of all participants. 
+                          Updating this event will trigger a complete re-analysis of all participants.
                           This process may take several minutes to complete.
                         </p>
                       </div>

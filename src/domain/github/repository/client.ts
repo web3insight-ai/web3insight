@@ -1,22 +1,16 @@
 import { normalizeRestfulResponse } from "@/clients/http";
-import HttpClient from "@/clients/http/HttpClient";
+import HttpClient, { type RequestConfigWithTimeout } from "@/clients/http/HttpClient";
 import { getHttpTimeout } from "@/utils/env";
 import type { DataValue } from "@/types";
 
 // Create base HTTP client
 const baseHttpClient = new HttpClient({
-  baseUrl: `${process.env.DATA_API_URL}/v1/github/proxy`,
+  baseURL: `${process.env.DATA_API_URL}/v1/github/proxy`,
   headers: {
     Authorization: `Bearer ${process.env.DATA_API_TOKEN}`,
   },
   normalizer: normalizeRestfulResponse,
 });
-
-// Type definitions for the wrapper
-interface RequestConfigWithTimeout {
-  signal?: AbortSignal;
-  [key: string]: unknown;
-}
 
 // Get centralized timeout value
 const httpTimeout = getHttpTimeout();

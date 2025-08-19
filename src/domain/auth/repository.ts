@@ -3,7 +3,8 @@ import { isServerSide, generateFailedResponse } from "@/clients/http";
 import httpClient from "@/clients/http/default";
 import { getVar } from "@/utils/env";
 
-import { getSession, clearSession } from "./helper/server-only";
+import { getSession } from "./helper/server";
+import { clearSession } from "./helper/client";
 
 import type { ApiUser, ApiAuthResponse, GitHubOAuthRequest, MagicResponse, WalletBindRequest, WalletBindResponse } from "./typing";
 
@@ -29,11 +30,11 @@ function transformApiUserToCompatibleFormat(apiResponse: {
   };
 }): ApiUser {
   const { profile, binds, role } = apiResponse;
-  
+
   // Find GitHub bind for username
   const githubBind = binds.find((bind: {bind_type: string; bind_key: string}) => bind.bind_type === "github");
   const emailBind = binds.find((bind: {bind_type: string; bind_key: string}) => bind.bind_type === "email");
-  
+
   return {
     profile,
     binds,
@@ -56,7 +57,7 @@ async function signInWithGitHub(code: string): Promise<ResponseResult<ApiAuthRes
 
   try {
     if (!code) {
-      return generateFailedResponse("GitHub authorization code is required", 400);
+      return generateFailedResponse("GitHub authorization code is required", "400");
     }
 
     const oauthRequest: GitHubOAuthRequest = {
@@ -77,11 +78,11 @@ async function signInWithGitHub(code: string): Promise<ResponseResult<ApiAuthRes
     if (!response.ok) {
       const error = await response.text();
       console.error("GitHub OAuth token exchange failed:", error);
-      return generateFailedResponse("Failed to authenticate with GitHub", response.status);
+      return generateFailedResponse("Failed to authenticate with GitHub", response.status.toString());
     }
 
     const authData = await response.json();
-    
+
     if (!authData.token) {
       return generateFailedResponse("Invalid authentication response from server");
     }
@@ -196,7 +197,7 @@ async function fetchCurrentUser(request?: Request): Promise<ResponseResult<ApiUs
           data: null,
         };
       }
-      
+
       // For other errors, return default empty result
       return defaultResult;
     }
@@ -222,8 +223,8 @@ async function getUser(request: Request): Promise<ApiUser | null> {
 
 // Get GitHub OAuth URL
 function getGitHubAuthUrl(): string {
-  const baseUrl = typeof window !== "undefined" 
-    ? window.location.origin 
+  const baseUrl = typeof window !== "undefined"
+    ? window.location.origin
     : (getVar("DATA_API_URL") || "http://localhost:5173");
   const redirectUri = `${baseUrl}/connect/github/redirect`;
   return `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&scope=user:email&redirect_uri=${encodeURIComponent(redirectUri)}`;
@@ -257,7 +258,7 @@ async function fetchMagic(request?: Request): Promise<ResponseResult<MagicRespon
   const userToken = session.get("userToken");
 
   if (!userToken) {
-    return generateFailedResponse("Not authenticated", 401);
+    return generateFailedResponse("Not authenticated", "401");
   }
 
   try {
@@ -272,7 +273,7 @@ async function fetchMagic(request?: Request): Promise<ResponseResult<MagicRespon
     if (!response.ok) {
       const error = await response.text();
       console.error("Failed to fetch magic string:", error);
-      return generateFailedResponse("Failed to fetch magic string", response.status);
+      return generateFailedResponse("Failed to fetch magic string", response.status.toString());
     }
 
     const data = await response.json();
@@ -298,7 +299,7 @@ async function bindWallet(walletBindData: WalletBindRequest, request?: Request):
   const userToken = session.get("userToken");
 
   if (!userToken) {
-    return generateFailedResponse("Not authenticated", 401);
+    return generateFailedResponse("Not authenticated", "401");
   }
 
   try {
@@ -315,11 +316,11 @@ async function bindWallet(walletBindData: WalletBindRequest, request?: Request):
     if (!response.ok) {
       const error = await response.text();
       console.error("Wallet binding failed:", error);
-      return generateFailedResponse("Failed to bind wallet", response.status);
+      return generateFailedResponse("Failed to bind wallet", response.status.toString());
     }
 
     const data = await response.json();
-    
+
     // Invalidate user cache after successful binding
     if (userToken && userCache[userToken]) {
       delete userCache[userToken];

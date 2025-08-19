@@ -1,6 +1,8 @@
+'use client';
+
 import { Card, CardHeader, Modal, ModalContent, ModalHeader, ModalBody } from "@nextui-org/react";
 import { Users, ArrowRight, Trophy, Medal, Award } from "lucide-react";
-import { Link } from "@remix-run/react";
+import Link from "next/link";
 import { useState } from "react";
 
 import RepoLinkWidget from "../../../repository/widgets/repo-link";
@@ -130,7 +132,7 @@ function DeveloperRankGridView({ dataSource }: Pick<DeveloperRankViewWidgetProps
 
         <div className="px-6 py-4 border-t border-border dark:border-border-dark">
           <Link 
-            to="/developers" 
+            href="/developers" 
             className="flex items-center justify-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200"
           >
             View All Developers

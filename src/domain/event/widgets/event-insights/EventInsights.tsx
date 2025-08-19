@@ -1,7 +1,8 @@
 import { Card, Skeleton } from "@nextui-org/react";
 import { Calendar, ArrowRight, Lock } from "lucide-react";
 import { useAtom } from "jotai";
-import { useNavigate, Link } from "@remix-run/react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import { addToastAtom } from "#/atoms";
 import { canManageEvents } from "~/auth/helper";
@@ -16,11 +17,11 @@ type EventInsightsProps = {
 
 function EventInsightsWidget({ dataSource, loading = false, user }: EventInsightsProps) {
   const [, addToast] = useAtom(addToastAtom);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleViewDetailsClick = (eventId: string) => {
     if (canManageEvents(user)) {
-      navigate(`/admin/events/${eventId}`);
+      router.push(`/admin/events/${eventId}`);
     } else {
       addToast({
         type: 'warning',
@@ -97,7 +98,7 @@ function EventInsightsWidget({ dataSource, loading = false, user }: EventInsight
                 month: 'short',
                 day: 'numeric',
               });
-              
+
               return (
                 <tr key={event.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -114,7 +115,7 @@ function EventInsightsWidget({ dataSource, loading = false, user }: EventInsight
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     {canManageEvents(user) ? (
-                      <button 
+                      <button
                         onClick={() => handleViewDetailsClick(event.id)}
                         className="inline-flex items-center gap-1 text-sm font-medium text-gray-900 dark:text-white hover:text-primary dark:hover:text-primary transition-colors"
                       >
@@ -122,7 +123,7 @@ function EventInsightsWidget({ dataSource, loading = false, user }: EventInsight
                         <ArrowRight size={14} />
                       </button>
                     ) : (
-                      <button 
+                      <button
                         onClick={() => handleViewDetailsClick(event.id)}
                         className="inline-flex items-center gap-1 text-sm font-medium text-gray-400 dark:text-gray-500 cursor-not-allowed"
                       >
@@ -139,8 +140,8 @@ function EventInsightsWidget({ dataSource, loading = false, user }: EventInsight
         </table>
       </div>
       <div className="px-6 py-4 border-t border-border dark:border-border-dark">
-        <Link 
-          to="/events" 
+        <Link
+          href="/events"
           className="flex items-center justify-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200"
         >
           View All Events

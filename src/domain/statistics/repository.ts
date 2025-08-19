@@ -20,7 +20,7 @@ async function safeApiCall<T>(apiCall: () => Promise<T>): Promise<T> {
 
     return generateFailedResponse(
       error instanceof Error ? error.message : "Network request failed",
-      isTimeoutError ? 408 : 500,
+      isTimeoutError ? "408" : "500",
     ) as T;
   }
 }
@@ -40,15 +40,16 @@ async function fetchStatisticsOverview() {
 
     console.error("request failed while fetching statistics overview", failedIndex, failed?.code, failed?.message);
 
-    return {
-      ...failed,
-      data: {
+    return generateFailedResponse(
+      failed?.message || "Failed to fetch statistics overview",
+      failed?.code || "500",
+      {
         ecosystem: 0,
         repository: 0,
         developer: 0,
         coreDeveloper: 0,
       },
-    };
+    );
   }
 
   return generateSuccessResponse({
@@ -68,14 +69,15 @@ async function fetchStatisticsRank() {
 
   const failed = responses.find(res => !res.success);
 
-  return failed ? {
-    ...failed,
-    data: {
+  return failed ? generateFailedResponse(
+    failed?.message || "Failed to fetch statistics rank",
+    failed?.code || "500",
+    {
       ecosystem: [],
       repository: [],
       developer: [],
     },
-  } : generateSuccessResponse({
+  ) : generateSuccessResponse({
     ecosystem: responses[0].data.list,
     repository: responses[1].data.list,
     developer: responses[2].data.list.slice(0, 10),

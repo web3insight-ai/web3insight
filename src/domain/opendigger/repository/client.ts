@@ -1,49 +1,25 @@
 import type { DataValue, ResponseResult } from "@/types";
-import { isPlainObject } from "@/utils";
-import { getHttpTimeout } from "@/utils/env";
-import HttpClient from "@/clients/http/HttpClient";
+import { getHttpTimeout, getVar } from "@/utils/env";
+import HttpClient, { type RequestConfigWithTimeout } from "@/clients/http/HttpClient";
 
-async function normalizeResponse<VT extends DataValue = DataValue>(res: Response): Promise<ResponseResult<VT>> {
-  const jsonData = await res.json();
-  const defaultCode = `${res.status}`;
-
-  if (res.ok) {
-    if (isPlainObject(jsonData)) {
-      const { success, code = defaultCode, message, data, extra, ...others } = jsonData;
-      const resBase = { success: success ?? true, code, message };
-
-      return "data" in jsonData ? {
-        ...resBase,
-        data,
-        extra: { ...extra, ...others },
-      } : {
-        ...resBase,
-        data: others,
-        extra,
-      };
-    }
-
+// OpenDigger API returns raw data directly, so we need to normalize it
+function normalizeResponse<VT extends DataValue = DataValue>(jsonData: unknown): ResponseResult<VT> {
+  if (jsonData !== null && jsonData !== undefined) {
+    // OpenDigger API returns data directly (not wrapped in success/data structure)
+    // So we normalize it to our expected ResponseResult format
     return {
       success: true,
-      code: defaultCode,
-      message: "",
-      data: jsonData,
+      code: "200",
+      message: "OpenDigger data retrieved successfully",
+      data: jsonData as VT,
       extra: {},
     };
   }
 
-  let message;
-
-  if (res.status === 404) {
-    message = `\`${new URL(res.url).pathname}\` is not found`;
-  } if (isPlainObject(jsonData)) {
-    message = jsonData.message;
-  }
-
   return {
     success: false,
-    code: defaultCode,
-    message: message ?? res.statusText,
+    code: "500",
+    message: "No data received from OpenDigger API",
     data: undefined as VT,
     extra: {},
   };
@@ -51,15 +27,9 @@ async function normalizeResponse<VT extends DataValue = DataValue>(res: Response
 
 // Create base HTTP client
 const baseHttpClient = new HttpClient({
-  baseUrl: process.env.OPENDIGGER_URL,
+  baseURL: getVar("OPENDIGGER_URL"),
   normalizer: normalizeResponse,
 });
-
-// Type definitions for the wrapper
-interface RequestConfigWithTimeout {
-  signal?: AbortSignal;
-  [key: string]: unknown;
-}
 
 // Get centralized timeout value
 const httpTimeout = getHttpTimeout();

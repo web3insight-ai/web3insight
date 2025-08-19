@@ -1,0 +1,69 @@
+
+> web3insight@ predev /Users/pseudoyu/Developer/web3insight-ai/web3insight
+> npm run env
+
+
+> env
+> node .knosys/scripts env
+
+
+> web3insight@ dev /Users/pseudoyu/Developer/web3insight-ai/web3insight
+> next dev
+
+ ⚠ Port 3000 is in use by process 19849
+31342
+93610, using available port 3001 instead.
+   ▲ Next.js 15.4.6
+   - Local:        http://localhost:3001
+   - Network:      http://192.168.50.193:3001
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ✓ Ready in 2.2s
+ ○ Compiling / ...
+ ⚠ ./node_modules/.pnpm/pino@7.11.0/node_modules/pino/lib/tools.js
+Module not found: Can't resolve 'pino-pretty' in '/Users/pseudoyu/Developer/web3insight-ai/web3insight/node_modules/.pnpm/pino@7.11.0/node_modules/pino/lib'
+
+Import trace for requested module:
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/lib/tools.js
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/pino.js
+./node_modules/.pnpm/@walletconnect+logger@2.1.2/node_modules/@walletconnect/logger/dist/index.es.js
+./node_modules/.pnpm/@walletconnect+universal-provider@2.21.1_@azure+identity@4.4.1_bufferutil@4.0.9_ioredis@5.4.1_hlahzhaeoobocwigaxrgdivyjy/node_modules/@walletconnect/universal-provider/dist/index.es.js
+./node_modules/.pnpm/@walletconnect+ethereum-provider@2.21.1_@azure+identity@4.4.1_@types+react@18.3.3_bufferutil@_pcm7lwm3ln555etqoug2pybmye/node_modules/@walletconnect/ethereum-provider/dist/index.es.js
+./node_modules/.pnpm/@campnetwork+origin@0.0.17_@azure+identity@4.4.1_@tanstack+query-core@5.83.1_@tanstack+react-_kzk7m3b5yvoci53rrdybcta57a/node_modules/@campnetwork/origin/dist/react/index.esm.js
+./src/shared/providers/OriginProvider.tsx
+./src/shared/providers/WalletProvider.tsx
+./app/providers.tsx
+ HEAD / 200 in 13118ms
+[ReferenceError: indexedDB is not defined]
+ ⨯ unhandledRejection: [ReferenceError: indexedDB is not defined]
+ ⨯ unhandledRejection:  [ReferenceError: indexedDB is not defined]
+[ReferenceError: indexedDB is not defined]
+ ⨯ unhandledRejection: [ReferenceError: indexedDB is not defined]
+ ⨯ unhandledRejection:  [ReferenceError: indexedDB is not defined]
+ ⚠ ./node_modules/.pnpm/pino@7.11.0/node_modules/pino/lib/tools.js
+Module not found: Can't resolve 'pino-pretty' in '/Users/pseudoyu/Developer/web3insight-ai/web3insight/node_modules/.pnpm/pino@7.11.0/node_modules/pino/lib'
+
+Import trace for requested module:
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/lib/tools.js
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/pino.js
+./node_modules/.pnpm/@walletconnect+logger@2.1.2/node_modules/@walletconnect/logger/dist/index.es.js
+./node_modules/.pnpm/@walletconnect+universal-provider@2.21.1_@azure+identity@4.4.1_bufferutil@4.0.9_ioredis@5.4.1_hlahzhaeoobocwigaxrgdivyjy/node_modules/@walletconnect/universal-provider/dist/index.es.js
+./node_modules/.pnpm/@walletconnect+ethereum-provider@2.21.1_@azure+identity@4.4.1_@types+react@18.3.3_bufferutil@_pcm7lwm3ln555etqoug2pybmye/node_modules/@walletconnect/ethereum-provider/dist/index.es.js
+./node_modules/.pnpm/@campnetwork+origin@0.0.17_@azure+identity@4.4.1_@tanstack+query-core@5.83.1_@tanstack+react-_kzk7m3b5yvoci53rrdybcta57a/node_modules/@campnetwork/origin/dist/react/index.esm.js
+./src/shared/providers/OriginProvider.tsx
+./src/shared/providers/WalletProvider.tsx
+./app/providers.tsx
+ ⚠ ./node_modules/.pnpm/pino@7.11.0/node_modules/pino/lib/tools.js
+Module not found: Can't resolve 'pino-pretty' in '/Users/pseudoyu/Developer/web3insight-ai/web3insight/node_modules/.pnpm/pino@7.11.0/node_modules/pino/lib'
+
+Import trace for requested module:
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/lib/tools.js
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/pino.js
+./node_modules/.pnpm/@walletconnect+logger@2.1.2/node_modules/@walletconnect/logger/dist/index.es.js
+./node_modules/.pnpm/@walletconnect+universal-provider@2.21.1_@azure+identity@4.4.1_bufferutil@4.0.9_ioredis@5.4.1_hlahzhaeoobocwigaxrgdivyjy/node_modules/@walletconnect/universal-provider/dist/index.es.js
+./node_modules/.pnpm/@walletconnect+ethereum-provider@2.21.1_@azure+identity@4.4.1_@types+react@18.3.3_bufferutil@_pcm7lwm3ln555etqoug2pybmye/node_modules/@walletconnect/ethereum-provider/dist/index.es.js
+./node_modules/.pnpm/@campnetwork+origin@0.0.17_@azure+identity@4.4.1_@tanstack+query-core@5.83.1_@tanstack+react-_kzk7m3b5yvoci53rrdybcta57a/node_modules/@campnetwork/origin/dist/react/index.esm.js
+./src/shared/providers/OriginProvider.tsx
+./src/shared/providers/WalletProvider.tsx
+./app/providers.tsx

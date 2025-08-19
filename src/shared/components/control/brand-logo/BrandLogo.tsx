@@ -1,20 +1,21 @@
-import { Image, type ImageProps } from "@nextui-org/react";
+import Image from "next/image";
 
 import { getTitle } from "../../../utils/app";
-import Logo from "./logo.png";
 
 type BrandLogoProps = {
   className?: string;
-  width?: ImageProps["width"];
+  width?: number;
 }
 
-function BrandLogo({ className, width }: BrandLogoProps) {
+function BrandLogo({ className, width = 28 }: BrandLogoProps) {
   return (
     <Image
       className={className}
-      src={Logo}
+      src="/logo.png"
       width={width}
+      height={width}
       alt={`${getTitle()} Logo`}
+      priority
     />
   );
 }

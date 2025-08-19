@@ -1,24 +1,19 @@
+'use client';
+
 import { Button, Modal, ModalBody, ModalContent, ModalHeader } from "@nextui-org/react";
 import { useState, useEffect, useCallback } from "react";
 import { useAtom } from "jotai";
 import { authModalOpenAtom } from "#/atoms";
-import { useRevalidator, useOutletContext } from "@remix-run/react";
 import { Sparkles, Github } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { getTitle } from "@/utils/app";
 
-import type { ApiUser } from "../../typing";
-import { fetchCurrentUser, getGitHubAuthUrl } from "../../repository";
 
-type AuthContext<U = ApiUser | null> = {
-  user: U;
-  setUser: (user: U) => void;
-};
 
 function AuthFormDialogView() {
   const [isOpen, setIsOpen] = useAtom(authModalOpenAtom);
-  const { setUser } = useOutletContext<AuthContext>();
-  const revalidator = useRevalidator();
+  const router = useRouter();
 
   const [isLoginSuccess, setIsLoginSuccess] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
@@ -36,21 +31,26 @@ function AuthFormDialogView() {
 
   const fetchUserData = useCallback(async () => {
     try {
-      const res = await fetchCurrentUser();
-      if (res.success) {
-        if (res.data) {
-          // Update user context
-          if (setUser) {
-            setUser(res.data);
-          }
-          // Force re-validation of all loaders
-          revalidator.revalidate();
+      // Fetch current user via API route
+      const response = await fetch('/api/auth/me', {
+        method: 'GET',
+        credentials: 'same-origin',
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          // For Next.js migration - simplified user context handling
+          console.log('User updated:', data.data);
+          // Refresh the page to update all components
+          router.refresh();
         }
       }
     } catch (error) {
       // Silent fail - errors will be handled by the UI gracefully
+      console.error('Failed to fetch user data:', error);
     }
-  }, [setUser, revalidator]);
+  }, [router]);
 
   // Handle successful login
   useEffect(() => {
@@ -75,8 +75,13 @@ function AuthFormDialogView() {
     setIsAuthenticating(true);
     // Small delay to show loading state before redirect
     setTimeout(() => {
-      // Redirect to GitHub OAuth URL
-      window.location.href = getGitHubAuthUrl();
+      // Use the same GitHub OAuth URL pattern
+      const GITHUB_CLIENT_ID = "Ov23liAbxj5y1kCBSQeX";
+      const baseUrl = window.location.origin;
+      const redirectUri = `${baseUrl}/connect/github/redirect`;
+      const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&scope=user:email&redirect_uri=${encodeURIComponent(redirectUri)}`;
+
+      window.location.href = githubAuthUrl;
     }, 500);
   };
 
@@ -126,7 +131,7 @@ function AuthFormDialogView() {
                     </div>
                   </div>
                 )}
-                
+
                 <div className="text-center space-y-4">
                   {/* Simple Content */}
                   <div className="space-y-2">

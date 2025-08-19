@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import clsx from "clsx";
 import { Card, Button, Input, Pagination } from "@nextui-org/react";
-import { useNavigate } from "@remix-run/react";
+import { useRouter } from "next/navigation";
 import { Calendar, Plus, Search, Eye } from "lucide-react";
 
 import { fetchList } from "../../repository";
@@ -33,7 +33,7 @@ function EventListView({ className }: EventListViewWidgetProps) {
   const [addedResult, setAddedResult] = useState<EventDialogPayload>({ eventId: 0, contestants: [], failedAccounts: [] });
   const [addedResultVisible, setAddedResultVisible] = useState(false);
 
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
     setLoading(true);
@@ -46,7 +46,7 @@ function EventListView({ className }: EventListViewWidgetProps) {
       .finally(() => setLoading(false));
   }, [page, refetchTimestamp]);
 
-  const gotoDetail = (id: number) => navigate(`/admin/events/${id}`);
+  const gotoDetail = (id: number) => router.push(`/admin/events/${id}`);
 
   const closeDialog = (payload?: EventDialogPayload) => {
     setVisible(false);

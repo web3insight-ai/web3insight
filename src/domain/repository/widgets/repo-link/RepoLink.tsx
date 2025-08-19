@@ -1,5 +1,7 @@
+'use client';
+
 import clsx from "clsx";
-import { Link } from "@remix-run/react";
+import Link from "next/link";
 
 import type { RepoLinkWidgetProps } from "./typing";
 
@@ -11,7 +13,7 @@ function RepoLink({ className, repo, repoId }: RepoLinkWidgetProps) {
     return (
       <Link
         className={clsx("hover:text-primary hover:underline", className)}
-        to={`/repositories/${repoId}?${searchParams}`}
+        href={`/repositories/${repoId}?${searchParams}`}
         target="_blank"
         rel="noreferrer"
       >

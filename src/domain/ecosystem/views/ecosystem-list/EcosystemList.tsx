@@ -1,4 +1,4 @@
-import { Link } from "@remix-run/react";
+import Link from "next/link";
 import { Card, CardBody } from "@nextui-org/react";
 
 import type { EcosystemListViewWidgetProps } from "./typing";
@@ -8,7 +8,7 @@ function EcosystemListView({ dataSource }: EcosystemListViewWidgetProps) {
     <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-4">
       {dataSource.map(eco => (
         <li key={eco.name.replaceAll(" ", "")}>
-          <Link to={`/admin/ecosystems/${encodeURIComponent(eco.name)}`}>
+          <Link href={`/admin/ecosystems/${encodeURIComponent(eco.name)}`}>
             <Card className="hover:shadow-hover hover:scale-[1.02] transition-all duration-200 border border-border dark:border-border-dark">
               <CardBody className="min-h-40 items-center justify-center bg-surface dark:bg-surface-dark">
                 <span className="text-sm font-medium text-gray-900 dark:text-gray-100 text-center">

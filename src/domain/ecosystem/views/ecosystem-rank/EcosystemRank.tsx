@@ -1,4 +1,6 @@
-import { Link } from "@remix-run/react";
+'use client';
+
+import Link from "next/link";
 import { Card } from "@nextui-org/react";
 import { Warehouse, ArrowRight } from "lucide-react";
 import { useState } from "react";
@@ -74,7 +76,7 @@ function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <Link 
-                    to={`/ecosystems/${encodeURIComponent(ecosystem.eco_name)}`} 
+                    href={`/ecosystems/${encodeURIComponent(ecosystem.eco_name)}`} 
                     className="font-medium text-gray-900 dark:text-white hover:text-primary transition-colors duration-200"
                   >
                     {ecosystem.eco_name}
@@ -107,7 +109,7 @@ function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
       </div>
       <div className="px-6 py-4 border-t border-border dark:border-border-dark">
         <Link 
-          to="/ecosystems" 
+          href="/ecosystems" 
           className="flex items-center justify-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200"
         >
           View All Ecosystems

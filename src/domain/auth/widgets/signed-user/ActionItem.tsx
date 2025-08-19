@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { Link } from "@remix-run/react";
+import Link from "next/link";
 import { Lock } from "lucide-react";
 
 import type { ActionItemProps } from "./typing";
@@ -43,7 +43,7 @@ function ActionItem({
       {actionContent}
     </button>
   ) : (
-    <Link className={actionClassName} to={action}>
+    <Link className={actionClassName} href={action}>
       {actionContent}
     </Link>
   );

@@ -1,15 +1,9 @@
-import HttpClient from "@/clients/http/HttpClient";
-import { getHttpTimeout } from "@/utils/env";
+import HttpClient, { type RequestConfigWithTimeout } from "@/clients/http/HttpClient";
+import { getHttpTimeout, getVar } from "@/utils/env";
 import type { DataValue } from "@/types";
 
 // Create base HTTP client
-const baseHttpClient = new HttpClient({ baseUrl: process.env.RSS3_DSL_URL });
-
-// Type definitions for the wrapper
-interface RequestConfigWithTimeout {
-  signal?: AbortSignal;
-  [key: string]: unknown;
-}
+const baseHttpClient = new HttpClient({ baseURL: getVar("RSS3_DSL_URL") });
 
 // Get centralized timeout value
 const httpTimeout = getHttpTimeout();

@@ -2,31 +2,15 @@
  * Centralized access to environment variables
  */
 
-import type { DataValue } from "../types";
 
-// Environment variables are handled by Vite/Remix automatically
+
+// Environment variables are handled by Next.js automatically
 // No need to manually load dotenv in development
-
-try {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const test = process.env;
-} catch(err) {
-  window.process = { env: {} } as DataValue;
-}
 
 // Helper function to get environment variable from both server and client
 function getEnvVar(key: string): string {
-  // In browser, try import.meta.env first, then process.env
-  if (typeof window !== 'undefined') {
-    // Client-side (browser)
-    if (typeof import.meta !== 'undefined' && import.meta.env) {
-      return (import.meta.env as Record<string, string>)[key] || "";
-    }
-    // Fallback to process.env if available
-    return (window as { process?: { env?: Record<string, string> } }).process?.env?.[key] || "";
-  }
-
-  // Server-side (Node.js)
+  // Next.js handles environment variables through process.env
+  // Client-side variables must be prefixed with NEXT_PUBLIC_
   return process.env[key] || "";
 }
 
@@ -38,10 +22,12 @@ const vars: Record<string, any> = { // eslint-disable-line @typescript-eslint/no
   // Data API configuration
   DATA_API_URL: getEnvVar("DATA_API_URL") || "https://api.web3insight.ai",
   DATA_API_TOKEN: getEnvVar("DATA_API_TOKEN"),
+  // External service URLs
+  OPENDIGGER_URL: getEnvVar("OPENDIGGER_URL") || "https://oss.x-lab.info/open_digger",
+  OSSINSIGHT_URL: getEnvVar("OSSINSIGHT_URL") || "https://api.ossinsight.io",
+  RSS3_DSL_URL: getEnvVar("RSS3_DSL_URL"),
   // Session configuration
   SESSION_SECRET: getEnvVar("SESSION_SECRET") || "default-secret-change-me",
-  // Database configuration
-  DATABASE_URL: getEnvVar("DATABASE_URL"),
   // WalletConnect configuration
   WALLETCONNECT_PROJECT_ID: getEnvVar("WALLETCONNECT_PROJECT_ID"),
   // Origin SDK configuration
@@ -65,7 +51,7 @@ function getHttpTimeout() {
 
 // Check if important environment variables are set
 function validateEnvironment(): boolean {
-  const requiredVars = ["DATA_API_URL", "DATABASE_URL"].map(name => ({ name, value: getVar(name) }));
+  const requiredVars = ["DATA_API_URL"].map(name => ({ name, value: getVar(name) }));
 
   let valid = true;
 
