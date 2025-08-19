@@ -528,24 +528,32 @@ ORDER BY ecosystem;`;
 
   async EcoRank() {
     const sqlRawQuery = `
-WITH repo_eco AS (
-    SELECT r.repo_id,
-           e.key AS ecosystem_name
-    FROM data.repos r,
-         LATERAL jsonb_object_keys(r.upstream_marks) AS e(key)),
-     dev_per_eco AS (
-         SELECT re.ecosystem_name,
-                COUNT(DISTINCT e.actor_id) AS dev_cnt
-         FROM repo_eco re
-                  JOIN data.events e
-                       ON e.repo_id = re.repo_id
-                           AND e.created_at >= NOW() - INTERVAL '3 years'
-                           AND e.event_type <> 'WatchEvent'
-         GROUP BY re.ecosystem_name)
+WITH repo_eco AS (SELECT r.repo_id,
+                         e.key AS ecosystem_name
+                  FROM data.repos r,
+                       LATERAL jsonb_object_keys(r.upstream_marks) AS e(key)),
+
+     active_dev_ids AS (SELECT re.ecosystem_name,
+                               ev.actor_id
+                        FROM repo_eco re
+                                 JOIN data.events ev
+                                      ON ev.repo_id = re.repo_id
+                                          AND ev.created_at >= NOW() - INTERVAL '1 year'
+                                          AND ev.event_type IN ('PullRequestEvent', 'PushEvent')
+                        GROUP BY re.ecosystem_name, ev.actor_id
+                        HAVING COUNT(DISTINCT ev.event_type) = 2),
+
+     dev_per_eco AS (SELECT ecosystem_name,
+                            COUNT(DISTINCT actor_id) AS dev_cnt
+                     FROM active_dev_ids
+                     GROUP BY ecosystem_name)
+
 UPDATE data.ecosystems AS eco
 SET score = dpe.dev_cnt
 FROM dev_per_eco dpe
-WHERE eco.name = dpe.ecosystem_name;`;
+WHERE eco.name = dpe.ecosystem_name;
+`;
+
     const query = CompiledQuery.raw(sqlRawQuery);
     const results = await this.db.executeQuery(query);
 
