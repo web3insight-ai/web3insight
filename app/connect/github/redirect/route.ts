@@ -5,11 +5,45 @@ import { getVar } from "@/utils/env";
 // Web3Insight API OAuth endpoint
 const API_BASE_URL = getVar("DATA_API_URL") || "https://api.web3insight.ai";
 
+function transformApiUserToCompatibleFormat(apiResponse: {
+  profile: {
+    user_id: string;
+    user_nick_name: string;
+    user_avatar: string;
+    created_at: string;
+    updated_at: string;
+  };
+  binds: Array<{bind_type: string; bind_key: string}>;
+  role: {
+    allowed_roles: string[];
+    default_role: string;
+    user_id: string;
+  };
+}) {
+  const { profile, binds, role } = apiResponse;
+
+  // Find GitHub bind for username
+  const githubBind = binds.find((bind: {bind_type: string; bind_key: string}) => bind.bind_type === "github");
+  const emailBind = binds.find((bind: {bind_type: string; bind_key: string}) => bind.bind_type === "email");
+
+  return {
+    profile,
+    binds,
+    role,
+    id: profile.user_id,
+    username: githubBind?.bind_key || profile.user_nick_name,
+    email: emailBind?.bind_key || "",
+    provider: "github",
+    confirmed: true,
+    blocked: false,
+    avatar_url: profile.user_avatar,
+  };
+}
+
 // Authenticate with Web3Insight API using GitHub OAuth code
 async function authenticateWithAPI(code: string) {
-  console.log(`🔗 Calling API: ${API_BASE_URL}/v1/auth/login/oauth`);
-
-  const response = await fetch(`${API_BASE_URL}/v1/auth/login/oauth`, {
+  // Step 1: Exchange code for token
+  const tokenResponse = await fetch(`${API_BASE_URL}/v1/auth/login/oauth`, {
     method: 'POST',
     headers: {
       'accept': '*/*',
@@ -21,28 +55,41 @@ async function authenticateWithAPI(code: string) {
     }),
   });
 
-  const data = await response.json();
-  console.log(`📊 API Response (${response.status}):`, JSON.stringify(data, null, 2));
+  const tokenData = await tokenResponse.json();
 
-  if (!response.ok) {
-    // Handle specific error cases
-    if (response.status === 500) {
-      throw new Error(`API server error (500): ${data.message || 'Internal server error'}`);
-    } else if (response.status === 400) {
-      throw new Error(`Invalid request (400): ${data.message || 'Bad request'}`);
-    } else if (response.status === 401) {
-      throw new Error(`Unauthorized (401): ${data.message || 'Code may have expired'}`);
-    } else {
-      throw new Error(`API authentication failed: ${response.status} ${response.statusText}`);
-    }
+  if (!tokenResponse.ok) {
+    throw new Error(`Token exchange failed: ${tokenResponse.status} ${tokenResponse.statusText}`);
   }
 
-  // Handle successful responses where success might be a boolean
-  if (data.success === false) {
-    throw new Error(`API OAuth error: ${data.message || 'Authentication failed'}`);
+  if (!tokenData.token) {
+    throw new Error(`Invalid authentication response: Missing token`);
   }
 
-  return data;
+  // Step 2: Fetch user profile using the token
+  const userResponse = await fetch(`${API_BASE_URL}/v1/auth/user`, {
+    method: "GET",
+    headers: {
+      "Authorization": `Bearer ${tokenData.token}`,
+      "accept": "*/*",
+    },
+  });
+
+  if (!userResponse.ok) {
+    const error = await userResponse.text();
+    console.error("Failed to fetch user profile:", error);
+    throw new Error(`Failed to fetch user profile: ${userResponse.status} ${userResponse.statusText}`);
+  }
+
+  const userData = await userResponse.json();
+  const user = transformApiUserToCompatibleFormat(userData);
+
+  return {
+    success: true,
+    data: {
+      token: tokenData.token,
+      user,
+    },
+  };
 }
 
 export async function GET(request: NextRequest) {
@@ -66,11 +113,8 @@ export async function GET(request: NextRequest) {
   let authResult;
 
   try {
-    console.log("🔄 Authenticating with Web3Insight API for code:", code.substring(0, 8) + "...");
-
     // Authenticate directly with Web3Insight API
     authResult = await authenticateWithAPI(code);
-    console.log("✅ API authentication successful for user:", authResult.data?.user?.username || 'unknown');
 
   } catch (apiError) {
     console.error("API authentication failed:", apiError);
@@ -86,7 +130,7 @@ export async function GET(request: NextRequest) {
 
   // Validate auth result
   if (!authResult || !authResult.success) {
-    console.error("GitHub authentication failed:", authResult?.message || 'Unknown error');
+    console.error("GitHub authentication failed:", 'Unknown error');
     return NextResponse.redirect(new URL("/?error=auth_failed", request.url));
   }
 
@@ -100,12 +144,9 @@ export async function GET(request: NextRequest) {
   // Create user session
   try {
     const sessionOpts = await createUserSession({
-      request,
       userToken: token,
       userId: user.id,
     });
-
-    console.log("✅ GitHub authentication successful for user:", user.username || user.id);
 
     // Create redirect response with session cookies
     const redirectUrl = new URL("/", request.url);

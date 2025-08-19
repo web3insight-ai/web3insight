@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getMetadata } from "@/utils/app";
 import { fetchStatisticsOverview, fetchStatisticsRank } from "~/statistics/repository";
+import { getUser } from "~/auth/repository";
 import { headers } from 'next/headers';
 import EcosystemRankViewWidget from "~/ecosystem/views/ecosystem-rank";
 import RepositoryRankViewWidget from "~/repository/views/repository-rank";
@@ -28,15 +29,19 @@ interface HomePageProps {
 
 export default async function HomePage({ searchParams }: HomePageProps) {
   const resolvedSearchParams = await searchParams;
-  const { error, code } = resolvedSearchParams;
+  const { code } = resolvedSearchParams;
 
   // If this is a GitHub OAuth callback, redirect to the proper handler
   if (code) {
     redirect(`/connect/github/redirect?code=${code}`);
   }
 
-  // Get user authentication data (will be implemented later in API route)
-  const user = null;
+  // Get current user from session
+  const headersList = await headers();
+  const request = new Request('http://localhost', {
+    headers: headersList,
+  });
+  const user = await getUser(request);
 
   try {
     const [statisticsResult, rankResult] = await Promise.all([

@@ -104,15 +104,6 @@ export default async function RepositoryDetailPage({ params, searchParams }: Rep
         fetchRepoAnalysis(repoName),
       ]);
 
-      // Debug logging
-      console.log(`[DEBUG] Repository analysis for ${repoName}:`, {
-        analysisSuccess: analysisRes.success,
-        analysisData: analysisRes.data,
-        hasOpenrank: !!(analysisRes.data?.openrank && Object.keys(analysisRes.data.openrank).length > 0),
-        hasAttention: !!(analysisRes.data?.attention && Object.keys(analysisRes.data.attention).length > 0),
-        hasParticipants: !!(analysisRes.data?.participants && Object.keys(analysisRes.data.participants).length > 0),
-      });
-
       // Use GitHub API data as primary source for repository metrics
       let repositoryData = {
         id: repoRankData!.repo_id,

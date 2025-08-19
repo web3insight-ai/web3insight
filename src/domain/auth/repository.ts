@@ -3,8 +3,7 @@ import { isServerSide, generateFailedResponse } from "@/clients/http";
 import httpClient from "@/clients/http/default";
 import { getVar } from "@/utils/env";
 
-import { getSession } from "./helper/server";
-import { clearSession } from "./helper/client";
+import { getSession, clearSession } from "./helper/server";
 
 import type { ApiUser, ApiAuthResponse, GitHubOAuthRequest, MagicResponse, WalletBindRequest, WalletBindResponse } from "./typing";
 

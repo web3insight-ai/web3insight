@@ -29,7 +29,7 @@ export default function AuthSuccessPage() {
             <p className="text-gray-600 dark:text-gray-400 mb-6">
               You have been successfully authenticated. Redirecting you to the home page...
             </p>
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto" />
           </CardBody>
         </Card>
       </div>

@@ -1,3 +1,4 @@
+/* eslint-env node */
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typescript: {
@@ -7,11 +8,8 @@ const nextConfig = {
     ignoreDuringBuilds: true, // Temporarily ignore for migration validation
   },
   // Environment variable configuration to mirror Vite setup
-  env: {
-    VITE_ORIGIN_CLIENT_ID: process.env.VITE_ORIGIN_CLIENT_ID,
-    VITE_ORIGIN_API_URL: process.env.VITE_ORIGIN_API_URL,
-    VITE_ORIGIN_SUBGRAPH_URL: process.env.VITE_ORIGIN_SUBGRAPH_URL,
-  },
+  // Remove custom env configuration - let Next.js handle NEXT_PUBLIC_ automatically
+  // Server-side variables will be accessed directly via process.env in server code
   // Ensure proper bundling for server-side dependencies
   serverExternalPackages: ['@remix-run/node'],
   // Handle problematic dependencies
@@ -44,3 +42,4 @@ const nextConfig = {
 };
 
 module.exports = nextConfig;
+

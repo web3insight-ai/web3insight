@@ -31,9 +31,9 @@ const vars: Record<string, any> = { // eslint-disable-line @typescript-eslint/no
   // WalletConnect configuration
   WALLETCONNECT_PROJECT_ID: getEnvVar("WALLETCONNECT_PROJECT_ID"),
   // Origin SDK configuration
-  ORIGIN_API_URL: getEnvVar("VITE_ORIGIN_API_URL"),
-  ORIGIN_CLIENT_ID: getEnvVar("VITE_ORIGIN_CLIENT_ID"),
-  ORIGIN_SUBGRAPH_URL: getEnvVar("VITE_ORIGIN_SUBGRAPH_URL"),
+  ORIGIN_API_URL: process.env.NEXT_PUBLIC_ORIGIN_API_URL || "",
+  ORIGIN_CLIENT_ID: process.env.NEXT_PUBLIC_ORIGIN_CLIENT_ID || "",
+  ORIGIN_SUBGRAPH_URL: process.env.NEXT_PUBLIC_ORIGIN_SUBGRAPH_URL || "",
   // Environment detection
   NODE_ENV: getEnvVar("NODE_ENV") || "development",
   IS_DEVELOPMENT: isDevelopment,

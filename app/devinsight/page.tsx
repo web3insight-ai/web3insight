@@ -6,10 +6,38 @@ import { getTitle } from "@/utils/app";
 import DefaultLayoutWrapper from '../DefaultLayoutWrapper';
 import { cookies } from 'next/headers';
 
-export const metadata: Metadata = {
-  title: "DevInsight | Web3 Insights",
-  description: "AI-powered DevInsight analysis of your Web3 development profile",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const title = getTitle();
+
+  try {
+    const cookieStore = await cookies();
+    const mockRequest = new Request('http://localhost:3000/devinsight', {
+      headers: {
+        Cookie: cookieStore.toString(),
+      },
+    });
+
+    const userResult = await fetchCurrentUser(mockRequest);
+
+    if (userResult.success && userResult.data) {
+      const githubHandle = getGitHubHandle(userResult.data);
+      if (githubHandle) {
+        return {
+          title: `${githubHandle} DevInsight | ${title}`,
+          description: `AI-powered DevInsight analysis of ${githubHandle}'s Web3 development profile`,
+        };
+      }
+    }
+  } catch (error) {
+    console.error('Error generating metadata:', error);
+  }
+
+  // Fallback metadata
+  return {
+    title: "DevInsight | Web3 Insights",
+    description: "AI-powered DevInsight analysis of your Web3 development profile",
+  };
+}
 
 export default async function DevInsightPage() {
   try {

@@ -41,7 +41,7 @@ function AuthFormDialogView() {
         const data = await response.json();
         if (data.success && data.data) {
           // For Next.js migration - simplified user context handling
-          console.log('User updated:', data.data);
+
           // Refresh the page to update all components
           router.refresh();
         }

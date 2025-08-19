@@ -9,10 +9,10 @@ function useSessionActions<U = ApiUser | null>() {
   const [, setAuthModalType] = useAtom(authModalTypeAtom);
 
   const router = useRouter();
-  // For now, simplified without outlet context
-  const setUser = (user: U) => {
+  // For now, simplified without outlet context  
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const setUser = (_user: U) => {
     // This will be handled differently in Next.js
-    console.log('Setting user:', user);
   };
 
   // Function to open auth modal with specified type

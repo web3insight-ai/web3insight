@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import DevelopersPageClient from './DevelopersPageClient';
 import { fetchStatisticsRank, fetchStatisticsOverview } from "~/statistics/repository";
+import { getUser } from "~/auth/repository";
+import { headers } from 'next/headers';
 import DefaultLayoutWrapper from '../DefaultLayoutWrapper';
 
 export const metadata: Metadata = {
@@ -12,12 +14,19 @@ export const metadata: Metadata = {
 };
 
 export default async function DevelopersPage() {
+  // Get current user from session
+  const headersList = await headers();
+  const request = new Request('http://localhost', {
+    headers: headersList,
+  });
+  const user = await getUser(request);
+
   try {
     const [statisticsResult, rankResult] = await Promise.all([
       fetchStatisticsOverview(),
       fetchStatisticsRank(),
     ]);
-    
+
     const developers = rankResult.success ? rankResult.data.developer : [];
     const statisticOverview = statisticsResult.success ? statisticsResult.data : {
       ecosystem: 0,
@@ -25,7 +34,7 @@ export default async function DevelopersPage() {
       developer: 0,
       coreDeveloper: 0,
     };
-    
+
     if (!statisticsResult.success) {
       console.warn("Statistics overview fetch failed:", statisticsResult.message);
     }
@@ -42,13 +51,13 @@ export default async function DevelopersPage() {
     };
 
     return (
-      <DefaultLayoutWrapper user={null}>
+      <DefaultLayoutWrapper user={user}>
         <DevelopersPageClient {...pageData} />
       </DefaultLayoutWrapper>
     );
   } catch (error) {
     console.error("Error in developers route:", error);
-    
+
     const fallbackData = {
       developers: [],
       activeDevelopers: 0,
@@ -58,7 +67,7 @@ export default async function DevelopersPage() {
     };
 
     return (
-      <DefaultLayoutWrapper user={null}>
+      <DefaultLayoutWrapper user={user}>
         <DevelopersPageClient {...fallbackData} />
       </DefaultLayoutWrapper>
     );

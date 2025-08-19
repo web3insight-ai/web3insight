@@ -21,7 +21,7 @@ import { getRoleName, getEffectiveRole } from "@/utils/role";
 import { getGitHubHandle } from "~/profile-analysis/helper";
 
 import { authModalOpenAtom } from "../atoms";
-import Section from "../../src/entry/components/section";
+import Section from "../../src/components/section";
 import { WalletBindWidget } from "~/auth/widgets/wallet-bind";
 import { OriginAuthWidget } from "~/origin/widgets/OriginAuthWidget";
 
@@ -104,16 +104,16 @@ export default function ProfilePageClient({ user, error, expired }: ProfilePageP
 
   return (
     <div className="min-h-dvh flex flex-col">
-      <div className="w-full max-w-content mx-auto px-6 py-8">
+      <div className="w-full max-w-content mx-auto px-6 py-6">
         <Section
           title="Profile"
           summary="Manage your account information and settings"
         >
-          <div className="max-w-4xl mx-auto space-y-8">
+          <div className="max-w-4xl mx-auto space-y-6">
 
             {/* Profile Header Card */}
             <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">
-              <CardBody className="p-8">
+              <CardBody className="p-6">
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
                   <div className="flex-shrink-0">
                     <Avatar
@@ -144,7 +144,7 @@ export default function ProfilePageClient({ user, error, expired }: ProfilePageP
                       )}
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-4 text-sm text-gray-600 dark:text-gray-400">
+                    <div className="flex flex-col sm:flex-row gap-3 text-sm text-gray-600 dark:text-gray-400">
                       <div className="flex items-center justify-center md:justify-start gap-2">
                         <Calendar size={16} />
                         <span>
@@ -164,11 +164,11 @@ export default function ProfilePageClient({ user, error, expired }: ProfilePageP
             </Card>
 
             {/* First Row: Account Information | Roles & Permissions */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Account Information */}
               <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
                 <CardBody className="p-6">
-                  <div className="flex items-center gap-3 mb-6">
+                  <div className="flex items-center gap-3 mb-4">
                     <div className="p-2 bg-gray-100 dark:bg-surface-elevated rounded-lg">
                       <UserIcon size={20} className="text-gray-600 dark:text-gray-400" />
                     </div>
@@ -214,7 +214,7 @@ export default function ProfilePageClient({ user, error, expired }: ProfilePageP
               {/* Roles & Permissions */}
               <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
                 <CardBody className="p-6">
-                  <div className="flex items-center gap-3 mb-6">
+                  <div className="flex items-center gap-3 mb-4">
                     <div className="p-2 bg-gray-100 dark:bg-surface-elevated rounded-lg">
                       <Shield size={20} className="text-gray-600 dark:text-gray-400" />
                     </div>
@@ -272,11 +272,11 @@ export default function ProfilePageClient({ user, error, expired }: ProfilePageP
             </div>
 
             {/* Second Row: Connected Accounts | Camp Network */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Connected Accounts */}
               <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
                 <CardBody className="p-6">
-                  <div className="flex items-center gap-3 mb-6">
+                  <div className="flex items-center gap-3 mb-4">
                     <div className="p-2 bg-gray-100 dark:bg-surface-elevated rounded-lg">
                       <ExternalLink size={20} className="text-gray-600 dark:text-gray-400" />
                     </div>

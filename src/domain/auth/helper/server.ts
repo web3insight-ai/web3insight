@@ -88,5 +88,12 @@ async function createUserSession({
   };
 }
 
-export { getSession, createUserSession, MockSession };
+// Server-only function - clears session cookies
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function clearSession(_session?: MockSession) {
+  // Return a cookie header string that clears the session cookie
+  return `web3insight_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+}
+
+export { getSession, createUserSession, clearSession, MockSession };
 export type { SessionData };

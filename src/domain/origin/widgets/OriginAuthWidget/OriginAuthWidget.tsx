@@ -14,10 +14,8 @@ export interface OriginAuthWidgetProps {
   className?: string;
 }
 
-export function OriginAuthWidget({ className }: OriginAuthWidgetProps) {
-  const { isAvailable } = useOriginAvailable();
-
-  // Always call hooks but handle unavailability through context
+// Internal component that uses Camp hooks - only rendered when available
+function CampNetworkContent({ className }: { className?: string }) {
   const authState = useAuthState();
   const connectHooks = useConnect();
   const socialsHooks = useSocials();
@@ -51,38 +49,6 @@ export function OriginAuthWidget({ className }: OriginAuthWidgetProps) {
       linkAction: () => linkSpotify(),
     },
   ];
-
-  // Handle when Origin SDK is not available
-  if (!isAvailable) {
-    return (
-      <Card className={className}>
-        <CardBody className="p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-gray-100 dark:bg-surface-elevated rounded-lg">
-              <Settings size={20} className="text-gray-600 dark:text-gray-400" />
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Camp Network
-              </h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Configuration required
-              </p>
-            </div>
-          </div>
-
-          <div className="p-4 bg-gray-50 dark:bg-surface-elevated rounded-lg border border-gray-200 dark:border-border-dark">
-            <p className="text-sm text-gray-800 dark:text-gray-300 mb-2">
-              <strong>Camp SDK Not Configured</strong>
-            </p>
-            <p className="text-sm text-gray-700 dark:text-gray-400">
-              Set the <code className="bg-gray-100 dark:bg-surface-dark px-1 rounded">VITE_ORIGIN_CLIENT_ID</code> environment variable to enable Camp Network features.
-            </p>
-          </div>
-        </CardBody>
-      </Card>
-    );
-  }
 
   if (loading) {
     return (
@@ -220,4 +186,54 @@ export function OriginAuthWidget({ className }: OriginAuthWidgetProps) {
       </CardBody>
     </Card>
   );
+}
+
+// Main exported component
+export function OriginAuthWidget({ className }: OriginAuthWidgetProps) {
+  const { isAvailable } = useOriginAvailable();
+
+  // Handle when Origin SDK is not available
+  if (!isAvailable) {
+    return (
+      <Card className={className}>
+        <CardBody className="p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-gray-100 dark:bg-surface-elevated rounded-lg">
+              <Settings size={20} className="text-gray-600 dark:text-gray-400" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Camp Network
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Configuration required
+              </p>
+            </div>
+          </div>
+
+          <div className="p-4 bg-gray-50 dark:bg-surface-elevated rounded-lg border border-gray-200 dark:border-border-dark">
+            <p className="text-sm text-gray-800 dark:text-gray-300 mb-2">
+              <strong>Camp SDK Not Configured</strong>
+            </p>
+            <p className="text-sm text-gray-700 dark:text-gray-400 mb-3">
+              To enable Camp Network features:
+            </p>
+            <ol className="text-xs text-gray-600 dark:text-gray-400 space-y-1 list-decimal list-inside">
+              <li>Get your client ID from the <a href="https://camp.network" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Camp Network dashboard</a></li>
+              <li>Add it to your <code className="bg-gray-100 dark:bg-surface-dark px-1 rounded">.env.local</code> file:</li>
+            </ol>
+            <div className="mt-2 p-2 bg-gray-100 dark:bg-surface-dark rounded text-xs font-mono text-gray-700 dark:text-gray-300">
+              NEXT_PUBLIC_ORIGIN_CLIENT_ID=your_client_id_here
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+              Restart the development server after adding the environment variable.
+            </p>
+          </div>
+        </CardBody>
+      </Card>
+    );
+  }
+
+  // Render the camp content when available
+  return <CampNetworkContent className={className} />;
 }

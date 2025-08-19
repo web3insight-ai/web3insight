@@ -29,11 +29,11 @@ function ContestantListDialog({ dataSource, eventId, failedAccounts, visible, on
     const pollAnalysisStatus = async () => {
       try {
         const response = await fetchOne(eventId);
-        
+
         if (response.success && response.data && response.data.contestants && response.data.contestants.length > 0) {
-          const hasCompleteData = response.data.contestants.some(contestant => 
-            contestant.analytics && 
-            Array.isArray(contestant.analytics) && 
+          const hasCompleteData = response.data.contestants.some(contestant =>
+            contestant.analytics &&
+            Array.isArray(contestant.analytics) &&
             contestant.analytics.length > 0,
           );
 
@@ -41,12 +41,12 @@ function ContestantListDialog({ dataSource, eventId, failedAccounts, visible, on
             setAnalysisComplete(true);
             setAnalysisProgress(100);
             setIsPolling(false);
-            
+
             // Auto-navigate to event detail page when analysis is complete
             setTimeout(() => {
               onGoto();
             }, 1500); // Small delay to show completion state
-            
+
             return;
           }
         }
@@ -86,7 +86,7 @@ function ContestantListDialog({ dataSource, eventId, failedAccounts, visible, on
       const accountsText = failedAccounts.join('\n');
       navigator.clipboard.writeText(accountsText).then(() => {
         // Could add a toast notification here
-        console.log('Failed accounts copied to clipboard');
+
       });
     }
   };
@@ -116,9 +116,9 @@ function ContestantListDialog({ dataSource, eventId, failedAccounts, visible, on
                 </Badge>
               </div>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                {analysisComplete 
-                  ? "Basic profiles loaded • Analysis complete" 
-                  : pollingError 
+                {analysisComplete
+                  ? "Basic profiles loaded • Analysis complete"
+                  : pollingError
                     ? `Analysis failed: ${pollingError}`
                     : "Basic profiles loaded • Analysis in progress"
                 }
@@ -133,28 +133,28 @@ function ContestantListDialog({ dataSource, eventId, failedAccounts, visible, on
                     </Link>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <Link 
-                          href={user.html_url} 
-                          isExternal 
+                        <Link
+                          href={user.html_url}
+                          isExternal
                           className="text-lg font-semibold text-gray-900 dark:text-gray-100 hover:text-primary transition-colors"
                         >
                           {user.login}
                         </Link>
                         <ExternalLink size={14} className="text-gray-400" />
                       </div>
-                      
+
                       {user.name && (
                         <div className="text-sm text-gray-600 dark:text-gray-300 mb-1">
                           {user.name}
                         </div>
                       )}
-                      
+
                       {user.bio && (
                         <div className="text-sm text-gray-500 dark:text-gray-400 mb-2 line-clamp-2">
                           {user.bio}
                         </div>
                       )}
-                      
+
                       <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 mb-3">
                         {user.location && (
                           <div className="flex items-center gap-1">
@@ -172,15 +172,15 @@ function ContestantListDialog({ dataSource, eventId, failedAccounts, visible, on
                           <span>Joined {new Date(user.created_at).getFullYear()}</span>
                         </div>
                       </div>
-                      
-                      <AnalysisProgress 
-                        status={analysisComplete ? "completed" : pollingError ? "failed" : "analyzing"} 
+
+                      <AnalysisProgress
+                        status={analysisComplete ? "completed" : pollingError ? "failed" : "analyzing"}
                         progress={analysisProgress}
                         estimatedTime={analysisComplete ? "Completed" : "2-3 minutes"}
                         message={
-                          analysisComplete 
-                            ? "Analysis completed successfully" 
-                            : pollingError 
+                          analysisComplete
+                            ? "Analysis completed successfully"
+                            : pollingError
                               ? pollingError
                               : "Analyzing contribution patterns..."
                         }
@@ -194,7 +194,7 @@ function ContestantListDialog({ dataSource, eventId, failedAccounts, visible, on
               {failedAccounts && failedAccounts.length > 0 && (
                 <div className="px-6 pb-6">
                   <Card className="border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
-                    <CardHeader 
+                    <CardHeader
                       className="pb-3 cursor-pointer hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
                       onClick={() => setFailedAccountsExpanded(!failedAccountsExpanded)}
                     >
@@ -257,8 +257,8 @@ function ContestantListDialog({ dataSource, eventId, failedAccounts, visible, on
             <ModalFooter>
               <div className="flex justify-between items-center w-full">
                 <div className="text-sm text-gray-500 dark:text-gray-400">
-                  {analysisComplete 
-                    ? "Analysis completed successfully" 
+                  {analysisComplete
+                    ? "Analysis completed successfully"
                     : pollingError
                       ? "Analysis failed - please try again"
                       : "Analysis will continue in background"
@@ -268,8 +268,8 @@ function ContestantListDialog({ dataSource, eventId, failedAccounts, visible, on
                   <Button variant="bordered" onClick={onClose}>
                     Close
                   </Button>
-                  <Button 
-                    color="primary" 
+                  <Button
+                    color="primary"
                     onClick={onGoto}
                     isDisabled={!analysisComplete || !!pollingError}
                     isLoading={isPolling && !pollingError}
