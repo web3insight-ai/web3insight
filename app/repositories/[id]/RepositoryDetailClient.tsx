@@ -12,9 +12,9 @@ interface RepositoryDetailProps {
     forksCount: number;
     openIssuesCount: number;
     contributorCount: number;
-    details: any;
+    details: Record<string, unknown>;
   } | null;
-  analysis: any;
+  analysis: Record<string, unknown>;
 }
 
 export default function RepositoryDetailClient({

@@ -61,7 +61,7 @@ function SignedUser({ user, onSignIn, onSignOut }: SignedUserProps) {
                 <ActionItem
                   text="Ecosystems"
                   icon={Warehouse}
-                  action="/admin"
+                  action="/admin/ecosystems"
                   disabled={!canManageEcosystems(user)}
                 />
                 <ActionItem

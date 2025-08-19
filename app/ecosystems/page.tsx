@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import EcosystemsPageClient from './EcosystemsPageClient';
 import { fetchStatisticsRank } from "~/statistics/repository";
 import { fetchEcosystemCount } from "~/api/repository";
+import { getUser } from "~/auth/repository";
+import { headers } from 'next/headers';
 import DefaultLayoutWrapper from '../DefaultLayoutWrapper';
 
 export const metadata: Metadata = {
@@ -13,6 +15,17 @@ export const metadata: Metadata = {
 };
 
 export default async function EcosystemsPage() {
+  // Get current user from session
+  const headersList = headers();
+  const host = headersList.get('host') || 'localhost:3000';
+  const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
+  const url = `${protocol}://${host}/ecosystems`;
+
+  const request = new Request(url, {
+    headers: Object.fromEntries(headersList.entries()),
+  });
+  const user = await getUser(request);
+
   try {
     const [rankResult, countResult] = await Promise.all([
       fetchStatisticsRank(),
@@ -44,7 +57,7 @@ export default async function EcosystemsPage() {
     };
 
     return (
-      <DefaultLayoutWrapper user={null}>
+      <DefaultLayoutWrapper user={user}>
         <EcosystemsPageClient {...pageData} />
       </DefaultLayoutWrapper>
     );
@@ -61,7 +74,7 @@ export default async function EcosystemsPage() {
     };
 
     return (
-      <DefaultLayoutWrapper user={null}>
+      <DefaultLayoutWrapper user={user}>
         <EcosystemsPageClient {...fallbackData} />
       </DefaultLayoutWrapper>
     );

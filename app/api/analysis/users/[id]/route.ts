@@ -4,7 +4,7 @@ import { fetchCurrentUser } from "~/auth/repository";
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const resolvedParams = await params;
   try {
@@ -14,7 +14,7 @@ export async function GET(
     if (!analysisId) {
       return Response.json(
         { success: false, code: "INVALID_REQUEST", message: "Analysis ID is required", data: null },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -36,7 +36,7 @@ export async function GET(
     if (!authToken) {
       return Response.json(
         { success: false, code: "UNAUTHORIZED", message: "No authentication token available", data: null },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -72,7 +72,7 @@ export async function GET(
         message: error instanceof Error ? error.message : "Unknown error",
         data: null,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

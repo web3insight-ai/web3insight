@@ -21,7 +21,7 @@ function Navbar({ className, children, user, extra }: NavbarProps) {
     <div className={clsx("flex items-center w-full px-6 py-4", className)}>
       {/* Left side - Logo */}
       <div className="flex items-center gap-3 flex-1">
-        <Link className="flex items-center gap-3 group" title="Back to home" to="/">
+        <Link className="flex items-center gap-3 group" title="Back to home" href="/">
           <BrandLogo width={isDesktop ? 28 : 24} />
           {!isMobile && (
             <span className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary transition-colors">
@@ -30,12 +30,12 @@ function Navbar({ className, children, user, extra }: NavbarProps) {
           )}
         </Link>
       </div>
-      
+
       {/* Center - Navigation Menu */}
       <div className="flex items-center justify-center flex-1">
         {extra}
       </div>
-      
+
       {/* Right side - User controls */}
       <div className="flex items-center gap-3 flex-1 justify-end">
         {children}

@@ -1,6 +1,8 @@
+'use client';
+
 import { useState, useMemo } from "react";
 import clsx from "clsx";
-import { 
+import {
   Card, CardBody, CardHeader, Input, Dropdown, DropdownTrigger,
   DropdownMenu, DropdownItem, Button, Pagination,
 } from "@nextui-org/react";
@@ -37,11 +39,11 @@ function RepositoryListView({
     const markedRepos = dataSource.filter(repo => repo.customMark && Number(repo.customMark) > 0).length;
     const totalStars = dataSource.reduce((acc, repo) => acc + Number(repo.statistics?.star || 0), 0);
     const totalForks = dataSource.reduce((acc, repo) => acc + Number(repo.statistics?.fork || 0), 0);
-    
+
     // Check if API actually provides star/fork data (not just zeros)
     const hasStarData = dataSource.some(repo => repo.statistics?.star && Number(repo.statistics.star) > 0);
     const hasForkData = dataSource.some(repo => repo.statistics?.fork && Number(repo.statistics.fork) > 0);
-    
+
     return { totalRepos, markedRepos, totalStars, totalForks, hasStarData, hasForkData };
   }, [dataSource]);
 
@@ -62,7 +64,7 @@ function RepositoryListView({
   const sortedItems = useMemo(() => {
     return [...filteredItems].sort((a, b) => {
       let first, second;
-      
+
       switch (sortDescriptor.column) {
       case "fullName":
         first = a.fullName;
@@ -114,8 +116,8 @@ function RepositoryListView({
     <div className={clsx("min-h-full space-y-6", className)}>
       {/* Summary Cards */}
       <div className={`grid grid-cols-1 gap-4 md:gap-6 ${
-        stats.hasStarData && stats.hasForkData ? 'md:grid-cols-4' : 
-          stats.hasStarData || stats.hasForkData ? 'md:grid-cols-3' : 
+        stats.hasStarData && stats.hasForkData ? 'md:grid-cols-4' :
+          stats.hasStarData || stats.hasForkData ? 'md:grid-cols-3' :
             'md:grid-cols-2'
       }`}>
         <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
@@ -264,7 +266,7 @@ function RepositoryListView({
             <h3 className="text-lg font-medium text-gray-900 dark:text-white">Repository Management</h3>
           </div>
         </CardHeader>
-        
+
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -295,8 +297,8 @@ function RepositoryListView({
                 sortedItems.map((repo, index) => {
                   const absoluteIndex = (pagination.pageNum - 1) * pagination.pageSize + index + 1;
                   return (
-                    <tr 
-                      key={repo.id} 
+                    <tr
+                      key={repo.id}
                       className="hover:bg-surface dark:hover:bg-surface-dark transition-colors duration-200 group animate-fade-in"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
@@ -335,7 +337,7 @@ function RepositoryListView({
                       )}
                       <td className="px-6 py-4 whitespace-nowrap text-center">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          !repo.customMark || Number(repo.customMark) === 0 
+                          !repo.customMark || Number(repo.customMark) === 0
                             ? 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200'
                             : Number(repo.customMark) <= 3
                               ? 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200'
@@ -372,7 +374,7 @@ function RepositoryListView({
             </tbody>
           </table>
         </div>
-        
+
         <div className="px-6 py-4 border-t border-border dark:border-border-dark flex justify-between items-center">
           <div className="text-sm text-gray-500 dark:text-gray-400">
             Showing {Math.min((pagination.pageNum - 1) * pagination.pageSize + 1, pagination.total)} to{' '}

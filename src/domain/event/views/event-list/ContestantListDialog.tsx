@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect } from "react";
 import {
   Modal, ModalContent, ModalHeader, ModalBody, ModalFooter,
@@ -6,7 +8,7 @@ import {
 import { MapPin, Calendar, ExternalLink, Users, AlertTriangle, Copy, ChevronDown, ChevronUp } from "lucide-react";
 
 import AnalysisProgress from "@/components/loading/AnalysisProgress";
-import { fetchOne } from "../../repository";
+import { fetchOne } from "../../repository/client";
 
 import type { ContestantListDialogProps } from "./typing";
 
@@ -128,13 +130,13 @@ function ContestantListDialog({ dataSource, eventId, failedAccounts, visible, on
               <div className="flex flex-col gap-4 max-h-96 overflow-auto">
                 {dataSource.map(user => (
                   <div className="flex gap-4 p-4 border border-border dark:border-border-dark rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" key={user.id}>
-                    <Link href={user.html_url} isExternal className="shrink-0">
-                      <Avatar src={user.avatar_url} size="lg" className="ring-2 ring-border dark:ring-border-dark" />
+                    <Link href={user.html_url || `https://github.com/${user.login}`} isExternal className="shrink-0">
+                      <Avatar src={user.avatar_url} size="lg" className="ring-2 ring-border dark:border-border-dark" />
                     </Link>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <Link
-                          href={user.html_url}
+                          href={user.html_url || `https://github.com/${user.login}`}
                           isExternal
                           className="text-lg font-semibold text-gray-900 dark:text-gray-100 hover:text-primary transition-colors"
                         >

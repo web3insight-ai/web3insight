@@ -1,10 +1,12 @@
+'use client';
+
 import { useState, useEffect } from "react";
 import clsx from "clsx";
 import { Card, Button, Input, Pagination } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import { Calendar, Plus, Search, Eye } from "lucide-react";
 
-import { fetchList } from "../../repository";
+import { fetchList } from "../../repository/client";
 
 import type { EventDialogPayload, EventListViewWidgetProps } from "./typing";
 import CreatedTimeFieldWidget from "./CreatedTimeField";
@@ -33,6 +35,9 @@ function EventListView({ className }: EventListViewWidgetProps) {
   const [addedResult, setAddedResult] = useState<EventDialogPayload>({ eventId: 0, contestants: [], failedAccounts: [] });
   const [addedResultVisible, setAddedResultVisible] = useState(false);
 
+  // Loading state for navigation
+  const [navigatingEventId, setNavigatingEventId] = useState<number | null>(null);
+
   const router = useRouter();
 
   useEffect(() => {
@@ -46,7 +51,24 @@ function EventListView({ className }: EventListViewWidgetProps) {
       .finally(() => setLoading(false));
   }, [page, refetchTimestamp]);
 
-  const gotoDetail = (id: number) => router.push(`/admin/events/${id}`);
+  const gotoDetail = async (id: number) => {
+    setNavigatingEventId(id);
+
+    // Set a timeout to clear loading state in case navigation gets stuck
+    const timeoutId = setTimeout(() => {
+      setNavigatingEventId(null);
+    }, 5000); // 5 seconds timeout
+
+    try {
+      await router.push(`/admin/events/${id}`);
+      clearTimeout(timeoutId);
+    } catch (error) {
+      console.error('Navigation error:', error);
+      clearTimeout(timeoutId);
+      setNavigatingEventId(null);
+    }
+    // Note: navigatingEventId will be cleared when component unmounts during successful navigation
+  };
 
   const closeDialog = (payload?: EventDialogPayload) => {
     setVisible(false);
@@ -172,6 +194,8 @@ function EventListView({ className }: EventListViewWidgetProps) {
                           isIconOnly
                           variant="bordered"
                           onClick={() => gotoDetail(event.id)}
+                          isLoading={navigatingEventId === event.id}
+                          isDisabled={navigatingEventId !== null}
                           className="border-border dark:border-border-dark hover:bg-surface dark:hover:bg-surface-dark"
                           title="View Event Details"
                         >

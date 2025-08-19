@@ -43,7 +43,7 @@ function NavMenu({ settings = false, user }: NavMenuProps) {
                   "text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary": !isActive,
                 },
               )}
-              to={item.path}
+              href={item.path || "/"}
             >
               <div className="flex items-center gap-3">
                 <div className={clsx(

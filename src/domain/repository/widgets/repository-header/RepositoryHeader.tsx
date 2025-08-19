@@ -27,7 +27,7 @@ function RepositoryHeader({ className, repository }: RepositoryHeaderProps) {
           {/* External Links */}
           <div className="flex items-center gap-4 mb-6">
             <a
-              href={`https://github.com/${repository.name}`}
+              href={`https://github.com/${repository.name || 'unknown/repository'}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary transition-colors"
@@ -37,7 +37,7 @@ function RepositoryHeader({ className, repository }: RepositoryHeaderProps) {
             </a>
             {repository.details?.homepage && (
               <a
-                href={repository.details.homepage}
+                href={repository.details.homepage || '#'}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary transition-colors"

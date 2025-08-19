@@ -164,7 +164,14 @@ async function insertOne(
 
   // Get user token from session
   const session = await getSession(request);
-  const userToken = session.get("userToken");
+  let userToken = session.get("userToken");
+
+  // TEMPORARY: Check for test token in headers for development/testing
+  const testTokenHeader = request.headers.get('x-test-token');
+  if (testTokenHeader && !userToken) {
+    console.log('🧪 Using test token for event creation');
+    userToken = testTokenHeader;
+  }
 
   if (!userToken) {
     return {

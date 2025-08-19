@@ -15,7 +15,7 @@ import MetricOverview from "./MetricOverview";
 
 interface EcosystemDetailProps {
   ecosystem: string;
-  statistics: any;
+  statistics: Record<string, unknown>;
 }
 
 export default function EcosystemDetailClient({
@@ -67,8 +67,8 @@ export default function EcosystemDetailClient({
         </div>
         <div className="animate-slide-up" style={{ animationDelay: "300ms" }}>
           {isLoading ? (
-            <TableSkeleton 
-              title="Top Repositories" 
+            <TableSkeleton
+              title="Top Repositories"
               icon={<Github size={18} className="text-primary" />}
               rows={10}
               columns={6}
@@ -79,8 +79,8 @@ export default function EcosystemDetailClient({
         </div>
         <div className="animate-slide-up" style={{ animationDelay: "400ms" }}>
           {isLoading ? (
-            <TableSkeleton 
-              title="Top Contributors" 
+            <TableSkeleton
+              title="Top Contributors"
               icon={<Users size={18} className="text-secondary" />}
               rows={10}
               columns={4}

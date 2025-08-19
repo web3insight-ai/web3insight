@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from "react";
 import { Card, CardHeader, CardBody, Divider, Link, Chip, Button } from "@nextui-org/react";
 import { Github, Trophy, ChevronDown, ChevronUp } from "lucide-react";
@@ -129,10 +131,10 @@ function RepoScoreListCard({ dataSource }: RepoScoreListCardProps) {
                                 {/* Repository Info */}
                                 <div className="flex-1">
                                   <Link
-                                    href={`https://github.com/${fullName}`}
+                                    href={`https://github.com/${fullName || 'unknown/repository'}`}
                                     isExternal
                                     className="text-xs font-mono leading-relaxed text-gray-900 dark:text-white hover:text-primary group-hover:text-primary transition-colors line-clamp-3 break-all"
-                                    title={fullName}
+                                    title={fullName || 'Unknown Repository'}
                                   >
                                     <span className="text-gray-500 dark:text-gray-400 font-normal">{owner}/</span>
                                     <span className="font-medium">{shortName}</span>

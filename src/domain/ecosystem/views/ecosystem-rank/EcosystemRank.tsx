@@ -76,10 +76,10 @@ function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <Link 
-                    href={`/ecosystems/${encodeURIComponent(ecosystem.eco_name)}`} 
+                    href={`/ecosystems/${encodeURIComponent(ecosystem.eco_name || 'unknown-ecosystem')}`} 
                     className="font-medium text-gray-900 dark:text-white hover:text-primary transition-colors duration-200"
                   >
-                    {ecosystem.eco_name}
+                    {ecosystem.eco_name || 'Unknown Ecosystem'}
                   </Link>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right">

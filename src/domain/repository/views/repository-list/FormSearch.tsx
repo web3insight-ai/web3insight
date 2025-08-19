@@ -1,5 +1,6 @@
+'use client';
+
 import { type FormEventHandler, useState } from "react";
-import { Form } from "@remix-run/react";
 import { Input, Button } from "@nextui-org/react";
 
 import type { SearchValue, FormSearchWidgetProps } from "./typing";
@@ -19,7 +20,7 @@ function FormSearch({ onSearch }: FormSearchWidgetProps) {
   };
 
   return (
-    <Form className="flex items-end gap-4 md:gap-6" onSubmit={handleSubmit}>
+    <form className="flex items-end gap-4 md:gap-6" onSubmit={handleSubmit}>
       <div className="flex-grow grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
         <Input
           label="Keyword"
@@ -34,7 +35,7 @@ function FormSearch({ onSearch }: FormSearchWidgetProps) {
       <Button className="flex-shrink-0" type="submit" color="primary">
         Search
       </Button>
-    </Form>
+    </form>
   );
 }
 

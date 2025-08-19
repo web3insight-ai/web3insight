@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect, useCallback } from "react";
 import { Card, CardHeader, Avatar, Badge, Button } from "@nextui-org/react";
 import { Users, Trophy, Medal, Award, ChevronDown, ChevronUp, RefreshCw, Edit3 } from "lucide-react";
@@ -6,12 +8,12 @@ import AnalysisProgress from "@/components/loading/AnalysisProgress";
 import AnalysisSkeleton from "@/components/loading/AnalysisSkeleton";
 
 import type { PartialContestant, EventReport } from "../../typing";
-import { 
-  createPartialContestants, 
+import {
+  createPartialContestants,
   isAnalysisComplete,
-  calculateOverallProgress, 
+  calculateOverallProgress,
 } from "../../helper/progressive";
-import { fetchOne } from "../../repository";
+import { fetchOne } from "../../repository/client";
 
 import type { EventDetailViewWidgetProps } from "./typing";
 import EventEditDialog from "./EventEditDialog";
@@ -27,54 +29,28 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
   const [eventData, setEventData] = useState<EventReport | null>(null);
   const [loadingEventData, setLoadingEventData] = useState(false);
 
-  // Simulate progressive analysis updates
-  const simulateProgressUpdates = useCallback(() => {
+  // Poll for real analysis updates from the server
+  const pollAnalysisUpdates = useCallback(async () => {
     if (analysisComplete) return;
 
-    setContestants(prevContestants => {
-      const updatedContestants = prevContestants.map(contestant => {
-        if (contestant.analysisStatus === "analyzing") {
-          const newProgress = Math.min((contestant.analysisProgress || 10) + Math.random() * 15, 95);
-          
-          if (newProgress > 90 && Math.random() > 0.5) {
-            // Complete this contestant's analysis
-            return {
-              ...contestant,
-              analysisStatus: "completed" as const,
-              analysisProgress: 100,
-              analytics: contestant.analytics?.map(analytics => ({
-                ...analytics,
-                status: "completed" as const,
-                progress: 100,
-                score: Math.floor(Math.random() * 900) + 100, // Random score
-                repos: [
-                  { fullName: "example/repo1", score: "250" },
-                  { fullName: "example/repo2", score: "180" },
-                  { fullName: "example/repo3", score: "95" },
-                ],
-              })),
-            };
-          }
+    try {
+      const result = await fetchOne(id);
+      if (result.success && result.data.contestants) {
+        const updatedContestants = createPartialContestants(result.data.contestants);
+        setContestants(updatedContestants);
 
-          return {
-            ...contestant,
-            analysisProgress: newProgress,
-          };
+        const newOverallProgress = calculateOverallProgress(updatedContestants);
+        setOverallProgress(newOverallProgress);
+
+        if (isAnalysisComplete(updatedContestants)) {
+          setAnalysisComplete(true);
+          setPollingActive(false);
         }
-        return contestant;
-      });
-
-      const newOverallProgress = calculateOverallProgress(updatedContestants);
-      setOverallProgress(newOverallProgress);
-
-      if (isAnalysisComplete(updatedContestants)) {
-        setAnalysisComplete(true);
-        setPollingActive(false);
       }
-
-      return updatedContestants;
-    });
-  }, [analysisComplete]);
+    } catch (error) {
+      console.error('[Progressive Event Detail] Error polling analysis updates:', error);
+    }
+  }, [analysisComplete, id]);
 
   // Fetch event data for editing
   const fetchEventData = async () => {
@@ -103,67 +79,38 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
     window.location.reload();
   };
 
-  // Initial fetch - get basic GitHub user data immediately
+  // Initial fetch - get event data and show contestants immediately
   useEffect(() => {
-    const fetchBasicData = async () => {
+    const fetchEventData = async () => {
       try {
-        // This would typically be a modified insertOne response
-        // For now, we'll simulate getting basic GitHub user data
-        const mockGithubUsers = [
-          {
-            id: 1,
-            login: "johndev",
-            name: "John Developer",
-            bio: "Full-stack developer passionate about Web3",
-            avatar_url: "https://github.com/identicons/johndev.png",
-            location: "San Francisco, CA",
-            public_repos: 25,
-            html_url: "https://github.com/johndev",
-            email: "",
-            company: "",
-            blog: "",
-            twitter_username: "",
-            created_at: "2019-03-15T10:00:00Z",
-          },
-          {
-            id: 2,
-            login: "aliceblockchain",
-            name: "Alice Blockchain",
-            bio: "Smart contract developer and DeFi enthusiast",
-            avatar_url: "https://github.com/identicons/aliceblockchain.png",
-            location: "Berlin, Germany",
-            public_repos: 42,
-            html_url: "https://github.com/aliceblockchain",
-            email: "",
-            company: "",
-            blog: "",
-            twitter_username: "",
-            created_at: "2018-07-22T14:30:00Z",
-          },
-        ];
-
-        const partialContestants = createPartialContestants(mockGithubUsers);
-        setContestants(partialContestants);
-        setOverallProgress(calculateOverallProgress(partialContestants));
-        setPollingActive(true);
+        const result = await fetchOne(id);
+        if (result.success && result.data.contestants) {
+          // Convert real contestants to partial contestants for progressive display
+          const partialContestants = createPartialContestants(result.data.contestants);
+          setContestants(partialContestants);
+          setOverallProgress(calculateOverallProgress(partialContestants));
+          setPollingActive(true);
+        } else {
+          console.error(`[Progressive Event Detail] Failed to fetch event data:`, result.message);
+        }
         setLoading(false);
       } catch (error) {
-        console.error(`[Progressive Event Detail] Error fetching basic data:`, error);
+        console.error(`[Progressive Event Detail] Error fetching event data:`, error);
         setLoading(false);
       }
     };
 
-    fetchBasicData();
+    fetchEventData();
   }, [id]);
 
   // Polling for analysis updates
   useEffect(() => {
     if (!pollingActive || analysisComplete) return;
 
-    const interval = setInterval(simulateProgressUpdates, 3000); // Update every 3 seconds
+    const interval = setInterval(pollAnalysisUpdates, 10000); // Update every 10 seconds (same as original)
 
     return () => clearInterval(interval);
-  }, [pollingActive, analysisComplete, simulateProgressUpdates]);
+  }, [pollingActive, analysisComplete, pollAnalysisUpdates]);
 
   const toggleContestant = (contestantId: string) => {
     const newExpanded = new Set(expandedContestants);
@@ -209,16 +156,16 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
                 </p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-3 justify-end">
               {!analysisComplete && (
-                <AnalysisProgress 
-                  status="analyzing" 
+                <AnalysisProgress
+                  status="analyzing"
                   progress={overallProgress}
                   message={`${contestants.filter(c => c.analysisStatus === "completed").length}/${contestants.length} completed`}
                 />
               )}
-              
+
               {analysisComplete && (
                 <Badge color="success" variant="flat">
                   ✓ Complete
@@ -254,11 +201,11 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
             )}
           </div>
         </CardHeader>
-        
+
         <div className="divide-y divide-border dark:divide-border-dark">
           {contestants.map((contestant, index) => {
             const isExpanded = expandedContestants.has(contestant.id.toString());
-            
+
             return (
               <div key={contestant.id} className="p-6">
                 <div className="flex items-start gap-4">
@@ -286,7 +233,7 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
                           )}
                         </div>
                       </div>
-                      
+
                       <Button
                         variant="light"
                         size="sm"
@@ -299,7 +246,7 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
 
                     {/* Analysis Status */}
                     <div className="mb-4">
-                      <AnalysisProgress 
+                      <AnalysisProgress
                         status={contestant.analysisStatus}
                         progress={contestant.analysisProgress}
                         estimatedTime={contestant.estimatedTime}

@@ -1,5 +1,8 @@
+'use client';
+
+import { useState } from "react";
 import { Card, Skeleton } from "@nextui-org/react";
-import { Calendar, ArrowRight, Lock } from "lucide-react";
+import { Calendar, ArrowRight, Lock, Loader2 } from "lucide-react";
 import { useAtom } from "jotai";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -18,10 +21,25 @@ type EventInsightsProps = {
 function EventInsightsWidget({ dataSource, loading = false, user }: EventInsightsProps) {
   const [, addToast] = useAtom(addToastAtom);
   const router = useRouter();
+  const [navigatingEventId, setNavigatingEventId] = useState<string | null>(null);
 
-  const handleViewDetailsClick = (eventId: string) => {
+  const handleViewDetailsClick = async (eventId: string) => {
     if (canManageEvents(user)) {
-      router.push(`/admin/events/${eventId}`);
+      setNavigatingEventId(eventId);
+
+      // Set a timeout to clear loading state in case navigation gets stuck
+      const timeoutId = setTimeout(() => {
+        setNavigatingEventId(null);
+      }, 5000);
+
+      try {
+        await router.push(`/admin/events/${eventId}`);
+        clearTimeout(timeoutId);
+      } catch (error) {
+        console.error('Navigation error:', error);
+        clearTimeout(timeoutId);
+        setNavigatingEventId(null);
+      }
     } else {
       addToast({
         type: 'warning',
@@ -117,19 +135,29 @@ function EventInsightsWidget({ dataSource, loading = false, user }: EventInsight
                     {canManageEvents(user) ? (
                       <button
                         onClick={() => handleViewDetailsClick(event.id)}
-                        className="inline-flex items-center gap-1 text-sm font-medium text-gray-900 dark:text-white hover:text-primary dark:hover:text-primary transition-colors"
+                        disabled={navigatingEventId !== null}
+                        className="inline-flex items-center gap-1 text-sm font-medium text-gray-900 dark:text-white hover:text-primary dark:hover:text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         View Details
-                        <ArrowRight size={14} />
+                        {navigatingEventId === event.id ? (
+                          <Loader2 size={14} className="animate-spin" />
+                        ) : (
+                          <ArrowRight size={14} />
+                        )}
                       </button>
                     ) : (
                       <button
                         onClick={() => handleViewDetailsClick(event.id)}
-                        className="inline-flex items-center gap-1 text-sm font-medium text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                        disabled={navigatingEventId !== null}
+                        className="inline-flex items-center gap-1 text-sm font-medium text-gray-400 dark:text-gray-500 cursor-not-allowed disabled:opacity-30"
                       >
                         <Lock size={12} />
                         View Details
-                        <ArrowRight size={14} />
+                        {navigatingEventId === event.id ? (
+                          <Loader2 size={14} className="animate-spin" />
+                        ) : (
+                          <ArrowRight size={14} />
+                        )}
                       </button>
                     )}
                   </td>

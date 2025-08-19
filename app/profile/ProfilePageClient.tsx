@@ -26,7 +26,7 @@ import { WalletBindWidget } from "~/auth/widgets/wallet-bind";
 import { OriginAuthWidget } from "~/origin/widgets/OriginAuthWidget";
 
 interface ProfilePageProps {
-  user: any;
+  user: Record<string, unknown>;
   error: string | null;
   expired: boolean;
 }
@@ -98,9 +98,9 @@ export default function ProfilePageClient({ user, error, expired }: ProfilePageP
     );
   }
 
-  const githubBind = user.binds?.find((bind: any) => bind.bind_type === 'github');
-  const emailBind = user.binds?.find((bind: any) => bind.bind_type === 'email');
-  const walletBinds = user.binds?.filter((bind: any) => bind.bind_type === 'wallet') || [];
+  const githubBind = (user.binds as Record<string, unknown>[] | undefined)?.find((bind: Record<string, unknown>) => bind.bind_type === 'github');
+  const emailBind = (user.binds as Record<string, unknown>[] | undefined)?.find((bind: Record<string, unknown>) => bind.bind_type === 'email');
+  const walletBinds = (user.binds as Record<string, unknown>[] | undefined)?.filter((bind: Record<string, unknown>) => bind.bind_type === 'wallet') || [];
 
   return (
     <div className="min-h-dvh flex flex-col">

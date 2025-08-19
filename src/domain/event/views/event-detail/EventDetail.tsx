@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect } from "react";
 import { Card, CardHeader, Avatar, Button } from "@nextui-org/react";
 import { Calendar, Users, Trophy, Medal, Award, ChevronDown, ChevronUp, Edit3 } from "lucide-react";
@@ -7,7 +9,7 @@ import ChartCard from "@/components/control/chart-card";
 import ProfileCardWidget from "../../../developer/widgets/profile-card";
 
 import type { EventReport } from "../../typing";
-import { fetchOne } from "../../repository";
+import { fetchOne } from "../../repository/client";
 
 import type { EventDetailViewWidgetProps } from "./typing";
 import { resolveChartOptions } from "./helper";

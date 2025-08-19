@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     if (!requestData.intent) {
       return Response.json(
         { success: false, code: "INVALID_REQUEST", message: "Intent is required", data: null },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     if (!authToken) {
       return Response.json(
         { success: false, code: "UNAUTHORIZED", message: "No authentication token available", data: null },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
         message: error instanceof Error ? error.message : "Unknown error",
         data: null,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

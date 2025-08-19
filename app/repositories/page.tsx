@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import RepositoriesPageClient from './RepositoriesPageClient';
 import { fetchStatisticsRank, fetchStatisticsOverview } from "~/statistics/repository";
+import { getUser } from "~/auth/repository";
+import { headers } from 'next/headers';
 import DefaultLayoutWrapper from '../DefaultLayoutWrapper';
 
 export const metadata: Metadata = {
@@ -12,6 +14,17 @@ export const metadata: Metadata = {
 };
 
 export default async function RepositoriesPage() {
+  // Get current user from session
+  const headersList = headers();
+  const host = headersList.get('host') || 'localhost:3000';
+  const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
+  const url = `${protocol}://${host}/repositories`;
+
+  const request = new Request(url, {
+    headers: Object.fromEntries(headersList.entries()),
+  });
+  const user = await getUser(request);
+
   try {
     const [statisticsResult, rankResult] = await Promise.all([
       fetchStatisticsOverview(),
@@ -42,7 +55,7 @@ export default async function RepositoriesPage() {
     };
 
     return (
-      <DefaultLayoutWrapper user={null}>
+      <DefaultLayoutWrapper user={user}>
         <RepositoriesPageClient {...pageData} />
       </DefaultLayoutWrapper>
     );
@@ -58,7 +71,7 @@ export default async function RepositoriesPage() {
     };
 
     return (
-      <DefaultLayoutWrapper user={null}>
+      <DefaultLayoutWrapper user={user}>
         <RepositoriesPageClient {...fallbackData} />
       </DefaultLayoutWrapper>
     );

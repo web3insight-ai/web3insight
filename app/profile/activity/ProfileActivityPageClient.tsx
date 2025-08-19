@@ -3,10 +3,10 @@
 import { Card, CardBody, CardHeader } from "@nextui-org/react";
 
 interface ProfileActivityPageProps {
-  user: any;
+  user: Record<string, unknown>;
 }
 
-export default function ProfileActivityPageClient({ user }: ProfileActivityPageProps) {
+export default function ProfileActivityPageClient({ user: _user }: ProfileActivityPageProps) {
   return (
     <div className="flex flex-col items-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl w-full">

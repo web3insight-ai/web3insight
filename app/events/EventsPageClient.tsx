@@ -28,7 +28,7 @@ export default function EventsPageClient({
 
     if (filterValue) {
       filtered = filtered.filter(event =>
-        (event.description && event.description.toLowerCase().includes(filterValue.toLowerCase()))
+        (event.description && event.description.toLowerCase().includes(filterValue.toLowerCase())),
       );
     }
 

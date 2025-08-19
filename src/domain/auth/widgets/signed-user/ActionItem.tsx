@@ -39,11 +39,11 @@ function ActionItem({
   }
 
   return renderType === "button" ? (
-    <button className={actionClassName} onClick={action}>
+    <button className={actionClassName} onClick={action as (() => void)}>
       {actionContent}
     </button>
   ) : (
-    <Link className={actionClassName} href={action}>
+    <Link className={actionClassName} href={(action as string) || "/"}>
       {actionContent}
     </Link>
   );

@@ -1,5 +1,7 @@
+'use client';
+
 import { useState, useMemo, useEffect } from "react";
-import { Link } from "@remix-run/react";
+import Link from "next/link";
 import {
   Card, CardHeader, Input, Pagination, Button,
 } from "@nextui-org/react";
@@ -126,10 +128,10 @@ function EcosystemManagementTable({ ecosystems }: EcosystemManagementTableProps)
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Link
-                          to={`/admin/ecosystems/${encodeURIComponent(ecosystem.eco_name)}`}
+                          href={`/admin/ecosystems/${encodeURIComponent(ecosystem.eco_name || 'unknown-ecosystem')}`}
                           className="font-medium text-gray-900 dark:text-white hover:text-primary transition-colors duration-200"
                         >
-                          {ecosystem.eco_name}
+                          {ecosystem.eco_name || 'Unknown Ecosystem'}
                         </Link>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
@@ -155,7 +157,7 @@ function EcosystemManagementTable({ ecosystems }: EcosystemManagementTableProps)
                       <td className="px-6 py-4 whitespace-nowrap text-center">
                         <Button
                           as={Link}
-                          to={`/admin/ecosystems/${encodeURIComponent(ecosystem.eco_name)}`}
+                          href={`/admin/ecosystems/${encodeURIComponent(ecosystem.eco_name || 'unknown-ecosystem')}`}
                           isIconOnly
                           size="sm"
                           variant="light"

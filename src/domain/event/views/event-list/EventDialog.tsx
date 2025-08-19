@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useRef, MouseEvent } from "react";
 import {
   Modal, ModalContent, ModalHeader, ModalBody, ModalFooter,
@@ -7,7 +9,7 @@ import { Calendar } from "lucide-react";
 
 import FileUpload from "@/components/control/file-upload";
 
-import { insertOne } from "../../repository";
+import { insertOne } from "../../repository/client";
 
 import type { EventDialogPayload, EventDialogProps } from "./typing";
 import { resolveContestants } from "./helper";

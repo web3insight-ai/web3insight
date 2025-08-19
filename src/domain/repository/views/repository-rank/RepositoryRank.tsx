@@ -55,12 +55,12 @@ function RepositoryRankView({ className, dataSource }: RepositoryRankViewWidgetP
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <Link 
-                    href={`/repositories/${repo.id}?name=${encodeURIComponent(repo.fullName)}`} 
+                    href={`/repositories/${repo.id || 'unknown'}?name=${encodeURIComponent(repo.fullName || 'unknown-repo')}`} 
                     className="font-medium text-gray-900 dark:text-white hover:text-primary transition-colors duration-200"
                     target="_blank"
                     rel="noreferrer"
                   >
-                    {repo.fullName}
+                    {repo.fullName || 'Unknown Repository'}
                   </Link>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right">

@@ -7,7 +7,7 @@ export async function GET(request: Request) {
     if (!result.success) {
       return Response.json(
         { error: result.message || "Failed to fetch magic string" },
-        { status: parseInt(result.code) || 500 }
+        { status: parseInt(result.code) || 500 },
       );
     }
 
@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     console.error("Magic API error:", error);
     return Response.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

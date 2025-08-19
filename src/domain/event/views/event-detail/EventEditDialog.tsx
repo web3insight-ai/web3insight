@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect, useRef, MouseEvent } from "react";
 import {
   Modal, ModalContent, ModalHeader, ModalBody, ModalFooter,
@@ -10,7 +12,7 @@ import { useAtom } from "jotai";
 import { addToastAtom } from "#/atoms";
 import FileUpload from "@/components/control/file-upload";
 import AnalysisProgress from "@/components/loading/AnalysisProgress";
-import { updateOne, fetchOne } from "../../repository";
+import { updateOne, fetchOne } from "../../repository/client";
 import { resolveContestants } from "../event-list/helper";
 
 import type { EventReport } from "../../typing";

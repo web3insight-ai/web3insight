@@ -34,7 +34,7 @@ export default async function EcosystemDetailPage({ params }: EcosystemPageProps
 
     const pageData = {
       ecosystem: ecosystemName,
-      statistics
+      statistics,
     };
 
     return (
@@ -47,7 +47,7 @@ export default async function EcosystemDetailPage({ params }: EcosystemPageProps
 
     const fallbackData = {
       ecosystem: ecosystemName,
-      statistics: null
+      statistics: null,
     };
 
     return (

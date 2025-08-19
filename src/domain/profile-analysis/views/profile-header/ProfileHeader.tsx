@@ -40,7 +40,7 @@ export function ProfileHeader({ user, className = "" }: ProfileHeaderProps) {
               {user.name || user.login}
             </h1>
             <Link
-              href={user.html_url}
+              href={user.html_url || `https://github.com/${user.login}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"

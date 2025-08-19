@@ -125,7 +125,7 @@ export default async function RepositoryDetailPage({ params, searchParams }: Rep
           forksCount: githubRepo.forks_count,
           openIssuesCount: githubRepo.open_issues_count,
           contributorCount: 0, // Not displayed in UI
-          details: githubRepo as any, // Pass the entire GitHub repo object as details
+          details: githubRepo as Record<string, unknown>, // Pass the entire GitHub repo object as details
         };
       }
 
