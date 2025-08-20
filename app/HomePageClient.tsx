@@ -27,6 +27,7 @@ export default function HomePageClient() {
     developer: 0,
     coreDeveloper: 0,
   });
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
 
   // Load statistics overview on client side
   useEffect(() => {
@@ -44,6 +45,9 @@ export default function HomePageClient() {
       })
       .catch(error => {
         console.error('Failed to load statistics overview:', error);
+      })
+      .finally(() => {
+        setIsLoadingStats(false);
       });
   }, []);
 
@@ -251,7 +255,7 @@ export default function HomePageClient() {
         </div>
       </div>
 
-      <MetricOverview dataSource={statisticOverview} />
+      <MetricOverview dataSource={statisticOverview} isLoading={isLoadingStats} />
 
       {/* Answer Display Modal */}
       <Modal

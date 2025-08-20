@@ -1,10 +1,12 @@
 import { Code2, Users, Zap, Database } from "lucide-react";
 
 import MetricCard, { type MetricCardProps } from "$/control/metric-card";
+import MetricOverviewSkeleton from "./loading/MetricOverviewSkeleton";
 import type { DataValue } from "@/types";
 
 type MetricOverviewProps = {
   dataSource: Record<string, DataValue>;
+  isLoading?: boolean;
 };
 
 function resolveMetrics(dataSource: MetricOverviewProps["dataSource"]): MetricCardProps[] {
@@ -36,7 +38,11 @@ function resolveMetrics(dataSource: MetricOverviewProps["dataSource"]): MetricCa
   ];
 }
 
-function MetricOverview({ dataSource }: MetricOverviewProps) {
+function MetricOverview({ dataSource, isLoading = false }: MetricOverviewProps) {
+  if (isLoading) {
+    return <MetricOverviewSkeleton />;
+  }
+
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
       {resolveMetrics(dataSource).map((metric, index) => (
