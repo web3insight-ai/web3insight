@@ -9,7 +9,7 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import type { ActorRankRecord } from "~/api/typing";
 import RepoLinkWidget from "~/repository/widgets/repo-link";
-import MetricCard, { type MetricCardProps } from "$/control/metric-card";
+import MetricCard, { type MetricCardProps } from "$/controls/metric-card";
 
 interface DevelopersPageProps {
   developers: ActorRankRecord[];

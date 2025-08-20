@@ -3,7 +3,7 @@
 import { Skeleton } from "@nextui-org/react";
 import { Github } from "lucide-react";
 
-import ChartCard from "$/control/chart-card";
+import ChartCard from "$/controls/chart-card";
 import { CardSkeleton, ChartSkeleton, TableSkeleton } from "$/loading";
 import ClientOnly from "$/ClientOnly";
 

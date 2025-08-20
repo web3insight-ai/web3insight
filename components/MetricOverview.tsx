@@ -1,6 +1,6 @@
 import { Code2, Users, Zap, Database } from "lucide-react";
 
-import MetricCard, { type MetricCardProps } from "$/control/metric-card";
+import MetricCard, { type MetricCardProps } from "$/controls/metric-card";
 import MetricOverviewSkeleton from "./loading/MetricOverviewSkeleton";
 import type { DataValue } from "@/types";
 

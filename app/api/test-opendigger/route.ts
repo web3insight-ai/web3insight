@@ -1,4 +1,4 @@
-import { fetchRepoOpenrank } from "../../../src/domain/opendigger/repository";
+import { fetchRepoOpenrank } from "~/opendigger/repository";
 
 export async function GET() {
   try {

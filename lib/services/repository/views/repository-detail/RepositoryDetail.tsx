@@ -1,4 +1,4 @@
-import ChartCard from "$/control/chart-card";
+import ChartCard from "$/controls/chart-card";
 
 import RepositoryHeaderWidget from "~/repository/widgets/repository-header";
 import ClientOnly from "$/ClientOnly";

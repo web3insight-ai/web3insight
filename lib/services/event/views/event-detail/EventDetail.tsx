@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardHeader, Avatar, Button } from "@nextui-org/react";
 import { Calendar, Users, Trophy, Medal, Award, ChevronDown, ChevronUp, Edit3 } from "lucide-react";
 
-import ChartCard from "$/control/chart-card";
+import ChartCard from "$/controls/chart-card";
 
 import ProfileCardWidget from "../../../developer/widgets/profile-card";
 

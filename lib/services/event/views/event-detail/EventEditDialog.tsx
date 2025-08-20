@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { useAtom } from "jotai";
 
 import { addToastAtom } from "#/atoms";
-import FileUpload from "$/control/file-upload";
+import FileUpload from "$/controls/file-upload";
 import AnalysisProgress from "$/loading/AnalysisProgress";
 import { updateOne, fetchOne } from "../../repository/client";
 import { resolveContestants } from "../event-list/helper";

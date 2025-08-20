@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { Users, Code2, Zap, Database } from "lucide-react";
 
-import MetricCard, { type MetricCardProps } from "$/control/metric-card";
+import MetricCard, { type MetricCardProps } from "$/controls/metric-card";
 
 import type { MetricOverviewProps } from "./typing";
 

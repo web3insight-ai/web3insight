@@ -2,7 +2,7 @@ import { useState } from "react";
 import clsx from "clsx";
 import { Card } from "@nextui-org/react";
 
-import TableViewWidget from "$/widget/view/table";
+import TableViewWidget from "$/widgets/view/table";
 
 import type { Manager } from "../../typing";
 

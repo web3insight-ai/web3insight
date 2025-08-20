@@ -2,8 +2,8 @@ import type { JSXElementConstructor } from "react";
 
 import { type ButtonProps, Button } from "@nextui-org/react";
 
-import type { DataValue, ViewFieldDescriptor, FieldRendererProps } from "../@/types";
-import type { TableColumn } from "../../../control/data-table";
+import type { DataValue, ViewFieldDescriptor, FieldRendererProps } from "@/types";
+import type { TableColumn } from "$/controls/data-table";
 
 import type { TableViewAction, ActionGroup, TableViewWidgetProps } from "./typing";
 

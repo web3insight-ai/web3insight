@@ -1,7 +1,7 @@
 import type { ReactNode, PropsWithChildren } from "react";
 
-import type { DataValue, ClientAction, ViewDescriptor } from "../@/types";
-import type { DataTableProps } from "../../../control/data-table";
+import type { DataValue, ClientAction, ViewDescriptor } from "@/types";
+import type { DataTableProps } from "$/controls/data-table";
 
 type TableViewAction<T extends DataValue = Record<string, DataValue>> = Omit<ClientAction, "category" | "execute"> & {
   execute?: (data: T) => void;

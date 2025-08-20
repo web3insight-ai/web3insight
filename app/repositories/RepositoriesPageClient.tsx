@@ -8,7 +8,7 @@ import { Database, Filter, SortAsc, SortDesc, Search, Users, Code2, Zap, Star, G
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import type { RepoRankRecord } from "~/api/typing";
-import MetricCard, { type MetricCardProps } from "$/control/metric-card";
+import MetricCard, { type MetricCardProps } from "$/controls/metric-card";
 
 interface RepositoriesPageProps {
   repositories: RepoRankRecord[];

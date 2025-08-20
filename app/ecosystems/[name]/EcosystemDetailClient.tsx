@@ -2,7 +2,7 @@
 
 import { Warehouse, Github, Users } from "lucide-react";
 
-import ChartCard from "$/control/chart-card";
+import ChartCard from "$/controls/chart-card";
 import { CardSkeleton, ChartSkeleton, TableSkeleton } from "$/loading";
 
 import RepositoryRankViewWidget from "~/repository/views/repository-rank";

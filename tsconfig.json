@@ -21,10 +21,10 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/lib/*"],
-      "~/*": ["./src/domain/*"],
+      "@/*": ["./lib/*"],
+      "~/*": ["./lib/services/*"],
       "#/*": ["./app/*"],
-      "$/*": ["./src/components/*"]
+      "$/*": ["./components/*"]
     }
   },
   "include": [

@@ -1,6 +1,6 @@
 import clsx from "clsx";
 
-import DataTable from "../../../control/data-table";
+import DataTable from "$/controls/data-table";
 
 import type { TableViewWidgetProps } from "./typing";
 import { resolveActionGroup, resolveColumns } from "./helper";

@@ -75,49 +75,45 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
     return (
       <DefaultLayoutWrapper user={user}>
-        <div className="min-h-dvh flex flex-col">
-          <div className="w-full max-w-content mx-auto px-6 py-8">
-            {/* AI Query Section - Client Component */}
-            <HomePageClient />
+        <div className="w-full max-w-content mx-auto px-6 py-8">
+          {/* AI Query Section - Client Component */}
+          <HomePageClient />
 
-            {/* Server-rendered content */}
-            <div className="w-full max-w-content mx-auto px-6 pb-12">
-              <Section
-                className="mt-12"
-                title="Web3 Ecosystem Analytics"
-                summary="Comprehensive insights about major blockchain ecosystems"
-              >
-                <EcosystemRankViewWidget dataSource={statisticRank.ecosystem} />
-              </Section>
-              <Section
-                className="mt-16"
-                title="Repository Activity"
-                summary="Top repositories by developer engagement and contributions"
-              >
-                <RepositoryRankViewWidget dataSource={statisticRank.repository} />
-              </Section>
-              <Section
-                className="mt-16"
-                title="Top Developer Activity"
-                summary="Leading contributors across Web3 ecosystems"
-              >
-                <DeveloperRankViewWidget dataSource={statisticRank.developer} view="grid" />
-              </Section>
+          {/* Server-rendered content sections */}
+          <Section
+            className="mt-12"
+            title="Web3 Ecosystem Analytics"
+            summary="Comprehensive insights about major blockchain ecosystems"
+          >
+            <EcosystemRankViewWidget dataSource={statisticRank.ecosystem} />
+          </Section>
+          <Section
+            className="mt-16"
+            title="Repository Activity"
+            summary="Top repositories by developer engagement and contributions"
+          >
+            <RepositoryRankViewWidget dataSource={statisticRank.repository} />
+          </Section>
+          <Section
+            className="mt-16"
+            title="Top Developer Activity"
+            summary="Leading contributors across Web3 ecosystems"
+          >
+            <DeveloperRankViewWidget dataSource={statisticRank.developer} view="grid" />
+          </Section>
 
-              {/* Footer */}
-              <footer className="mt-16 pt-8 border-t border-border dark:border-border-dark">
-                <div className="text-center">
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">
-                    Supported by{" "}
-                    <a href="https://openbuild.xyz/" className="text-foreground dark:text-foreground font-medium hover:text-primary transition-colors">
-                      OpenBuild
-                    </a>{" "}
-                  </p>
-                  <p className="text-xs text-gray-400 dark:text-gray-600">© {new Date().getFullYear()} {title}. All rights reserved.</p>
-                </div>
-              </footer>
+          {/* Footer */}
+          <footer className="mt-16 pt-8 border-t border-border dark:border-border-dark">
+            <div className="text-center">
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                Supported by{" "}
+                <a href="https://openbuild.xyz/" className="text-foreground dark:text-foreground font-medium hover:text-primary transition-colors">
+                  OpenBuild
+                </a>{" "}
+              </p>
+              <p className="text-xs text-gray-400 dark:text-gray-600">© {new Date().getFullYear()} {title}. All rights reserved.</p>
             </div>
-          </div>
+          </footer>
         </div>
       </DefaultLayoutWrapper>
     );
@@ -141,34 +137,31 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
     return (
       <DefaultLayoutWrapper user={user}>
-        <div className="min-h-dvh flex flex-col">
-          <div className="w-full max-w-content mx-auto px-6 py-8">
-            <HomePageClient />
+        <div className="w-full max-w-content mx-auto px-6 py-8">
+          <HomePageClient />
 
-            <div className="w-full max-w-content mx-auto px-6 pb-12">
-              <Section
-                className="mt-12"
-                title="Web3 Ecosystem Analytics"
-                summary="Comprehensive insights about major blockchain ecosystems"
-              >
-                <EcosystemRankViewWidget dataSource={fallbackStatisticRank.ecosystem} />
-              </Section>
-              <Section
-                className="mt-16"
-                title="Repository Activity"
-                summary="Top repositories by developer engagement and contributions"
-              >
-                <RepositoryRankViewWidget dataSource={fallbackStatisticRank.repository} />
-              </Section>
-              <Section
-                className="mt-16"
-                title="Top Developer Activity"
-                summary="Leading contributors across Web3 ecosystems"
-              >
-                <DeveloperRankViewWidget dataSource={fallbackStatisticRank.developer} view="grid" />
-              </Section>
-            </div>
-          </div>
+          {/* Fallback sections */}
+          <Section
+            className="mt-12"
+            title="Web3 Ecosystem Analytics"
+            summary="Comprehensive insights about major blockchain ecosystems"
+          >
+            <EcosystemRankViewWidget dataSource={fallbackStatisticRank.ecosystem} />
+          </Section>
+          <Section
+            className="mt-16"
+            title="Repository Activity"
+            summary="Top repositories by developer engagement and contributions"
+          >
+            <RepositoryRankViewWidget dataSource={fallbackStatisticRank.repository} />
+          </Section>
+          <Section
+            className="mt-16"
+            title="Top Developer Activity"
+            summary="Leading contributors across Web3 ecosystems"
+          >
+            <DeveloperRankViewWidget dataSource={fallbackStatisticRank.developer} view="grid" />
+          </Section>
         </div>
       </DefaultLayoutWrapper>
     );

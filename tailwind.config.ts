@@ -4,8 +4,8 @@ import { nextui } from "@nextui-org/react";
 export default {
   content: [
     "./app/**/*.{js,ts,jsx,tsx}",
-    "./src/components/**/*.{js,jsx,ts,tsx}",
-    "./src/domain/**/*.{js,jsx,ts,tsx}",
+    "./components/**/*.{js,jsx,ts,tsx}",
+    "./lib/**/*.{js,jsx,ts,tsx}",
     "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
