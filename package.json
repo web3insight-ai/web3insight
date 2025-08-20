@@ -8,7 +8,7 @@
   "packageManager": "pnpm@9.4.0",
   "scripts": {
     "env": "node .knosys/scripts env",
-    "build": "next build --turbopack",
+    "build": "next build",
     "predev": "npm run env",
     "dev": "next dev --turbopack",
     "lint": "next lint",
