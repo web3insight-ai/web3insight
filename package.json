@@ -8,9 +8,9 @@
   "packageManager": "pnpm@9.4.0",
   "scripts": {
     "env": "node .knosys/scripts env",
-    "build": "next build",
+    "build": "next build --turbopack",
     "predev": "npm run env",
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
     "lint": "next lint",
     "start": "next start",
     "typecheck": "tsc --noEmit || true",
@@ -24,6 +24,7 @@
     "@campnetwork/origin": "^0.0.17",
     "@nextui-org/react": "^2.6.11",
     "@rainbow-me/rainbowkit": "^2.2.8",
+    "@t3-oss/env-nextjs": "0.13.8",
     "@tanstack/react-query": "^5.84.1",
     "ai": "^3.3.6",
     "clsx": "^2.1.1",
@@ -51,7 +52,7 @@
     "tailwind-merge": "^3.2.0",
     "viem": "^2.33.3",
     "wagmi": "^2.16.1",
-    "zod": "3.23.8"
+    "zod": "3.25.76"
   },
   "devDependencies": {
     "@knosys/sdk": "^0.0.3",
@@ -60,6 +61,7 @@
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "autoprefixer": "^10.4.20",
+    "code-inspector-plugin": "1.2.2",
     "eslint": "^8.57.0",
     "eslint-config-next": "^15.1.4",
     "eslint-import-resolver-typescript": "^3.6.1",

@@ -1,23 +1,28 @@
-import type { Metadata } from 'next';
-import RepositoriesPageClient from './RepositoriesPageClient';
-import { fetchStatisticsRank, fetchStatisticsOverview } from "~/statistics/repository";
+import type { Metadata } from "next";
+import RepositoriesPageClient from "./RepositoriesPageClient";
+import {
+  fetchStatisticsRank,
+  fetchStatisticsOverview,
+} from "~/statistics/repository";
 import { getUser } from "~/auth/repository";
-import { headers } from 'next/headers';
-import DefaultLayoutWrapper from '../DefaultLayoutWrapper';
+import { headers } from "next/headers";
+import DefaultLayoutWrapper from "../DefaultLayoutWrapper";
+import { env } from "@/env";
 
 export const metadata: Metadata = {
   title: "All Repositories | Web3 Insights",
   openGraph: {
     title: "All Repositories | Web3 Insights",
   },
-  description: "Top repositories by developer engagement and contributions across Web3 ecosystems",
+  description:
+    "Top repositories by developer engagement and contributions across Web3 ecosystems",
 };
 
 export default async function RepositoriesPage() {
   // Get current user from session
   const headersList = await headers();
-  const host = headersList.get('host') || 'localhost:3000';
-  const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
+  const host = headersList.get("host") || "localhost:3000";
+  const protocol = env.NODE_ENV === "development" ? "http" : "https";
   const url = `${protocol}://${host}/repositories`;
 
   const request = new Request(url, {
@@ -32,15 +37,20 @@ export default async function RepositoriesPage() {
     ]);
 
     const repositories = rankResult.success ? rankResult.data.repository : [];
-    const statisticOverview = statisticsResult.success ? statisticsResult.data : {
-      ecosystem: 0,
-      repository: 0,
-      developer: 0,
-      coreDeveloper: 0,
-    };
+    const statisticOverview = statisticsResult.success
+      ? statisticsResult.data
+      : {
+          ecosystem: 0,
+          repository: 0,
+          developer: 0,
+          coreDeveloper: 0,
+        };
 
     if (!statisticsResult.success) {
-      console.warn("Statistics overview fetch failed:", statisticsResult.message);
+      console.warn(
+        "Statistics overview fetch failed:",
+        statisticsResult.message
+      );
     }
     if (!rankResult.success) {
       console.warn("Statistics rank fetch failed:", rankResult.message);

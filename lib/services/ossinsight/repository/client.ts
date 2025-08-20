@@ -1,11 +1,19 @@
-import HttpClient, { type RequestConfigWithTimeout } from "@/clients/http/HttpClient";
-import { getHttpTimeout, getVar } from "@/utils/env";
+import HttpClient, {
+  type RequestConfigWithTimeout,
+} from "@/clients/http/HttpClient";
+import { env } from "@/env";
 import type { DataValue, ResponseResult } from "@/types";
 
 // OSS Insight API returns data in a specific structure, so we need to normalize it
-function normalizeResponse<VT extends DataValue = DataValue>(apiResponse: unknown): ResponseResult<VT> {
+function normalizeResponse<VT extends DataValue = DataValue>(
+  apiResponse: unknown
+): ResponseResult<VT> {
   // OSS Insight API returns: { data: actualData, requestedAt, finishedAt, etc. }
-  if (apiResponse && apiResponse.data !== undefined && apiResponse.data !== null) {
+  if (
+    apiResponse &&
+    apiResponse.data !== undefined &&
+    apiResponse.data !== null
+  ) {
     return {
       success: true,
       code: "200",
@@ -30,12 +38,12 @@ function normalizeResponse<VT extends DataValue = DataValue>(apiResponse: unknow
 
 // Create base HTTP client
 const baseHttpClient = new HttpClient({
-  baseURL: getVar("OSSINSIGHT_URL"),
+  baseURL: env.OSSINSIGHT_URL,
   normalizer: normalizeResponse,
 });
 
 // Get centralized timeout value
-const httpTimeout = getHttpTimeout();
+const httpTimeout = env.HTTP_TIMEOUT;
 
 // Create wrapper with timeout configuration
 const httpClient = {
@@ -46,21 +54,30 @@ const httpClient = {
     }
     return baseHttpClient.get(url, config);
   },
-  post: (url: string, data?: Record<string, DataValue>, config: RequestConfigWithTimeout = {}) => {
+  post: (
+    url: string,
+    data?: Record<string, DataValue>,
+    config: RequestConfigWithTimeout = {}
+  ) => {
     // Add longer timeout if no signal is provided
     if (!config.signal) {
       config.signal = AbortSignal.timeout(httpTimeout);
     }
     return baseHttpClient.post(url, data, config);
   },
-  put: (url: string, data?: Record<string, DataValue>, config: RequestConfigWithTimeout = {}) => {
+  put: (
+    url: string,
+    data?: Record<string, DataValue>,
+    config: RequestConfigWithTimeout = {}
+  ) => {
     // Add longer timeout if no signal is provided
     if (!config.signal) {
       config.signal = AbortSignal.timeout(httpTimeout);
     }
     return baseHttpClient.put(url, data, config);
   },
-  use: (interceptor: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+  use: (interceptor: any) => {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
     // Delegate to the base HTTP client
     return baseHttpClient.use(interceptor);
   },

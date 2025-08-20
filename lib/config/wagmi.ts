@@ -1,13 +1,6 @@
-import { getDefaultConfig } from '@rainbow-me/rainbowkit';
-import { supportedChains } from './chains';
-import { getVar } from '@/utils/env';
-
-// Get WalletConnect project ID from environment using the project's env system
-const projectId = getVar('WALLETCONNECT_PROJECT_ID') || 'project_id';
-
-if (!getVar('WALLETCONNECT_PROJECT_ID')) {
-  console.warn('WALLETCONNECT_PROJECT_ID environment variable not set. Using fallback project ID.');
-}
+import { getDefaultConfig } from "@rainbow-me/rainbowkit";
+import { supportedChains } from "./chains";
+import { env } from "@/env";
 
 // Create config only once to prevent multiple WalletConnect Core initializations
 let _wagmiConfig: ReturnType<typeof getDefaultConfig> | null = null;
@@ -18,17 +11,18 @@ function createWagmiConfig() {
   }
 
   _wagmiConfig = getDefaultConfig({
-    appName: 'Web3Insight',
-    projectId,
+    appName: "Web3Insight",
+    projectId: env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID,
     chains: supportedChains,
     ssr: true, // Enable server-side rendering support
     // Add storage configuration to handle SSR properly
-    storage: typeof window !== 'undefined' && window.localStorage ? window.localStorage : undefined,
+    storage:
+      typeof window !== "undefined" && window.localStorage
+        ? window.localStorage
+        : null,
   });
 
   return _wagmiConfig;
 }
 
 export const wagmiConfig = createWagmiConfig();
-
-export default wagmiConfig;

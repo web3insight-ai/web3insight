@@ -1,24 +1,26 @@
-import type { Metadata } from 'next';
-import EcosystemsPageClient from './EcosystemsPageClient';
+import type { Metadata } from "next";
+import EcosystemsPageClient from "./EcosystemsPageClient";
 import { fetchStatisticsRank } from "~/statistics/repository";
 import { fetchEcosystemCount } from "~/api/repository";
 import { getUser } from "~/auth/repository";
-import { headers } from 'next/headers';
-import DefaultLayoutWrapper from '../DefaultLayoutWrapper';
+import { headers } from "next/headers";
+import DefaultLayoutWrapper from "../DefaultLayoutWrapper";
+import { env } from "@/env";
 
 export const metadata: Metadata = {
   title: "All Ecosystems | Web3 Insights",
   openGraph: {
     title: "All Ecosystems | Web3 Insights",
   },
-  description: "Comprehensive overview of all blockchain and Web3 ecosystems with analytics and insights",
+  description:
+    "Comprehensive overview of all blockchain and Web3 ecosystems with analytics and insights",
 };
 
 export default async function EcosystemsPage() {
   // Get current user from session
   const headersList = await headers();
-  const host = headersList.get('host') || 'localhost:3000';
-  const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
+  const host = headersList.get("host") || "localhost:3000";
+  const protocol = env.NODE_ENV === "development" ? "http" : "https";
   const url = `${protocol}://${host}/ecosystems`;
 
   const request = new Request(url, {
@@ -39,13 +41,27 @@ export default async function EcosystemsPage() {
     }
 
     // Get true ecosystem count from API, fallback to array length if API fails
-    const totalEcosystems = countResult.success ? Number(countResult.data.total) : ecosystems.length;
+    const totalEcosystems = countResult.success
+      ? Number(countResult.data.total)
+      : ecosystems.length;
 
     // Calculate totals from the real data
-    const totalRepositories = ecosystems.reduce((acc, eco) => acc + Number(eco.repos_total), 0);
-    const totalDevelopers = ecosystems.reduce((acc, eco) => acc + Number(eco.actors_total), 0);
-    const totalCoreDevelopers = ecosystems.reduce((acc, eco) => acc + Number(eco.actors_core_total), 0);
-    const totalNewDevelopers = ecosystems.reduce((acc, eco) => acc + Number(eco.actors_new_total), 0);
+    const totalRepositories = ecosystems.reduce(
+      (acc, eco) => acc + Number(eco.repos_total),
+      0
+    );
+    const totalDevelopers = ecosystems.reduce(
+      (acc, eco) => acc + Number(eco.actors_total),
+      0
+    );
+    const totalCoreDevelopers = ecosystems.reduce(
+      (acc, eco) => acc + Number(eco.actors_core_total),
+      0
+    );
+    const totalNewDevelopers = ecosystems.reduce(
+      (acc, eco) => acc + Number(eco.actors_new_total),
+      0
+    );
 
     const pageData = {
       ecosystems,

@@ -1,16 +1,20 @@
 "use client";
 
-import React from 'react';
-import { WagmiProvider } from 'wagmi';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { RainbowKitProvider, darkTheme, lightTheme } from '@rainbow-me/rainbowkit';
-import { useTheme } from 'next-themes';
+import React from "react";
+import { WagmiProvider } from "wagmi";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  RainbowKitProvider,
+  darkTheme,
+  lightTheme,
+} from "@rainbow-me/rainbowkit";
+import { useTheme } from "next-themes";
 
-import { wagmiConfig } from '@/config/wagmi';
-import { OriginProvider } from './OriginProvider';
+import { wagmiConfig } from "@/config/wagmi";
+import { OriginProvider } from "./OriginProvider";
 
 // Import RainbowKit styles
-import '@rainbow-me/rainbowkit/styles.css';
+import "@rainbow-me/rainbowkit/styles.css";
 
 // Function to create QueryClient with SSR-safe configuration
 function makeQueryClient() {
@@ -21,11 +25,11 @@ function makeQueryClient() {
         // above 0 to avoid refetching immediately on the client
         staleTime: 60 * 1000,
         // Disable retries on server side to prevent indexedDB issues
-        retry: typeof window !== 'undefined',
+        retry: typeof window !== "undefined",
       },
       mutations: {
         // Disable retries on server side
-        retry: typeof window !== 'undefined',
+        retry: typeof window !== "undefined",
       },
     },
   });
@@ -35,7 +39,7 @@ function makeQueryClient() {
 let browserQueryClient: QueryClient | undefined = undefined;
 
 function getQueryClient() {
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     // Server: always make a new query client
     return makeQueryClient();
   } else {
@@ -51,25 +55,26 @@ interface WalletProviderProps {
 
 export function WalletProvider({ children }: WalletProviderProps) {
   const { resolvedTheme } = useTheme();
-  
+
   // Get the query client instance
   const queryClient = getQueryClient();
 
-  const rainbowKitTheme = resolvedTheme === 'dark'
-    ? darkTheme({
-      accentColor: '#007cee', // Primary blue from NextUI theme
-      accentColorForeground: 'white',
-      borderRadius: 'medium',
-      fontStack: 'system',
-      overlayBlur: 'small',
-    })
-    : lightTheme({
-      accentColor: '#007cee', // Primary blue from NextUI theme
-      accentColorForeground: 'white',
-      borderRadius: 'medium',
-      fontStack: 'system',
-      overlayBlur: 'small',
-    });
+  const rainbowKitTheme =
+    resolvedTheme === "dark"
+      ? darkTheme({
+          accentColor: "#007cee", // Primary blue from NextUI theme
+          accentColorForeground: "white",
+          borderRadius: "medium",
+          fontStack: "system",
+          overlayBlur: "small",
+        })
+      : lightTheme({
+          accentColor: "#007cee", // Primary blue from NextUI theme
+          accentColorForeground: "white",
+          borderRadius: "medium",
+          fontStack: "system",
+          overlayBlur: "small",
+        });
 
   return (
     <WagmiProvider config={wagmiConfig}>
@@ -79,9 +84,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
           modalSize="compact"
           showRecentTransactions={true}
         >
-          <OriginProvider>
-            {children}
-          </OriginProvider>
+          <OriginProvider>{children}</OriginProvider>
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>

@@ -1,12 +1,14 @@
-import 'server-only';
+import "server-only";
 
-import { cookies } from 'next/headers';
-import { SignJWT, jwtVerify } from 'jose';
+import { cookies } from "next/headers";
+import { SignJWT, jwtVerify } from "jose";
 
-import { getVar } from "@/utils/env";
+import { env } from "@/env";
 
-const secret = new TextEncoder().encode(getVar("SESSION_SECRET") || 'fallback-secret-key');
-const alg = 'HS256';
+const secret = new TextEncoder().encode(
+  env.SESSION_SECRET || "fallback-secret-key"
+);
+const alg = "HS256";
 
 interface SessionData {
   userToken?: string;
@@ -48,7 +50,7 @@ async function getSession(): Promise<MockSession> {
 
   try {
     const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('web3insight_session');
+    const sessionCookie = cookieStore.get("web3insight_session");
 
     if (sessionCookie?.value) {
       const { payload } = await jwtVerify(sessionCookie.value, secret);
@@ -56,7 +58,7 @@ async function getSession(): Promise<MockSession> {
     }
   } catch (error) {
     // If JWT verification fails, return empty session
-    console.warn('Session verification failed:', error);
+    console.warn("Session verification failed:", error);
   }
 
   return session;
@@ -78,12 +80,14 @@ async function createUserSession({
   const token = await new SignJWT(sessionData)
     .setProtectedHeader({ alg })
     .setIssuedAt()
-    .setExpirationTime('24h')
+    .setExpirationTime("24h")
     .sign(secret);
 
   return {
     headers: {
-      "Set-Cookie": `web3insight_session=${token}; Path=/; HttpOnly; SameSite=Lax; ${process.env.NODE_ENV === 'production' ? 'Secure;' : ''} Max-Age=86400`,
+      "Set-Cookie": `web3insight_session=${token}; Path=/; HttpOnly; SameSite=Lax; ${
+        env.NODE_ENV === "production" ? "Secure;" : ""
+      } Max-Age=86400`,
     },
   };
 }

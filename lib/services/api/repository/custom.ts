@@ -2,7 +2,7 @@ import type { ResponseResult } from "@/types";
 import type { SqlStylePagination } from "@/clients/http";
 import { normalizeRestfulResponse } from "@/clients/http";
 import HttpClient from "@/clients/http/HttpClient";
-import { getHttpTimeout } from "@/utils/env";
+import { getHttpTimeout, env } from "@/env";
 
 import type { User as GithubUser } from "../../github/typing";
 
@@ -13,7 +13,7 @@ function createAuthenticatedClient(userToken: string) {
   const httpTimeout = getHttpTimeout();
 
   const baseClient = new HttpClient({
-    baseURL: process.env.DATA_API_URL,
+    baseURL: env.DATA_API_URL,
     headers: {
       Authorization: `Bearer ${userToken}`,
     },
@@ -27,7 +27,11 @@ function createAuthenticatedClient(userToken: string) {
       }
       return baseClient.get(url, config);
     },
-    post: (url: string, data?: Record<string, unknown>, config: Record<string, unknown> = {}) => {
+    post: (
+      url: string,
+      data?: Record<string, unknown>,
+      config: Record<string, unknown> = {}
+    ) => {
       if (!config.signal) {
         config.signal = AbortSignal.timeout(httpTimeout);
       }
@@ -40,7 +44,7 @@ async function fetchAnalysisUserList(
   userToken: string,
   params: Partial<SqlStylePagination> & {
     direction?: string;
-  },
+  }
 ): Promise<ResponseResult<ListResponseData & TotalResponseData>> {
   const client = createAuthenticatedClient(userToken);
   return client.get("/v1/custom/analysis/users", { params });
@@ -52,16 +56,21 @@ async function analyzeUserList(
     request_data: string[];
     intent: string;
     description?: string;
-  },
-): Promise<ResponseResult<{
-  id: number;
-  users: GithubUser[];
-}>> {
+  }
+): Promise<
+  ResponseResult<{
+    id: number;
+    users: GithubUser[];
+  }>
+> {
   const client = createAuthenticatedClient(userToken);
   return client.post("/v1/custom/analysis/users", data);
 }
 
-async function fetchAnalysisUser(userToken: string, id: number): Promise<ResponseResult> {
+async function fetchAnalysisUser(
+  userToken: string,
+  id: number
+): Promise<ResponseResult> {
   const client = createAuthenticatedClient(userToken);
   return client.get(`/v1/custom/analysis/users/${id}`);
 }
@@ -73,13 +82,20 @@ async function updateAnalysisUser(
     request_data: string[];
     intent: string;
     description?: string;
-  },
-): Promise<ResponseResult<{
-  id: number;
-  users: GithubUser[];
-}>> {
+  }
+): Promise<
+  ResponseResult<{
+    id: number;
+    users: GithubUser[];
+  }>
+> {
   const client = createAuthenticatedClient(userToken);
   return client.post(`/v1/custom/analysis/users/${id}`, data);
 }
 
-export { fetchAnalysisUserList, analyzeUserList, fetchAnalysisUser, updateAnalysisUser };
+export {
+  fetchAnalysisUserList,
+  analyzeUserList,
+  fetchAnalysisUser,
+  updateAnalysisUser,
+};

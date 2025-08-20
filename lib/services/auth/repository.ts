@@ -1,16 +1,23 @@
 import type { ResponseResult } from "@/types";
 import { isServerSide, generateFailedResponse } from "@/clients/http";
 import httpClient from "@/clients/http/default";
-import { getVar } from "@/utils/env";
 
 import { getSession, clearSession } from "./helper/server";
 
-import type { ApiUser, ApiAuthResponse, GitHubOAuthRequest, MagicResponse, WalletBindRequest, WalletBindResponse } from "./typing";
+import type {
+  ApiUser,
+  ApiAuthResponse,
+  GitHubOAuthRequest,
+  MagicResponse,
+  WalletBindRequest,
+  WalletBindResponse,
+} from "./typing";
+import { env } from "@/env";
 
 const userCache: Record<string, { user: ApiUser; timestamp: number }> = {};
 const CACHE_TTL = 60 * 1000; // 60 seconds cache TTL
 
-const DATA_API_URL = getVar("DATA_API_URL");
+const DATA_API_URL = env.DATA_API_URL;
 const GITHUB_CLIENT_ID = "Ov23liAbxj5y1kCBSQeX";
 
 function transformApiUserToCompatibleFormat(apiResponse: {
@@ -21,7 +28,7 @@ function transformApiUserToCompatibleFormat(apiResponse: {
     created_at: string;
     updated_at: string;
   };
-  binds: Array<{bind_type: string; bind_key: string}>;
+  binds: Array<{ bind_type: string; bind_key: string }>;
   role: {
     allowed_roles: string[];
     default_role: string;
@@ -31,8 +38,14 @@ function transformApiUserToCompatibleFormat(apiResponse: {
   const { profile, binds, role } = apiResponse;
 
   // Find GitHub bind for username
-  const githubBind = binds.find((bind: {bind_type: string; bind_key: string}) => bind.bind_type === "github");
-  const emailBind = binds.find((bind: {bind_type: string; bind_key: string}) => bind.bind_type === "email");
+  const githubBind = binds.find(
+    (bind: { bind_type: string; bind_key: string }) =>
+      bind.bind_type === "github"
+  );
+  const emailBind = binds.find(
+    (bind: { bind_type: string; bind_key: string }) =>
+      bind.bind_type === "email"
+  );
 
   return {
     profile,
@@ -49,14 +62,19 @@ function transformApiUserToCompatibleFormat(apiResponse: {
 }
 
 // GitHub OAuth login flow
-async function signInWithGitHub(code: string): Promise<ResponseResult<ApiAuthResponse>> {
+async function signInWithGitHub(
+  code: string
+): Promise<ResponseResult<ApiAuthResponse>> {
   if (!isServerSide()) {
     return httpClient.post("/api/auth/login", { code, clientSide: true });
   }
 
   try {
     if (!code) {
-      return generateFailedResponse("GitHub authorization code is required", "400");
+      return generateFailedResponse(
+        "GitHub authorization code is required",
+        "400"
+      );
     }
 
     const oauthRequest: GitHubOAuthRequest = {
@@ -69,7 +87,7 @@ async function signInWithGitHub(code: string): Promise<ResponseResult<ApiAuthRes
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "accept": "*/*",
+        accept: "*/*",
       },
       body: JSON.stringify(oauthRequest),
     });
@@ -77,27 +95,35 @@ async function signInWithGitHub(code: string): Promise<ResponseResult<ApiAuthRes
     if (!response.ok) {
       const error = await response.text();
       console.error("GitHub OAuth token exchange failed:", error);
-      return generateFailedResponse("Failed to authenticate with GitHub", response.status.toString());
+      return generateFailedResponse(
+        "Failed to authenticate with GitHub",
+        response.status.toString()
+      );
     }
 
     const authData = await response.json();
 
     if (!authData.token) {
-      return generateFailedResponse("Invalid authentication response from server");
+      return generateFailedResponse(
+        "Invalid authentication response from server"
+      );
     }
 
     // Fetch user profile using the token
     const userResponse = await fetch(`${DATA_API_URL}/v1/auth/user`, {
       method: "GET",
       headers: {
-        "Authorization": `Bearer ${authData.token}`,
-        "accept": "*/*",
+        Authorization: `Bearer ${authData.token}`,
+        accept: "*/*",
       },
     });
 
     if (!userResponse.ok) {
       console.error("Failed to fetch user profile:", await userResponse.text());
-      return generateFailedResponse("Failed to fetch user profile", userResponse.status);
+      return generateFailedResponse(
+        "Failed to fetch user profile",
+        userResponse.status
+      );
     }
 
     const userData = await userResponse.json();
@@ -120,7 +146,9 @@ async function signInWithGitHub(code: string): Promise<ResponseResult<ApiAuthRes
     };
   } catch (error) {
     console.error("GitHub authentication error:", error);
-    return generateFailedResponse("An error occurred during GitHub authentication");
+    return generateFailedResponse(
+      "An error occurred during GitHub authentication"
+    );
   }
 }
 
@@ -150,7 +178,9 @@ async function signOut(request?: Request): Promise<ResponseResult> {
 }
 
 // Get the authenticated user from the session
-async function fetchCurrentUser(request?: Request): Promise<ResponseResult<ApiUser | null>> {
+async function fetchCurrentUser(
+  request?: Request
+): Promise<ResponseResult<ApiUser | null>> {
   if (!isServerSide()) {
     return httpClient.get("/api/auth/me");
   }
@@ -168,7 +198,7 @@ async function fetchCurrentUser(request?: Request): Promise<ResponseResult<ApiUs
   // Check cache first
   const now = Date.now();
   const cachedData = userCache[userToken];
-  if (cachedData && (now - cachedData.timestamp) < CACHE_TTL) {
+  if (cachedData && now - cachedData.timestamp < CACHE_TTL) {
     return { ...defaultResult, data: cachedData.user };
   }
 
@@ -177,8 +207,8 @@ async function fetchCurrentUser(request?: Request): Promise<ResponseResult<ApiUs
     const response = await fetch(`${DATA_API_URL}/v1/auth/user`, {
       method: "GET",
       headers: {
-        "Authorization": `Bearer ${userToken}`,
-        "accept": "*/*",
+        Authorization: `Bearer ${userToken}`,
+        accept: "*/*",
       },
     });
 
@@ -222,17 +252,22 @@ async function getUser(request: Request): Promise<ApiUser | null> {
 
 // Get GitHub OAuth URL
 function getGitHubAuthUrl(): string {
-  const baseUrl = typeof window !== "undefined"
-    ? window.location.origin
-    : (getVar("DATA_API_URL") || "http://localhost:5173");
+  const baseUrl =
+    typeof window !== "undefined"
+      ? window.location.origin
+      : env.DATA_API_URL || "http://localhost:5173";
   const redirectUri = `${baseUrl}/connect/github/redirect`;
-  return `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&scope=user:email&redirect_uri=${encodeURIComponent(redirectUri)}`;
+  return `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&scope=user:email&redirect_uri=${encodeURIComponent(
+    redirectUri
+  )}`;
 }
 
 // Role-based access control helpers
 function hasRole(user: ApiUser | null, role: string): boolean {
   if (!user || !user.role) return false;
-  return user.role.allowed_roles.includes(role) || user.role.default_role === role;
+  return (
+    user.role.allowed_roles.includes(role) || user.role.default_role === role
+  );
 }
 
 function isServices(user: ApiUser | null): boolean {
@@ -248,7 +283,9 @@ function isManageable(user: ApiUser | null): boolean {
 }
 
 // Get magic string for wallet binding
-async function fetchMagic(request?: Request): Promise<ResponseResult<MagicResponse>> {
+async function fetchMagic(
+  request?: Request
+): Promise<ResponseResult<MagicResponse>> {
   if (!isServerSide()) {
     return httpClient.get("/api/auth/magic");
   }
@@ -264,15 +301,18 @@ async function fetchMagic(request?: Request): Promise<ResponseResult<MagicRespon
     const response = await fetch(`${DATA_API_URL}/v1/auth/magic`, {
       method: "GET",
       headers: {
-        "Authorization": `Bearer ${userToken}`,
-        "accept": "*/*",
+        Authorization: `Bearer ${userToken}`,
+        accept: "*/*",
       },
     });
 
     if (!response.ok) {
       const error = await response.text();
       console.error("Failed to fetch magic string:", error);
-      return generateFailedResponse("Failed to fetch magic string", response.status.toString());
+      return generateFailedResponse(
+        "Failed to fetch magic string",
+        response.status.toString()
+      );
     }
 
     const data = await response.json();
@@ -284,12 +324,17 @@ async function fetchMagic(request?: Request): Promise<ResponseResult<MagicRespon
     };
   } catch (error) {
     console.error("Magic fetch error:", error);
-    return generateFailedResponse("An error occurred while fetching magic string");
+    return generateFailedResponse(
+      "An error occurred while fetching magic string"
+    );
   }
 }
 
 // Bind wallet address to user account
-async function bindWallet(walletBindData: WalletBindRequest, request?: Request): Promise<ResponseResult<WalletBindResponse>> {
+async function bindWallet(
+  walletBindData: WalletBindRequest,
+  request?: Request
+): Promise<ResponseResult<WalletBindResponse>> {
   if (!isServerSide()) {
     return httpClient.post("/api/auth/bind/wallet", walletBindData);
   }
@@ -306,8 +351,8 @@ async function bindWallet(walletBindData: WalletBindRequest, request?: Request):
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${userToken}`,
-        "accept": "*/*",
+        Authorization: `Bearer ${userToken}`,
+        accept: "*/*",
       },
       body: JSON.stringify(walletBindData),
     });
@@ -315,7 +360,10 @@ async function bindWallet(walletBindData: WalletBindRequest, request?: Request):
     if (!response.ok) {
       const error = await response.text();
       console.error("Wallet binding failed:", error);
-      return generateFailedResponse("Failed to bind wallet", response.status.toString());
+      return generateFailedResponse(
+        "Failed to bind wallet",
+        response.status.toString()
+      );
     }
 
     const data = await response.json();

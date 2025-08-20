@@ -1,7 +1,8 @@
 "use client";
 
-import React, { createContext, useContext } from 'react';
-import { CampProvider } from '@campnetwork/origin/react';
+import React, { createContext, useContext } from "react";
+import { CampProvider } from "@campnetwork/origin/react";
+import { env } from "@/env";
 
 interface OriginProviderProps {
   children: React.ReactNode;
@@ -16,14 +17,17 @@ export const useOriginAvailable = () => useContext(OriginAvailabilityContext);
 
 export function OriginProvider({ children }: OriginProviderProps) {
   // Direct access to NEXT_PUBLIC_ environment variable
-  const originClientId = process.env.NEXT_PUBLIC_ORIGIN_CLIENT_ID;
+  const originClientId = env.NEXT_PUBLIC_ORIGIN_CLIENT_ID;
 
   // Get current origin safely (SSR compatible)
-  const currentOrigin = typeof window !== 'undefined' ? window.location.origin : '';
-  const profileRedirect = currentOrigin ? `${currentOrigin}/profile` : '/profile';
+  const currentOrigin =
+    typeof window !== "undefined" ? window.location.origin : "";
+  const profileRedirect = currentOrigin
+    ? `${currentOrigin}/profile`
+    : "/profile";
 
   // On server side, always return as unavailable to prevent SSR issues
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return (
       <OriginAvailabilityContext.Provider value={{ isAvailable: false }}>
         {children}
@@ -54,7 +58,7 @@ export function OriginProvider({ children }: OriginProviderProps) {
       </OriginAvailabilityContext.Provider>
     );
   } catch (error) {
-    console.warn('Origin provider initialization failed:', error);
+    console.warn("Origin provider initialization failed:", error);
     return (
       <OriginAvailabilityContext.Provider value={{ isAvailable: false }}>
         {children}

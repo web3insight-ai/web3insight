@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
 import { createUserSession } from "~/auth/helper/server";
-import { getVar } from "@/utils/env";
+
+import { env } from "@/env";
 
 // Web3Insight API OAuth endpoint
-const API_BASE_URL = getVar("DATA_API_URL") || "https://api.web3insight.ai";
+const API_BASE_URL = env.DATA_API_URL || "https://api.web3insight.ai";
 
 function transformApiUserToCompatibleFormat(apiResponse: {
   profile: {
@@ -13,7 +14,7 @@ function transformApiUserToCompatibleFormat(apiResponse: {
     created_at: string;
     updated_at: string;
   };
-  binds: Array<{bind_type: string; bind_key: string}>;
+  binds: Array<{ bind_type: string; bind_key: string }>;
   role: {
     allowed_roles: string[];
     default_role: string;
@@ -23,8 +24,14 @@ function transformApiUserToCompatibleFormat(apiResponse: {
   const { profile, binds, role } = apiResponse;
 
   // Find GitHub bind for username
-  const githubBind = binds.find((bind: {bind_type: string; bind_key: string}) => bind.bind_type === "github");
-  const emailBind = binds.find((bind: {bind_type: string; bind_key: string}) => bind.bind_type === "email");
+  const githubBind = binds.find(
+    (bind: { bind_type: string; bind_key: string }) =>
+      bind.bind_type === "github"
+  );
+  const emailBind = binds.find(
+    (bind: { bind_type: string; bind_key: string }) =>
+      bind.bind_type === "email"
+  );
 
   return {
     profile,
@@ -44,10 +51,10 @@ function transformApiUserToCompatibleFormat(apiResponse: {
 async function authenticateWithAPI(code: string) {
   // Step 1: Exchange code for token
   const tokenResponse = await fetch(`${API_BASE_URL}/v1/auth/login/oauth`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'accept': '*/*',
-      'Content-Type': 'application/json',
+      accept: "*/*",
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       type: "github",
@@ -58,7 +65,9 @@ async function authenticateWithAPI(code: string) {
   const tokenData = await tokenResponse.json();
 
   if (!tokenResponse.ok) {
-    throw new Error(`Token exchange failed: ${tokenResponse.status} ${tokenResponse.statusText}`);
+    throw new Error(
+      `Token exchange failed: ${tokenResponse.status} ${tokenResponse.statusText}`
+    );
   }
 
   if (!tokenData.token) {
@@ -69,15 +78,17 @@ async function authenticateWithAPI(code: string) {
   const userResponse = await fetch(`${API_BASE_URL}/v1/auth/user`, {
     method: "GET",
     headers: {
-      "Authorization": `Bearer ${tokenData.token}`,
-      "accept": "*/*",
+      Authorization: `Bearer ${tokenData.token}`,
+      accept: "*/*",
     },
   });
 
   if (!userResponse.ok) {
     const error = await userResponse.text();
     console.error("Failed to fetch user profile:", error);
-    throw new Error(`Failed to fetch user profile: ${userResponse.status} ${userResponse.statusText}`);
+    throw new Error(
+      `Failed to fetch user profile: ${userResponse.status} ${userResponse.statusText}`
+    );
   }
 
   const userData = await userResponse.json();
@@ -94,9 +105,9 @@ async function authenticateWithAPI(code: string) {
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const code = searchParams.get('code');
-  const error = searchParams.get('error');
-  const error_description = searchParams.get('error_description');
+  const code = searchParams.get("code");
+  const error = searchParams.get("error");
+  const error_description = searchParams.get("error_description");
 
   // Handle OAuth errors
   if (error) {
@@ -115,22 +126,26 @@ export async function GET(request: NextRequest) {
   try {
     // Authenticate directly with Web3Insight API
     authResult = await authenticateWithAPI(code);
-
   } catch (apiError) {
     console.error("API authentication failed:", apiError);
-    const errorMessage = apiError instanceof Error ? apiError.message : 'Unknown API error';
+    const errorMessage =
+      apiError instanceof Error ? apiError.message : "Unknown API error";
 
     // Provide more specific error handling
-    if (errorMessage.includes('API authentication failed')) {
-      return NextResponse.redirect(new URL("/?error=api_auth_failed", request.url));
+    if (errorMessage.includes("API authentication failed")) {
+      return NextResponse.redirect(
+        new URL("/?error=api_auth_failed", request.url)
+      );
     } else {
-      return NextResponse.redirect(new URL("/?error=oauth_failed", request.url));
+      return NextResponse.redirect(
+        new URL("/?error=oauth_failed", request.url)
+      );
     }
   }
 
   // Validate auth result
   if (!authResult || !authResult.success) {
-    console.error("GitHub authentication failed:", 'Unknown error');
+    console.error("GitHub authentication failed:", "Unknown error");
     return NextResponse.redirect(new URL("/?error=auth_failed", request.url));
   }
 
@@ -158,8 +173,8 @@ export async function GET(request: NextRequest) {
         ? sessionOpts.headers["Set-Cookie"]
         : [sessionOpts.headers["Set-Cookie"]];
 
-      cookies.forEach(cookie => {
-        response.headers.append('Set-Cookie', cookie);
+      cookies.forEach((cookie) => {
+        response.headers.append("Set-Cookie", cookie);
       });
     }
 
