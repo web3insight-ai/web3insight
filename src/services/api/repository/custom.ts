@@ -30,7 +30,7 @@ function createAuthenticatedClient(userToken: string) {
     post: (
       url: string,
       data?: Record<string, unknown>,
-      config: Record<string, unknown> = {}
+      config: Record<string, unknown> = {},
     ) => {
       if (!config.signal) {
         config.signal = AbortSignal.timeout(httpTimeout);
@@ -44,7 +44,7 @@ async function fetchAnalysisUserList(
   userToken: string,
   params: Partial<SqlStylePagination> & {
     direction?: string;
-  }
+  },
 ): Promise<ResponseResult<ListResponseData & TotalResponseData>> {
   const client = createAuthenticatedClient(userToken);
   return client.get("/v1/custom/analysis/users", { params });
@@ -56,7 +56,7 @@ async function analyzeUserList(
     request_data: string[];
     intent: string;
     description?: string;
-  }
+  },
 ): Promise<
   ResponseResult<{
     id: number;
@@ -69,7 +69,7 @@ async function analyzeUserList(
 
 async function fetchAnalysisUser(
   userToken: string,
-  id: number
+  id: number,
 ): Promise<ResponseResult> {
   const client = createAuthenticatedClient(userToken);
   return client.get(`/v1/custom/analysis/users/${id}`);
@@ -82,7 +82,7 @@ async function updateAnalysisUser(
     request_data: string[];
     intent: string;
     description?: string;
-  }
+  },
 ): Promise<
   ResponseResult<{
     id: number;

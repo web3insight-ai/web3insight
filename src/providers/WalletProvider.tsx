@@ -62,19 +62,19 @@ export function WalletProvider({ children }: WalletProviderProps) {
   const rainbowKitTheme =
     resolvedTheme === "dark"
       ? darkTheme({
-          accentColor: "#007cee", // Primary blue from NextUI theme
-          accentColorForeground: "white",
-          borderRadius: "medium",
-          fontStack: "system",
-          overlayBlur: "small",
-        })
+        accentColor: "#007cee", // Primary blue from NextUI theme
+        accentColorForeground: "white",
+        borderRadius: "medium",
+        fontStack: "system",
+        overlayBlur: "small",
+      })
       : lightTheme({
-          accentColor: "#007cee", // Primary blue from NextUI theme
-          accentColorForeground: "white",
-          borderRadius: "medium",
-          fontStack: "system",
-          overlayBlur: "small",
-        });
+        accentColor: "#007cee", // Primary blue from NextUI theme
+        accentColorForeground: "white",
+        borderRadius: "medium",
+        fontStack: "system",
+        overlayBlur: "small",
+      });
 
   return (
     <WagmiProvider config={wagmiConfig}>

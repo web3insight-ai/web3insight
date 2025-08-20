@@ -26,11 +26,11 @@ function transformApiUserToCompatibleFormat(apiResponse: {
   // Find GitHub bind for username
   const githubBind = binds.find(
     (bind: { bind_type: string; bind_key: string }) =>
-      bind.bind_type === "github"
+      bind.bind_type === "github",
   );
   const emailBind = binds.find(
     (bind: { bind_type: string; bind_key: string }) =>
-      bind.bind_type === "email"
+      bind.bind_type === "email",
   );
 
   return {
@@ -66,7 +66,7 @@ async function authenticateWithAPI(code: string) {
 
   if (!tokenResponse.ok) {
     throw new Error(
-      `Token exchange failed: ${tokenResponse.status} ${tokenResponse.statusText}`
+      `Token exchange failed: ${tokenResponse.status} ${tokenResponse.statusText}`,
     );
   }
 
@@ -87,7 +87,7 @@ async function authenticateWithAPI(code: string) {
     const error = await userResponse.text();
     console.error("Failed to fetch user profile:", error);
     throw new Error(
-      `Failed to fetch user profile: ${userResponse.status} ${userResponse.statusText}`
+      `Failed to fetch user profile: ${userResponse.status} ${userResponse.statusText}`,
     );
   }
 
@@ -134,11 +134,11 @@ export async function GET(request: NextRequest) {
     // Provide more specific error handling
     if (errorMessage.includes("API authentication failed")) {
       return NextResponse.redirect(
-        new URL("/?error=api_auth_failed", request.url)
+        new URL("/?error=api_auth_failed", request.url),
       );
     } else {
       return NextResponse.redirect(
-        new URL("/?error=oauth_failed", request.url)
+        new URL("/?error=oauth_failed", request.url),
       );
     }
   }

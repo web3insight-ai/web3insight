@@ -40,11 +40,11 @@ function transformApiUserToCompatibleFormat(apiResponse: {
   // Find GitHub bind for username
   const githubBind = binds.find(
     (bind: { bind_type: string; bind_key: string }) =>
-      bind.bind_type === "github"
+      bind.bind_type === "github",
   );
   const emailBind = binds.find(
     (bind: { bind_type: string; bind_key: string }) =>
-      bind.bind_type === "email"
+      bind.bind_type === "email",
   );
 
   return {
@@ -63,7 +63,7 @@ function transformApiUserToCompatibleFormat(apiResponse: {
 
 // GitHub OAuth login flow
 async function signInWithGitHub(
-  code: string
+  code: string,
 ): Promise<ResponseResult<ApiAuthResponse>> {
   if (!isServerSide()) {
     return httpClient.post("/api/auth/login", { code, clientSide: true });
@@ -73,7 +73,7 @@ async function signInWithGitHub(
     if (!code) {
       return generateFailedResponse(
         "GitHub authorization code is required",
-        "400"
+        "400",
       );
     }
 
@@ -97,7 +97,7 @@ async function signInWithGitHub(
       console.error("GitHub OAuth token exchange failed:", error);
       return generateFailedResponse(
         "Failed to authenticate with GitHub",
-        response.status.toString()
+        response.status.toString(),
       );
     }
 
@@ -105,7 +105,7 @@ async function signInWithGitHub(
 
     if (!authData.token) {
       return generateFailedResponse(
-        "Invalid authentication response from server"
+        "Invalid authentication response from server",
       );
     }
 
@@ -122,7 +122,7 @@ async function signInWithGitHub(
       console.error("Failed to fetch user profile:", await userResponse.text());
       return generateFailedResponse(
         "Failed to fetch user profile",
-        userResponse.status
+        userResponse.status,
       );
     }
 
@@ -147,7 +147,7 @@ async function signInWithGitHub(
   } catch (error) {
     console.error("GitHub authentication error:", error);
     return generateFailedResponse(
-      "An error occurred during GitHub authentication"
+      "An error occurred during GitHub authentication",
     );
   }
 }
@@ -179,7 +179,7 @@ async function signOut(request?: Request): Promise<ResponseResult> {
 
 // Get the authenticated user from the session
 async function fetchCurrentUser(
-  request?: Request
+  request?: Request,
 ): Promise<ResponseResult<ApiUser | null>> {
   if (!isServerSide()) {
     return httpClient.get("/api/auth/me");
@@ -258,7 +258,7 @@ function getGitHubAuthUrl(): string {
       : env.DATA_API_URL || "http://localhost:5173";
   const redirectUri = `${baseUrl}/connect/github/redirect`;
   return `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&scope=user:email&redirect_uri=${encodeURIComponent(
-    redirectUri
+    redirectUri,
   )}`;
 }
 
@@ -284,7 +284,7 @@ function isManageable(user: ApiUser | null): boolean {
 
 // Get magic string for wallet binding
 async function fetchMagic(
-  request?: Request
+  request?: Request,
 ): Promise<ResponseResult<MagicResponse>> {
   if (!isServerSide()) {
     return httpClient.get("/api/auth/magic");
@@ -311,7 +311,7 @@ async function fetchMagic(
       console.error("Failed to fetch magic string:", error);
       return generateFailedResponse(
         "Failed to fetch magic string",
-        response.status.toString()
+        response.status.toString(),
       );
     }
 
@@ -325,7 +325,7 @@ async function fetchMagic(
   } catch (error) {
     console.error("Magic fetch error:", error);
     return generateFailedResponse(
-      "An error occurred while fetching magic string"
+      "An error occurred while fetching magic string",
     );
   }
 }
@@ -333,7 +333,7 @@ async function fetchMagic(
 // Bind wallet address to user account
 async function bindWallet(
   walletBindData: WalletBindRequest,
-  request?: Request
+  request?: Request,
 ): Promise<ResponseResult<WalletBindResponse>> {
   if (!isServerSide()) {
     return httpClient.post("/api/auth/bind/wallet", walletBindData);
@@ -362,7 +362,7 @@ async function bindWallet(
       console.error("Wallet binding failed:", error);
       return generateFailedResponse(
         "Failed to bind wallet",
-        response.status.toString()
+        response.status.toString(),
       );
     }
 

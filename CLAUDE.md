@@ -7,9 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Web3Insight is a comprehensive analytics platform for Web3 ecosystems, repositories, and developers. It's built with Next.js 15 (App Router), React Server Components, TypeScript, and integrates multiple data sources to provide insights into blockchain development activity.
 
 This is part of a larger pnpm workspace project (Web3Insight AI) that includes three applications:
-- **sakuin** - NestJS backend API server (../sakuin/)  
+- **sakuin** - NestJS backend API server (../sakuin/)
 - **web3insight** - This Next.js 15 frontend application
-- **web3insight-profile** - Next.js 15 application for AI-powered developer profiles
 
 ## Tech Stack
 
@@ -87,7 +86,7 @@ The project uses these TypeScript path aliases:
 
 ### 1. Next.js App Router Structure
 - **Page Components**: `page.tsx` files define routes
-- **Layout Components**: `layout.tsx` files define nested layouts  
+- **Layout Components**: `layout.tsx` files define nested layouts
 - **API Routes**: `route.ts` files in `/app/api/` structure
 - **Dynamic Routes**: `[param]/page.tsx` for dynamic segments
 - **Server Components**: Default rendering mode for pages
@@ -199,7 +198,7 @@ The project uses strict TypeScript configuration:
 ## Environment Setup
 
 - Environment configuration is managed via `.knosys/scripts env` command
-- The `predev` script automatically runs environment setup before starting development  
+- The `predev` script automatically runs environment setup before starting development
 - Custom environment utilities are available in `/lib/utils/env.ts`
 - Next.js environment variables use `NEXT_PUBLIC_` prefix for client-side access
 

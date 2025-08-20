@@ -40,16 +40,16 @@ export default async function RepositoriesPage() {
     const statisticOverview = statisticsResult.success
       ? statisticsResult.data
       : {
-          ecosystem: 0,
-          repository: 0,
-          developer: 0,
-          coreDeveloper: 0,
-        };
+        ecosystem: 0,
+        repository: 0,
+        developer: 0,
+        coreDeveloper: 0,
+      };
 
     if (!statisticsResult.success) {
       console.warn(
         "Statistics overview fetch failed:",
-        statisticsResult.message
+        statisticsResult.message,
       );
     }
     if (!rankResult.success) {

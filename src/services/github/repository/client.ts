@@ -1,6 +1,7 @@
 import { normalizeRestfulResponse } from "@/clients/http";
 import HttpClient, {
   type RequestConfigWithTimeout,
+  type ResponseInterceptor,
 } from "@/clients/http/HttpClient";
 
 import type { DataValue } from "@/types";
@@ -30,7 +31,7 @@ const httpClient = {
   post: (
     url: string,
     data?: Record<string, DataValue>,
-    config: RequestConfigWithTimeout = {}
+    config: RequestConfigWithTimeout = {},
   ) => {
     // Add longer timeout if no signal is provided
     if (!config.signal) {
@@ -41,7 +42,7 @@ const httpClient = {
   put: (
     url: string,
     data?: Record<string, DataValue>,
-    config: RequestConfigWithTimeout = {}
+    config: RequestConfigWithTimeout = {},
   ) => {
     // Add longer timeout if no signal is provided
     if (!config.signal) {
@@ -49,8 +50,7 @@ const httpClient = {
     }
     return baseHttpClient.put(url, data, config);
   },
-  use: (interceptor: any) => {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
+  use: (interceptor: ResponseInterceptor) => {
     // Delegate to the base HTTP client
     return baseHttpClient.use(interceptor);
   },

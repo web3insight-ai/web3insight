@@ -2,11 +2,12 @@ import type { DataValue, ResponseResult } from "@/types";
 import { env } from "@/env";
 import HttpClient, {
   type RequestConfigWithTimeout,
+  type ResponseInterceptor,
 } from "@/clients/http/HttpClient";
 
 // OpenDigger API returns raw data directly, so we need to normalize it
 function normalizeResponse<VT extends DataValue = DataValue>(
-  jsonData: unknown
+  jsonData: unknown,
 ): ResponseResult<VT> {
   if (jsonData !== null && jsonData !== undefined) {
     // OpenDigger API returns data directly (not wrapped in success/data structure)
@@ -50,7 +51,7 @@ const httpClient = {
   post: (
     url: string,
     data?: Record<string, DataValue>,
-    config: RequestConfigWithTimeout = {}
+    config: RequestConfigWithTimeout = {},
   ) => {
     // Add longer timeout if no signal is provided
     if (!config.signal) {
@@ -61,7 +62,7 @@ const httpClient = {
   put: (
     url: string,
     data?: Record<string, DataValue>,
-    config: RequestConfigWithTimeout = {}
+    config: RequestConfigWithTimeout = {},
   ) => {
     // Add longer timeout if no signal is provided
     if (!config.signal) {
@@ -69,8 +70,7 @@ const httpClient = {
     }
     return baseHttpClient.put(url, data, config);
   },
-  use: (interceptor: any) => {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
+  use: (interceptor: ResponseInterceptor) => {
     // Delegate to the base HTTP client
     return baseHttpClient.use(interceptor);
   },

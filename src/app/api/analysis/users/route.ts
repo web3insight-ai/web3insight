@@ -17,7 +17,7 @@ export async function POST(request: Request) {
           message: "Intent is required",
           data: null,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
           message: "No authentication token available",
           data: null,
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
           message: `HTTP ${response.status}: ${response.statusText}`,
           data: null,
         },
-        { status: response.status }
+        { status: response.status },
       );
     }
 
@@ -83,7 +83,7 @@ export async function POST(request: Request) {
         message: error instanceof Error ? error.message : "Unknown error",
         data: null,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

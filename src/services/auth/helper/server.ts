@@ -6,7 +6,7 @@ import { SignJWT, jwtVerify } from "jose";
 import { env } from "@/env";
 
 const secret = new TextEncoder().encode(
-  env.SESSION_SECRET || "fallback-secret-key"
+  env.SESSION_SECRET || "fallback-secret-key",
 );
 const alg = "HS256";
 

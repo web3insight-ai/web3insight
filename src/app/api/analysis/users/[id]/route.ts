@@ -4,7 +4,7 @@ import { env } from "@/env";
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const resolvedParams = await params;
   try {
@@ -19,7 +19,7 @@ export async function GET(
           message: "Analysis ID is required",
           data: null,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -46,7 +46,7 @@ export async function GET(
           message: "No authentication token available",
           data: null,
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -69,7 +69,7 @@ export async function GET(
           message: `HTTP ${response.status}: ${response.statusText}`,
           data: null,
         },
-        { status: response.status }
+        { status: response.status },
       );
     }
 
@@ -84,7 +84,7 @@ export async function GET(
         message: error instanceof Error ? error.message : "Unknown error",
         data: null,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

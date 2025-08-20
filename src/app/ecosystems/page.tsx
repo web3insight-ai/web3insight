@@ -48,19 +48,19 @@ export default async function EcosystemsPage() {
     // Calculate totals from the real data
     const totalRepositories = ecosystems.reduce(
       (acc, eco) => acc + Number(eco.repos_total),
-      0
+      0,
     );
     const totalDevelopers = ecosystems.reduce(
       (acc, eco) => acc + Number(eco.actors_total),
-      0
+      0,
     );
     const totalCoreDevelopers = ecosystems.reduce(
       (acc, eco) => acc + Number(eco.actors_core_total),
-      0
+      0,
     );
     const totalNewDevelopers = ecosystems.reduce(
       (acc, eco) => acc + Number(eco.actors_new_total),
-      0
+      0,
     );
 
     const pageData = {
