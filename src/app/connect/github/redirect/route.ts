@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { createUserSession } from "~/auth/helper/server";
 import { env } from "../../../../env";
 
+// Helper to create production-safe redirect URLs
+function createRedirectUrl(path: string, request: NextRequest): URL {
+  if (process.env.NODE_ENV === "production") {
+    return new URL(path, "https://web3insight.ai");
+  }
+  return new URL(path, request.url);
+}
+
 // Web3Insight API OAuth endpoint - Throw error if not configured to avoid security risk
 const apiUrl = env.DATA_API_URL;
 if (!apiUrl) {
@@ -115,13 +123,13 @@ export async function GET(request: NextRequest) {
   // Handle OAuth errors
   if (error) {
     console.error("GitHub OAuth error:", error, error_description);
-    return NextResponse.redirect(new URL("/?error=oauth_error", request.url));
+    return NextResponse.redirect(createRedirectUrl("/?error=oauth_error", request));
   }
 
   // Handle missing code
   if (!code) {
     console.error("GitHub OAuth error: No authorization code received");
-    return NextResponse.redirect(new URL("/?error=no_code", request.url));
+    return NextResponse.redirect(createRedirectUrl("/?error=no_code", request));
   }
 
   let authResult;
@@ -137,11 +145,11 @@ export async function GET(request: NextRequest) {
     // Provide more specific error handling
     if (errorMessage.includes("API authentication failed")) {
       return NextResponse.redirect(
-        new URL("/?error=api_auth_failed", request.url),
+        createRedirectUrl("/?error=api_auth_failed", request),
       );
     } else {
       return NextResponse.redirect(
-        new URL("/?error=oauth_failed", request.url),
+        createRedirectUrl("/?error=oauth_failed", request),
       );
     }
   }
@@ -149,14 +157,14 @@ export async function GET(request: NextRequest) {
   // Validate auth result
   if (!authResult || !authResult.success) {
     console.error("GitHub authentication failed:", "Unknown error");
-    return NextResponse.redirect(new URL("/?error=auth_failed", request.url));
+    return NextResponse.redirect(createRedirectUrl("/?error=auth_failed", request));
   }
 
   const { token, user } = authResult.data;
 
   if (!user || !user.id) {
     console.error("GitHub authentication: User data missing");
-    return NextResponse.redirect(new URL("/?error=no_user_data", request.url));
+    return NextResponse.redirect(createRedirectUrl("/?error=no_user_data", request));
   }
 
   // Create user session
@@ -167,7 +175,8 @@ export async function GET(request: NextRequest) {
     });
 
     // Create redirect response with session cookies
-    const redirectUrl = new URL("/", request.url);
+    // Always redirect to production URL to avoid localhost issues
+    const redirectUrl = createRedirectUrl("/", request);
     const response = NextResponse.redirect(redirectUrl);
 
     // Apply session cookies to the redirect response
@@ -184,6 +193,6 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (sessionError) {
     console.error("Session creation failed:", sessionError);
-    return NextResponse.redirect(new URL("/?error=session_error", request.url));
+    return NextResponse.redirect(createRedirectUrl("/?error=session_error", request));
   }
 }
