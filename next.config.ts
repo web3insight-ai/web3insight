@@ -15,6 +15,7 @@ const nextConfig: NextConfig = {
     rules: codeInspectorPlugin({
       bundler: "turbopack",
       hotKeys: ["altKey"],
+      port: 5679, // Change port to avoid conflict
     }),
   },
   webpack: (config, { isServer, webpack }) => {

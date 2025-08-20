@@ -6,33 +6,30 @@ import {
   Textarea, Button, Chip,
 } from "@nextui-org/react";
 import { Calendar, AlertTriangle, X } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useAtom } from "jotai";
 
 import { addToastAtom } from "#/atoms";
 import FileUpload from "$/controls/file-upload";
-import AnalysisProgress from "$/loading/AnalysisProgress";
-import { updateOne, fetchOne } from "../../repository/client";
+import { updateOne } from "../../repository/client";
 import { resolveContestants } from "../event-list/helper";
+import ContestantListDialog from "../event-list/ContestantListDialog";
 
-import type { EventReport } from "../../typing";
+import type { EventReport, Contestant } from "../../typing";
 
 type EventEditDialogProps = {
   visible: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess?: () => void;
   event: EventReport | null;
+  onAnalysisStart?: (eventId: number, contestants: Contestant[], failedAccounts: string[]) => void;
 };
 
-function EventEditDialog({ visible, onClose, event }: EventEditDialogProps) {
-  const router = useRouter();
+function EventEditDialog({ visible, onClose, event, onAnalysisStart }: EventEditDialogProps) {
   const [, addToast] = useAtom(addToastAtom);
   const [description, setDescription] = useState("");
   const [currentParticipants, setCurrentParticipants] = useState<string[]>([]);
   const [userInput, setUserInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [analysisProgress, setAnalysisProgress] = useState(0);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const uploadRef = useRef<HTMLInputElement>(null);
 
@@ -79,8 +76,6 @@ function EventEditDialog({ visible, onClose, event }: EventEditDialogProps) {
     setCurrentParticipants([]);
     setUserInput("");
     setLoading(false);
-    setIsAnalyzing(false);
-    setAnalysisProgress(0);
     onClose();
   };
 
@@ -116,8 +111,6 @@ function EventEditDialog({ visible, onClose, event }: EventEditDialogProps) {
     }
 
     setLoading(true);
-    setIsAnalyzing(true);
-    setAnalysisProgress(10);
 
     try {
       // Step 1: Update the event
@@ -128,21 +121,23 @@ function EventEditDialog({ visible, onClose, event }: EventEditDialogProps) {
       });
 
       if (result.success) {
-        setAnalysisProgress(20);
-
+        setLoading(false);
+        
         addToast({
           type: 'success',
           title: 'Event Updated',
           message: 'Event updated successfully. Analysis in progress...',
         });
 
-        // Step 2: Poll for analysis completion
-        await pollAnalysisCompletion(Number(event.id));
+        // Trigger the analysis dialog
+        if (onAnalysisStart) {
+          onAnalysisStart(Number(event.id), result.data || [], result.extra?.fail || []);
+        }
       } else {
+        setLoading(false);
         throw new Error(result.message || 'Update failed');
       }
     } catch (error) {
-      setIsAnalyzing(false);
       setLoading(false);
 
       addToast({
@@ -153,95 +148,6 @@ function EventEditDialog({ visible, onClose, event }: EventEditDialogProps) {
     }
   };
 
-  const pollAnalysisCompletion = async (eventId: number): Promise<void> => {
-    const maxAttempts = 40; // 40 attempts × 5 seconds = 200 seconds max wait
-    let attempts = 0;
-
-    const poll = async (): Promise<void> => {
-      try {
-        attempts++;
-
-        // Update progress based on attempts (20% to 90%)
-        const progressIncrement = Math.min(70 / maxAttempts * attempts, 70);
-        setAnalysisProgress(20 + progressIncrement);
-
-        const response = await fetchOne(eventId);
-
-        if (response.success && response.data && response.data.contestants && response.data.contestants.length > 0) {
-          // Check if analysis is complete by looking for analytics data
-          const hasCompleteData = response.data.contestants.some(contestant =>
-            contestant.analytics &&
-            Array.isArray(contestant.analytics) &&
-            contestant.analytics.length > 0 &&
-            contestant.analytics.some(analytics => analytics.score !== undefined && analytics.score !== null),
-          );
-
-          if (hasCompleteData) {
-            // Analysis complete!
-            setAnalysisProgress(100);
-
-            addToast({
-              type: 'success',
-              title: 'Analysis Complete',
-              message: 'Event analysis completed successfully',
-            });
-
-            // Wait a moment to show completion, then navigate and refresh
-            setTimeout(() => {
-              router.push(`/admin/events/${eventId}`);
-              closeDialog();
-              // Trigger page refresh to get latest data
-              window.location.reload();
-            }, 1500);
-
-            return;
-          }
-        }
-
-        // Continue polling if not complete and under max attempts
-        if (attempts < maxAttempts) {
-          setTimeout(() => {
-            poll();
-          }, 5000); // Poll every 5 seconds
-        } else {
-          // Max attempts reached, but still navigate to show partial results
-          setAnalysisProgress(100);
-
-          addToast({
-            type: 'warning',
-            title: 'Analysis Taking Longer',
-            message: 'Analysis is still in progress. You can view current status on the detail page.',
-          });
-
-          setTimeout(() => {
-            router.push(`/admin/events/${eventId}`);
-            closeDialog();
-            // Trigger page refresh to get latest data
-            window.location.reload();
-          }, 1500);
-        }
-      } catch (error) {
-        // On polling error, still navigate but show warning
-        addToast({
-          type: 'warning',
-          title: 'Unable to Check Status',
-          message: 'Event updated but unable to verify analysis completion. Please check the detail page.',
-        });
-
-        setTimeout(() => {
-          router.push(`/admin/events/${eventId}`);
-          closeDialog();
-          // Trigger page refresh to get latest data
-          window.location.reload();
-        }, 1500);
-      }
-    };
-
-    // Start polling after a short delay
-    setTimeout(() => {
-      poll();
-    }, 2000);
-  };
 
   return (
     <Modal
@@ -285,30 +191,6 @@ function EventEditDialog({ visible, onClose, event }: EventEditDialogProps) {
 
             <ModalBody className="flex-1 overflow-y-auto">
               <div className="px-6 py-6 space-y-6 relative">
-                {/* Loading Overlay */}
-                {loading && (
-                  <div className="absolute inset-0 bg-white/80 dark:bg-surface-dark/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-b-lg">
-                    <div className="text-center space-y-3">
-                      {isAnalyzing ? (
-                        <AnalysisProgress
-                          progress={analysisProgress}
-                          status="analyzing"
-                          message={analysisProgress < 20 ? "Updating event..." :
-                            analysisProgress < 90 ? "Re-analyzing participants..." :
-                              "Finalizing analysis..."}
-                          estimatedTime="This may take several minutes"
-                        />
-                      ) : (
-                        <>
-                          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Updating event...
-                          </p>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                )}
 
                 <div className="space-y-6">
                   <Textarea
@@ -438,4 +320,59 @@ function EventEditDialog({ visible, onClose, event }: EventEditDialogProps) {
   );
 }
 
-export default EventEditDialog;
+// Wrapper component to handle both edit dialog and analysis dialog
+function EventEditDialogWrapper(props: EventEditDialogProps) {
+  const [editVisible, setEditVisible] = useState(true);
+  const [analysisVisible, setAnalysisVisible] = useState(false);
+  const [analysisEventId, setAnalysisEventId] = useState(0);
+  const [analysisContestants, setAnalysisContestants] = useState<Contestant[]>([]);
+  const [analysisFailedAccounts, setAnalysisFailedAccounts] = useState<string[]>([]);
+
+  const handleEditClose = () => {
+    setEditVisible(false);
+    props.onClose();
+  };
+
+  const handleAnalysisStart = (eventId: number, contestants: Contestant[], failedAccounts: string[]) => {
+    setEditVisible(false);
+    setAnalysisEventId(eventId);
+    setAnalysisContestants(contestants);
+    setAnalysisFailedAccounts(failedAccounts);
+    setAnalysisVisible(true);
+  };
+
+  const handleAnalysisGoto = () => {
+    setAnalysisVisible(false);
+    props.onClose();
+    // Trigger success callback to refresh the page
+    if (props.onSuccess) {
+      props.onSuccess();
+    }
+  };
+
+  const handleAnalysisClose = () => {
+    setAnalysisVisible(false);
+    props.onClose();
+  };
+
+  return (
+    <>
+      <EventEditDialog
+        {...props}
+        visible={editVisible && props.visible}
+        onClose={handleEditClose}
+        onAnalysisStart={handleAnalysisStart}
+      />
+      <ContestantListDialog
+        dataSource={analysisContestants}
+        eventId={analysisEventId}
+        failedAccounts={analysisFailedAccounts}
+        visible={analysisVisible}
+        onGoto={handleAnalysisGoto}
+        onClose={handleAnalysisClose}
+      />
+    </>
+  );
+}
+
+export default EventEditDialogWrapper;

@@ -152,7 +152,7 @@ export function RepositoryContributions({ ecosystemScores, className = "" }: Rep
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {detailed.map((ecosystem, index) => (
-              <div key={ecosystem.ecosystem} className="bg-gray-50 dark:bg-surface-dark border-2 border-border dark:border-border-dark rounded-lg p-4">
+              <div key={`repo-contributions-${ecosystem.ecosystem || index}`} className="bg-gray-50 dark:bg-surface-dark border-2 border-border dark:border-border-dark rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     {index < 3 && <Award size={12} className="text-warning" />}

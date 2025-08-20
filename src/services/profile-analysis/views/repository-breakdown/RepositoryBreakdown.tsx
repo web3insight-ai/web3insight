@@ -156,11 +156,11 @@ export function RepositoryBreakdown({ ecosystemScores, className = "" }: Reposit
             {Object.entries(reposByEcosystem)
               .sort(([, a], [, b]) => b.totalScore - a.totalScore)
               .slice(0, 9)
-              .map(([ecosystem, data]) => {
+              .map(([ecosystem, data], index) => {
                 const isHighContribution = data.avgScore > 100;
 
                 return (
-                  <div key={ecosystem} className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-surface-dark dark:to-surface-dark border border-border dark:border-border-dark rounded-lg p-4">
+                  <div key={`repo-breakdown-${ecosystem || index}`} className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-surface-dark dark:to-surface-dark border border-border dark:border-border-dark rounded-lg p-4">
                     <div className="flex items-center justify-between mb-3">
                       <Chip
                         color={isHighContribution ? "success" : "default"}

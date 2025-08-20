@@ -18,7 +18,7 @@ const userCache: Record<string, { user: ApiUser; timestamp: number }> = {};
 const CACHE_TTL = 60 * 1000; // 60 seconds cache TTL
 
 const DATA_API_URL = env.DATA_API_URL;
-const GITHUB_CLIENT_ID = "Ov23liAbxj5y1kCBSQeX";
+const GITHUB_CLIENT_ID = env.NEXT_PUBLIC_GITHUB_CLIENT_ID;
 
 function transformApiUserToCompatibleFormat(apiResponse: {
   profile: {

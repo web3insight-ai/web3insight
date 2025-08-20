@@ -51,7 +51,7 @@ export function TechnicalBreakdown({ ecosystemScores, className = "" }: Technica
                 const skillLevel = proficiency >= 80 ? "Expert" : proficiency >= 65 ? "Proficient" : "Familiar";
 
                 return (
-                  <div key={language} className="space-y-2">
+                  <div key={`language-${language}-${index}`} className="space-y-2">
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-2">
                         <Cpu size={12} className="text-gray-500 dark:text-gray-400" />
@@ -102,7 +102,7 @@ export function TechnicalBreakdown({ ecosystemScores, className = "" }: Technica
                 const expertise = skillLevel >= 85 ? "Advanced" : skillLevel >= 70 ? "Intermediate" : "Developing";
 
                 return (
-                  <div key={skill} className="space-y-2">
+                  <div key={`skill-${skill}-${index}`} className="space-y-2">
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-2">
                         <Database size={12} className="text-gray-500 dark:text-gray-400" />
@@ -151,7 +151,7 @@ export function TechnicalBreakdown({ ecosystemScores, className = "" }: Technica
             {frameworks.map((framework, index) => {
               return (
                 <div
-                  key={framework}
+                  key={`framework-${framework}-${index}`}
                   className="border border-gray-200 dark:border-gray-600 rounded-lg p-3 text-center transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-700/50"
                 >
                   <div className="flex items-center justify-center gap-2 mb-2">

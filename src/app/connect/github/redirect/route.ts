@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createUserSession } from "~/auth/helper/server";
+import { env } from "../../../../env";
 
-import { env } from "@/env";
-
-// Web3Insight API OAuth endpoint
-const API_BASE_URL = env.DATA_API_URL || "https://api.web3insight.ai";
+// Web3Insight API OAuth endpoint - Throw error if not configured to avoid security risk
+const apiUrl = env.DATA_API_URL;
+if (!apiUrl) {
+  throw new Error("DATA_API_URL environment variable is not set. Please configure it to continue.");
+}
+const API_BASE_URL = apiUrl;
 
 function transformApiUserToCompatibleFormat(apiResponse: {
   profile: {

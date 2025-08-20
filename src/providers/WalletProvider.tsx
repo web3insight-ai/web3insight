@@ -9,6 +9,7 @@ import {
   lightTheme,
 } from "@rainbow-me/rainbowkit";
 import { useTheme } from "next-themes";
+import { isServerSide } from "@/clients/http";
 
 import { wagmiConfig } from "@/config/wagmi";
 import { OriginProvider } from "./OriginProvider";
@@ -25,11 +26,11 @@ function makeQueryClient() {
         // above 0 to avoid refetching immediately on the client
         staleTime: 60 * 1000,
         // Disable retries on server side to prevent indexedDB issues
-        retry: typeof window !== "undefined",
+        retry: !isServerSide(),
       },
       mutations: {
         // Disable retries on server side
-        retry: typeof window !== "undefined",
+        retry: !isServerSide(),
       },
     },
   });

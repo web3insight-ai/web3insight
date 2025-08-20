@@ -17,10 +17,10 @@ export const env = createEnv({
       .url()
       .default("https://oss.x-lab.info/open_digger"),
     OSSINSIGHT_URL: z.string().url().default("https://api.ossinsight.io"),
-    RSS3_DSL_URL: z.string().url().optional(),
 
     // Session configuration
     SESSION_SECRET: z.string().min(1).default("default-secret-change-me"),
+
 
     // AI Services
     OPENAI_BASE_URL: z.string().url().optional(),
@@ -28,8 +28,6 @@ export const env = createEnv({
     AI_API_URL: z.string().url().optional(),
     AI_API_TOKEN: z.string().min(1).optional(),
 
-    // Redis
-    REDIS_URL: z.string().url(),
 
     // HTTP timeout configuration (in milliseconds)
     HTTP_TIMEOUT: z
@@ -51,6 +49,8 @@ export const env = createEnv({
   client: {
     // WalletConnect configuration
     NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: z.string().min(1),
+    // GitHub OAuth configuration
+    NEXT_PUBLIC_GITHUB_CLIENT_ID: z.string().min(1),
     // Origin SDK configuration (client-side)
     NEXT_PUBLIC_ORIGIN_API_URL: z.string().url().optional(),
     NEXT_PUBLIC_ORIGIN_CLIENT_ID: z.string().min(1).optional(),
@@ -67,17 +67,16 @@ export const env = createEnv({
     DATA_API_TOKEN: process.env.DATA_API_TOKEN,
     OPENDIGGER_URL: process.env.OPENDIGGER_URL,
     OSSINSIGHT_URL: process.env.OSSINSIGHT_URL,
-    RSS3_DSL_URL: process.env.RSS3_DSL_URL,
     SESSION_SECRET: process.env.SESSION_SECRET,
     OPENAI_BASE_URL: process.env.OPENAI_BASE_URL,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     AI_API_URL: process.env.AI_API_URL,
     AI_API_TOKEN: process.env.AI_API_TOKEN,
-    REDIS_URL: process.env.REDIS_URL,
     HTTP_TIMEOUT: process.env.HTTP_TIMEOUT,
     NODE_ENV: process.env.NODE_ENV,
 
     // Client vars
+    NEXT_PUBLIC_GITHUB_CLIENT_ID: process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID,
     NEXT_PUBLIC_ORIGIN_API_URL: process.env.NEXT_PUBLIC_ORIGIN_API_URL,
     NEXT_PUBLIC_ORIGIN_CLIENT_ID: process.env.NEXT_PUBLIC_ORIGIN_CLIENT_ID,
     NEXT_PUBLIC_ORIGIN_SUBGRAPH_URL:

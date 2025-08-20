@@ -4,6 +4,7 @@ import ProfilePageClient from './ProfilePageClient';
 import { getTitle } from "@/utils/app";
 import { fetchCurrentUser } from "~/auth/repository";
 import DefaultLayoutWrapper from '../DefaultLayoutWrapper';
+import { headers } from 'next/headers';
 
 export const metadata: Metadata = {
   title: `My Profile | ${getTitle()}`,
@@ -12,7 +13,12 @@ export const metadata: Metadata = {
 
 export default async function ProfilePage() {
   // Get user data with proper error handling
-  const userResult = await fetchCurrentUser(new Request('http://localhost:3000/profile'));
+  const headersList = await headers();
+  const host = headersList.get("host") || "localhost:3000";
+  const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
+  const url = `${protocol}://${host}/profile`;
+  
+  const userResult = await fetchCurrentUser(new Request(url));
 
   // Handle expired token (401)
   if (!userResult.success && userResult.code === "401") {

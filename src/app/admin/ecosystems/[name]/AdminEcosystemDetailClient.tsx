@@ -57,13 +57,45 @@ export default function AdminEcosystemDetailClient({
   };
 
   const handleMark = (mark: number | string | undefined, record: Record<string, DataValue>) => {
-    return updateManageableRepositoryMark({ eco: ecosystem.name, id: record.id, mark: mark ? Number(mark) : 0 })
+    const newMark = mark ? Number(mark) : 0;
+    
+    // Optimistically update the UI immediately
+    setDataSource(prevData => 
+      prevData.map(repo => 
+        repo.id === record.id 
+          ? { ...repo, customMark: newMark }
+          : repo,
+      ),
+    );
+
+    return updateManageableRepositoryMark({ eco: ecosystem.name, id: record.id, mark: newMark })
       .then(res => {
         if (res.success) {
+          // Refresh data to sync with server state
           fetchData({ pageNum: page.pageNum, ...search });
+        } else {
+          // Revert optimistic update on failure
+          setDataSource(prevData => 
+            prevData.map(repo => 
+              repo.id === record.id 
+                ? { ...repo, customMark: record.customMark }
+                : repo,
+            ),
+          );
         }
 
         return res;
+      })
+      .catch(error => {
+        // Revert optimistic update on error
+        setDataSource(prevData => 
+          prevData.map(repo => 
+            repo.id === record.id 
+              ? { ...repo, customMark: record.customMark }
+              : repo,
+          ),
+        );
+        throw error;
       });
   };
 

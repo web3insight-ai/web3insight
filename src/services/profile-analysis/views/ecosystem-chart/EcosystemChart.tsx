@@ -35,7 +35,7 @@ export function EcosystemChart({ aiProfile, className = "" }: EcosystemChartProp
             const color = colors[index];
 
             return (
-              <div key={ecosystem.name} className="space-y-2">
+              <div key={`ecosystem-chart-${ecosystem.name || index}`} className="space-y-2">
                 {/* Ecosystem Header */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -112,9 +112,9 @@ export function EcosystemChart({ aiProfile, className = "" }: EcosystemChartProp
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {aiProfile.web3Ecosystems.otherEcosystems.slice(0, 6).map((eco) => (
+              {aiProfile.web3Ecosystems.otherEcosystems.slice(0, 6).map((eco, index) => (
                 <Chip
-                  key={eco.name}
+                  key={`other-ecosystem-${eco.name}-${index}`}
                   variant="bordered"
                   size="sm"
                   className="text-xs"

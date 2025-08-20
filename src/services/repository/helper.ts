@@ -16,7 +16,17 @@ const customMarkTextMap = {
 };
 
 function resolveCustomMarkText(mark: number | string): string {
-  return customMarkTextMap[mark as keyof typeof customMarkTextMap] || "Unspecified";
+  if (mark === null || mark === undefined || mark === '') {
+    return "Unspecified";
+  }
+  
+  const numericMark = typeof mark === 'string' ? parseInt(mark, 10) : mark;
+  
+  if (isNaN(numericMark)) {
+    return "Unspecified";
+  }
+  
+  return customMarkTextMap[numericMark as keyof typeof customMarkTextMap] || "Unspecified";
 }
 
 function resolveDataSource(raw: RepoRankRecord[]): Repository[] {

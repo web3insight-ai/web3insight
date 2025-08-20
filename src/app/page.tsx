@@ -38,7 +38,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
   // Get current user from session
   const headersList = await headers();
-  const request = new Request('http://localhost', {
+  const host = headersList.get("host") || "localhost:3000";
+  const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
+  const url = `${protocol}://${host}`;
+  
+  const request = new Request(url, {
     headers: headersList,
   });
   const user = await getUser(request);

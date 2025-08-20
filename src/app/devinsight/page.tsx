@@ -4,14 +4,19 @@ import { fetchCurrentUser } from "~/auth/repository";
 import { getGitHubHandle } from "~/profile-analysis/helper";
 import { getTitle } from "@/utils/app";
 import DefaultLayoutWrapper from '../DefaultLayoutWrapper';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 
 export async function generateMetadata(): Promise<Metadata> {
   const title = getTitle();
 
   try {
     const cookieStore = await cookies();
-    const mockRequest = new Request('http://localhost:3000/devinsight', {
+    const headersList = await headers();
+    const host = headersList.get("host") || "localhost:3000";
+    const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
+    const url = `${protocol}://${host}/devinsight`;
+    
+    const mockRequest = new Request(url, {
       headers: {
         Cookie: cookieStore.toString(),
       },
@@ -43,7 +48,12 @@ export default async function DevInsightPage() {
   try {
     // Create a mock Request object with cookies for authentication
     const cookieStore = await cookies();
-    const mockRequest = new Request('http://localhost:3000/devinsight', {
+    const headersList = await headers();
+    const host = headersList.get("host") || "localhost:3000";
+    const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
+    const url = `${protocol}://${host}/devinsight`;
+    
+    const mockRequest = new Request(url, {
       headers: {
         Cookie: cookieStore.toString(),
       },

@@ -31,26 +31,6 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    // TEMPORARY: Check for test token in header
-    const testToken = request.headers.get('x-test-token');
-    if (testToken) {
-      console.log('🧪 Using test token for event contestant creation');
-      const data = await request.json();
-
-      // Create a modified request with the test token in the session
-      const testRequest = new Request(request.url, {
-        method: request.method,
-        headers: new Headers({
-          ...Object.fromEntries(request.headers.entries()),
-          'cookie': `web3insight_session=${testToken}`,
-        }),
-        body: JSON.stringify(data),
-      });
-
-      const result = await insertOne(testRequest, data);
-      return NextResponse.json(result, { status: Number(result.code) });
-    }
-
     const res = await fetchCurrentUser(request);
 
     if (!canManageEvents(res.data)) {

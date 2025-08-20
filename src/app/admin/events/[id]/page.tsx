@@ -88,7 +88,7 @@ export default async function AdminEventDetailPage({ params }: AdminEventDetailP
             </div>
             <div>
               <h1 className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
-                {eventName} (#{eventId})
+                {eventName}
               </h1>
               <p className="text-lg text-gray-500 dark:text-gray-400">Event Details & Analytics</p>
             </div>

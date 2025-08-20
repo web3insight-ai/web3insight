@@ -1,1 +1,1 @@
-export { default } from "./EventInsights";
+export { default as EventInsights } from "./EventInsights";

@@ -6,19 +6,14 @@ import { useState, useEffect } from "react";
 import { useAtom } from "jotai";
 import { authModalOpenAtom } from "../atoms";
 
-import {
-  analyzeGitHubUser,
-  type AnalysisResult,
-  type BasicAnalysisResult,
-  type AnalysisStatus,
-  hasAIData,
-  hasEcosystemData,
-  AnalysisProgress,
-  ProfileHeader,
-  KeyMetrics,
-  AnalysisTabs,
-  AIInsights,
-} from "~/profile-analysis";
+import { analyzeGitHubUser } from "~/profile-analysis/repository";
+import type { AnalysisResult, BasicAnalysisResult, AnalysisStatus } from "~/profile-analysis/typing";
+import { hasAIData, hasEcosystemData } from "~/profile-analysis/helper";
+import { AnalysisProgress } from "~/profile-analysis/views/analysis-progress";
+import { ProfileHeader } from "~/profile-analysis/views/profile-header";
+import { KeyMetrics } from "~/profile-analysis/views/key-metrics";
+import { AnalysisTabs } from "~/profile-analysis/views/analysis-tabs";
+import { AIInsights } from "~/profile-analysis/views/ai-insights";
 
 interface DevInsightPageProps {
   requiresAuth: boolean;

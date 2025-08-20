@@ -1,12 +1,11 @@
 import { notFound } from 'next/navigation';
 import { headers } from 'next/headers';
-import { Chip } from "@nextui-org/react";
 
 import { canManageEcosystems, canManageEvents } from "~/auth/helper";
 import { getUser } from "~/auth/repository";
-import Navbar from "$/navbar";
-import { getRoleName, getRoleColor, getEffectiveRole } from "@/utils/role";
+import { getEffectiveRole } from "@/utils/role";
 import AdminNavMenu from './AdminNavMenu';
+import AdminHeader from './AdminHeader';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -39,28 +38,7 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <div className="flex flex-col h-screen bg-background dark:bg-background-dark">
-      <header className="flex-shrink-0 glass-morphism border-b border-border dark:border-border-dark">
-        <Navbar
-          user={user}
-          extra={
-            <div className="flex items-center gap-3 border-l border-border dark:border-border-dark pl-4">
-              <span className="text-sm font-medium text-foreground dark:text-foreground-dark">
-                Admin Panel
-              </span>
-              {effectiveRole && (
-                <Chip
-                  size="sm"
-                  color={getRoleColor(effectiveRole)}
-                  variant="flat"
-                  className="text-xs font-medium"
-                >
-                  {getRoleName(effectiveRole)}
-                </Chip>
-              )}
-            </div>
-          }
-        />
-      </header>
+      <AdminHeader user={user} effectiveRole={effectiveRole} />
       <main className="flex-grow flex min-h-0">
         {/* Sidebar */}
         <aside className="flex-shrink-0 w-64 bg-white dark:bg-surface-dark border-r border-border dark:border-border-dark hidden md:block">

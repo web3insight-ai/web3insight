@@ -8,7 +8,7 @@ const fileTypeMap: Record<FileUploadType, string[]> = {
 };
 
 function resolveFileAccept(accept?: FileUploadAccept, type?: FileUploadType): FileUploadAccept {
-  return accept || type && fileTypeMap[type].join(",");
+  return accept || (type && fileTypeMap[type].join(","));
 }
 
 const sizeUnits = {
@@ -22,7 +22,7 @@ const sizeUnits = {
 
 function resolveFileSize(size: FileUploadSize): number {
   if (isNumber(size)) {
-    return <number>size;
+    return size as number;
   }
 
   const matched = String(size).trim().match(/^(\d+(?:\.\d+)?)\s*([KMGTP]?B)$/i);

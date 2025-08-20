@@ -6,6 +6,7 @@ import { useAtom } from "jotai";
 import { authModalOpenAtom } from "#/atoms";
 import { Sparkles, Github } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { env } from "@/env";
 
 import { getTitle } from "@/utils/app";
 
@@ -76,10 +77,9 @@ function AuthFormDialogView() {
     // Small delay to show loading state before redirect
     setTimeout(() => {
       // Use the same GitHub OAuth URL pattern
-      const GITHUB_CLIENT_ID = "Ov23liAbxj5y1kCBSQeX";
       const baseUrl = window.location.origin;
       const redirectUri = `${baseUrl}/connect/github/redirect`;
-      const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&scope=user:email&redirect_uri=${encodeURIComponent(redirectUri)}`;
+      const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${env.NEXT_PUBLIC_GITHUB_CLIENT_ID}&scope=user:email&redirect_uri=${encodeURIComponent(redirectUri)}`;
 
       window.location.href = githubAuthUrl;
     }, 500);

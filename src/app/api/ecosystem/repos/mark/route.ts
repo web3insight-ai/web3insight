@@ -31,15 +31,6 @@ export async function GET(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    // TEMPORARY: Check for test token in header
-    const testToken = request.headers.get('x-test-token');
-    if (testToken) {
-      console.log('🧪 Using test token for ecosystem repo marking');
-      const data = await request.json();
-      const result = await updateManageableRepositoryMark(data as Record<string, unknown>);
-      return NextResponse.json(result, { status: Number(result.code) });
-    }
-
     const res = await fetchCurrentUser(request);
 
     if (!canManageEcosystems(res.data)) {

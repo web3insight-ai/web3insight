@@ -111,17 +111,6 @@ function EventDialog({ visible, onClose }: EventDialogProps) {
 
             <ModalBody>
               <div className="px-6 py-6 space-y-6 relative">
-                {/* Loading Overlay */}
-                {loading && (
-                  <div className="absolute inset-0 bg-white/80 dark:bg-surface-dark/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-b-lg">
-                    <div className="text-center space-y-3">
-                      <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Creating event...
-                      </p>
-                    </div>
-                  </div>
-                )}
 
                 <div className="space-y-4">
                   <Textarea

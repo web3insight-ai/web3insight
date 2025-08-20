@@ -3,15 +3,8 @@ import { isServerSide, generateSuccessResponse } from "@/clients/http";
 import httpClient from "@/clients/http/default";
 
 import type { RepoRankRecord, ActorRankRecord, ActorTrendRecord, EcoRequestParams } from "../../api/typing";
-import {
-  fetchRepoCount, fetchRepoRankList,
-  fetchActorCount, fetchActorGrowthCount, fetchActorRankList, fetchActorTrendList,
-  updateRepoCustomMark,
-  fetchEcosystemRankList,
-} from "../../api/repository";
 
 import type { Repository } from "../../repository/typing";
-import { fetchManageableList as fetchManageableRepoListByEco } from "../../repository/repository";
 
 import type { Manager } from "../../admin/typing";
 
@@ -26,6 +19,12 @@ async function fetchStatistics(name: string): Promise<ResponseResult<{
   repositoryTotalCount: number | string;
   repositories: RepoRankRecord[];
 }>> {
+  // Dynamic import for server-side only
+  const {
+    fetchRepoCount, fetchRepoRankList,
+    fetchActorCount, fetchActorGrowthCount, fetchActorRankList, fetchActorTrendList,
+  } = await import("../../api/repository");
+
   const params = { eco: name } as any;  // eslint-disable-line @typescript-eslint/no-explicit-any
   const responses = await Promise.all([
     fetchActorCount(params),
@@ -75,6 +74,7 @@ async function fetchManageableRepositoryList(params: RepositoryListParams): Prom
     return httpClient.get("/api/ecosystem/repos", { params });
   }
 
+  const { fetchManageableList: fetchManageableRepoListByEco } = await import("../../repository/repository");
   return fetchManageableRepoListByEco(params);
 }
 
@@ -83,10 +83,12 @@ async function updateManageableRepositoryMark(data: EcoRequestParams & { id: num
     return httpClient.put("/api/ecosystem/repos/mark", data);
   }
 
+  const { updateRepoCustomMark } = await import("../../api/repository");
   return updateRepoCustomMark(data);
 }
 
 async function fetchManageableEcosystemsWithStats(): Promise<ResponseResult<EcosystemWithStats[]>> {
+  const { fetchEcosystemRankList } = await import("../../api/repository");
   const { data, ...others } = await fetchEcosystemRankList();
   
   return {

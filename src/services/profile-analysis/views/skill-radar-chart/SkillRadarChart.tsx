@@ -103,7 +103,7 @@ export function SkillRadarChart({ aiProfile, className = "" }: SkillRadarChartPr
 
               return (
                 <div
-                  key={skill.name}
+                  key={`skill-radar-${skill.name}-${index}`}
                   className="absolute flex flex-col items-center"
                   style={{
                     transform: `translate(${x}px, ${y}px)`,
@@ -138,8 +138,8 @@ export function SkillRadarChart({ aiProfile, className = "" }: SkillRadarChartPr
 
           {/* Legend */}
           <div className="mt-6 flex flex-wrap gap-4 justify-center">
-            {skillCategories.map((skill) => (
-              <div key={skill.name} className="flex items-center gap-2">
+            {skillCategories.map((skill, index) => (
+              <div key={`skill-legend-${skill.name}-${index}`} className="flex items-center gap-2">
                 <div
                   className="w-3 h-3 border border-white dark:border-gray-800"
                   style={{ backgroundColor: skill.color }}

@@ -4,7 +4,6 @@ import RepositoryDetailClient from './RepositoryDetailClient';
 import { getTitle } from "@/utils/app";
 import { fetchRepoRankList } from "~/api/repository";
 import { fetchRepoByName } from "~/github/repository";
-import { fetchRepoAnalysis } from "~/ecosystem/repository/legacy";
 import type { RepoRankRecord } from "~/api/typing";
 import DefaultLayoutWrapper from '../../DefaultLayoutWrapper';
 
@@ -99,10 +98,8 @@ export default async function RepositoryDetailPage({ params, searchParams }: Rep
     }
 
     try {
-      const [repoDetailsRes, analysisRes] = await Promise.all([
-        fetchRepoByName(repoName),
-        fetchRepoAnalysis(repoName),
-      ]);
+      const repoDetailsRes = await fetchRepoByName(repoName);
+      const analysisRes = null; // Legacy analysis removed
 
       // Use GitHub API data as primary source for repository metrics
       let repositoryData = {
