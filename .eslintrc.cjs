@@ -26,7 +26,7 @@ module.exports = {
 
   rules: {
     "no-empty-function": "error",
-    "no-unused-vars": "error",
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
     "semi": ["warn", "always"],
     "indent": ["error", 2],
     "comma-dangle": ["warn", "always-multiline"],
@@ -37,7 +37,7 @@ module.exports = {
   overrides: [
     // React
     {
-      files: ["src/**/*.{js,jsx,ts,tsx}"],
+      files: ["src/**/*.{js,jsx,ts,tsx}", "app/**/*.{js,jsx,ts,tsx}"],
       plugins: ["react", "jsx-a11y"],
       extends: [
         "plugin:react/recommended",
@@ -81,6 +81,9 @@ module.exports = {
         "plugin:import/recommended",
         "plugin:import/typescript",
       ],
+      rules: {
+        "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+      },
     },
 
     // Node

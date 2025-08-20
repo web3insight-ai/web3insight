@@ -3,9 +3,7 @@ import { nextui } from "@nextui-org/react";
 
 export default {
   content: [
-    "./src/shared/components/**/*.{js,jsx,ts,tsx}",
-    "./src/domain/**/*.{js,jsx,ts,tsx}",
-    "./src/entry/**/{**,.client,.server}/**/*.{js,jsx,ts,tsx}",
+    "./src/**/*.{js,ts,jsx,tsx}",
     "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
