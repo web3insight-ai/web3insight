@@ -1,11 +1,20 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { headers } from 'next/headers';
 import RepositoryDetailClient from './RepositoryDetailClient';
 import { getTitle } from "@/utils/app";
 import { fetchRepoRankList } from "~/api/repository";
 import { fetchRepoByName } from "~/github/repository";
+import { getUser } from "~/auth/repository";
+import { 
+  fetchRepoOpenrank, 
+  fetchRepoAttention, 
+  fetchRepoParticipants, 
+  fetchRepoNewContributors, 
+} from "~/opendigger/repository";
 import type { RepoRankRecord } from "~/api/typing";
 import DefaultLayoutWrapper from '../../DefaultLayoutWrapper';
+import { env } from "@/env";
 
 interface RepositoryPageProps {
   params: Promise<{
@@ -64,6 +73,44 @@ export default async function RepositoryDetailPage({ params, searchParams }: Rep
     notFound();
   }
 
+  // Get current user from session
+  const headersList = await headers();
+  const host = headersList.get("host") || "localhost:3000";
+  const protocol = env.NODE_ENV === "development" ? "http" : "https";
+  const url = `${protocol}://${host}/repositories/${repoId}`;
+
+  const request = new Request(url, {
+    headers: Object.fromEntries(headersList.entries()),
+  });
+  const user = await getUser(request);
+
+  // Helper function to fetch OpenDigger data
+  async function fetchOpenDiggerData(repoName: string) {
+    try {
+      const [openrankRes, attentionRes, participantsRes, newContributorsRes] = await Promise.all([
+        fetchRepoOpenrank(repoName).catch(() => ({ success: false, data: {} })),
+        fetchRepoAttention(repoName).catch(() => ({ success: false, data: {} })),
+        fetchRepoParticipants(repoName).catch(() => ({ success: false, data: {} })),
+        fetchRepoNewContributors(repoName).catch(() => ({ success: false, data: {} })),
+      ]);
+
+      return {
+        openrank: openrankRes.success ? openrankRes.data : {},
+        attention: attentionRes.success ? attentionRes.data : {},
+        participants: participantsRes.success ? participantsRes.data : {},
+        newContributors: newContributorsRes.success ? newContributorsRes.data : {},
+      };
+    } catch (error) {
+      console.error('Error fetching OpenDigger data:', error);
+      return {
+        openrank: {},
+        attention: {},
+        participants: {},
+        newContributors: {},
+      };
+    }
+  }
+
   let repoName: string;
   let repoRankData: RepoRankRecord | null = null;
 
@@ -98,8 +145,10 @@ export default async function RepositoryDetailPage({ params, searchParams }: Rep
     }
 
     try {
-      const repoDetailsRes = await fetchRepoByName(repoName);
-      const analysisRes = null; // Legacy analysis removed
+      const [repoDetailsRes, opendiggerData] = await Promise.all([
+        fetchRepoByName(repoName),
+        fetchOpenDiggerData(repoName),
+      ]);
 
       // Use GitHub API data as primary source for repository metrics
       let repositoryData = {
@@ -128,16 +177,19 @@ export default async function RepositoryDetailPage({ params, searchParams }: Rep
 
       const pageData = {
         repository: repositoryData,
-        analysis: analysisRes.success ? analysisRes.data : null,
+        analysis: opendiggerData, // OpenDigger analysis data
       };
 
       return (
-        <DefaultLayoutWrapper user={null}>
+        <DefaultLayoutWrapper user={user}>
           <RepositoryDetailClient {...pageData} />
         </DefaultLayoutWrapper>
       );
     } catch (error) {
       console.error(`[Route] Error fetching repository details:`, error);
+      // Try to fetch OpenDigger data even if GitHub API fails
+      const opendiggerData = await fetchOpenDiggerData(repoName);
+      
       // Return basic data even if detailed fetches fail
       const pageData = {
         repository: {
@@ -149,11 +201,11 @@ export default async function RepositoryDetailPage({ params, searchParams }: Rep
           contributorCount: 0, // Not displayed in UI
           details: null,
         },
-        analysis: null,
+        analysis: opendiggerData,
       };
 
       return (
-        <DefaultLayoutWrapper user={null}>
+        <DefaultLayoutWrapper user={user}>
           <RepositoryDetailClient {...pageData} />
         </DefaultLayoutWrapper>
       );
