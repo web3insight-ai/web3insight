@@ -340,7 +340,41 @@ FROM user_ids u;`;
       });
     }
 
-    const body = JSON.stringify({ users: rows });
+    const data: any = { users: rows };
+
+    const totalUsers = data.users.length;
+
+    const usersWithContributions = data.users.filter(
+      (user: any) => user.ecosystem_scores && user.ecosystem_scores.length > 0,
+    ).length;
+
+    const usersWithoutContributions = totalUsers - usersWithContributions;
+
+    const contributionPercentage = (usersWithContributions / totalUsers) * 100;
+
+    const ecosystemCounts: { [key: string]: number } = {};
+
+    data.users.forEach((user: any) => {
+      if (user.ecosystem_scores) {
+        user.ecosystem_scores.forEach((ecosystem) => {
+          if (ecosystem.ecosystem) {
+            ecosystemCounts[ecosystem.ecosystem] =
+              (ecosystemCounts[ecosystem.ecosystem] || 0) + 1;
+          }
+        });
+      }
+    });
+
+    const ecosystemRanking = Object.entries(ecosystemCounts)
+      .sort(([, countA], [, countB]) => countB - countA)
+      .map(([ecosystem, count]) => ({ ecosystem, count }));
+
+    data.users_with_contributions = usersWithContributions;
+    data.users_without_contributions = usersWithoutContributions;
+    data.contribution_percentage = contributionPercentage;
+    data.ecosystem_ranking = ecosystemRanking;
+
+    const body = JSON.stringify(data);
 
     if (rows.length > 0) {
       const update = this.db
