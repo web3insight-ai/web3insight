@@ -156,8 +156,17 @@ async function pollAnalysisResult(
           response.data.data.users.length > 0;
 
         // Check if AI analysis is complete - verify actual AI data content
-        const hasAIData = !!(response.data.ai?.data?.profile && response.data.ai?.data?.roastReport);
+        // More flexible check for AI data availability
+        const hasAIData = !!(
+          response.data.ai && (
+            (response.data.ai.data?.profile && response.data.ai.data?.roastReport) ||  // New structure
+            (response.data.ai.data?.profile) ||  // Profile only
+            (response.data.ai.data?.roastReport) || // Roast report only
+            (response.data.ai.success && response.data.ai.data) // General AI data available
+          )
+        );
 
+        // IMPORTANT: If AI data is available, process and return immediately
         if (hasGithubData && hasAnalyticsData && hasAIData) {
           
           // Process AI data and merge with GitHub users
@@ -173,8 +182,8 @@ async function pollAnalysisResult(
               ecosystem_scores: analyticsUser?.ecosystem_scores || [],
             };
 
-            // Process AI data if available
-            if (response.data.ai && response.data.ai.success && response.data.ai.data) {
+            // Process AI data if available (more flexible condition)
+            if (response.data.ai && (response.data.ai.success || response.data.ai.data)) {
               const aiData = response.data.ai.data;
               const aiProfile = aiData.profile; // Direct access, no .output
               const roastReport = aiData.roastReport;

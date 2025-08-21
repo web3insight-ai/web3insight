@@ -23,7 +23,7 @@ function formatNumber(num: number): string {
 
 export function ProfileHeader({ user, className = "" }: ProfileHeaderProps) {
   return (
-    <div className={`bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark p-3 ${className}`}>
+    <div className={`bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark compact-card ${className}`}>
       <div className="flex items-center gap-3">
         {/* Avatar - Prominent */}
         <Avatar
@@ -31,6 +31,7 @@ export function ProfileHeader({ user, className = "" }: ProfileHeaderProps) {
           name={user.name || user.login}
           className="w-14 h-14"
           isBordered
+          radius="full"
         />
 
         {/* User Info - Full Width Layout */}

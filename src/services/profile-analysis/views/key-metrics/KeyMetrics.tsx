@@ -42,7 +42,7 @@ export function KeyMetrics({ user, className = "" }: KeyMetricsProps) {
   const totalScore = rankings.reduce((sum, eco) => sum + eco.score, 0);
 
   return (
-    <div className={`bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark p-4 ${className}`}>
+    <div className={`bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark compact-card ${className}`}>
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
         <Globe size={16} className="text-gray-500 dark:text-gray-400" />
