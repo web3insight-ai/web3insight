@@ -63,9 +63,6 @@ function ProfileCard({ className, developer }: ProfileCardWidgetProps) {
                   <strong className="text-gray-900 dark:text-white text-sm">{githubData.stats.totalCommits}</strong> Commits (2025)
                 </span>
                 <span className="text-gray-600 dark:text-gray-400">
-                  <strong className="text-gray-900 dark:text-white text-sm">{githubData.stats.totalPRs}</strong> PRs
-                </span>
-                <span className="text-gray-600 dark:text-gray-400">
                   <strong className="text-gray-900 dark:text-white text-sm">{developer.statistics.codeReview}</strong> Reviews
                 </span>
               </>

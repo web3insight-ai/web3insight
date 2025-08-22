@@ -1,11 +1,14 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { headers } from 'next/headers';
 import DeveloperDetailClient from './DeveloperDetailClient';
 import { getTitle } from "@/utils/app";
 import type { Repository } from "~/repository/typing";
 import type { DeveloperActivity, DeveloperContribution } from "~/developer/typing";
 import { fetchOne, fetchRepositoryRankList, fetchActivityList, fetchContributionList } from "~/developer/repository";
+import { getUser } from "~/auth/repository";
 import DefaultLayoutWrapper from '../../DefaultLayoutWrapper';
+import { env } from "@/env";
 
 interface DeveloperPageProps {
   params: Promise<{
@@ -48,6 +51,17 @@ export default async function DeveloperDetailPage({ params }: DeveloperPageProps
   const resolvedParams = await params;
   const developerId = resolvedParams.id;
 
+  // Get current user from session
+  const headersList = await headers();
+  const host = headersList.get("host") || "localhost:3000";
+  const protocol = env.NODE_ENV === "development" ? "http" : "https";
+  const url = `${protocol}://${host}/developers/${developerId}`;
+
+  const request = new Request(url, {
+    headers: Object.fromEntries(headersList.entries()),
+  });
+  const user = await getUser(request);
+
   try {
     const res = await fetchOne(developerId);
 
@@ -82,7 +96,7 @@ export default async function DeveloperDetailPage({ params }: DeveloperPageProps
     };
 
     return (
-      <DefaultLayoutWrapper user={null}>
+      <DefaultLayoutWrapper user={user}>
         <DeveloperDetailClient {...pageData} />
       </DefaultLayoutWrapper>
     );
