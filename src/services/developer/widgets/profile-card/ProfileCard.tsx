@@ -50,6 +50,9 @@ function ProfileCard({ className, developer }: ProfileCardWidgetProps) {
                 <div className="w-16 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
                 <div className="w-20 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
                 <div className="w-12 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <span className="text-gray-600 dark:text-gray-400">
+                  <strong className="text-gray-900 dark:text-white text-sm">{developer.statistics.codeReview}</strong> Reviews
+                </span>
               </div>
             ) : githubData?.stats ? (
               <>
@@ -62,8 +65,15 @@ function ProfileCard({ className, developer }: ProfileCardWidgetProps) {
                 <span className="text-gray-600 dark:text-gray-400">
                   <strong className="text-gray-900 dark:text-white text-sm">{githubData.stats.totalPRs}</strong> PRs
                 </span>
+                <span className="text-gray-600 dark:text-gray-400">
+                  <strong className="text-gray-900 dark:text-white text-sm">{developer.statistics.codeReview}</strong> Reviews
+                </span>
               </>
-            ) : null}
+            ) : (
+              <span className="text-gray-600 dark:text-gray-400">
+                <strong className="text-gray-900 dark:text-white text-sm">{developer.statistics.codeReview}</strong> Reviews
+              </span>
+            )}
           </div>
         </div>
       </div>

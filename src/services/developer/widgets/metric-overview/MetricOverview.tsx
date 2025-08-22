@@ -9,7 +9,6 @@ function MetricOverview({ className, dataSource }: MetricOverviewWidgetProps) {
     { 
       label: `${dataSource.pullRequest} PRs`, 
       value: totalPRs,
-      subtitle: `(+${dataSource.codeReview} reviews)`,
     },
   ];
 
@@ -24,9 +23,6 @@ function MetricOverview({ className, dataSource }: MetricOverviewWidgetProps) {
             <div className="flex flex-col items-center text-center">
               <p className="text-sm text-gray-500 dark:text-gray-400">{metric.label}</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">{metric.value.toLocaleString()}</p>
-              {metric.subtitle && (
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{metric.subtitle}</p>
-              )}
             </div>
           </CardBody>
         </Card>
