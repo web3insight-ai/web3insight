@@ -4,9 +4,13 @@ import { useState, useEffect } from "react";
 import { Card, CardHeader, Avatar, Button } from "@nextui-org/react";
 import { Calendar, Users, Trophy, Medal, Award, ChevronDown, ChevronUp, Edit3 } from "lucide-react";
 
-import ChartCard from "$/controls/chart-card";
+import ReactECharts from "echarts-for-react";
 
 import ProfileCardWidget from "../../../developer/widgets/profile-card";
+import ContributionStatsChart from "../../../../components/ContributionStatsChart";
+import EcosystemRankingChart from "../../../../components/EcosystemRankingChart";
+import EventAnalyticsOverview from "../../../../components/EventAnalyticsOverview";
+import EventAnalyticsSkeleton from "../../../../components/loading/EventAnalyticsSkeleton";
 
 import type { EventReport } from "../../typing";
 import { fetchOne } from "../../repository/client";
@@ -16,6 +20,13 @@ import { resolveChartOptions } from "./helper";
 import RepoScoreListCard from "./RepoScoreListCard";
 import EventEditDialog from "./EventEditDialog";
 
+interface EventAnalysisData {
+  ecosystem_ranking: Array<{ ecosystem: string; count: number }>;
+  contribution_percentage: number;
+  users_with_contributions: number;
+  users_without_contributions: number;
+}
+
 function EventDetailView({ id }: EventDetailViewWidgetProps) {
   const [loading, setLoading] = useState(false);
   const [contestants, setContestants] = useState<EventReport["contestants"]>([]);
@@ -23,6 +34,8 @@ function EventDetailView({ id }: EventDetailViewWidgetProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [eventData, setEventData] = useState<EventReport | null>(null);
   const [loadingEventData, setLoadingEventData] = useState(false);
+  const [analysisData, setAnalysisData] = useState<EventAnalysisData | null>(null);
+  const [loadingAnalysis, setLoadingAnalysis] = useState(false);
 
   const formatDisplayName = (contestant: typeof contestants[0]) => {
     if (!contestant.nickname || contestant.nickname === contestant.username) {
@@ -41,22 +54,58 @@ function EventDetailView({ id }: EventDetailViewWidgetProps) {
   useEffect(() => {
     setLoading(true);
 
-    fetchOne(id)
-      .then(res => {
-        if (res.success) {
-          setContestants(res.data.contestants);
-        } else {
-          console.error(`[Event Detail] Failed to fetch event data:`, res.message);
-          alert(res.message);
+    // Fetch event analysis data
+    const fetchAnalysisData = async () => {
+      setLoadingAnalysis(true);
+      try {
+        const response = await fetch(`/api/analysis/events/${id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.data) {
+            setAnalysisData({
+              ecosystem_ranking: result.data.ecosystem_ranking || [],
+              contribution_percentage: result.data.contribution_percentage || 0,
+              users_with_contributions: result.data.users_with_contributions || 0,
+              users_without_contributions: result.data.users_without_contributions || 0,
+            });
+          }
         }
-      })
-      .catch(error => {
+      } catch (error) {
+        console.error('[Event Detail] Error fetching analysis data:', error);
+      } finally {
+        setLoadingAnalysis(false);
+      }
+    };
+
+    const loadEventData = async () => {
+      try {
+        // Fetch both event data and analysis data
+        await Promise.all([
+          fetchOne(id).then(res => {
+            if (res.success) {
+              setContestants(res.data.contestants);
+            } else {
+              console.error(`[Event Detail] Failed to fetch event data:`, res.message);
+              alert(res.message);
+            }
+          }),
+          fetchAnalysisData(),
+        ]);
+      } catch (error) {
         console.error(`[Event Detail] Error fetching event data:`, error);
         alert("Failed to load event data. Please try again.");
-      })
-      .finally(() => {
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    loadEventData();
   }, [id]);
 
   // Fetch event data for editing
@@ -146,7 +195,7 @@ function EventDetailView({ id }: EventDetailViewWidgetProps) {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       {/* Event Overview */}
       <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
         <CardHeader className="px-6 py-5">
@@ -163,19 +212,48 @@ function EventDetailView({ id }: EventDetailViewWidgetProps) {
             <div className="flex justify-end">
               <Button
                 size="sm"
-                color="primary"
-                variant="flat"
-                startContent={<Edit3 size={16} />}
+                variant="light"
+                startContent={<Edit3 size={14} />}
                 onClick={handleEditClick}
                 isLoading={loadingEventData}
-                className="text-sm font-medium px-4 h-9"
+                className="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 h-8 min-w-0"
               >
-                Edit Event
+                Edit
               </Button>
             </div>
           </div>
         </CardHeader>
       </Card>
+
+      {/* Web3 Analytics Section */}
+      {analysisData ? (
+        <div className="space-y-4">
+          {/* Analytics Overview */}
+          <EventAnalyticsOverview
+            totalUsers={analysisData.users_with_contributions + analysisData.users_without_contributions}
+            usersWithContributions={analysisData.users_with_contributions}
+            usersWithoutContributions={analysisData.users_without_contributions}
+            contributionPercentage={analysisData.contribution_percentage}
+            topEcosystemsCount={analysisData.ecosystem_ranking.length}
+          />
+
+          {/* Contribution Statistics */}
+          <ContributionStatsChart
+            usersWithContributions={analysisData.users_with_contributions}
+            usersWithoutContributions={analysisData.users_without_contributions}
+            contributionPercentage={analysisData.contribution_percentage}
+          />
+
+          {/* Ecosystem Ranking */}
+          {analysisData.ecosystem_ranking.length > 0 && (
+            <EcosystemRankingChart
+              ecosystemRanking={analysisData.ecosystem_ranking}
+            />
+          )}
+        </div>
+      ) : loadingAnalysis ? (
+        <EventAnalyticsSkeleton />
+      ) : null}
 
       {/* Participants List */}
       <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">
@@ -307,12 +385,12 @@ function EventDetailView({ id }: EventDetailViewWidgetProps) {
                 {isExpanded && (
                   <div
                     id={`contestant-details-${String(contestant.id)}`}
-                    className="animate-slide-up px-6 pb-6 bg-gray-50 dark:bg-surface-elevated"
+                    className="px-6 pb-4 bg-gray-50 dark:bg-surface-elevated"
                   >
-                    <div className="space-y-6 pt-6">
+                    <div className="space-y-3 pt-3">
                       {/* Profile Section */}
                       <div>
-                        <h5 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+                        <h5 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
                           Developer Profile
                         </h5>
                         <ProfileCardWidget developer={contestant} />
@@ -320,12 +398,18 @@ function EventDetailView({ id }: EventDetailViewWidgetProps) {
 
                       {/* Chart Section */}
                       <div>
-                        <ChartCard
-                          title="Ecosystem Scores"
-                          style={{ height: "300px" }}
-                          option={resolveChartOptions(contestant.analytics)}
-                          chartContainerClassName="h-[260px]"
-                        />
+                        <div className="border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Trophy size={14} className="text-gray-600 dark:text-gray-400" />
+                            <h3 className="text-sm font-medium text-gray-900 dark:text-white">Ecosystem Scores</h3>
+                          </div>
+                          <div className="h-40">
+                            <ReactECharts
+                              option={resolveChartOptions(contestant.analytics)}
+                              style={{ height: '100%', width: '100%' }}
+                            />
+                          </div>
+                        </div>
                       </div>
 
                       {/* Repository Scores Section */}

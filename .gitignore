@@ -1,19 +1,36 @@
-.editorconfig
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-node_modules/
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
 
-/.cache
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
 /build
-.env*
-!.env.example
-.DS_Store
 
-.deps/
-.states/
-artifacts/
-.roomodes
-memory-bank/
-.cursorrules
-.windsurfrules
-/.vscode/
-.next/
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
