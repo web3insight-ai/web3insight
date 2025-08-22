@@ -36,6 +36,17 @@ const nextConfig: NextConfig = {
       });
     }
 
+    // Prevent WalletConnect and indexedDB-dependent packages from being bundled on server
+    if (isServer) {
+      config.externals = config.externals || [];
+      config.externals.push({
+        "@walletconnect/core": "@walletconnect/core",
+        "@walletconnect/sign-client": "@walletconnect/sign-client",
+        "@walletconnect/universal-provider": "@walletconnect/universal-provider",
+        "@walletconnect/web3wallet": "@walletconnect/web3wallet",
+      });
+    }
+
     // Ignore optional dependencies that cause build issues
     config.plugins = config.plugins || [];
     config.plugins.push(

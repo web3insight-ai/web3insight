@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
@@ -11,7 +11,7 @@ import {
 import { useTheme } from "next-themes";
 import { isServerSide } from "@/clients/http";
 
-import { wagmiConfig } from "@/config/wagmi";
+import { getWagmiConfig } from "@/config/wagmi";
 import { OriginProvider } from "./OriginProvider";
 
 // Import RainbowKit styles
@@ -56,9 +56,20 @@ interface WalletProviderProps {
 
 export function WalletProvider({ children }: WalletProviderProps) {
   const { resolvedTheme } = useTheme();
+  const [wagmiConfig, setWagmiConfig] = useState<ReturnType<typeof getWagmiConfig>>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Get the query client instance
   const queryClient = getQueryClient();
+
+  // Initialize wagmi config on client side only
+  useEffect(() => {
+    if (typeof window !== "undefined" && !isInitialized) {
+      const config = getWagmiConfig();
+      setWagmiConfig(config);
+      setIsInitialized(true);
+    }
+  }, [isInitialized]);
 
   const rainbowKitTheme =
     resolvedTheme === "dark"
@@ -76,6 +87,15 @@ export function WalletProvider({ children }: WalletProviderProps) {
         fontStack: "system",
         overlayBlur: "small",
       });
+
+  // Always provide QueryClient, but only add WagmiProvider and RainbowKitProvider when config is ready
+  if (!wagmiConfig || !isInitialized) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <OriginProvider>{children}</OriginProvider>
+      </QueryClientProvider>
+    );
+  }
 
   return (
     <WagmiProvider config={wagmiConfig}>

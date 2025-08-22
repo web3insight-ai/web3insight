@@ -62,7 +62,7 @@ export function EcosystemInsights({ ecosystemScores, className = "" }: Ecosystem
             const barWidth = (ecosystem.score / maxScore) * 100;
 
             return (
-              <div key={`ecosystem-top5-${ecosystem.name || index}`} className="space-y-2">
+              <div key={`ecosystem-top5-${ecosystem.name}-${index}`} className="space-y-2">
                 {/* Ecosystem Header */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -129,7 +129,7 @@ export function EcosystemInsights({ ecosystemScores, className = "" }: Ecosystem
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {(showAllEcosystems ? rankings : rankings.slice(0, 9)).map((eco, index) => (
-            <div key={`ecosystem-distribution-${eco.ecosystem || index}`} className="border border-gray-200 dark:border-gray-600 rounded-lg p-3">
+            <div key={`ecosystem-distribution-${eco.ecosystem}-${index}`} className="border border-gray-200 dark:border-gray-600 rounded-lg p-3">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
                   #{eco.rank}

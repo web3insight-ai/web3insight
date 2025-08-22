@@ -1,6 +1,7 @@
 import { Button } from '@nextui-org/react';
 import { ConnectButton as RainbowConnectButton } from '@rainbow-me/rainbowkit';
 import { Wallet, WalletMinimal, ChevronDown } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface CustomConnectButtonProps {
   showBalance?: boolean;
@@ -10,6 +11,23 @@ interface CustomConnectButtonProps {
   className?: string;
 }
 
+function useRainbowKitReady() {
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    // Check if we're on client side and if RainbowKit context is available
+    if (typeof window !== 'undefined') {
+      // Small delay to allow RainbowKit to initialize
+      const timer = setTimeout(() => {
+        setIsReady(true);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  return isReady;
+}
+
 export function ConnectButton({
   showBalance = false,
   size = 'md',
@@ -17,6 +35,24 @@ export function ConnectButton({
   color = 'primary',
   className = '',
 }: CustomConnectButtonProps) {
+  const isRainbowKitReady = useRainbowKitReady();
+
+  // Fallback button when RainbowKit is not available
+  if (!isRainbowKitReady) {
+    return (
+      <Button
+        size={size}
+        variant={variant}
+        color={color}
+        startContent={<Wallet size={18} />}
+        className={className}
+        disabled
+      >
+        Connect Wallet
+      </Button>
+    );
+  }
+
   return (
     <RainbowConnectButton.Custom>
       {({ account, chain, openAccountModal, openChainModal, openConnectModal, mounted }) => {
