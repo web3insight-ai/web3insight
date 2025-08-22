@@ -15,6 +15,7 @@ import { KeyMetrics } from "~/profile-analysis/views/key-metrics";
 import { AnalysisTabs } from "~/profile-analysis/views/analysis-tabs";
 import { AIInsights } from "~/profile-analysis/views/ai-insights";
 
+
 interface DevInsightPageProps {
   requiresAuth: boolean;
   error?: string;
@@ -226,7 +227,7 @@ export default function DevInsightPageClient({
           {currentUser && (
             <div className="space-y-4">
               {/* Profile Header - Full Width */}
-              <ProfileHeader user={currentUser} />
+              <ProfileHeader user={currentUser} githubUsername={githubHandle} />
 
               {/* Key Metrics */}
               {hasEcosystemData(currentUser) && (
@@ -240,7 +241,7 @@ export default function DevInsightPageClient({
 
               {/* Detailed Analysis */}
               {hasEcosystemData(currentUser) && (
-                <AnalysisTabs user={currentUser} />
+                <AnalysisTabs user={currentUser} githubUsername={githubHandle} />
               )}
 
               {/* Loading State */}

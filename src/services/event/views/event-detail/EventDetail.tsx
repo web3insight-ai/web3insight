@@ -7,6 +7,8 @@ import { Calendar, Users, Trophy, Medal, Award, ChevronDown, ChevronUp, Edit3 } 
 import ReactECharts from "echarts-for-react";
 
 import ProfileCardWidget from "../../../developer/widgets/profile-card";
+import { ProgrammingLanguagesBar } from "../../../../components/event/ProgrammingLanguagesBar";
+import { ProgrammingLanguagesPie } from "../../../../components/event/ProgrammingLanguagesPie";
 import ContributionStatsChart from "../../../../components/ContributionStatsChart";
 import EcosystemRankingChart from "../../../../components/EcosystemRankingChart";
 import EventAnalyticsOverview from "../../../../components/EventAnalyticsOverview";
@@ -387,8 +389,8 @@ function EventDetailView({ id }: EventDetailViewWidgetProps) {
                     id={`contestant-details-${String(contestant.id)}`}
                     className="px-6 pb-4 bg-gray-50 dark:bg-surface-elevated"
                   >
-                    <div className="space-y-3 pt-3">
-                      {/* Profile Section */}
+                    <div className="space-y-4 pt-3">
+                      {/* Profile Section - Full Width */}
                       <div>
                         <h5 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
                           Developer Profile
@@ -396,7 +398,18 @@ function EventDetailView({ id }: EventDetailViewWidgetProps) {
                         <ProfileCardWidget developer={contestant} />
                       </div>
 
-                      {/* Chart Section */}
+                      {/* Programming Languages Section - Two Column Layout */}
+                      <div>
+                        <h5 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                          Programming Languages
+                        </h5>
+                        <div className="grid gap-4 lg:grid-cols-2">
+                          <ProgrammingLanguagesBar username={contestant.username} />
+                          <ProgrammingLanguagesPie username={contestant.username} />
+                        </div>
+                      </div>
+
+                      {/* Ecosystem Scores Chart - Full Width */}
                       <div>
                         <div className="border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle">
                           <div className="flex items-center gap-2 mb-3">
@@ -412,7 +425,7 @@ function EventDetailView({ id }: EventDetailViewWidgetProps) {
                         </div>
                       </div>
 
-                      {/* Repository Scores Section */}
+                      {/* Repository Scores Section - Full Width */}
                       <div>
                         <RepoScoreListCard dataSource={contestant.analytics} />
                       </div>

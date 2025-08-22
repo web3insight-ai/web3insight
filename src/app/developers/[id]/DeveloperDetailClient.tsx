@@ -14,6 +14,8 @@ import type { DeveloperActivity, DeveloperContribution, Developer } from "~/deve
 import ProfileCardWidget from "~/developer/widgets/profile-card";
 import MetricOverviewWidget from "~/developer/widgets/metric-overview";
 import ActivityListViewWidget from "~/developer/views/activity-list";
+import { ProgrammingLanguagesBar } from "../../../components/event/ProgrammingLanguagesBar";
+import { ProgrammingLanguagesPie } from "../../../components/event/ProgrammingLanguagesPie";
 
 import { resolveChartOptions } from "./helper";
 
@@ -72,6 +74,17 @@ export default function DeveloperDetailClient({
       <div className="w-full max-w-content mx-auto px-6">
         <div className="animate-fade-in">
           <ProfileCardWidget className="mb-4" developer={developer} />
+        </div>
+        <div className="animate-slide-up" style={{ animationDelay: "50ms" }}>
+          <div className="mb-4">
+            <h5 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+              Programming Languages
+            </h5>
+            <div className="grid gap-4 lg:grid-cols-2">
+              <ProgrammingLanguagesBar username={developer.username} />
+              <ProgrammingLanguagesPie username={developer.username} />
+            </div>
+          </div>
         </div>
         <div className="animate-slide-up" style={{ animationDelay: "100ms" }}>
           <MetricOverviewWidget className="mb-4" dataSource={developer.statistics} />

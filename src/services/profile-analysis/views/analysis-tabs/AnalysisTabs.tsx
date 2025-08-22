@@ -9,10 +9,11 @@ import { ActivityAnalytics } from "../activity-analytics";
 
 interface AnalysisTabsProps {
   user: GitHubUser;
+  githubUsername?: string;
   className?: string;
 }
 
-export function AnalysisTabs({ user, className = "" }: AnalysisTabsProps) {
+export function AnalysisTabs({ user, githubUsername, className = "" }: AnalysisTabsProps) {
   const [selectedTab, setSelectedTab] = useState("overview");
 
   if (!hasEcosystemData(user)) {
@@ -48,7 +49,7 @@ export function AnalysisTabs({ user, className = "" }: AnalysisTabsProps) {
       title: "Technical Details",
       icon: Code,
       subtitle: "Tech stack analysis",
-      content: <TechnicalBreakdown ecosystemScores={user.ecosystem_scores!} />,
+      content: <TechnicalBreakdown ecosystemScores={user.ecosystem_scores!} githubUsername={githubUsername} />,
     },
     {
       key: "activity",
