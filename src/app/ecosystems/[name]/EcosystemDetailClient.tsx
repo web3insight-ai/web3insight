@@ -1,9 +1,9 @@
 'use client';
 
-import { Warehouse, Github, Users } from "lucide-react";
+import { Warehouse, Github, Users , TrendingUp } from "lucide-react";
 
-import ChartCard from "$/controls/chart-card";
 import { CardSkeleton, ChartSkeleton, TableSkeleton } from "$/loading";
+import ReactECharts from 'echarts-for-react';
 
 import RepositoryRankViewWidget from "~/repository/views/repository-rank";
 import DeveloperRankViewWidget from "~/developer/views/developer-rank";
@@ -29,7 +29,7 @@ export default function EcosystemDetailClient({
     <div className="min-h-dvh bg-background dark:bg-background-dark py-8">
       <div className="w-full max-w-content mx-auto px-6">
         {/* Header and Overview */}
-        <div className="mb-12 animate-fade-in">
+        <div className="mb-4 animate-fade-in">
           <div className="flex items-center gap-4 mb-4">
             <div className="p-3 rounded-xl bg-primary/10">
               <Warehouse size={28} className="text-primary" />
@@ -48,7 +48,7 @@ export default function EcosystemDetailClient({
           {isLoading ? (
             <CardSkeleton count={4} />
           ) : (
-            <MetricOverview className="mb-12" dataSource={statistics} />
+            <MetricOverview className="mb-4" dataSource={statistics} />
           )}
         </div>
         <div className="animate-slide-up" style={{ animationDelay: "200ms" }}>
@@ -56,12 +56,18 @@ export default function EcosystemDetailClient({
             {isLoading ? (
               <ChartSkeleton title="Developer Activity Trend" height="320px" />
             ) : (
-              <ChartCard
-                className="mb-10"
-                style={{ height: "320px" }}
-                title="Developer Activity Trend"
-                option={resolveChartOptions(statistics.trend)}
-              />
+              <div className="mb-4 border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle">
+                <div className="flex items-center gap-2 mb-3">
+                  <TrendingUp size={14} className="text-gray-600 dark:text-gray-400" />
+                  <h3 className="text-sm font-medium text-gray-900 dark:text-white">Developer Activity Trend</h3>
+                </div>
+                <div className="h-56">
+                  <ReactECharts
+                    option={resolveChartOptions(statistics.trend)}
+                    style={{ height: '100%', width: '100%' }}
+                  />
+                </div>
+              </div>
             )}
           </ClientOnly>
         </div>
@@ -74,7 +80,7 @@ export default function EcosystemDetailClient({
               columns={6}
             />
           ) : (
-            <RepositoryRankViewWidget className="mb-10" dataSource={statistics.repositories} />
+            <RepositoryRankViewWidget className="mb-4" dataSource={statistics.repositories} />
           )}
         </div>
         <div className="animate-slide-up" style={{ animationDelay: "400ms" }}>

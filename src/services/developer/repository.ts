@@ -11,12 +11,15 @@ import type { Developer, DeveloperActivity, DeveloperContribution } from "./typi
 import { resolveActivityFromGithubEvent, resolveDeveloperFromGithubUser } from "./helper";
 
 async function fetchOne(idOrUsername: number | string): Promise<ResponseResult<Developer | null>> {
-  const { data, ...others } = isNumeric(idOrUsername) ? await fetchUserById(idOrUsername) : await fetchUser(<string>idOrUsername);
+  const { data, ...others } = isNumeric(idOrUsername)
+    ? await fetchUserById(idOrUsername)
+    : await fetchUser(<string>idOrUsername);
 
   if (!others.success) {
+    const errorCode = others.message && others.message.toLowerCase().indexOf("not found") > -1 ? "404" : others.code;
     return {
       ...others,
-      code: others.message && others.message.toLowerCase().indexOf("not found") > -1 ? "404" : others.code,
+      code: errorCode,
       data: null,
     };
   }
@@ -24,19 +27,31 @@ async function fetchOne(idOrUsername: number | string): Promise<ResponseResult<D
   const { data: statistics, ...rest } = await fetchPersonalOverview(data.id);
 
   if (!rest.success) {
-    return { ...rest, data: null  };
+    return {
+      ...rest,
+      data: null,
+    };
   }
+
+  if (!others.success) {
+    return {
+      ...others,
+      data: null,
+    };
+  }
+
+  const developerData = {
+    ...resolveDeveloperFromGithubUser(data),
+    statistics: {
+      repository: data.public_repos,
+      pullRequest: statistics[0].pull_requests,
+      codeReview: statistics[0].code_reviews,
+    },
+  };
 
   return {
     ...others,
-    data: others.success? {
-      ...resolveDeveloperFromGithubUser(data),
-      statistics: {
-        repository: data.public_repos,
-        pullRequest: statistics[0].pull_requests,
-        codeReview: statistics[0].code_reviews,
-      },
-    } : null,
+    data: developerData,
   };
 }
 
