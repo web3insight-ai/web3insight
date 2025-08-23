@@ -328,6 +328,13 @@ function EventEditDialogWrapper(props: EventEditDialogProps) {
   const [analysisContestants, setAnalysisContestants] = useState<Contestant[]>([]);
   const [analysisFailedAccounts, setAnalysisFailedAccounts] = useState<string[]>([]);
 
+  // Reset editVisible when props.visible changes from false to true
+  useEffect(() => {
+    if (props.visible && !editVisible) {
+      setEditVisible(true);
+    }
+  }, [props.visible, editVisible]);
+
   const handleEditClose = () => {
     setEditVisible(false);
     props.onClose();
