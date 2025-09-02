@@ -3,6 +3,9 @@ import EcosystemDetailClient from './EcosystemDetailClient';
 import { getTitle } from "@/utils/app";
 import { fetchStatistics } from "~/ecosystem/repository";
 import DefaultLayoutWrapper from '../../DefaultLayoutWrapper';
+import { getUser } from "~/auth/repository";
+import { headers } from "next/headers";
+import { env } from "@/env";
 
 interface EcosystemPageProps {
   params: Promise<{
@@ -29,6 +32,17 @@ export default async function EcosystemDetailPage({ params }: EcosystemPageProps
   const resolvedParams = await params;
   const ecosystemName = decodeURIComponent(resolvedParams.name);
 
+  // Resolve current user from session so navbar shows profile
+  const headersList = await headers();
+  const host = headersList.get("host") || "localhost:3000";
+  const protocol = env.NODE_ENV === "development" ? "http" : "https";
+  const url = `${protocol}://${host}/ecosystems/${encodeURIComponent(ecosystemName)}`;
+
+  const request = new Request(url, {
+    headers: Object.fromEntries(headersList.entries()),
+  });
+  const user = await getUser(request);
+
   try {
     const { data: statistics } = await fetchStatistics(ecosystemName);
 
@@ -38,7 +52,7 @@ export default async function EcosystemDetailPage({ params }: EcosystemPageProps
     };
 
     return (
-      <DefaultLayoutWrapper user={null}>
+      <DefaultLayoutWrapper user={user}>
         <EcosystemDetailClient {...pageData} />
       </DefaultLayoutWrapper>
     );
@@ -51,7 +65,7 @@ export default async function EcosystemDetailPage({ params }: EcosystemPageProps
     };
 
     return (
-      <DefaultLayoutWrapper user={null}>
+      <DefaultLayoutWrapper user={user}>
         <EcosystemDetailClient {...fallbackData} />
       </DefaultLayoutWrapper>
     );
