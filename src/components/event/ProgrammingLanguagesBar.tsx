@@ -29,20 +29,24 @@ export function ProgrammingLanguagesBar({ username, className = "" }: Programmin
 
             return (
               <div key={`language-${language.name}-${index}`} className="space-y-2">
-                <div className="flex justify-between items-center">
+                <div className="flex items-center">
                   <div className="flex items-center gap-2">
                     <Cpu size={12} className="text-gray-500 dark:text-gray-400" />
                     <span className="font-medium text-sm text-gray-900 dark:text-white">
                       {language.name}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-700 dark:text-gray-200 bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded border dark:border-gray-600">
-                      {skillLevel}
-                    </span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                      {percentage.toFixed(1)}%
-                    </span>
+                  <div className="ml-auto grid grid-cols-[100px_56px] gap-x-0.5 justify-items-start w-[156px]">
+                    <div className="w-[100px]">
+                      <span className="inline-block text-xs text-gray-700 dark:text-gray-200 bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded border dark:border-gray-600">
+                        {skillLevel}
+                      </span>
+                    </div>
+                    <div className="w-[56px]">
+                      <span className="text-xs text-gray-500 dark:text-gray-400 tabular-nums">
+                        {percentage.toFixed(1)}%
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -63,14 +67,14 @@ export function ProgrammingLanguagesBar({ username, className = "" }: Programmin
         <div className="space-y-3 animate-pulse">
           {Array.from({ length: 5 }).map((_, index) => (
             <div key={index} className="space-y-2">
-              <div className="flex justify-between items-center">
+              <div className="flex items-center">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-gray-300 dark:bg-gray-700 rounded" />
                   <div className="w-16 h-4 bg-gray-300 dark:bg-gray-700 rounded" />
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-12 h-4 bg-gray-300 dark:bg-gray-700 rounded" />
-                  <div className="w-8 h-4 bg-gray-300 dark:bg-gray-700 rounded" />
+                <div className="ml-auto grid grid-cols-[100px_56px] gap-x-0.5 justify-items-start w-[156px]">
+                  <div className="w-[100px] h-4 bg-gray-300 dark:bg-gray-700 rounded" />
+                  <div className="w-[56px] h-4 bg-gray-300 dark:bg-gray-700 rounded" />
                 </div>
               </div>
               <div className="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-full">
