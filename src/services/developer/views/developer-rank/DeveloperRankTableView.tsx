@@ -3,6 +3,7 @@
 import { Card, CardHeader } from "@nextui-org/react";
 import { Users, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import TableHeader from "$/controls/table-header";
 
 import RepoLinkWidget from "../../../repository/widgets/repo-link";
 
@@ -28,9 +29,9 @@ function DeveloperRankTableView({ dataSource }: Pick<DeveloperRankViewWidgetProp
           <thead>
             <tr className="border-t border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider w-12">#</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Developer</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Score</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Top Projects</th>
+              <TableHeader>Developer</TableHeader>
+              <TableHeader tooltip="Total number of commits made by this developer">Score</TableHeader>
+              <TableHeader tooltip="Most active repositories this developer contributes to">Top Projects</TableHeader>
             </tr>
           </thead>
           <tbody className="divide-y divide-border dark:divide-border-dark">

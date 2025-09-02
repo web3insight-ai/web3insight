@@ -9,6 +9,7 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import type { RepoRankRecord } from "~/api/typing";
 import MetricCard, { type MetricCardProps } from "$/controls/metric-card";
+import TableHeader from "$/controls/table-header";
 
 interface RepositoriesPageProps {
   repositories: RepoRankRecord[];
@@ -30,24 +31,28 @@ function resolveMetrics(dataSource: {
       value: Number(dataSource.totalCoreDevelopers).toLocaleString(),
       icon: <Code2 size={20} className="text-secondary" />,
       iconBgClassName: "bg-secondary/10",
+      tooltip: "Developers with pull requests and push events in the past year",
     },
     {
       label: "ECO Contributors",
       value: Number(dataSource.totalDevelopers).toLocaleString(),
       icon: <Users size={20} className="text-primary" />,
       iconBgClassName: "bg-primary/10",
+      tooltip: "Developers with activity (star not included) in this ecosystem (all time)",
     },
     {
       label: "Ecosystems",
       value: Number(dataSource.totalEcosystems).toLocaleString(),
       icon: <Database size={20} className="text-warning" />,
       iconBgClassName: "bg-warning/10",
+      tooltip: "Total number of ecosystems tracked",
     },
     {
       label: "Repositories",
       value: Number(dataSource.totalRepositories).toLocaleString(),
       icon: <Zap size={20} className="text-success" />,
       iconBgClassName: "bg-success/10",
+      tooltip: "Total repositories grouped by ecosystem",
     },
   ];
 }
@@ -212,11 +217,11 @@ export default function RepositoriesPageClient({
               <thead>
                 <tr className="border-t border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider w-12">#</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Repository</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Stars</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Forks</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Contributors</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Issues</th>
+                  <TableHeader>Repository</TableHeader>
+                  <TableHeader align="right" tooltip="Total number of stars received by this repository">Stars</TableHeader>
+                  <TableHeader align="right" tooltip="Total number of forks created from this repository">Forks</TableHeader>
+                  <TableHeader align="right" tooltip="Total number of developers who have contributed to this repository">Contributors</TableHeader>
+                  <TableHeader align="right" tooltip="Current number of open issues in this repository">Issues</TableHeader>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border dark:divide-border-dark">

@@ -4,6 +4,7 @@ import { Warehouse, Github, Users , TrendingUp } from "lucide-react";
 
 import { CardSkeleton, ChartSkeleton, TableSkeleton } from "$/loading";
 import ReactECharts from 'echarts-for-react';
+import ChartTitle from "$/controls/chart-title";
 
 import RepositoryRankViewWidget from "~/repository/views/repository-rank";
 import DeveloperRankViewWidget from "~/developer/views/developer-rank";
@@ -57,10 +58,12 @@ export default function EcosystemDetailClient({
               <ChartSkeleton title="Developer Activity Trend" height="320px" />
             ) : (
               <div className="mb-4 border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle">
-                <div className="flex items-center gap-2 mb-3">
-                  <TrendingUp size={14} className="text-gray-600 dark:text-gray-400" />
-                  <h3 className="text-sm font-medium text-gray-900 dark:text-white">Developer Activity Trend</h3>
-                </div>
+                <ChartTitle
+                  icon={<TrendingUp size={14} />}
+                  title="Developer Activity Trend"
+                  tooltip="Developers with activity (star not included) over time"
+                  className="mb-3"
+                />
                 <div className="h-56">
                   <ReactECharts
                     option={resolveChartOptions(statistics.trend)}

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Card, CardHeader } from "@nextui-org/react";
 import { Github, ArrowRight } from "lucide-react";
+import TableHeader from "$/controls/table-header";
 
 import { resolveDataSource } from "../../helper";
 
@@ -28,11 +29,11 @@ function RepositoryRankView({ className, dataSource }: RepositoryRankViewWidgetP
           <thead>
             <tr className="border-t border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider w-12">#</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Repository</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Stars</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Forks</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Issues</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Contributors</th>
+              <TableHeader>Repository</TableHeader>
+              <TableHeader align="right" tooltip="Total number of stars received by this repository">Stars</TableHeader>
+              <TableHeader align="right" tooltip="Total number of forks created from this repository">Forks</TableHeader>
+              <TableHeader align="right" tooltip="Current number of open issues in this repository">Issues</TableHeader>
+              <TableHeader align="right" tooltip="Total number of developers who have contributed to this repository">Contributors</TableHeader>
             </tr>
           </thead>
           <tbody className="divide-y divide-border dark:divide-border-dark">

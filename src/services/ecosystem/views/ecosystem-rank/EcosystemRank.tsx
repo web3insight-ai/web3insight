@@ -6,6 +6,7 @@ import { Warehouse, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { EcosystemType } from "~/ecosystem/typing";
 import { EcosystemTypeFilter } from "$/ecosystem-type-filter";
+import TableHeader from "$/controls/table-header";
 
 import type { EcosystemRankViewWidgetProps } from "./typing";
 
@@ -17,7 +18,7 @@ function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
     if (selectedType === EcosystemType.ALL) {
       return true;
     }
-    
+
     // Map API kind values to EcosystemType enum
     const kindMapping: Record<string, EcosystemType> = {
       'Public Chain': EcosystemType.PUBLIC_CHAIN,
@@ -38,28 +39,28 @@ function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
           </div>
           <h3 className="text-lg font-medium text-gray-900 dark:text-white">Top Ecosystems</h3>
         </div>
-        <EcosystemTypeFilter 
+        <EcosystemTypeFilter
           selectedType={selectedType}
           onTypeChange={setSelectedType}
         />
       </div>
-      
+
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="border-t border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider w-12">#</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Ecosystem</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Devs</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Contributors</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">New</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">Repos</th>
+              <TableHeader>Ecosystem</TableHeader>
+              <TableHeader align="right" tooltip="Developers with pull requests and push events in the past year">Devs</TableHeader>
+              <TableHeader align="right" tooltip="Developers with activity (star not included) in this ecosystem (all time)">Contributors</TableHeader>
+              <TableHeader align="right" tooltip="Developers with first activity in past 90 days">New</TableHeader>
+              <TableHeader align="right" tooltip="Total repositories in this ecosystem">Repos</TableHeader>
             </tr>
           </thead>
           <tbody className="divide-y divide-border dark:divide-border-dark">
             {filteredData.slice(0, 10).map((ecosystem, index) => (
-              <tr 
-                key={index} 
+              <tr
+                key={index}
                 className="hover:bg-surface dark:hover:bg-surface-dark transition-colors duration-200 group animate-fade-in"
                 style={{ animationDelay: `${index * 50}ms` }}
               >
@@ -75,8 +76,8 @@ function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <Link 
-                    href={`/ecosystems/${encodeURIComponent(ecosystem.eco_name || 'unknown-ecosystem')}`} 
+                  <Link
+                    href={`/ecosystems/${encodeURIComponent(ecosystem.eco_name || 'unknown-ecosystem')}`}
                     className="font-medium text-gray-900 dark:text-white hover:text-primary transition-colors duration-200"
                   >
                     {ecosystem.eco_name || 'Unknown Ecosystem'}
@@ -108,8 +109,8 @@ function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
         </table>
       </div>
       <div className="px-6 py-4 border-t border-border dark:border-border-dark">
-        <Link 
-          href="/ecosystems" 
+        <Link
+          href="/ecosystems"
           className="flex items-center justify-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200"
         >
           View All Ecosystems

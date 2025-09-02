@@ -7,6 +7,7 @@ type MetricCardProps = {
   growth?: number;
   icon: ReactNode;
   iconBgClassName: ClassValue;
+  tooltip?: string;
 };
 
 export type { MetricCardProps };
