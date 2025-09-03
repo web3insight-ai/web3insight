@@ -25,7 +25,9 @@ function MetricCard({ label, value, growth, icon, iconBgClassName, tooltip }: Me
                   placement="top"
                   classNames={{
                     base: "max-w-xs",
-                    content: "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 shadow-lg text-xs leading-relaxed p-3 rounded-lg",
+                    // Use elevated surface and subtle border in dark mode to match theme
+                    content: "bg-white dark:bg-surface-elevated text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-border-dark shadow-lg text-xs leading-relaxed p-3 rounded-lg",
+                    arrow: "bg-white dark:bg-surface-elevated border border-gray-200 dark:border-border-dark",
                   }}
                   delay={300}
                   closeDelay={0}
