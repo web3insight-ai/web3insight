@@ -30,7 +30,7 @@ function DeveloperRankTableView({ dataSource }: Pick<DeveloperRankViewWidgetProp
             <tr className="border-t border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider w-12">#</th>
               <TableHeader>Developer</TableHeader>
-              <TableHeader tooltip="Total number of commits made by this developer">Score</TableHeader>
+              <TableHeader tooltip="Weighted contribution score based on PRs and recent activity. Recent contributions are weighted higher than older ones.">Contribution Score</TableHeader>
               <TableHeader tooltip="Most active repositories this developer contributes to">Top Projects</TableHeader>
             </tr>
           </thead>

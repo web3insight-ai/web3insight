@@ -14,7 +14,7 @@ function TableHeader({ children, tooltip, align = "left", className = "" }: Tabl
   return (
     <th className={`px-6 py-3 ${alignClass} text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider ${className}`}>
       <div className={`flex items-center gap-1.5 ${align === "right" ? "justify-end" : align === "center" ? "justify-center" : "justify-start"}`}>
-        <span>{children}</span>
+        <span className="whitespace-nowrap">{children}</span>
         {tooltip && (
           <Tooltip
             content={tooltip}

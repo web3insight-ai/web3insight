@@ -193,7 +193,7 @@ export default function DevelopersPageClient({
                 </DropdownItem>
                 <DropdownItem key="total_commit_count" onClick={() => handleSortChange("total_commit_count")}>
                   <div className="flex items-center justify-between w-full">
-                    <span>Commits</span>
+                    <span>Contribution Score</span>
                     {sortDescriptor.column === "total_commit_count" && (
                       sortDescriptor.direction === "ascending" ? <SortAsc size={16} /> : <SortDesc size={16} />
                     )}
@@ -221,7 +221,7 @@ export default function DevelopersPageClient({
                 <tr className="border-t border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider w-12">#</th>
                   <TableHeader>Developer</TableHeader>
-                  <TableHeader align="right" tooltip="Total number of commits made by this developer">Commits</TableHeader>
+                  <TableHeader tooltip="Weighted contribution score based on PRs and recent activity. Recent contributions are weighted higher than older ones.">Contribution Score</TableHeader>
                   <TableHeader tooltip="Most active repositories this developer contributes to">Top Repos</TableHeader>
                 </tr>
               </thead>
@@ -249,7 +249,7 @@ export default function DevelopersPageClient({
                           @{developer.actor_login}
                         </Link>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
                           {Number(developer.total_commit_count).toLocaleString()}
                         </span>
