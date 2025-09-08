@@ -56,6 +56,20 @@ export class CustomController {
     );
   }
 
+  @Post('custom/analysis/users/:id/delete')
+  @ApiOperation({
+    summary: 'Remove this id, only profile',
+    description: '',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AppAuthGuard)
+  async remove(
+    @Req() req: RequestWithUser,
+    @Param() params: BaseIdReqAndResDto,
+  ) {
+    return await this.userServices.remove(req.user.uid, params);
+  }
+
   @Get('custom/analysis/users')
   @ApiOperation({
     summary: 'Get analysis history list, only for user',
