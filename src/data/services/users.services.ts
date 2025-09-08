@@ -130,6 +130,27 @@ export class UsersService {
     return res;
   }
 
+  async remove(uid: string, params: BaseIdReqAndResDto) {
+    const existing = await this.db
+      .selectFrom('api.analysis_users')
+      .select(['id'])
+      .where('submitter_id', '=', uid)
+      .where('intent', '=', Intent.Profile)
+      .where('id', '=', String(params.id))
+      .executeTakeFirst();
+
+    if (!existing) {
+      throw new Error('Analysis not found');
+    }
+
+    await this.db
+      .deleteFrom('api.analysis_users')
+      .where('id', '=', String(params.id))
+      .execute();
+
+    return new Object();
+  }
+
   async getList(params: CustomQueryUsersOrderReqDto, uid: string) {
     let query = this.db
       .selectFrom('api.analysis_users')
