@@ -9,11 +9,14 @@ import { authModalOpenAtom } from "../atoms";
 import { analyzeGitHubUser } from "~/profile-analysis/repository";
 import type { AnalysisResult, BasicAnalysisResult, AnalysisStatus, GitHubUser } from "~/profile-analysis/typing";
 import { hasAIData, hasEcosystemData } from "~/profile-analysis/helper";
-import { AnalysisProgress } from "~/profile-analysis/views/analysis-progress";
-import { ProfileHeader } from "~/profile-analysis/views/profile-header";
+// Progress card removed per design; keep skeleton-only loading experience
+import { ProfileHeader, ProfileHeaderSkeleton } from "~/profile-analysis/views/profile-header";
 import { KeyMetrics } from "~/profile-analysis/views/key-metrics";
 import { AnalysisTabs } from "~/profile-analysis/views/analysis-tabs";
-import { AIInsights } from "~/profile-analysis/views/ai-insights";
+import { AIInsights, AIInsightsSkeleton } from "~/profile-analysis/views/ai-insights";
+import MetricOverviewSkeleton from "$/loading/MetricOverviewSkeleton";
+import ChartSkeleton from "$/loading/ChartSkeleton";
+import FadeIn from "$/FadeIn";
 
 
 interface DevInsightPageProps {
@@ -34,8 +37,8 @@ export default function DevInsightPageClient({
   // Analysis state
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisStatus, setAnalysisStatus] = useState<AnalysisStatus>("pending");
-  const [progress, setProgress] = useState(0);
-  const [statusMessage, setStatusMessage] = useState("");
+  const [_progress, setProgress] = useState(0);
+  const [_statusMessage, setStatusMessage] = useState("");
   const [basicInfo, setBasicInfo] = useState<BasicAnalysisResult | null>(null);
   const [results, setResults] = useState<AnalysisResult | null>(null);
   const [analysisError, setAnalysisError] = useState("");
@@ -198,15 +201,7 @@ export default function DevInsightPageClient({
         </div>
 
         <div className="space-y-4">
-          {/* Analysis Progress - Auto-hide when completed */}
-          {(isAnalyzing || (analysisStatus !== "pending" && analysisStatus !== "completed")) && (
-            <AnalysisProgress
-              status={analysisStatus}
-              progress={progress}
-              message={statusMessage}
-              estimatedTime={isAnalyzing ? "2-3 minutes" : undefined}
-            />
-          )}
+          {/* Progress section intentionally removed; show skeletons only while analyzing */}
 
           {/* Error State */}
           {analysisError && (
@@ -235,26 +230,54 @@ export default function DevInsightPageClient({
           {/* Profile Content */}
           {currentUser && (
             <div className="space-y-4">
-              {/* Profile Header - Full Width */}
-              <ProfileHeader user={currentUser} githubUsername={githubHandle} />
+              {/* While analyzing, show skeletons for all sections */}
+              {isAnalyzing ? (
+                <>
+                  <ProfileHeaderSkeleton />
+                  <AIInsightsSkeleton />
+                  <MetricOverviewSkeleton />
+                  <ChartSkeleton title="Ecosystem Overview" height="280px" />
+                  <div className="text-center text-sm text-gray-500 dark:text-gray-400">
+                    <span className="inline-flex items-center gap-2">
+                      <Loader2 size={14} className="animate-spin" />
+                      Analysis in progress... Usually takes 2–3 minutes
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Profile Header - Full Width */}
+                  <FadeIn>
+                    <ProfileHeader user={currentUser} githubUsername={githubHandle} />
+                  </FadeIn>
 
-              {/* Key Metrics */}
-              {hasEcosystemData(currentUser) && (
-                <KeyMetrics user={currentUser} />
-              )}
+                  {/* Key Metrics */}
+                  {hasEcosystemData(currentUser) && (
+                    <FadeIn>
+                      <KeyMetrics user={currentUser} />
+                    </FadeIn>
+                  )}
 
-              {/* AI Analysis */}
-              {hasAIData(currentUser) && (
-                <AIInsights user={currentUser} />
-              )}
+                  {/* AI Analysis */}
+                  {hasAIData(currentUser) ? (
+                    <FadeIn>
+                      <AIInsights user={currentUser} />
+                    </FadeIn>
+                  ) : (
+                    isAnalyzing && <AIInsightsSkeleton />
+                  )}
 
-              {/* Detailed Analysis */}
-              {hasEcosystemData(currentUser) && (
-                <AnalysisTabs user={currentUser} githubUsername={githubHandle} />
+                  {/* Detailed Analysis */}
+                  {hasEcosystemData(currentUser) && (
+                    <FadeIn>
+                      <AnalysisTabs user={currentUser} githubUsername={githubHandle} />
+                    </FadeIn>
+                  )}
+                </>
               )}
 
               {/* Loading State */}
-              {!hasEcosystemData(currentUser) && !analysisError && (
+              {!hasEcosystemData(currentUser) && !analysisError && !isAnalyzing && (
                 <div className="glass-card dark:glass-card-dark p-4 text-center">
                   <div className="space-y-2">
                     <div className="flex items-center justify-center gap-2">

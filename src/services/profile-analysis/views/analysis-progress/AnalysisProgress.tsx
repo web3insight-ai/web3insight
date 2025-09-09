@@ -1,5 +1,6 @@
 import { Card, CardBody, Progress, Chip } from "@nextui-org/react";
-import { Brain, CheckCircle, AlertCircle, Clock } from "lucide-react";
+import { Brain, CheckCircle, AlertCircle, Clock, Loader2 } from "lucide-react";
+import FadeIn from "$/FadeIn";
 
 import type { AnalysisStatus } from "../../typing";
 
@@ -21,7 +22,7 @@ export function AnalysisProgress({
     case "pending":
       return <Clock size={20} className="text-warning" />;
     case "analyzing":
-      return <Brain size={20} className="text-primary animate-pulse" />;
+      return <Brain size={20} className="text-primary/80" />;
     case "completed":
       return <CheckCircle size={20} className="text-success" />;
     case "failed":
@@ -60,64 +61,67 @@ export function AnalysisProgress({
   };
 
   return (
-    <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-      <CardBody className="p-6">
-        <div className="space-y-4">
-          {/* Status Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {getStatusIcon()}
-              <h3 className="font-semibold text-gray-900 dark:text-white">
-                {getStatusText()}
-              </h3>
+    <FadeIn key={`${status}-${Math.floor(progress)}`}>
+      <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
+        <CardBody className="p-5 md:p-6">
+          <div className="space-y-4">
+            {/* Status Header */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {getStatusIcon()}
+                <h3 className="font-semibold text-gray-900 dark:text-white">
+                  {getStatusText()}
+                </h3>
+              </div>
+              <Chip color={getStatusColor()} variant="flat" size="sm">
+                {status.charAt(0).toUpperCase() + status.slice(1)}
+              </Chip>
             </div>
-            <Chip
-              color={getStatusColor()}
-              variant="flat"
-              size="sm"
-            >
-              {status.charAt(0).toUpperCase() + status.slice(1)}
-            </Chip>
-          </div>
 
-          {/* Progress Bar */}
-          <div className="space-y-2">
-            <Progress 
-              value={progress} 
-              color={getStatusColor()}
-              className="w-full"
-            />
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600 dark:text-gray-400">
-                {message || "Processing..."}
-              </span>
-              <span className="font-semibold">{progress}%</span>
+            {/* Progress Bar - simple, no numeric percentage */}
+            <div className="space-y-3" aria-busy={status === "analyzing"}>
+              <Progress
+                size="md"
+                radius="full"
+                color={getStatusColor()}
+                className="w-full"
+                aria-label="Analysis progress"
+                isIndeterminate={status === "analyzing"}
+                value={status === "completed" ? 100 : undefined}
+              />
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                <Loader2
+                  size={14}
+                  className={status === "analyzing" ? "animate-spin text-primary" : "text-success"}
+                />
+                <span>{message || (status === "analyzing" ? "Loading analysis..." : "Analysis complete")}</span>
+              </div>
             </div>
-          </div>
 
-          {/* Estimated Time */}
-          {estimatedTime && status === "analyzing" && (
-            <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
-              <p className="text-sm text-primary">
-                <strong>Estimated time:</strong> {estimatedTime}
+            {/* Estimated Time */}
+            {estimatedTime && status === "analyzing" && (
+              <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
+                <p className="text-sm text-primary">
+                  <strong>Estimated time:</strong> {estimatedTime}
+                </p>
+              </div>
+            )}
+
+            {/* Status Messages */}
+            {status === "analyzing" && (
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Analyzing GitHub profile and generating AI insights...
               </p>
-            </div>
-          )}
+            )}
 
-          {/* Status Messages */}
-          {status === "analyzing" && (
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Analyzing GitHub profile and generating AI insights...
-            </p>
-          )}
-          
-          {status === "completed" && (
-            <p className="text-xs text-success">
-              Analysis completed successfully! Check the results below.
-            </p>
-          )}
-        </div>
-      </CardBody>
-    </Card>
+            {status === "completed" && (
+              <p className="text-xs text-success">
+                Analysis completed successfully! Check the results below.
+              </p>
+            )}
+          </div>
+        </CardBody>
+      </Card>
+    </FadeIn>
   );
 }
