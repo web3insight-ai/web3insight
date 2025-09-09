@@ -70,9 +70,13 @@ function RepoTable({ className, dataSource, title, icon }: RepoTableProps ) {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right">
-                  <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
-                    {repo.statistics.contributor.toLocaleString()}
-                  </span>
+                  {repo.statistics.contributor > 0 ? (
+                    <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
+                      {repo.statistics.contributor.toLocaleString()}
+                    </span>
+                  ) : (
+                    <span className="text-gray-400 dark:text-gray-600">—</span>
+                  )}
                 </td>
               </tr>
             ))}
