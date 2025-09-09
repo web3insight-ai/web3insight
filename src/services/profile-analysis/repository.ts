@@ -7,6 +7,7 @@ import type {
   AnalysisResult,
   ProgressCallback,
   BasicDataCallback,
+  GitHubUser,
 } from "./typing";
 
 /**
@@ -273,31 +274,10 @@ async function pollAnalysisResult(
           };
         }
 
-        // If we have GitHub + Analytics data but no AI yet, return partial result with ecosystem data
+        // If we have GitHub + Analytics data but no AI yet, keep polling.
+        // Progress updates are emitted via onProgress; do not return yet.
         if (hasGithubData && hasAnalyticsData && !hasAIData) {
-          // Process basic data and merge with GitHub users to show ecosystem visualizations
-          const mergedUsers = response.data.github.users.map((githubUser) => {
-            // Find matching analytics data
-            const analyticsUser = response.data.data.users.find(
-              (au) => au.actor_id === githubUser.id.toString(),
-            );
-            
-            // Attach ecosystem scores to GitHub user for visualization
-            return {
-              ...githubUser,
-              ecosystem_scores: analyticsUser?.ecosystem_scores || [],
-            };
-          });
-
-          return {
-            success: true,
-            code: "SUCCESS",
-            message: "Analysis completed with ecosystem data (AI analysis in progress)",
-            data: {
-              data: { users: mergedUsers },
-              status: "completed" as const,
-            },
-          };
+          // continue polling
         }
       }
 
@@ -396,12 +376,109 @@ export async function analyzeGitHubUser(
       15000, // Increase interval to 15 seconds
       (attempt, rawData) => {
         if (onProgress) {
-          const progress = Math.min(15 + (attempt * 5), 90);
-          // Convert raw data to expected callback format if needed
-          const progressData = rawData ? {
-            data: { users: [] }, // This will be populated when analysis completes
-            status: "analyzing" as const,
-          } : undefined;
+          const progress = Math.min(15 + attempt * 5, 95);
+
+          let progressData: { data: { users: GitHubUser[] }; status: "analyzing" } | undefined = undefined;
+          try {
+            if (rawData && rawData.github && rawData.data) {
+              const hasAI = !!(
+                rawData.ai && (
+                  (rawData.ai.data?.profile && rawData.ai.data?.roastReport) ||
+                  rawData.ai.data?.profile ||
+                  rawData.ai.data?.roastReport ||
+                  (rawData.ai.success && rawData.ai.data)
+                )
+              );
+
+              const mergedUsers = (rawData.github.users || []).map((githubUser) => {
+                const analyticsUser = (rawData.data?.users || []).find(
+                  (au) => au.actor_id === githubUser.id.toString(),
+                );
+
+                const userWithScores: GitHubUser = {
+                  ...githubUser,
+                  ecosystem_scores: analyticsUser?.ecosystem_scores || [],
+                } as GitHubUser;
+
+                if (hasAI && rawData.ai && (rawData.ai.success || rawData.ai.data)) {
+                  type AiData = NonNullable<NonNullable<RawAnalysisResult["ai"]>["data"]>;
+                  const aiData = rawData.ai.data as AiData;
+                  const aiProfile = aiData?.profile;
+                  const roastReport = aiData?.roastReport;
+
+                  if (aiProfile) {
+                    const totalScore = parseInt(aiProfile.stats?.totalScore || "0");
+                    const web3Score = Math.min(Math.round((totalScore / 400) * 100), 100);
+
+                    let level = "Beginner";
+                    if (web3Score >= 80) level = "Expert";
+                    else if (web3Score >= 60) level = "Advanced";
+                    else if (web3Score >= 30) level = "Intermediate";
+
+                    userWithScores.ai = {
+                      summary: "AI analysis completed successfully.",
+                      web3_involvement: {
+                        score: web3Score,
+                        level,
+                        evidence: [
+                          `Total Web3 score: ${totalScore}`,
+                          `Active in ${analyticsUser?.ecosystem_scores?.length || 0} ecosystems`,
+                        ],
+                      },
+                      skills: [],
+                      expertise_areas: [],
+                      recommendation: "Continue developing your Web3 skills across multiple ecosystems.",
+                      analysis_date: rawData.ai?.timestamp,
+                      profileCard: {
+                        bio: aiProfile.bio,
+                        blog: aiProfile.blog,
+                        name: aiProfile.name,
+                        stats: {
+                          followers: parseInt(aiProfile.stats.followers),
+                          following: parseInt(aiProfile.stats.following),
+                          totalScore: parseInt(aiProfile.stats.totalScore),
+                          publicRepos: parseInt(aiProfile.stats.publicRepos),
+                        },
+                        twitter: aiProfile.twitter,
+                        location: aiProfile.location,
+                        username: aiProfile.username,
+                        avatar_url: aiProfile.avatar_url,
+                        created_at: aiProfile.created_at,
+                      },
+                    };
+
+                    if (roastReport) {
+                      userWithScores.ai.roast_report = {
+                        title: "AI Analysis Report",
+                        overall_roast: roastReport.english || roastReport.chinese || "",
+                        activity_roast: "",
+                        ecosystem_roast: "",
+                        technical_roast: "",
+                        final_verdict: "",
+                        constructive_sarcasm: [],
+                        roast_score: {
+                          spicyLevel: "8",
+                          truthLevel: "9",
+                          helpfulLevel: "7",
+                        },
+                      };
+                      userWithScores.ai.roastReport = {
+                        english: roastReport.english,
+                        chinese: roastReport.chinese,
+                      };
+                    }
+                  }
+                }
+
+                return userWithScores;
+              });
+
+              progressData = { data: { users: mergedUsers }, status: "analyzing" };
+            }
+          } catch {
+            // ignore merge errors
+          }
+
           onProgress(`Waiting for AI analysis completion (${attempt}/15)...`, progress, progressData);
         }
       },

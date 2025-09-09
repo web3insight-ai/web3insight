@@ -7,7 +7,7 @@ import { useAtom } from "jotai";
 import { authModalOpenAtom } from "../atoms";
 
 import { analyzeGitHubUser } from "~/profile-analysis/repository";
-import type { AnalysisResult, BasicAnalysisResult, AnalysisStatus } from "~/profile-analysis/typing";
+import type { AnalysisResult, BasicAnalysisResult, AnalysisStatus, GitHubUser } from "~/profile-analysis/typing";
 import { hasAIData, hasEcosystemData } from "~/profile-analysis/helper";
 import { AnalysisProgress } from "~/profile-analysis/views/analysis-progress";
 import { ProfileHeader } from "~/profile-analysis/views/profile-header";
@@ -79,9 +79,18 @@ export default function DevInsightPageClient({
     try {
       const response = await analyzeGitHubUser(
         githubHandle,
-        (status, progressValue) => {
+        (status, progressValue, data) => {
           setStatusMessage(status);
           if (progressValue) setProgress(progressValue);
+          // Live update results when partial data (including AI) arrives via polling
+          if (data?.data?.users && data.data.users.length > 0) {
+            setResults({
+              data: { users: data.data.users as GitHubUser[] },
+              status: data.status || "analyzing",
+              progress: progressValue,
+              message: status,
+            });
+          }
         },
         (basicData) => {
           setBasicInfo(basicData);

@@ -82,7 +82,7 @@ export function AIInsights({ user, className = "" }: AIInsightsProps) {
             {hasNewRoastReport && (
               <div className="border-l-3 border-l-primary pl-3">
                 <p className="chinese-content text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-                  {aiProfile.roastReport?.[language]}
+                  {aiProfile.roastReport?.[language] ?? aiProfile.roastReport?.english ?? aiProfile.roastReport?.chinese}
                 </p>
               </div>
             )}
