@@ -297,18 +297,8 @@ export default function DevInsightPageClient({
 
           {/* Initial Loading State */}
           {!currentUser && !analysisError && isAnalyzing && (
-            <div className="text-center py-12">
-              <div className="space-y-4">
-                <Loader2 size={32} className="animate-spin text-primary mx-auto" />
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                    Starting DevInsight Analysis
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Fetching GitHub profile data for @{githubHandle}
-                  </p>
-                </div>
-              </div>
+            <div className="flex items-center justify-center min-h-[60vh]">
+              <Loader2 size={48} className="animate-spin text-primary" />
             </div>
           )}
         </div>
