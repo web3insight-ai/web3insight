@@ -3,6 +3,7 @@ import {
   CustomQueryUsersOrderReqDto,
   CustomQueryUsersReqDto,
   CustomQueryUsersResDto,
+  CustomShareReqDto,
   CustomUploadResDto,
   GithubUsersDto,
   Intent,
@@ -34,12 +35,14 @@ export class UsersService {
     if (body.intent === Intent.Profile) {
       const existing = await this.db
         .selectFrom('api.analysis_users')
-        .select(['id', 'github'])
-        .where('submitter_id', '=', uid)
+        .select(['id', 'github', 'public', 'submitter_id'])
         .where('intent', '=', body.intent)
         .executeTakeFirst();
 
       if (existing) {
+        if (existing.public === false && existing.submitter_id !== uid) {
+          throw new Error('Not public');
+        }
         const res = new CustomUploadResDto();
         res.users = existing.github as any[];
         res.id = Number(existing.id);
@@ -128,6 +131,34 @@ export class UsersService {
     this.eventEmitter.emit('api.custom.analysis.created', res);
 
     return res;
+  }
+
+  async share(
+    uid: string,
+    params: BaseIdReqAndResDto,
+    body: CustomShareReqDto,
+  ) {
+    const existing = await this.db
+      .selectFrom('api.analysis_users')
+      .select(['id', 'public'])
+      .where('submitter_id', '=', uid)
+      .where('intent', '=', Intent.Profile)
+      .where('id', '=', String(params.id))
+      .executeTakeFirst();
+
+    if (!existing) {
+      throw new Error('Analysis not found');
+    }
+
+    await this.db
+      .updateTable('api.analysis_users')
+      .where('id', '=', String(params.id))
+      .set({
+        public: body.share,
+      })
+      .execute();
+
+    return new Object();
   }
 
   async remove(uid: string, params: BaseIdReqAndResDto) {
