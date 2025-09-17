@@ -44,7 +44,6 @@ export class CustomController {
     description: '',
   })
   @ApiBearerAuth()
-  @AuthRoles(AuthRole.OPTIONAL)
   @UseGuards(AppAuthGuard)
   async uploadReload(
     @Body() body: CustomQueryUsersReqDto,
@@ -53,7 +52,7 @@ export class CustomController {
   ) {
     return await this.userServices.uploadAndGetUsers(
       body,
-      req.user.uid ?? '0',
+      req.user.uid,
       String(params.id),
     );
   }
@@ -115,6 +114,7 @@ export class CustomController {
     summary: 'Get data from analysis',
     description: '',
   })
+  @AuthRoles(AuthRole.OPTIONAL)
   @ApiBearerAuth()
   @UseGuards(AppAuthGuard)
   async analysis(@Param() params: BaseIdReqAndResDto) {

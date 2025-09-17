@@ -36,13 +36,11 @@ export class UsersService {
       const existing = await this.db
         .selectFrom('api.analysis_users')
         .select(['id', 'github', 'public', 'submitter_id'])
+        .where('submitter_id', '=', uid)
         .where('intent', '=', body.intent)
         .executeTakeFirst();
 
       if (existing) {
-        if (existing.public === false && existing.submitter_id !== uid) {
-          throw new Error('Not public');
-        }
         const res = new CustomUploadResDto();
         res.users = existing.github as any[];
         res.id = Number(existing.id);
