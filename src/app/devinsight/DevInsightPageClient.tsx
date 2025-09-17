@@ -42,6 +42,7 @@ export default function DevInsightPageClient({
   const [basicInfo, setBasicInfo] = useState<BasicAnalysisResult | null>(null);
   const [results, setResults] = useState<AnalysisResult | null>(null);
   const [analysisError, setAnalysisError] = useState("");
+  const [analysisId, setAnalysisId] = useState<number | null>(null);
 
   // Auto-trigger login modal for unauthenticated users
   useEffect(() => {
@@ -57,6 +58,18 @@ export default function DevInsightPageClient({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [githubHandle]);
+
+  useEffect(() => {
+    if (basicInfo?.id) {
+      setAnalysisId(basicInfo.id);
+    }
+  }, [basicInfo]);
+
+  useEffect(() => {
+    if (results?.analysisId) {
+      setAnalysisId(results.analysisId);
+    }
+  }, [results]);
 
   // Force re-render when results change to ensure AI insights appear
   useEffect(() => {
@@ -78,6 +91,7 @@ export default function DevInsightPageClient({
     setProgress(0);
     setBasicInfo(null);
     setResults(null);
+    setAnalysisId(null);
 
     try {
       const response = await analyzeGitHubUser(
@@ -201,6 +215,7 @@ export default function DevInsightPageClient({
         </div>
 
         <div className="space-y-4">
+
           {/* Progress section intentionally removed; show skeletons only while analyzing */}
 
           {/* Error State */}
@@ -248,7 +263,7 @@ export default function DevInsightPageClient({
                 <>
                   {/* Profile Header - Full Width */}
                   <FadeIn>
-                    <ProfileHeader user={currentUser} githubUsername={githubHandle} />
+                    <ProfileHeader user={currentUser} githubUsername={githubHandle} analysisId={analysisId} />
                   </FadeIn>
 
                   {/* Key Metrics */}

@@ -33,7 +33,6 @@ function RepositoryRankView({ className, dataSource }: RepositoryRankViewWidgetP
               <TableHeader align="right" tooltip="Total number of stars received by this repository">Stars</TableHeader>
               <TableHeader align="right" tooltip="Total number of forks created from this repository">Forks</TableHeader>
               <TableHeader align="right" tooltip="Current number of open issues in this repository">Issues</TableHeader>
-              <TableHeader align="right" tooltip="Total number of developers who have contributed to this repository">Contributors</TableHeader>
             </tr>
           </thead>
           <tbody className="divide-y divide-border dark:divide-border-dark">
@@ -73,11 +72,6 @@ function RepositoryRankView({ className, dataSource }: RepositoryRankViewWidgetP
                 <td className="px-6 py-4 whitespace-nowrap text-right">
                   <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
                     {repo.statistics.openIssue.toLocaleString()}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right">
-                  <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
-                    {repo.statistics.contributor.toLocaleString()}
                   </span>
                 </td>
               </tr>

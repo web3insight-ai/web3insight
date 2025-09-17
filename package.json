@@ -14,7 +14,7 @@
     "lint": "next lint",
     "start": "next start",
     "typecheck": "tsc --noEmit || true",
-    "prepare": "husky"
+    "prepare": "husky || exit 0"
   },
   "dependencies": {
     "@ai-sdk/azure": "^0.0.17",

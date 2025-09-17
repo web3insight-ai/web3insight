@@ -229,11 +229,14 @@ export interface AnalysisResult {
   progress?: number;
   estimatedTime?: string;
   message?: string;
+  analysisId?: number;
+  public?: boolean;
 }
 
 export interface BasicAnalysisResult {
   id: number;
   users: GitHubUser[];
+  public?: boolean;
 }
 
 export type AnalysisStatus = "pending" | "analyzing" | "completed" | "failed";
