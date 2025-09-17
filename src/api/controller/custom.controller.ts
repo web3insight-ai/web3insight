@@ -1,4 +1,4 @@
-import { AppAuthGuard } from '@/auth/app.auth.guard';
+import { AppAuthGuard, AuthRole, AuthRoles } from '@/auth/app.auth.guard';
 import { UsersService } from '@/data/services/users.services';
 import {
   Body,
@@ -15,6 +15,7 @@ import {
   BaseIdReqAndResDto,
   CustomQueryUsersOrderReqDto,
   CustomQueryUsersReqDto,
+  CustomShareReqDto,
 } from '../dto/api.dto';
 import { RequestWithUser } from '@/auth/auth.jwt.dto';
 
@@ -43,6 +44,7 @@ export class CustomController {
     description: '',
   })
   @ApiBearerAuth()
+  @AuthRoles(AuthRole.OPTIONAL)
   @UseGuards(AppAuthGuard)
   async uploadReload(
     @Body() body: CustomQueryUsersReqDto,
@@ -51,14 +53,14 @@ export class CustomController {
   ) {
     return await this.userServices.uploadAndGetUsers(
       body,
-      req.user.uid,
+      req.user.uid ?? '0',
       String(params.id),
     );
   }
 
   @Post('custom/analysis/users/:id/delete')
   @ApiOperation({
-    summary: 'Remove this id, only profile',
+    summary: 'Remove this id, only my profile',
     description: '',
   })
   @ApiBearerAuth()
@@ -68,6 +70,21 @@ export class CustomController {
     @Param() params: BaseIdReqAndResDto,
   ) {
     return await this.userServices.remove(req.user.uid, params);
+  }
+
+  @Post('custom/analysis/users/:id/share')
+  @ApiOperation({
+    summary: 'Switch share status, only my profile',
+    description: '',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AppAuthGuard)
+  async share(
+    @Req() req: RequestWithUser,
+    @Param() params: BaseIdReqAndResDto,
+    @Body() body: CustomShareReqDto,
+  ) {
+    return await this.userServices.share(req.user.uid, params, body);
   }
 
   @Get('custom/analysis/users')

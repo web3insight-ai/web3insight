@@ -205,3 +205,8 @@ export class GithubUsersDto {
   created_at: string;
   updated_at: string;
 }
+
+export class CustomShareReqDto {
+  @IsOptional()
+  share: boolean = false;
+}
