@@ -247,6 +247,78 @@ export class UsersService {
     return analysis;
   }
 
+  async getTopFormUserName(username: string) {
+    // 使用 JSONB 查询直接在数据库层面查找包含该用户的记录
+    const analysis = await this.db
+      .selectFrom('api.analysis_users')
+      .select(['data', 'github'])
+      .where('intent', '=', Intent.Profile)
+      .where('data', '!=', '{}')
+      .where(
+        'github',
+        '@>',
+        JSON.stringify({
+          users: [{ login: username }],
+        }),
+      )
+      .executeTakeFirst();
+
+    if (!analysis) {
+      return {
+        username,
+        top_ecosystems: [],
+        message: 'User not found',
+      };
+    }
+
+    const githubData = analysis.github as any;
+    const githubUser = githubData.users.find(
+      (u: any) => u.login && u.login.toLowerCase() === username.toLowerCase(),
+    );
+
+    if (!githubUser) {
+      return {
+        username,
+        top_ecosystems: [],
+        message: 'User not found in github data',
+      };
+    }
+
+    const data = analysis.data as any;
+    const userEcosystemData = data.users?.find(
+      (u: any) =>
+        u.actor_id === githubUser.id.toString() ||
+        Number(u.actor_id) === githubUser.id,
+    );
+
+    if (!userEcosystemData || !userEcosystemData.ecosystem_scores) {
+      return {
+        username,
+        actor_id: githubUser.id,
+        top_ecosystems: [],
+        message: 'No ecosystem data found for user',
+      };
+    }
+
+    const topEcosystems = userEcosystemData.ecosystem_scores
+      .sort((a: any, b: any) => b.total_score - a.total_score)
+      .slice(0, 3)
+      .map((ecosystem: any) => ({
+        ecosystem: ecosystem.ecosystem,
+        score: ecosystem.total_score,
+        repos_count: ecosystem.repos ? ecosystem.repos.length : 0,
+        first_activity_at: ecosystem.first_activity_at,
+        last_activity_at: ecosystem.last_activity_at,
+      }));
+
+    return {
+      username,
+      actor_id: githubUser.id,
+      top_ecosystems: topEcosystems,
+      total_ecosystems: userEcosystemData.ecosystem_scores.length,
+    };
+  }
+
   private extractUsername(input: string): string | null {
     const s = input.trim();
     if (!s) return null;

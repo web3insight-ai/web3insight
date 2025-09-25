@@ -120,4 +120,13 @@ export class CustomController {
   async analysis(@Param() params: BaseIdReqAndResDto) {
     return await this.userServices.analysisUsers(params);
   }
+
+  @Get('external/users/:username')
+  @ApiOperation({
+    summary: 'Get data external card',
+    description: '',
+  })
+  async external(@Param('username') username: string) {
+    return await this.userServices.getTopFormUserName(username);
+  }
 }
