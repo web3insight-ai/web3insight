@@ -16,6 +16,17 @@
     "typecheck": "tsc --noEmit || true",
     "prepare": "husky || exit 0"
   },
+  "lint-staged": {
+        "*.js": [
+            "prettier --ignore-unknown --ignore-path ./.gitignore --write",
+            "eslint --cache --fix"
+        ],
+        "*.{ts,tsx}": [
+            "prettier --ignore-unknown --ignore-path ./.gitignore --write",
+            "eslint --cache --fix"
+        ],
+        "*.yml": "eslint --cache --fix"
+    },
   "dependencies": {
     "@ai-sdk/azure": "^0.0.17",
     "@ai-sdk/openai": "^0.0.40",
