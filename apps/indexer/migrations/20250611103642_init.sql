@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS "data"."repos"
     "api_updated_at"     TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE "data"."actors"
+CREATE TABLE IF NOT EXISTS "data"."actors"
 (
     "actor_id"    BIGINT PRIMARY KEY       NOT NULL,
     "actor_login" TEXT,
@@ -89,3 +89,15 @@ CREATE TABLE IF NOT EXISTS data.events_2025_12 PARTITION OF data.events FOR VALU
 -- CALL mooncake.create_table('events_iceberg', 'events');
 
 
+CREATE TABLE IF NOT EXISTS ecosystems
+(
+    id          BIGSERIAL PRIMARY KEY,
+    name        TEXT                                    NOT NULL,
+    icon        TEXT                     DEFAULT ''     NOT NULL,
+    description TEXT                     DEFAULT ''     NOT NULL,
+    active      BOOLEAN                  DEFAULT FALSE  NOT NULL,
+    created_at  TIMESTAMP WITH TIME ZONE DEFAULT NOW()  NOT NULL,
+    updated_at  TIMESTAMP WITH TIME ZONE DEFAULT NOW()  NOT NULL,
+    score       NUMERIC                  DEFAULT 0      NOT NULL,
+    kind        TEXT                     DEFAULT ''     NOT NULL
+);
