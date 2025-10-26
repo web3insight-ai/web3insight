@@ -248,7 +248,6 @@ export class UsersService {
   }
 
   async getTopFormUserName(username: string) {
-    // 使用 JSONB 查询直接在数据库层面查找包含该用户的记录
     const analysis = await this.db
       .selectFrom('api.analysis_users')
       .select(['data', 'github'])

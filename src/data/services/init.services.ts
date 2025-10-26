@@ -285,6 +285,14 @@ export class InitDataService {
       })
       .map((repo) => {
         console.log(`Processing repo: ${repo.repo_id}`);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        if (!repo.api?.owner?.login) {
+          console.error(
+            `有问题的 repo_id: ${repo.repo_id}, upstream_repo_name: ${repo.upstream_repo_name}, api:`,
+            repo.api,
+          );
+        }
         return {
           repo_id: repo.repo_id,
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
