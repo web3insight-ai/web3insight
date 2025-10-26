@@ -396,7 +396,7 @@ ORDER BY ecosystem_name;`;
           icon: '',
         }));
 
-        for (const batch of chunkArray(ecoValues, 1000)) {
+        for (const batch of chunkArray(ecoValues, 100)) {
           await this.db.insertInto('data.ecosystems').values(batch).execute();
           console.log(`Inserted batch of ecosystems: ${batch.length}`);
         }
@@ -417,7 +417,7 @@ ORDER BY ecosystem_name;`;
       );
 
       if (shouldDelete) {
-        for (const batch of chunkArray(ecosystemsToDelete, 1000)) {
+        for (const batch of chunkArray(ecosystemsToDelete, 100)) {
           await this.db
             .deleteFrom('data.ecosystems')
             .where('name', 'in', batch)
