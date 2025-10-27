@@ -73,12 +73,10 @@ pub async fn start_channel() -> Result<()> {
 
     while let Some(Ok(_)) = consumers.join_next().await {}
 
-    if !get_env_bool("FULL_MODE") {
-        ReposTableStruct::update_indexed().await?;
-        ReposTableStruct::clean_events().await?;
-        ReposTableStruct::init_repos().await?;
-        ReposTableStruct::init_actors().await?;
-    }
+    ReposTableStruct::update_indexed().await?;
+    ReposTableStruct::clean_events().await?;
+    ReposTableStruct::init_repos().await?;
+    ReposTableStruct::init_actors().await?;
 
     Ok(())
 }
