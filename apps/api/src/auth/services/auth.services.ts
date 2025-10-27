@@ -271,4 +271,29 @@ export class AuthService {
     console.log('Token:', res.token);
     console.log('User:', res.data);
   }
+
+  @Command({
+    command: 'test:sign:fn',
+    description: '',
+  })
+  async sign() {
+    const claims = new JwtPayload();
+    claims.uid = '1';
+    claims.iss = 'web3insights.app';
+    claims.exp = Math.floor(Date.now() / 1000) + 31536000;
+    claims.type = 'admin';
+    claims.extra = {
+      claims: {
+        allowed_roles: ['user', 'admin'],
+        default_role: 'user',
+        user_id: '1',
+      },
+    };
+
+    const jwt = await this.jwtService.signAsync(JSON.stringify(claims), {
+      secret: this.configService.get<string>('JWT_SECRET'),
+    });
+
+    console.log('JWT:', jwt);
+  }
 }
