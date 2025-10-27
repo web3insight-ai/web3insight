@@ -184,4 +184,30 @@ FROM data.repos;";
         tracing::info!("Rows affected: {}", rows_affected);
         Ok(())
     }
+
+    pub async fn clean_events() -> Result<()> {
+        let sql = "DELETE FROM data.events WHERE NOT EXISTS (SELECT 1
+                               FROM data.repos AS r
+                               WHERE r.repo_id = data.events.repo_id)";
+        let result = sqlx::query(sql).execute(&db_pool()?).await?;
+        let rows_affected = result.rows_affected();
+        tracing::info!("Cleaned events, rows affected: {}", rows_affected);
+        Ok(())
+    }
+
+    pub async fn init_actors() -> Result<()> {
+        let sql = "select data.init_actors();";
+        let result = sqlx::query(sql).execute(&db_pool()?).await?;
+        let rows_affected = result.rows_affected();
+        tracing::info!("Cleared repos table, rows affected: {}", rows_affected);
+        Ok(())
+    }
+
+    pub async fn init_repos() -> Result<()> {
+        let sql = "select data.init_repos();";
+        let result = sqlx::query(sql).execute(&db_pool()?).await?;
+        let rows_affected = result.rows_affected();
+        tracing::info!("Cleared repos table, rows affected: {}", rows_affected);
+        Ok(())
+    }
 }

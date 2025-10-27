@@ -75,6 +75,9 @@ pub async fn start_channel() -> Result<()> {
 
     if !get_env_bool("FULL_MODE") {
         ReposTableStruct::update_indexed().await?;
+        ReposTableStruct::clean_events().await?;
+        ReposTableStruct::init_repos().await?;
+        ReposTableStruct::init_actors().await?;
     }
 
     Ok(())
