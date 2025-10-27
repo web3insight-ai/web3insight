@@ -3003,6 +3003,7 @@ dependencies = [
  "rust_decimal",
  "serde",
  "serde_json",
+ "serde_path_to_error",
  "sqlx",
  "tokio",
  "tracing",

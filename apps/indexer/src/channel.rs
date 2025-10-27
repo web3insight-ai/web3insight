@@ -187,11 +187,14 @@ async fn load_gh_event(file_path: PathBuf) -> Vec<EventTableStruct> {
             let new_line = line.chars().filter(|&c| c != '\0').collect::<String>();
             new_line.replace("\u{0000}", " ").replace("u0000", "u0020")
         })
-        .filter_map(|line| match serde_json::from_str::<Event>(&line) {
-            Ok(event) => Some(event),
-            Err(e) => {
-                tracing::error!("Failed to load event: {}", e);
-                None
+        .filter_map(|line| {
+            let deserializer = &mut serde_json::Deserializer::from_str(&line);
+            match serde_path_to_error::deserialize::<_, Event>(deserializer) {
+                Ok(event) => Some(event),
+                Err(e) => {
+                    tracing::error!("Failed at '{}': {}\nJSON: {}", e.path(), e.inner(), line);
+                    None
+                }
             }
         })
         .filter(|event| full_mode || ECO_REPO.contains(&event.repo.id.to_string()))
