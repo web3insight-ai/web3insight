@@ -250,7 +250,7 @@ SELECT ecosystem,
                )
        ) top_repositories
 FROM top_ecosystem
-WHERE ranking <= 20
+WHERE ranking <= 200
 GROUP BY ecosystem
 ORDER BY ecosystem;`;
 
