@@ -127,7 +127,7 @@ export class RankService {
 WITH ecosystem_list AS (SELECT UNNEST($1::text[]) AS ecosystem_name),
      filtered_events AS (SELECT events.actor_id,
                                 events.repo_id,
-                                LEAST(COUNT(*), 100) AS score  
+                                LEAST(COUNT(*), 50) AS score  
                          FROM data.repos repos
                                   JOIN data.events events ON repos.repo_id = events.repo_id
                          WHERE events.event_type = 'PullRequestEvent'
