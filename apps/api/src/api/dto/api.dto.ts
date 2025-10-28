@@ -19,6 +19,7 @@ import {
   QueryTopStarRepo,
 } from '@/data/dto/query.dto';
 import { ApiAnalysisUsers } from '@/app/db/dto/db.dto';
+import { Optional } from '@nestjs/common';
 
 export class GetTotalReqDto {
   @IsEnum(EcoType)
@@ -116,6 +117,14 @@ export class LoginReqDto {
   type: string = 'github';
   @IsString()
   code: string = '';
+}
+
+export class BindOAuthReqDto {
+  @IsString()
+  code: string = '';
+  @IsString()
+  @Optional()
+  codeVerifier: string = '';
 }
 
 export class AuthBindWalletReqDto {

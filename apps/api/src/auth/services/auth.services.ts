@@ -1,4 +1,9 @@
-import { AuthBindWalletReqDto, LoginReqDto } from '@/api/dto/api.dto';
+import {
+  AuthBindWalletReqDto,
+  BindOAuthReqDto,
+  LoginReqDto,
+  SucessResDto,
+} from '@/api/dto/api.dto';
 import { KYSELY } from '@/app/db/db.provider';
 import { DB } from '@/app/db/dto/db.dto';
 import { Inject, Injectable } from '@nestjs/common';
@@ -10,10 +15,17 @@ import { ExtraClaims, JwtPayload } from '../auth.jwt.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ethers } from 'ethers';
 
-interface GitHubTokenResponse {
+interface OAuth2TokenResponse {
   access_token: string;
   token_type: string;
   scope: string;
+}
+
+interface OAuthUserData {
+  id: string;
+  username: string;
+  avatar: string;
+  email?: string;
 }
 
 @Injectable()
@@ -41,8 +53,8 @@ export class AuthService {
       const [newUser] = await this.db
         .insertInto('api.auth_users')
         .values({
-          user_nick_name: res.data.login,
-          user_avatar: res.data.avatar_url,
+          user_nick_name: res.data.username,
+          user_avatar: res.data.avatar,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
@@ -53,7 +65,7 @@ export class AuthService {
         .insertInto('api.auth_users_binds')
         .values([
           {
-            bind_key: res.data.login,
+            bind_key: res.data.username,
             bind_openid: String(res.data.id),
             bind_secret: res.token.access_token,
             bind_type: 'github',
@@ -77,6 +89,62 @@ export class AuthService {
     }
 
     return { token: await this.generateOAuthServerToken(uid, 'github') };
+  }
+
+  async bindOAuth(
+    uid: string,
+    body: BindOAuthReqDto,
+    type: 'twitter' | 'discord' | 'linkedin',
+  ) {
+    let res: { token: OAuth2TokenResponse; data: OAuthUserData };
+
+    switch (type) {
+      case 'twitter':
+        res = await this.getInfoFormTwitterOAuth(body.code, body.codeVerifier);
+        break;
+      case 'discord':
+        res = await this.getInfoFormDiscordOAuth(body.code);
+        break;
+      case 'linkedin':
+        res = await this.getInfoFormLinkedInOAuth(body.code);
+        break;
+    }
+
+    const existingBind = await this.db
+      .selectFrom('api.auth_users_binds')
+      .select(['bind_id'])
+      .where('bind_uid', '=', uid)
+      .where('bind_type', '=', type)
+      .executeTakeFirst();
+
+    if (existingBind) {
+      await this.db
+        .updateTable('api.auth_users_binds')
+        .set({
+          bind_key: res.data.username,
+          bind_openid: res.data.id,
+          bind_secret: res.token.access_token,
+          updated_at: new Date().toISOString(),
+        })
+        .where('bind_id', '=', existingBind.bind_id)
+        .execute();
+    } else {
+      await this.db
+        .insertInto('api.auth_users_binds')
+        .values({
+          bind_key: res.data.username,
+          bind_openid: res.data.id,
+          bind_secret: res.token.access_token,
+          bind_type: type,
+          bind_uid: uid,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .execute();
+    }
+    const req = new SucessResDto();
+    req.sucess = true;
+    return req;
   }
 
   async getUserInfo(data: JwtPayload) {
@@ -243,7 +311,18 @@ export class AuthService {
       },
     );
 
-    const tokenData = (await response.json()) as GitHubTokenResponse;
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(
+        `GitHub OAuth token error: ${error.error_description || error.error}`,
+      );
+    }
+
+    const tokenData = (await response.json()) as OAuth2TokenResponse;
+
+    if (!tokenData.access_token) {
+      throw new Error('GitHub OAuth: No access token received');
+    }
 
     const client = new Octokit({
       auth: tokenData.access_token,
@@ -258,7 +337,182 @@ export class AuthService {
 
     const token = tokenData;
 
-    return { token, data: userResponse.data };
+    const data: OAuthUserData = {
+      id: String(userResponse.data.id),
+      username: userResponse.data.login,
+      avatar: userResponse.data.avatar_url,
+      email: userResponse.data.email,
+    };
+
+    return { token, data };
+  }
+
+  async getInfoFormTwitterOAuth(code: string, codeVerifier: string) {
+    const response = await fetch('https://api.twitter.com/2/oauth2/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Authorization: `Basic ${Buffer.from(
+          `${this.configService.get<string>('TWITTER_OAUTH_CLIENT')}:${this.configService.get<string>('TWITTER_OAUTH_SECRET')}`,
+        ).toString('base64')}`,
+      },
+      body: new URLSearchParams({
+        code,
+        grant_type: 'authorization_code',
+        redirect_uri:
+          this.configService.get<string>('TWITTER_OAUTH_REDIRECT_URI') || '',
+        code_verifier: codeVerifier,
+      }).toString(),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(
+        `Twitter OAuth token error: ${error.error_description || error.error}`,
+      );
+    }
+
+    const tokenData = (await response.json()) as OAuth2TokenResponse;
+
+    const userResponse = await fetch(
+      'https://api.twitter.com/2/users/me?user.fields=profile_image_url',
+      {
+        headers: {
+          Authorization: `Bearer ${tokenData.access_token}`,
+        },
+      },
+    );
+
+    if (!userResponse.ok) {
+      const error = await userResponse.json();
+      throw new Error(
+        `Twitter user info error: ${error.detail || error.title || 'Unknown error'}`,
+      );
+    }
+
+    const userData = await userResponse.json();
+
+    const token = tokenData;
+
+    const data: OAuthUserData = {
+      id: userData.data.id,
+      username: userData.data.username,
+      avatar: userData.data.profile_image_url,
+    };
+
+    return { token, data };
+  }
+
+  async getInfoFormDiscordOAuth(code: string) {
+    const response = await fetch('https://discord.com/api/oauth2/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        client_id: this.configService.get<string>('DISCORD_OAUTH_CLIENT') || '',
+        client_secret:
+          this.configService.get<string>('DISCORD_OAUTH_SECRET') || '',
+        code,
+        grant_type: 'authorization_code',
+        redirect_uri:
+          this.configService.get<string>('DISCORD_OAUTH_REDIRECT_URI') || '',
+      }).toString(),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(
+        `Discord OAuth token error: ${error.error_description || error.error}`,
+      );
+    }
+
+    const tokenData = (await response.json()) as OAuth2TokenResponse;
+
+    const userResponse = await fetch('https://discord.com/api/users/@me', {
+      headers: {
+        Authorization: `Bearer ${tokenData.access_token}`,
+      },
+    });
+
+    if (!userResponse.ok) {
+      const error = await userResponse.json();
+      throw new Error(
+        `Discord user info error: ${error.message || 'Unknown error'}`,
+      );
+    }
+
+    const userData = await userResponse.json();
+
+    const token = tokenData;
+
+    const data: OAuthUserData = {
+      id: userData.id,
+      username: userData.global_name || userData.username,
+      avatar: userData.avatar
+        ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`
+        : '',
+      email: userData.email,
+    };
+
+    return { token, data };
+  }
+
+  async getInfoFormLinkedInOAuth(code: string) {
+    const response = await fetch(
+      'https://www.linkedin.com/oauth/v2/accessToken',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          grant_type: 'authorization_code',
+          code,
+          client_id:
+            this.configService.get<string>('LINKEDIN_OAUTH_CLIENT') || '',
+          client_secret:
+            this.configService.get<string>('LINKEDIN_OAUTH_SECRET') || '',
+          redirect_uri:
+            this.configService.get<string>('LINKEDIN_OAUTH_REDIRECT_URI') || '',
+        }).toString(),
+      },
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(
+        `LinkedIn OAuth token error: ${error.error_description || error.error}`,
+      );
+    }
+
+    const tokenData = (await response.json()) as OAuth2TokenResponse;
+
+    const userResponse = await fetch('https://api.linkedin.com/v2/userinfo', {
+      headers: {
+        Authorization: `Bearer ${tokenData.access_token}`,
+      },
+    });
+
+    if (!userResponse.ok) {
+      const error = await userResponse.json();
+      throw new Error(
+        `LinkedIn user info error: ${error.message || 'Unknown error'}`,
+      );
+    }
+
+    const userData = await userResponse.json();
+
+    const token = tokenData;
+
+    const data: OAuthUserData = {
+      id: userData.sub,
+      username: userData.name || userData.given_name || userData.email,
+      avatar: userData.picture || '',
+      email: userData.email,
+    };
+
+    return { token, data };
   }
 
   @Command({
