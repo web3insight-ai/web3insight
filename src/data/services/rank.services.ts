@@ -155,6 +155,7 @@ WITH ecosystem_list AS (SELECT UNNEST($1::text[]) AS ecosystem_name),
                       WHERE a.actor_login NOT ILIKE '%[bot]%'
                         AND a.actor_login NOT ILIKE 'bot-%'
                         AND a.actor_login NOT ILIKE '%-bot'
+                        AND a.actor_login NOT ILIKE 'Copilot'
                       GROUP BY es.ecosystem, es.actor_id, a.actor_login),
 
      top_contributors AS (SELECT at.ecosystem,
