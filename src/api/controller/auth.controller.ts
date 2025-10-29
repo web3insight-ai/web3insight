@@ -2,6 +2,10 @@ import { AuthService } from '@/auth/services/auth.services';
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import {
   AuthBindWalletReqDto,
+  AuthBindSolanaWalletReqDto,
+  AuthBindAptosWalletReqDto,
+  AuthBindSuiWalletReqDto,
+  AuthBindFarcasterReqDto,
   BindOAuthReqDto,
   LoginReqDto,
 } from '../dto/api.dto';
@@ -98,5 +102,61 @@ export class AuthController {
     @Body() body: BindOAuthReqDto,
   ) {
     return this.authServices.bindOAuth(req.user.uid, body, 'linkedin');
+  }
+
+  @Post('bind/wallet/solana')
+  @ApiOperation({
+    summary: 'Bind Solana wallet address to user',
+    description: '',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AppAuthGuard)
+  async bindSolanaWallet(
+    @Req() req: RequestWithUser,
+    @Body() body: AuthBindSolanaWalletReqDto,
+  ) {
+    return this.authServices.bindSolanaWallet(req.user.uid, body);
+  }
+
+  @Post('bind/wallet/aptos')
+  @ApiOperation({
+    summary: 'Bind Aptos wallet address to user',
+    description: '',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AppAuthGuard)
+  async bindAptosWallet(
+    @Req() req: RequestWithUser,
+    @Body() body: AuthBindAptosWalletReqDto,
+  ) {
+    return this.authServices.bindAptosWallet(req.user.uid, body);
+  }
+
+  @Post('bind/wallet/sui')
+  @ApiOperation({
+    summary: 'Bind Sui wallet address to user',
+    description: '',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AppAuthGuard)
+  async bindSuiWallet(
+    @Req() req: RequestWithUser,
+    @Body() body: AuthBindSuiWalletReqDto,
+  ) {
+    return this.authServices.bindSuiWallet(req.user.uid, body);
+  }
+
+  @Post('bind/farcaster')
+  @ApiOperation({
+    summary: 'Bind Farcaster account to user',
+    description: '',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AppAuthGuard)
+  async bindFarcaster(
+    @Req() req: RequestWithUser,
+    @Body() body: AuthBindFarcasterReqDto,
+  ) {
+    return this.authServices.bindFarcaster(req.user.uid, body);
   }
 }

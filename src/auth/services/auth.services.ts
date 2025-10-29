@@ -1,5 +1,9 @@
 import {
   AuthBindWalletReqDto,
+  AuthBindSolanaWalletReqDto,
+  AuthBindAptosWalletReqDto,
+  AuthBindSuiWalletReqDto,
+  AuthBindFarcasterReqDto,
   BindOAuthReqDto,
   LoginReqDto,
   SucessResDto,
@@ -14,6 +18,14 @@ import { Command, Console } from 'nestjs-console';
 import { ExtraClaims, JwtPayload } from '../auth.jwt.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ethers } from 'ethers';
+import { PublicKey } from '@solana/web3.js';
+import nacl from 'tweetnacl';
+import { Ed25519PublicKey } from '@mysten/sui.js/keypairs/ed25519';
+import {
+  Ed25519PublicKey as AptosPublicKey,
+  Ed25519Signature,
+} from '@aptos-labs/ts-sdk';
+import { createAppClient, viemConnector } from '@farcaster/auth-client';
 
 interface OAuth2TokenResponse {
   access_token: string;
@@ -276,6 +288,317 @@ export class AuthService {
       })
       .execute();
     return { success: true };
+  }
+
+  async bindSolanaWallet(uid: string, body: AuthBindSolanaWalletReqDto) {
+    const checkUser = await this.db
+      .selectFrom('api.auth_users_binds')
+      .select(['bind_id'])
+      .where('bind_uid', '=', uid)
+      .where('bind_type', '=', 'solana_wallet')
+      .executeTakeFirst();
+
+    if (checkUser) {
+      throw new Error('Solana wallet already bound');
+    }
+
+    const maigcCheck = await this.db
+      .selectFrom('api.auth_magic')
+      .select(['id', 'magic'])
+      .where('uid', '=', uid)
+      .where('magic', '=', body.magic)
+      .where('created_at', '>', new Date(Date.now() - 120 * 1000))
+      .where('status', '=', 0)
+      .limit(1)
+      .orderBy('created_at', 'desc')
+      .executeTakeFirst();
+
+    if (maigcCheck) {
+      await this.db
+        .updateTable('api.auth_magic')
+        .set({ status: 1 })
+        .where('id', '=', maigcCheck.id)
+        .execute();
+    } else {
+      throw new Error('Magic number not found or expired');
+    }
+
+    try {
+      const publicKey = new PublicKey(body.address);
+      const messageBytes = new TextEncoder().encode(body.magic);
+      const signatureBytes = Buffer.from(body.signature, 'base64');
+
+      const verified = nacl.sign.detached.verify(
+        messageBytes,
+        signatureBytes,
+        publicKey.toBytes(),
+      );
+
+      if (!verified) {
+        throw new Error('Signature verification failed');
+      }
+    } catch (error) {
+      throw new Error(`Solana signature verification failed: ${error.message}`);
+    }
+
+    const bindCheck = await this.db
+      .selectFrom('api.auth_users_binds')
+      .select(['api.auth_users_binds.bind_key'])
+      .where('bind_openid', '=', body.address)
+      .where('bind_type', '=', 'solana_wallet')
+      .executeTakeFirst();
+
+    if (bindCheck) {
+      throw new Error('Solana wallet already bound');
+    }
+
+    await this.db
+      .insertInto('api.auth_users_binds')
+      .values({
+        bind_key: body.address,
+        bind_type: 'solana_wallet',
+        bind_uid: uid,
+      })
+      .execute();
+
+    return { success: true };
+  }
+
+  async bindAptosWallet(uid: string, body: AuthBindAptosWalletReqDto) {
+    const checkUser = await this.db
+      .selectFrom('api.auth_users_binds')
+      .select(['bind_id'])
+      .where('bind_uid', '=', uid)
+      .where('bind_type', '=', 'aptos_wallet')
+      .executeTakeFirst();
+
+    if (checkUser) {
+      throw new Error('Aptos wallet already bound');
+    }
+
+    const maigcCheck = await this.db
+      .selectFrom('api.auth_magic')
+      .select(['id', 'magic'])
+      .where('uid', '=', uid)
+      .where('magic', '=', body.magic)
+      .where('created_at', '>', new Date(Date.now() - 120 * 1000))
+      .where('status', '=', 0)
+      .limit(1)
+      .orderBy('created_at', 'desc')
+      .executeTakeFirst();
+
+    if (maigcCheck) {
+      await this.db
+        .updateTable('api.auth_magic')
+        .set({ status: 1 })
+        .where('id', '=', maigcCheck.id)
+        .execute();
+    } else {
+      throw new Error('Magic number not found or expired');
+    }
+
+    try {
+      const publicKey = new AptosPublicKey(body.publicKey);
+      const messageBytes = new TextEncoder().encode(body.magic);
+      const signature = new Ed25519Signature(body.signature);
+
+      const verified = publicKey.verifySignature({
+        message: messageBytes,
+        signature: signature,
+      });
+
+      if (!verified) {
+        throw new Error('Signature verification failed');
+      }
+
+      const derivedAddress = publicKey.authKey().toString();
+      if (derivedAddress !== body.address) {
+        throw new Error('Address does not match public key');
+      }
+    } catch (error) {
+      throw new Error(`Aptos signature verification failed: ${error.message}`);
+    }
+
+    const bindCheck = await this.db
+      .selectFrom('api.auth_users_binds')
+      .select(['api.auth_users_binds.bind_key'])
+      .where('bind_openid', '=', body.address)
+      .where('bind_type', '=', 'aptos_wallet')
+      .executeTakeFirst();
+
+    if (bindCheck) {
+      throw new Error('Aptos wallet already bound');
+    }
+
+    await this.db
+      .insertInto('api.auth_users_binds')
+      .values({
+        bind_key: body.address,
+        bind_type: 'aptos_wallet',
+        bind_uid: uid,
+      })
+      .execute();
+
+    return { success: true };
+  }
+
+  async bindSuiWallet(uid: string, body: AuthBindSuiWalletReqDto) {
+    const checkUser = await this.db
+      .selectFrom('api.auth_users_binds')
+      .select(['bind_id'])
+      .where('bind_uid', '=', uid)
+      .where('bind_type', '=', 'sui_wallet')
+      .executeTakeFirst();
+
+    if (checkUser) {
+      throw new Error('Sui wallet already bound');
+    }
+
+    const maigcCheck = await this.db
+      .selectFrom('api.auth_magic')
+      .select(['id', 'magic'])
+      .where('uid', '=', uid)
+      .where('magic', '=', body.magic)
+      .where('created_at', '>', new Date(Date.now() - 120 * 1000))
+      .where('status', '=', 0)
+      .limit(1)
+      .orderBy('created_at', 'desc')
+      .executeTakeFirst();
+
+    if (maigcCheck) {
+      await this.db
+        .updateTable('api.auth_magic')
+        .set({ status: 1 })
+        .where('id', '=', maigcCheck.id)
+        .execute();
+    } else {
+      throw new Error('Magic number not found or expired');
+    }
+
+    try {
+      const publicKey = new Ed25519PublicKey(body.publicKey);
+      const messageBytes = new TextEncoder().encode(body.magic);
+      const signatureBytes = Buffer.from(body.signature, 'base64');
+
+      const verified = await publicKey.verify(messageBytes, signatureBytes);
+
+      if (!verified) {
+        throw new Error('Signature verification failed');
+      }
+
+      const derivedAddress = publicKey.toSuiAddress();
+      if (derivedAddress !== body.address) {
+        throw new Error('Address does not match public key');
+      }
+    } catch (error) {
+      throw new Error(`Sui signature verification failed: ${error.message}`);
+    }
+
+    const bindCheck = await this.db
+      .selectFrom('api.auth_users_binds')
+      .select(['api.auth_users_binds.bind_key'])
+      .where('bind_openid', '=', body.address)
+      .where('bind_type', '=', 'sui_wallet')
+      .executeTakeFirst();
+
+    if (bindCheck) {
+      throw new Error('Sui wallet already bound');
+    }
+
+    await this.db
+      .insertInto('api.auth_users_binds')
+      .values({
+        bind_key: body.address,
+        bind_type: 'sui_wallet',
+        bind_uid: uid,
+      })
+      .execute();
+
+    return { success: true };
+  }
+
+  async bindFarcaster(uid: string, body: AuthBindFarcasterReqDto) {
+    try {
+      const appClient = createAppClient({
+        ethereum: viemConnector(),
+      });
+
+      const verifyResponse = await appClient.verifySignInMessage({
+        message: body.message,
+        signature: body.signature as `0x${string}`,
+        domain:
+          this.configService.get<string>('FARCASTER_DOMAIN') || 'localhost',
+        nonce: this.extractNonceFromMessage(body.message),
+      });
+
+      if (!verifyResponse.success) {
+        throw new Error('Farcaster signature verification failed');
+      }
+
+      if (verifyResponse.fid.toString() !== body.fid) {
+        throw new Error('FID mismatch');
+      }
+    } catch (error) {
+      throw new Error(`Farcaster verification failed: ${error.message}`);
+    }
+
+    const existingBind = await this.db
+      .selectFrom('api.auth_users_binds')
+      .select(['bind_id'])
+      .where('bind_uid', '=', uid)
+      .where('bind_type', '=', 'farcaster')
+      .executeTakeFirst();
+
+    if (existingBind) {
+      await this.db
+        .updateTable('api.auth_users_binds')
+        .set({
+          bind_key: body.username,
+          bind_openid: body.fid,
+          bind_secret: body.pfpUrl || '',
+          updated_at: new Date().toISOString(),
+        })
+        .where('bind_id', '=', existingBind.bind_id)
+        .execute();
+    } else {
+      const fidCheck = await this.db
+        .selectFrom('api.auth_users_binds')
+        .select(['bind_uid'])
+        .where('bind_openid', '=', body.fid)
+        .where('bind_type', '=', 'farcaster')
+        .executeTakeFirst();
+
+      if (fidCheck) {
+        throw new Error(
+          'This Farcaster account is already bound to another user',
+        );
+      }
+
+      await this.db
+        .insertInto('api.auth_users_binds')
+        .values({
+          bind_key: body.username,
+          bind_openid: body.fid,
+          bind_secret: body.pfpUrl || '',
+          bind_type: 'farcaster',
+          bind_uid: uid,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .execute();
+    }
+
+    const req = new SucessResDto();
+    req.sucess = true;
+    return req;
+  }
+
+  private extractNonceFromMessage(message: string): string {
+    const nonceMatch = message.match(/Nonce: ([^\n]+)/);
+    if (!nonceMatch) {
+      throw new Error('Unable to extract nonce from message');
+    }
+    return nonceMatch[1];
   }
 
   async genMagicNumber(uid: string) {
