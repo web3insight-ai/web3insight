@@ -136,6 +136,51 @@ export class AuthBindWalletReqDto {
   signature: string;
 }
 
+export class AuthBindSolanaWalletReqDto {
+  @IsString()
+  address: string;
+  @IsString()
+  magic: string;
+  @IsString()
+  signature: string;
+}
+
+export class AuthBindAptosWalletReqDto {
+  @IsString()
+  address: string;
+  @IsString()
+  magic: string;
+  @IsString()
+  signature: string;
+  @IsString()
+  publicKey: string;
+}
+
+export class AuthBindSuiWalletReqDto {
+  @IsString()
+  address: string;
+  @IsString()
+  magic: string;
+  @IsString()
+  signature: string;
+  @IsString()
+  publicKey: string;
+}
+
+export class AuthBindFarcasterReqDto {
+  @IsString()
+  message: string;
+  @IsString()
+  signature: string;
+  @IsString()
+  fid: string;
+  @IsString()
+  username: string;
+  @IsString()
+  @IsOptional()
+  pfpUrl?: string;
+}
+
 export class ReposCustomMarkReqDto {
   @IsEnum(EcoType)
   @IsOptional()
