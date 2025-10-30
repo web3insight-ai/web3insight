@@ -346,13 +346,7 @@ function RepositoryDetail({ repository, analysis }: RepositoryDetailProps) {
              (!analysis.participants || Object.keys(analysis.participants).length === 0) &&
              (!analysis.newContributors || Object.keys(analysis.newContributors).length === 0) &&
              (!analysis.attention || Object.keys(analysis.attention).length === 0) && (
-              <div className="animate-slide-up mb-4" style={{ animationDelay: "100ms" }}>
-                <div className="bg-yellow-50 dark:bg-yellow-900/10 rounded-xl border border-yellow-200 dark:border-yellow-800 p-4 text-center">
-                  <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                    OpenDigger metrics are currently unavailable for this repository.
-                  </p>
-                </div>
-              </div>
+              <div />
             )}
           </>
         )}
