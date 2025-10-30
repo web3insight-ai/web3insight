@@ -12,6 +12,8 @@ export class QueryTopStarRepo {
   forks_count: number = 0;
   open_issues_count: number = 0;
   contributor_count: number;
+  description: string;
+  star_growth_7d: number;
 }
 
 export class QueryTopActors {

@@ -286,6 +286,86 @@ ORDER BY ecosystem;`;
     return results.rows;
   }
 
+  async get7daysTopStarRepos(ecoNames: string[]) {
+    const sqlRawQuery = `
+WITH ecosystem_list AS (SELECT UNNEST($1::text[]) AS ecosystem_name),
+     time_range AS (SELECT date_trunc('day', max(created_at))                     AS last_day,
+                           date_trunc('day', max(created_at)) - INTERVAL '6 days' AS start_day
+                    FROM data.events),
+
+     target_repos AS (SELECT repo_id
+                      FROM data.repos
+                      WHERE upstream_marks ?| (SELECT ARRAY_AGG(ecosystem_name) FROM ecosystem_list)),
+
+     recent_stars AS (SELECT e.repo_id,
+                             COUNT(DISTINCT e.actor_id) AS star_growth_7d
+                      FROM data.events e
+                               JOIN time_range t
+                                    ON date_trunc('day', e.created_at) BETWEEN t.start_day AND t.last_day
+                               JOIN target_repos tr
+                                    ON e.repo_id = tr.repo_id
+                      WHERE e.event_type = 'WatchEvent'
+                      GROUP BY e.repo_id),
+
+     ranked AS (SELECT eco.ecosystem_name      AS ecosystem,
+                       rs.repo_id,
+                       r.repo_name,
+                       rs.star_growth_7d,
+                       r.api ->> 'description' AS repo_description,
+                       ROW_NUMBER() OVER (
+                           PARTITION BY eco.ecosystem_name
+                           ORDER BY rs.star_growth_7d DESC
+                           )                   AS ranking
+                FROM recent_stars rs
+                         JOIN data.repos r ON r.repo_id = rs.repo_id
+                         CROSS JOIN ecosystem_list eco
+                WHERE r.upstream_marks ? eco.ecosystem_name
+                  AND NOT (r.api ->> 'archived')::boolean)
+
+SELECT ecosystem,
+       json_agg(
+               json_build_object(
+                       'repo_id', repo_id,
+                       'repo_name', repo_name,
+                       'star_growth_7d', star_growth_7d,
+                       'description', repo_description
+               ) ORDER BY ranking
+       ) AS top_repositories
+FROM ranked
+WHERE ranking <= 200
+GROUP BY ecosystem
+ORDER BY ecosystem;`;
+    const query = CompiledQuery.raw(sqlRawQuery, [ecoNames]);
+
+    const results = await this.db.executeQuery(query);
+
+    for (const row of results.rows as QueryTopStar[]) {
+      const ids = row.top_repositories.map((repo) => repo.repo_id);
+
+      const res = await this.reposService.getRepoInfo(ids);
+
+      const data: QueryTopStarRepo[] = row.top_repositories.map((row) => {
+        const api = res.find((r) => r.id === row.repo_id);
+        return {
+          ...row,
+          star_count: api.stargazers_count,
+          forks_count: api.forks_count,
+          open_issues_count: api.open_issues_count,
+          description: api.description,
+        };
+      });
+      const cacheData = new RepoRankListDto();
+      cacheData.list = data;
+      await this.cacheDataService.updateCacheData(
+        CacheKey.RepoStarRank7d,
+        cacheData,
+        new Date().toISOString(),
+        row.ecosystem,
+      );
+    }
+    return results.rows;
+  }
+
   async getEcoRepoRank(ecoNames: string[]) {
     // Original SQL query logic
     const sqlRawQuery = `
@@ -571,6 +651,7 @@ WHERE eco.name = dpe.ecosystem_name;
     await this.getTopScoreActors(ecoTypes);
     await this.repoStarRank(ecoTypes);
     await this.ecoRankTotal(EcoType.ALL, false);
+    await this.get7daysTopStarRepos(ecoTypes);
   }
 
   @Command({

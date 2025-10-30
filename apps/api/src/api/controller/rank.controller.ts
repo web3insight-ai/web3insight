@@ -66,6 +66,27 @@ export class RankController {
     }
   }
 
+  @Get('repos/top/7d')
+  @ApiOperation({
+    summary: 'Get repos rank list top 10 by star count',
+    description: '',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AppAuthGuard)
+  async getRepoTop7d(@Query() query: GetTotalReqDto) {
+    try {
+      const res = await this.cacheDataService.getCacheData(
+        CacheKey.RepoStarRank7d,
+        query.eco_name,
+      );
+      return res?.cache_data as RepoRankListDto;
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        throw new HttpException(e, 400);
+      }
+    }
+  }
+
   @Get('actors/top')
   @ApiOperation({
     summary: 'Get actors rank list top 10',
