@@ -4,21 +4,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Web3Insight is a comprehensive analytics platform for Web3 ecosystems, repositories, and developers. It's built with Next.js 15 (App Router), React Server Components, TypeScript, and integrates multiple data sources to provide insights into blockchain development activity.
+Web3Insight is a comprehensive analytics platform for Web3 ecosystems, repositories, and developers. Built with Next.js 15 (App Router), React Server Components, and TypeScript, it integrates multiple data sources to provide insights into blockchain development activity.
 
-This is part of a larger pnpm workspace project (Web3Insight AI) that includes three applications:
+This is part of a larger pnpm workspace project (Web3Insight AI) that includes:
 - **sakuin** - NestJS backend API server (../sakuin/)
-- **web3insight** - This Next.js 15 frontend application
+- **web3insight** - This Next.js 15 frontend application (current)
+- **web3insight-profile** - Next.js 15 profile analysis application (../web3insight-profile/)
 
 ## Tech Stack
 
-- **Frontend**: Next.js 15 (App Router), React, TypeScript
+- **Frontend**: Next.js 15 (App Router), React Server Components, TypeScript
 - **Styling**: Tailwind CSS, NextUI components
-- **State Management**: Jotai (atomic state)
-- **Build Tool**: Next.js with Turbopack (dev)
+- **State Management**: Jotai (atomic state management)
+- **Build Tool**: Next.js with Turbopack (dev mode)
 - **Package Manager**: pnpm (v9.4.0)
 - **Node Version**: >=20.0.0
-- **Backend**: Custom REST API (DATA_API_URL)
+- **Backend Integration**: Custom REST API (DATA_API_URL)
 - **Data Sources**: OpenDigger, OSS Insight, RSS3, GitHub API
 - **AI**: OpenAI and Azure OpenAI integrations with streaming support
 - **Web3**: RainbowKit + Wagmi for wallet connections
@@ -27,8 +28,8 @@ This is part of a larger pnpm workspace project (Web3Insight AI) that includes t
 
 ```bash
 # Development
-pnpm dev              # Start development server with Turbopack
-pnpm run env          # Generate environment configuration (runs automatically before dev)
+pnpm dev              # Start development server with Turbopack (auto-runs env setup)
+pnpm run env          # Generate environment configuration
 
 # Code Quality
 pnpm lint             # Run Next.js linting with ESLint
@@ -39,186 +40,234 @@ pnpm build            # Build for production with Next.js
 pnpm start            # Start production server
 ```
 
-**Important**: Always run `pnpm lint` and `pnpm typecheck` after making changes. The project uses pre-commit hooks with lint-staged that enforce linting on staged TypeScript files (2-space indentation, semicolons required).
+**Important**: The project uses pre-commit hooks with lint-staged that enforce linting on staged files:
+- 2-space indentation required
+- Semicolons required
+- Prettier formatting applied automatically
+- ESLint fixes applied automatically
 
 ## Architecture Overview
 
-This is a **Next.js 15 App Router application** that was recently migrated from Remix and underwent a complete directory restructure to eliminate the `/src` directory. The architecture follows Next.js best practices with a Domain-Driven Design approach:
+This is a **Next.js 15 App Router application** following a Domain-Driven Design (DDD) approach with all code in the `/src/` directory:
 
-### 1. `/app/` - Next.js App Router
-- **File-based routing**: Following Next.js App Router conventions
+### `/src/app/` - Next.js App Router
+- **File-based routing**: Following Next.js 15 conventions
 - **Server Components**: Default server-side rendering with RSC
-- **Client Components**: Marked with `"use client"` for interactivity
-- **API Routes**: RESTful endpoints in `/app/api/` structure
+- **Client Components**: Marked with `"use client"` directive for interactivity
+- **API Routes**: RESTful endpoints in `/src/app/api/` structure
 - **Layouts**: Nested layouts with `layout.tsx` files
 - **Global styles**: `globals.css` for Tailwind CSS
+- **Atoms**: Jotai atoms defined in `atoms.ts`
 
-### 2. `/lib/services/` - Business Logic (Domain Layer)
-Each domain module (e.g., developer, ecosystem, repository, admin, ai, auth, event, profile-analysis) contains:
+### `/src/services/` - Business Logic (Domain Layer)
+Domain-Driven Design with each module containing:
 - `typing.ts` - TypeScript type definitions
-- `repository.ts` or `repository/` - Data access layer
-- `helper.ts` or `helper/` - Utility functions
-- `views/` - UI components for pages
-- `widgets/` - Reusable UI components
+- `repository.ts` or `repository/` - Data access layer with API clients
+- `helper.ts` or `helper/` - Domain-specific utility functions
+- `views/` - Page-level UI components
+- `widgets/` - Domain-specific reusable UI components
 
-### 3. `/components/` - Shared UI Components
-- **Shared Components**: Reusable UI components used across the application
+**Current Domains**:
+- `admin/` - Administrative features
+- `ai/` - AI-powered analysis services
+- `api/` - Main backend API integration
+- `auth/` - Authentication management
+- `developer/` - Developer analytics and ranking
+- `ecosystem/` - Web3 ecosystem analysis
+- `event/` - Event tracking and management
+- `github/` - GitHub API integration
+- `opendigger/` - OpenDigger API integration
+- `origin/` - Origin protocol integration
+- `ossinsight/` - OSS Insight API integration
+- `profile-analysis/` - Developer profile analysis
+- `repository/` - Repository metrics and insights
+- `statistics/` - Statistical analysis features
+
+### `/src/components/` - Shared UI Components
+Reusable components used across domains:
 - **Controls**: Complex reusable components (brand-logo, chart-card, data-table, metric-card, etc.)
 - **Loading**: Skeleton components for loading states
 - **Widgets**: Specialized UI components for specific use cases
 
-### 4. `/lib/` - Shared Resources
-- `clients/` - HTTP and Redis clients
-- `types/` - Shared TypeScript types
-- `utils/` - Utility functions
+### `/src/` - Other Shared Resources
+- `clients/` - Configured HTTP and Redis clients
+- `types/` - Shared TypeScript type definitions
+- `utils/` - Utility functions and helpers
 - `config/` - Configuration files
 - `providers/` - React context providers
+- `hooks/` - Custom React hooks
+- `env.ts` - Environment variable configuration with validation
 
 ## Path Aliases
 
-The project uses these TypeScript path aliases:
-- `@/*` → `./lib/*` (shared resources)
-- `~/*` → `./lib/services/*` (domain modules)
-- `#/*` → `./app/*` (Next.js App Router)
-- `$/*` → `./components/*` (shared components)
+The project uses these TypeScript path aliases (defined in `tsconfig.json`):
+- `@env` → `./src/env.ts` (environment configuration)
+- `@/*` → `./src/*` (all source files)
+- `~/*` → `./src/services/*` (domain modules)
+- `#/*` → `./src/app/*` (Next.js App Router)
+- `$/*` → `./src/components/*` (shared components)
 
 ## Key Development Patterns
 
 ### 1. Next.js App Router Structure
 - **Page Components**: `page.tsx` files define routes
 - **Layout Components**: `layout.tsx` files define nested layouts
-- **API Routes**: `route.ts` files in `/app/api/` structure
+- **API Routes**: `route.ts` files in `/src/app/api/` structure
 - **Dynamic Routes**: `[param]/page.tsx` for dynamic segments
-- **Server Components**: Default rendering mode for pages
-- **Client Components**: Use `"use client"` directive for interactivity
+- **Server Components**: Default rendering mode (no directive needed)
+- **Client Components**: Require `"use client"` directive
 
 ### 2. Data Fetching Patterns
+
 **Server Components** (preferred for initial data):
 ```typescript
-// Server Component - runs on server
+// Server Component - runs on server, can directly call async functions
 export default async function Page() {
-  const data = await fetchData(); // Direct async calls
+  const data = await fetchDataFromAPI();
   return <Component data={data} />;
 }
 ```
 
 **Repository Pattern** (maintained from original architecture):
 ```typescript
-// Always returns ResponseResult<T>
+// Always returns ResponseResult<T> from API
 async function fetchOne(id: string): Promise<ResponseResult<Entity>> {
-  // Implementation
+  const response = await apiClient.get(`/entity/${id}`);
+  return response.data;
 }
 ```
 
 ### 3. Component Architecture
-- **Server Components**: Default for pages and static content
-- **Client Components**: Interactive components with `"use client"`
-- **Views**: Page-level components in `/lib/services/*/views/`
-- **Widgets**: Domain-specific reusable components in `/lib/services/*/widgets/`
-- **Shared**: Cross-domain components in `/components/`
+- **Server Components**: Default for pages and static content (better performance)
+- **Client Components**: Use `"use client"` for interactivity, hooks, browser APIs
+- **Views**: Page-level components in `/src/services/*/views/`
+- **Widgets**: Domain-specific reusable components in `/src/services/*/widgets/`
+- **Shared Components**: Cross-domain components in `/src/components/`
 
-### 4. State Management
-Jotai atoms for client-side state (requires client components):
+### 4. State Management with Jotai
+Client-side state using Jotai atoms (requires client components):
 ```typescript
 'use client';
-import { useAtom } from 'jotai';
-// Define in app/atoms.ts or domain-specific files
-export const someAtom = atom<Type>(initialValue);
+import { atom, useAtom } from 'jotai';
+
+// Define atoms in src/app/atoms.ts or domain-specific files
+export const userAtom = atom<User | null>(null);
+
+// Usage in client components
+const [user, setUser] = useAtom(userAtom);
 ```
 
 ### 5. HTTP Client Usage
-Each external API has its own configured client:
-- Main API: `/lib/services/api/repository/client.ts` (uses DATA_API_URL)
-- GitHub: `/lib/services/github/repository/client.ts`
-- OpenDigger: `/lib/services/opendigger/repository/client.ts`
-- OSS Insight: `/lib/services/ossinsight/repository/client.ts`
-- RSS3: `/lib/services/rss3/repository/client.ts`
-- AI Services: `/lib/services/ai/repository/` (OpenAI/Azure OpenAI)
+Each external API has its own configured client in the domain's `repository/` or `repository.ts`:
+- **Main API**: `/src/services/api/repository/client.ts` (uses DATA_API_URL)
+- **GitHub**: `/src/services/github/repository/client.ts`
+- **OpenDigger**: `/src/services/opendigger/repository/client.ts`
+- **OSS Insight**: `/src/services/ossinsight/repository/client.ts`
+- **AI Services**: `/src/services/ai/repository/` (OpenAI/Azure OpenAI)
+
+All clients return consistent `ResponseResult<T>` types for error handling.
 
 ## Important Conventions
 
-1. **TypeScript**: Strict mode is enabled. All code must be properly typed.
-2. **Linting**: Code must pass ESLint checks. Uses 2-space indentation and requires semicolons.
-3. **Components**: Use function components with TypeScript. Props must be typed.
-4. **Client Components**: Add `"use client"` directive for interactive components.
+1. **TypeScript**: Strict mode enabled. All code must be properly typed.
+2. **Linting**: 2-space indentation, semicolons required, ESLint rules enforced via pre-commit hooks.
+3. **Components**: Use function components with TypeScript. Props must be typed with interfaces or types.
+4. **Client Components**: Add `"use client"` directive ONLY when using hooks, browser APIs, or event handlers.
 5. **Imports**: Use path aliases (@/, ~/, #/, $/) for cleaner imports.
 6. **Async Operations**: Handle errors properly and return consistent ResponseResult types.
-7. **Environment Variables**: Access via helper functions in `/lib/utils/env.ts`.
+7. **Environment Variables**:
+   - Server-side: Access via `env` from `@env` (validated with Zod)
+   - Client-side: Must be prefixed with `NEXT_PUBLIC_`
 
 ## Adding New Features
 
 When adding a new feature:
-1. Create a new domain module in `/lib/services/` if it's a major feature
-2. Follow the existing structure (typing.ts, repository.ts, helper.ts, views/, widgets/)
-3. Add routes in `/app/` following Next.js App Router conventions
-4. Use Server Components by default, Client Components for interactivity
-5. Use existing UI components from NextUI and shared components
-6. Integrate with existing HTTP clients for API calls
-7. Add necessary types and maintain type safety throughout
-8. Consider AI streaming patterns for data-intensive features
+1. **Create domain module** in `/src/services/` if it's a major feature area
+2. **Follow DDD structure**:
+   - `typing.ts` - Define types
+   - `repository.ts` or `repository/` - Data access layer
+   - `helper.ts` or `helper/` - Business logic
+   - `views/` - Page-level components
+   - `widgets/` - Reusable components
+3. **Add routes** in `/src/app/` following Next.js App Router conventions
+4. **Use Server Components by default**, Client Components only for interactivity
+5. **Reuse existing UI components** from NextUI and shared components
+6. **Integrate with existing HTTP clients** for API calls
+7. **Maintain type safety** throughout the feature
+8. **Consider AI streaming patterns** for data-intensive features
 
 ## External Service Integration
 
-The project integrates with multiple services:
-- **Custom Backend API**: Primary backend for content, data, and authentication (DATA_API_URL)
+The project integrates with multiple external services:
+- **Custom Backend API** (sakuin): Primary backend for content, data, and authentication
 - **OpenDigger**: Open source project metrics
 - **OSS Insight**: GitHub analytics data
-- **RSS3**: Web3 social and activity data
+- **RSS3**: Web3 social and activity data (via rss3 service)
 - **GitHub API**: Direct repository and user data
-- **OpenAI/Azure OpenAI**: AI-powered analysis
+- **OpenAI/Azure OpenAI**: AI-powered analysis with streaming support
 
-When working with these services, use the existing client configurations and follow the established patterns in the respective domain modules.
+All external service integrations follow the repository pattern in their respective domain modules.
 
 ## Performance Considerations
 
-1. **Server Components**: Leverage React Server Components for initial page loads
-2. **Client Components**: Use `"use client"` only when necessary for interactivity
-3. **Streaming**: Utilize Next.js streaming for progressive page rendering
-4. **Loading States**: Implement proper loading.tsx files and skeletons
-5. **Parallel Fetching**: Use Promise.all() in Server Components for parallel data fetching
+1. **Server Components**: Leverage RSC for initial page loads (zero JS shipped to client)
+2. **Client Components**: Use `"use client"` sparingly - only when necessary
+3. **Streaming**: Utilize Next.js streaming with Suspense for progressive rendering
+4. **Loading States**: Implement `loading.tsx` files and skeleton components
+5. **Parallel Fetching**: Use `Promise.all()` in Server Components for parallel data fetching
 6. **Code Splitting**: Next.js automatic code splitting reduces bundle sizes
 7. **AI Streaming**: Server-Sent Events for real-time AI response streaming
 
 ## Build Configuration
 
-- **Next.js Configuration**: Custom webpack config with server external packages
-- **TypeScript**: Strict mode with build error ignoring during migration (`|| true` in typecheck script)
-- **ESLint**: Custom configuration with React, TypeScript, and accessibility rules
-- **Tailwind**: Custom configuration with NextUI integration and content paths for new directory structure
-- **Images**: Remote patterns configured for GitHub avatars
+- **Next.js Config**: Custom webpack config with server/client externals (`next.config.ts`)
+- **TypeScript**: Strict mode with `ignoreBuildErrors: true` temporarily during migration
+- **ESLint**: Custom configuration (`.eslintrc.cjs`) with React, TypeScript, and a11y rules
+- **Tailwind**: Custom configuration with NextUI integration
+- **Images**: Remote patterns configured for GitHub avatars and github.com
+- **Environment**: Validated via `@t3-oss/env-nextjs` with Zod schemas in `/src/env.ts`
 
-## TypeScript Configuration
+## Environment Configuration
 
-The project uses strict TypeScript configuration:
-- `strict: true` - Enables all strict type checking options
-- `skipLibCheck: true` - Skips type checking of declaration files
+Environment variables are validated using `@t3-oss/env-nextjs` in `/src/env.ts`:
 
-**Known Issue**: The `pnpm typecheck` command may show errors from third-party libraries (`@petals/basic` and `petals-ui`). The typecheck script includes `|| true` to prevent CI/CD pipeline failures from third-party library issues.
+**Required Server Variables**:
+- `DATA_API_URL` - Main backend API URL
+- `DATA_API_TOKEN` - API authentication token
+- `OPENDIGGER_URL` - OpenDigger API URL
+- `OSSINSIGHT_URL` - OSS Insight API URL
+- `SESSION_SECRET` - Session encryption secret
 
-## Environment Setup
+**Optional Server Variables**:
+- `OPENAI_BASE_URL`, `OPENAI_API_KEY` - OpenAI configuration
+- `AI_API_URL`, `AI_API_TOKEN` - Alternative AI service
+- `HTTP_TIMEOUT` - HTTP client timeout (default: 30000ms)
 
-- Environment configuration is managed via `.knosys/scripts env` command
-- The `predev` script automatically runs environment setup before starting development
-- Custom environment utilities are available in `/lib/utils/env.ts`
-- Next.js environment variables use `NEXT_PUBLIC_` prefix for client-side access
+**Required Client Variables** (prefixed with `NEXT_PUBLIC_`):
+- `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` - WalletConnect configuration
+- `NEXT_PUBLIC_GITHUB_CLIENT_ID` - GitHub OAuth configuration
 
-## Migration Status
+The `predev` script automatically runs environment setup before starting development.
 
-This application has undergone two major migrations:
-1. **Remix to Next.js 15**: Complete framework migration maintaining functionality
-2. **Directory Structure Refactor**: Eliminated `/src` directory following Next.js best practices
+## Known Issues & Migration Status
 
-**Current State**: Fully functional Next.js 15 App Router application with clean directory structure
+**TypeScript Errors**: The `pnpm typecheck` command includes `|| true` to prevent CI/CD failures from third-party library type errors (particularly `petals-ui`).
+
+**Build Configuration**: `ignoreBuildErrors: true` and `ignoreDuringBuilds: true` are temporarily enabled during ongoing migration validation.
+
+**Migration History**:
+1. Migrated from Remix to Next.js 15 (complete)
+2. All functionality preserved with Next.js App Router
 
 ## Development Notes
 
-- **Framework**: Next.js 15 with App Router
+- **Framework**: Next.js 15 with App Router (file-based routing)
 - **Server Components**: Default rendering mode for better performance
-- **Client Components**: Use `"use client"` directive for interactive features
-- **API Routes**: Use `/app/api/` structure for backend endpoints
+- **Client Components**: Use `"use client"` directive when needed
+- **API Routes**: Use `/src/app/api/` structure for backend endpoints
 - **Streaming**: AI responses use Server-Sent Events for real-time updates
 - **Testing**: No test framework currently configured
 - **Git Hooks**: Husky with lint-staged for pre-commit validation
-- **Authentication**: GitHub OAuth through custom backend API
-- **Admin Features**: Require special permissions
-- **Workspace**: Part of larger pnpm workspace - consider impact on sibling applications
+- **Authentication**: GitHub OAuth through custom backend API (sakuin)
+- **Admin Features**: Role-based access control via backend API
+- **Workspace Context**: Part of larger pnpm workspace - coordinate changes with sibling applications

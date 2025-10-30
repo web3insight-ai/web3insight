@@ -1,47 +1,37 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-- `src/app` (`#/*`): Next.js App Router routes. APIs under `src/app/api/*`. Global styles: `src/app/globals.css`. Shared layout/providers: `src/app/layout.tsx`, `src/app/providers.tsx`.
-- `src/components` (`$/*`): Reusable React components (PascalCase `.tsx`).
-- `src/services` (`~/*`): Domain logic (e.g., `developer`, `repository`, `ecosystem`, `ai`, `github`, `api`). HTTP wrappers in `src/clients/http`.
-- `src/config`, `src/providers`, `src/utils`, `src/types`: Configuration, context, helpers, shared types.
-- `public/`: Static assets. Root contains Next/Tailwind config and tooling.
+- `src/app`: Next.js route groups (`developers`, `ecosystems`, `devinsight`, `admin`) share `layout.tsx` and `globals.css`.
+- Shared UI lives in `src/components`, with cross-cutting logic in `src/hooks` and `src/providers`.
+- Data access lives in `src/clients` and `src/services`; shared helpers sit in `src/utils` and `src/types`, configuration in `config/` and `env.ts`, and assets in `public/`.
 
 ## Build, Test, and Development Commands
-- `pnpm i`: Install dependencies (Node >= 20, `pnpm@9`).
-- `cp .env.example .env`: Bootstrap local env vars (edit securely).
-- `pnpm env`: Validate Node/tooling via `.knosys`.
-- `pnpm dev`: Run local dev (Next.js + Turbopack).
-- `pnpm build`: Create production build; `pnpm start`: Serve built app.
-- `pnpm lint`: Run ESLint; `pnpm typecheck`: TypeScript checks.
-
-Example:
-```
-pnpm i
-cp .env.example .env
-pnpm env
-pnpm dev
-```
+- `pnpm install`: install dependencies (Node.js ≥ 20).
+- `pnpm dev`: run the Next.js app locally with Turbopack.
+- `pnpm build`: produce a production bundle.
+- `pnpm start`: serve the built output.
+- `pnpm lint`: execute ESLint with Prettier auto-formatting.
+- `pnpm typecheck`: run the TypeScript compiler without emitting files.
+- `pnpm env`: list required environment variables via the Knosys helper.
 
 ## Coding Style & Naming Conventions
-- TypeScript; 2-space indent; semicolons; trailing commas. Prettier uses double quotes.
-- No unused vars (ESLint). Keep changes minimal and focused.
-- Components: PascalCase filenames/exports. Next.js route files lower-case.
-- Use path aliases from `tsconfig.json`: `@env`, `@/*`, `#/*`, `$/*`, `~/*`.
+- TypeScript + the Next.js ESLint preset enforce strict typing and accessible JSX—resolve warnings before a PR.
+- Prettier runs via lint-staged; keep the default two-space indentation, trailing commas, and single quotes it produces.
+- Components and pages use `PascalCase`; hooks start with `use`; helper utilities stay in `camelCase` near their feature.
+- Compose Tailwind classes with semantic groupings and reuse tokens defined in `tailwind.config.ts` to avoid drift.
 
 ## Testing Guidelines
-- No formal suite yet. Prefer Vitest + React Testing Library for new tests.
-- Place tests under `src/__tests__/`. Name `ComponentName.test.tsx` or `module.test.ts`.
-- Run via `vitest` or `pnpm test` when configured; target services/utilities first.
+- A shared test runner is in progress; every change must still pass `pnpm lint` and `pnpm typecheck`.
+- Add targeted unit or integration checks when introducing behavior, naming files `*.test.ts(x)` beside the module.
+- For API or data-layer edits, document manual verification steps in the PR and add reusable fixtures under `src/services/__mocks__` when applicable.
 
 ## Commit & Pull Request Guidelines
-- Conventional Commits: `feat:`, `fix:`, `refactor:`, `style:`, etc.
-- Pre-commit: Husky + lint-staged runs `eslint --fix` on staged TS/TSX.
-- PRs: clear description, linked issues, screenshots for UI, note env/migration impacts.
-- CI runs lint on PRs; keep PRs small and coherent.
+- Follow the Conventional Commit pattern in history (`feat:`, `refactor:`, `chore:`) with subjects ≤ 72 characters.
+- Keep related changes within a commit and describe the rationale, not just the mechanics.
+- PRs should summarize scope, link issues or roadmap items, list validation commands, and include UI screenshots or clips when visuals change.
+- Call out new environment variables, migrations, or manual follow-up steps directly in the PR body.
 
 ## Security & Configuration Tips
-- Keep secrets out of VCS. Use `.env` locally; see `.env.example` (OpenAI, Redis, OSS Insight, RSS3, Strapi, Data API).
-- Rotate keys regularly; avoid logging credentials.
-- Require Node >= 20 and `pnpm@9`; verify with `pnpm env`.
-
+- Store secrets in `.env.local`; never commit or capture them in screenshots.
+- `env.ts` plus `@t3-oss/env-nextjs` enforces runtime schemas—run `pnpm env` to confirm expected keys before shipping.
+- When adding external integrations, document required scopes, rate limits, and auth nuances in `config/` or the PR summary so downstream agents stay aligned.
