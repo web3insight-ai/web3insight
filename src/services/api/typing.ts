@@ -45,6 +45,14 @@ type RepoRankRecord =  RepoBasic & {
   contributor_count: number;
 }
 
+type RepoTrendingRecord = RepoBasic & {
+  star_count: number;
+  forks_count: number;
+  open_issues_count: number;
+  star_growth_7d: number;
+  description: string;
+};
+
 type ActorBasic = {
   actor_id: number;
   actor_login: string;
@@ -66,5 +74,6 @@ export type {
   PaginatableParams, TotalResponseData, ListResponseData,
   EcoRequestParams, EcoRankRecord, EcoRepo,
   RepoRankRecord,
+  RepoTrendingRecord,
   ActorRankRecord, ActorTrendRecord,
 };

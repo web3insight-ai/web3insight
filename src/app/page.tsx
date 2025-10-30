@@ -1,10 +1,12 @@
 import { redirect } from 'next/navigation';
 import { getMetadata } from "@/utils/app";
 import { fetchStatisticsOverview, fetchStatisticsRank } from "~/statistics/repository";
+import { fetchWeeklyTrendingList } from "~/repository/repository";
 import { getUser } from "~/auth/repository";
 import { headers } from 'next/headers';
 import EcosystemRankViewWidget from "~/ecosystem/views/ecosystem-rank";
 import RepositoryRankViewWidget from "~/repository/views/repository-rank";
+import RepositoryTrendingViewWidget from "~/repository/views/repository-trending";
 import DeveloperRankViewWidget from "~/developer/views/developer-rank";
 import Section from "$/section";
 import DefaultLayoutWrapper from "./DefaultLayoutWrapper";
@@ -48,9 +50,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const user = await getUser(request);
 
   try {
-    const [statisticsResult, rankResult] = await Promise.all([
+    const [statisticsResult, rankResult, trendingResult] = await Promise.all([
       fetchStatisticsOverview(),
       fetchStatisticsRank(),
+      fetchWeeklyTrendingList(),
     ]);
 
     // Use fallback data if statistics fetch failed
@@ -68,6 +71,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       repository: [],
       developer: [],
     };
+    const weeklyTrendingRepos = trendingResult.success ? trendingResult.data : [];
 
     // Log any failures for debugging
     if (!statisticsResult.success) {
@@ -75,6 +79,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     }
     if (!rankResult.success) {
       console.warn("Statistics rank fetch failed:", rankResult.message);
+    }
+    if (!trendingResult.success) {
+      console.warn("Weekly trending repositories fetch failed:", trendingResult.message);
     }
 
     return (
@@ -97,6 +104,13 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             summary="Top repositories by developer engagement and contributions"
           >
             <RepositoryRankViewWidget dataSource={statisticRank.repository} />
+          </Section>
+          <Section
+            className="mt-16"
+            title="Weekly Star Growth"
+            summary="Repositories gaining the most stars in the past 7 days"
+          >
+            <RepositoryTrendingViewWidget dataSource={weeklyTrendingRepos} />
           </Section>
           <Section
             className="mt-16"
@@ -158,6 +172,13 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             summary="Top repositories by developer engagement and contributions"
           >
             <RepositoryRankViewWidget dataSource={fallbackStatisticRank.repository} />
+          </Section>
+          <Section
+            className="mt-16"
+            title="Weekly Star Growth"
+            summary="Repositories gaining the most stars in the past 7 days"
+          >
+            <RepositoryTrendingViewWidget dataSource={[]} />
           </Section>
           <Section
             className="mt-16"

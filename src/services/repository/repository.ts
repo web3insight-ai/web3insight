@@ -2,8 +2,9 @@ import type { ResponseResult } from "@/types";
 import { generateSuccessResponse, resolvePaginationParams } from "@/clients/http";
 
 import { fetchRepoListByUserLogin } from "../github/repository";
-import { fetchAdminRepoList } from "../api/repository";
+import { fetchAdminRepoList, fetchRepoTrendingList } from "../api/repository";
 
+import type { RepoTrendingRecord } from "../api/typing";
 import type { Repository, ManageableListParams } from "./typing";
 
 async function fetchListByDeveloper(username: string): Promise<ResponseResult<Repository[]>> {
@@ -66,4 +67,26 @@ async function fetchManageableList(
   };
 }
 
-export { fetchListByDeveloper, fetchListByEcosystem, fetchManageableList };
+async function fetchWeeklyTrendingList(eco: string = "ALL"): Promise<ResponseResult<RepoTrendingRecord[]>> {
+  const response = await fetchRepoTrendingList({ eco });
+
+  if (!response.success) {
+    return {
+      success: false,
+      message: response.message,
+      code: response.code,
+      extra: response.extra,
+      data: [],
+    };
+  }
+
+  return {
+    success: true,
+    message: response.message,
+    code: response.code,
+    extra: response.extra,
+    data: response.data.list ?? [],
+  };
+}
+
+export { fetchListByDeveloper, fetchListByEcosystem, fetchManageableList, fetchWeeklyTrendingList };

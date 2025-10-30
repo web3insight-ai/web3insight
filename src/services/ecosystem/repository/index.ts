@@ -2,7 +2,7 @@ import type { ResponseResult } from "@/types";
 import { isServerSide, generateSuccessResponse } from "@/clients/http";
 import httpClient from "@/clients/http/default";
 
-import type { RepoRankRecord, ActorRankRecord, ActorTrendRecord, EcoRequestParams } from "../../api/typing";
+import type { RepoRankRecord, RepoTrendingRecord, ActorRankRecord, ActorTrendRecord, EcoRequestParams } from "../../api/typing";
 
 import type { Repository } from "../../repository/typing";
 
@@ -18,10 +18,11 @@ async function fetchStatistics(name: string): Promise<ResponseResult<{
   trend: ActorTrendRecord[];
   repositoryTotalCount: number | string;
   repositories: RepoRankRecord[];
+  trendingRepositories: RepoTrendingRecord[];
 }>> {
   // Dynamic import for server-side only
   const {
-    fetchRepoCount, fetchRepoRankList,
+    fetchRepoCount, fetchRepoRankList, fetchRepoTrendingList,
     fetchActorCount, fetchActorGrowthCount, fetchActorRankList, fetchActorTrendList,
   } = await import("../../api/repository");
 
@@ -34,6 +35,7 @@ async function fetchStatistics(name: string): Promise<ResponseResult<{
     fetchActorTrendList(params),
     fetchRepoCount(params),
     fetchRepoRankList(params),
+    fetchRepoTrendingList(params),
   ]);
   const failed = responses.find(res => !res.success);
 
@@ -47,6 +49,7 @@ async function fetchStatistics(name: string): Promise<ResponseResult<{
       trend: [],
       repositoryTotalCount: 0,
       repositories: [],
+      trendingRepositories: [],
     },
   } : generateSuccessResponse({
     developerTotalCount: responses[0].data.total,
@@ -56,6 +59,7 @@ async function fetchStatistics(name: string): Promise<ResponseResult<{
     trend: responses[4].data.list,
     repositoryTotalCount: responses[5].data.total,
     repositories: responses[6].data.list,
+    trendingRepositories: responses[7].data.list,
   });
 }
 
