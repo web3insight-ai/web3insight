@@ -8,15 +8,29 @@ import ChartTitle from "$/controls/chart-title";
 
 import RepositoryRankViewWidget from "~/repository/views/repository-rank";
 import DeveloperRankViewWidget from "~/developer/views/developer-rank";
+import RepositoryTrendingViewWidget from "~/repository/views/repository-trending";
 
 import ClientOnly from "$/ClientOnly";
 
 import { resolveChartOptions } from "./helper";
 import MetricOverview from "./MetricOverview";
 
+import type { ActorRankRecord, ActorTrendRecord, RepoRankRecord, RepoTrendingRecord } from "~/api/typing";
+
+interface EcosystemStatistics {
+  developerTotalCount: number | string;
+  developerCoreCount: number | string;
+  developerGrowthCount: number | string;
+  developers: ActorRankRecord[];
+  trend: ActorTrendRecord[];
+  repositoryTotalCount: number | string;
+  repositories: RepoRankRecord[];
+  trendingRepositories: RepoTrendingRecord[];
+}
+
 interface EcosystemDetailProps {
   ecosystem: string;
-  statistics: Record<string, unknown>;
+  statistics: EcosystemStatistics | null;
 }
 
 export default function EcosystemDetailClient({
@@ -24,7 +38,7 @@ export default function EcosystemDetailClient({
   statistics,
 }: EcosystemDetailProps) {
   // Show loading skeleton while data is being fetched
-  const isLoading = !statistics || !statistics.developers || !statistics.repositories;
+  const isLoading = !statistics;
 
   return (
     <div className="min-h-dvh bg-background dark:bg-background-dark py-8">
@@ -49,7 +63,7 @@ export default function EcosystemDetailClient({
           {isLoading ? (
             <CardSkeleton count={4} />
           ) : (
-            <MetricOverview className="mb-4" dataSource={statistics} />
+            <MetricOverview className="mb-4" dataSource={statistics!} />
           )}
         </div>
         <div className="animate-slide-up" style={{ animationDelay: "200ms" }}>
@@ -66,7 +80,7 @@ export default function EcosystemDetailClient({
                 />
                 <div className="h-56">
                   <ReactECharts
-                    option={resolveChartOptions(statistics.trend)}
+                    option={resolveChartOptions(statistics!.trend)}
                     style={{ height: '100%', width: '100%' }}
                   />
                 </div>
@@ -83,7 +97,14 @@ export default function EcosystemDetailClient({
               columns={6}
             />
           ) : (
-            <RepositoryRankViewWidget className="mb-4" dataSource={statistics.repositories} />
+            <RepositoryRankViewWidget className="mb-4" dataSource={statistics!.repositories} />
+          )}
+        </div>
+        <div className="animate-slide-up" style={{ animationDelay: "350ms" }}>
+          {isLoading ? (
+            <CardSkeleton count={1} />
+          ) : (
+            <RepositoryTrendingViewWidget className="mb-4" dataSource={statistics!.trendingRepositories} />
           )}
         </div>
         <div className="animate-slide-up" style={{ animationDelay: "400ms" }}>
@@ -95,7 +116,7 @@ export default function EcosystemDetailClient({
               columns={4}
             />
           ) : (
-            <DeveloperRankViewWidget dataSource={statistics.developers} />
+            <DeveloperRankViewWidget dataSource={statistics!.developers} />
           )}
         </div>
       </div>
