@@ -728,7 +728,8 @@ WHERE eco.name = dpe.ecosystem_name;
     command: 'test:eco:rank',
   })
   async test2() {
-    await this.get7daysTopStarRepos([EcoType.ALL]);
-    await this.get7daysDevelopersRank();
+    // await this.get7daysTopStarRepos([EcoType.ALL]);
+    // await this.get7daysDevelopersRank();
+    await this.ecoRankTotal(EcoType.ALL, false);
   }
 }
