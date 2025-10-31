@@ -1,12 +1,13 @@
 import { redirect } from 'next/navigation';
 import { getMetadata } from "@/utils/app";
 import { fetchStatisticsOverview, fetchStatisticsRank } from "~/statistics/repository";
-import { fetchWeeklyTrendingList } from "~/repository/repository";
+import { fetchWeeklyTrendingList, fetchWeeklyDeveloperActivityList } from "~/repository/repository";
 import { getUser } from "~/auth/repository";
 import { headers } from 'next/headers';
 import EcosystemRankViewWidget from "~/ecosystem/views/ecosystem-rank";
 import RepositoryRankViewWidget from "~/repository/views/repository-rank";
 import RepositoryTrendingViewWidget from "~/repository/views/repository-trending";
+import RepositoryDeveloperActivityViewWidget from "~/repository/views/repository-developer-activity";
 import DeveloperRankViewWidget from "~/developer/views/developer-rank";
 import Section from "$/section";
 import DefaultLayoutWrapper from "./DefaultLayoutWrapper";
@@ -50,10 +51,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const user = await getUser(request);
 
   try {
-    const [statisticsResult, rankResult, trendingResult] = await Promise.all([
+    const [statisticsResult, rankResult, trendingResult, developerActivityResult] = await Promise.all([
       fetchStatisticsOverview(),
       fetchStatisticsRank(),
       fetchWeeklyTrendingList(),
+      fetchWeeklyDeveloperActivityList(),
     ]);
 
     // Use fallback data if statistics fetch failed
@@ -72,6 +74,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       developer: [],
     };
     const weeklyTrendingRepos = trendingResult.success ? trendingResult.data : [];
+    const weeklyDeveloperActivityRepos = developerActivityResult.success ? developerActivityResult.data : [];
 
     // Log any failures for debugging
     if (!statisticsResult.success) {
@@ -82,6 +85,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     }
     if (!trendingResult.success) {
       console.warn("Weekly trending repositories fetch failed:", trendingResult.message);
+    }
+    if (!developerActivityResult.success) {
+      console.warn("Weekly developer activity fetch failed:", developerActivityResult.message);
     }
 
     return (
@@ -104,6 +110,13 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             summary="Repositories gaining the most stars in the past 7 days"
           >
             <RepositoryTrendingViewWidget dataSource={weeklyTrendingRepos} />
+          </Section>
+          <Section
+            className="mt-16"
+            title="Developer Participation Rank"
+            summary="Repositories with the most active developers over the last 7 days"
+          >
+            <RepositoryDeveloperActivityViewWidget dataSource={weeklyDeveloperActivityRepos} />
           </Section>
           <Section
             className="mt-16"
@@ -172,6 +185,13 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             summary="Repositories gaining the most stars in the past 7 days"
           >
             <RepositoryTrendingViewWidget dataSource={[]} />
+          </Section>
+          <Section
+            className="mt-16"
+            title="Developer Participation Rank"
+            summary="Repositories with the most active developers over the last 7 days"
+          >
+            <RepositoryDeveloperActivityViewWidget dataSource={[]} />
           </Section>
           <Section
             className="mt-16"

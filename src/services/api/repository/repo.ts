@@ -6,6 +6,7 @@ import type {
   ListResponseData,
   RepoRankRecord,
   RepoTrendingRecord,
+  RepoDeveloperActivityRecord,
   RepoActiveDeveloperRecord,
 } from "../typing";
 import httpClient from "./client";
@@ -28,10 +29,22 @@ async function fetchTrendingList(
   return httpClient.get("/v1/repos/top/7d", { params: { eco_name: params.eco } });
 }
 
+async function fetchDeveloperActivityList(
+  params: EcoRequestParams = { eco: "ALL" },
+): Promise<ResponseResult<ListResponseData<RepoDeveloperActivityRecord>>> {
+  return httpClient.get("/v1/repos/top/dev/7d", { params: { eco_name: params.eco } });
+}
+
 async function fetchActiveDeveloperList(
   repoId: number,
 ): Promise<ResponseResult<ListResponseData<RepoActiveDeveloperRecord>>> {
   return httpClient.get("/v1/repos/active/developer", { params: { repo_id: repoId } });
 }
 
-export { fetchTotalCount, fetchRankList, fetchTrendingList, fetchActiveDeveloperList };
+export {
+  fetchTotalCount,
+  fetchRankList,
+  fetchTrendingList,
+  fetchDeveloperActivityList,
+  fetchActiveDeveloperList,
+};

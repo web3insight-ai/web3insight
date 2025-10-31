@@ -7,6 +7,7 @@ export {
   fetchTotalCount as fetchRepoCount,
   fetchRankList as fetchRepoRankList,
   fetchTrendingList as fetchRepoTrendingList,
+  fetchDeveloperActivityList as fetchRepoDeveloperActivityList,
   fetchActiveDeveloperList as fetchRepoActiveDeveloperList,
 } from "./repo";
 export {

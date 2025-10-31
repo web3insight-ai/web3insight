@@ -23,6 +23,8 @@ type ChartDatum = {
   displayName: string;
   starGrowth: number;
   starCount: number;
+  forkCount: number;
+  issueCount: number;
   description: string;
 };
 
@@ -44,6 +46,8 @@ function RepositoryTrendingView({ className, dataSource }: RepositoryTrendingVie
         displayName: repo.repo_name?.split("/").pop() || repo.repo_name || "Unknown Repository",
         starGrowth: Number.isFinite(Number(repo.star_growth_7d)) ? Number(repo.star_growth_7d) : 0,
         starCount: Number.isFinite(Number(repo.star_count)) ? Number(repo.star_count) : 0,
+        forkCount: Number.isFinite(Number(repo.forks_count)) ? Number(repo.forks_count) : 0,
+        issueCount: Number.isFinite(Number(repo.open_issues_count)) ? Number(repo.open_issues_count) : 0,
         description: repo.description || "",
       }))
       .filter(item => item.repoName && (item.starGrowth > 0 || item.starCount > 0))
@@ -82,6 +86,14 @@ function RepositoryTrendingView({ className, dataSource }: RepositoryTrendingVie
             <div className="flex items-center justify-between">
               <span className="text-gray-500 dark:text-gray-400">Total Stars</span>
               <span className="font-semibold text-gray-900 dark:text-white">{formatNumber(data.starCount)}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-500 dark:text-gray-400">Forks</span>
+              <span className="font-semibold text-gray-900 dark:text-white">{formatNumber(data.forkCount)}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-500 dark:text-gray-400">Open Issues</span>
+              <span className="font-semibold text-gray-900 dark:text-white">{formatNumber(data.issueCount)}</span>
             </div>
           </div>
         </div>
@@ -182,7 +194,7 @@ function RepositoryTrendingView({ className, dataSource }: RepositoryTrendingVie
                         +{formatNumber(repo.starGrowth)}
                       </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">
-                        {formatNumber(repo.starCount)} total stars
+                        {formatNumber(repo.starCount)} stars · {formatNumber(repo.forkCount)} forks · {formatNumber(repo.issueCount)} open issues
                       </div>
                     </div>
                   </div>
