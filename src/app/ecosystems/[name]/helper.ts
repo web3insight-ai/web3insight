@@ -17,7 +17,7 @@ function resolveChartOptions(dataSource: ActorTrendRecord[]): EChartsOption {
       left: "8%",
       right: "4%",
       top: "5%",
-      bottom: "15%",
+      bottom: "20%",
     },
     xAxis: {
       type: "category",
