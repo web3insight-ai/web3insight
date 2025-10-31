@@ -91,7 +91,7 @@ export class RankService {
       });
     }
 
-    data.sort((a, b) => b.actors_total - a.actors_total);
+    data.sort((a, b) => b.actors_core_total - a.actors_core_total);
 
     const ecoNames = data.map((item) => item.eco_name);
 
@@ -728,7 +728,8 @@ WHERE eco.name = dpe.ecosystem_name;
     command: 'test:eco:rank',
   })
   async test2() {
-    await this.get7daysTopStarRepos([EcoType.ALL]);
-    await this.get7daysDevelopersRank();
+    // await this.get7daysTopStarRepos([EcoType.ALL]);
+    // await this.get7daysDevelopersRank();
+    await this.ecoRankTotal(EcoType.ALL, false);
   }
 }
