@@ -32,6 +32,7 @@ async function bootstrap() {
     .addBearerAuth()
     .addServer('https://api.web3insight.ai')
     .addServer('http://localhost:3010')
+    .addServer('https://api.dev.web3insight.ai')
     .build();
 
   const document = SwaggerModule.createDocument(app, config, {
