@@ -13,14 +13,8 @@ export type RepositoryDetailProps = {
       topics?: string[];
     } | null;
   };
-  analysis: {
-    openrank: Record<string, number> | null;
-    communityOpenrank: {
-      data: Record<string, Record<string, number>>;
-    } | null;
-    attention: Record<string, number> | null;
-    participants: Record<string, number> | null;
-    newContributors: Record<string, number> | null;
-    inactiveContributors: Record<string, number> | null;
-  } | null;
+  activeDevelopers?: Array<{
+    month: string;
+    developers: number;
+  }> | null;
 };

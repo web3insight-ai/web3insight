@@ -53,6 +53,11 @@ type RepoTrendingRecord = RepoBasic & {
   description: string;
 };
 
+type RepoActiveDeveloperRecord = {
+  month: string;
+  developers: number;
+};
+
 type ActorBasic = {
   actor_id: number;
   actor_login: string;
@@ -75,5 +80,6 @@ export type {
   EcoRequestParams, EcoRankRecord, EcoRepo,
   RepoRankRecord,
   RepoTrendingRecord,
+  RepoActiveDeveloperRecord,
   ActorRankRecord, ActorTrendRecord,
 };

@@ -3,15 +3,9 @@ import { notFound } from 'next/navigation';
 import { headers } from 'next/headers';
 import RepositoryDetailClient from './RepositoryDetailClient';
 import { getTitle } from "@/utils/app";
-import { fetchRepoRankList } from "~/api/repository";
+import { fetchRepoRankList, fetchRepoActiveDeveloperList } from "~/api/repository";
 import { fetchRepoByName } from "~/github/repository";
 import { getUser } from "~/auth/repository";
-import { 
-  fetchRepoOpenrank, 
-  fetchRepoAttention, 
-  fetchRepoParticipants, 
-  fetchRepoNewContributors, 
-} from "~/opendigger/repository";
 import type { RepoRankRecord } from "~/api/typing";
 import DefaultLayoutWrapper from '../../DefaultLayoutWrapper';
 import { env } from "@/env";
@@ -67,9 +61,14 @@ export default async function RepositoryDetailPage({ params, searchParams }: Rep
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
   const repoId = resolvedParams.id;
+  const repoNumericId = Number.parseInt(repoId, 10);
   const repoNameFromQuery = resolvedSearchParams.name;
 
   if (!repoId) {
+    notFound();
+  }
+
+  if (Number.isNaN(repoNumericId)) {
     notFound();
   }
 
@@ -84,30 +83,16 @@ export default async function RepositoryDetailPage({ params, searchParams }: Rep
   });
   const user = await getUser(request);
 
-  // Helper function to fetch OpenDigger data
-  async function fetchOpenDiggerData(repoName: string) {
+  async function fetchActiveDeveloperData(repoId: number) {
     try {
-      const [openrankRes, attentionRes, participantsRes, newContributorsRes] = await Promise.all([
-        fetchRepoOpenrank(repoName).catch(() => ({ success: false, data: {} })),
-        fetchRepoAttention(repoName).catch(() => ({ success: false, data: {} })),
-        fetchRepoParticipants(repoName).catch(() => ({ success: false, data: {} })),
-        fetchRepoNewContributors(repoName).catch(() => ({ success: false, data: {} })),
-      ]);
-
-      return {
-        openrank: openrankRes.success ? openrankRes.data : {},
-        attention: attentionRes.success ? attentionRes.data : {},
-        participants: participantsRes.success ? participantsRes.data : {},
-        newContributors: newContributorsRes.success ? newContributorsRes.data : {},
-      };
+      const response = await fetchRepoActiveDeveloperList(repoId);
+      if (response.success && response.data?.list) {
+        return response.data.list;
+      }
+      return [];
     } catch (error) {
-      console.error('Error fetching OpenDigger data:', error);
-      return {
-        openrank: {},
-        attention: {},
-        participants: {},
-        newContributors: {},
-      };
+      console.error('Error fetching active developer data:', error);
+      return [];
     }
   }
 
@@ -120,7 +105,7 @@ export default async function RepositoryDetailPage({ params, searchParams }: Rep
       repoName = repoNameFromQuery;
       // Create a minimal rank data object for consistency
       repoRankData = {
-        repo_id: parseInt(repoId),
+        repo_id: repoNumericId,
         repo_name: repoName,
         star_count: 0,
         forks_count: 0,
@@ -135,7 +120,7 @@ export default async function RepositoryDetailPage({ params, searchParams }: Rep
         throw new Error("Failed to fetch repository data");
       }
 
-      repoRankData = rankListRes.data.list.find(repo => repo.repo_id === parseInt(repoId)) || null;
+      repoRankData = rankListRes.data.list.find(repo => repo.repo_id === repoNumericId) || null;
 
       if (!repoRankData) {
         notFound();
@@ -145,9 +130,9 @@ export default async function RepositoryDetailPage({ params, searchParams }: Rep
     }
 
     try {
-      const [repoDetailsRes, opendiggerData] = await Promise.all([
+      const [repoDetailsRes, activeDevelopers] = await Promise.all([
         fetchRepoByName(repoName),
-        fetchOpenDiggerData(repoName),
+        fetchActiveDeveloperData(repoNumericId),
       ]);
 
       // Use GitHub API data as primary source for repository metrics
@@ -177,7 +162,7 @@ export default async function RepositoryDetailPage({ params, searchParams }: Rep
 
       const pageData = {
         repository: repositoryData,
-        analysis: opendiggerData, // OpenDigger analysis data
+        activeDevelopers,
       };
 
       return (
@@ -187,9 +172,7 @@ export default async function RepositoryDetailPage({ params, searchParams }: Rep
       );
     } catch (error) {
       console.error(`[Route] Error fetching repository details:`, error);
-      // Try to fetch OpenDigger data even if GitHub API fails
-      const opendiggerData = await fetchOpenDiggerData(repoName);
-      
+
       // Return basic data even if detailed fetches fail
       const pageData = {
         repository: {
@@ -201,7 +184,7 @@ export default async function RepositoryDetailPage({ params, searchParams }: Rep
           contributorCount: 0, // Not displayed in UI
           details: null,
         },
-        analysis: opendiggerData,
+        activeDevelopers: await fetchActiveDeveloperData(repoNumericId),
       };
 
       return (
