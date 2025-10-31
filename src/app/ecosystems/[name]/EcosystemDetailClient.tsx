@@ -88,6 +88,13 @@ export default function EcosystemDetailClient({
             )}
           </ClientOnly>
         </div>
+        <div className="animate-slide-up" style={{ animationDelay: "350ms" }}>
+          {isLoading ? (
+            <CardSkeleton count={1} />
+          ) : (
+            <RepositoryTrendingViewWidget className="mb-4" dataSource={statistics!.trendingRepositories} />
+          )}
+        </div>
         <div className="animate-slide-up" style={{ animationDelay: "300ms" }}>
           {isLoading ? (
             <TableSkeleton
@@ -98,13 +105,6 @@ export default function EcosystemDetailClient({
             />
           ) : (
             <RepositoryRankViewWidget className="mb-4" dataSource={statistics!.repositories} />
-          )}
-        </div>
-        <div className="animate-slide-up" style={{ animationDelay: "350ms" }}>
-          {isLoading ? (
-            <CardSkeleton count={1} />
-          ) : (
-            <RepositoryTrendingViewWidget className="mb-4" dataSource={statistics!.trendingRepositories} />
           )}
         </div>
         <div className="animate-slide-up" style={{ animationDelay: "400ms" }}>
