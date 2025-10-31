@@ -8,6 +8,7 @@ import { RepoInfo, TokenPoolService } from '@/app/db/pool.services';
 import {
   BaseIdReqAndResDto,
   GetReposMarkResDto,
+  RepoActiveDevDto,
   RepoMarkDto,
   ReposCustomMarkReqDto,
   ReposOrderEnum,
@@ -159,6 +160,22 @@ export class ReposService {
     const repoInfo = results.flat();
 
     return repoInfo;
+  }
+
+  async getRepoActiveDevelopers(repoId: number): Promise<RepoActiveDevDto> {
+    const repo = await this.db
+      .selectFrom('data.repos')
+      .selectAll()
+      .where('repo_id', '=', String(repoId))
+      .executeTakeFirst();
+    if (!repo) {
+      throw new NotFoundException(`Repo with id ${repoId} not found`);
+    }
+    const activeDevelopers = repo.active_developers;
+
+    const res = new RepoActiveDevDto();
+    res.list = activeDevelopers as [];
+    return res;
   }
 
   @Command({

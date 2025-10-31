@@ -100,14 +100,16 @@ export interface ApiAnalysisUsers {
 }
 
 export interface DataRepos {
+  active_developers: Generated<Json>;
+  api: Generated<Json | null> | RepoInfo;
   api_updated_at: Generated<Timestamp>;
   created_at: Generated<Timestamp>;
   custom_marks: Generated<Json>;
   indexed: Generated<boolean>;
   repo_id: Int8;
   repo_name: string;
+  star_history: Generated<Json>;
   upstream_marks: Generated<Json>;
-  api: Generated<Json | null> | RepoInfo;
 }
 
 export interface ApiAuthUsers {

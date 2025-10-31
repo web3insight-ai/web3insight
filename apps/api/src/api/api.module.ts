@@ -10,6 +10,7 @@ import { DBModule } from '@/app/db/db.module';
 import { CustomController } from './controller/custom.controller';
 import { AuthModule } from '@/auth/auth.module';
 import { AuthController } from './controller/auth.controller';
+import { RepoController } from './controller/repo.controller';
 
 @Module({
   controllers: [
@@ -19,6 +20,7 @@ import { AuthController } from './controller/auth.controller';
     GithubController,
     CustomController,
     AuthController,
+    RepoController,
   ],
   providers: [JwtService, GithubService],
   exports: [],
