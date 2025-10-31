@@ -100,17 +100,17 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           </Section>
           <Section
             className="mt-16"
-            title="Repository Activity"
-            summary="Top repositories by developer engagement and contributions"
-          >
-            <RepositoryRankViewWidget dataSource={statisticRank.repository} />
-          </Section>
-          <Section
-            className="mt-16"
             title="Weekly Star Growth"
             summary="Repositories gaining the most stars in the past 7 days"
           >
             <RepositoryTrendingViewWidget dataSource={weeklyTrendingRepos} />
+          </Section>
+          <Section
+            className="mt-16"
+            title="Repository Activity"
+            summary="Top repositories by developer engagement and contributions"
+          >
+            <RepositoryRankViewWidget dataSource={statisticRank.repository} />
           </Section>
           <Section
             className="mt-16"
@@ -168,17 +168,17 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           </Section>
           <Section
             className="mt-16"
-            title="Repository Activity"
-            summary="Top repositories by developer engagement and contributions"
-          >
-            <RepositoryRankViewWidget dataSource={fallbackStatisticRank.repository} />
-          </Section>
-          <Section
-            className="mt-16"
             title="Weekly Star Growth"
             summary="Repositories gaining the most stars in the past 7 days"
           >
             <RepositoryTrendingViewWidget dataSource={[]} />
+          </Section>
+          <Section
+            className="mt-16"
+            title="Repository Activity"
+            summary="Top repositories by developer engagement and contributions"
+          >
+            <RepositoryRankViewWidget dataSource={fallbackStatisticRank.repository} />
           </Section>
           <Section
             className="mt-16"
