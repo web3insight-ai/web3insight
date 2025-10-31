@@ -14,6 +14,7 @@ export class QueryTopStarRepo {
   contributor_count: number;
   description: string;
   star_growth_7d: number;
+  developer_count_last_7_days: number;
 }
 
 export class QueryTopActors {

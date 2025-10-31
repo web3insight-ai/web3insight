@@ -9,6 +9,7 @@ export const CacheKey = {
   EcoRank: 'eco_rank',
   RepoStarRank: 'repo_star_rank',
   RepoStarRank7d: 'repo_star_rank_7d',
+  RepoDevRank7d: 'repo_dev_rank_7d',
   ActorScoreRank: 'actor_score_rank',
   EcoRepoRank: 'eco_repo_rank',
 } as const;
