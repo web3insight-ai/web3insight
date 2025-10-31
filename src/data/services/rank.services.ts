@@ -725,11 +725,12 @@ WHERE eco.name = dpe.ecosystem_name;
   }
 
   @Command({
-    command: 'test:eco:rank',
+    command: 'test:rank',
   })
   async test2() {
     // await this.get7daysTopStarRepos([EcoType.ALL]);
     // await this.get7daysDevelopersRank();
-    await this.ecoRankTotal(EcoType.ALL, false);
+    const ecoTypes = Object.values(EcoType);
+    await this.getTopScoreActors(ecoTypes);
   }
 }
