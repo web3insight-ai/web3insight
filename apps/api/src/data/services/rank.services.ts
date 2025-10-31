@@ -91,7 +91,7 @@ export class RankService {
       });
     }
 
-    data.sort((a, b) => b.actors_total - a.actors_total);
+    data.sort((a, b) => b.actors_core_total - a.actors_core_total);
 
     const ecoNames = data.map((item) => item.eco_name);
 
