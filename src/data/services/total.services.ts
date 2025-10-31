@@ -234,6 +234,71 @@ ORDER BY ecosystem_name, time_unit;
   }
 
   @Command({
+    command: 'sync:indexer:last',
+    description: 'indexer add more data',
+  })
+  async indexerd(): Promise<void> {
+    const sqlRawQuery = `
+WITH time_range AS (SELECT date_trunc('month', now()) - interval '11 months' AS start_month),
+     monthly_dev AS (SELECT e.repo_id,
+                            date_trunc('month', e.created_at) AS month,
+                            COUNT(DISTINCT e.actor_id)        AS developers
+                     FROM data.events e
+                              JOIN time_range t ON e.created_at >= t.start_month
+                     WHERE e.event_type IN ('PullRequestEvent', 'PushEvent')
+                     GROUP BY e.repo_id, date_trunc('month', e.created_at)),
+
+     repo_json AS (SELECT repo_id,
+                          jsonb_agg(
+                                  jsonb_build_object(
+                                          'month', to_char(month, 'YYYY-MM'),
+                                          'developers', developers
+                                  ) ORDER BY month
+                          ) AS active_developers
+                   FROM monthly_dev
+                   GROUP BY repo_id)
+UPDATE data.repos r
+SET active_developers = rj.active_developers
+FROM repo_json rj
+WHERE r.repo_id = rj.repo_id;
+`;
+    const query = CompiledQuery.raw(sqlRawQuery);
+
+    const exec = await this.db.executeQuery(query);
+
+    console.log('Indexer monthly dev updated rows:', exec);
+
+    const sqlRawQuery2 = `
+WITH monthly_star AS (SELECT e.repo_id,
+                             date_trunc('month', e.created_at) AS month,
+                             COUNT(*)                          AS stars
+                      FROM data.events e
+                      WHERE e.event_type = 'WatchEvent'
+                      GROUP BY e.repo_id, date_trunc('month', e.created_at)),
+
+     repo_json AS (SELECT repo_id,
+                          jsonb_agg(
+                                  jsonb_build_object(
+                                          'month', to_char(month, 'YYYY-MM'),
+                                          'stars', stars
+                                  ) ORDER BY month
+                          ) AS star_history
+                   FROM monthly_star
+                   GROUP BY repo_id)
+
+UPDATE data.repos r
+SET star_history = rj.star_history
+FROM repo_json rj
+WHERE r.repo_id = rj.repo_id;
+`;
+    const query2 = CompiledQuery.raw(sqlRawQuery2);
+
+    const exec2 = await this.db.executeQuery(query2);
+
+    console.log('Indexer star updated rows:', exec2);
+  }
+
+  @Command({
     command: 'sync:eco:total',
     description: 'Test eco data',
   })
