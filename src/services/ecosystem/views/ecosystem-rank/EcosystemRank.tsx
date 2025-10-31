@@ -51,8 +51,8 @@ function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
             <tr className="border-t border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider w-12">#</th>
               <TableHeader>Ecosystem</TableHeader>
-              <TableHeader align="right" tooltip="Developers with activity (star not included) in this ecosystem (all time)">Contributors</TableHeader>
               <TableHeader align="right" tooltip="Developers with pull requests and push events in the past year">Devs</TableHeader>
+              <TableHeader align="right" tooltip="Developers with activity (star not included) in this ecosystem (all time)">Contributors</TableHeader>
               <TableHeader align="right" tooltip="Developers with first activity in past 90 days">New</TableHeader>
               <TableHeader align="right" tooltip="Total repositories in this ecosystem">Repos</TableHeader>
             </tr>
@@ -81,12 +81,12 @@ function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right">
                   <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
-                    {Number(ecosystem.actors_total).toLocaleString()}
+                    {Number(ecosystem.actors_core_total).toLocaleString()}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right">
                   <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
-                    {Number(ecosystem.actors_core_total).toLocaleString()}
+                    {Number(ecosystem.actors_total).toLocaleString()}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right">
