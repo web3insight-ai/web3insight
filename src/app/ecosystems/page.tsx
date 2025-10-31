@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import EcosystemsPageClient from "./EcosystemsPageClient";
-import { fetchStatisticsRank } from "~/statistics/repository";
+import { fetchStatisticsRank, fetchStatisticsOverview } from "~/statistics/repository";
 import { fetchEcosystemCount } from "~/api/repository";
 import { getUser } from "~/auth/repository";
 import { headers } from "next/headers";
@@ -29,15 +29,29 @@ export default async function EcosystemsPage() {
   const user = await getUser(request);
 
   try {
-    const [rankResult, countResult] = await Promise.all([
+    const [rankResult, countResult, overviewResult] = await Promise.all([
       fetchStatisticsRank(),
       fetchEcosystemCount(),
+      fetchStatisticsOverview(),
     ]);
 
     const ecosystems = rankResult.success ? rankResult.data.ecosystem : [];
 
+    const statisticsOverview = overviewResult.success
+      ? overviewResult.data
+      : {
+        ecosystem: 0,
+        repository: 0,
+        developer: 0,
+        coreDeveloper: 0,
+      };
+
     if (!rankResult.success) {
       console.warn("Statistics rank fetch failed:", rankResult.message);
+    }
+
+    if (!overviewResult.success) {
+      console.warn("Statistics overview fetch failed:", overviewResult.message);
     }
 
     // Get true ecosystem count from API, fallback to array length if API fails
@@ -46,18 +60,9 @@ export default async function EcosystemsPage() {
       : ecosystems.length;
 
     // Calculate totals from the real data
-    const totalRepositories = ecosystems.reduce(
-      (acc, eco) => acc + Number(eco.repos_total),
-      0,
-    );
-    const totalDevelopers = ecosystems.reduce(
-      (acc, eco) => acc + Number(eco.actors_total),
-      0,
-    );
-    const totalCoreDevelopers = ecosystems.reduce(
-      (acc, eco) => acc + Number(eco.actors_core_total),
-      0,
-    );
+    const totalRepositories = Number(statisticsOverview.repository);
+    const totalDevelopers = Number(statisticsOverview.developer);
+    const totalCoreDevelopers = Number(statisticsOverview.coreDeveloper);
     const totalNewDevelopers = ecosystems.reduce(
       (acc, eco) => acc + Number(eco.actors_new_total),
       0,
