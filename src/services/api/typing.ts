@@ -53,6 +53,14 @@ type RepoTrendingRecord = RepoBasic & {
   description: string;
 };
 
+type RepoDeveloperActivityRecord = RepoBasic & {
+  dev_7_day: number;
+  star_count: number;
+  forks_count: number;
+  open_issues_count: number;
+  description: string;
+};
+
 type RepoActiveDeveloperRecord = {
   month: string;
   developers: number;
@@ -80,6 +88,7 @@ export type {
   EcoRequestParams, EcoRankRecord, EcoRepo,
   RepoRankRecord,
   RepoTrendingRecord,
+  RepoDeveloperActivityRecord,
   RepoActiveDeveloperRecord,
   ActorRankRecord, ActorTrendRecord,
 };
