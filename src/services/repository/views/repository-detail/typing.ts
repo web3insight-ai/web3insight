@@ -22,5 +22,9 @@ export type RepositoryDetailProps = {
     participants: Record<string, number> | null;
     newContributors: Record<string, number> | null;
     inactiveContributors: Record<string, number> | null;
+    activeDevelopers: Array<{
+      month: string;
+      developers: number;
+    }> | null;
   } | null;
 };
