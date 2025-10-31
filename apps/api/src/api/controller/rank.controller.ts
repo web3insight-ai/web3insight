@@ -87,6 +87,27 @@ export class RankController {
     }
   }
 
+  @Get('repos/top/dev/7d')
+  @ApiOperation({
+    summary: 'Get repos rank list top 10 by dev count',
+    description: '',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AppAuthGuard)
+  async getRepoTopDev7d(@Query() query: GetTotalReqDto) {
+    try {
+      const res = await this.cacheDataService.getCacheData(
+        CacheKey.RepoDevRank7d,
+        query.eco_name,
+      );
+      return res?.cache_data as RepoRankListDto;
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        throw new HttpException(e, 400);
+      }
+    }
+  }
+
   @Get('actors/top')
   @ApiOperation({
     summary: 'Get actors rank list top 10',

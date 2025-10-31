@@ -286,6 +286,66 @@ ORDER BY ecosystem;`;
     return results.rows;
   }
 
+  async get7daysDevelopersRank() {
+    const sqlRawQuery = `
+WITH filtered_events AS (SELECT repo_id,
+                                actor_id
+                         FROM data.events
+                         WHERE created_at >= DATE_TRUNC('day', NOW()) - INTERVAL '7 days'
+                           AND event_type IN ('PullRequestEvent', 'PushEvent')),
+     developer_count AS (SELECT repo_id,
+                                COUNT(DISTINCT actor_id) AS developer_cnt
+                         FROM filtered_events
+                         GROUP BY repo_id),
+
+     top200_repo AS (SELECT repo_id,
+                            developer_cnt
+                     FROM developer_count
+                     ORDER BY developer_cnt DESC
+                     LIMIT 200)
+
+SELECT json_agg(
+               json_build_object(
+                       'repo_id', tr.repo_id,
+                       'repo_name', r.repo_name,
+                       'dev_7_day', tr.developer_cnt
+               ) ORDER BY tr.developer_cnt DESC
+       ) AS top_repositories
+
+FROM top200_repo tr
+         JOIN data.repos r ON r.repo_id = tr.repo_id;`;
+
+    const query = CompiledQuery.raw(sqlRawQuery);
+
+    const results = await this.db.executeQuery(query);
+
+    for (const row of results.rows as QueryTopStar[]) {
+      const ids = row.top_repositories.map((repo) => repo.repo_id);
+
+      const res = await this.reposService.getRepoInfo(ids);
+
+      const data: QueryTopStarRepo[] = row.top_repositories.map((row) => {
+        const api = res.find((r) => r.id === row.repo_id);
+        return {
+          ...row,
+          star_count: api.stargazers_count,
+          forks_count: api.forks_count,
+          open_issues_count: api.open_issues_count,
+          description: api.description,
+        };
+      });
+      const cacheData = new RepoRankListDto();
+      cacheData.list = data;
+      await this.cacheDataService.updateCacheData(
+        CacheKey.RepoDevRank7d,
+        cacheData,
+        new Date().toISOString(),
+        'ALL',
+      );
+    }
+    return results.rows;
+  }
+
   async get7daysTopStarRepos(ecoNames: string[]) {
     const sqlRawQuery = `
 WITH ecosystem_list AS (SELECT UNNEST($1::text[]) AS ecosystem_name),
@@ -652,6 +712,7 @@ WHERE eco.name = dpe.ecosystem_name;
     await this.repoStarRank(ecoTypes);
     await this.ecoRankTotal(EcoType.ALL, false);
     await this.get7daysTopStarRepos(ecoTypes);
+    await this.get7daysDevelopersRank();
   }
 
   @Command({
@@ -666,5 +727,8 @@ WHERE eco.name = dpe.ecosystem_name;
   @Command({
     command: 'test:eco:rank',
   })
-  async test2() {}
+  async test2() {
+    await this.get7daysTopStarRepos([EcoType.ALL]);
+    await this.get7daysDevelopersRank();
+  }
 }
