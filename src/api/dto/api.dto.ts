@@ -27,6 +27,11 @@ export class GetTotalReqDto {
   eco_name: EcoType = EcoType.ALL;
 }
 
+export class GetRepoInfoDto {
+  @IsNumber()
+  repo_id: number = 0;
+}
+
 export class GetActorsTotalReqDto extends GetTotalReqDto {
   @IsEnum(ActorsScopeType)
   @IsOptional()
@@ -66,6 +71,14 @@ export class RepoRankListDto {
 
 export class ActorScoreRankListDto {
   list: QueryTopActor[] = [];
+}
+
+export class RepoActiveDevDto {
+  list: GithubRepoDto[] = [];
+}
+
+export class GithubRepoDto {
+  repo_id: number = 0;
 }
 
 export enum ReposOrderEnum {
