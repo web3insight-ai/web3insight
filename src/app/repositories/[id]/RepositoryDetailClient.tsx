@@ -14,13 +14,13 @@ interface RepositoryDetailProps {
     contributorCount: number;
     details: Record<string, unknown>;
   } | null;
-  analysis: Record<string, unknown>;
+  activeDevelopers: Array<{
+    month: string;
+    developers: number;
+  }> | null;
 }
 
-export default function RepositoryDetailClient({
-  repository,
-  analysis,
-}: RepositoryDetailProps) {
+export default function RepositoryDetailClient({ repository, activeDevelopers }: RepositoryDetailProps) {
   // Show loading skeleton while critical data is missing
   if (!repository || !repository.name) {
     return (
@@ -29,14 +29,7 @@ export default function RepositoryDetailClient({
           <div className="mb-8">
             <ChartSkeleton title="Loading repository..." height="120px" />
           </div>
-          <div className="space-y-6">
-            <ChartSkeleton title="OpenRank Trend" />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <ChartSkeleton title="Active Participants" height="280px" />
-              <ChartSkeleton title="New Contributors" height="280px" />
-            </div>
-            <ChartSkeleton title="Repository Attention" height="280px" />
-          </div>
+          <ChartSkeleton title="Active Developers" height="280px" />
         </div>
       </div>
     );
@@ -44,7 +37,7 @@ export default function RepositoryDetailClient({
 
   return (
     <ClientOnly>
-      <RepositoryDetailView repository={repository} analysis={analysis} />
+      <RepositoryDetailView repository={repository} activeDevelopers={activeDevelopers} />
     </ClientOnly>
   );
 }
