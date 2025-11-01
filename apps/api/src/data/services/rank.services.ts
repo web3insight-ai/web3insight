@@ -5,7 +5,7 @@ import { CompiledQuery, Kysely } from 'kysely';
 import { Command, Console } from 'nestjs-console';
 import { CacheDataService } from './cache.services';
 import { CacheKey } from '../dto/cache.dto';
-import { EcoType } from '../dto/data.dto';
+import { ECO_ALL, EcoNameFilter } from '../dto/data.dto';
 import {
   EcoRankDto,
   EcoRankListDto,
@@ -19,6 +19,7 @@ import {
   QueryTopStarRepo,
 } from '../dto/query.dto';
 import { ReposService } from './repos.services';
+import { EcoService } from './eco.services';
 
 export class EcoRankItem {
   eco_name: string;
@@ -39,9 +40,10 @@ export class RankService {
   constructor(
     private cacheDataService: CacheDataService,
     private reposService: ReposService,
+    private ecoService: EcoService,
   ) {}
 
-  async ecoRankTotal(ecoName: EcoType, cache: boolean = true) {
+  async ecoRankTotal(ecoName: EcoNameFilter, cache: boolean = true) {
     const dbData = await this.cacheDataService.getCacheData(
       CacheKey.EcoRank,
       ecoName,
@@ -57,9 +59,7 @@ export class RankService {
 
     const data: EcoRankDto[] = [];
 
-    const ecoTypes = Object.values(EcoType).filter(
-      (eco) => eco !== EcoType.ALL,
-    );
+    const ecoTypes = await this.ecoService.getActiveEcoNames();
     for (const ecoName of ecoTypes) {
       const actorsTotalAllScopeResult =
         await this.cacheDataService.getCacheData(CacheKey.ActorTotal, ecoName);
@@ -707,10 +707,11 @@ WHERE eco.name = dpe.ecosystem_name;
     description: 'Test eco data',
   })
   async test() {
-    const ecoTypes = Object.values(EcoType);
+    const ecoTypes = await this.ecoService.getActiveEcoNames();
+    await this.EcoRank();
     await this.getTopScoreActors(ecoTypes);
     await this.repoStarRank(ecoTypes);
-    await this.ecoRankTotal(EcoType.ALL, false);
+    await this.ecoRankTotal(ECO_ALL, false);
     await this.get7daysTopStarRepos(ecoTypes);
     await this.get7daysDevelopersRank();
   }
@@ -720,7 +721,7 @@ WHERE eco.name = dpe.ecosystem_name;
     description: 'Synchronize ecosystem repository ranking data',
   })
   async syncEcoRank() {
-    const ecoTypes = Object.values(EcoType);
+    const ecoTypes = await this.ecoService.getActiveEcoNames();
     await this.getEcoRepoRank(ecoTypes);
   }
 
@@ -728,9 +729,9 @@ WHERE eco.name = dpe.ecosystem_name;
     command: 'test:rank',
   })
   async test2() {
-    // await this.get7daysTopStarRepos([EcoType.ALL]);
+    // await this.get7daysTopStarRepos([ECO_ALL]);
     // await this.get7daysDevelopersRank();
-    const ecoTypes = Object.values(EcoType);
+    const ecoTypes = await this.ecoService.getActiveEcoNames();
     await this.getTopScoreActors(ecoTypes);
   }
 }

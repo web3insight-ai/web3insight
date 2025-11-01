@@ -18,7 +18,7 @@ import {
 import { TotalService } from '@/data/services/total.services';
 import { CacheDataService } from '@/data/services/cache.services';
 import { CacheKey } from '@/data/dto/cache.dto';
-import { ActorsScopeType, EcoType, StatsPeriod } from '@/data/dto/data.dto';
+import { ActorsScopeType, ECO_ALL, StatsPeriod } from '@/data/dto/data.dto';
 
 @Controller()
 @ApiTags('Total')
@@ -110,7 +110,7 @@ export class TotalController {
     try {
       const res = await this.cacheDataService.getCacheData(
         CacheKey.EcoTotal,
-        EcoType.ALL,
+        ECO_ALL,
       );
       return res?.cache_data as TotalDto;
     } catch (e: unknown) {
