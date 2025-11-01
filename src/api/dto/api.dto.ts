@@ -11,7 +11,12 @@ import {
   ValidateIf,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ActorsScopeType, EcoType, StatsPeriod } from '@/data/dto/data.dto';
+import {
+  ActorsScopeType,
+  ECO_ALL,
+  EcoNameFilter,
+  StatsPeriod,
+} from '@/data/dto/data.dto';
 import { Expose, Type } from 'class-transformer';
 import {
   ActorDateItemDto,
@@ -22,9 +27,9 @@ import { ApiAnalysisUsers } from '@/app/db/dto/db.dto';
 import { Optional } from '@nestjs/common';
 
 export class GetTotalReqDto {
-  @IsEnum(EcoType)
+  @IsString()
   @IsOptional()
-  eco_name: EcoType = EcoType.ALL;
+  eco_name: EcoNameFilter = ECO_ALL;
 }
 
 export class GetRepoInfoDto {
@@ -95,9 +100,9 @@ export class ReposOrderReqDto {
   @IsEnum(ReposOrderEnum)
   @IsOptional()
   order: ReposOrderEnum = ReposOrderEnum.ID;
-  @IsEnum(EcoType)
+  @IsString()
   @IsOptional()
-  eco_name: EcoType = EcoType.ALL;
+  eco_name: EcoNameFilter = ECO_ALL;
   @IsNumber()
   skip: number = 0;
   @IsNumber()
@@ -195,10 +200,10 @@ export class AuthBindFarcasterReqDto {
 }
 
 export class ReposCustomMarkReqDto {
-  @IsEnum(EcoType)
+  @ValidateIf((o: ReposCustomMarkReqDto) => o.eco_name !== ECO_ALL)
+  @IsString()
   @IsOptional()
-  @ValidateIf((o: ReposCustomMarkReqDto) => o.eco_name !== EcoType.ALL)
-  eco_name: EcoType = EcoType.ALL;
+  eco_name: EcoNameFilter = ECO_ALL;
   @IsNumber()
   @Min(0)
   @Max(10)

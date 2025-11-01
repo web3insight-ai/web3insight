@@ -3,7 +3,7 @@ import { DB } from '@/app/db/dto/db.dto';
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Kysely } from 'kysely';
 import { Command, Console } from 'nestjs-console';
-import { EcoType } from '../dto/data.dto';
+import { ECO_ALL } from '../dto/data.dto';
 import { RepoInfo, TokenPoolService } from '@/app/db/pool.services';
 import {
   BaseIdReqAndResDto,
@@ -26,7 +26,7 @@ export class ReposService {
 
   async getReposByEcoName(params: ReposOrderReqDto) {
     let query = this.db.selectFrom('data.repos');
-    if (params.eco_name !== EcoType.ALL) {
+    if (params.eco_name !== ECO_ALL) {
       query = query.where('upstream_marks', '?', params.eco_name);
     }
 
@@ -188,7 +188,7 @@ export class ReposService {
     params.order = ReposOrderEnum.ID;
     params.skip = 0;
     params.take = 10;
-    params.eco_name = EcoType.ALL;
+    params.eco_name = ECO_ALL;
     await this.getReposByEcoName(params);
     return Promise.resolve();
   }

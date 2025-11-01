@@ -15,7 +15,7 @@ import {
   GetTotalReqDto,
   RepoRankListDto,
 } from '../dto/api.dto';
-import { EcoType } from '@/data/dto/data.dto';
+import { ECO_ALL } from '@/data/dto/data.dto';
 import { CacheDataService } from '@/data/services/cache.services';
 import { CacheKey } from '@/data/dto/cache.dto';
 
@@ -36,7 +36,7 @@ export class RankController {
   @UseGuards(AppAuthGuard)
   async getEcoTop() {
     try {
-      const res = await this.rankService.ecoRankTotal(EcoType.ALL);
+      const res = await this.rankService.ecoRankTotal(ECO_ALL);
       return res?.cache_data as EcoRankListDto;
     } catch (e: unknown) {
       if (e instanceof Error) {

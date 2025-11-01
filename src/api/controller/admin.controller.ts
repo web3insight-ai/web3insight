@@ -1,6 +1,7 @@
 import { AppAuthGuard } from '@/auth/app.auth.guard';
 import { RankService } from '@/data/services/rank.services';
 import { ReposService } from '@/data/services/repos.services';
+import { EcoService } from '@/data/services/eco.services';
 import {
   Body,
   Controller,
@@ -17,7 +18,6 @@ import {
   ReposCustomMarkReqDto,
   ReposOrderReqDto,
 } from '../dto/api.dto';
-import { EcoTypeArray } from '@/data/dto/data.dto';
 
 @Controller()
 @ApiTags('Admin')
@@ -25,6 +25,7 @@ export class AdminController {
   constructor(
     private readonly _rankService: RankService,
     private readonly reposService: ReposService,
+    private readonly ecoService: EcoService,
   ) {}
 
   @Get('admin/ecosystems')
@@ -34,10 +35,11 @@ export class AdminController {
   })
   @ApiBearerAuth()
   @UseGuards(AppAuthGuard)
-  getEcoSystems(): EcoList {
+  async getEcoSystems(): Promise<EcoList> {
+    const ecoFilters = await this.ecoService.getEcoNameFilters();
     return {
-      available_ecosystem: EcoTypeArray,
-      provider_ecosystem: EcoTypeArray,
+      available_ecosystem: ecoFilters,
+      provider_ecosystem: ecoFilters,
     };
   }
 

@@ -5,7 +5,8 @@ import { CompiledQuery, Kysely } from 'kysely';
 import { Command, Console } from 'nestjs-console';
 import { CacheDataService } from './cache.services';
 import { CacheKey, CacheKeyValue } from '../dto/cache.dto';
-import { EcoType, StatsPeriod } from '../dto/data.dto';
+import { ECO_ALL, StatsPeriod } from '../dto/data.dto';
+import { EcoService } from './eco.services';
 import {
   QueryActorDate,
   QueryActorsTotal,
@@ -19,7 +20,10 @@ import { ActorDateListDto } from '@/api/dto/api.dto';
 export class TotalService {
   @Inject(KYSELY) private readonly db!: Kysely<DB>;
 
-  constructor(private cacheDataService: CacheDataService) {}
+  constructor(
+    private cacheDataService: CacheDataService,
+    private ecoService: EcoService,
+  ) {}
 
   async reposTotal(ecoNames: string[]) {
     const sqlRawQuery = `
@@ -160,7 +164,7 @@ FROM (
         CacheKey.EcoTotal,
         { total: row.ecosystem_count },
         new Date().toISOString(),
-        EcoType.ALL,
+        ECO_ALL,
       );
     }
   }
@@ -303,8 +307,8 @@ WHERE r.repo_id = rj.repo_id;
     description: 'Test eco data',
   })
   async test(): Promise<void> {
-    const ecoTypes = Object.values(EcoType);
-    await this.getActorDate(ecoTypes.filter((eco) => eco !== EcoType.ALL));
+    const ecoTypes = await this.ecoService.getActiveEcoNames();
+    await this.getActorDate(ecoTypes);
     await this.reposTotal(ecoTypes);
     await this.actorsTotalNew(ecoTypes);
     await this.ecoTotal();
