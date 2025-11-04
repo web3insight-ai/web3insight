@@ -15,7 +15,7 @@ import EventAnalyticsOverview from "../../../../components/EventAnalyticsOvervie
 import EventAnalyticsSkeleton from "../../../../components/loading/EventAnalyticsSkeleton";
 
 import type { EventReport } from "../../typing";
-import { fetchOne } from "../../repository/client";
+import { fetchOne, fetchPublicEventDetail } from "../../repository/client";
 
 import type { EventDetailViewWidgetProps } from "./typing";
 import { resolveChartOptions } from "./helper";
@@ -29,7 +29,9 @@ interface EventAnalysisData {
   users_without_contributions: number;
 }
 
-function EventDetailView({ id }: EventDetailViewWidgetProps) {
+function EventDetailView({ id, mode = 'admin', showParticipants }: EventDetailViewWidgetProps) {
+  const isAdminMode = mode === 'admin';
+  const shouldShowParticipants = showParticipants ?? isAdminMode;
   const [loading, setLoading] = useState(false);
   const [contestants, setContestants] = useState<EventReport["contestants"]>([]);
   const [expandedContestants, setExpandedContestants] = useState<Set<string>>(new Set());
@@ -87,31 +89,43 @@ function EventDetailView({ id }: EventDetailViewWidgetProps) {
 
     const loadEventData = async () => {
       try {
-        // Fetch both event data and analysis data
+        const detailFetcher = isAdminMode ? fetchOne : fetchPublicEventDetail;
+
         await Promise.all([
-          fetchOne(id).then(res => {
-            if (res.success) {
-              setContestants(res.data.contestants);
+          detailFetcher(id).then(res => {
+            if (res.success && res.data) {
+              const detail = res.data as EventReport;
+              setContestants(detail.contestants || []);
+              if (isAdminMode) {
+                setEventData(detail);
+              }
             } else {
               console.error(`[Event Detail] Failed to fetch event data:`, res.message);
-              alert(res.message);
+              if (isAdminMode) {
+                alert(res.message);
+              }
             }
           }),
           fetchAnalysisData(),
         ]);
       } catch (error) {
         console.error(`[Event Detail] Error fetching event data:`, error);
-        alert("Failed to load event data. Please try again.");
+        if (isAdminMode) {
+          alert("Failed to load event data. Please try again.");
+        }
       } finally {
         setLoading(false);
       }
     };
 
     loadEventData();
-  }, [id]);
+  }, [id, isAdminMode]);
 
   // Fetch event data for editing
   const fetchEventData = async () => {
+    if (!isAdminMode) {
+      return;
+    }
     setLoadingEventData(true);
     try {
       const result = await fetchOne(id);
@@ -126,15 +140,20 @@ function EventDetailView({ id }: EventDetailViewWidgetProps) {
   };
 
   const handleEditClick = () => {
+    if (!isAdminMode) {
+      return;
+    }
     if (!eventData) {
-      fetchEventData();
+      void fetchEventData();
     }
     setShowEditDialog(true);
   };
 
   const handleEditSuccess = () => {
     // Refresh the page to show updated data
-    window.location.reload();
+    if (isAdminMode) {
+      window.location.reload();
+    }
   };
 
   if (loading) {
@@ -148,7 +167,7 @@ function EventDetailView({ id }: EventDetailViewWidgetProps) {
     );
   }
 
-  if (contestants.length === 0) {
+  if (contestants.length === 0 && shouldShowParticipants) {
     return (
       <div className="flex items-center justify-center min-h-96">
         <div className="text-center">
@@ -211,18 +230,20 @@ function EventDetailView({ id }: EventDetailViewWidgetProps) {
                 <p className="text-xs text-gray-500 dark:text-gray-400">{contestants.length} contestants participating</p>
               </div>
             </div>
-            <div className="flex justify-end">
-              <Button
-                size="sm"
-                variant="light"
-                startContent={<Edit3 size={14} />}
-                onClick={handleEditClick}
-                isLoading={loadingEventData}
-                className="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 h-8 min-w-0"
-              >
-                Edit
-              </Button>
-            </div>
+            {isAdminMode && (
+              <div className="flex justify-end">
+                <Button
+                  size="sm"
+                  variant="light"
+                  startContent={<Edit3 size={14} />}
+                  onClick={handleEditClick}
+                  isLoading={loadingEventData}
+                  className="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 h-8 min-w-0"
+                >
+                  Edit
+                </Button>
+              </div>
+            )}
           </div>
         </CardHeader>
       </Card>
@@ -257,194 +278,197 @@ function EventDetailView({ id }: EventDetailViewWidgetProps) {
         <EventAnalyticsSkeleton />
       ) : null}
 
-      {/* Participants List */}
-      <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">
-        <CardHeader className="px-6 py-5">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-secondary/10">
-              <Users size={18} className="text-secondary" />
+      {shouldShowParticipants && (
+        <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">
+          <CardHeader className="px-6 py-5">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-secondary/10">
+                <Users size={18} className="text-secondary" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">Event Participants</h3>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Event Participants</h3>
-          </div>
-        </CardHeader>
+          </CardHeader>
 
-        <div className="divide-y divide-border dark:divide-border-dark">
-          {contestants.map((contestant, index) => {
-            const isExpanded = expandedContestants.has(String(contestant.id));
+          <div className="divide-y divide-border dark:divide-border-dark">
+            {contestants.map((contestant, index) => {
+              const isExpanded = expandedContestants.has(String(contestant.id));
 
-            return (
-              <div key={contestant.id} className="animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
-                {/* Participant Row */}
-                <button
-                  className="w-full px-6 py-4 text-left hover:bg-surface dark:hover:bg-surface-dark transition-colors duration-200 focus:outline-none focus:bg-surface dark:focus:bg-surface-dark"
-                  onClick={() => toggleContestant(String(contestant.id))}
-                  aria-expanded={isExpanded}
-                  aria-controls={`contestant-details-${String(contestant.id)}`}
-                >
-                  <div className="flex items-center gap-4">
-                    {/* Rank Badge */}
-                    <div className={`w-8 h-8 rounded-full border flex items-center justify-center text-xs font-medium ${getRankBadgeStyles(index)}`}>
-                      {getRankIcon(index)}
-                    </div>
+              return (
+                <div key={contestant.id} className="animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
+                  {/* Participant Row */}
+                  <button
+                    className="w-full px-6 py-4 text-left hover:bg-surface dark:hover:bg-surface-dark transition-colors duration-200 focus:outline-none focus:bg-surface dark:focus:bg-surface-dark"
+                    onClick={() => toggleContestant(String(contestant.id))}
+                    aria-expanded={isExpanded}
+                    aria-controls={`contestant-details-${String(contestant.id)}`}
+                  >
+                    <div className="flex items-center gap-4">
+                      {/* Rank Badge */}
+                      <div className={`w-8 h-8 rounded-full border flex items-center justify-center text-xs font-medium ${getRankBadgeStyles(index)}`}>
+                        {getRankIcon(index)}
+                      </div>
 
-                    {/* Avatar */}
-                    <Avatar
-                      src={contestant.avatar}
-                      fallback={contestant.username || "?"}
-                      size="md"
-                      className="border-2 border-white dark:border-gray-700 shadow-sm flex-shrink-0"
-                    />
+                      {/* Avatar */}
+                      <Avatar
+                        src={contestant.avatar}
+                        fallback={contestant.username || "?"}
+                        size="md"
+                        className="border-2 border-white dark:border-gray-700 shadow-sm flex-shrink-0"
+                      />
 
-                    {/* Participant Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="text-base font-semibold text-gray-900 dark:text-white">
-                            {formatDisplayName(contestant)}
-                          </h4>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {/* Participant Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="text-base font-semibold text-gray-900 dark:text-white">
+                              {formatDisplayName(contestant)}
+                            </h4>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
                             Rank #{index + 1} • {contestant.analytics.length} ecosystems
-                          </p>
-                        </div>
-
-                        {/* Top Ecosystem Scores - Horizontal Display */}
-                        <div className="flex items-center gap-2 ml-2">
-                          <div className="hidden lg:flex items-center gap-1.5 max-w-2xl overflow-hidden">
-                            {contestant.analytics.slice(0, 3).map((eco, ecoIndex) => (
-                              <div
-                                key={`${eco.name}-${ecoIndex}`}
-                                className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 dark:bg-gray-800 rounded-md flex-shrink-0"
-                                title={`${eco.name}: ${eco.score}`}
-                              >
-                                <div className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
-                                <span className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                                  {eco.name}
-                                </span>
-                                <span className="text-xs font-semibold text-primary flex-shrink-0">
-                                  {eco.score}
-                                </span>
-                              </div>
-                            ))}
-                            {contestant.analytics.length > 3 && (
-                              <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
-                                +{contestant.analytics.length - 3}
-                              </span>
-                            )}
+                            </p>
                           </div>
 
-                          {/* Medium screens: Show abbreviated names */}
-                          <div className="hidden sm:flex lg:hidden items-center gap-1.5 max-w-lg overflow-hidden">
-                            {contestant.analytics.slice(0, 3).map((eco, ecoIndex) => {
-                              // Smart abbreviation for medium screens
-                              const abbrevName = eco.name.length > 8
-                                ? eco.name.split(' ').map(word => word.slice(0, 3)).join(' ')
-                                : eco.name;
-
-                              return (
+                          {/* Top Ecosystem Scores - Horizontal Display */}
+                          <div className="flex items-center gap-2 ml-2">
+                            <div className="hidden lg:flex items-center gap-1.5 max-w-2xl overflow-hidden">
+                              {contestant.analytics.slice(0, 3).map((eco, ecoIndex) => (
                                 <div
                                   key={`${eco.name}-${ecoIndex}`}
-                                  className="flex items-center gap-1 px-2 py-1 bg-gray-50 dark:bg-gray-800 rounded-md flex-shrink-0"
+                                  className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 dark:bg-gray-800 rounded-md flex-shrink-0"
                                   title={`${eco.name}: ${eco.score}`}
                                 >
                                   <div className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
-                                  <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                                    {abbrevName}
+                                  <span className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                                    {eco.name}
                                   </span>
                                   <span className="text-xs font-semibold text-primary flex-shrink-0">
                                     {eco.score}
                                   </span>
                                 </div>
-                              );
-                            })}
-                            {contestant.analytics.length > 3 && (
-                              <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
+                              ))}
+                              {contestant.analytics.length > 3 && (
+                                <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
                                 +{contestant.analytics.length - 3}
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Medium screens: Show abbreviated names */}
+                            <div className="hidden sm:flex lg:hidden items-center gap-1.5 max-w-lg overflow-hidden">
+                              {contestant.analytics.slice(0, 3).map((eco, ecoIndex) => {
+                              // Smart abbreviation for medium screens
+                                const abbrevName = eco.name.length > 8
+                                  ? eco.name.split(' ').map(word => word.slice(0, 3)).join(' ')
+                                  : eco.name;
+
+                                return (
+                                  <div
+                                    key={`${eco.name}-${ecoIndex}`}
+                                    className="flex items-center gap-1 px-2 py-1 bg-gray-50 dark:bg-gray-800 rounded-md flex-shrink-0"
+                                    title={`${eco.name}: ${eco.score}`}
+                                  >
+                                    <div className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                                      {abbrevName}
+                                    </span>
+                                    <span className="text-xs font-semibold text-primary flex-shrink-0">
+                                      {eco.score}
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                              {contestant.analytics.length > 3 && (
+                                <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                +{contestant.analytics.length - 3}
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Mobile: Show only count */}
+                            <div className="sm:hidden">
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                {contestant.analytics.length} ecosystems
                               </span>
-                            )}
-                          </div>
+                            </div>
 
-                          {/* Mobile: Show only count */}
-                          <div className="sm:hidden">
-                            <span className="text-xs text-gray-500 dark:text-gray-400">
-                              {contestant.analytics.length} ecosystems
-                            </span>
-                          </div>
-
-                          {/* Expand/Collapse Icon */}
-                          <div className="flex items-center text-gray-400 dark:text-gray-500">
-                            {isExpanded ? (
-                              <ChevronUp size={18} className="transition-transform duration-200" />
-                            ) : (
-                              <ChevronDown size={18} className="transition-transform duration-200" />
-                            )}
+                            {/* Expand/Collapse Icon */}
+                            <div className="flex items-center text-gray-400 dark:text-gray-500">
+                              {isExpanded ? (
+                                <ChevronUp size={18} className="transition-transform duration-200" />
+                              ) : (
+                                <ChevronDown size={18} className="transition-transform duration-200" />
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </button>
+                  </button>
 
-                {isExpanded && (
-                  <div
-                    id={`contestant-details-${String(contestant.id)}`}
-                    className="px-6 pb-4 bg-gray-50 dark:bg-surface-elevated"
-                  >
-                    <div className="space-y-4 pt-3">
-                      {/* Profile Section - Full Width */}
-                      <div>
-                        <h5 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                  {isExpanded && (
+                    <div
+                      id={`contestant-details-${String(contestant.id)}`}
+                      className="px-6 pb-4 bg-gray-50 dark:bg-surface-elevated"
+                    >
+                      <div className="space-y-4 pt-3">
+                        {/* Profile Section - Full Width */}
+                        <div>
+                          <h5 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
                           Developer Profile
-                        </h5>
-                        <ProfileCardWidget developer={contestant} />
-                      </div>
+                          </h5>
+                          <ProfileCardWidget developer={contestant} />
+                        </div>
 
-                      {/* Programming Languages Section - Two Column Layout */}
-                      <div>
-                        <h5 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                        {/* Programming Languages Section - Two Column Layout */}
+                        <div>
+                          <h5 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
                           Programming Languages
-                        </h5>
-                        <div className="grid gap-4 lg:grid-cols-2">
-                          <ProgrammingLanguagesBar username={contestant.username} />
-                          <ProgrammingLanguagesPie username={contestant.username} />
-                        </div>
-                      </div>
-
-                      {/* Ecosystem Scores Chart - Full Width */}
-                      <div>
-                        <div className="border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle">
-                          <div className="flex items-center gap-2 mb-3">
-                            <Trophy size={14} className="text-gray-600 dark:text-gray-400" />
-                            <h3 className="text-sm font-medium text-gray-900 dark:text-white">Ecosystem Scores</h3>
-                          </div>
-                          <div className="h-40">
-                            <ReactECharts
-                              option={resolveChartOptions(contestant.analytics)}
-                              style={{ height: '100%', width: '100%' }}
-                            />
+                          </h5>
+                          <div className="grid gap-4 lg:grid-cols-2">
+                            <ProgrammingLanguagesBar username={contestant.username} />
+                            <ProgrammingLanguagesPie username={contestant.username} />
                           </div>
                         </div>
-                      </div>
 
-                      {/* Repository Scores Section - Full Width */}
-                      <div>
-                        <RepoScoreListCard dataSource={contestant.analytics} />
+                        {/* Ecosystem Scores Chart - Full Width */}
+                        <div>
+                          <div className="border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle">
+                            <div className="flex items-center gap-2 mb-3">
+                              <Trophy size={14} className="text-gray-600 dark:text-gray-400" />
+                              <h3 className="text-sm font-medium text-gray-900 dark:text-white">Ecosystem Scores</h3>
+                            </div>
+                            <div className="h-40">
+                              <ReactECharts
+                                option={resolveChartOptions(contestant.analytics)}
+                                style={{ height: '100%', width: '100%' }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Repository Scores Section - Full Width */}
+                        <div>
+                          <RepoScoreListCard dataSource={contestant.analytics} />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </Card>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      )}
 
       {/* Edit Dialog */}
-      <EventEditDialog
-        visible={showEditDialog}
-        onClose={() => setShowEditDialog(false)}
-        onSuccess={handleEditSuccess}
-        event={eventData}
-      />
+      {isAdminMode && (
+        <EventEditDialog
+          visible={showEditDialog}
+          onClose={() => setShowEditDialog(false)}
+          onSuccess={handleEditSuccess}
+          event={eventData}
+        />
+      )}
     </div>
   );
 }
