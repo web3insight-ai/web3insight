@@ -82,7 +82,7 @@ export default function EventsPageClient({
 
         {/* Events Table */}
         <div>
-          <EventInsightsWidget dataSource={paginatedItems} />
+          <EventInsightsWidget dataSource={paginatedItems} variant="public" />
 
           {pages > 1 && (
             <div className="px-6 py-4 border-t border-border dark:border-border-dark flex justify-center">

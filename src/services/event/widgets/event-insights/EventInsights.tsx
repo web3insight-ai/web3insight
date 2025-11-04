@@ -16,36 +16,43 @@ type EventInsightsProps = {
   dataSource: EventInsight[];
   loading?: boolean;
   user?: ApiUser | null | undefined;
+  variant?: 'admin' | 'public';
 };
 
-function EventInsightsWidget({ dataSource, loading = false, user }: EventInsightsProps) {
+function EventInsightsWidget({ dataSource, loading = false, user, variant = 'admin' }: EventInsightsProps) {
   const [, addToast] = useAtom(addToastAtom);
   const router = useRouter();
   const [navigatingEventId, setNavigatingEventId] = useState<string | null>(null);
+  const isAdminVariant = variant === 'admin';
+  const userHasAdminAccess = canManageEvents(user);
+  const isLockedForUser = isAdminVariant && !userHasAdminAccess;
 
   const handleViewDetailsClick = async (eventId: string) => {
-    if (canManageEvents(user)) {
-      setNavigatingEventId(eventId);
-
-      // Set a timeout to clear loading state in case navigation gets stuck
-      const timeoutId = setTimeout(() => {
-        setNavigatingEventId(null);
-      }, 5000);
-
-      try {
-        await router.push(`/admin/events/${eventId}`);
-        clearTimeout(timeoutId);
-      } catch (error) {
-        console.error('Navigation error:', error);
-        clearTimeout(timeoutId);
-        setNavigatingEventId(null);
-      }
-    } else {
+    if (isAdminVariant && !canManageEvents(user)) {
       addToast({
         type: 'warning',
         title: 'Access Restricted',
         message: "You don't have enough role to manage events",
       });
+      return;
+    }
+
+    setNavigatingEventId(eventId);
+
+    // Set a timeout to clear loading state in case navigation gets stuck
+    const timeoutId = setTimeout(() => {
+      setNavigatingEventId(null);
+    }, 5000);
+
+    const targetPath = isAdminVariant ? `/admin/events/${eventId}` : `/events/${eventId}`;
+
+    try {
+      await router.push(targetPath);
+      clearTimeout(timeoutId);
+    } catch (error) {
+      console.error('Navigation error:', error);
+      clearTimeout(timeoutId);
+      setNavigatingEventId(null);
     }
   };
 
@@ -132,34 +139,19 @@ function EventInsightsWidget({ dataSource, loading = false, user }: EventInsight
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
-                    {canManageEvents(user) ? (
-                      <button
-                        onClick={() => handleViewDetailsClick(event.id)}
-                        disabled={navigatingEventId !== null}
-                        className="inline-flex items-center gap-1 text-sm font-medium text-gray-900 dark:text-white hover:text-primary dark:hover:text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        View Details
-                        {navigatingEventId === event.id ? (
-                          <Loader2 size={14} className="animate-spin" />
-                        ) : (
-                          <ArrowRight size={14} />
-                        )}
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleViewDetailsClick(event.id)}
-                        disabled={navigatingEventId !== null}
-                        className="inline-flex items-center gap-1 text-sm font-medium text-gray-400 dark:text-gray-500 cursor-not-allowed disabled:opacity-30"
-                      >
-                        <Lock size={12} />
-                        View Details
-                        {navigatingEventId === event.id ? (
-                          <Loader2 size={14} className="animate-spin" />
-                        ) : (
-                          <ArrowRight size={14} />
-                        )}
-                      </button>
-                    )}
+                    <button
+                      onClick={() => handleViewDetailsClick(event.id)}
+                      disabled={navigatingEventId !== null}
+                      className={`inline-flex items-center gap-1 text-sm font-medium transition-colors ${isLockedForUser ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed disabled:opacity-30' : 'text-gray-900 dark:text-white hover:text-primary dark:hover:text-primary disabled:opacity-50 disabled:cursor-not-allowed'}`}
+                    >
+                      {isLockedForUser && <Lock size={12} />}
+                      View Details
+                      {navigatingEventId === event.id ? (
+                        <Loader2 size={14} className="animate-spin" />
+                      ) : (
+                        <ArrowRight size={14} />
+                      )}
+                    </button>
                   </td>
                 </tr>
               );
@@ -169,7 +161,7 @@ function EventInsightsWidget({ dataSource, loading = false, user }: EventInsight
       </div>
       <div className="px-6 py-4 border-t border-border dark:border-border-dark">
         <Link
-          href="/events"
+          href={isAdminVariant ? '/admin/events' : '/events'}
           className="flex items-center justify-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200"
         >
           View All Events

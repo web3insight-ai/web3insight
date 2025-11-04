@@ -6,6 +6,8 @@ type RepoScoreListCardProps = {
 
 type EventDetailViewWidgetProps = {
   id: number;
+  mode?: 'admin' | 'public';
+  showParticipants?: boolean;
 };
 
 export type { RepoScoreListCardProps, EventDetailViewWidgetProps };
