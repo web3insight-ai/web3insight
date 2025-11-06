@@ -39,6 +39,8 @@ export interface DataActors {
   created_at: Timestamp;
   api: Generated<Json>;
   abnormal: Generated<boolean | null>;
+  city: Generated<string>;
+  country: Generated<string>;
 }
 
 export interface ApiUpstreamRepos {

@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { join, isAbsolute } from 'path';
 import * as fs from 'fs';
 import * as readline from 'readline';
+import { Workbook } from 'exceljs';
 import { Command, Console } from 'nestjs-console';
 import { KYSELY } from '@/app/db/db.provider';
 import { CompiledQuery, Kysely } from 'kysely';
@@ -478,5 +479,60 @@ ORDER BY ecosystem_name;`;
       await this.db.executeQuery(CompiledQuery.raw(sql, params));
       console.log(`Updated ${updates.length} actors`);
     }
+  }
+
+  @Command({
+    command: 'sync:db:actors:location <file>',
+    description:
+      'Import actor location mappings from CSV to update city and country fields',
+  })
+  async importActorLocationData(file: string) {
+    const filePath = isAbsolute(file) ? file : join(process.cwd(), file);
+    const workbook = new Workbook();
+    await workbook.csv.readFile(filePath);
+    const sheet = workbook.worksheets[0];
+    if (!sheet) return;
+
+    const locations = new Map<string, { country: string; city: string }>();
+    sheet.eachRow((row, index) => {
+      const location = String(row.getCell(1).text ?? '').trim();
+      if (!location || (index === 1 && location.toLowerCase() === 'location')) {
+        return;
+      }
+      locations.set(location, {
+        country: String(row.getCell(2).text ?? '').trim(),
+        city: String(row.getCell(3).text ?? '').trim(),
+      });
+    });
+
+    if (
+      !locations.size ||
+      !(await askForConfirmation('Update actor locations?'))
+    )
+      return;
+
+    let updated = 0;
+    for (const batch of chunkArray(Array.from(locations.entries()), 500)) {
+      const params: string[] = [];
+      const placeholders = batch.map((entry, index) => {
+        const base = index * 3 + 1;
+        params.push(entry[0], entry[1].country, entry[1].city);
+        return `($${base}, $${base + 1}, $${base + 2})`;
+      });
+
+      const sql = `
+        UPDATE data.actors AS a
+        SET country = v.country, city = v.city
+        FROM (VALUES ${placeholders.join(',')}) AS v(location, country, city)
+        WHERE COALESCE(a.api->>'location', '') = v.location;
+      `;
+
+      const res = await this.db.executeQuery(CompiledQuery.raw(sql, params));
+      const affected = (res as unknown as { numUpdatedOrDeletedRows?: number })
+        .numUpdatedOrDeletedRows;
+      updated += Number(affected ?? 0);
+    }
+
+    console.log(`Updated ${updated} actors from ${filePath}.`);
   }
 }
