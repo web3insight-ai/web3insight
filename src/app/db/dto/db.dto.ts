@@ -37,6 +37,8 @@ export interface DataActors {
   actor_id: Int8;
   actor_login: string | null;
   created_at: Timestamp;
+  api: Generated<Json>;
+  abnormal: Generated<boolean | null>;
 }
 
 export interface ApiUpstreamRepos {

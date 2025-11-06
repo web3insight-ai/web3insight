@@ -312,6 +312,7 @@ WHERE r.repo_id = rj.repo_id;
     await this.reposTotal(ecoTypes);
     await this.actorsTotalNew(ecoTypes);
     await this.ecoTotal();
+    await this.indexerd();
     return null;
   }
 }

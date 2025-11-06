@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { join } from 'path';
+import { join, isAbsolute } from 'path';
 import * as fs from 'fs';
 import * as readline from 'readline';
 import { Command, Console } from 'nestjs-console';
@@ -431,5 +431,42 @@ ORDER BY ecosystem_name;`;
       console.log('No ecosystems to delete');
     }
     return '';
+  }
+
+  @Command({
+    command: 'sync:db:actors:api <directory>',
+    description: 'Import actor API data from local JSON files',
+  })
+  async importActorApiData(directory: string) {
+    const dir = isAbsolute(directory)
+      ? directory
+      : join(process.cwd(), directory);
+    const files = (await fs.promises.readdir(dir, { withFileTypes: true }))
+      .filter((entry) => entry.isFile() && entry.name.endsWith('.json'))
+      .map((entry) => entry.name);
+    for (const batch of chunkArray(files, 5000)) {
+      const updates: { login: string; data: any }[] = [];
+      for (const name of batch) {
+        const login = name.replace(/\.json$/i, '');
+        const raw = await fs.promises.readFile(join(dir, name), 'utf-8');
+        if (!raw.trim()) continue;
+        try {
+          const data = JSON.parse(raw);
+          if (data == null || Object.keys(data).length === 0) continue;
+          updates.push({ login, data });
+        } catch {
+          continue;
+        }
+      }
+      if (updates.length === 0) continue;
+      for (const item of updates) {
+        await this.db
+          .updateTable('data.actors')
+          .set({ api: item.data })
+          .where('actor_login', '=', item.login)
+          .execute();
+      }
+      console.log(`Updated ${updates.length} actors`);
+    }
   }
 }
