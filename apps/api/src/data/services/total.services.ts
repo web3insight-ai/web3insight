@@ -341,12 +341,12 @@ WHERE r.repo_id = rj.repo_id;
   })
   async test(): Promise<void> {
     const ecoTypes = await this.ecoService.getActiveEcoNames();
+    await this.indexerd();
     await this.getActorDate(ecoTypes);
     await this.reposTotal(ecoTypes);
     await this.actorsTotalNew(ecoTypes);
     await this.ecoTotal();
     await this.actorCountryStats();
-    await this.indexerd();
     return null;
   }
 }
