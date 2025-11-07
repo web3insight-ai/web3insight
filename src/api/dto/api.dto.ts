@@ -47,6 +47,16 @@ export class TotalDto {
   total: number = 0;
 }
 
+export class ActorCountryStatItemDto {
+  country: string = '';
+  total: number = 0;
+}
+
+export class ActorCountryStatListDto {
+  total: number = 0;
+  list: ActorCountryStatItemDto[] = [];
+}
+
 export class EcoRankDto {
   eco_name: string = '';
   actors_total: number = 0;

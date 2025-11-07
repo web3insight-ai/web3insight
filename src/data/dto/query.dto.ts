@@ -63,3 +63,8 @@ export class ActorDateItemDto {
   date: Date = new Date();
   total: number = 0;
 }
+
+export class QueryActorCountryStat {
+  country: string;
+  actor_count: number;
+}

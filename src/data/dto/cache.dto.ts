@@ -12,6 +12,7 @@ export const CacheKey = {
   RepoDevRank7d: 'repo_dev_rank_7d',
   ActorScoreRank: 'actor_score_rank',
   EcoRepoRank: 'eco_repo_rank',
+  ActorCountryStats: 'actor_country_stats',
 } as const;
 
 export type CacheKeyType = typeof CacheKey;
