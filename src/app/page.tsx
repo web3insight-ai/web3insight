@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { getMetadata } from "@/utils/app";
 import { fetchStatisticsOverview, fetchStatisticsRank } from "~/statistics/repository";
 import { fetchWeeklyTrendingList, fetchWeeklyDeveloperActivityList } from "~/repository/repository";
+import { fetchActorCountryRankList } from "~/api/repository";
 import { getUser } from "~/auth/repository";
 import { headers } from 'next/headers';
 import EcosystemRankViewWidget from "~/ecosystem/views/ecosystem-rank";
@@ -10,6 +11,7 @@ import RepositoryTrendingViewWidget from "~/repository/views/repository-trending
 import RepositoryDeveloperActivityViewWidget from "~/repository/views/repository-developer-activity";
 import DeveloperRankViewWidget from "~/developer/views/developer-rank";
 import Section from "$/section";
+import CountryDistributionChart from "$/CountryDistributionChart";
 import DefaultLayoutWrapper from "./DefaultLayoutWrapper";
 import HomePageClient from "./HomePageClient";
 
@@ -51,11 +53,12 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const user = await getUser(request);
 
   try {
-    const [statisticsResult, rankResult, trendingResult, developerActivityResult] = await Promise.all([
+    const [statisticsResult, rankResult, trendingResult, developerActivityResult, countryRankResult] = await Promise.all([
       fetchStatisticsOverview(),
       fetchStatisticsRank(),
       fetchWeeklyTrendingList(),
       fetchWeeklyDeveloperActivityList(),
+      fetchActorCountryRankList(),
     ]);
 
     // Use fallback data if statistics fetch failed
@@ -75,6 +78,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     };
     const weeklyTrendingRepos = trendingResult.success ? trendingResult.data : [];
     const weeklyDeveloperActivityRepos = developerActivityResult.success ? developerActivityResult.data : [];
+    const countryDistribution = countryRankResult.success ? (countryRankResult.data.list ?? []) : [];
+    const countryDistributionTotal = countryRankResult.success ? Number(countryRankResult.data.total ?? 0) : 0;
 
     // Log any failures for debugging
     if (!statisticsResult.success) {
@@ -89,6 +94,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     if (!developerActivityResult.success) {
       console.warn("Weekly developer activity fetch failed:", developerActivityResult.message);
     }
+    if (!countryRankResult.success) {
+      console.warn("Country distribution fetch failed:", countryRankResult.message);
+    }
 
     return (
       <DefaultLayoutWrapper user={user}>
@@ -99,6 +107,16 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           {/* Server-rendered content sections */}
           <Section
             className="mt-12"
+            title="Global Contributor Footprint"
+            summary="Leading countries and regions by contributor counts"
+          >
+            <CountryDistributionChart
+              data={countryDistribution}
+              totalDevelopers={countryDistributionTotal}
+            />
+          </Section>
+          <Section
+            className="mt-16"
             title="Web3 Ecosystem Analytics"
             summary="Comprehensive insights about major blockchain ecosystems"
           >
@@ -174,6 +192,13 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           {/* Fallback sections */}
           <Section
             className="mt-12"
+            title="Global Contributor Footprint"
+            summary="Leading countries and regions by contributor counts"
+          >
+            <CountryDistributionChart data={[]} totalDevelopers={0} />
+          </Section>
+          <Section
+            className="mt-16"
             title="Web3 Ecosystem Analytics"
             summary="Comprehensive insights about major blockchain ecosystems"
           >

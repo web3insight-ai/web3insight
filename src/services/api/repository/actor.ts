@@ -3,6 +3,7 @@ import type { ResponseResult } from "@/types";
 import type {
   EcoRequestParams, TotalResponseData, ListResponseData,
   ActorRankRecord, ActorTrendRecord,
+  ActorCountryRankResponse,
 } from "../typing";
 import httpClient from "./client";
 
@@ -34,4 +35,8 @@ async function fetchTrendList(
   return httpClient.get("/v1/actors/total/date", { params: { eco_name: eco, period } });
 }
 
-export { fetchTotalCount, fetchGrowthCount, fetchRankList, fetchTrendList };
+async function fetchCountryRankList(): Promise<ResponseResult<ActorCountryRankResponse>> {
+  return httpClient.get("/v1/actors/country/rank");
+}
+
+export { fetchTotalCount, fetchGrowthCount, fetchRankList, fetchTrendList, fetchCountryRankList };
