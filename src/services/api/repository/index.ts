@@ -15,5 +15,6 @@ export {
   fetchGrowthCount as fetchActorGrowthCount,
   fetchTrendList as fetchActorTrendList,
   fetchRankList as fetchActorRankList,
+  fetchCountryRankList as fetchActorCountryRankList,
 } from "./actor";
 export { fetchAnalysisUserList, analyzeUserList, fetchAnalysisUser, updateAnalysisUser } from "./custom";

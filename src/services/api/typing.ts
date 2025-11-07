@@ -83,6 +83,15 @@ type ActorTrendRecord = {
   total: number;
 }
 
+type ActorCountryRankRecord = {
+  country: string;
+  total: number;
+};
+
+type ActorCountryRankResponse = ListResponseData<ActorCountryRankRecord> & {
+  total: number;
+};
+
 export type {
   PaginatableParams, TotalResponseData, ListResponseData,
   EcoRequestParams, EcoRankRecord, EcoRepo,
@@ -91,4 +100,5 @@ export type {
   RepoDeveloperActivityRecord,
   RepoActiveDeveloperRecord,
   ActorRankRecord, ActorTrendRecord,
+  ActorCountryRankRecord, ActorCountryRankResponse,
 };
