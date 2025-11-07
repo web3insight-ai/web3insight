@@ -8,12 +8,13 @@ import { CacheKey, CacheKeyValue } from '../dto/cache.dto';
 import { ECO_ALL, StatsPeriod } from '../dto/data.dto';
 import { EcoService } from './eco.services';
 import {
+  QueryActorCountryStat,
   QueryActorDate,
   QueryActorsTotal,
   QueryEcoTotal,
   QueryReposTotal,
 } from '../dto/query.dto';
-import { ActorDateListDto } from '@/api/dto/api.dto';
+import { ActorCountryStatListDto, ActorDateListDto } from '@/api/dto/api.dto';
 
 @Injectable()
 @Console()
@@ -237,6 +238,38 @@ ORDER BY ecosystem_name, time_unit;
     }
   }
 
+  async actorCountryStats() {
+    const sqlRawQuery = `
+SELECT country,
+       COUNT(*) AS actor_count
+FROM data.actors
+WHERE country IS NOT NULL
+  AND country <> ''
+GROUP BY country
+ORDER BY actor_count DESC, country ASC;
+`;
+    const query = CompiledQuery.raw(sqlRawQuery);
+    const exec = await this.db.executeQuery(query);
+    const rows = exec.rows as QueryActorCountryStat[];
+
+    const result = new ActorCountryStatListDto();
+    result.total = rows.reduce(
+      (sum, row) => sum + Number(row.actor_count ?? 0),
+      0,
+    );
+    result.list = rows.map((row) => ({
+      country: row.country,
+      total: Number(row.actor_count ?? 0),
+    }));
+
+    await this.cacheDataService.updateCacheData(
+      CacheKey.ActorCountryStats,
+      result,
+      new Date().toISOString(),
+      ECO_ALL,
+    );
+  }
+
   @Command({
     command: 'sync:indexer:last',
     description: 'indexer add more data',
@@ -312,6 +345,7 @@ WHERE r.repo_id = rj.repo_id;
     await this.reposTotal(ecoTypes);
     await this.actorsTotalNew(ecoTypes);
     await this.ecoTotal();
+    await this.actorCountryStats();
     await this.indexerd();
     return null;
   }

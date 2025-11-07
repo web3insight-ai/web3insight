@@ -14,6 +14,7 @@ import {
   GetTotalReqDto,
   TotalDto,
   ActorDateListDto,
+  ActorCountryStatListDto,
 } from '../dto/api.dto';
 import { TotalService } from '@/data/services/total.services';
 import { CacheDataService } from '@/data/services/cache.services';
@@ -143,6 +144,28 @@ export class TotalController {
         );
         return res?.cache_data as ActorDateListDto;
       }
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        throw new HttpException(e.message, 400);
+      }
+      throw new HttpException('An unknown error occurred', 500);
+    }
+  }
+
+  @Get('actors/country/rank')
+  @ApiOperation({
+    summary: 'Get actor counts by country',
+    description: '',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AppAuthGuard)
+  async getActorCountryRank() {
+    try {
+      const res = await this.cacheDataService.getCacheData(
+        CacheKey.ActorCountryStats,
+        ECO_ALL,
+      );
+      return res?.cache_data as ActorCountryStatListDto;
     } catch (e: unknown) {
       if (e instanceof Error) {
         throw new HttpException(e.message, 400);
