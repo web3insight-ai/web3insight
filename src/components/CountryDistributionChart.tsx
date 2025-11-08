@@ -300,7 +300,7 @@ function CountryDistributionChart({
             brightness: 0,
           },
         },
-        center: ['50%', '55%'],
+        center: ['55%', '55%'],
       },
     },
     series: [
@@ -353,7 +353,7 @@ function CountryDistributionChart({
               containerProps={{ style: { height: 440 } }}
             />
           </div>
-          <div className="w-full lg:w-[320px] xl:w-[360px]">
+          <div className="w-full lg:w-[360px] xl:w-[380px]">
             <div className="border border-gray-200 dark:border-gray-800 rounded-xl p-4 bg-gray-50 dark:bg-gray-900 h-full flex flex-col">
               {pieSeriesData.length ? (
                 <>
