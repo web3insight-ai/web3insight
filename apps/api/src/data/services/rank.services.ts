@@ -79,7 +79,6 @@ export class RankService {
         CacheKey.RepoTotal,
         ecoName,
       );
-
       data.push({
         eco_name: ecoName,
         actors_total: (actorsTotalAllScopeResult?.cache_data as TotalDto).total,
@@ -707,12 +706,17 @@ WHERE eco.name = dpe.ecosystem_name;
     description: 'Test eco data',
   })
   async test() {
-    const ecoTypes = await this.ecoService.getActiveEcoNames();
+    const ecoTypes = await this.ecoService.getEcoNameFilters();
     await this.EcoRank();
+    console.log('Ecosystem rank synchronized');
     await this.getTopScoreActors(ecoTypes);
+    console.log('Top score actors synchronized');
     await this.repoStarRank(ecoTypes);
+    console.log('Repository star rank synchronized');
     await this.ecoRankTotal(ECO_ALL, false);
+    console.log('Ecosystem total rank synchronized');
     await this.get7daysTopStarRepos(ecoTypes);
+    console.log('7 days top star repositories synchronized');
     await this.get7daysDevelopersRank();
   }
 

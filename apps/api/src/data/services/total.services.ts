@@ -340,7 +340,7 @@ WHERE r.repo_id = rj.repo_id;
     description: 'Test eco data',
   })
   async test(): Promise<void> {
-    const ecoTypes = await this.ecoService.getActiveEcoNames();
+    const ecoTypes = await this.ecoService.getEcoNameFilters();
     await this.indexerd();
     await this.getActorDate(ecoTypes);
     await this.reposTotal(ecoTypes);
