@@ -80,6 +80,16 @@ export class RankService {
         ecoName,
       );
 
+      console.log(
+        `EcoRankTotal: ${ecoName} - actors total: ${
+          (actorsTotalAllScopeResult?.cache_data as TotalDto).total
+        }, new actors: ${
+          (actorsNewTotal?.cache_data as TotalDto).total
+        }, core actors: ${
+          (actorsTotalCoreScopeResult?.cache_data as TotalDto).total
+        }, repos total: ${(totalRepos?.cache_data as TotalDto).total}`,
+      );
+
       data.push({
         eco_name: ecoName,
         actors_total: (actorsTotalAllScopeResult?.cache_data as TotalDto).total,
@@ -707,7 +717,7 @@ WHERE eco.name = dpe.ecosystem_name;
     description: 'Test eco data',
   })
   async test() {
-    const ecoTypes = await this.ecoService.getActiveEcoNames();
+    const ecoTypes = await this.ecoService.getEcoNameFilters();
     await this.EcoRank();
     await this.getTopScoreActors(ecoTypes);
     await this.repoStarRank(ecoTypes);
