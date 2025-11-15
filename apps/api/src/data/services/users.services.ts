@@ -367,6 +367,14 @@ WITH user_ids AS (SELECT UNNEST($1::bigint[]) AS actor_id),
                          FROM data.repos r
                                   JOIN repo_scores rs ON r.repo_id = rs.repo_id
                          WHERE r.upstream_marks != '{}'::jsonb),
+     user_total_score AS (SELECT actor_id,
+
+                                 SUM(total_score) AS user_score
+
+                          FROM repo_scores
+
+                          GROUP BY actor_id),
+
      repo_ecosystem_scores AS (SELECT rs.actor_id,
                                       rs.repo_name,
                                       re.ecosystem_key,
@@ -400,6 +408,7 @@ WITH user_ids AS (SELECT UNNEST($1::bigint[]) AS actor_id),
                          FROM unique_ecosystem_repos
                          GROUP BY actor_id, ecosystem_key)
 SELECT u.actor_id,
+       s.user_score,
        COALESCE(
                (SELECT jsonb_agg(
                                jsonb_build_object(
@@ -408,14 +417,15 @@ SELECT u.actor_id,
                                        'total_score', ecosystem_total_score,
                                        'first_activity_at', ecosystem_first_activity_at,
                                        'last_activity_at', ecosystem_last_activity_at
-                               )
-                               ORDER BY ecosystem_total_score DESC
+                               ) ORDER BY ecosystem_total_score DESC
                        )
                 FROM ecosystem_repos er
                 WHERE er.actor_id = u.actor_id),
                '[]'::jsonb
        ) AS ecosystem_scores
-FROM user_ids u;`;
+FROM user_ids u
+         JOIN user_total_score s ON u.actor_id = s.actor_id
+ORDER BY s.user_score DESC;`;
 
     const ids = payload.users.map((user: { id: any }) => user.id);
     const query = CompiledQuery.raw(sqlRawQuery, [ids]);
@@ -446,18 +456,6 @@ FROM user_ids u;`;
           },
         );
         return true;
-      });
-
-      rows.sort((a: any, b: any) => {
-        const scoreA = a.ecosystem_scores.reduce(
-          (s: any, e: { total_score: any }) => s + e.total_score,
-          0,
-        );
-        const scoreB = b.ecosystem_scores.reduce(
-          (s: any, e: { total_score: any }) => s + e.total_score,
-          0,
-        );
-        return scoreB - scoreA;
       });
     }
 
