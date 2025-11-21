@@ -98,14 +98,7 @@ export async function GET(
       
       // Fallback: use known data if parsing fails
       if (languages.length === 0) {
-        const fallbackData = [
-          { name: 'PHP', percentage: '38.6%' },
-          { name: 'Python', percentage: '38.05%' },
-          { name: 'JavaScript', percentage: '10.36%' },
-          { name: 'Solidity', percentage: '6.67%' },
-          { name: 'TypeScript', percentage: '6.32%' },
-        ];
-        return fallbackData;
+        return [];
       }
 
       return languages.slice(0, 5); // Limit to top 5
