@@ -1,14 +1,6 @@
 import { AuthService } from '@/auth/services/auth.services';
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
-import {
-  AuthBindWalletReqDto,
-  AuthBindSolanaWalletReqDto,
-  AuthBindAptosWalletReqDto,
-  AuthBindSuiWalletReqDto,
-  AuthBindFarcasterReqDto,
-  BindOAuthReqDto,
-  LoginReqDto,
-} from '../dto/api.dto';
+import { AuthBindWalletReqDto, LoginReqDto, PrivyReqDto } from '../dto/api.dto';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { AppAuthGuard } from '@/auth/app.auth.guard';
 import { RequestWithUser } from '@/auth/auth.jwt.dto';
@@ -62,101 +54,12 @@ export class AuthController {
     return this.authServices.bindWallet(req.user.uid, body);
   }
 
-  @Post('bind/twitter')
+  @Post('privy/token/auth')
   @ApiOperation({
-    summary: 'Bind Twitter account to user',
+    summary: 'Post privy token ',
     description: '',
   })
-  @ApiBearerAuth()
-  @UseGuards(AppAuthGuard)
-  async bindTwitter(
-    @Req() req: RequestWithUser,
-    @Body() body: BindOAuthReqDto,
-  ) {
-    return this.authServices.bindOAuth(req.user.uid, body, 'twitter');
-  }
-
-  @Post('bind/discord')
-  @ApiOperation({
-    summary: 'Bind Discord account to user',
-    description: '',
-  })
-  @ApiBearerAuth()
-  @UseGuards(AppAuthGuard)
-  async bindDiscord(
-    @Req() req: RequestWithUser,
-    @Body() body: BindOAuthReqDto,
-  ) {
-    return this.authServices.bindOAuth(req.user.uid, body, 'discord');
-  }
-
-  @Post('bind/linkedin')
-  @ApiOperation({
-    summary: 'Bind LinkedIn account to user',
-    description: '',
-  })
-  @ApiBearerAuth()
-  @UseGuards(AppAuthGuard)
-  async bindLinkedIn(
-    @Req() req: RequestWithUser,
-    @Body() body: BindOAuthReqDto,
-  ) {
-    return this.authServices.bindOAuth(req.user.uid, body, 'linkedin');
-  }
-
-  @Post('bind/wallet/solana')
-  @ApiOperation({
-    summary: 'Bind Solana wallet address to user',
-    description: '',
-  })
-  @ApiBearerAuth()
-  @UseGuards(AppAuthGuard)
-  async bindSolanaWallet(
-    @Req() req: RequestWithUser,
-    @Body() body: AuthBindSolanaWalletReqDto,
-  ) {
-    return this.authServices.bindSolanaWallet(req.user.uid, body);
-  }
-
-  @Post('bind/wallet/aptos')
-  @ApiOperation({
-    summary: 'Bind Aptos wallet address to user',
-    description: '',
-  })
-  @ApiBearerAuth()
-  @UseGuards(AppAuthGuard)
-  async bindAptosWallet(
-    @Req() req: RequestWithUser,
-    @Body() body: AuthBindAptosWalletReqDto,
-  ) {
-    return this.authServices.bindAptosWallet(req.user.uid, body);
-  }
-
-  @Post('bind/wallet/sui')
-  @ApiOperation({
-    summary: 'Bind Sui wallet address to user',
-    description: '',
-  })
-  @ApiBearerAuth()
-  @UseGuards(AppAuthGuard)
-  async bindSuiWallet(
-    @Req() req: RequestWithUser,
-    @Body() body: AuthBindSuiWalletReqDto,
-  ) {
-    return this.authServices.bindSuiWallet(req.user.uid, body);
-  }
-
-  @Post('bind/farcaster')
-  @ApiOperation({
-    summary: 'Bind Farcaster account to user',
-    description: '',
-  })
-  @ApiBearerAuth()
-  @UseGuards(AppAuthGuard)
-  async bindFarcaster(
-    @Req() req: RequestWithUser,
-    @Body() body: AuthBindFarcasterReqDto,
-  ) {
-    return this.authServices.bindFarcaster(req.user.uid, body);
+  async privyTokenAuth(@Body() body: PrivyReqDto) {
+    return this.authServices.privyTokenAuth(body.id_token);
   }
 }
