@@ -11,7 +11,7 @@ interface GitHubStats {
   contributedTo: string;
 }
 
-interface Language {
+export interface GitHubLanguage {
   name: string;
   percentage: string;
 }
@@ -19,7 +19,7 @@ interface Language {
 interface GitHubStatsData {
   username: string;
   stats: GitHubStats | null;
-  languages: Language[];
+  languages?: GitHubLanguage[];
 }
 
 interface UseGitHubStatsResult {

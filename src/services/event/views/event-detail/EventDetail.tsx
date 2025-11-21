@@ -13,6 +13,7 @@ import ContributionStatsChart from "../../../../components/ContributionStatsChar
 import EcosystemRankingChart from "../../../../components/EcosystemRankingChart";
 import EventAnalyticsOverview from "../../../../components/EventAnalyticsOverview";
 import EventAnalyticsSkeleton from "../../../../components/loading/EventAnalyticsSkeleton";
+import { useGitHubStats } from "../../../../hooks/useGitHubStats";
 
 import type { EventReport } from "../../typing";
 import { fetchOne, fetchPublicEventDetail } from "../../repository/client";
@@ -27,6 +28,34 @@ interface EventAnalysisData {
   contribution_percentage: number;
   users_with_contributions: number;
   users_without_contributions: number;
+}
+
+function ContestantProgrammingLanguages({ username }: { username: string }) {
+  const { data, loading } = useGitHubStats(username || null);
+  const languages = data?.languages ?? [];
+  const shouldRender = loading || languages.length > 0;
+
+  if (!shouldRender) {
+    return null;
+  }
+
+  return (
+    <div>
+      <h5 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+        Programming Languages
+      </h5>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <ProgrammingLanguagesBar
+          languages={languages}
+          loading={loading}
+        />
+        <ProgrammingLanguagesPie
+          languages={languages}
+          loading={loading}
+        />
+      </div>
+    </div>
+  );
 }
 
 function EventDetailView({ id, mode = 'admin', showParticipants }: EventDetailViewWidgetProps) {
@@ -420,15 +449,7 @@ function EventDetailView({ id, mode = 'admin', showParticipants }: EventDetailVi
                         </div>
 
                         {/* Programming Languages Section - Two Column Layout */}
-                        <div>
-                          <h5 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                          Programming Languages
-                          </h5>
-                          <div className="grid gap-4 lg:grid-cols-2">
-                            <ProgrammingLanguagesBar username={contestant.username} />
-                            <ProgrammingLanguagesPie username={contestant.username} />
-                          </div>
-                        </div>
+                        <ContestantProgrammingLanguages username={contestant.username} />
 
                         {/* Ecosystem Scores Chart - Full Width */}
                         <div>

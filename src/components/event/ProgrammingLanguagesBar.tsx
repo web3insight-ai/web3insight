@@ -1,29 +1,44 @@
 import { Code2, Cpu } from "lucide-react";
-import { useGitHubStats } from "../../hooks/useGitHubStats";
+import { useGitHubStats, type GitHubLanguage } from "../../hooks/useGitHubStats";
 
 interface ProgrammingLanguagesBarProps {
-  username: string;
+  username?: string | null;
   className?: string;
+  languages?: GitHubLanguage[];
+  loading?: boolean;
 }
 
-export function ProgrammingLanguagesBar({ username, className = "" }: ProgrammingLanguagesBarProps) {
-  const { data: githubData } = useGitHubStats(username);
+export function ProgrammingLanguagesBar({
+  username,
+  className = "",
+  languages: providedLanguages,
+  loading: forcedLoading,
+}: ProgrammingLanguagesBarProps) {
+  const shouldFetch = !providedLanguages && !!username;
+  const { data: githubData, loading } = useGitHubStats(shouldFetch ? (username ?? null) : null);
+  const languages = providedLanguages ?? githubData?.languages ?? [];
+  const isLoading = typeof forcedLoading === "boolean" ? forcedLoading : (shouldFetch ? loading : false);
+  const hasLanguages = languages.length > 0;
+
+  if (!isLoading && !hasLanguages) {
+    return null;
+  }
 
   return (
     <div className={`border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle ${className}`}>
       <div className="flex items-center gap-2 mb-4">
         <Code2 size={14} className="text-gray-600 dark:text-gray-400" />
         <h4 className="text-sm font-medium text-gray-900 dark:text-white">Programming Languages</h4>
-        {githubData?.languages && (
+        {hasLanguages && (
           <span className="text-xs text-gray-500 dark:text-gray-400 ml-auto">
-            {githubData.languages.length}
+            {languages.length}
           </span>
         )}
       </div>
 
-      {githubData?.languages && githubData.languages.length > 0 ? (
+      {hasLanguages ? (
         <div className="space-y-3">
-          {githubData.languages.slice(0, 5).map((language, index) => {
+          {languages.slice(0, 5).map((language, index) => {
             const percentage = parseFloat(language.percentage.replace('%', ''));
             const skillLevel = percentage >= 80 ? "Expert" : percentage >= 65 ? "Proficient" : "Familiar";
 
