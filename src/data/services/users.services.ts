@@ -556,3 +556,119 @@ ORDER BY s.user_score DESC;`;
     await this.analysisUsers(id);
   }
 }
+
+// WITH repo_base_scores AS (
+// -- Step 1: 从 events 聚合用户-仓库活跃指标（强制时间过滤，限定事件类型，排除空 ID）
+//     SELECT e.actor_id,
+//            e.repo_id,
+//            MAX(CASE WHEN e.event_type = 'PushEvent' THEN 1 ELSE 0 END)   AS has_commit,
+//            COUNT(CASE WHEN e.event_type = 'PullRequestEvent' THEN 1 END) AS pr_count,
+//            MIN(e.created_at)                                             AS first_activity_at,
+//            MAX(e.created_at)                                             AS last_activity_at
+//     FROM data.events e
+//     WHERE e.event_type IN ('PushEvent', 'PullRequestEvent')
+//     GROUP BY e.actor_id, e.repo_id),
+//      repo_scores AS (
+// -- Step 2: 计算每个用户-仓库的总分
+//          SELECT actor_id,
+//                 repo_id,
+//                 (has_commit * 1 + pr_count * 2) AS total_score,
+//                 first_activity_at,
+//                 last_activity_at
+//          FROM repo_base_scores),
+//      active_repos AS (
+// -- Step 3: 提取有活动记录的仓库列表（仅 repo_id）
+//          SELECT DISTINCT repo_id
+//          FROM repo_scores),
+//      repo_ecosystems AS (
+// -- Step 4: 展开每个活动仓库的生态键
+//          SELECT r.repo_id,
+//                 ek.ecosystem_key
+//          FROM active_repos ar
+//                   JOIN data.repos r ON r.repo_id = ar.repo_id
+//                   CROSS JOIN LATERAL jsonb_object_keys(r.upstream_marks) AS ek(ecosystem_key)
+//          WHERE r.upstream_marks <> '{}'::jsonb),
+//      user_total_score AS (
+// -- Step 5: 用户总得分（跨所有仓库）
+//          SELECT actor_id,
+//                 SUM(total_score) AS user_score
+//          FROM repo_scores
+//          GROUP BY actor_id),
+//      repo_ecosystem_scores AS (
+// -- Step 6: 关联仓库分数与生态信息
+//          SELECT rs.actor_id,
+//                 rs.repo_id,
+//                 re.ecosystem_key,
+//                 rs.total_score,
+//                 rs.first_activity_at,
+//                 rs.last_activity_at
+//          FROM repo_scores rs
+//                   JOIN repo_ecosystems re ON rs.repo_id = re.repo_id
+//          WHERE rs.total_score > 0),
+//      unique_ecosystem_repos AS (
+// -- Step 7: 去重，保留 actor-ecosystem-repo 粒度唯一明细
+//          SELECT DISTINCT actor_id,
+//                          ecosystem_key,
+//                          repo_id,
+//                          total_score,
+//                          first_activity_at,
+//                          last_activity_at
+//          FROM repo_ecosystem_scores),
+//      ecosystem_repos AS (
+// -- Step 8: 关联 repos 获取最新 repo_name，并聚合为生态级 JSONB
+//          SELECT uer.actor_id,
+//                 uer.ecosystem_key,
+//                 jsonb_agg(
+//                         jsonb_build_object(
+//                                 'repo_name', r.repo_name,
+//                                 'score', uer.total_score,
+//                                 'first_activity_at', uer.first_activity_at,
+//                                 'last_activity_at', uer.last_activity_at
+//                         )
+//                         ORDER BY uer.total_score DESC
+//                 )                          AS repo_details,
+//                 SUM(uer.total_score)       AS ecosystem_total_score,
+//                 MIN(uer.first_activity_at) AS ecosystem_first_activity_at,
+//                 MAX(uer.last_activity_at)  AS ecosystem_last_activity_at
+//          FROM unique_ecosystem_repos uer
+//                   JOIN data.repos r ON r.repo_id = uer.repo_id
+//          GROUP BY uer.actor_id, uer.ecosystem_key),
+//      actor_ecosystems_json AS (
+// -- Step 9: 预聚合为每位用户的生态数组 JSONB，避免相关子查询
+//          SELECT er.actor_id,
+//                 jsonb_agg(
+//                         jsonb_build_object(
+//                                 'ecosystem', er.ecosystem_key,
+//                                 'repos', er.repo_details,
+//                                 'total_score', er.ecosystem_total_score,
+//                                 'first_activity_at', er.ecosystem_first_activity_at,
+//                                 'last_activity_at', er.ecosystem_last_activity_at
+//                         )
+//                         ORDER BY er.ecosystem_total_score DESC
+//                 ) AS ecosystem_scores
+//          FROM ecosystem_repos er
+//          GROUP BY er.actor_id),
+//      user_ecosystem_scores AS (
+// -- Step 9: 聚合为用户维度生态分数结构
+//          SELECT u.actor_id,
+//                 u.user_score,
+//                 COALESCE(aej.ecosystem_scores, '[]'::jsonb) AS ecosystem_scores
+//          FROM user_total_score u
+//                   LEFT JOIN actor_ecosystems_json aej ON aej.actor_id = u.actor_id),
+//      updated_active AS (
+// -- Step 10: 更新 actors.eco_score（仅更新有活动的用户），并返回已更新 actor_id
+//          UPDATE data.actors a
+//              SET eco_score = jsonb_build_object(
+//                      'total_score', ues.user_score,
+//                      'ecosystems', ues.ecosystem_scores,
+//                      'updated_at', NOW()
+//                              )
+//              FROM user_ecosystem_scores ues
+//              WHERE a.actor_id = ues.actor_id
+//              RETURNING a.actor_id)
+// -- Step 11: 将未在 updated_active 中的其他用户 eco_score 统一置为 '{}'
+// UPDATE data.actors a
+// SET eco_score = '{}'::jsonb
+// WHERE NOT EXISTS (SELECT 1
+//                   FROM updated_active ua
+//                   WHERE ua.actor_id = a.actor_id);
