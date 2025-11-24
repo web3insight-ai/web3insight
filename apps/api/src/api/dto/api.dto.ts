@@ -24,7 +24,6 @@ import {
   QueryTopStarRepo,
 } from '@/data/dto/query.dto';
 import { ApiAnalysisUsers } from '@/app/db/dto/db.dto';
-import { Optional } from '@nestjs/common';
 
 export class GetTotalReqDto {
   @IsString()
@@ -147,12 +146,9 @@ export class LoginReqDto {
   code: string = '';
 }
 
-export class BindOAuthReqDto {
+export class PrivyReqDto {
   @IsString()
-  code: string = '';
-  @IsString()
-  @Optional()
-  codeVerifier: string = '';
+  id_token: string = '';
 }
 
 export class AuthBindWalletReqDto {
@@ -164,49 +160,18 @@ export class AuthBindWalletReqDto {
   signature: string;
 }
 
-export class AuthBindSolanaWalletReqDto {
-  @IsString()
-  address: string;
-  @IsString()
-  magic: string;
-  @IsString()
-  signature: string;
-}
-
-export class AuthBindAptosWalletReqDto {
-  @IsString()
-  address: string;
-  @IsString()
-  magic: string;
-  @IsString()
-  signature: string;
-  @IsString()
-  publicKey: string;
-}
-
-export class AuthBindSuiWalletReqDto {
-  @IsString()
-  address: string;
-  @IsString()
-  magic: string;
-  @IsString()
-  signature: string;
-  @IsString()
-  publicKey: string;
-}
-
-export class AuthBindFarcasterReqDto {
-  @IsString()
-  message: string;
-  @IsString()
-  signature: string;
-  @IsString()
-  fid: string;
-  @IsString()
-  username: string;
-  @IsString()
+export class UpdateUserReqDto {
   @IsOptional()
-  pfpUrl?: string;
+  @IsString()
+  user_nick_name?: string;
+
+  @IsOptional()
+  @IsString()
+  user_avatar?: string;
+
+  @IsOptional()
+  @IsString()
+  user_bio?: string;
 }
 
 export class ReposCustomMarkReqDto {
