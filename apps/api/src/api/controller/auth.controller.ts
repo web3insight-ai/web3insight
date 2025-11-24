@@ -1,6 +1,11 @@
 import { AuthService } from '@/auth/services/auth.services';
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
-import { AuthBindWalletReqDto, LoginReqDto, PrivyReqDto } from '../dto/api.dto';
+import {
+  AuthBindWalletReqDto,
+  LoginReqDto,
+  PrivyReqDto,
+  UpdateUserReqDto,
+} from '../dto/api.dto';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { AppAuthGuard } from '@/auth/app.auth.guard';
 import { RequestWithUser } from '@/auth/auth.jwt.dto';
@@ -27,6 +32,20 @@ export class AuthController {
   @UseGuards(AppAuthGuard)
   async getUser(@Req() req: RequestWithUser) {
     return this.authServices.getUserInfo(req.user);
+  }
+
+  @Post('user')
+  @ApiOperation({
+    summary: 'Update user profile',
+    description: '',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AppAuthGuard)
+  async updateUser(
+    @Req() req: RequestWithUser,
+    @Body() body: UpdateUserReqDto,
+  ) {
+    return this.authServices.updateUserInfo(req.user, body);
   }
 
   @Get('magic')
