@@ -1,84 +1,63 @@
 'use client';
 
-import { Popover, PopoverContent, PopoverTrigger, Avatar } from "@nextui-org/react";
-import { LogIn, LogOut, User as UserIcon, Settings, Warehouse, Calendar } from "lucide-react";
-
-import { canManageEcosystems, canManageEvents, isAdmin } from "../../helper";
-import { signOut } from "../../client-repository";
+import { Avatar, Popover, PopoverTrigger, PopoverContent, Button } from "@nextui-org/react";
+import { LogIn, LogOut } from "lucide-react";
+import { usePrivy } from "@privy-io/react-auth";
+import { useRouter } from "next/navigation";
 
 import type { SignedUserProps } from "./typing";
-import ActionItem from "./ActionItem";
 
-function SignedUser({ user, onSignIn, onSignOut }: SignedUserProps) {
-  const handleLogout = async (e: React.MouseEvent) => {
-    e.preventDefault();
+function SignedUser({ onSignIn }: SignedUserProps) {
+  const { ready, authenticated, user: privyUser, logout } = usePrivy();
+  const router = useRouter();
 
-    try {
-      const res = await signOut();
+  // Only show if Privy is authenticated
+  const isPrivyAuthenticated = ready && authenticated && privyUser;
 
-      if (res.success) {
-        onSignOut(null);
-      } else {
-        console.error(`Logout failed: ${res.message}`);
-      }
-    } catch (error) {
-      console.error('Error during logout:', error);
-    }
-  };
+  if (isPrivyAuthenticated) {
+    // Use Privy user data
+    const displayName = privyUser.email?.address || privyUser.wallet?.address || 'User';
+    const firstLetter = displayName.substring(0, 1).toUpperCase();
 
-  // More robust check for user data
-  if (user && typeof user === 'object' && user.id) {
-    const firstLetter = user.username ? user.username.substring(0, 1).toUpperCase() : '?';
-    const avatarUrl = user.avatar_url || '';
+    const handleLogout = async () => {
+      await logout();
+      router.push('/');
+      router.refresh();
+    };
 
     return (
       <Popover placement="bottom-end">
         <PopoverTrigger>
           <Avatar
-            src={avatarUrl}
-            name={avatarUrl ? undefined : firstLetter}
+            name={firstLetter}
             size="sm"
             className="cursor-pointer"
             color="primary"
             isBordered
+            as="button"
           />
         </PopoverTrigger>
         <PopoverContent className="p-0 rounded-lg bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark" style={{ width: "220px" }}>
           <div className="flex flex-col">
             {/* User info section */}
             <div className="px-4 py-3 border-b border-border dark:border-border-dark bg-gray-50 dark:bg-surface-elevated rounded-t-lg">
-              <p className="font-medium text-sm text-gray-900 dark:text-white">{user.username || 'User'}</p>
-              <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{user.email || ''}</p>
+              <p className="font-medium text-sm text-gray-900 dark:text-white truncate">{displayName}</p>
+              <p className="text-xs text-primary mt-1">Via Privy</p>
             </div>
 
-            {/* Menu items */}
-            <div className="py-1">
-              <ActionItem text="Profile" icon={UserIcon} action="/profile" />
-            </div>
-
-            {(canManageEcosystems(user) || canManageEvents(user)) && (
-              <div className="py-1 border-t border-border dark:border-border-dark">
-                <ActionItem
-                  text="Ecosystems"
-                  icon={Warehouse}
-                  action="/admin/ecosystems"
-                  disabled={!canManageEcosystems(user)}
-                />
-                <ActionItem
-                  text="Events"
-                  icon={Calendar}
-                  action="/admin/events"
-                  disabled={!canManageEvents(user)}
-                />
-                {isAdmin(user) && (
-                  <ActionItem text="Settings" icon={Settings} action="/settings" />
-                )}
-              </div>
-            )}
-
-            {/* Logout section */}
-            <div className="py-1 border-t border-border dark:border-border-dark">
-              <ActionItem text="Logout" icon={LogOut} renderType="button" action={handleLogout} danger />
+            {/* Logout button */}
+            <div className="p-2">
+              <Button
+                fullWidth
+                size="sm"
+                color="danger"
+                variant="flat"
+                startContent={<LogOut size={16} />}
+                onPress={handleLogout}
+                className="justify-start"
+              >
+                Logout
+              </Button>
             </div>
           </div>
         </PopoverContent>

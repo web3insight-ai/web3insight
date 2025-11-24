@@ -7,24 +7,27 @@ import { Provider as JotaiProvider } from "jotai";
 import NavigationProgress from "$/NavigationProgress";
 import ClientOnly from "$/ClientOnly";
 import { WalletProvider } from "@/providers/WalletProvider";
+import { PrivyProvider } from "@/providers/PrivyProvider";
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {
   return (
     <JotaiProvider>
-      <NextUIProvider>
-        <ThemeProvider
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <ClientOnly>
-            <WalletProvider>
-              <NavigationProgress />
-              {children}
-            </WalletProvider>
-          </ClientOnly>
-        </ThemeProvider>
-      </NextUIProvider>
+      <PrivyProvider>
+        <NextUIProvider>
+          <ThemeProvider
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <ClientOnly>
+              <WalletProvider>
+                <NavigationProgress />
+                {children}
+              </WalletProvider>
+            </ClientOnly>
+          </ThemeProvider>
+        </NextUIProvider>
+      </PrivyProvider>
     </JotaiProvider>
   );
 }

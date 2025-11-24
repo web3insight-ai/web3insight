@@ -1,6 +1,5 @@
 import type { NextConfig } from "next";
 import { env } from "./src/env";
-import { codeInspectorPlugin } from "code-inspector-plugin";
 
 void env;
 
@@ -11,13 +10,6 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true, // Temporarily ignore for migration validation
   },
-  turbopack: {
-    rules: codeInspectorPlugin({
-      bundler: "turbopack",
-      hotKeys: ["altKey"],
-      port: 5679, // Change port to avoid conflict
-    }),
-  },
   webpack: (config, { isServer, webpack }) => {
     config.resolve.fallback = {
       ...config.resolve.fallback,
@@ -27,9 +19,17 @@ const nextConfig: NextConfig = {
       crypto: false,
     };
 
+    // Externalize Solana dependencies (required by Privy)
+    config.externals = config.externals || [];
+    config.externals["@solana/kit"] = "commonjs @solana/kit";
+    config.externals["@solana-program/memo"] = "commonjs @solana-program/memo";
+    config.externals["@solana-program/system"] =
+      "commonjs @solana-program/system";
+    config.externals["@solana-program/token"] =
+      "commonjs @solana-program/token";
+
     // Externalize server-only packages that shouldn't be bundled for client
     if (!isServer) {
-      config.externals = config.externals || [];
       config.externals.push({
         "pino-pretty": "pino-pretty",
         encoding: "encoding",
@@ -38,7 +38,6 @@ const nextConfig: NextConfig = {
 
     // Prevent WalletConnect and indexedDB-dependent packages from being bundled on server
     if (isServer) {
-      config.externals = config.externals || [];
       config.externals.push({
         "@walletconnect/core": "@walletconnect/core",
         "@walletconnect/sign-client": "@walletconnect/sign-client",
@@ -52,7 +51,7 @@ const nextConfig: NextConfig = {
     config.plugins.push(
       new webpack.IgnorePlugin({
         resourceRegExp: /^(pino-pretty|encoding)$/,
-      })
+      }),
     );
 
     return config;

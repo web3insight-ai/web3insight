@@ -3,14 +3,12 @@
 import { Input, Skeleton, Modal, ModalContent, ModalHeader, ModalBody } from "@nextui-org/react";
 import { ArrowRight, Search, Sparkles } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
-import { useAtom } from "jotai";
 import Markdown from "react-markdown";
-import { authModalOpenAtom, authModalTypeAtom } from "./atoms";
+import { usePrivy } from "@privy-io/react-auth";
 import { MetricOverview } from "$/index";
 
 export default function HomePageClient() {
-  const [, setAuthModalOpen] = useAtom(authModalOpenAtom);
-  const [, setAuthModalType] = useAtom(authModalTypeAtom);
+  const { ready, authenticated, login } = usePrivy();
   const [input, setInput] = useState("");
   const [output, setOutput] = useState<string>("");
   const [isStreaming, setIsStreaming] = useState(false);
@@ -52,12 +50,11 @@ export default function HomePageClient() {
   }, []);
 
   useEffect(() => {
-    if (!asking && errorMessage) {
-      // Open the sign-in modal when unauthorized
-      setAuthModalType("signin");
-      setAuthModalOpen(true);
+    if (!asking && errorMessage && ready && !authenticated) {
+      // Open Privy login when unauthorized
+      login();
     }
-  }, [asking, errorMessage, setAuthModalOpen, setAuthModalType]);
+  }, [asking, errorMessage, ready, authenticated, login]);
 
   // Check if user is at the bottom of the scrollable area
   const isAtBottom = (element: HTMLElement) => {

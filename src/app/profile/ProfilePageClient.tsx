@@ -14,13 +14,12 @@ import {
   CheckCircle,
   Brain,
 } from "lucide-react";
-import { useAtom } from "jotai";
 import { useEffect } from "react";
+import { usePrivy } from "@privy-io/react-auth";
 
 import { getRoleName, getEffectiveRole } from "@/utils/role";
 import { getGitHubHandle } from "~/profile-analysis/helper";
 
-import { authModalOpenAtom } from "../atoms";
 import Section from "$/section";
 import { WalletBindWidget } from "~/auth/widgets/wallet-bind";
 import { OriginAuthWidget } from "~/origin/widgets/OriginAuthWidget";
@@ -42,7 +41,7 @@ function formatDate(dateString: string): string {
 }
 
 export default function ProfilePageClient({ user, error, expired }: ProfilePageProps) {
-  const [, setAuthModalOpen] = useAtom(authModalOpenAtom);
+  const { ready, authenticated, login } = usePrivy();
 
   // Get effective role (highest priority role from allowed roles)
   const effectiveRole = user?.role ? getEffectiveRole(user.role.default_role, user.role.allowed_roles) : 'user';
@@ -50,15 +49,15 @@ export default function ProfilePageClient({ user, error, expired }: ProfilePageP
   // Get GitHub handle for AI analysis
   const githubHandle = user ? getGitHubHandle(user) : null;
 
-  // Handle expired token
+  // Handle expired token - trigger Privy login
   useEffect(() => {
-    if (expired) {
-      // Show auth modal after a short delay
+    if (expired && ready && !authenticated) {
+      // Show Privy login after a short delay
       setTimeout(() => {
-        setAuthModalOpen(true);
+        login();
       }, 100);
     }
-  }, [expired, setAuthModalOpen]);
+  }, [expired, ready, authenticated, login]);
 
   // If token expired, show error state
   if (expired || !user) {

@@ -17,16 +17,16 @@
     "prepare": "husky || exit 0"
   },
   "lint-staged": {
-        "*.js": [
-            "prettier --ignore-unknown --ignore-path ./.gitignore --write",
-            "eslint --cache --fix"
-        ],
-        "*.{ts,tsx}": [
-            "prettier --ignore-unknown --ignore-path ./.gitignore --write",
-            "eslint --cache --fix"
-        ],
-        "*.yml": "eslint --cache --fix"
-    },
+    "*.js": [
+      "prettier --ignore-unknown --ignore-path ./.gitignore --write",
+      "eslint --cache --fix"
+    ],
+    "*.{ts,tsx}": [
+      "prettier --ignore-unknown --ignore-path ./.gitignore --write",
+      "eslint --cache --fix"
+    ],
+    "*.yml": "eslint --cache --fix"
+  },
   "dependencies": {
     "@ai-sdk/azure": "^0.0.17",
     "@ai-sdk/openai": "^0.0.40",
@@ -35,7 +35,12 @@
     "@campnetwork/origin": "^0.0.17",
     "@highcharts/map-collection": "^2.3.2",
     "@nextui-org/react": "^2.6.11",
+    "@privy-io/react-auth": "^3.8.0",
     "@rainbow-me/rainbowkit": "^2.2.8",
+    "@solana-program/memo": "^0.10.0",
+    "@solana-program/system": "^0.10.0",
+    "@solana-program/token": "^0.9.0",
+    "@solana/kit": "^5.0.0",
     "@t3-oss/env-nextjs": "0.13.8",
     "@tanstack/react-query": "^5.84.1",
     "ai": "^3.3.6",
@@ -75,7 +80,6 @@
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "autoprefixer": "^10.4.20",
-    "code-inspector-plugin": "1.2.2",
     "eslint": "^8.57.0",
     "eslint-config-next": "^15.1.4",
     "eslint-import-resolver-typescript": "^3.6.1",

@@ -3,8 +3,7 @@
 import { Button, Card, CardBody } from "@nextui-org/react";
 import { Brain, AlertCircle, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useAtom } from "jotai";
-import { authModalOpenAtom } from "../atoms";
+import { usePrivy } from "@privy-io/react-auth";
 
 import { analyzeGitHubUser } from "~/profile-analysis/repository";
 import type { AnalysisResult, BasicAnalysisResult, AnalysisStatus, GitHubUser } from "~/profile-analysis/typing";
@@ -32,7 +31,7 @@ export default function DevInsightPageClient({
   user: _user,
   githubHandle,
 }: DevInsightPageProps) {
-  const [, setAuthModalOpen] = useAtom(authModalOpenAtom);
+  const { ready, authenticated, login } = usePrivy();
 
   // Analysis state
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -44,12 +43,12 @@ export default function DevInsightPageClient({
   const [analysisError, setAnalysisError] = useState("");
   const [analysisId, setAnalysisId] = useState<number | null>(null);
 
-  // Auto-trigger login modal for unauthenticated users
+  // Auto-trigger Privy login for unauthenticated users
   useEffect(() => {
-    if (requiresAuth) {
-      setAuthModalOpen(true);
+    if (requiresAuth && ready && !authenticated) {
+      login();
     }
-  }, [requiresAuth, setAuthModalOpen]);
+  }, [requiresAuth, ready, authenticated, login]);
 
   // Auto-start analysis on component mount for authenticated users
   useEffect(() => {
