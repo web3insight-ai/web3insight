@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Card, CardBody } from "@nextui-org/react";
+import { Button, Card, CardBody, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react";
 import { Brain, AlertCircle, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { usePrivy } from "@privy-io/react-auth";
@@ -29,9 +29,43 @@ export default function DevInsightPageClient({
   requiresAuth,
   error,
   user: _user,
-  githubHandle,
+  githubHandle: serverGithubHandle,
 }: DevInsightPageProps) {
-  const { ready, authenticated, login } = usePrivy();
+  const { ready, authenticated, login, user: privyUser, linkGithub } = usePrivy();
+
+  // Get GitHub handle from Privy linkedAccounts if not provided by server
+  const githubAccount = privyUser?.linkedAccounts?.find(acc => acc.type === 'github_oauth');
+  const privyGithubHandle = githubAccount?.username || null;
+
+  // Use Privy GitHub handle if server didn't provide one
+  const githubHandle = serverGithubHandle || privyGithubHandle;
+
+  // State for GitHub linking
+  const [isLinkingGithub, setIsLinkingGithub] = useState(false);
+  const [showGitHubModal, setShowGitHubModal] = useState(false);
+
+  // Show modal when user needs to link GitHub
+  useEffect(() => {
+    if (error && ready && authenticated && !githubHandle) {
+      setShowGitHubModal(true);
+    } else {
+      setShowGitHubModal(false);
+    }
+  }, [error, ready, authenticated, githubHandle]);
+
+  // Handle GitHub account linking
+  const handleLinkGithub = async () => {
+    setIsLinkingGithub(true);
+    try {
+      await linkGithub();
+      // Privy will handle the OAuth flow and update linkedAccounts automatically
+      // The page will detect the new GitHub account via useEffect
+    } catch (error) {
+      // Error handled by Privy UI
+    } finally {
+      setIsLinkingGithub(false);
+    }
+  };
 
   // Analysis state
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -50,13 +84,17 @@ export default function DevInsightPageClient({
     }
   }, [requiresAuth, ready, authenticated, login]);
 
-  // Auto-start analysis on component mount for authenticated users
+  // Auto-start analysis when GitHub handle becomes available
+  // This handles both initial load and when user links GitHub account
   useEffect(() => {
-    if (githubHandle && !isAnalyzing && analysisStatus === "pending") {
-      handleAnalyze();
+    if (ready && githubHandle && !isAnalyzing) {
+      // If we have a GitHub handle and not currently analyzing, start analysis
+      if (analysisStatus === "pending" || (!results && !basicInfo)) {
+        handleAnalyze();
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [githubHandle]);
+  }, [ready, githubHandle]);
 
   useEffect(() => {
     if (basicInfo?.id) {
@@ -131,32 +169,6 @@ export default function DevInsightPageClient({
 
   // Get the current user data for display
   const currentUser = results?.data.users[0] || basicInfo?.users[0];
-
-  if (error) {
-    return (
-      <div className="min-h-dvh bg-background dark:bg-background-dark flex items-center justify-center px-6">
-        <Card className="w-full max-w-md bg-white dark:bg-surface-dark border border-border dark:border-border-dark">
-          <CardBody className="p-8 text-center">
-            <div className="p-3 bg-red-100 dark:bg-red-900/20 rounded-full inline-flex mb-4">
-              <AlertCircle size={24} className="text-red-600 dark:text-red-400" />
-            </div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              Error Loading DevInsight
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              {error}
-            </p>
-            <Button
-              color="primary"
-              onPress={() => window.location.reload()}
-            >
-              Try Again
-            </Button>
-          </CardBody>
-        </Card>
-      </div>
-    );
-  }
 
   // For unauthenticated users, show a simple message and let the modal handle login
   if (requiresAuth) {
@@ -317,6 +329,45 @@ export default function DevInsightPageClient({
           )}
         </div>
       </div>
+
+      {/* GitHub Account Required Modal */}
+      <Modal
+        isOpen={showGitHubModal}
+        onClose={() => setShowGitHubModal(false)}
+        placement="center"
+        backdrop="blur"
+      >
+        <ModalContent>
+          <ModalHeader className="flex flex-col gap-1">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-red-100 dark:bg-red-900/20 rounded-full">
+                <AlertCircle size={24} className="text-red-600 dark:text-red-400" />
+              </div>
+              <span className="text-xl font-semibold">GitHub Account Required</span>
+            </div>
+          </ModalHeader>
+          <ModalBody>
+            <p className="text-gray-600 dark:text-gray-400">
+              Connect your GitHub account to unlock AI-powered Web3 development insights
+            </p>
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              variant="light"
+              onPress={() => setShowGitHubModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              color="primary"
+              onPress={handleLinkGithub}
+              isLoading={isLinkingGithub}
+            >
+              Connect GitHub Account
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </div>
   );
 }
