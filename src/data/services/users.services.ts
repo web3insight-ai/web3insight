@@ -11,6 +11,7 @@ import {
 import { KYSELY } from '@/app/db/db.provider';
 import { ApiAnalysisUsers, DB } from '@/app/db/dto/db.dto';
 import { TokenPoolService } from '@/app/db/pool.services';
+import { AuthService } from '@/auth/services/auth.services';
 import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { CompiledQuery, Kysely } from 'kysely';
@@ -23,6 +24,7 @@ export class UsersService {
     @Inject(KYSELY) private readonly db: Kysely<DB>,
     private readonly tokenPoolService: TokenPoolService,
     private eventEmitter: EventEmitter2,
+    private readonly authService: AuthService,
   ) {}
 
   async uploadAndGetUsers(
@@ -30,7 +32,7 @@ export class UsersService {
     uid: string,
     ref: string = '',
   ) {
-    let usernames = body.request_data.map((url) => this.extractUsername(url));
+    const usernames = body.request_data.map((url) => this.extractUsername(url));
 
     if (body.intent === Intent.Profile) {
       const existing = await this.db
@@ -47,16 +49,25 @@ export class UsersService {
         return res;
       }
 
-      const githubName = await this.db
+      const privyBind = await this.db
         .selectFrom('api.auth_users_binds')
-        .select(['bind_key', 'bind_uid', 'bind_id'])
+        .select(['bind_openid'])
         .where('bind_uid', '=', uid)
-        .where('bind_type', '=', 'github')
+        .where('bind_type', '=', 'privy')
         .executeTakeFirst();
 
-      if (githubName) {
-        usernames = [];
-        usernames.push(githubName.bind_key);
+      const account = await this.authService.getPrivyUserBindings(
+        privyBind?.bind_openid || '',
+      );
+
+      for (const acc of account.linked_accounts) {
+        if (acc.type == 'github_oauth') {
+          usernames.push(acc.username);
+        }
+      }
+
+      if (usernames.length === 0) {
+        throw new Error('No GitHub usernames provided or linked');
       }
     }
 

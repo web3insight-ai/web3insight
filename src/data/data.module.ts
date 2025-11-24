@@ -7,9 +7,10 @@ import { RankService } from './services/rank.services';
 import { ReposService } from './services/repos.services';
 import { UsersService } from './services/users.services';
 import { EcoService } from './services/eco.services';
+import { AuthModule } from '@/auth/auth.module';
 
 @Module({
-  imports: [DBModule],
+  imports: [DBModule, AuthModule],
   providers: [
     InitDataService,
     TotalService,

@@ -14,6 +14,7 @@ import { ExtraClaims, JwtPayload } from '../auth.jwt.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ethers } from 'ethers';
 import { PrivyClient } from '@privy-io/node';
+import { LinkedAccount } from '@privy-io/node/resources/users';
 
 interface OAuth2TokenResponse {
   access_token: string;
@@ -37,6 +38,13 @@ export class AuthService {
     private readonly configService: ConfigService,
     private jwtService: JwtService,
   ) {}
+
+  private createPrivyClient() {
+    return new PrivyClient({
+      appId: this.configService.get<string>('PRIVY_APP_ID'),
+      appSecret: this.configService.get<string>('PRIVY_APP_SECRET'),
+    });
+  }
 
   async login(body: LoginReqDto) {
     const res = await this.getInfoFormGithubOAuth(body.code);
@@ -326,10 +334,7 @@ export class AuthService {
   }
 
   async privyTokenAuth(privyToken: string) {
-    const client = new PrivyClient({
-      appId: this.configService.get<string>('PRIVY_APP_ID'),
-      appSecret: this.configService.get<string>('PRIVY_APP_SECRET'),
-    });
+    const client = this.createPrivyClient();
 
     const user = await client.users().get({ id_token: privyToken });
 
@@ -375,15 +380,33 @@ export class AuthService {
     return { token: await this.generateOAuthServerToken(uid, 'privy') };
   }
 
+  async getPrivyUserBindings(userDid: string): Promise<{
+    user_id: string;
+    linked_accounts: LinkedAccount[];
+  }> {
+    if (!userDid) {
+      throw new Error('Privy user id is required');
+    }
+
+    const client = this.createPrivyClient();
+    const user = await client.users()._get(userDid);
+
+    return {
+      user_id: user.id,
+      linked_accounts: user.linked_accounts || [],
+    };
+  }
+
   @Command({
     command: 'test:oauth:fn',
     description: '',
   })
   async test() {
-    const code = 'd3a9d0da9fd38c5df414';
-    const res = await this.getInfoFormGithubOAuth(code);
-    console.log('Token:', res.token);
-    console.log('User:', res.data);
+    // test run
+    const res = await this.getPrivyUserBindings(
+      'did:privy:cmicpey8k05wpl10c4vz978fz',
+    );
+    console.log('Privy User Bindings:', res);
   }
 
   @Command({
