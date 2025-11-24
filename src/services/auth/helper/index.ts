@@ -41,15 +41,18 @@ function isContentManager(user: ApiUser | null): boolean {
   return isEditor(user) || isServices(user) || isAdmin(user);
 }
 
-export { 
-  hasRole, 
-  isServices, 
-  isAdmin, 
-  isEditor, 
-  isEcosystemManager, 
+export {
+  hasRole,
+  isServices,
+  isAdmin,
+  isEditor,
+  isEcosystemManager,
   isHackathonManager,
   canManageEcosystems,
   canManageEvents,
-  isManageable, 
-  isContentManager, 
+  isManageable,
+  isContentManager,
 };
+
+export { getPrivyUserDisplayInfo } from "./privy-user";
+export type { UserDisplayInfo } from "./privy-user";

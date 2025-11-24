@@ -1,11 +1,10 @@
 'use client';
 
-import { Card, CardBody, Avatar, Button, Divider } from "@nextui-org/react";
+import { Card, CardBody, Avatar, Button } from "@nextui-org/react";
 import Link from "next/link";
 import {
   User as UserIcon,
   Calendar,
-  Clock,
   Shield,
   ExternalLink,
   AlertTriangle,
@@ -15,7 +14,8 @@ import {
 import { useEffect } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 
-import { getRoleName, getEffectiveRole } from "@/utils/role";
+import { getRoleName } from "@/utils/role";
+import { getPrivyUserDisplayInfo } from "~/auth/helper";
 
 import Section from "$/section";
 import { PrivyAccountsWidget } from "~/auth/widgets/privy-accounts";
@@ -39,10 +39,10 @@ function formatDate(dateString: string): string {
 export default function ProfilePageClient({ user, error, expired }: ProfilePageProps) {
   const { ready, authenticated, login, user: privyUser } = usePrivy();
 
-  // Get effective role (highest priority role from allowed roles)
-  const effectiveRole = user?.role ? getEffectiveRole(user.role.default_role, user.role.allowed_roles) : 'user';
+  // Get user display info from Privy based on login method
+  const userInfo = getPrivyUserDisplayInfo(privyUser);
 
-  // Get GitHub handle from Privy linked accounts
+  // Get GitHub handle from Privy linked accounts for DevInsight button
   const githubAccount = privyUser?.linkedAccounts?.find(acc => acc.type === 'github_oauth');
   const githubHandle = githubAccount?.username || null;
 
@@ -110,8 +110,8 @@ export default function ProfilePageClient({ user, error, expired }: ProfilePageP
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
                   <div className="flex-shrink-0">
                     <Avatar
-                      src={user.avatar_url || user.profile?.user_avatar}
-                      name={user.username?.substring(0, 1).toUpperCase() || 'U'}
+                      src={userInfo.avatarUrl || user.avatar_url || user.profile?.user_avatar}
+                      name={userInfo.displayName.substring(0, 1).toUpperCase()}
                       size="lg"
                       className="w-24 h-24 text-large"
                       isBordered
@@ -121,7 +121,7 @@ export default function ProfilePageClient({ user, error, expired }: ProfilePageP
                   <div className="flex-1 text-center md:text-left">
                     <div className="flex flex-col md:flex-row md:items-center gap-3 mb-4">
                       <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {user.profile?.user_nick_name || user.username || 'User'}
+                        {userInfo.displayName}
                       </h1>
                       {githubHandle && (
                         <Link href="/devinsight">
@@ -142,12 +142,6 @@ export default function ProfilePageClient({ user, error, expired }: ProfilePageP
                         <Calendar size={16} />
                         <span>
                           Joined {formatDate(user.profile?.created_at || new Date().toISOString())}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-center md:justify-start gap-2">
-                        <Clock size={16} />
-                        <span>
-                          Last active {formatDate(user.profile?.updated_at || new Date().toISOString())}
                         </span>
                       </div>
                     </div>
@@ -185,7 +179,16 @@ export default function ProfilePageClient({ user, error, expired }: ProfilePageP
                         Username
                       </p>
                       <p className="text-sm text-gray-900 dark:text-white">
-                        {user.profile?.user_nick_name || user.username || 'Not set'}
+                        {userInfo.displayName}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">
+                        Primary Account
+                      </p>
+                      <p className="text-sm text-gray-900 dark:text-white">
+                        {userInfo.primaryAccount}
                       </p>
                     </div>
 
@@ -216,48 +219,23 @@ export default function ProfilePageClient({ user, error, expired }: ProfilePageP
                     </h2>
                   </div>
 
-                  <div className="space-y-6">
-                    <div>
-                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-3">
-                        Current Role
-                      </p>
-                      <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-100 dark:bg-slate-500/20 text-slate-700 dark:text-slate-300 rounded-full border border-slate-200 dark:border-slate-500/30">
-                        <div className="flex items-center justify-center w-5 h-5 bg-slate-200 dark:bg-slate-500/30 rounded-full">
-                          <Shield size={12} className="text-slate-600 dark:text-slate-400" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-3">
+                      Available Roles
+                    </p>
+                    <div className="flex flex-wrap gap-3">
+                      {user.role?.allowed_roles?.map((role: string) => (
+                        <div
+                          key={role}
+                          className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full border bg-gray-50 dark:bg-surface-elevated text-gray-600 dark:text-gray-400 border-gray-200 dark:border-border-dark"
+                        >
+                          {getRoleName(role)}
                         </div>
-                        <span className="font-medium text-sm">
-                          {getRoleName(effectiveRole)}
-                        </span>
-                      </div>
-                    </div>
-
-                    <Divider />
-
-                    <div>
-                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-3">
-                        Available Roles
-                      </p>
-                      <div className="flex flex-wrap gap-3">
-                        {user.role?.allowed_roles?.map((role: string) => {
-                          const isCurrentRole = role === effectiveRole;
-                          return (
-                            <div
-                              key={role}
-                              className={`inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full border ${
-                                isCurrentRole
-                                  ? 'bg-slate-100 dark:bg-slate-500/20 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-500/30'
-                                  : 'bg-gray-50 dark:bg-surface-elevated text-gray-600 dark:text-gray-400 border-gray-200 dark:border-border-dark'
-                              }`}
-                            >
-                              {getRoleName(role)}
-                            </div>
-                          );
-                        }) || (
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            No additional roles available
-                          </p>
-                        )}
-                      </div>
+                      )) || (
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          No roles available
+                        </p>
+                      )}
                     </div>
                   </div>
                 </CardBody>

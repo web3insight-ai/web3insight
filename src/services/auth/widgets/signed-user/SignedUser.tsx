@@ -1,7 +1,7 @@
 'use client';
 
 import { Avatar, Popover, PopoverTrigger, PopoverContent, Button } from "@nextui-org/react";
-import { LogIn, LogOut, User, Shield, Layers, Calendar } from "lucide-react";
+import { LogIn, LogOut, User, Layers, Calendar } from "lucide-react";
 import { usePrivy } from "@privy-io/react-auth";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -9,7 +9,7 @@ import { useState, useEffect } from "react";
 import type { SignedUserProps } from "./typing";
 import type { ApiUser } from "../../typing";
 import ActionItem from "./ActionItem";
-import { canManageEcosystems, canManageEvents } from "../../helper";
+import { canManageEcosystems, canManageEvents, getPrivyUserDisplayInfo } from "../../helper";
 
 function SignedUser({ onSignIn }: SignedUserProps) {
   const { ready, authenticated, user: privyUser, logout } = usePrivy();
@@ -40,8 +40,10 @@ function SignedUser({ onSignIn }: SignedUserProps) {
   const isPrivyAuthenticated = ready && authenticated && privyUser;
 
   if (isPrivyAuthenticated) {
-    // Use Privy user data for display
-    const displayName = privyUser.email?.address || privyUser.wallet?.address || 'User';
+    // Extract user display info from Privy based on login method
+    const userInfo = getPrivyUserDisplayInfo(privyUser);
+    const displayName = userInfo.displayName;
+    const avatarUrl = userInfo.avatarUrl || backendUser?.avatar_url;
     const firstLetter = displayName.substring(0, 1).toUpperCase();
 
     // Check user roles from backend
@@ -76,7 +78,7 @@ function SignedUser({ onSignIn }: SignedUserProps) {
       <Popover placement="bottom-end">
         <PopoverTrigger>
           <Avatar
-            src={backendUser?.avatar_url}
+            src={avatarUrl}
             name={firstLetter}
             size="sm"
             className="cursor-pointer"
@@ -90,19 +92,11 @@ function SignedUser({ onSignIn }: SignedUserProps) {
             {/* User info section */}
             <div className="px-4 py-3 border-b border-border dark:border-border-dark bg-gray-50 dark:bg-surface-elevated rounded-t-lg">
               <p className="font-medium text-sm text-gray-900 dark:text-white truncate">
-                {backendUser?.username || displayName}
-              </p>
-              <p className="text-xs text-gray-600 dark:text-gray-400 truncate mt-1">
                 {displayName}
               </p>
-              {backendUser?.role && (
-                <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-1 bg-white dark:bg-surface-dark rounded-md text-xs">
-                  <Shield size={12} className="text-primary" />
-                  <span className="text-gray-700 dark:text-gray-300 font-medium">
-                    {backendUser.role.default_role}
-                  </span>
-                </div>
-              )}
+              <p className="text-xs text-gray-600 dark:text-gray-400 truncate mt-1">
+                {userInfo.primaryAccount}
+              </p>
             </div>
 
             {/* Menu items */}
