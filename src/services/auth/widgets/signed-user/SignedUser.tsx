@@ -1,34 +1,79 @@
 'use client';
 
 import { Avatar, Popover, PopoverTrigger, PopoverContent, Button } from "@nextui-org/react";
-import { LogIn, LogOut } from "lucide-react";
+import { LogIn, LogOut, User, Shield } from "lucide-react";
 import { usePrivy } from "@privy-io/react-auth";
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
 import type { SignedUserProps } from "./typing";
+import type { ApiUser } from "../../typing";
+import ActionItem from "./ActionItem";
 
 function SignedUser({ onSignIn }: SignedUserProps) {
   const { ready, authenticated, user: privyUser, logout } = usePrivy();
   const router = useRouter();
+  const [backendUser, setBackendUser] = useState<ApiUser | null>(null);
+
+  // Fetch backend user data
+  useEffect(() => {
+    if (!authenticated) {
+      setBackendUser(null);
+      return;
+    }
+
+    // Fetch user data from backend
+    fetch('/api/auth/me', { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.data) {
+          setBackendUser(data.data);
+        }
+      })
+      .catch(() => {
+        // Silent error handling
+      });
+  }, [authenticated]);
 
   // Only show if Privy is authenticated
   const isPrivyAuthenticated = ready && authenticated && privyUser;
 
   if (isPrivyAuthenticated) {
-    // Use Privy user data
+    // Use Privy user data for display
     const displayName = privyUser.email?.address || privyUser.wallet?.address || 'User';
     const firstLetter = displayName.substring(0, 1).toUpperCase();
 
+    // Check user roles from backend
+    const isAdmin = backendUser?.role?.allowed_roles?.includes('admin') || false;
+
     const handleLogout = async () => {
-      await logout();
-      router.push('/');
-      router.refresh();
+      try {
+        // Logout from Privy
+        await logout();
+
+        // Clear backend session
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        // Redirect and refresh
+        router.push('/');
+        router.refresh();
+      } catch (error) {
+        // Still redirect even if there's an error
+        router.push('/');
+        router.refresh();
+      }
     };
 
     return (
       <Popover placement="bottom-end">
         <PopoverTrigger>
           <Avatar
+            src={backendUser?.avatar_url}
             name={firstLetter}
             size="sm"
             className="cursor-pointer"
@@ -37,16 +82,47 @@ function SignedUser({ onSignIn }: SignedUserProps) {
             as="button"
           />
         </PopoverTrigger>
-        <PopoverContent className="p-0 rounded-lg bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark" style={{ width: "220px" }}>
+        <PopoverContent className="p-0 rounded-lg bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark" style={{ width: "240px" }}>
           <div className="flex flex-col">
             {/* User info section */}
             <div className="px-4 py-3 border-b border-border dark:border-border-dark bg-gray-50 dark:bg-surface-elevated rounded-t-lg">
-              <p className="font-medium text-sm text-gray-900 dark:text-white truncate">{displayName}</p>
-              <p className="text-xs text-primary mt-1">Via Privy</p>
+              <p className="font-medium text-sm text-gray-900 dark:text-white truncate">
+                {backendUser?.username || displayName}
+              </p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 truncate mt-1">
+                {displayName}
+              </p>
+              {backendUser?.role && (
+                <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-1 bg-white dark:bg-surface-dark rounded-md text-xs">
+                  <Shield size={12} className="text-primary" />
+                  <span className="text-gray-700 dark:text-gray-300 font-medium">
+                    {backendUser.role.default_role}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Menu items */}
+            <div className="py-2">
+              <ActionItem
+                text="Profile"
+                icon={User}
+                action="/profile"
+                renderType="link"
+              />
+
+              {isAdmin && (
+                <ActionItem
+                  text="Admin Panel"
+                  icon={Shield}
+                  action="/admin"
+                  renderType="link"
+                />
+              )}
             </div>
 
             {/* Logout button */}
-            <div className="p-2">
+            <div className="p-2 border-t border-border dark:border-border-dark">
               <Button
                 fullWidth
                 size="sm"

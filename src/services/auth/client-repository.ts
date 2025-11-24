@@ -11,6 +11,10 @@ async function signInWithGitHub(code: string): Promise<ResponseResult<ApiAuthRes
   return httpClient.post("/api/auth/login", { code, clientSide: true });
 }
 
+async function signInWithPrivy(idToken: string): Promise<ResponseResult<ApiAuthResponse>> {
+  return httpClient.post("/api/auth/privy", { idToken });
+}
+
 async function signOut(): Promise<ResponseResult> {
   return httpClient.post("/api/auth/logout", { clientSide: true });
 }
@@ -29,6 +33,7 @@ async function bindWallet(params: { signature: string; message: string; address:
 
 export {
   signInWithGitHub,
+  signInWithPrivy,
   signOut,
   fetchCurrentUser,
   fetchMagic,

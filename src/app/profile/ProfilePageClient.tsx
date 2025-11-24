@@ -7,8 +7,6 @@ import {
   Calendar,
   Clock,
   Shield,
-  Github,
-  Mail,
   ExternalLink,
   AlertTriangle,
   CheckCircle,
@@ -18,11 +16,9 @@ import { useEffect } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 
 import { getRoleName, getEffectiveRole } from "@/utils/role";
-import { getGitHubHandle } from "~/profile-analysis/helper";
 
 import Section from "$/section";
-import { WalletBindWidget } from "~/auth/widgets/wallet-bind";
-import { OriginAuthWidget } from "~/origin/widgets/OriginAuthWidget";
+import { PrivyAccountsWidget } from "~/auth/widgets/privy-accounts";
 
 interface ProfilePageProps {
   user: Record<string, unknown>;
@@ -41,13 +37,14 @@ function formatDate(dateString: string): string {
 }
 
 export default function ProfilePageClient({ user, error, expired }: ProfilePageProps) {
-  const { ready, authenticated, login } = usePrivy();
+  const { ready, authenticated, login, user: privyUser } = usePrivy();
 
   // Get effective role (highest priority role from allowed roles)
   const effectiveRole = user?.role ? getEffectiveRole(user.role.default_role, user.role.allowed_roles) : 'user';
 
-  // Get GitHub handle for AI analysis
-  const githubHandle = user ? getGitHubHandle(user) : null;
+  // Get GitHub handle from Privy linked accounts
+  const githubAccount = privyUser?.linkedAccounts?.find(acc => acc.type === 'github_oauth');
+  const githubHandle = githubAccount?.username || null;
 
   // Handle expired token - trigger Privy login
   useEffect(() => {
@@ -83,7 +80,7 @@ export default function ProfilePageClient({ user, error, expired }: ProfilePageP
                   </p>
                   <Button
                     color="primary"
-                    onClick={() => setAuthModalOpen(true)}
+                    onClick={() => login()}
                     className="font-medium"
                   >
                     Sign In Again
@@ -97,9 +94,6 @@ export default function ProfilePageClient({ user, error, expired }: ProfilePageP
     );
   }
 
-  const githubBind = (user.binds as Record<string, unknown>[] | undefined)?.find((bind: Record<string, unknown>) => bind.bind_type === 'github');
-  const emailBind = (user.binds as Record<string, unknown>[] | undefined)?.find((bind: Record<string, unknown>) => bind.bind_type === 'email');
-  const walletBinds = (user.binds as Record<string, unknown>[] | undefined)?.filter((bind: Record<string, unknown>) => bind.bind_type === 'wallet') || [];
 
   return (
     <div className="min-h-dvh flex flex-col">
@@ -129,7 +123,7 @@ export default function ProfilePageClient({ user, error, expired }: ProfilePageP
                       <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                         {user.profile?.user_nick_name || user.username || 'User'}
                       </h1>
-                      {githubBind && githubHandle && (
+                      {githubHandle && (
                         <Link href="/devinsight">
                           <Button
                             variant="light"
@@ -270,74 +264,22 @@ export default function ProfilePageClient({ user, error, expired }: ProfilePageP
               </Card>
             </div>
 
-            {/* Second Row: Connected Accounts | Camp Network */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Connected Accounts */}
-              <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-                <CardBody className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-gray-100 dark:bg-surface-elevated rounded-lg">
-                      <ExternalLink size={20} className="text-gray-600 dark:text-gray-400" />
-                    </div>
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      Connected Accounts
-                    </h2>
+            {/* Connected Accounts */}
+            <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
+              <CardBody className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-gray-100 dark:bg-surface-elevated rounded-lg">
+                    <ExternalLink size={20} className="text-gray-600 dark:text-gray-400" />
                   </div>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Connected Accounts
+                  </h2>
+                </div>
 
-                  <div className="space-y-4">
-                    {githubBind && (
-                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-surface-elevated rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <Github size={20} className="text-gray-700 dark:text-gray-300" />
-                          <div>
-                            <p className="text-sm font-medium text-gray-900 dark:text-white">
-                              GitHub
-                            </p>
-                            <p className="text-xs text-gray-600 dark:text-gray-400">
-                              @{githubBind.bind_key}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="px-3 py-1.5 bg-gray-100 dark:bg-surface-elevated text-gray-700 dark:text-gray-300 text-xs font-medium rounded-full border border-gray-200 dark:border-border-dark">
-                          Verified
-                        </div>
-                      </div>
-                    )}
-
-                    {emailBind && (
-                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-surface-elevated rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <Mail size={20} className="text-gray-700 dark:text-gray-300" />
-                          <div>
-                            <p className="text-sm font-medium text-gray-900 dark:text-white">
-                              Email
-                            </p>
-                            <p className="text-xs text-gray-600 dark:text-gray-400">
-                              {emailBind.bind_key}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="px-3 py-1.5 bg-gray-100 dark:bg-surface-elevated text-gray-700 dark:text-gray-300 text-xs font-medium rounded-full border border-gray-200 dark:border-border-dark">
-                          Verified
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Wallet Binding Widget - replaces individual wallet entries */}
-                    <WalletBindWidget user={user} />
-
-                    {(!githubBind && !emailBind && walletBinds.length === 0) && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 text-center py-4">
-                        No connected accounts
-                      </p>
-                    )}
-                  </div>
-                </CardBody>
-              </Card>
-
-              {/* Camp Network (Origin Network Integration) */}
-              <OriginAuthWidget className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark" />
-            </div>
+                {/* Privy Accounts Widget */}
+                <PrivyAccountsWidget />
+              </CardBody>
+            </Card>
           </div>
         </Section>
       </div>

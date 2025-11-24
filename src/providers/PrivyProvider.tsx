@@ -2,6 +2,7 @@
 
 import { PrivyProvider as PrivyAuthProvider } from "@privy-io/react-auth";
 import { env } from "@env";
+import { PrivyAuthSync } from "./PrivyAuthSync";
 
 export function PrivyProvider({ children }: { children: React.ReactNode }) {
   const appId = env.NEXT_PUBLIC_PRIVY_APP_ID;
@@ -28,6 +29,7 @@ export function PrivyProvider({ children }: { children: React.ReactNode }) {
         loginMethods: ["email", "wallet", "google", "github"],
       }}
     >
+      <PrivyAuthSync />
       {children}
     </PrivyAuthProvider>
   );

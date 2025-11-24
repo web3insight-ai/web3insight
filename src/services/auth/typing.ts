@@ -40,6 +40,10 @@ interface GitHubOAuthRequest {
   code: string;
 }
 
+interface PrivyAuthRequest {
+  idToken: string;
+}
+
 type RoleType = "user" | "ecosystem" | "hackathon" | "services" | "admin";
 
 // Wallet binding related types
@@ -58,13 +62,14 @@ interface WalletBindResponse {
   message?: string;
 }
 
-export type { 
-  ApiUser, 
-  ApiAuthResponse, 
-  GitHubOAuthRequest, 
-  UserProfile, 
-  UserBind, 
-  UserRole, 
+export type {
+  ApiUser,
+  ApiAuthResponse,
+  GitHubOAuthRequest,
+  PrivyAuthRequest,
+  UserProfile,
+  UserBind,
+  UserRole,
   RoleType,
   MagicResponse,
   WalletBindRequest,

@@ -6,7 +6,17 @@ export async function GET(request: Request) {
   const resolved = { ...others, data, extra: { ...extra, authenticated: !!data } };
 
   if (data) {
-    resolved.data = pick(data as Record<string, unknown>, ["id", "username", "email", "confirmed", "avatar_url"]) as Record<string, unknown>;
+    // Return more user fields including role information
+    resolved.data = pick(data as Record<string, unknown>, [
+      "id",
+      "username",
+      "email",
+      "confirmed",
+      "avatar_url",
+      "role",  // Include role information
+      "binds", // Include connected accounts
+      "profile", // Include profile data
+    ]) as Record<string, unknown>;
   } else {
     resolved.code = "401";
   }

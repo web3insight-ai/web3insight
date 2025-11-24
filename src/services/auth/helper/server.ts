@@ -50,8 +50,17 @@ async function getSession(): Promise<MockSession> {
 
   try {
     const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get("web3insight_session");
 
+    // First try to get the new auth-token (from Privy login)
+    const authTokenCookie = cookieStore.get("auth-token");
+    if (authTokenCookie?.value) {
+      // Store the token directly in session
+      session.setData({ userToken: authTokenCookie.value, userId: "" });
+      return session;
+    }
+
+    // Fallback to old session cookie (for backwards compatibility with GitHub login)
+    const sessionCookie = cookieStore.get("web3insight_session");
     if (sessionCookie?.value) {
       const { payload } = await jwtVerify(sessionCookie.value, secret);
       session.setData(payload as SessionData);
@@ -95,7 +104,13 @@ async function createUserSession({
 // Server-only function - clears session cookies
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function clearSession(_session?: MockSession) {
-  // Return a cookie header string that clears the session cookie
+  const cookieStore = await cookies();
+
+  // Clear both cookies
+  cookieStore.delete("auth-token");
+  cookieStore.delete("web3insight_session");
+
+  // Return a cookie header string that clears the session cookie (for backwards compatibility)
   return `web3insight_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT`;
 }
 

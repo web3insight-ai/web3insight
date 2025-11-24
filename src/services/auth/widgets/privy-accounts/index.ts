@@ -1,0 +1,2 @@
+export { PrivyAccountsWidget } from './PrivyAccountsWidget';
+
