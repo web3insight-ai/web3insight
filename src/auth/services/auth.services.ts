@@ -128,8 +128,13 @@ export class AuthService {
   }
 
   async updateUserInfo(user: JwtPayload, body: UpdateUserReqDto) {
+    const {
+      created_at: _createdAt,
+      updated_at: _updatedAt,
+      ...rest
+    } = body as any;
     const updatePayload = Object.fromEntries(
-      Object.entries(body).filter(([, value]) => value !== undefined),
+      Object.entries(rest).filter(([, value]) => value !== undefined),
     ) as Partial<Updateable<ApiAuthUsers>>;
 
     if (Object.keys(updatePayload).length === 0) {
