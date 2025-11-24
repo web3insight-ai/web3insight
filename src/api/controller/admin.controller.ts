@@ -67,4 +67,15 @@ export class AdminController {
   ) {
     return await this.reposService.markRepo(params, body);
   }
+
+  @Post('admin/test/version')
+  @ApiOperation({
+    summary: 'Get version test',
+    description: '',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AppAuthGuard)
+  version() {
+    return { version: '0.0.20' };
+  }
 }
