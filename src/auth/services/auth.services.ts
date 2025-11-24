@@ -1,10 +1,14 @@
-import { AuthBindWalletReqDto, LoginReqDto } from '@/api/dto/api.dto';
+import {
+  AuthBindWalletReqDto,
+  LoginReqDto,
+  UpdateUserReqDto,
+} from '@/api/dto/api.dto';
 import { KYSELY } from '@/app/db/db.provider';
-import { DB } from '@/app/db/dto/db.dto';
+import { ApiAuthUsers, DB } from '@/app/db/dto/db.dto';
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Octokit } from '@octokit/rest';
-import { Kysely } from 'kysely';
+import { Kysely, Updateable } from 'kysely';
 import { Command, Console } from 'nestjs-console';
 import { ExtraClaims, JwtPayload } from '../auth.jwt.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -121,6 +125,27 @@ export class AuthService {
       binds: binds,
       role: extraClaims,
     };
+  }
+
+  async updateUserInfo(user: JwtPayload, body: UpdateUserReqDto) {
+    const updatePayload = Object.fromEntries(
+      Object.entries(body).filter(([, value]) => value !== undefined),
+    ) as Partial<Updateable<ApiAuthUsers>>;
+
+    if (Object.keys(updatePayload).length === 0) {
+      return this.getUserInfo(user);
+    }
+
+    await this.db
+      .updateTable('api.auth_users')
+      .set({
+        ...updatePayload,
+        updated_at: new Date().toISOString(),
+      })
+      .where('user_id', '=', user.uid)
+      .execute();
+
+    return this.getUserInfo(user);
   }
 
   async generateOAuthServerToken(uid: string, type: string) {

@@ -160,6 +160,20 @@ export class AuthBindWalletReqDto {
   signature: string;
 }
 
+export class UpdateUserReqDto {
+  @IsOptional()
+  @IsString()
+  user_nick_name?: string;
+
+  @IsOptional()
+  @IsString()
+  user_avatar?: string;
+
+  @IsOptional()
+  @IsString()
+  user_bio?: string;
+}
+
 export class ReposCustomMarkReqDto {
   @ValidateIf((o: ReposCustomMarkReqDto) => o.eco_name !== ECO_ALL)
   @IsString()
