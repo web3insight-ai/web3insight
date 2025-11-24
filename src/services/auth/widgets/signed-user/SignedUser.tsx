@@ -1,7 +1,7 @@
 'use client';
 
 import { Avatar, Popover, PopoverTrigger, PopoverContent, Button } from "@nextui-org/react";
-import { LogIn, LogOut, User, Shield } from "lucide-react";
+import { LogIn, LogOut, User, Shield, Layers, Calendar } from "lucide-react";
 import { usePrivy } from "@privy-io/react-auth";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 import type { SignedUserProps } from "./typing";
 import type { ApiUser } from "../../typing";
 import ActionItem from "./ActionItem";
+import { canManageEcosystems, canManageEvents } from "../../helper";
 
 function SignedUser({ onSignIn }: SignedUserProps) {
   const { ready, authenticated, user: privyUser, logout } = usePrivy();
@@ -45,6 +46,8 @@ function SignedUser({ onSignIn }: SignedUserProps) {
 
     // Check user roles from backend
     const isAdmin = backendUser?.role?.allowed_roles?.includes('admin') || false;
+    const canManageEco = canManageEcosystems(backendUser);
+    const canManageEvt = canManageEvents(backendUser);
 
     const handleLogout = async () => {
       try {
@@ -110,6 +113,24 @@ function SignedUser({ onSignIn }: SignedUserProps) {
                 action="/profile"
                 renderType="link"
               />
+
+              {canManageEco && (
+                <ActionItem
+                  text="Ecosystem Manager"
+                  icon={Layers}
+                  action="/admin/ecosystems"
+                  renderType="link"
+                />
+              )}
+
+              {canManageEvt && (
+                <ActionItem
+                  text="Event Manager"
+                  icon={Calendar}
+                  action="/admin/events"
+                  renderType="link"
+                />
+              )}
 
               {isAdmin && (
                 <ActionItem
