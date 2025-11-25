@@ -19,6 +19,7 @@ import ProfileCardWidget from "~/developer/widgets/profile-card";
 import ActivityListViewWidget from "~/developer/views/activity-list";
 import { ProgrammingLanguagesBar } from "../../../components/event/ProgrammingLanguagesBar";
 import { ProgrammingLanguagesPie } from "../../../components/event/ProgrammingLanguagesPie";
+import { useGitHubStats } from "../../../hooks/useGitHubStats";
 
 import { resolveChartOptions } from "./helper";
 
@@ -35,6 +36,10 @@ export default function DeveloperDetailClient({
   repositories,
   recentActivity,
 }: DeveloperDetailProps) {
+  const { data: githubStats, loading: githubStatsLoading } = useGitHubStats(developer?.username || null);
+  const githubLanguages = githubStats?.languages ?? [];
+  const shouldShowGitHubLanguages = githubStatsLoading || githubLanguages.length > 0;
+
   // Show loading skeleton while data is being fetched
   if (!developer) {
     return (
@@ -78,17 +83,25 @@ export default function DeveloperDetailClient({
         <div className="animate-fade-in">
           <ProfileCardWidget className="mb-4" developer={developer} />
         </div>
-        <div className="animate-slide-up" style={{ animationDelay: "50ms" }}>
-          <div className="mb-4">
-            <h5 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-              Programming Languages
-            </h5>
-            <div className="grid gap-4 lg:grid-cols-2">
-              <ProgrammingLanguagesBar username={developer.username} />
-              <ProgrammingLanguagesPie username={developer.username} />
+        {shouldShowGitHubLanguages && (
+          <div className="animate-slide-up" style={{ animationDelay: "50ms" }}>
+            <div className="mb-4">
+              <h5 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                Programming Languages
+              </h5>
+              <div className="grid gap-4 lg:grid-cols-2">
+                <ProgrammingLanguagesBar
+                  languages={githubLanguages}
+                  loading={githubStatsLoading}
+                />
+                <ProgrammingLanguagesPie
+                  languages={githubLanguages}
+                  loading={githubStatsLoading}
+                />
+              </div>
             </div>
           </div>
-        </div>
+        )}
         <div
           className="animate-slide-up mb-4"
           style={{ animationDelay: "200ms" }}

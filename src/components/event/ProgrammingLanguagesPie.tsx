@@ -1,10 +1,12 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { Code2 } from "lucide-react";
-import { useGitHubStats } from "../../hooks/useGitHubStats";
+import { useGitHubStats, type GitHubLanguage } from "../../hooks/useGitHubStats";
 
 interface ProgrammingLanguagesPieProps {
-  username: string;
+  username?: string | null;
   className?: string;
+  languages?: GitHubLanguage[];
+  loading?: boolean;
 }
 
 // Balanced teal/green theme colors - not too bright, not too dark
@@ -17,14 +19,28 @@ const COLORS = [
   "#10b981", // emerald-500
 ];
 
-export function ProgrammingLanguagesPie({ username, className = "" }: ProgrammingLanguagesPieProps) {
-  const { data: githubData } = useGitHubStats(username);
+export function ProgrammingLanguagesPie({
+  username,
+  className = "",
+  languages: providedLanguages,
+  loading: forcedLoading,
+}: ProgrammingLanguagesPieProps) {
+  const shouldFetch = !providedLanguages && !!username;
+  const { data: githubData, loading } = useGitHubStats(shouldFetch ? (username ?? null) : null);
+  const languages = providedLanguages ?? githubData?.languages ?? [];
+  const isLoading = typeof forcedLoading === "boolean" ? forcedLoading : (shouldFetch ? loading : false);
+  const hasLanguages = languages.length > 0;
+  const chartData = hasLanguages
+    ? languages.slice(0, 6).map(lang => ({
+      name: lang.name,
+      value: parseFloat(lang.percentage.replace('%', '')),
+      percentage: lang.percentage,
+    }))
+    : [];
 
-  const chartData = githubData?.languages?.slice(0, 6).map(lang => ({
-    name: lang.name,
-    value: parseFloat(lang.percentage.replace('%', '')),
-    percentage: lang.percentage,
-  })) || [];
+  if (!isLoading && !hasLanguages) {
+    return null;
+  }
 
   const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { name: string; percentage: string } }> }) => {
     if (active && payload && payload.length) {
@@ -48,14 +64,14 @@ export function ProgrammingLanguagesPie({ username, className = "" }: Programmin
       <div className="flex items-center gap-2 mb-4">
         <Code2 size={14} className="text-gray-600 dark:text-gray-400" />
         <h4 className="text-sm font-medium text-gray-900 dark:text-white">Language Distribution</h4>
-        {githubData?.languages && (
+        {hasLanguages && (
           <span className="text-xs text-gray-500 dark:text-gray-400 ml-auto">
-            Top {Math.min(6, githubData.languages.length)}
+            Top {Math.min(6, languages.length)}
           </span>
         )}
       </div>
 
-      {githubData?.languages && githubData.languages.length > 0 ? (
+      {hasLanguages ? (
         <div className="space-y-4">
           {/* Compact Chart */}
           <div className="h-32 flex items-center justify-center">
