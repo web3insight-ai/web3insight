@@ -1,29 +1,14 @@
 "use client"
 
-import { useRef, useEffect, useState } from "react"
+import { useRef } from "react"
 import { Search, LineChart, Users, Database, TrendingUp, Award } from "lucide-react"
 import { useI18n } from "@/lib/i18n-context"
+import { motion, useInView } from "framer-motion"
+import { fadeInUp, ScrollReveal, stagger } from "@/components/ui/motion"
 
 function FeatureVisual({ type }: { type: string }) {
-  const [isVisible, setIsVisible] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          setIsVisible(true)
-        }
-      },
-      { threshold: 0.5 },
-    )
-
-    if (ref.current) {
-      observer.observe(ref.current)
-    }
-
-    return () => observer.disconnect()
-  }, [])
+  const isVisible = useInView(ref, { once: true, margin: "-10% 0px -5% 0px" })
 
   return (
     <div ref={ref} className="relative h-32 bg-secondary rounded-md overflow-hidden">
@@ -276,16 +261,23 @@ export function FeaturesSection() {
       </div>
 
       <div className="relative max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 pt-16">
-        <div className="text-center mb-16">
+        <ScrollReveal className="text-center mb-16" margin="-15% 0px -15% 0px">
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4 text-balance">{t("features.title")}</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">{t("features.description")}</p>
-        </div>
+        </ScrollReveal>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-children">
+        <motion.div
+          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
+          variants={stagger(0.12)}
+        >
           {features.map((feature) => (
-            <div
+            <motion.div
               key={feature.titleKey}
               className="group p-6 bg-card border border-border rounded-lg hover:border-accent/50 transition-all duration-300"
+              variants={fadeInUp()}
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-md bg-secondary flex items-center justify-center group-hover:bg-accent/10 transition-colors">
@@ -295,9 +287,9 @@ export function FeaturesSection() {
               </div>
               <p className="text-sm text-muted-foreground mb-4 leading-relaxed">{t(feature.descriptionKey)}</p>
               <FeatureVisual type={feature.visual} />
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   )

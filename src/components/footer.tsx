@@ -4,6 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { Github } from "lucide-react"
 import { useI18n } from "@/lib/i18n-context"
+import type { MouseEvent } from "react"
 
 function XIcon({ className }: { className?: string }) {
   return (
@@ -15,6 +16,15 @@ function XIcon({ className }: { className?: string }) {
 
 export function Footer() {
   const { t } = useI18n()
+
+  const handleScrollTo = (event: MouseEvent, targetId: string) => {
+    event.preventDefault()
+    const target = document.getElementById(targetId)
+    if (!target) return
+    const headerOffset = 80
+    const y = target.getBoundingClientRect().top + window.scrollY - headerOffset
+    window.scrollTo({ top: y, behavior: "smooth" })
+  }
 
   return (
     <footer className="py-16 bg-card border-t border-border">
@@ -62,20 +72,22 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link
+                <a
                   href="#features"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={(e) => handleScrollTo(e, "features")}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                 >
                   {t("nav.features")}
-                </Link>
+                </a>
               </li>
               <li>
-                <Link
+                <a
                   href="#use-cases"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={(e) => handleScrollTo(e, "use-cases")}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                 >
                   {t("nav.useCases")}
-                </Link>
+                </a>
               </li>
             </ul>
           </div>

@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useRef } from "react"
 import { useI18n } from "@/lib/i18n-context"
+import { motion, useInView } from "framer-motion"
+import { fadeInUp, stagger } from "@/components/ui/motion"
 
 // Utility function to format numbers with comma separators
 function formatNumber(num: number): string {
@@ -109,6 +111,7 @@ function LoadingNumber() {
 function AnimatedNumber({ value, suffix, isLoading }: { value: number; suffix: string; isLoading?: boolean }) {
   const [displayValue, setDisplayValue] = useState(0)
   const ref = useRef<HTMLDivElement>(null)
+  const isInView = useInView(ref, { once: true, margin: "-10% 0px -10% 0px" })
   const hasAnimated = useRef(false)
 
   useEffect(() => {
@@ -119,6 +122,8 @@ function AnimatedNumber({ value, suffix, isLoading }: { value: number; suffix: s
       return
     }
 
+    if (!isInView) return
+
     // If value is 0, set display value immediately
     if (value === 0) {
       setDisplayValue(0)
@@ -126,39 +131,26 @@ function AnimatedNumber({ value, suffix, isLoading }: { value: number; suffix: s
       return
     }
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !hasAnimated.current && value > 0) {
-          hasAnimated.current = true
-          const duration = 2000
-          const steps = 60
-          const increment = value / steps
-          let current = 0
+    if (hasAnimated.current || value <= 0) return
+    hasAnimated.current = true
 
-          const timer = setInterval(() => {
-            current += increment
-            if (current >= value) {
-              setDisplayValue(value)
-              clearInterval(timer)
-            } else {
-              setDisplayValue(Math.floor(current))
-            }
-          }, duration / steps)
-        } else if (!entries[0].isIntersecting && !hasAnimated.current && value > 0) {
-          // If not intersecting but has value, show the final value immediately
-          setDisplayValue(value)
-          hasAnimated.current = true
-        }
-      },
-      { threshold: 0.1 },
-    )
+    const duration = 2000
+    const steps = 60
+    const increment = value / steps
+    let current = 0
 
-    if (ref.current) {
-      observer.observe(ref.current)
-    }
+    const timer = setInterval(() => {
+      current += increment
+      if (current >= value) {
+        setDisplayValue(value)
+        clearInterval(timer)
+      } else {
+        setDisplayValue(Math.floor(current))
+      }
+    }, duration / steps)
 
-    return () => observer.disconnect()
-  }, [value, isLoading])
+    return () => clearInterval(timer)
+  }, [value, isLoading, isInView])
 
   return (
     <div ref={ref} className="text-3xl sm:text-4xl font-bold text-foreground tabular-nums">
@@ -208,12 +200,19 @@ export function StatsSection() {
 
   return (
     <section className="relative py-20 border-b border-border">
-      <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
+      <motion.div
+        className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
+        variants={stagger(0.14)}
+      >
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-          {stats.map((stat) => (
-            <div
+          {stats.map((stat, idx) => (
+            <motion.div
               key={stat.labelKey}
               className="relative p-6 bg-card border border-border rounded-lg group hover:border-accent/50 transition-colors"
+              variants={fadeInUp(0.05 * idx)}
             >
               {/* Corner decoration */}
               <div className="absolute top-0 right-0 w-8 h-8 border-t border-r border-border opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -231,10 +230,10 @@ export function StatsSection() {
                   <AnimatedNumber value={stat.value} suffix={stat.suffix} isLoading={isLoading} />
                 )}
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
-      </div>
+      </motion.div>
     </section>
   )
 }

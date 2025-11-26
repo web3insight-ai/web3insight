@@ -19,6 +19,16 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { t } = useI18n()
 
+  const handleScrollTo = (event: React.MouseEvent, targetId: string) => {
+    event.preventDefault()
+    setIsMenuOpen(false)
+    const target = document.getElementById(targetId)
+    if (!target) return
+    const headerOffset = 80 // account for fixed header height
+    const y = target.getBoundingClientRect().top + window.scrollY - headerOffset
+    window.scrollTo({ top: y, behavior: "smooth" })
+  }
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border">
       <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
@@ -29,12 +39,20 @@ export function Header() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
-            <Link href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <a
+              href="#features"
+              onClick={(e) => handleScrollTo(e, "features")}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            >
               {t("nav.features")}
-            </Link>
-            <Link href="#use-cases" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            </a>
+            <a
+              href="#use-cases"
+              onClick={(e) => handleScrollTo(e, "use-cases")}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            >
               {t("nav.useCases")}
-            </Link>
+            </a>
             <Link
               href="https://dash.web3insight.ai"
               target="_blank"
@@ -73,12 +91,20 @@ export function Header() {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-border">
             <nav className="flex flex-col gap-4">
-              <Link href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <a
+                href="#features"
+                onClick={(e) => handleScrollTo(e, "features")}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+              >
                 {t("nav.features")}
-              </Link>
-              <Link href="#use-cases" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              </a>
+              <a
+                href="#use-cases"
+                onClick={(e) => handleScrollTo(e, "use-cases")}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+              >
                 {t("nav.useCases")}
-              </Link>
+              </a>
               <Link
                 href="https://dash.web3insight.ai"
                 target="_blank"
