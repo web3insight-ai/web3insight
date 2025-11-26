@@ -96,13 +96,12 @@ function PackageIcon({ className }: { className?: string }) {
 
 function LoadingNumber() {
   return (
-    <div className="text-3xl sm:text-4xl font-bold text-foreground/60 tabular-nums flex items-center">
-      <span className="animate-pulse">0</span>
+    <div className="flex items-center">
       {/* Loading dots animation */}
-      <div className="ml-3 flex space-x-1">
-        <div className="w-1.5 h-1.5 bg-accent/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-        <div className="w-1.5 h-1.5 bg-accent/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-        <div className="w-1.5 h-1.5 bg-accent/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+      <div className="flex space-x-1.5">
+        <div className="w-2 h-2 bg-accent/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+        <div className="w-2 h-2 bg-accent/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+        <div className="w-2 h-2 bg-accent/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
       </div>
     </div>
   )
@@ -151,6 +150,20 @@ function AnimatedNumber({ value, suffix, isLoading }: { value: number; suffix: s
 
     return () => clearInterval(timer)
   }, [value, isLoading, isInView])
+
+  const shouldShowLoading =
+    isLoading ||
+    !isInView ||
+    value <= 0 ||
+    (displayValue === 0 && value > 0)
+
+  if (shouldShowLoading) {
+    return (
+      <div ref={ref}>
+        <LoadingNumber />
+      </div>
+    )
+  }
 
   return (
     <div ref={ref} className="text-3xl sm:text-4xl font-bold text-foreground tabular-nums">
@@ -224,7 +237,7 @@ export function StatsSection() {
                 <span className="text-xs text-muted-foreground uppercase tracking-wider">{t(stat.labelKey)}</span>
               </div>
               <div className="min-h-[48px] flex items-center">
-                {isLoading ? (
+                {isLoading || stat.value === 0 ? (
                   <LoadingNumber />
                 ) : (
                   <AnimatedNumber value={stat.value} suffix={stat.suffix} isLoading={isLoading} />
