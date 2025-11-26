@@ -4,6 +4,7 @@ import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import { I18nProvider } from "@/lib/i18n-context"
+import { env } from "@/env"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -32,6 +33,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          defer
+          src="https://umami.web3insight.ai/script.js"
+          data-website-id={env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
+        />
+      </head>
       <body className={`${GeistSans.variable} ${GeistMono.variable} font-sans antialiased overflow-x-hidden`}>
         <I18nProvider>{children}</I18nProvider>
         <Analytics />

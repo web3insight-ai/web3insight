@@ -29,7 +29,8 @@ export const env = createEnv({
    * `NEXT_PUBLIC_`.
    */
   client: {
-    // Add client-side environment variables here if needed
+    // Umami Analytics configuration
+    NEXT_PUBLIC_UMAMI_WEBSITE_ID: z.string().min(1),
   },
 
   /**
@@ -42,6 +43,9 @@ export const env = createEnv({
     DATA_API_TOKEN: process.env.DATA_API_TOKEN,
     HTTP_TIMEOUT: process.env.HTTP_TIMEOUT,
     NODE_ENV: process.env.NODE_ENV,
+
+    // Client vars
+    NEXT_PUBLIC_UMAMI_WEBSITE_ID: process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID,
   },
   /**
    * Run `build` or `dev` with SKIP_ENV_VALIDATION to skip env validation. This is especially
