@@ -59,6 +59,8 @@ export const env = createEnv({
     NEXT_PUBLIC_ORIGIN_API_URL: z.string().url().optional(),
     NEXT_PUBLIC_ORIGIN_CLIENT_ID: z.string().min(1).optional(),
     NEXT_PUBLIC_ORIGIN_SUBGRAPH_URL: z.string().url().optional(),
+    // Umami Analytics configuration
+    NEXT_PUBLIC_UMAMI_WEBSITE_ID: z.string().min(1),
   },
 
   /**
@@ -89,6 +91,7 @@ export const env = createEnv({
       process.env.NEXT_PUBLIC_ORIGIN_SUBGRAPH_URL,
     NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID:
       process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID,
+    NEXT_PUBLIC_UMAMI_WEBSITE_ID: process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID,
   },
   /**
    * Run `build` or `dev` with SKIP_ENV_VALIDATION to skip env validation. This is especially

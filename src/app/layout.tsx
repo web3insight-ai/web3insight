@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { env } from "@env";
 import { getTitle } from "@/utils/app";
 import { ClientProviders } from "./providers";
 import "./globals.css";
@@ -23,7 +24,7 @@ export default function RootLayout({
         <script
           defer
           src="https://umami.web3insight.ai/script.js"
-          data-website-id="b036732f-4406-4778-90cc-2e4002b5e13b"
+          data-website-id={env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
         />
       </head>
       <body>
