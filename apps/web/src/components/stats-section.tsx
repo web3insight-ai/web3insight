@@ -200,8 +200,8 @@ export function StatsSection() {
   }, [])
 
   const stats = [
-    { labelKey: "stats.developers", value: statsData.developer, suffix: "", icon: CodeIcon },
-    { labelKey: "stats.contributors", value: statsData.coreDeveloper, suffix: "+", icon: UsersIcon },
+    { labelKey: "stats.contributors", value: statsData.developer, suffix: "", icon: UsersIcon },
+    { labelKey: "stats.developers", value: statsData.coreDeveloper, suffix: "+", icon: CodeIcon },
     { labelKey: "stats.ecosystems", value: statsData.ecosystem, suffix: "", icon: GlobeIcon },
     { labelKey: "stats.repositories", value: statsData.repository, suffix: "", icon: PackageIcon },
   ]

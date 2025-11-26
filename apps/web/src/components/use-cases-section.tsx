@@ -104,7 +104,7 @@ export function UseCasesSection() {
           <div className="relative">
             <div className="sticky top-24 p-8 bg-card border border-border rounded-lg">
               {/* Decorative corner */}
-              <div className="absolute -top-px -right-px w-16 h-16">
+              <div className="absolute -top-px -right-px w-16 h-16 overflow-hidden rounded-tr-lg">
                 <div className="absolute top-0 right-0 w-full h-px bg-accent" />
                 <div className="absolute top-0 right-0 h-full w-px bg-accent" />
               </div>

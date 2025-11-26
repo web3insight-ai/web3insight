@@ -27,7 +27,7 @@ export function HeroSection() {
   }, [])
 
   return (
-    <section ref={containerRef} className="relative min-h-screen pt-16 overflow-hidden">
+    <section ref={containerRef} className="relative pt-16 pb-20 lg:pb-32 overflow-hidden">
       {/* Grid background */}
       <div className="absolute inset-0 opacity-[0.03]">
         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
