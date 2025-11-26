@@ -269,13 +269,13 @@ export function FeaturesSection() {
 
   return (
     <section id="features" className="relative py-24 border-b border-border overflow-hidden">
-      <div className="absolute top-8 left-0 w-full flex items-center justify-center pointer-events-none">
-        <div className="text-[120px] sm:text-[180px] font-bold text-foreground/[0.05] leading-none select-none">
+      <div className="absolute top-8 left-0 w-full flex items-center justify-center pointer-events-none overflow-hidden">
+        <div className="text-[80px] sm:text-[120px] lg:text-[180px] font-bold text-foreground/[0.05] leading-none select-none">
           Features
         </div>
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16">
+      <div className="relative max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 pt-16">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4 text-balance">{t("features.title")}</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">{t("features.description")}</p>

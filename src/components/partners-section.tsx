@@ -53,23 +53,23 @@ function PartnerIcon({ name, logo }: { name: string; logo: string }) {
     switch (partnerName) {
       case "Kite AI":
         return {
-          containerClass: "w-16 h-12 flex items-center justify-center", // Wider container
-          imageWidth: 64,
-          imageHeight: 48,
-          imageClass: "object-contain max-w-full max-h-full scale-125" // Larger scale
+          containerClass: "w-12 h-8 flex items-center justify-center", // Wider container
+          imageWidth: 48,
+          imageHeight: 32,
+          imageClass: "object-contain max-w-full max-h-full" // Larger scale
         }
       case "ETH Shenzhen":
         return {
-          containerClass: "w-14 h-14 flex items-center justify-center", // Larger square
-          imageWidth: 56,
-          imageHeight: 56,
-          imageClass: "object-contain max-w-full max-h-full scale-110" // Slightly larger
+          containerClass: "w-10 h-10 flex items-center justify-center", // Larger square
+          imageWidth: 40,
+          imageHeight: 40,
+          imageClass: "object-contain max-w-full max-h-full" // Slightly larger
         }
       default:
         return {
-          containerClass: "w-12 h-12 flex items-center justify-center",
-          imageWidth: 48,
-          imageHeight: 48,
+          containerClass: "w-8 h-8 flex items-center justify-center",
+          imageWidth: 32,
+          imageHeight: 32,
           imageClass: "object-contain max-w-full max-h-full"
         }
     }
@@ -80,8 +80,8 @@ function PartnerIcon({ name, logo }: { name: string; logo: string }) {
   if (imageError || !logo) {
     // Fallback to initial if image fails to load
     return (
-      <div className="w-12 h-12 rounded-md border border-border bg-secondary flex items-center justify-center">
-        <span className="text-lg font-semibold text-foreground">{initial}</span>
+      <div className="w-8 h-8 rounded-md border border-border bg-secondary flex items-center justify-center">
+        <span className="text-sm font-semibold text-foreground">{initial}</span>
       </div>
     )
   }
@@ -105,22 +105,22 @@ export function PartnersSection() {
 
   return (
     <section className="py-20 border-b border-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
         <p className="text-center text-sm text-muted-foreground uppercase tracking-wider mb-12">
           {t("partners.title")}
         </p>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-6 md:gap-8">
           {partners.map((partner) => (
             <Link
               key={partner.name}
               href={partner.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-col items-center justify-center p-4 rounded-lg hover:bg-accent/5 transition-colors group"
+              className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-accent/5 transition-colors group"
             >
               <PartnerIcon name={partner.name} logo={partner.logo} />
-              <span className="mt-4 text-sm text-muted-foreground text-center group-hover:text-foreground transition-colors font-medium">
+              <span className="mt-3 text-sm text-muted-foreground text-center group-hover:text-foreground transition-colors font-medium">
                 {partner.name}
               </span>
             </Link>
