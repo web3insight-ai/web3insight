@@ -4,7 +4,14 @@ import { ReactNode, useRef } from "react"
 import { motion, useInView, type Variants } from "framer-motion"
 import { cn } from "@/lib/utils"
 
-const easeOutExpo = [0.22, 1, 0.36, 1]
+const easeOutExpo: [number, number, number, number] = [0.22, 1, 0.36, 1]
+
+type MarginValue = `${number}${"px" | "%"}`
+type MarginType =
+  | MarginValue
+  | `${MarginValue} ${MarginValue}`
+  | `${MarginValue} ${MarginValue} ${MarginValue}`
+  | `${MarginValue} ${MarginValue} ${MarginValue} ${MarginValue}`
 
 export const fadeInUp = (delay = 0, y = 24): Variants => ({
   hidden: { opacity: 0, y },
@@ -29,7 +36,7 @@ type ScrollRevealProps = {
   y?: number
   duration?: number
   once?: boolean
-  margin?: string
+  margin?: MarginType
 }
 
 export function ScrollReveal({
