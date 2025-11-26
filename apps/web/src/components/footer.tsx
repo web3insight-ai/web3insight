@@ -18,10 +18,10 @@ export function Footer() {
 
   return (
     <footer className="py-16 bg-card border-t border-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-4 gap-12">
+      <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
           {/* Brand */}
-          <div className="md:col-span-2">
+          <div className="col-span-2">
             <Link href="/" className="flex items-center gap-2 mb-4">
               <Image src="/logo.png" alt="Web3Insight Logo" width={32} height={32} className="w-8 h-8" />
               <span className="font-semibold text-foreground">Web3Insight</span>

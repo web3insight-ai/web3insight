@@ -27,7 +27,7 @@ export function HeroSection() {
   }, [])
 
   return (
-    <section ref={containerRef} className="relative pt-16 pb-20 lg:pb-32 overflow-hidden">
+    <section ref={containerRef} className="relative pt-16 pb-20 lg:pb-32 overflow-hidden w-full max-w-full">
       {/* Grid background */}
       <div className="absolute inset-0 opacity-[0.03]">
         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -60,7 +60,7 @@ export function HeroSection() {
         />
       </svg>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 lg:pt-32">
+      <div className="relative max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 pt-20 lg:pt-32">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left content */}
           <div className="animate-fade-in-up">
@@ -93,16 +93,18 @@ export function HeroSection() {
 
             <p className="mt-6 text-lg text-muted-foreground max-w-lg leading-relaxed">{t("hero.description")}</p>
 
-            <div className="mt-8 flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="group" asChild>
+            <div className="mt-8 flex flex-row gap-3">
+              <Button size="lg" className="group flex-1 sm:flex-initial" asChild>
                 <Link href="https://dash.web3insight.ai">
-                  {t("hero.exploreDashboard")}
+                  <span className="hidden sm:inline">{t("hero.exploreDashboard")}</span>
+                  <span className="sm:hidden">Dashboard</span>
                   <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild>
+              <Button size="lg" variant="outline" className="flex-1 sm:flex-initial" asChild>
                 <Link href="https://github.com/web3insight-ai/web3insight" target="_blank">
-                  {t("hero.viewGithub")}
+                  <span className="hidden sm:inline">{t("hero.viewGithub")}</span>
+                  <span className="sm:hidden">GitHub</span>
                 </Link>
               </Button>
             </div>
