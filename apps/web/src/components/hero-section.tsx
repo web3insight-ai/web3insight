@@ -5,6 +5,8 @@ import { ArrowRight, Search, Globe } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useI18n } from "@/lib/i18n-context"
+import { motion } from "framer-motion"
+import { fadeInUp, stagger } from "@/components/ui/motion"
 
 export function HeroSection() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -27,7 +29,13 @@ export function HeroSection() {
   }, [])
 
   return (
-    <section ref={containerRef} className="relative pt-16 pb-20 lg:pb-32 overflow-hidden w-full max-w-full">
+    <motion.section
+      ref={containerRef}
+      className="relative pt-16 pb-20 lg:pb-32 overflow-hidden w-full max-w-full"
+      initial="hidden"
+      animate="visible"
+      variants={stagger(0.18, 0.05)}
+    >
       {/* Grid background */}
       <div className="absolute inset-0 opacity-[0.03]">
         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -63,7 +71,7 @@ export function HeroSection() {
       <div className="relative max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 pt-20 lg:pt-32">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left content */}
-          <div className="animate-fade-in-up">
+          <motion.div variants={fadeInUp()}>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border bg-card mb-6">
               <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
               <span className="text-xs font-medium text-muted-foreground">{t("hero.badge")}</span>
@@ -108,10 +116,10 @@ export function HeroSection() {
                 </Link>
               </Button>
             </div>
-          </div>
+          </motion.div>
 
           {/* Right side - Bento grid preview */}
-          <div className="relative animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+          <motion.div className="relative" variants={fadeInUp(0.15)}>
             <div className="grid grid-cols-2 gap-3">
               {/* Main card */}
               <div className="col-span-2 p-6 bg-card border border-border rounded-lg">
@@ -157,7 +165,7 @@ export function HeroSection() {
             {/* Decorative elements */}
             <div className="absolute -top-4 -right-4 w-8 h-8 border border-border rounded-full" />
             <div className="absolute -bottom-4 -left-4 w-12 h-12 border border-border rounded-sm rotate-45" />
-          </div>
+          </motion.div>
         </div>
       </div>
 
@@ -167,6 +175,6 @@ export function HeroSection() {
         <div className="absolute left-1/2 -top-1.5 w-3 h-3 bg-accent border border-accent rounded-full" />
         <div className="absolute left-3/4 -top-1.5 w-3 h-3 bg-background border border-border rounded-full" />
       </div>
-    </section>
+    </motion.section>
   )
 }

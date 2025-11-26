@@ -4,6 +4,8 @@ import { useI18n } from "@/lib/i18n-context"
 import Link from "next/link"
 import Image from "next/image"
 import { useState } from "react"
+import { motion } from "framer-motion"
+import { fadeInUp, ScrollReveal, stagger } from "@/components/ui/motion"
 
 const partners = [
   {
@@ -106,26 +108,35 @@ export function PartnersSection() {
   return (
     <section className="py-20 border-b border-border">
       <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
-        <p className="text-center text-sm text-muted-foreground uppercase tracking-wider mb-12">
-          {t("partners.title")}
-        </p>
+        <ScrollReveal className="mb-12" margin="-20% 0px -10% 0px">
+          <p className="text-center text-sm text-muted-foreground uppercase tracking-wider">
+            {t("partners.title")}
+          </p>
+        </ScrollReveal>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-6 md:gap-8">
-          {partners.map((partner) => (
-            <Link
-              key={partner.name}
-              href={partner.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-accent/5 transition-colors group"
-            >
-              <PartnerIcon name={partner.name} logo={partner.logo} />
-              <span className="mt-3 text-sm text-muted-foreground text-center group-hover:text-foreground transition-colors font-medium">
-                {partner.name}
-              </span>
-            </Link>
+        <motion.div
+          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-6 md:gap-8"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
+          variants={stagger(0.08)}
+        >
+          {partners.map((partner, idx) => (
+            <motion.div key={partner.name} variants={fadeInUp(0.02 * idx)}>
+              <Link
+                href={partner.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-accent/5 transition-colors group"
+              >
+                <PartnerIcon name={partner.name} logo={partner.logo} />
+                <span className="mt-3 text-sm text-muted-foreground text-center group-hover:text-foreground transition-colors font-medium">
+                  {partner.name}
+                </span>
+              </Link>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   )
