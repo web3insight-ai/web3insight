@@ -139,6 +139,7 @@ export class AuthService {
     const {
       created_at: _createdAt,
       updated_at: _updatedAt,
+      user_id: _userId,
       ...rest
     } = body as any;
     const updatePayload = Object.fromEntries(
