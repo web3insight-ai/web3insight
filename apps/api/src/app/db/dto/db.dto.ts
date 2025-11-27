@@ -41,6 +41,7 @@ export interface DataActors {
   abnormal: Generated<boolean | null>;
   city: Generated<string>;
   country: Generated<string>;
+  eco_score: Generated<number>;
 }
 
 export interface ApiUpstreamRepos {
