@@ -131,7 +131,7 @@ export class CustomController {
     return await this.userServices.getTopFormUserName(username);
   }
 
-  @Get('external/users/:id')
+  @Get('external/github/users/:id')
   @ApiOperation({
     summary: 'Get data external card, github uid',
     description: '',
@@ -139,5 +139,15 @@ export class CustomController {
   @Version('2')
   async external2(@Param('id') uid: string) {
     return await this.userServices.getTopFormUserId(uid);
+  }
+
+  @Get('external/github/users/:username')
+  @ApiOperation({
+    summary: 'Get data external card, github username',
+    description: '',
+  })
+  @Version('2')
+  async external3(@Param('username') username: string) {
+    return await this.userServices.getTopFormGithubUserName(username);
   }
 }
