@@ -123,6 +123,7 @@ export interface ApiAuthUsers {
   user_id: Generated<Int8>;
   user_nick_name: Generated<string>;
   user_bio: Generated<string>;
+  user_custom_x: Generated<string>;
 }
 
 export interface ApiAuthUsersBinds {
