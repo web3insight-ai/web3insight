@@ -9,6 +9,7 @@ import {
   Query,
   Req,
   UseGuards,
+  Version,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
@@ -123,10 +124,20 @@ export class CustomController {
 
   @Get('external/users/:username')
   @ApiOperation({
-    summary: 'Get data external card, github username or web3insight id',
+    summary: 'Get data external card, github username',
     description: '',
   })
   async external(@Param('username') username: string) {
     return await this.userServices.getTopFormUserName(username);
+  }
+
+  @Get('external/users/:id')
+  @ApiOperation({
+    summary: 'Get data external card, github uid',
+    description: '',
+  })
+  @Version('2')
+  async external2(@Param('id') uid: string) {
+    return await this.userServices.getTopFormUserId(uid);
   }
 }

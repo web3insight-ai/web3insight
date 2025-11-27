@@ -329,6 +329,19 @@ export class UsersService {
     };
   }
 
+  async getTopFormUserId(id: string) {
+    const analysis = await this.db
+      .selectFrom('data.actors')
+      .select(['eco_score', 'actor_id', 'actor_login'])
+      .where('actor_id', '=', id)
+      .executeTakeFirst();
+    if (!analysis) {
+      return {};
+    }
+
+    return analysis;
+  }
+
   private extractUsername(input: string): string | null {
     const s = input.trim();
     if (!s) return null;
