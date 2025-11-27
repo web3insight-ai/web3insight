@@ -176,6 +176,10 @@ export class UpdateUserReqDto {
   @IsOptional()
   @IsString()
   user_custom_x?: string;
+
+  @IsOptional()
+  @IsString()
+  user_custom_labels?: string;
 }
 
 export class ReposCustomMarkReqDto {
