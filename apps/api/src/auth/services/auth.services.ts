@@ -4,7 +4,7 @@ import {
   UpdateUserReqDto,
 } from '@/api/dto/api.dto';
 import { KYSELY } from '@/app/db/db.provider';
-import { ApiAuthUsers, DB } from '@/app/db/dto/db.dto';
+import { ApiAuthUsers, DB, Json } from '@/app/db/dto/db.dto';
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Octokit } from '@octokit/rest';
@@ -155,6 +155,12 @@ export class AuthService {
     const updatePayload = Object.fromEntries(
       Object.entries(body).filter(([, value]) => value !== undefined),
     ) as Partial<Updateable<ApiAuthUsers>>;
+
+    if (Array.isArray(updatePayload.user_custom_labels)) {
+      updatePayload.user_custom_labels = JSON.stringify(
+        updatePayload.user_custom_labels,
+      ) as Json;
+    }
 
     if (Object.keys(updatePayload).length === 0) {
       return this.getUserInfo(user);
@@ -426,7 +432,7 @@ export class AuthService {
   })
   async sign() {
     const claims = new JwtPayload();
-    claims.uid = '1';
+    claims.uid = '2';
     claims.iss = 'web3insights.app';
     claims.exp = Math.floor(Date.now() / 1000) + 31536000;
     claims.type = 'admin';

@@ -178,8 +178,8 @@ export class UpdateUserReqDto {
   user_custom_x?: string;
 
   @IsOptional()
-  @IsString()
-  user_custom_labels?: string;
+  @IsArray()
+  user_custom_labels?: Array<string>;
 }
 
 export class ReposCustomMarkReqDto {
