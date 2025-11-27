@@ -123,7 +123,7 @@ export class CustomController {
 
   @Get('external/users/:username')
   @ApiOperation({
-    summary: 'Get data external card',
+    summary: 'Get data external card, github username or web3insight id',
     description: '',
   })
   async external(@Param('username') username: string) {

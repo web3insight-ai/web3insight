@@ -135,6 +135,22 @@ export class AuthService {
     };
   }
 
+  async getUserInfoFormId(uid: string) {
+    const user = await this.db
+      .selectFrom('api.auth_users')
+      .selectAll()
+      .where('user_id', '=', uid)
+      .executeTakeFirst();
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return {
+      profile: user,
+    };
+  }
+
   async updateUserInfo(user: JwtPayload, body: UpdateUserReqDto) {
     const {
       created_at: _createdAt,
