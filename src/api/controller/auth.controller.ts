@@ -1,5 +1,13 @@
 import { AuthService } from '@/auth/services/auth.services';
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import {
   AuthBindWalletReqDto,
   LoginReqDto,
@@ -32,6 +40,15 @@ export class AuthController {
   @UseGuards(AppAuthGuard)
   async getUser(@Req() req: RequestWithUser) {
     return this.authServices.getUserInfo(req.user);
+  }
+
+  @Get('user/public/:id')
+  @ApiOperation({
+    summary: 'Get user public profile',
+    description: '',
+  })
+  async getUserId(@Param('id') id: string) {
+    return this.authServices.getUserInfoFormId(id);
   }
 
   @Post('user')
