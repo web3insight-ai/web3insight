@@ -49,21 +49,9 @@ export class UsersService {
         return res;
       }
 
-      const privyBind = await this.db
-        .selectFrom('api.auth_users_binds')
-        .select(['bind_openid'])
-        .where('bind_uid', '=', uid)
-        .where('bind_type', '=', 'privy')
-        .executeTakeFirst();
-
-      const account = await this.authService.getPrivyUserBindings(
-        privyBind?.bind_openid || '',
-      );
-
-      for (const acc of account.linked_accounts) {
-        if (acc.type == 'github_oauth') {
-          usernames.push(acc.username);
-        }
+      const githubUsername = await this.getPrivyGithubUsername(uid);
+      if (githubUsername) {
+        usernames.push(githubUsername);
       }
 
       if (usernames.length === 0) {
@@ -342,6 +330,12 @@ export class UsersService {
     return analysis;
   }
 
+  async getTopFormGithubUserName(username: string) {
+    const clinet = await this.tokenPoolService.getClient();
+    const response = await clinet.users.getByUsername({ username });
+    return await this.getTopFormUserId(response.data.id.toString());
+  }
+
   private extractUsername(input: string): string | null {
     const s = input.trim();
     if (!s) return null;
@@ -361,6 +355,25 @@ export class UsersService {
     }
 
     return s;
+  }
+
+  private async getPrivyGithubUsername(uid: string): Promise<string | null> {
+    const privyBind = await this.db
+      .selectFrom('api.auth_users_binds')
+      .select(['bind_openid'])
+      .where('bind_uid', '=', uid)
+      .where('bind_type', '=', 'privy')
+      .executeTakeFirst();
+
+    const account = await this.authService.getPrivyUserBindings(
+      privyBind?.bind_openid || '',
+    );
+
+    const githubAccount = account.linked_accounts.find(
+      (acc) => acc.type === 'github_oauth',
+    );
+
+    return githubAccount?.username || null;
   }
 
   @OnEvent('api.custom.analysis.created', { async: true })
