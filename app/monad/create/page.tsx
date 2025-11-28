@@ -193,7 +193,7 @@ function CreateForm() {
 
   const handleCreate = async () => {
     console.log("创建卡片 - 当前用户数据:", user)
-    
+
     if (!user) {
       setError("User not logged in, please login first")
       return
