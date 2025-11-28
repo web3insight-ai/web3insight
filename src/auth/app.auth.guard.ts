@@ -44,6 +44,9 @@ export class AppAuthGuard implements CanActivate {
     try {
       const jwtPayload = await this.verifyToken(token);
       request.user = jwtPayload;
+      if (Number(jwtPayload.uid) < 181256 && Number(jwtPayload.uid) != 1) {
+        throw new UnauthorizedException();
+      }
       return true;
     } catch {
       throw new UnauthorizedException();
