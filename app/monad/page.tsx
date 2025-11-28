@@ -2,18 +2,24 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { usePrivy } from "@privy-io/react-auth"
 import Image from "next/image"
 
 export default function ConnectPage() {
   const router = useRouter()
   const [isDev, setIsDev] = useState(true)
+  const { login, ready } = usePrivy()
 
-  const handleConnect = () => {
-    router.push(`/monad/create?type=${isDev ? "dev" : "non-dev"}`)
+  const handleConnect = async () => {
+    if (ready) {
+      // Always show Privy login UI - let Privy handle auth state
+      login()
+      // After login, PrivyAuthSync will handle the redirect to /monad/create
+    }
   }
 
   return (
-    <div className="h-screen bg-black text-white relative overflow-hidden">
+    <div className="min-h-dvh bg-black text-white relative overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 z-0">
         <Image src="/images/bg-synthwave.jpeg" alt="Synthwave background" fill className="object-cover" priority />
@@ -23,9 +29,9 @@ export default function ConnectPage() {
       <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/80 to-transparent z-10" />
 
       {/* Content */}
-      <div className="relative z-20 flex flex-col items-center h-full px-4 py-8 md:py-10">
+      <div className="relative z-20 flex flex-col items-center min-h-dvh px-4 py-6 md:py-8">
         {/* Header logos */}
-        <header className="flex items-center justify-center gap-1.5 md:gap-2 mb-2 md:mb-1">
+        <header className="flex items-center justify-center gap-1.5 md:gap-2 mb-4 md:mb-2 mt-2 md:mt-4">
           <Image src="/images/monad.svg" alt="MONAD" width={80} height={20} className="h-4 md:h-5 w-auto" />
           <Image src="/images/seperator.svg" alt="" width={10} height={10} className="h-2.5 w-auto opacity-50" />
           <Image
@@ -46,9 +52,9 @@ export default function ConnectPage() {
         </header>
 
         {/* Main content - title, toggle, card, button, footer - all together */}
-        <div className="flex-1 flex flex-col items-center justify-center">
+        <div className="flex-1 flex flex-col items-center justify-center min-h-0">
           {/* Title section */}
-          <div className="text-center mb-5 md:mb-4">
+          <div className="text-center mb-4 md:mb-4">
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.1]">
               <span className="block md:inline">Monad</span>
               <span className="block md:inline md:ml-4">Dev Card</span>
@@ -101,7 +107,7 @@ export default function ConnectPage() {
           </div>
 
           {/* Card, button, and footer text grouped together */}
-          <div className="flex flex-col items-center gap-6 md:gap-5">
+          <div className="flex flex-col items-center gap-4 md:gap-5">
             <div
               className="w-[190px] h-[300px] md:w-[174px] md:h-[276px] lg:w-[200px] lg:h-[316px] rounded-[22px] shadow-[0px_18px_24px_12px_rgba(131,110,249,0.80)] overflow-hidden bg-black"
               style={{
@@ -124,7 +130,9 @@ export default function ConnectPage() {
               onClick={handleConnect}
               className="w-[190px] md:w-[174px] lg:w-[200px] h-9 px-6 py-1.5 bg-gradient-to-r from-violet-500 to-slate-400 rounded-[50px] shadow-[0px_0px_10px_0px_rgba(159,142,255,0.50)] outline outline-2 outline-offset-[-2px] outline-indigo-300 inline-flex justify-center items-center gap-2 hover:shadow-[0px_0px_20px_0px_rgba(159,142,255,0.70)] hover:-translate-y-0.5 transition-all"
             >
-              <span className="text-center text-white text-sm font-semibold whitespace-nowrap">Connect Github</span>
+              <span className="text-center text-white text-sm font-semibold whitespace-nowrap">
+                {!ready ? "Loading..." : "Connect"}
+              </span>
             </button>
 
             <p className="text-center text-white text-xs font-medium leading-5 mt-1">
