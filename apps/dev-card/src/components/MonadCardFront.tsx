@@ -42,7 +42,7 @@ const MonadCardFront = forwardRef<HTMLDivElement, MonadCardFrontProps>(
         style={{ fontSize: '1rem', ...style }}
         {...rest}
       >
-        <div className="w-full h-full flex flex-col px-[5%] pt-[3%] pb-0 print:pt-[4.5%] print:px-[6%]">
+        <div className="w-full h-full flex flex-col px-[5%] pt-[3%] pb-0 print:py-[3mm] print:px-[6%]">
           {/* Title Badge */}
           <div className="flex justify-center mb-[1.2%] relative print:mb-[2.8%]">
             <div className="relative w-[70%] print:w-[85%]">
@@ -74,7 +74,7 @@ const MonadCardFront = forwardRef<HTMLDivElement, MonadCardFrontProps>(
           </div>
 
           {/* Avatar */}
-          <div className="flex justify-center mb-[1.5%] print:mb-[5%]">
+          <div className="flex justify-center mb-[1.5%] print:mb-[1mm]">
             <div
               className="w-[25%] aspect-square rounded-full p-0.5 print:w-[40%]"
               style={{
@@ -89,8 +89,8 @@ const MonadCardFront = forwardRef<HTMLDivElement, MonadCardFrontProps>(
                 <Image
                   src={avatar}
                   alt="User avatar"
-                  width={200}
-                  height={200}
+                  width={208}
+                  height={208}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement
@@ -102,14 +102,14 @@ const MonadCardFront = forwardRef<HTMLDivElement, MonadCardFrontProps>(
           </div>
 
           <h2
-            className="font-bold text-center text-white tracking-wide mb-[1%] text-[2.2em] print:text-[16px] print:mb-[0.3mm]"
+            className="font-bold text-center text-white tracking-wide mb-[1%] text-[2.2em] print:text-[16px] print:mb-[0.2mm]"
             style={{ fontFamily: "'DM Mono', monospace" }}
           >
             {name}
           </h2>
 
           <p
-            className="text-center text-white px-[8%] line-clamp-2 leading-relaxed font-light text-[0.95em] print:text-[6px] print:text-balance"
+            className="text-center text-white px-[8%] line-clamp-2 leading-relaxed font-light text-[0.95em] print:text-[8px] print:leading-[1.25] print:text-balance"
             style={{
               fontFamily: "'DM Sans', sans-serif",
             }}
@@ -118,7 +118,7 @@ const MonadCardFront = forwardRef<HTMLDivElement, MonadCardFrontProps>(
           </p>
 
           {/* Social Links */}
-          <div className="flex justify-center items-center gap-[3%] mt-[1.2%] px-[8%] text-[0.88em] print:text-[5px] print:mt-[0.5mm]">
+          <div className="flex justify-center items-center gap-[3%] mt-[1.2%] px-[8%] text-[0.88em] print:text-[7px] print:mt-[0.5mm]">
             {twitter && (
               <>
                 <a
@@ -194,7 +194,7 @@ const MonadCardFront = forwardRef<HTMLDivElement, MonadCardFrontProps>(
                 >
                   Building on
                 </h3>
-                <div className="flex flex-wrap gap-[2.8%] print:gap-[1.5mm]">
+                <div className="flex flex-wrap gap-[2.8%] print:gap-[1mm]">
                   {buildingOn.map((item) => (
                     <span
                       key={item}
@@ -227,7 +227,7 @@ const MonadCardFront = forwardRef<HTMLDivElement, MonadCardFrontProps>(
           </div>
 
           {/* Footer Logo */}
-          <div className="flex justify-center items-center py-[2%] print:py-[4.5%] print:pb-[6%]">
+          <div className="flex justify-center items-center py-[2%]">
             <Image
               src="/images/monad_footer.svg"
               alt="Monad DevCard"
