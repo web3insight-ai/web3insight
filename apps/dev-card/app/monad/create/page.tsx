@@ -528,7 +528,7 @@ function CreateForm() {
               onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
               maxLength={25}
               className="w-full bg-black/60 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#9F8EFF]"
-              placeholder="Your title (max 25 characters)"
+              placeholder="BuilderHero @Monad"
             />
           </div>
 
