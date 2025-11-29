@@ -42,10 +42,10 @@ const MonadCardFront = forwardRef<HTMLDivElement, MonadCardFrontProps>(
         style={{ fontSize: '1rem', ...style }}
         {...rest}
       >
-        <div className="w-full h-full flex flex-col px-[5%] pt-[3%] pb-0">
+        <div className="w-full h-full flex flex-col px-[5%] pt-[3%] pb-0 print:pt-[4.5%] print:px-[6%]">
           {/* Title Badge */}
-          <div className="flex justify-center mb-[1.2%] relative">
-            <div className="relative w-[70%]">
+          <div className="flex justify-center mb-[1.2%] relative print:mb-[2.8%]">
+            <div className="relative w-[70%] print:w-[85%]">
               <Image
                 src="/images/title_bg.svg"
                 alt=""
@@ -59,7 +59,7 @@ const MonadCardFront = forwardRef<HTMLDivElement, MonadCardFrontProps>(
                 style={{ height: '72.7%' }}
               >
                 <span
-                  className="text-white text-center line-clamp-1"
+                  className="text-white text-center line-clamp-1 print:!text-[1.8em] print:leading-tight print:font-bold"
                   style={{
                     fontFamily: "'DM Sans', sans-serif",
                     fontSize: '0.9em',
@@ -74,9 +74,9 @@ const MonadCardFront = forwardRef<HTMLDivElement, MonadCardFrontProps>(
           </div>
 
           {/* Avatar */}
-          <div className="flex justify-center mb-[1.5%]">
+          <div className="flex justify-center mb-[1.5%] print:mb-[5%]">
             <div
-              className="w-[25%] aspect-square rounded-full p-0.5"
+              className="w-[25%] aspect-square rounded-full p-0.5 print:w-[40%]"
               style={{
                 background:
                   'linear-gradient(135deg, #9F8EFF 0%, #EC4899 50%, #22D3EE 100%)',
@@ -102,14 +102,14 @@ const MonadCardFront = forwardRef<HTMLDivElement, MonadCardFrontProps>(
           </div>
 
           <h2
-            className="font-bold text-center text-white tracking-wide mb-[1%]"
+            className="font-bold text-center text-white tracking-wide mb-[1%] print:text-[128em] print:mb-[4%]"
             style={{ fontFamily: "'DM Mono', monospace", fontSize: '2.2em' }}
           >
             {name}
           </h2>
 
           <p
-            className="text-center text-white px-[8%] line-clamp-2 leading-relaxed font-light"
+            className="text-center text-white px-[8%] line-clamp-2 leading-relaxed font-light print:text-[51em] print:mb-[3.5%] print:leading-relaxed"
             style={{
               fontFamily: "'DM Sans', sans-serif",
               fontSize: '0.95em',
@@ -121,7 +121,7 @@ const MonadCardFront = forwardRef<HTMLDivElement, MonadCardFrontProps>(
 
           {/* Social Links */}
           <div
-            className="flex justify-center items-center gap-[3%] mt-[1.2%] px-[8%]"
+            className="flex justify-center items-center gap-[3%] mt-[1.2%] px-[8%] print:text-[47em] print:mt-[4%]"
             style={{ fontSize: '0.88em' }}
           >
             {twitter && (
@@ -187,23 +187,23 @@ const MonadCardFront = forwardRef<HTMLDivElement, MonadCardFrontProps>(
           </div>
 
           {/* Building on Section */}
-          <div className="flex-1 flex flex-col print:justify-normal justify-center pb-[3%] pt-[5%]">
+          <div className="flex-1 flex flex-col print:justify-normal justify-center pb-[3%] pt-[5%] print:pt-[6%] print:pb-[6%]">
             {hasEcosystems ? (
               <div
-                className="rounded-3xl p-[5.5%] border border-gray-800/50"
+                className="rounded-3xl p-[5.5%] border border-gray-800/50 print:py-[6%] print:px-[4%] print:rounded-[3rem]"
                 style={{ backgroundColor: '#927EFF1A' }}
               >
                 <h3
-                  className="mb-[4.5%] font-semibold"
+                  className="mb-[4.5%] font-semibold print:text-[60em] print:mb-[5%]"
                   style={{ color: '#9F8EFF', fontSize: '1.1em' }}
                 >
                   Building on
                 </h3>
-                <div className="flex flex-wrap gap-[2.8%]">
+                <div className="flex flex-wrap gap-[2.8%] print:gap-x-[3.5%] print:gap-y-[3.5%]">
                   {buildingOn.map((item) => (
                     <span
                       key={item}
-                      className="px-[5.5%] py-[2.2%] rounded-full text-white font-medium mb-[2.2%]"
+                      className="px-[5.5%] py-[2.2%] rounded-full text-white font-medium mb-[2.2%] print:text-[45em] print:px-[6.5%] print:py-[3%] print:mb-0"
                       style={{
                         outline: '1px solid #9F8EFF',
                         outlineOffset: '-1px',
@@ -233,12 +233,13 @@ const MonadCardFront = forwardRef<HTMLDivElement, MonadCardFrontProps>(
           </div>
 
           {/* Footer Logo */}
-          <div className="flex justify-center items-center py-[2%]">
+          <div className="flex justify-center items-center py-[2%] print:py-[4.5%] print:pb-[6%]">
             <Image
               src="/images/monad_footer.svg"
               alt="Monad DevCard"
               width={180}
               height={24}
+              className="print:!h-[1.2em]"
               style={{ height: '1.15em', width: 'auto', opacity: 0.9 }}
             />
           </div>
