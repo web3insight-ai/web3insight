@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { usePrivy } from "@privy-io/react-auth"
 import Image from "next/image"
@@ -10,11 +10,31 @@ export default function ConnectPage() {
   const [isDev, setIsDev] = useState(true)
   const { login, ready } = usePrivy()
 
+  // Initialize and save user type to localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Set default to "dev"
+      localStorage.setItem('userType', 'dev')
+    }
+  }, [])
+
+  // Update localStorage whenever isDev changes
+  const handleTypeChange = (isDevOption: boolean) => {
+    setIsDev(isDevOption)
+    const type = isDevOption ? "dev" : "not-dev"
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('userType', type)
+    }
+  }
+
   const handleConnect = async () => {
     if (ready) {
-      // Always show Privy login UI - let Privy handle auth state
+      // Set flag to redirect to create page after login
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('redirectToCreate', 'true')
+      }
+      // Trigger Privy login (userType already saved in localStorage)
       login()
-      // After login, PrivyAuthSync will handle the redirect to /monad/create
     }
   }
 
@@ -67,7 +87,7 @@ export default function ConnectPage() {
           {/* Toggle buttons */}
           <div className="p-1 bg-zinc-700/20 rounded-lg shadow-[0px_0px_32px_0px_rgba(159,142,255,0.30)] outline outline-1 outline-offset-[-1px] outline-white/20 inline-flex justify-center items-center gap-1 mb-10 md:mb-8">
             <button
-              onClick={() => setIsDev(true)}
+              onClick={() => handleTypeChange(true)}
               className={`h-7 px-3 py-px rounded-md inline-flex justify-center items-center gap-1 transition-all whitespace-nowrap ${
                 isDev
                   ? "bg-violet-500/20 shadow-[0px_2px_5px_0px_rgba(131,110,249,0.40)] outline outline-1 outline-offset-[-1px] outline-violet-500"
@@ -86,7 +106,7 @@ export default function ConnectPage() {
               </span>
             </button>
             <button
-              onClick={() => setIsDev(false)}
+              onClick={() => handleTypeChange(false)}
               className={`h-7 px-3 py-px rounded-md inline-flex justify-center items-center gap-1 transition-all whitespace-nowrap ${
                 !isDev
                   ? "bg-violet-500/20 shadow-[0px_2px_5px_0px_rgba(131,110,249,0.40)] outline outline-1 outline-offset-[-1px] outline-violet-500"

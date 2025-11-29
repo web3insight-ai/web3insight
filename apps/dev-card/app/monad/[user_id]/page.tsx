@@ -10,7 +10,7 @@ import { ApiUser } from "@/types/api"
 import LoadingScreen from "@/components/LoadingScreen"
 
 export default function CardPage({ params }: { params: Promise<{ user_id: string }> }) {
-  const [isFlipped, setIsFlipped] = useState(false)
+  const [isFlipped, setIsFlipped] = useState(true) // Default to front (user info)
   const [cardUser, setCardUser] = useState<ApiUser | null>(null)
   const [loading, setLoading] = useState(true)
   const [showProfileDialog, setShowProfileDialog] = useState(false)
@@ -38,6 +38,8 @@ export default function CardPage({ params }: { params: Promise<{ user_id: string
         const result = await getUserById(userId)
 
         if (result.success && result.data) {
+          console.log("Card user data:", result.data)
+          console.log("GitHub login:", result.data.github_login)
           setCardUser(result.data)
         }
       } catch (error) {
@@ -79,16 +81,7 @@ export default function CardPage({ params }: { params: Promise<{ user_id: string
   const bio = cardUser.user_bio || "Building the future of Web3!"
   const avatar = cardUser.user_avatar || "/images/user-avatar-sample.png"
   const twitter = cardUser.user_custom_x || ""
-
-  // Handle user_title - it might be an array or string from backend
-  let title = "BuilderHero @Monad"
-  if (cardUser.user_title) {
-    if (Array.isArray(cardUser.user_title) && cardUser.user_title.length > 0) {
-      title = cardUser.user_title[0]
-    } else if (typeof cardUser.user_title === 'string') {
-      title = cardUser.user_title
-    }
-  }
+  const title = cardUser.user_title || "BuilderHero @Monad"
 
   let buildingOn: string[] = []
   if (cardUser.user_custom_labels && Array.isArray(cardUser.user_custom_labels) && cardUser.user_custom_labels.length > 0) {
@@ -116,7 +109,9 @@ export default function CardPage({ params }: { params: Promise<{ user_id: string
             {/* Back side (default view - mascot) */}
             <div
               className="absolute inset-0 w-full h-full overflow-hidden"
-              style={{ backfaceVisibility: "hidden" }}
+              style={{
+                backfaceVisibility: "hidden",
+              }}
             >
               <div className="w-full h-full bg-black relative">
                 <div className="absolute top-0 left-0 right-0 p-4 sm:p-6 flex items-center justify-between z-10">
@@ -157,25 +152,36 @@ export default function CardPage({ params }: { params: Promise<{ user_id: string
               }}
               data-card-face="front"
             >
-              <div className="w-full h-full flex flex-col px-5 pt-12 pb-0">
+              <div className="w-full h-full flex flex-col px-5 pt-8 pb-0">
                 {/* Title Badge */}
-                <div className="flex justify-center mb-6 relative">
-                  <div className="relative w-full max-w-[340px]">
-                    <div className="w-full px-6 py-2.5 rounded-full text-white text-base font-semibold text-center" style={{ background: 'linear-gradient(to right, #5EEAD4, #9F8EFF)' }}>
-                      {title}
-                    </div>
-                    <div
-                      className="absolute -bottom-2 right-12 w-4 h-4"
-                      style={{
-                        clipPath: "polygon(0 0, 100% 0, 50% 100%)",
-                        backgroundColor: "#9F8EFF",
-                      }}
+                <div className="flex justify-center mb-3 relative">
+                  <div className="relative">
+                    <Image
+                      src="/images/title_bg.svg"
+                      alt=""
+                      width={340}
+                      height={58}
+                      priority
                     />
+                    <div className="absolute top-0 left-0 right-0 flex items-center justify-center px-8" style={{ height: '42px' }}>
+                      <span
+                        className="text-white text-center line-clamp-1"
+                        style={{
+                          fontFamily: "'DM Sans', sans-serif",
+                          fontSize: '16px',
+                          fontWeight: 700,
+                          lineHeight: '24px',
+                          letterSpacing: '0%'
+                        }}
+                      >
+                        {title}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
                 {/* Avatar */}
-                <div className="flex justify-center mb-5">
+                <div className="flex justify-center mb-4">
                   <div className="w-32 h-32 rounded-full p-[3px]" style={{ background: 'linear-gradient(to bottom right, #9F8EFF, #EC4899, #22D3EE)' }}>
                     <div
                       className={`w-full h-full rounded-full overflow-hidden ${isOwnCard && authenticated ? 'cursor-pointer' : ''}`}
