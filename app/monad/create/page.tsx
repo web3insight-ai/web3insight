@@ -548,7 +548,7 @@ function CreateForm() {
               rows={4}
               maxLength={50}
               className="w-full bg-black/60 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#9F8EFF] resize-none"
-              placeholder="Tell us about yourself... (max 50 characters)"
+              placeholder="Share your bio (max 50 chars)"
             />
           </div>
 
