@@ -226,7 +226,11 @@ export function useCardCapture(options: UseCardCaptureOptions = {}) {
       const url = URL.createObjectURL(blob)
       const link = document.createElement("a")
       link.href = url
-      link.download = `${fileName}.png`
+      // Generate filename as id+nickname.png (e.g., "181258+pseudoyu.png")
+      const downloadFileName = (cardData as any).id
+        ? `${(cardData as any).id}+${cardData.name}.png`
+        : `${cardData.name}.png`
+      link.download = downloadFileName
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
