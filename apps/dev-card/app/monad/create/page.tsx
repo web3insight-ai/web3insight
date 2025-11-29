@@ -37,10 +37,20 @@ function CreateForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // 生态系统相关状态
-  const [buildingOnOptions, setBuildingOnOptions] = useState<string[]>(["Monad", "Starknet", "Ethereum", "DeFiHackLabs", "Hardhat", "WTF.Academy", "OpenBuild"])
+  // 生态系统相关状态 - 初始为空，只有获取到真实数据才显示
+  const [buildingOnOptions, setBuildingOnOptions] = useState<string[]>([])
   const [userEcosystems, setUserEcosystems] = useState<string[]>([])
   const [loadingEcosystems, setLoadingEcosystems] = useState(false)
+  const [ecosystemsLoaded, setEcosystemsLoaded] = useState(false) // 标记生态系统数据是否已加载
+
+  // 调试：监控状态变化
+  useEffect(() => {
+    console.log("📊 buildingOnOptions 状态更新:", buildingOnOptions)
+  }, [buildingOnOptions])
+
+  useEffect(() => {
+    console.log("🌍 userEcosystems 状态更新:", userEcosystems)
+  }, [userEcosystems])
 
   // Auto-fill form with user data when available
   useEffect(() => {
@@ -79,8 +89,8 @@ function CreateForm() {
         bio: defaultBio
       })
 
-      // 从用户已保存的数据中读取生态系统选择，如果没有则默认选中 Monad
-      let existingBuildingOn = ["Monad"] // 默认选中 Monad
+      // 从用户已保存的数据中读取生态系统选择
+      let existingBuildingOn: string[] = []
       if (user?.user_custom_labels && Array.isArray(user.user_custom_labels)) {
         // 如果用户有保存的数据，使用保存的数据
         existingBuildingOn = [...user.user_custom_labels]
@@ -109,56 +119,87 @@ function CreateForm() {
 
   // 获取用户参与的生态系统
   useEffect(() => {
+    let mounted = true
+
     async function fetchUserEcosystems() {
       const github = formData.github || getGithubUsername()
 
-      if (!github || !authenticated) return
+      if (!authenticated) {
+        console.log("⏭️ 用户未认证，跳过生态系统加载")
+        return
+      }
+
+      if (!github) {
+        console.log("⚠️ 没有 GitHub 信息，标记为已加载")
+        if (mounted) {
+          setEcosystemsLoaded(true)
+        }
+        return
+      }
 
       try {
-        setLoadingEcosystems(true)
-        console.log("获取用户生态系统数据, GitHub:", github)
+        if (mounted) {
+          setLoadingEcosystems(true)
+          setEcosystemsLoaded(false)
+        }
+        console.log("🔍 开始获取用户生态系统数据, GitHub:", github)
 
         const result = await getUserEcosystems(github)
+        console.log("📦 getUserEcosystems 返回结果:", result)
 
         if (result.success && result.data) {
           const ecosystems = result.data.ecosystems
-          console.log("用户参与的生态系统:", ecosystems)
+          console.log("✅ 用户参与的生态系统:", ecosystems)
 
-          setUserEcosystems(ecosystems)
+          if (mounted) {
+            setUserEcosystems(ecosystems)
 
-          // 生成完整的选项列表，确保Monad在第一位
-          const options = getBuildingOnOptions(ecosystems)
-          setBuildingOnOptions(options)
-
-          // 如果用户没有已保存的生态系统选择，才自动选中参与过的项目
-          if (!user?.user_custom_labels || user.user_custom_labels.length === 0) {
-            setFormData(prev => {
-              const userParticipatedEcosystems = ecosystems.filter(eco => eco !== 'Monad')
-              const newBuildingOn = [...new Set([...prev.buildingOn, ...userParticipatedEcosystems])]
-
-              if (JSON.stringify(newBuildingOn) !== JSON.stringify(prev.buildingOn)) {
-                return {
-                  ...prev,
-                  buildingOn: newBuildingOn
-                }
-              }
-              return prev
-            })
+            // 生成完整的选项列表，确保Monad在第一位，最多 top 10
+            const options = getBuildingOnOptions(ecosystems)
+            console.log("🏗️ 生成的 Building On 选项 (top 10):", options)
+            setBuildingOnOptions(options)
           }
+
+          // 不自动选中任何选项，让用户手动选择
+        } else {
+          console.error("❌ 获取生态系统失败:", result.message)
         }
       } catch (error) {
-        console.error("获取用户生态系统失败:", error)
+        console.error("💥 获取用户生态系统异常:", error)
       } finally {
-        setLoadingEcosystems(false)
+        if (mounted) {
+          setLoadingEcosystems(false)
+          setEcosystemsLoaded(true)
+        }
       }
     }
 
     // 延迟执行，等表单数据填充完成
-    if (formData.github && authenticated) {
-      const timer = setTimeout(fetchUserEcosystems, 1000)
-      return () => clearTimeout(timer)
+    if (authenticated) {
+      if (formData.github) {
+        console.log("⏰ 1秒后执行获取生态系统, github=", formData.github)
+        const timer = setTimeout(fetchUserEcosystems, 1000)
+        return () => {
+          mounted = false
+          clearTimeout(timer)
+        }
+      } else {
+        // 如果2秒后仍然没有 GitHub 信息，标记为已加载
+        const timer = setTimeout(() => {
+          console.log("⏱️ 2秒后仍无 GitHub 信息，标记为已加载")
+          fetchUserEcosystems()
+        }, 2000)
+        return () => {
+          mounted = false
+          clearTimeout(timer)
+        }
+      }
     }
-  }, [formData.github, authenticated])
+
+    return () => {
+      mounted = false
+    }
+  }, [formData.github, authenticated, user])
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -193,6 +234,12 @@ function CreateForm() {
 
   const handleCreate = async () => {
     console.log("创建卡片 - 当前用户数据:", user)
+    console.log("用户 ID 检查:", {
+      userId: user?.id,
+      hasId: !!user?.id,
+      userKeys: user ? Object.keys(user) : [],
+      fullUser: user
+    })
 
     if (!user) {
       setError("User not logged in, please login first")
@@ -200,7 +247,7 @@ function CreateForm() {
     }
 
     if (!user.id) {
-      console.error("User ID missing:", { user, hasId: !!user.id, userKeys: Object.keys(user) })
+      console.error("User ID missing - 完整用户对象:", JSON.stringify(user, null, 2))
       setError("User ID missing, please login again")
       return
     }
@@ -255,10 +302,55 @@ function CreateForm() {
     }
   }
 
-  if (authLoading) {
+  if (authLoading || (authenticated && !ecosystemsLoaded)) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white">Loading...</div>
+      <div className="min-h-screen bg-black flex items-center justify-center overflow-hidden">
+        <style jsx>{`
+          @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+          }
+          @keyframes glow {
+            0%, 100% { opacity: 0.3; filter: blur(20px); }
+            50% { opacity: 0.6; filter: blur(30px); }
+          }
+          .float-animation {
+            animation: float 3s ease-in-out infinite;
+          }
+          .glow-animation {
+            animation: glow 2s ease-in-out infinite;
+          }
+        `}</style>
+
+        <div className="text-white text-center relative">
+          {/* Background glow effect */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div
+              className="w-40 h-40 rounded-full glow-animation"
+              style={{
+                background: 'radial-gradient(circle, rgba(111, 84, 255, 0.4) 0%, transparent 70%)'
+              }}
+            />
+          </div>
+
+          {/* Monad Logo with float animation */}
+          <div className="mb-6 relative inline-block float-animation">
+            <Image
+              src="/images/monad-icon.svg"
+              alt="Monad"
+              width={80}
+              height={80}
+              className="w-20 h-20 drop-shadow-[0_0_20px_rgba(111,84,255,0.6)]"
+            />
+          </div>
+
+          {/* Loading status text */}
+          {authenticated && !ecosystemsLoaded && (
+            <div className="text-sm text-gray-400 animate-pulse relative z-10">
+              Loading your ecosystem data...
+            </div>
+          )}
+        </div>
       </div>
     )
   }
@@ -401,51 +493,34 @@ function CreateForm() {
             />
           </div>
 
-          {/* Building on */}
-          <div className="mb-4">
-            <label className="block text-sm text-white mb-2 font-medium">
-              Building on
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {buildingOnOptions.map((item) => {
-                const isSelected = formData.buildingOn.includes(item)
-                const isMonad = item === 'Monad'
-                const isUserParticipated = userEcosystems.includes(item)
+          {/* Building on - 只有获取到真实数据时才显示 */}
+          {buildingOnOptions.length > 0 && (
+            <div className="mb-4">
+              <label className="block text-sm text-white mb-2 font-medium">
+                Building on
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {buildingOnOptions.map((item) => {
+                  const isSelected = formData.buildingOn.includes(item)
 
-                return (
-                  <button
-                    key={item}
-                    onClick={() => toggleBuildingOn(item)}
-                    className="px-3 py-1.5 rounded-full text-sm font-medium transition-all border-2 relative cursor-pointer"
-                    style={{
-                      borderColor: isSelected ? '#9F8EFF' : 'rgba(255,255,255,0.1)',
-                      color: 'white',
-                      opacity: isSelected ? 1 : 0.7
-                    }}
-                  >
-                    {item}
-                    {isUserParticipated && (
-                      <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full flex items-center justify-center">
-                        <span className="text-white text-xs">•</span>
-                      </span>
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-
-            {/* 说明文字 */}
-            {userEcosystems.length > 0 && (
-              <div className="mt-2 text-xs text-gray-400">
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 bg-green-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-xs">•</span>
-                  </div>
-                  <span>你参与过的项目</span>
-                </div>
+                  return (
+                    <button
+                      key={item}
+                      onClick={() => toggleBuildingOn(item)}
+                      className="px-3 py-1.5 rounded-full text-sm font-medium transition-all border-2 cursor-pointer"
+                      style={{
+                        borderColor: isSelected ? '#9F8EFF' : 'rgba(255,255,255,0.1)',
+                        color: 'white',
+                        opacity: isSelected ? 1 : 0.7
+                      }}
+                    >
+                      {item}
+                    </button>
+                  )
+                })}
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {error && (
             <div className="text-red-400 text-sm text-center mb-4">{error}</div>

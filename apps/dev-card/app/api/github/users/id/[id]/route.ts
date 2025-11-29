@@ -43,11 +43,27 @@ export async function GET(
     const githubData = await response.json()
     console.log("GitHub API 返回数据:", githubData)
 
+    // 解析并显示生态系统名称
+    let ecosystemNames: string[] = []
+    if (githubData.eco_score?.ecosystems) {
+      // 过滤掉 ALL 和 General，并提取生态系统名称
+      ecosystemNames = githubData.eco_score.ecosystems
+        .filter((eco: any) => eco.ecosystem && eco.ecosystem !== 'ALL' && eco.ecosystem !== 'General')
+        .map((eco: any) => eco.ecosystem)
+      console.log("生态系统列表:", ecosystemNames)
+    }
+
+    // 转换数据格式，将 eco_score.ecosystems 展开为 ecosystems 字段
+    const transformedData = {
+      ...githubData,
+      ecosystems: ecosystemNames
+    }
+
     return NextResponse.json({
       success: true,
       code: "200",
       message: "GitHub user data retrieved successfully",
-      data: githubData,
+      data: transformedData,
     })
   } catch (error) {
     console.error("GitHub API 调用异常:", error)
