@@ -28,7 +28,22 @@ export function CardActionButtons({ cardRef, userName }: CardActionButtonsProps)
   const handleDownload = async () => {
     if (!cardRef.current) return
     clearError()
+
+    // Temporarily force the card to show front face for screenshot
+    const cardElement = cardRef.current
+    const originalTransform = cardElement.style.transform
+
+    // Force display the front face
+    cardElement.style.transform = 'rotateY(0deg)'
+
+    // Wait for transform to apply
+    await new Promise(resolve => setTimeout(resolve, 100))
+
     const success = await downloadImage(cardRef.current)
+
+    // Restore original transform
+    cardElement.style.transform = originalTransform
+
     if (!success && error) {
       alert(`Download failed: ${error}`)
     }
@@ -49,10 +64,10 @@ export function CardActionButtons({ cardRef, userName }: CardActionButtonsProps)
   const handleSaveToGallery = async () => {
     if (!cardRef.current) return
     clearError()
-    
+
     // Add a small delay to ensure the card is fully rendered
     await new Promise(resolve => setTimeout(resolve, 100))
-    
+
     const success = await saveToGallery(cardRef.current)
     if (!success && error) {
       alert(`Save failed: ${error}`)
@@ -66,10 +81,10 @@ export function CardActionButtons({ cardRef, userName }: CardActionButtonsProps)
         onClick={isMobile ? handleSaveToGallery : handleDownload}
         disabled={isCapturing}
         className="px-5 py-2.5 text-sm text-white rounded-full transition-all flex items-center gap-2 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-        style={{ 
-          background: isCapturing 
-            ? 'linear-gradient(to right, rgba(94, 234, 212, 0.5), rgba(159, 142, 255, 0.5))' 
-            : 'linear-gradient(to right, rgba(94, 234, 212, 0.8), rgba(159, 142, 255, 0.8))' 
+        style={{
+          background: isCapturing
+            ? 'linear-gradient(to right, rgba(94, 234, 212, 0.5), rgba(159, 142, 255, 0.5))'
+            : 'linear-gradient(to right, rgba(94, 234, 212, 0.8), rgba(159, 142, 255, 0.8))'
         }}
         onMouseEnter={(e) => {
           if (!isCapturing) {
@@ -102,7 +117,7 @@ export function CardActionButtons({ cardRef, userName }: CardActionButtonsProps)
 
       {/* Secondary action - Share (if supported) or Download (on mobile) */}
       {canShare ? (
-        <button 
+        <button
           onClick={handleShare}
           disabled={isCapturing}
           className="px-5 py-2.5 text-sm bg-gray-800/80 hover:bg-gray-700 text-white rounded-full transition-colors border border-gray-700 flex items-center gap-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
@@ -112,7 +127,7 @@ export function CardActionButtons({ cardRef, userName }: CardActionButtonsProps)
         </button>
       ) : (
         !isMobile && (
-          <button 
+          <button
             onClick={handleShare}
             disabled={isCapturing}
             className="px-5 py-2.5 text-sm bg-gray-800/80 hover:bg-gray-700 text-white rounded-full transition-colors border border-gray-700 flex items-center gap-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"

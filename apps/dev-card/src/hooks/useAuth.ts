@@ -24,18 +24,14 @@ export function useAuth() {
           return
         }
 
-        console.log("开始获取用户信息...")
         const result = await getCurrentUser()
 
         if (result.success) {
-          console.log("用户信息获取成功:", result.data)
           setUser(result.data || null)
         } else {
-          console.error("用户信息获取失败:", result.message)
           setError(result.message)
         }
       } catch (err) {
-        console.error("用户信息获取异常:", err)
         setError(err instanceof Error ? err.message : "Failed to fetch user")
       } finally {
         setLoading(false)

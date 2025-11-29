@@ -8,6 +8,7 @@ import Image from "next/image"
 import { useAuth } from "@/hooks/useAuth"
 import { updateUserProfile } from "@/services/auth"
 import { getUserEcosystems, getBuildingOnOptions, type UserEcosystemData } from "@/services/ecosystem"
+import LoadingScreen from "@/components/LoadingScreen"
 
 function CreateForm() {
   const router = useRouter()
@@ -36,6 +37,8 @@ function CreateForm() {
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [connectingTwitter, setConnectingTwitter] = useState(false)
+  const [twitterConnected, setTwitterConnected] = useState(false)
 
   // 生态系统相关状态 - 初始为空，只有获取到真实数据才显示
   const [buildingOnOptions, setBuildingOnOptions] = useState<string[]>([])
@@ -43,36 +46,56 @@ function CreateForm() {
   const [loadingEcosystems, setLoadingEcosystems] = useState(false)
   const [ecosystemsLoaded, setEcosystemsLoaded] = useState(false) // 标记生态系统数据是否已加载
 
-  // 调试：监控状态变化
   useEffect(() => {
-    console.log("📊 buildingOnOptions 状态更新:", buildingOnOptions)
-  }, [buildingOnOptions])
-
-  useEffect(() => {
-    console.log("🌍 userEcosystems 状态更新:", userEcosystems)
-  }, [userEcosystems])
-
-  // Auto-fill form with user data when available
-  useEffect(() => {
-    console.log("用户数据更新:", {
-      user,
-      authLoading,
-      authenticated,
-      hasUserData: !!user
-    })
 
     if (authenticated) {
-      // 数据优先级：Web3Insight API > Privy 兜底
       const avatar = user?.user_avatar || getDisplayAvatar()
       const name = user?.nick_name || getDisplayName()
       const github = user?.github_login || getGithubUsername()
       const bio = user?.user_bio || ""
 
-      // 如果是第一次登录，从 Privy 生成默认简介
+      // Handle user_title - it might be an array, string, or stringified JSON
+      let title = ""
+      if (user?.user_title) {
+        let processedTitle = user.user_title
+
+        // If it's a string, try to parse it as JSON
+        if (typeof processedTitle === 'string') {
+          try {
+            processedTitle = JSON.parse(processedTitle)
+          } catch {
+            // If parsing fails, use the string as-is
+            title = processedTitle
+          }
+        }
+
+        // If it's an array after parsing, extract the first element
+        if (Array.isArray(processedTitle) && processedTitle.length > 0) {
+          let firstItem = processedTitle[0]
+
+          // Handle nested arrays or stringified JSON in array
+          if (typeof firstItem === 'string') {
+            try {
+              firstItem = JSON.parse(firstItem)
+            } catch {
+              // If parsing fails, use as-is
+            }
+          }
+
+          // If still an array, get the first item
+          if (Array.isArray(firstItem) && firstItem.length > 0) {
+            title = String(firstItem[0])
+          } else {
+            title = String(firstItem)
+          }
+        } else if (typeof processedTitle === 'string') {
+          title = processedTitle
+        }
+      }
+
       let defaultBio = bio
       if (!bio && !user?.user_bio) {
         const email = getEmail()
-        // 根据 GitHub 信息生成简介
         if (github) {
           defaultBio = `Building amazing things with code! Find me on GitHub @${github}`
         } else if (email) {
@@ -82,32 +105,27 @@ function CreateForm() {
         }
       }
 
-      console.log("填充表单数据:", {
-        avatar,
-        name,
-        github,
-        bio: defaultBio
-      })
 
-      // 从用户已保存的数据中读取生态系统选择
-      let existingBuildingOn: string[] = []
-      if (user?.user_custom_labels && Array.isArray(user.user_custom_labels)) {
-        // 如果用户有保存的数据，使用保存的数据
-        existingBuildingOn = [...user.user_custom_labels]
+      // 从用户已保存的数据中读取生态系统选择，确保 Monad 始终在列表中
+      let existingBuildingOn: string[] = ["Monad"]
+      if (user?.user_custom_labels && Array.isArray(user.user_custom_labels) && user.user_custom_labels.length > 0) {
+        // 如果用户有保存的数据，使用保存的数据，但确保 Monad 在第一位
+        const userLabels = user.user_custom_labels.filter(label => label !== 'Monad')
+        existingBuildingOn = ['Monad', ...userLabels]
       }
 
       // 获取 Twitter handle
       const twitter = user?.user_custom_x || ""
 
       setFormData(prev => {
-        // 只在数据实际改变时更新
-        if (prev.avatar !== avatar || prev.name !== name || prev.github !== github || prev.bio !== defaultBio || prev.twitter !== twitter || JSON.stringify(prev.buildingOn) !== JSON.stringify(existingBuildingOn)) {
+        if (prev.avatar !== avatar || prev.name !== name || prev.github !== github || prev.bio !== defaultBio || prev.title !== title || prev.twitter !== twitter || JSON.stringify(prev.buildingOn) !== JSON.stringify(existingBuildingOn)) {
           return {
             ...prev,
             avatar,
             name,
             github,
             twitter,
+            title,
             bio: defaultBio,
             buildingOn: existingBuildingOn,
           }
@@ -142,30 +160,20 @@ function CreateForm() {
           setLoadingEcosystems(true)
           setEcosystemsLoaded(false)
         }
-        console.log("🔍 开始获取用户生态系统数据, GitHub:", github)
 
         const result = await getUserEcosystems(github)
-        console.log("📦 getUserEcosystems 返回结果:", result)
 
         if (result.success && result.data) {
           const ecosystems = result.data.ecosystems
-          console.log("✅ 用户参与的生态系统:", ecosystems)
 
           if (mounted) {
             setUserEcosystems(ecosystems)
-
-            // 生成完整的选项列表，确保Monad在第一位，最多 top 10
             const options = getBuildingOnOptions(ecosystems)
-            console.log("🏗️ 生成的 Building On 选项 (top 10):", options)
             setBuildingOnOptions(options)
           }
-
-          // 不自动选中任何选项，让用户手动选择
-        } else {
-          console.error("❌ 获取生态系统失败:", result.message)
         }
       } catch (error) {
-        console.error("💥 获取用户生态系统异常:", error)
+        console.error("Failed to fetch user ecosystems:", error)
       } finally {
         if (mounted) {
           setLoadingEcosystems(false)
@@ -223,13 +231,69 @@ function CreateForm() {
     }
   }
 
+  const handleConnectTwitter = async () => {
+    const twitterHandle = formData.twitter.replace('@', '').trim()
+
+    if (!twitterHandle) {
+      setError("Please enter a Twitter username first")
+      return
+    }
+
+    try {
+      setConnectingTwitter(true)
+      setError(null)
+
+      const response = await fetch(`/api/twitter/user/${twitterHandle}`)
+      const result = await response.json()
+
+      if (result.success && result.data) {
+        if (result.data.bio) {
+          setFormData((prev) => ({
+            ...prev,
+            bio: result.data.bio
+          }))
+          setTwitterConnected(true)
+        }
+      } else {
+        setError(result.message || "Failed to fetch Twitter data")
+        setTwitterConnected(false)
+      }
+    } catch (error) {
+      console.error("Failed to fetch Twitter data:", error)
+      setError("Failed to connect to Twitter")
+      setTwitterConnected(false)
+    } finally {
+      setConnectingTwitter(false)
+    }
+  }
+
   const toggleBuildingOn = (item: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      buildingOn: prev.buildingOn.includes(item)
-        ? prev.buildingOn.filter((i) => i !== item)
-        : [...prev.buildingOn, item],
-    }))
+    setFormData((prev) => {
+      const isSelected = prev.buildingOn.includes(item)
+
+      // 如果是取消选择，直接移除
+      if (isSelected) {
+        // Monad 不能取消选择
+        if (item === 'Monad') {
+          return prev
+        }
+        return {
+          ...prev,
+          buildingOn: prev.buildingOn.filter((i) => i !== item)
+        }
+      }
+
+      // 如果是添加选择，检查数量限制（最多6个，包括Monad）
+      if (prev.buildingOn.length >= 6) {
+        // 已经选满6个，不能再选
+        return prev
+      }
+
+      return {
+        ...prev,
+        buildingOn: [...prev.buildingOn, item]
+      }
+    })
   }
 
   const handleCreate = async () => {
@@ -259,38 +323,23 @@ function CreateForm() {
       // 用户选择的生态系统
       const sortedBuildingOn = [...formData.buildingOn]
 
-      console.log("提交用户资料:", {
-        user_nick_name: formData.name,
-        user_avatar: formData.avatar,
-        user_bio: formData.bio,
-        user_custom_labels: sortedBuildingOn,
-        current_user_id: user?.id
-      })
 
-      // Update user profile with form data
       const result = await updateUserProfile({
         user_nick_name: formData.name,
         user_avatar: formData.avatar,
         user_bio: formData.bio,
-        user_custom_x: formData.twitter, // 保存 Twitter handle
-        user_custom_labels: sortedBuildingOn, // 保存生态系统选择，Monad 在第一位
+        user_title: formData.title,
+        user_custom_x: formData.twitter,
+        user_custom_labels: sortedBuildingOn,
       })
 
-      console.log("更新用户资料结果:", result)
-
       if (result.success) {
-        // 使用更新后的用户数据中的ID，或当前用户ID作为备选
         const userId = result.data?.id || user?.id
-        console.log("准备跳转，用户ID:", {
-          resultId: result.data?.id,
-          currentUserId: user?.id,
-          finalUserId: userId
-        })
 
         if (userId) {
-          router.push(`/monad/card/${userId}`)
+          router.push(`/monad/${userId}`)
         } else {
-          setError("无法获取用户ID，请重试")
+          setError("Failed to get user ID")
         }
       } else {
         setError(result.message)
@@ -304,54 +353,9 @@ function CreateForm() {
 
   if (authLoading || (authenticated && !ecosystemsLoaded)) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center overflow-hidden">
-        <style jsx>{`
-          @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(5deg); }
-          }
-          @keyframes glow {
-            0%, 100% { opacity: 0.3; filter: blur(20px); }
-            50% { opacity: 0.6; filter: blur(30px); }
-          }
-          .float-animation {
-            animation: float 3s ease-in-out infinite;
-          }
-          .glow-animation {
-            animation: glow 2s ease-in-out infinite;
-          }
-        `}</style>
-
-        <div className="text-white text-center relative">
-          {/* Background glow effect */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div
-              className="w-40 h-40 rounded-full glow-animation"
-              style={{
-                background: 'radial-gradient(circle, rgba(111, 84, 255, 0.4) 0%, transparent 70%)'
-              }}
-            />
-          </div>
-
-          {/* Monad Logo with float animation */}
-          <div className="mb-6 relative inline-block float-animation">
-            <Image
-              src="/images/monad-icon.svg"
-              alt="Monad"
-              width={80}
-              height={80}
-              className="w-20 h-20 drop-shadow-[0_0_20px_rgba(111,84,255,0.6)]"
-            />
-          </div>
-
-          {/* Loading status text */}
-          {authenticated && !ecosystemsLoaded && (
-            <div className="text-sm text-gray-400 animate-pulse relative z-10">
-              Loading your ecosystem data...
-            </div>
-          )}
-        </div>
-      </div>
+      <LoadingScreen
+        message={authenticated && !ecosystemsLoaded ? "Loading your ecosystem data..." : undefined}
+      />
     )
   }
 
@@ -453,24 +457,38 @@ function CreateForm() {
             <label className="block text-sm text-white mb-1.5 font-medium">
               Twitter
             </label>
-            <input
-              type="text"
-              value={formData.twitter}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  twitter: e.target.value,
-                }))
-              }
-              className="w-full bg-black/60 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#9F8EFF]"
-              placeholder="@username"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                value={formData.twitter}
+                onChange={(e) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    twitter: e.target.value,
+                  }))
+                  setTwitterConnected(false)
+                }}
+                className="w-full bg-black/60 border border-gray-700 rounded-lg px-3 py-2 pr-28 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#9F8EFF]"
+                placeholder="@username"
+              />
+              <button
+                type="button"
+                onClick={handleConnectTwitter}
+                disabled={connectingTwitter || !formData.twitter || twitterConnected}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-80"
+                style={{
+                  color: '#9F8EFF'
+                }}
+              >
+                {connectingTwitter ? "Connecting" : twitterConnected ? "Connected" : "Connect"}
+              </button>
+            </div>
           </div>
 
           {/* Title */}
           <div className="mb-3">
             <label className="block text-sm text-white mb-1.5 font-medium">
-              Title
+              Title <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
@@ -483,7 +501,9 @@ function CreateForm() {
 
           {/* Bio */}
           <div className="mb-3">
-            <label className="block text-sm text-white mb-1.5 font-medium">Bio</label>
+            <label className="block text-sm text-white mb-1.5 font-medium">
+              Bio <span className="text-red-400">*</span>
+            </label>
             <textarea
               value={formData.bio}
               onChange={(e) => setFormData((prev) => ({ ...prev, bio: e.target.value }))}
@@ -498,20 +518,27 @@ function CreateForm() {
             <div className="mb-4">
               <label className="block text-sm text-white mb-2 font-medium">
                 Building on
+                <span className="ml-2 text-xs text-gray-400 font-normal">
+                  (Selected: {formData.buildingOn.length}/6)
+                </span>
               </label>
               <div className="flex flex-wrap gap-2">
                 {buildingOnOptions.map((item) => {
                   const isSelected = formData.buildingOn.includes(item)
+                  const isMonad = item === 'Monad'
+                  const canSelect = isSelected || formData.buildingOn.length < 6
 
                   return (
                     <button
                       key={item}
                       onClick={() => toggleBuildingOn(item)}
-                      className="px-3 py-1.5 rounded-full text-sm font-medium transition-all border-2 cursor-pointer"
+                      disabled={!canSelect && !isSelected}
+                      className="px-3 py-1.5 rounded-full text-sm font-medium transition-all outline outline-1 outline-offset-[-1px]"
                       style={{
-                        borderColor: isSelected ? '#9F8EFF' : 'rgba(255,255,255,0.1)',
+                        outlineColor: isSelected ? '#9F8EFF' : 'rgba(255,255,255,0.1)',
                         color: 'white',
-                        opacity: isSelected ? 1 : 0.7
+                        opacity: isSelected ? 1 : (canSelect ? 0.7 : 0.3),
+                        cursor: (isMonad && isSelected) ? 'not-allowed' : (canSelect || isSelected ? 'pointer' : 'not-allowed')
                       }}
                     >
                       {item}
@@ -529,7 +556,7 @@ function CreateForm() {
           {/* Create button */}
           <button
             onClick={handleCreate}
-disabled={loading || !formData.name || !formData.github}
+            disabled={loading || !formData.name || !formData.github || !formData.title || !formData.bio}
             className="w-full h-12 px-9 py-2 rounded-[50px] shadow-[0px_0px_10px_0px_rgba(159,142,255,0.50)] outline outline-2 outline-offset-[-2px] outline-indigo-300 inline-flex justify-center items-center gap-2.5 mt-6 mb-8 hover:shadow-[0px_0px_20px_0px_rgba(159,142,255,0.70)] hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
               background: 'linear-gradient(to right, #5EEAD4, #9F8EFF)'

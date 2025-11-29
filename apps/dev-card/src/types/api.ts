@@ -10,6 +10,7 @@ export interface ApiUser {
   nick_name?: string
   user_avatar?: string
   user_bio?: string
+  user_title?: string
   github_login?: string
   google_email?: string
   user_custom_x?: string
@@ -27,6 +28,7 @@ export interface UpdateUserProfileRequest {
   user_nick_name?: string
   user_avatar?: string
   user_bio?: string
+  user_title?: string
   user_custom_x?: string
   user_custom_labels?: string[]
 }
