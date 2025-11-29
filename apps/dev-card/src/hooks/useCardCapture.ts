@@ -1,7 +1,8 @@
 "use client"
 
-import { useCallback, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import html2canvas from "html2canvas"
+import * as htmlToImage from "html-to-image"
 
 interface UseCardCaptureOptions {
   fileName?: string
@@ -26,81 +27,123 @@ export function useCardCapture(options: UseCardCaptureOptions = {}) {
   const isMobile = typeof navigator !== "undefined" &&
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
 
+  const outputSize = useMemo(() => ({
+    width: 1701,
+    height: 2709,
+  }), [])
+
+  const shouldIncludeNode = useCallback((node: HTMLElement) => {
+    if (node?.classList?.contains("ignore-screenshot")) return false
+    if (node?.hasAttribute("data-html2canvas-ignore")) return false
+    return true
+  }, [])
+
+  const waitForReadyState = useCallback(async (element: HTMLElement) => {
+    if (document.fonts) {
+      await document.fonts.ready
+    }
+
+    const images = element.querySelectorAll("img")
+    const imagePromises = Array.from(images).map((img) => {
+      if (img.complete) return Promise.resolve(undefined)
+      return new Promise<void>((resolve) => {
+        const done = () => resolve()
+        img.onload = done
+        img.onerror = done
+        setTimeout(done, 5000)
+      })
+    })
+    await Promise.all(imagePromises)
+
+    await new Promise(resolve => setTimeout(resolve, 200))
+  }, [])
+
+  const captureWithHtmlToImage = useCallback(async (element: HTMLElement) => {
+    const originalWidth = element.offsetWidth || element.getBoundingClientRect().width
+    const originalHeight = element.offsetHeight || element.getBoundingClientRect().height
+
+    const blob = await htmlToImage.toBlob(element, {
+      width: originalWidth,
+      height: originalHeight,
+      canvasWidth: outputSize.width,
+      canvasHeight: outputSize.height,
+      backgroundColor,
+      cacheBust: true,
+      skipFonts: false,
+      pixelRatio: 1,
+      quality,
+      filter: (node) => {
+        if (!(node instanceof HTMLElement)) return true
+        return shouldIncludeNode(node)
+      },
+      style: {
+        transformOrigin: "top left",
+      },
+      type: "image/png",
+    })
+
+    if (!blob) {
+      throw new Error("Failed to create image blob")
+    }
+
+    return blob
+  }, [backgroundColor, outputSize.height, outputSize.width, quality, shouldIncludeNode])
+
+  const captureWithHtml2Canvas = useCallback(async (element: HTMLElement) => {
+    const originalWidth = element.offsetWidth
+    const originalHeight = element.offsetHeight
+    const canvas = await html2canvas(element, {
+      quality,
+      backgroundColor,
+      scale: 1,
+      useCORS: true,
+      allowTaint: true,
+      foreignObjectRendering: false,
+      imageTimeout: 15000,
+      removeContainer: true,
+      logging: false,
+      width: originalWidth,
+      height: originalHeight,
+      ignoreElements: (el) => {
+        return !shouldIncludeNode(el as HTMLElement)
+      },
+    })
+
+    const outputCanvas = document.createElement("canvas")
+    outputCanvas.width = outputSize.width
+    outputCanvas.height = outputSize.height
+    const ctx = outputCanvas.getContext("2d")
+
+    if (ctx) {
+      ctx.fillStyle = backgroundColor
+      ctx.fillRect(0, 0, outputSize.width, outputSize.height)
+      ctx.drawImage(canvas, 0, 0, originalWidth, originalHeight, 0, 0, outputSize.width, outputSize.height)
+    }
+
+    return new Promise<Blob | null>((resolve) => {
+      outputCanvas.toBlob((blob) => {
+        resolve(blob)
+      }, "image/png", quality)
+    })
+  }, [backgroundColor, outputSize.height, outputSize.width, quality, shouldIncludeNode])
+
   const captureElement = useCallback(async (element: HTMLElement): Promise<Blob | null> => {
     try {
       setIsCapturing(true)
       setError(null)
+      await waitForReadyState(element)
 
-      // Wait for fonts to load
-      if (document.fonts) {
-        await document.fonts.ready
+      try {
+        return await captureWithHtmlToImage(element)
+      } catch (primaryError) {
+        console.warn("html-to-image failed, falling back to html2canvas", primaryError)
+        try {
+          return await captureWithHtml2Canvas(element)
+        } catch (fallbackError) {
+          console.error("html2canvas fallback failed", fallbackError)
+          throw fallbackError
+        }
       }
-
-      // Wait for images to load
-      const images = element.querySelectorAll("img")
-      const imagePromises = Array.from(images).map((img) => {
-        if (img.complete) return Promise.resolve()
-        return new Promise((resolve, reject) => {
-          img.onload = () => resolve(undefined)
-          img.onerror = () => resolve(undefined) // Don't fail on image errors
-          setTimeout(() => resolve(undefined), 5000) // Timeout after 5s
-        })
-      })
-      await Promise.all(imagePromises)
-
-      // Wait a bit for any animations to complete
-      await new Promise(resolve => setTimeout(resolve, 200))
-
-      // Fixed output dimensions for card (86mm × 54mm at 300 DPI = 2709 × 1701px)
-      const outputWidth = 2709
-      const outputHeight = 1701
-
-      // Get the original element dimensions
-      const originalWidth = element.offsetWidth
-      const originalHeight = element.offsetHeight
-      const scaleX = outputWidth / originalWidth
-      const scaleY = outputHeight / originalHeight
-
-      const canvas = await html2canvas(element, {
-        quality,
-        backgroundColor,
-        scale: 1,
-        useCORS: true,
-        allowTaint: true, // Allow tainted canvas to avoid CORS issues
-        foreignObjectRendering: false,
-        imageTimeout: 15000,
-        removeContainer: true,
-        logging: false,
-        width: originalWidth,
-        height: originalHeight,
-        ignoreElements: (el) => {
-          return el.classList?.contains('ignore-screenshot') ||
-                 el.hasAttribute('data-html2canvas-ignore') ||
-                 false
-        },
-      })
-
-      // Resize the canvas to the desired output dimensions
-      const outputCanvas = document.createElement('canvas')
-      outputCanvas.width = outputWidth
-      outputCanvas.height = outputHeight
-      const ctx = outputCanvas.getContext('2d')
-
-      if (ctx) {
-        // Fill background
-        ctx.fillStyle = backgroundColor
-        ctx.fillRect(0, 0, outputWidth, outputHeight)
-
-        // Draw the captured canvas scaled to fit
-        ctx.drawImage(canvas, 0, 0, originalWidth, originalHeight, 0, 0, outputWidth, outputHeight)
-      }
-
-      // Return blob from the scaled canvas
-      return new Promise((resolve) => {
-        outputCanvas.toBlob((blob) => {
-          resolve(blob)
-        }, "image/png", quality)
-      })
 
     } catch (err) {
       console.error("Failed to capture element:", err)
@@ -109,7 +152,7 @@ export function useCardCapture(options: UseCardCaptureOptions = {}) {
     } finally {
       setIsCapturing(false)
     }
-  }, [quality, backgroundColor])
+  }, [captureWithHtml2Canvas, captureWithHtmlToImage, waitForReadyState])
 
   const downloadImage = useCallback(async (element: HTMLElement) => {
     const blob = await captureElement(element)
