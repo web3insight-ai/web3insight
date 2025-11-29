@@ -331,7 +331,15 @@ export default function CardPage({ params }: { params: Promise<{ user_id: string
         <p className="text-gray-500 text-xs sm:text-sm">Tap card to flip</p>
 
         <CardActionButtons
-          cardRef={frontCardRef}
+          cardData={{
+            name,
+            github,
+            twitter,
+            bio,
+            avatar,
+            title,
+            buildingOn
+          }}
           userName={cardUser?.nick_name || cardUser?.github_login || "user"}
         />
       </div>

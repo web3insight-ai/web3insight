@@ -2,8 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react"
 import { createRoot } from "react-dom/client"
-import html2canvas from "html2canvas"
-import * as htmlToImage from "html-to-image"
+import { snapdom } from "@zumer/snapdom"
 import { CardTemplate, type CardData } from "@/components/CardTemplate"
 
 interface UseCardCaptureOptions {
@@ -60,28 +59,51 @@ export function useCardCapture(options: UseCardCaptureOptions = {}) {
     await new Promise(resolve => setTimeout(resolve, 200))
   }, [])
 
-  const captureWithHtmlToImage = useCallback(async (element: HTMLElement) => {
-    const originalWidth = element.offsetWidth || element.getBoundingClientRect().width
-    const originalHeight = element.offsetHeight || element.getBoundingClientRect().height
-
-    const blob = await htmlToImage.toBlob(element, {
-      width: originalWidth,
-      height: originalHeight,
-      canvasWidth: outputSize.width,
-      canvasHeight: outputSize.height,
-      backgroundColor,
-      cacheBust: true,
-      skipFonts: false,
+  const captureWithSnapDOM = useCallback(async (element: HTMLElement) => {
+    // Element should already be at the target size (1701x2709)
+    const snapshot = await snapdom(element, {
+      scale: 1,
       pixelRatio: 1,
+      width: outputSize.width,
+      height: outputSize.height,
+      backgroundColor,
       quality,
+      skipFonts: false,
       filter: (node) => {
         if (!(node instanceof HTMLElement)) return true
         return shouldIncludeNode(node)
       },
-      style: {
-        transformOrigin: "top left",
-      },
-      type: "image/png",
+    })
+
+    // Get the canvas from SnapDOM
+    const sourceCanvas = await snapshot.toCanvas()
+
+    // Create a new canvas with exact target dimensions
+    const targetCanvas = document.createElement('canvas')
+    targetCanvas.width = outputSize.width
+    targetCanvas.height = outputSize.height
+
+    const ctx = targetCanvas.getContext('2d')
+    if (!ctx) {
+      throw new Error("Failed to get canvas context")
+    }
+
+    // Fill background
+    ctx.fillStyle = backgroundColor
+    ctx.fillRect(0, 0, outputSize.width, outputSize.height)
+
+    // Draw the source canvas scaled to exact target size
+    ctx.drawImage(
+      sourceCanvas,
+      0, 0, sourceCanvas.width, sourceCanvas.height,
+      0, 0, outputSize.width, outputSize.height
+    )
+
+    // Convert to blob
+    const blob = await new Promise<Blob | null>((resolve) => {
+      targetCanvas.toBlob((blob) => {
+        resolve(blob)
+      }, 'image/png', quality)
     })
 
     if (!blob) {
@@ -89,45 +111,7 @@ export function useCardCapture(options: UseCardCaptureOptions = {}) {
     }
 
     return blob
-  }, [backgroundColor, outputSize.height, outputSize.width, quality, shouldIncludeNode])
-
-  const captureWithHtml2Canvas = useCallback(async (element: HTMLElement) => {
-    const originalWidth = element.offsetWidth
-    const originalHeight = element.offsetHeight
-    const canvas = await html2canvas(element, {
-      quality,
-      backgroundColor,
-      scale: 1,
-      useCORS: true,
-      allowTaint: true,
-      foreignObjectRendering: false,
-      imageTimeout: 15000,
-      removeContainer: true,
-      logging: false,
-      width: originalWidth,
-      height: originalHeight,
-      ignoreElements: (el) => {
-        return !shouldIncludeNode(el as HTMLElement)
-      },
-    })
-
-    const outputCanvas = document.createElement("canvas")
-    outputCanvas.width = outputSize.width
-    outputCanvas.height = outputSize.height
-    const ctx = outputCanvas.getContext("2d")
-
-    if (ctx) {
-      ctx.fillStyle = backgroundColor
-      ctx.fillRect(0, 0, outputSize.width, outputSize.height)
-      ctx.drawImage(canvas, 0, 0, originalWidth, originalHeight, 0, 0, outputSize.width, outputSize.height)
-    }
-
-    return new Promise<Blob | null>((resolve) => {
-      outputCanvas.toBlob((blob) => {
-        resolve(blob)
-      }, "image/png", quality)
-    })
-  }, [backgroundColor, outputSize.height, outputSize.width, quality, shouldIncludeNode])
+  }, [backgroundColor, outputSize.width, outputSize.height, quality, shouldIncludeNode])
 
   const captureElement = useCallback(async (element: HTMLElement): Promise<Blob | null> => {
     try {
@@ -135,18 +119,7 @@ export function useCardCapture(options: UseCardCaptureOptions = {}) {
       setError(null)
       await waitForReadyState(element)
 
-      try {
-        return await captureWithHtmlToImage(element)
-      } catch (primaryError) {
-        console.warn("html-to-image failed, falling back to html2canvas", primaryError)
-        try {
-          return await captureWithHtml2Canvas(element)
-        } catch (fallbackError) {
-          console.error("html2canvas fallback failed", fallbackError)
-          throw fallbackError
-        }
-      }
-
+      return await captureWithSnapDOM(element)
     } catch (err) {
       console.error("Failed to capture element:", err)
       setError(err instanceof Error ? err.message : "Failed to capture image")
@@ -154,7 +127,7 @@ export function useCardCapture(options: UseCardCaptureOptions = {}) {
     } finally {
       setIsCapturing(false)
     }
-  }, [captureWithHtml2Canvas, captureWithHtmlToImage, waitForReadyState])
+  }, [captureWithSnapDOM, waitForReadyState])
 
   /**
    * Capture card from data using the fixed-size template
@@ -168,7 +141,7 @@ export function useCardCapture(options: UseCardCaptureOptions = {}) {
       setIsCapturing(true)
       setError(null)
 
-      // Create a container off-screen
+      // Create a container off-screen with complete style isolation
       container = document.createElement("div")
       container.style.position = "fixed"
       container.style.left = "-9999px"
@@ -176,6 +149,16 @@ export function useCardCapture(options: UseCardCaptureOptions = {}) {
       container.style.width = "1701px"
       container.style.height = "2709px"
       container.style.zIndex = "-1"
+      // Reset all CSS custom properties that might contain oklch/lab colors
+      container.style.setProperty("--background", "#000000")
+      container.style.setProperty("--foreground", "#ffffff")
+      container.style.setProperty("--card", "#000000")
+      container.style.setProperty("--card-foreground", "#ffffff")
+      container.style.setProperty("--border", "#000000")
+      container.style.setProperty("--ring", "#000000")
+      // Disable all potential Tailwind CSS inheritance
+      container.className = ""
+      container.setAttribute("data-theme", "none")
       document.body.appendChild(container)
 
       // Render the CardTemplate into the container
@@ -185,29 +168,17 @@ export function useCardCapture(options: UseCardCaptureOptions = {}) {
       await new Promise<void>((resolve) => {
         root.render(<CardTemplate data={cardData} />)
         // Give React time to render and images to load
-        setTimeout(resolve, 500)
+        setTimeout(resolve, 1000)
       })
 
       // Wait for images and fonts to load
       await waitForReadyState(container)
 
       // Additional wait to ensure all assets are loaded
-      await new Promise(resolve => setTimeout(resolve, 500))
+      await new Promise(resolve => setTimeout(resolve, 1000))
 
       // Capture the rendered template
-      let blob: Blob | null = null
-
-      try {
-        blob = await captureWithHtmlToImage(container)
-      } catch (primaryError) {
-        console.warn("html-to-image failed, falling back to html2canvas", primaryError)
-        try {
-          blob = await captureWithHtml2Canvas(container)
-        } catch (fallbackError) {
-          console.error("html2canvas fallback failed", fallbackError)
-          throw fallbackError
-        }
-      }
+      const blob = await captureWithSnapDOM(container)
 
       // Cleanup
       root.unmount()
@@ -224,7 +195,7 @@ export function useCardCapture(options: UseCardCaptureOptions = {}) {
       }
       setIsCapturing(false)
     }
-  }, [captureWithHtml2Canvas, captureWithHtmlToImage, waitForReadyState])
+  }, [captureWithSnapDOM, waitForReadyState])
 
   const downloadImage = useCallback(async (element: HTMLElement) => {
     const blob = await captureElement(element)
