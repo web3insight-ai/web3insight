@@ -6,7 +6,7 @@ import { getCurrentUser } from "@/services/auth"
 import { ApiUser } from "@/types/api"
 
 export function useAuth() {
-  const { ready, authenticated, user: privyUser } = usePrivy()
+  const { ready, authenticated, user: privyUser, logout, login } = usePrivy()
   const [user, setUser] = useState<ApiUser | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -203,6 +203,8 @@ export function useAuth() {
     authenticated,
     ready,
     privyUser,
+    logout,
+    login,
     getDisplayAvatar,
     getDisplayName,
     getGithubUsername,

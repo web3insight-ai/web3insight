@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useRef, Suspense, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { useAuth } from "@/hooks/useAuth"
 import { updateUserProfile } from "@/services/auth"
@@ -12,8 +12,6 @@ import LoadingScreen from "@/components/LoadingScreen"
 
 function CreateForm() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const type = searchParams.get("type") || "dev"
   const fileInputRef = useRef<HTMLInputElement>(null)
   const {
     user,
@@ -23,7 +21,7 @@ function CreateForm() {
     getDisplayName,
     getGithubUsername,
     getEmail,
-    privyUser
+    privyUser,
   } = useAuth()
 
   const [formData, setFormData] = useState({
@@ -33,18 +31,28 @@ function CreateForm() {
     twitter: "",
     title: "",
     bio: "",
-    buildingOn: ["Monad"] as string[], // Monad 默认选中
+    buildingOn: ["Monad"] as string[],
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [connectingTwitter, setConnectingTwitter] = useState(false)
   const [twitterConnected, setTwitterConnected] = useState(false)
 
+  // Get user type from localStorage
+  const [userType, setUserType] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('userType') || 'dev'
+    }
+    return 'dev'
+  })
+
+  const isDev = userType === 'dev'
+
   // 生态系统相关状态 - 初始为空，只有获取到真实数据才显示
   const [buildingOnOptions, setBuildingOnOptions] = useState<string[]>([])
   const [userEcosystems, setUserEcosystems] = useState<string[]>([])
   const [loadingEcosystems, setLoadingEcosystems] = useState(false)
-  const [ecosystemsLoaded, setEcosystemsLoaded] = useState(false) // 标记生态系统数据是否已加载
+  const [ecosystemsLoaded, setEcosystemsLoaded] = useState(false)
 
   useEffect(() => {
 
@@ -54,44 +62,7 @@ function CreateForm() {
       const github = user?.github_login || getGithubUsername()
       const bio = user?.user_bio || ""
 
-      // Handle user_title - it might be an array, string, or stringified JSON
-      let title = ""
-      if (user?.user_title) {
-        let processedTitle = user.user_title
-
-        // If it's a string, try to parse it as JSON
-        if (typeof processedTitle === 'string') {
-          try {
-            processedTitle = JSON.parse(processedTitle)
-          } catch {
-            // If parsing fails, use the string as-is
-            title = processedTitle
-          }
-        }
-
-        // If it's an array after parsing, extract the first element
-        if (Array.isArray(processedTitle) && processedTitle.length > 0) {
-          let firstItem = processedTitle[0]
-
-          // Handle nested arrays or stringified JSON in array
-          if (typeof firstItem === 'string') {
-            try {
-              firstItem = JSON.parse(firstItem)
-            } catch {
-              // If parsing fails, use as-is
-            }
-          }
-
-          // If still an array, get the first item
-          if (Array.isArray(firstItem) && firstItem.length > 0) {
-            title = String(firstItem[0])
-          } else {
-            title = String(firstItem)
-          }
-        } else if (typeof processedTitle === 'string') {
-          title = processedTitle
-        }
-      }
+      const title = user?.user_title || ""
 
       let defaultBio = bio
       if (!bio && !user?.user_bio) {
@@ -209,12 +180,7 @@ function CreateForm() {
     }
   }, [formData.github, authenticated, user])
 
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (!authLoading && !authenticated) {
-      router.push("/monad")
-    }
-  }, [authLoading, authenticated, router])
+  // Don't auto-trigger login, show login button instead
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click()
@@ -316,6 +282,36 @@ function CreateForm() {
       return
     }
 
+    // Validation based on user type
+    if (!isDev) {
+      // For non-dev users, Twitter is required
+      if (!formData.twitter || !formData.twitter.trim()) {
+        setError("Twitter is required for non-developer accounts")
+        return
+      }
+    }
+
+    // Title and Bio are required for all users
+    if (!formData.title || !formData.title.trim()) {
+      setError("Title is required")
+      return
+    }
+
+    if (formData.title.length > 25) {
+      setError("Title must be 25 characters or less")
+      return
+    }
+
+    if (!formData.bio || !formData.bio.trim()) {
+      setError("Bio is required")
+      return
+    }
+
+    if (formData.bio.length > 50) {
+      setError("Bio must be 50 characters or less")
+      return
+    }
+
     try {
       setLoading(true)
       setError(null)
@@ -331,6 +327,7 @@ function CreateForm() {
         user_title: formData.title,
         user_custom_x: formData.twitter,
         user_custom_labels: sortedBuildingOn,
+        github_login: formData.github,
       })
 
       if (result.success) {
@@ -359,8 +356,10 @@ function CreateForm() {
     )
   }
 
-  if (!authenticated) {
-    return null // Will redirect
+  // Redirect to home if not authenticated
+  if (!authLoading && !authenticated) {
+    router.push('/monad')
+    return null
   }
 
   return (
@@ -445,7 +444,8 @@ function CreateForm() {
                   type="text"
                   value={formData.github}
                   onChange={(e) => setFormData((prev) => ({ ...prev, github: e.target.value }))}
-                  className="w-full bg-black/60 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#9F8EFF]"
+                  disabled={isDev}
+                  className="w-full bg-black/60 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#9F8EFF] disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="@username"
                 />
               </div>
@@ -456,6 +456,7 @@ function CreateForm() {
           <div className="mb-3">
             <label className="block text-sm text-white mb-1.5 font-medium">
               Twitter
+              {!isDev && <span className="text-red-400 ml-1">*</span>}
             </label>
             <div className="relative">
               <input
@@ -487,29 +488,41 @@ function CreateForm() {
 
           {/* Title */}
           <div className="mb-3">
-            <label className="block text-sm text-white mb-1.5 font-medium">
-              Title <span className="text-red-400">*</span>
-            </label>
+            <div className="flex justify-between items-center mb-1.5">
+              <label className="text-sm text-white font-medium">
+                Title <span className="text-red-400">*</span>
+              </label>
+              <span className="text-xs text-gray-400">
+                {formData.title.length}/25
+              </span>
+            </div>
             <input
               type="text"
               value={formData.title}
               onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
+              maxLength={25}
               className="w-full bg-black/60 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#9F8EFF]"
-              placeholder="Your title"
+              placeholder="Your title (max 25 characters)"
             />
           </div>
 
           {/* Bio */}
           <div className="mb-3">
-            <label className="block text-sm text-white mb-1.5 font-medium">
-              Bio <span className="text-red-400">*</span>
-            </label>
+            <div className="flex justify-between items-center mb-1.5">
+              <label className="text-sm text-white font-medium">
+                Bio <span className="text-red-400">*</span>
+              </label>
+              <span className="text-xs text-gray-400">
+                {formData.bio.length}/50
+              </span>
+            </div>
             <textarea
               value={formData.bio}
               onChange={(e) => setFormData((prev) => ({ ...prev, bio: e.target.value }))}
               rows={4}
+              maxLength={50}
               className="w-full bg-black/60 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#9F8EFF] resize-none"
-              placeholder="Tell us about yourself..."
+              placeholder="Tell us about yourself... (max 50 characters)"
             />
           </div>
 

@@ -35,10 +35,21 @@ export function PrivyAuthSync() {
         const result = await signInWithPrivy(identityToken)
 
         if (result.success) {
-          // Redirect to create page after successful authentication
-          router.push("/monad/create")
-          // Also refresh to ensure auth state is updated
-          router.refresh()
+          // Only redirect to create page if user clicked "Connect" from home page
+          // Check for the redirect flag in localStorage
+          if (typeof window !== 'undefined') {
+            const shouldRedirectToCreate = localStorage.getItem('redirectToCreate')
+
+            if (shouldRedirectToCreate === 'true') {
+              // Clear the flag
+              localStorage.removeItem('redirectToCreate')
+
+              // Redirect to create page
+              router.push('/monad/create')
+              // Also refresh to ensure auth state is updated
+              router.refresh()
+            }
+          }
         } else {
           hasAuthenticatedRef.current = false // Allow retry
         }

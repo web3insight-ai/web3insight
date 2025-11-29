@@ -31,4 +31,5 @@ export interface UpdateUserProfileRequest {
   user_title?: string
   user_custom_x?: string
   user_custom_labels?: string[]
+  github_login?: string
 }

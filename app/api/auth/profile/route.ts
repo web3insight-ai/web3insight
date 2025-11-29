@@ -19,10 +19,7 @@ export async function PUT(request: Request) {
     const profileData = await request.json()
 
     const transformedData = {
-      ...profileData,
-      user_title: profileData.user_title
-        ? (Array.isArray(profileData.user_title) ? profileData.user_title : [profileData.user_title])
-        : []
+      ...profileData
     }
     const response = await fetch(`${DATA_API_URL}/v1/auth/user`, {
       method: "POST",
@@ -55,11 +52,10 @@ export async function PUT(request: Request) {
         nick_name: userData.profile.user_nick_name,
         user_avatar: userData.profile.user_avatar,
         user_bio: userData.profile.user_bio,
-        user_title: Array.isArray(userData.profile.user_title) && userData.profile.user_title.length > 0
-          ? userData.profile.user_title[0]
-          : userData.profile.user_title || "",
+        user_title: userData.profile.user_title || "",
         user_custom_x: userData.profile.user_custom_x,
         user_custom_labels: userData.profile.user_custom_labels,
+        github_login: userData.profile.github_login || "",
         created_at: userData.profile.created_at,
         updated_at: userData.profile.updated_at,
         profile: userData.profile,

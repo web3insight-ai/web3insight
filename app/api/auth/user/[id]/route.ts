@@ -41,8 +41,21 @@ export async function GET(
     let processedUserData = userData
 
     if (userData && userData.profile) {
+      // Try to get GitHub from multiple sources
       let githubLogin = ""
-      if (userData.binds && Array.isArray(userData.binds)) {
+      
+      // 1. Check top-level github field (from public API)
+      if (userData.github) {
+        githubLogin = userData.github
+      }
+      
+      // 2. Check profile.github_login
+      if (!githubLogin && userData.profile.github_login) {
+        githubLogin = userData.profile.github_login
+      }
+      
+      // 3. Check binds array
+      if (!githubLogin && userData.binds && Array.isArray(userData.binds)) {
         const githubBind = userData.binds.find((bind: any) =>
           bind.bind_type === 'github' || bind.bind_type === 'github_oauth'
         )
@@ -56,9 +69,7 @@ export async function GET(
         nick_name: userData.profile.user_nick_name,
         user_avatar: userData.profile.user_avatar,
         user_bio: userData.profile.user_bio,
-        user_title: Array.isArray(userData.profile.user_title) && userData.profile.user_title.length > 0
-          ? userData.profile.user_title[0]
-          : userData.profile.user_title || "",
+        user_title: userData.profile.user_title || "",
         user_custom_x: userData.profile.user_custom_x,
         user_custom_labels: userData.profile.user_custom_labels,
         github_login: githubLogin,
