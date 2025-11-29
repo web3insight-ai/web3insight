@@ -408,7 +408,7 @@ export class AuthService {
     linked_accounts: LinkedAccount[];
   }> {
     if (!userDid) {
-      throw new Error('Privy user id is required');
+      return null;
     }
 
     const client = this.createPrivyClient();
