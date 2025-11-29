@@ -12,7 +12,7 @@ import { KYSELY } from '@/app/db/db.provider';
 import { ApiAnalysisUsers, DB } from '@/app/db/dto/db.dto';
 import { TokenPoolService } from '@/app/db/pool.services';
 import { AuthService } from '@/auth/services/auth.services';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { CompiledQuery, Kysely } from 'kysely';
 import { Command, Console } from 'nestjs-console';
@@ -24,6 +24,7 @@ export class UsersService {
     @Inject(KYSELY) private readonly db: Kysely<DB>,
     private readonly tokenPoolService: TokenPoolService,
     private eventEmitter: EventEmitter2,
+    @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
   ) {}
 
@@ -403,7 +404,7 @@ export class UsersService {
     return activeEcosystems.map((ecosystem) => ecosystem.name);
   }
 
-  private async getPrivyGithubUsername(uid: string): Promise<string | null> {
+  async getPrivyGithubUsername(uid: string): Promise<string | null> {
     const privyBind = await this.db
       .selectFrom('api.auth_users_binds')
       .select(['bind_openid'])

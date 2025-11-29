@@ -5,7 +5,7 @@ import {
 } from '@/api/dto/api.dto';
 import { KYSELY } from '@/app/db/db.provider';
 import { ApiAuthUsers, DB, Json } from '@/app/db/dto/db.dto';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Octokit } from '@octokit/rest';
 import { Kysely, Updateable } from 'kysely';
@@ -15,6 +15,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ethers } from 'ethers';
 import { PrivyClient } from '@privy-io/node';
 import { LinkedAccount } from '@privy-io/node/resources/users';
+import { UsersService } from '@/data/services/users.services';
 
 interface OAuth2TokenResponse {
   access_token: string;
@@ -37,6 +38,8 @@ export class AuthService {
   constructor(
     private readonly configService: ConfigService,
     private jwtService: JwtService,
+    @Inject(forwardRef(() => UsersService))
+    private readonly userService: UsersService,
   ) {}
 
   private createPrivyClient() {
@@ -146,8 +149,11 @@ export class AuthService {
       throw new Error('User not found');
     }
 
+    const github = await this.userService.getPrivyGithubUsername(uid);
+
     return {
       profile: user,
+      github: github,
     };
   }
 
