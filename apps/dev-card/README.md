@@ -5,7 +5,7 @@ A beautiful developer card application built with Next.js 16, integrated with Pr
 ## Features
 
 - 🔐 **Privy Authentication** - Secure login with GitHub, Google, email, and wallet
-- 👤 **User Profiles** - Customizable developer profiles with avatars and bios  
+- 👤 **User Profiles** - Customizable developer profiles with avatars and bios
 - 🎨 **Beautiful Cards** - Flippable cards with stunning design
 - 📱 **Responsive** - Works perfectly on desktop and mobile
 - ⚡ **Fast** - Built with Next.js 16 and optimized for performance
@@ -14,7 +14,7 @@ A beautiful developer card application built with Next.js 16, integrated with Pr
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - pnpm
 - Privy account and app ID
 
@@ -38,6 +38,7 @@ DATA_API_URL=https://api.web3insight.ai
 NEXT_PUBLIC_PRIVY_APP_ID=your_privy_app_id
 PRIVY_APP_SECRET=your_privy_app_secret
 NEXT_PUBLIC_UMAMI_WEBSITE_ID=your_umami_website_id
+NEXT_PUBLIC_UMAMI_URL=https://umami.web3insight.ai
 ```
 
 4. Run the development server:
@@ -69,7 +70,7 @@ web3insight-dev-card/
 
 1. User visits `/monad` and clicks "Connect"
 2. Privy modal opens for authentication (GitHub, Google, email, or wallet)
-3. Upon successful authentication, user is redirected to `/monad/create`  
+3. Upon successful authentication, user is redirected to `/monad/create`
 4. User can customize their profile and create a dev card
 5. Card is displayed at `/monad/card/{user_id}`
 
@@ -78,7 +79,7 @@ web3insight-dev-card/
 ### PrivyProvider
 Wraps the app with Privy authentication context.
 
-### PrivyAuthSync  
+### PrivyAuthSync
 Automatically syncs Privy authentication with the backend API.
 
 ### useAuth Hook
