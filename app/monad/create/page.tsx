@@ -56,22 +56,25 @@ function CreateForm() {
 
   useEffect(() => {
     if (authenticated) {
-      console.log('=== Create Form 初始化数据 ===')
-      console.log('user 对象:', user)
-      console.log('user?.user_avatar:', user?.user_avatar)
+      // Avatar priority: Twitter > GitHub > Monad Icon
+      let finalAvatar = ""
 
-      // Get avatar from Privy - this should be the primary source
-      const privyAvatar = getDisplayAvatar()
-      console.log('Privy avatar (getDisplayAvatar):', privyAvatar)
+      // 1. Check if API has a Twitter avatar (from previous Connect Twitter)
+      const apiAvatar = user?.user_avatar
+      const isTwitterAvatar = apiAvatar && (apiAvatar.includes('pbs.twimg.com') || apiAvatar.includes('twimg.com'))
+      const isValidApiAvatar = apiAvatar && apiAvatar !== '/images/monad-icon.svg'
 
-      // Use Privy avatar if user_avatar is not set or is default
-      let finalAvatar = privyAvatar
-      if (user?.user_avatar && user.user_avatar !== '/images/user-avatar-sample.png') {
-        finalAvatar = user.user_avatar
+      if (isTwitterAvatar) {
+        // Use Twitter avatar if it exists in API
+        finalAvatar = apiAvatar
+      } else if (isValidApiAvatar) {
+        // Use any other valid avatar from API (could be custom upload)
+        finalAvatar = apiAvatar
+      } else {
+        // 2. Fall back to GitHub avatar from Privy
+        const privyAvatar = getDisplayAvatar()
+        finalAvatar = privyAvatar
       }
-
-      console.log('最终 avatar:', finalAvatar)
-      console.log('avatar 来源:', user?.user_avatar ? 'API' : 'Privy')
 
       const name = user?.nick_name || getDisplayName()
       const github = user?.github_login || getGithubUsername()
@@ -101,7 +104,6 @@ function CreateForm() {
 
       setFormData(prev => {
         if (prev.avatar !== finalAvatar || prev.name !== name || prev.github !== github || prev.bio !== defaultBio || prev.title !== title || prev.twitter !== twitter || JSON.stringify(prev.buildingOn) !== JSON.stringify(existingBuildingOn)) {
-          console.log('📝 更新 formData:', { avatar: finalAvatar, name, github, title })
           return {
             ...prev,
             avatar: finalAvatar,
@@ -126,12 +128,10 @@ function CreateForm() {
       const github = formData.github || getGithubUsername()
 
       if (!authenticated) {
-        console.log("⏭️ 用户未认证，跳过生态系统加载")
         return
       }
 
       if (!github) {
-        console.log("⚠️ 没有 GitHub 信息，标记为已加载")
         if (mounted) {
           setEcosystemsLoaded(true)
         }
@@ -168,7 +168,6 @@ function CreateForm() {
     // 延迟执行，等表单数据填充完成
     if (authenticated) {
       if (formData.github) {
-        console.log("⏰ 1秒后执行获取生态系统, github=", formData.github)
         const timer = setTimeout(fetchUserEcosystems, 1000)
         return () => {
           mounted = false
@@ -177,7 +176,6 @@ function CreateForm() {
       } else {
         // 如果2秒后仍然没有 GitHub 信息，标记为已加载
         const timer = setTimeout(() => {
-          console.log("⏱️ 2秒后仍无 GitHub 信息，标记为已加载")
           fetchUserEcosystems()
         }, 2000)
         return () => {
@@ -230,13 +228,25 @@ function CreateForm() {
       const result = await response.json()
 
       if (result.success && result.data) {
+        const updates: any = {}
+
+        // Update bio if available
         if (result.data.bio) {
+          updates.bio = result.data.bio
+        }
+
+        // Update avatar - Twitter avatar always takes priority
+        if (result.data.avatar) {
+          updates.avatar = result.data.avatar
+        }
+
+        if (Object.keys(updates).length > 0) {
           setFormData((prev) => ({
             ...prev,
-            bio: result.data.bio
+            ...updates
           }))
-          setTwitterConnected(true)
         }
+        setTwitterConnected(true)
       } else {
         setError(result.message || "Failed to fetch Twitter data")
         setTwitterConnected(false)
@@ -280,21 +290,12 @@ function CreateForm() {
   }
 
   const handleCreate = async () => {
-    console.log("创建卡片 - 当前用户数据:", user)
-    console.log("用户 ID 检查:", {
-      userId: user?.id,
-      hasId: !!user?.id,
-      userKeys: user ? Object.keys(user) : [],
-      fullUser: user
-    })
-
     if (!user) {
       setError("User not logged in, please login first")
       return
     }
 
     if (!user.id) {
-      console.error("User ID missing - 完整用户对象:", JSON.stringify(user, null, 2))
       setError("User ID missing, please login again")
       return
     }
@@ -337,10 +338,6 @@ function CreateForm() {
       const sortedBuildingOn = [...formData.buildingOn]
 
       // 准备提交数据
-      console.log('=== 提交数据调试 ===')
-      console.log('formData.avatar:', formData.avatar)
-      console.log('是否为默认头像:', formData.avatar === '/images/user-avatar-sample.png')
-
       const profileData: any = {
         user_nick_name: formData.name,
         user_bio: formData.bio,
@@ -350,15 +347,10 @@ function CreateForm() {
         github_login: formData.github,
       }
 
-      // Always include avatar if it exists and is not default
-      if (formData.avatar && formData.avatar !== '/images/user-avatar-sample.png') {
+      // Always include avatar if it exists and is not default Monad icon
+      if (formData.avatar && formData.avatar !== '/images/monad-icon.svg') {
         profileData.user_avatar = formData.avatar
-        console.log('✅ 包含 avatar 在提交数据中:', formData.avatar)
-      } else {
-        console.log('⚠️ 跳过 avatar（默认头像或为空）')
       }
-
-      console.log('最终提交数据:', profileData)
 
       const result = await updateUserProfile(profileData)
 
@@ -443,14 +435,14 @@ function CreateForm() {
                 style={{ borderColor: '#9F8EFF50' }}
               >
                 <Image
-                  src={formData.avatar && formData.avatar.trim() !== '' ? formData.avatar : "/images/user-avatar-sample.png"}
+                  src={formData.avatar && formData.avatar.trim() !== '' ? formData.avatar : "/images/monad-icon.svg"}
                   alt="Avatar preview"
                   width={110}
                   height={110}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement
-                    target.src = "/images/user-avatar-sample.png"
+                    target.src = "/images/monad-icon.svg"
                   }}
                 />
               </button>

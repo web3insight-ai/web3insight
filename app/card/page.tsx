@@ -87,7 +87,7 @@ export default function CardPage() {
                   <div className="w-32 h-32 rounded-full p-[3px]" style={{ background: 'linear-gradient(to bottom right, #9F8EFF, #EC4899, #22D3EE)' }}>
                     <div className="w-full h-full rounded-full overflow-hidden" style={{ backgroundColor: '#9F8EFF' }}>
                       <Image
-                        src="/images/user-avatar-sample.png"
+                        src="/images/monad-icon.svg"
                         alt="Default avatar"
                         width={128}
                         height={128}

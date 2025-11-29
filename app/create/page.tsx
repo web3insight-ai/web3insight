@@ -15,7 +15,7 @@ function CreateForm() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [formData, setFormData] = useState({
-    avatar: "/images/user-avatar-sample.png",
+    avatar: "/images/monad-icon.svg",
     name: "",
     github: "",
     twitter: "",
@@ -107,7 +107,7 @@ function CreateForm() {
                 style={{ borderColor: '#9F8EFF50' }}
               >
                 <Image
-                  src={formData.avatar || "/images/user-avatar-sample.png"}
+                  src={formData.avatar || "/images/monad-icon.svg"}
                   alt="Avatar preview"
                   width={110}
                   height={110}
