@@ -21,21 +21,7 @@ const nextConfig = {
       '@': path.resolve(__dirname, 'src'),
     }
 
-    // Exclude test files from being bundled
-    config.module = config.module || {}
-    config.module.rules = config.module.rules || []
-    config.module.rules.push({
-      test: /\.test\.(js|jsx|ts|tsx)$/,
-      loader: 'ignore-loader',
-    })
-
-    // Exclude problematic test/bench files from being processed
-    config.module.rules.push({
-      test: /\/(test|bench|helper)\.(js|ts|cjs|mjs)$/,
-      use: 'ignore-loader',
-    })
-
-    // Ignore Node.js modules and test-related files in client bundles
+    // Ignore Node.js modules in client bundles
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -54,39 +40,22 @@ const nextConfig = {
       }
     }
 
-    // Replace viem test modules with empty exports
+    // Ignore viem test modules completely
     config.plugins = config.plugins || []
-    
-    // Use IgnorePlugin to prevent bundling test-related modules
     config.plugins.push(
       new webpack.IgnorePlugin({
-        resourceRegExp: /^\.\/createTestClient\.js$/,
-        contextRegExp: /viem\/_esm\/clients$/,
-      }),
-      new webpack.IgnorePlugin({
-        resourceRegExp: /^\.\/clients\/createTestClient\.js$/,
-        contextRegExp: /viem\/_esm$/,
-      }),
-      new webpack.IgnorePlugin({
-        resourceRegExp: /^\.\/test\.js$/,
-        contextRegExp: /viem\/_esm\/clients\/decorators$/,
-      }),
-      new webpack.IgnorePlugin({
-        resourceRegExp: /^\.\/clients\/decorators\/test\.js$/,
-        contextRegExp: /viem\/_esm$/,
+        checkResource(resource, context) {
+          // Ignore test-related modules in viem
+          if (context && context.includes('viem')) {
+            if (resource.includes('createTestClient') ||
+                resource.includes('/test.js') ||
+                resource.includes('/test/')) {
+              return true
+            }
+          }
+          return false
+        },
       })
-    )
-    
-    // Also use NormalModuleReplacementPlugin as backup
-    config.plugins.push(
-      new webpack.NormalModuleReplacementPlugin(
-        /viem\/_esm\/clients\/createTestClient/,
-        path.resolve(__dirname, 'lib/empty-module.js')
-      ),
-      new webpack.NormalModuleReplacementPlugin(
-        /viem\/_esm\/clients\/decorators\/test/,
-        path.resolve(__dirname, 'lib/empty-module.js')
-      )
     )
 
     return config
