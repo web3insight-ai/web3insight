@@ -1,19 +1,19 @@
 "use client"
 
-import { useRef } from "react"
 import { Download, Share2, Image as ImageIcon } from "lucide-react"
 import { useCardCapture } from "@/hooks/useCardCapture"
+import type { CardData } from "@/components/CardTemplate"
 
 interface CardActionButtonsProps {
-  cardRef: React.RefObject<HTMLElement>
+  cardData: CardData
   userName?: string
 }
 
-export function CardActionButtons({ cardRef, userName }: CardActionButtonsProps) {
+export function CardActionButtons({ cardData, userName }: CardActionButtonsProps) {
   const {
-    downloadImage,
-    shareImage,
-    saveToGallery,
+    downloadCardImage,
+    shareCardImage,
+    saveCardToGallery,
     isCapturing,
     error,
     canShare,
@@ -22,37 +22,20 @@ export function CardActionButtons({ cardRef, userName }: CardActionButtonsProps)
   } = useCardCapture({
     fileName: `${userName ? `${userName}-` : ""}monad-dev-card`,
     quality: 1,
-    backgroundColor: "#000000"
+    backgroundColor: "#090111"
   })
 
   const handleDownload = async () => {
-    if (!cardRef.current) return
     clearError()
-
-    // Temporarily force the card to show front face for screenshot
-    const cardElement = cardRef.current
-    const originalTransform = cardElement.style.transform
-
-    // Force display the front face
-    cardElement.style.transform = 'rotateY(0deg)'
-
-    // Wait for transform to apply
-    await new Promise(resolve => setTimeout(resolve, 100))
-
-    const success = await downloadImage(cardRef.current)
-
-    // Restore original transform
-    cardElement.style.transform = originalTransform
-
+    const success = await downloadCardImage(cardData)
     if (!success && error) {
       alert(`Download failed: ${error}`)
     }
   }
 
   const handleShare = async () => {
-    if (!cardRef.current) return
     clearError()
-    const success = await shareImage(cardRef.current, {
+    const success = await shareCardImage(cardData, {
       title: `${userName ? `${userName}'s` : "My"} Monad Dev Card`,
       text: "Check out this awesome developer card! 🚀"
     })
@@ -62,13 +45,8 @@ export function CardActionButtons({ cardRef, userName }: CardActionButtonsProps)
   }
 
   const handleSaveToGallery = async () => {
-    if (!cardRef.current) return
     clearError()
-
-    // Add a small delay to ensure the card is fully rendered
-    await new Promise(resolve => setTimeout(resolve, 100))
-
-    const success = await saveToGallery(cardRef.current)
+    const success = await saveCardToGallery(cardData)
     if (!success && error) {
       alert(`Save failed: ${error}`)
     }
