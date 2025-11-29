@@ -113,10 +113,19 @@ export default function CardPage({ params }: { params: Promise<{ user_id: string
               style={{
                 backfaceVisibility: "hidden",
                 WebkitBackfaceVisibility: "hidden",
+                transform: "rotateY(0deg)",
               }}
             >
               <div className="w-full h-full relative">
-                <div className="absolute top-0 left-0 right-0 p-[4%] flex items-center justify-between z-10">
+                <div
+                  className="absolute top-0 left-0 right-0 p-[4%] flex items-center justify-between z-10 ignore-screenshot"
+                  data-html2canvas-ignore="true"
+                  style={{
+                    opacity: isFlipped ? 0 : 1,
+                    pointerEvents: isFlipped ? 'none' : 'auto',
+                    transition: 'opacity 0.1s'
+                  }}
+                >
                   <Image
                     src="/images/monad.svg"
                     alt="MONAD"
@@ -156,8 +165,8 @@ export default function CardPage({ params }: { params: Promise<{ user_id: string
               className="absolute inset-0 w-full h-full overflow-hidden"
               style={{
                 backfaceVisibility: "hidden",
-                transform: "rotateY(180deg)",
                 WebkitBackfaceVisibility: "hidden",
+                transform: "rotateY(180deg)",
                 backgroundColor: "#090111"
               }}
               data-card-face="front"
