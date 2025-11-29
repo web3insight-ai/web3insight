@@ -416,6 +416,12 @@ export class UsersService {
       privyBind?.bind_openid || '',
     );
 
+    console.log(account);
+
+    if (account == null) {
+      return null;
+    }
+
     const githubAccount = account.linked_accounts.find(
       (acc) => acc.type === 'github_oauth',
     );
