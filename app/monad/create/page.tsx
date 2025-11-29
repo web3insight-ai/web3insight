@@ -25,7 +25,7 @@ function CreateForm() {
   } = useAuth()
 
   const [formData, setFormData] = useState({
-    avatar: "/images/user-avatar-sample.png",
+    avatar: "",
     name: "",
     github: "",
     twitter: "",
@@ -55,13 +55,27 @@ function CreateForm() {
   const [ecosystemsLoaded, setEcosystemsLoaded] = useState(false)
 
   useEffect(() => {
-
     if (authenticated) {
-      const avatar = user?.user_avatar || getDisplayAvatar()
+      console.log('=== Create Form 初始化数据 ===')
+      console.log('user 对象:', user)
+      console.log('user?.user_avatar:', user?.user_avatar)
+
+      // Get avatar from Privy - this should be the primary source
+      const privyAvatar = getDisplayAvatar()
+      console.log('Privy avatar (getDisplayAvatar):', privyAvatar)
+
+      // Use Privy avatar if user_avatar is not set or is default
+      let finalAvatar = privyAvatar
+      if (user?.user_avatar && user.user_avatar !== '/images/user-avatar-sample.png') {
+        finalAvatar = user.user_avatar
+      }
+
+      console.log('最终 avatar:', finalAvatar)
+      console.log('avatar 来源:', user?.user_avatar ? 'API' : 'Privy')
+
       const name = user?.nick_name || getDisplayName()
       const github = user?.github_login || getGithubUsername()
       const bio = user?.user_bio || ""
-
       const title = user?.user_title || ""
 
       let defaultBio = bio
@@ -76,23 +90,21 @@ function CreateForm() {
         }
       }
 
-
       // 从用户已保存的数据中读取生态系统选择，确保 Monad 始终在列表中
       let existingBuildingOn: string[] = ["Monad"]
       if (user?.user_custom_labels && Array.isArray(user.user_custom_labels) && user.user_custom_labels.length > 0) {
-        // 如果用户有保存的数据，使用保存的数据，但确保 Monad 在第一位
         const userLabels = user.user_custom_labels.filter(label => label !== 'Monad')
         existingBuildingOn = ['Monad', ...userLabels]
       }
 
-      // 获取 Twitter handle
       const twitter = user?.user_custom_x || ""
 
       setFormData(prev => {
-        if (prev.avatar !== avatar || prev.name !== name || prev.github !== github || prev.bio !== defaultBio || prev.title !== title || prev.twitter !== twitter || JSON.stringify(prev.buildingOn) !== JSON.stringify(existingBuildingOn)) {
+        if (prev.avatar !== finalAvatar || prev.name !== name || prev.github !== github || prev.bio !== defaultBio || prev.title !== title || prev.twitter !== twitter || JSON.stringify(prev.buildingOn) !== JSON.stringify(existingBuildingOn)) {
+          console.log('📝 更新 formData:', { avatar: finalAvatar, name, github, title })
           return {
             ...prev,
-            avatar,
+            avatar: finalAvatar,
             name,
             github,
             twitter,
@@ -180,7 +192,12 @@ function CreateForm() {
     }
   }, [formData.github, authenticated, user])
 
-  // Don't auto-trigger login, show login button instead
+  // Redirect to home if not authenticated
+  useEffect(() => {
+    if (!authLoading && !authenticated) {
+      router.push('/monad')
+    }
+  }, [authLoading, authenticated, router])
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click()
@@ -319,16 +336,31 @@ function CreateForm() {
       // 用户选择的生态系统
       const sortedBuildingOn = [...formData.buildingOn]
 
+      // 准备提交数据
+      console.log('=== 提交数据调试 ===')
+      console.log('formData.avatar:', formData.avatar)
+      console.log('是否为默认头像:', formData.avatar === '/images/user-avatar-sample.png')
 
-      const result = await updateUserProfile({
+      const profileData: any = {
         user_nick_name: formData.name,
-        user_avatar: formData.avatar,
         user_bio: formData.bio,
         user_title: formData.title,
         user_custom_x: formData.twitter,
         user_custom_labels: sortedBuildingOn,
         github_login: formData.github,
-      })
+      }
+
+      // Always include avatar if it exists and is not default
+      if (formData.avatar && formData.avatar !== '/images/user-avatar-sample.png') {
+        profileData.user_avatar = formData.avatar
+        console.log('✅ 包含 avatar 在提交数据中:', formData.avatar)
+      } else {
+        console.log('⚠️ 跳过 avatar（默认头像或为空）')
+      }
+
+      console.log('最终提交数据:', profileData)
+
+      const result = await updateUserProfile(profileData)
 
       if (result.success) {
         const userId = result.data?.id || user?.id
@@ -356,9 +388,7 @@ function CreateForm() {
     )
   }
 
-  // Redirect to home if not authenticated
   if (!authLoading && !authenticated) {
-    router.push('/monad')
     return null
   }
 
@@ -413,11 +443,15 @@ function CreateForm() {
                 style={{ borderColor: '#9F8EFF50' }}
               >
                 <Image
-                  src={formData.avatar || "/images/user-avatar-sample.png"}
+                  src={formData.avatar && formData.avatar.trim() !== '' ? formData.avatar : "/images/user-avatar-sample.png"}
                   alt="Avatar preview"
                   width={110}
                   height={110}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement
+                    target.src = "/images/user-avatar-sample.png"
+                  }}
                 />
               </button>
             </div>

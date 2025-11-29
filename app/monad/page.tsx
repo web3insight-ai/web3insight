@@ -8,7 +8,7 @@ import Image from "next/image"
 export default function ConnectPage() {
   const router = useRouter()
   const [isDev, setIsDev] = useState(true)
-  const { login, ready } = usePrivy()
+  const { login, ready, authenticated } = usePrivy()
 
   // Initialize and save user type to localStorage on mount
   useEffect(() => {
@@ -17,6 +17,13 @@ export default function ConnectPage() {
       localStorage.setItem('userType', 'dev')
     }
   }, [])
+
+  // Redirect to create page if already logged in
+  useEffect(() => {
+    if (ready && authenticated) {
+      router.push('/monad/create')
+    }
+  }, [ready, authenticated, router])
 
   // Update localStorage whenever isDev changes
   const handleTypeChange = (isDevOption: boolean) => {
