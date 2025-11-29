@@ -59,7 +59,7 @@ const MonadCardFront = forwardRef<HTMLDivElement, MonadCardFrontProps>(
                 style={{ height: '72.7%' }}
               >
                 <span
-                  className="text-white text-center line-clamp-1 print:!text-[1.8em] print:leading-tight print:font-bold"
+                  className="text-white text-center line-clamp-1 print:text-[1.8em]! print:leading-tight print:font-bold"
                   style={{
                     fontFamily: "'DM Sans', sans-serif",
                     fontSize: '0.9em',
@@ -102,28 +102,23 @@ const MonadCardFront = forwardRef<HTMLDivElement, MonadCardFrontProps>(
           </div>
 
           <h2
-            className="font-bold text-center text-white tracking-wide mb-[1%] print:text-[128em] print:mb-[4%]"
-            style={{ fontFamily: "'DM Mono', monospace", fontSize: '2.2em' }}
+            className="font-bold text-center text-white tracking-wide mb-[1%] text-[2.2em] print:text-[16px] print:mb-[0.3mm]"
+            style={{ fontFamily: "'DM Mono', monospace" }}
           >
             {name}
           </h2>
 
           <p
-            className="text-center text-white px-[8%] line-clamp-2 leading-relaxed font-light print:text-[51em] print:mb-[3.5%] print:leading-relaxed"
+            className="text-center text-white px-[8%] line-clamp-2 leading-relaxed font-light text-[0.95em] print:text-[6px] print:text-balance"
             style={{
               fontFamily: "'DM Sans', sans-serif",
-              fontSize: '0.95em',
-              lineHeight: 1.6,
             }}
           >
             {bio}
           </p>
 
           {/* Social Links */}
-          <div
-            className="flex justify-center items-center gap-[3%] mt-[1.2%] px-[8%] print:text-[47em] print:mt-[4%]"
-            style={{ fontSize: '0.88em' }}
-          >
+          <div className="flex justify-center items-center gap-[3%] mt-[1.2%] px-[8%] text-[0.88em] print:text-[5px] print:mt-[0.5mm]">
             {twitter && (
               <>
                 <a
@@ -187,27 +182,26 @@ const MonadCardFront = forwardRef<HTMLDivElement, MonadCardFrontProps>(
           </div>
 
           {/* Building on Section */}
-          <div className="flex-1 flex flex-col print:justify-normal justify-center pb-[3%] pt-[5%] print:pt-[6%] print:pb-[6%]">
+          <div className="flex-1 flex flex-col print:justify-normal justify-center pb-[3%] pt-[5%] print:pt-[1mm] print:pb-[1mm] print:mt-[4mm]">
             {hasEcosystems ? (
               <div
                 className="rounded-3xl p-[5.5%] border border-gray-800/50 print:py-[6%] print:px-[4%] print:rounded-[3rem]"
                 style={{ backgroundColor: '#927EFF1A' }}
               >
                 <h3
-                  className="mb-[4.5%] font-semibold print:text-[60em] print:mb-[5%]"
-                  style={{ color: '#9F8EFF', fontSize: '1.1em' }}
+                  className="mb-[4.5%] font-semibold print:text-[6.5px] text-[1.1em] print:mb-[1mm]"
+                  style={{ color: '#9F8EFF' }}
                 >
                   Building on
                 </h3>
-                <div className="flex flex-wrap gap-[2.8%] print:gap-x-[3.5%] print:gap-y-[3.5%]">
+                <div className="flex flex-wrap gap-[2.8%] print:gap-[1.5mm]">
                   {buildingOn.map((item) => (
                     <span
                       key={item}
-                      className="px-[5.5%] py-[2.2%] rounded-full text-white font-medium mb-[2.2%] print:text-[45em] print:px-[6.5%] print:py-[3%] print:mb-0"
+                      className="px-[5.5%] py-[2.2%] rounded-full text-white font-medium mb-[2.2%] text-[0.95em] print:text-[6px] print:px-[6.5%] print:py-[3%] print:mb-0"
                       style={{
                         outline: '1px solid #9F8EFF',
                         outlineOffset: '-1px',
-                        fontSize: '0.95em',
                       }}
                     >
                       {item}
@@ -239,8 +233,8 @@ const MonadCardFront = forwardRef<HTMLDivElement, MonadCardFrontProps>(
               alt="Monad DevCard"
               width={180}
               height={24}
-              className="print:!h-[1.2em]"
-              style={{ height: '1.15em', width: 'auto', opacity: 0.9 }}
+              className="print:h-[2mm] h-[1.15em]"
+              style={{ width: 'auto', opacity: 0.9 }}
             />
           </div>
         </div>
