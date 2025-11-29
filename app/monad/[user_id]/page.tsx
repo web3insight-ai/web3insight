@@ -90,14 +90,15 @@ export default function CardPage({ params }: { params: Promise<{ user_id: string
 
   return (
     <div className="h-dvh w-full bg-black flex flex-col overflow-hidden items-center">
-      <div className="flex-1 w-full flex items-center justify-center py-4">
+      <div className="flex-1 w-full min-h-0 flex items-center justify-center py-2 sm:py-4">
         <div
           ref={cardRef}
-          className="relative w-full max-w-[min(95vw,calc((100vh-200px)*1701/2709))] h-auto cursor-pointer"
+          className="relative w-[min(90vw,calc((100vh-160px)*1701/2709))] h-auto cursor-pointer"
           onClick={() => setIsFlipped(!isFlipped)}
           style={{
             perspective: "1000px",
-            aspectRatio: "1701 / 2709"
+            aspectRatio: "1701 / 2709",
+            maxHeight: "calc(100vh - 160px)"
           }}
         >
           <div
@@ -116,7 +117,7 @@ export default function CardPage({ params }: { params: Promise<{ user_id: string
                 transform: "rotateY(0deg)",
               }}
             >
-              <div className="w-full h-full relative">
+              <div className="w-full h-full relative" style={{ fontSize: '1rem' }}>
                 <div
                   className="absolute top-0 left-0 right-0 p-[4%] flex items-center justify-between z-10 ignore-screenshot"
                   data-html2canvas-ignore="true"
@@ -131,16 +132,16 @@ export default function CardPage({ params }: { params: Promise<{ user_id: string
                     alt="MONAD"
                     width={100}
                     height={24}
-                    className="h-[clamp(18px,2.2vw,24px)] w-auto"
+                    style={{ height: '1.4em', width: 'auto' }}
                   />
-                  <div className="text-right text-gray-400" style={{ fontSize: 'clamp(11px, 1.3vw, 14px)' }}>
+                  <div className="text-right text-gray-400" style={{ fontSize: '0.82em' }}>
                     <div className="mb-0.5">Powered by</div>
                     <Image
                       src="/images/web3insight_logo.svg"
                       alt="Web3insight"
                       width={120}
                       height={24}
-                      className="h-[clamp(18px,2.2vw,24px)] w-auto"
+                      style={{ height: '1.4em', width: 'auto' }}
                     />
                   </div>
                 </div>
@@ -171,9 +172,9 @@ export default function CardPage({ params }: { params: Promise<{ user_id: string
               }}
               data-card-face="front"
             >
-              <div className="w-full h-full flex flex-col px-[5%] pt-[3.5%] pb-0">
+              <div className="w-full h-full flex flex-col px-[5%] pt-[3%] pb-0" style={{ fontSize: '1rem' }}>
                 {/* Title Badge */}
-                <div className="flex justify-center mb-[1.5%] relative">
+                <div className="flex justify-center mb-[1.2%] relative">
                   <div className="relative w-[70%]">
                     <Image
                       src="/images/title_bg.svg"
@@ -188,7 +189,7 @@ export default function CardPage({ params }: { params: Promise<{ user_id: string
                         className="text-white text-center line-clamp-1"
                         style={{
                           fontFamily: "'DM Sans', sans-serif",
-                          fontSize: 'clamp(14px, 1.8vw, 18px)',
+                          fontSize: '0.9em',
                           fontWeight: 700,
                           lineHeight: 1.4,
                         }}
@@ -200,7 +201,7 @@ export default function CardPage({ params }: { params: Promise<{ user_id: string
                 </div>
 
                 {/* Avatar */}
-                <div className="flex justify-center mb-[2%]">
+                <div className="flex justify-center mb-[1.5%]">
                   <div className="w-[25%] aspect-square rounded-full p-[2px]" style={{ background: 'linear-gradient(135deg, #9F8EFF 0%, #EC4899 50%, #22D3EE 100%)' }}>
                     <div
                       className={`w-full h-full rounded-full overflow-hidden ${isOwnCard && authenticated ? 'cursor-pointer' : ''}`}
@@ -222,16 +223,16 @@ export default function CardPage({ params }: { params: Promise<{ user_id: string
                   </div>
                 </div>
 
-                <h2 className="font-bold text-center text-white tracking-wide mb-[1.2%]" style={{ fontFamily: "'DM Mono', monospace", fontSize: 'clamp(32px, 4.5vw, 48px)' }}>
+                <h2 className="font-bold text-center text-white tracking-wide mb-[1%]" style={{ fontFamily: "'DM Mono', monospace", fontSize: '2.8em' }}>
                   {name}
                 </h2>
 
-                <p className="text-center text-white px-[8%] line-clamp-2 leading-relaxed font-light" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 'clamp(13px, 1.6vw, 16px)', lineHeight: 1.6 }}>
+                <p className="text-center text-white px-[8%] line-clamp-2 leading-relaxed font-light" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.95em', lineHeight: 1.6 }}>
                   {bio}
                 </p>
 
                 {/* Social Links */}
-                <div className="flex justify-center items-center gap-[3%] mt-[1.5%] mb-[1%]" style={{ fontSize: 'clamp(12px, 1.4vw, 15px)' }}>
+                <div className="flex justify-center items-center gap-[3%] mt-[1.2%]" style={{ fontSize: '0.88em' }}>
                   {twitter && (
                     <>
                       <a
@@ -243,7 +244,7 @@ export default function CardPage({ params }: { params: Promise<{ user_id: string
                         onMouseEnter={(e) => e.currentTarget.style.color = '#BBA9FF'}
                         onMouseLeave={(e) => e.currentTarget.style.color = '#9F8EFF'}
                       >
-                        <svg className="text-white" viewBox="0 0 24 24" fill="currentColor" style={{ width: 'clamp(14px, 1.6vw, 18px)', height: 'clamp(14px, 1.6vw, 18px)' }}>
+                        <svg className="text-white" viewBox="0 0 24 24" fill="currentColor" style={{ width: '1em', height: '1em' }}>
                           <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                         </svg>
                         <span>@{twitter}</span>
@@ -265,7 +266,7 @@ export default function CardPage({ params }: { params: Promise<{ user_id: string
                         e.currentTarget.style.color = '#9F8EFF'
                       }}
                     >
-                      <svg className="text-white" viewBox="0 0 24 24" fill="currentColor" style={{ width: 'clamp(14px, 1.6vw, 18px)', height: 'clamp(14px, 1.6vw, 18px)' }}>
+                      <svg className="text-white" viewBox="0 0 24 24" fill="currentColor" style={{ width: '1em', height: '1em' }}>
                         <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
                       </svg>
                       <span>{github}</span>
@@ -277,16 +278,16 @@ export default function CardPage({ params }: { params: Promise<{ user_id: string
                 </div>
 
                 {/* Building on Section */}
-                <div className="flex-1 flex flex-col justify-end pb-[5%]">
+                <div className="flex-1 flex flex-col justify-center pb-[3%] pt-[5%]">
                   {hasEcosystems ? (
-                    <div className="rounded-3xl p-[5%] border border-gray-800/50" style={{ backgroundColor: '#927EFF1A' }}>
-                      <h3 className="mb-[4%] font-semibold" style={{ color: '#9F8EFF', fontSize: 'clamp(16px, 2vw, 20px)' }}>Building on</h3>
-                      <div className="flex flex-wrap gap-[2.5%]">
+                    <div className="rounded-3xl p-[5.5%] border border-gray-800/50" style={{ backgroundColor: '#927EFF1A' }}>
+                      <h3 className="mb-[4.5%] font-semibold" style={{ color: '#9F8EFF', fontSize: '1.1em' }}>Building on</h3>
+                      <div className="flex flex-wrap gap-[2.8%]">
                         {buildingOn.map((item) => (
                           <span
                             key={item}
-                            className="px-[5%] py-[2%] rounded-full text-white font-medium outline outline-1 outline-offset-[-1px] mb-[2%]"
-                            style={{ outlineColor: '#9F8EFF', fontSize: 'clamp(14px, 1.7vw, 17px)' }}
+                            className="px-[5.5%] py-[2.2%] rounded-full text-white font-medium outline outline-1 outline-offset-[-1px] mb-[2.2%]"
+                            style={{ outlineColor: '#9F8EFF', fontSize: '0.95em' }}
                           >
                             {item}
                           </span>
@@ -311,13 +312,13 @@ export default function CardPage({ params }: { params: Promise<{ user_id: string
                 </div>
 
                 {/* Footer Logo */}
-                <div className="flex justify-center items-center py-[2.5%]">
+                <div className="flex justify-center items-center py-[2%]">
                   <Image
                     src="/images/monad_footer.svg"
                     alt="Monad DevCard"
                     width={180}
                     height={24}
-                    className="h-[clamp(16px,2vw,20px)] w-auto opacity-90"
+                    style={{ height: '1.15em', width: 'auto', opacity: 0.9 }}
                   />
                 </div>
               </div>
@@ -326,8 +327,8 @@ export default function CardPage({ params }: { params: Promise<{ user_id: string
         </div>
       </div>
 
-      <div className="flex-shrink-0 flex flex-col items-center pb-6 pt-4 gap-3 ignore-screenshot" data-html2canvas-ignore="true">
-        <p className="text-gray-500 text-sm">Tap card to flip</p>
+      <div className="flex-shrink-0 w-full flex flex-col items-center pb-4 sm:pb-6 pt-2 sm:pt-4 gap-2 sm:gap-3 ignore-screenshot" data-html2canvas-ignore="true">
+        <p className="text-gray-500 text-xs sm:text-sm">Tap card to flip</p>
 
         <CardActionButtons
           cardRef={frontCardRef}

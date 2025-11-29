@@ -75,12 +75,12 @@ export function CardActionButtons({ cardRef, userName }: CardActionButtonsProps)
   }
 
   return (
-    <div className="flex gap-3">
+    <div className="flex gap-2 sm:gap-3">
       {/* Primary action - Download/Save based on platform */}
       <button
         onClick={isMobile ? handleSaveToGallery : handleDownload}
         disabled={isCapturing}
-        className="px-5 py-2.5 text-sm text-white rounded-full transition-all flex items-center gap-2 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm text-white rounded-full transition-all flex items-center gap-1.5 sm:gap-2 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
         style={{
           background: isCapturing
             ? 'linear-gradient(to right, rgba(94, 234, 212, 0.5), rgba(159, 142, 255, 0.5))'
@@ -99,18 +99,18 @@ export function CardActionButtons({ cardRef, userName }: CardActionButtonsProps)
       >
         {isCapturing ? (
           <>
-            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            Capturing...
+            <div className="w-3 sm:w-4 h-3 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            <span className="hidden xs:inline">Capturing...</span>
           </>
         ) : isMobile ? (
           <>
-            <ImageIcon className="w-4 h-4" />
-            Save Image
+            <ImageIcon className="w-3 sm:w-4 h-3 sm:h-4" />
+            <span>Save Image</span>
           </>
         ) : (
           <>
-            <Download className="w-4 h-4" />
-            Download
+            <Download className="w-3 sm:w-4 h-3 sm:h-4" />
+            <span>Download</span>
           </>
         )}
       </button>
@@ -120,20 +120,20 @@ export function CardActionButtons({ cardRef, userName }: CardActionButtonsProps)
         <button
           onClick={handleShare}
           disabled={isCapturing}
-          className="px-5 py-2.5 text-sm bg-gray-800/80 hover:bg-gray-700 text-white rounded-full transition-colors border border-gray-700 flex items-center gap-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm bg-gray-800/80 hover:bg-gray-700 text-white rounded-full transition-colors border border-gray-700 flex items-center gap-1.5 sm:gap-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <Share2 className="w-4 h-4" />
-          Share
+          <Share2 className="w-3 sm:w-4 h-3 sm:h-4" />
+          <span>Share</span>
         </button>
       ) : (
         !isMobile && (
           <button
             onClick={handleShare}
             disabled={isCapturing}
-            className="px-5 py-2.5 text-sm bg-gray-800/80 hover:bg-gray-700 text-white rounded-full transition-colors border border-gray-700 flex items-center gap-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm bg-gray-800/80 hover:bg-gray-700 text-white rounded-full transition-colors border border-gray-700 flex items-center gap-1.5 sm:gap-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Share2 className="w-4 h-4" />
-            Share
+            <Share2 className="w-3 sm:w-4 h-3 sm:h-4" />
+            <span>Share</span>
           </button>
         )
       )}
