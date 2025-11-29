@@ -182,7 +182,7 @@ export class UpdateUserReqDto {
   user_custom_labels?: Array<string>;
 
   @IsOptional()
-  @IsArray()
+  @IsString()
   user_title?: string;
 }
 
