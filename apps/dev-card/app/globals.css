@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -76,8 +76,8 @@
 
 @theme inline {
   /* Using DM Sans as the main font */
-  --font-sans: "DM Sans", "DM Sans Fallback", sans-serif;
-  --font-mono: "Geist Mono", "Geist Mono Fallback";
+  --font-sans: 'DM Sans', 'DM Sans Fallback', sans-serif;
+  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -128,4 +128,27 @@
 /* Card flip animation */
 .perspective-1000 {
   perspective: 1000px;
+}
+
+@page {
+  size: 54mm 86mm;
+  margin: 0; /* 尽量去掉边距，具体还看打印机设置 */
+}
+
+@media print {
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    width: 54mm;
+    height: 86mm;
+
+    font-family: 4px;
+  }
+
+  body {
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+  }
 }

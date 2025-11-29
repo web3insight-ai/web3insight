@@ -1,22 +1,26 @@
-"use client"
+'use client'
 
-import { useState, useEffect, useRef } from "react"
-import Image from "next/image"
-import { useAuth } from "@/hooks/useAuth"
-import { getUserById } from "@/services/auth"
-import { ProfileUpdateDialog } from "@/components/ProfileUpdateDialog"
-import { CardActionButtons } from "@/components/CardActionButtons"
-import { ApiUser } from "@/types/api"
-import LoadingScreen from "@/components/LoadingScreen"
+import { useState, useEffect, useRef } from 'react'
+import { useAuth } from '@/hooks/useAuth'
+import { getUserById } from '@/services/auth'
+import { ProfileUpdateDialog } from '@/components/ProfileUpdateDialog'
+import { CardActionButtons } from '@/components/CardActionButtons'
+import MonadCardBack from '@/components/MonadCardBack'
+import MonadCardFront from '@/components/MonadCardFront'
+import { ApiUser } from '@/types/api'
+import LoadingScreen from '@/components/LoadingScreen'
 
-export default function CardPage({ params }: { params: Promise<{ user_id: string }> }) {
+export default function CardPage({
+  params,
+}: {
+  params: Promise<{ user_id: string }>
+}) {
   const [isFlipped, setIsFlipped] = useState(true) // Default to front (user info)
   const [cardUser, setCardUser] = useState<ApiUser | null>(null)
   const [loading, setLoading] = useState(true)
   const [showProfileDialog, setShowProfileDialog] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
-  const { user: currentUser, authenticated } = useAuth()
-  const cardRef = useRef<HTMLDivElement>(null)
+  const { user: currentUser } = useAuth()
   const frontCardRef = useRef<HTMLDivElement>(null)
 
   const isOwnCard = currentUser?.id === userId
@@ -41,7 +45,7 @@ export default function CardPage({ params }: { params: Promise<{ user_id: string
           setCardUser(result.data)
         }
       } catch (error) {
-        console.error("Failed to fetch user:", error)
+        console.error('Failed to fetch user:', error)
       } finally {
         setLoading(false)
       }
@@ -49,7 +53,6 @@ export default function CardPage({ params }: { params: Promise<{ user_id: string
 
     fetchCardUser()
   }, [userId])
-
 
   const handleProfileUpdate = () => {
     if (isOwnCard && currentUser) {
@@ -69,285 +72,118 @@ export default function CardPage({ params }: { params: Promise<{ user_id: string
     )
   }
 
-  const name = cardUser.nick_name || "Anonymous"
-  const github = cardUser.github_login || ""
-  const bio = cardUser.user_bio || "Building the future of Web3!"
-  const avatar = cardUser.user_avatar || "/images/monad-icon.svg"
-  const twitter = cardUser.user_custom_x || ""
-  const title = cardUser.user_title || "BuilderHero @Monad"
+  const name = cardUser.nick_name || 'Anonymous'
+  const github = cardUser.github_login || ''
+  const bio = cardUser.user_bio || 'Building the future of Web3!'
+  const avatar = cardUser.user_avatar || '/images/monad-icon.svg'
+  const twitter = cardUser.user_custom_x || ''
+  const title = cardUser.user_title || 'BuilderHero @Monad'
 
   let buildingOn: string[] = []
-  if (cardUser.user_custom_labels && Array.isArray(cardUser.user_custom_labels) && cardUser.user_custom_labels.length > 0) {
+  if (
+    cardUser.user_custom_labels &&
+    Array.isArray(cardUser.user_custom_labels) &&
+    cardUser.user_custom_labels.length > 0
+  ) {
     buildingOn = [...cardUser.user_custom_labels]
   }
 
-  const hasEcosystems = buildingOn.length > 1
-
   return (
-    <div className="h-dvh w-full bg-black flex flex-col overflow-hidden items-center">
-      <div className="flex-1 w-full min-h-0 flex items-center justify-center py-2 sm:py-4">
-        <div
-          ref={cardRef}
-          className="relative w-[min(90vw,calc((100vh-160px)*1701/2709))] h-auto cursor-pointer"
-          onClick={() => setIsFlipped(!isFlipped)}
-          style={{
-            perspective: "1000px",
-            aspectRatio: "1701 / 2709",
-            maxHeight: "calc(100vh - 160px)"
-          }}
-        >
+    <div>
+      <div className="flex-col print:flex hidden">
+        <MonadCardBack className="h-dvh overflow-hidden bg-black" />
+        <MonadCardFront
+          className="h-dvh overflow-hidden"
+          name={name}
+          github={github}
+          twitter={twitter}
+          bio={bio}
+          avatar={avatar}
+          title={title}
+          buildingOn={buildingOn}
+        />
+      </div>
+      <div className="h-dvh w-full print:hidden bg-black flex flex-col overflow-hidden items-center">
+        <div className="flex-1 w-full min-h-0 flex items-center justify-center py-2 sm:py-4">
           <div
-            className="relative w-full h-full transition-transform duration-700"
+            className="relative w-[min(90vw,calc((100vh-160px)*1701/2709))] h-auto cursor-pointer"
+            onClick={() => setIsFlipped(!isFlipped)}
             style={{
-              transformStyle: "preserve-3d",
-              transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
+              perspective: '1000px',
+              aspectRatio: '1701 / 2709',
+              maxHeight: 'calc(100vh - 160px)',
             }}
           >
-            {/* Back side (default view - mascot) */}
             <div
-              className="absolute inset-0 w-full h-full overflow-hidden bg-black"
+              className="relative w-full h-full transition-transform duration-700"
               style={{
-                backfaceVisibility: "hidden",
-                WebkitBackfaceVisibility: "hidden",
-                transform: "rotateY(0deg)",
+                transformStyle: 'preserve-3d',
+                transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
               }}
             >
-              <div className="w-full h-full relative" style={{ fontSize: '1rem' }}>
-                <div
-                  className="absolute top-0 left-0 right-0 p-[4%] flex items-center justify-between z-10 ignore-screenshot"
-                  data-html2canvas-ignore="true"
-                  style={{
-                    opacity: isFlipped ? 0 : 1,
-                    pointerEvents: isFlipped ? 'none' : 'auto',
-                    transition: 'opacity 0.1s'
-                  }}
-                >
-                  <Image
-                    src="/images/monad.svg"
-                    alt="MONAD"
-                    width={100}
-                    height={24}
-                    style={{ height: '1.4em', width: 'auto' }}
-                  />
-                  <div className="text-right text-gray-400" style={{ fontSize: '0.82em' }}>
-                    <div className="mb-0.5">Powered by</div>
-                    <Image
-                      src="/images/web3insight_logo.svg"
-                      alt="Web3insight"
-                      width={120}
-                      height={24}
-                      style={{ height: '1.4em', width: 'auto' }}
-                    />
-                  </div>
-                </div>
+              {/* Back side (default view - mascot) */}
+              <MonadCardBack
+                isFlipped={isFlipped}
+                className="absolute inset-0 w-full h-full overflow-hidden bg-black"
+                style={{
+                  backfaceVisibility: 'hidden',
+                  WebkitBackfaceVisibility: 'hidden',
+                  transform: 'rotateY(0deg)',
+                }}
+              />
 
-                <Image
-                  src="/images/monad-mascot.png"
-                  alt="Monad mascot"
-                  fill
-                  className="object-cover"
-                  priority
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement
-                    target.style.display = 'none'
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Front side (user info) */}
-            <div
-              ref={frontCardRef}
-              className="absolute inset-0 w-full h-full overflow-hidden"
-              style={{
-                backfaceVisibility: "hidden",
-                WebkitBackfaceVisibility: "hidden",
-                transform: "rotateY(180deg)",
-                backgroundColor: "#090111"
-              }}
-              data-card-face="front"
-            >
-              <div className="w-full h-full flex flex-col px-[5%] pt-[3%] pb-0" style={{ fontSize: '1rem' }}>
-                {/* Title Badge */}
-                <div className="flex justify-center mb-[1.2%] relative">
-                  <div className="relative w-[70%]">
-                    <Image
-                      src="/images/title_bg.svg"
-                      alt=""
-                      width={340}
-                      height={58}
-                      priority
-                      className="w-full h-auto"
-                    />
-                    <div className="absolute top-0 left-0 right-0 flex items-center justify-center px-[10%]" style={{ height: '72.7%' }}>
-                      <span
-                        className="text-white text-center line-clamp-1"
-                        style={{
-                          fontFamily: "'DM Sans', sans-serif",
-                          fontSize: '0.9em',
-                          fontWeight: 700,
-                          lineHeight: 1.4,
-                        }}
-                      >
-                        {title}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Avatar */}
-                <div className="flex justify-center mb-[1.5%]">
-                  <div className="w-[25%] aspect-square rounded-full p-[2px]" style={{ background: 'linear-gradient(135deg, #9F8EFF 0%, #EC4899 50%, #22D3EE 100%)' }}>
-                    <div
-                      className="w-full h-full rounded-full overflow-hidden"
-                      style={{ backgroundColor: '#9F8EFF' }}
-                    >
-                      <Image
-                        src={avatar}
-                        alt="User avatar"
-                        width={200}
-                        height={200}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement
-                          target.src = "/images/monad-icon.svg"
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <h2 className="font-bold text-center text-white tracking-wide mb-[1%]" style={{ fontFamily: "'DM Mono', monospace", fontSize: '2.2em' }}>
-                  {name}
-                </h2>
-
-                <p className="text-center text-white px-[8%] line-clamp-2 leading-relaxed font-light" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.95em', lineHeight: 1.6 }}>
-                  {bio}
-                </p>
-
-                {/* Social Links */}
-                <div className="flex justify-center items-center gap-[3%] mt-[1.2%] px-[8%]" style={{ fontSize: '0.88em' }}>
-                  {twitter && (
-                    <>
-                      <a
-                        href={`https://twitter.com/${twitter}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 transition-colors overflow-hidden"
-                        style={{ color: '#9F8EFF', maxWidth: github ? '45%' : '90%' }}
-                        onMouseEnter={(e) => e.currentTarget.style.color = '#BBA9FF'}
-                        onMouseLeave={(e) => e.currentTarget.style.color = '#9F8EFF'}
-                      >
-                        <svg className="text-white flex-shrink-0" viewBox="0 0 24 24" fill="currentColor" style={{ width: '1em', height: '1em' }}>
-                          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                        </svg>
-                        <span className="truncate">@{twitter}</span>
-                      </a>
-                      {github && <span className="text-gray-600 mx-1 flex-shrink-0">|</span>}
-                    </>
-                  )}
-                  {github && (
-                    <a
-                      href={`https://github.com/${github}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 transition-colors overflow-hidden"
-                      style={{ color: '#9F8EFF', maxWidth: twitter ? '45%' : '90%' }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.color = '#BBA9FF'
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.color = '#9F8EFF'
-                      }}
-                    >
-                      <svg className="text-white flex-shrink-0" viewBox="0 0 24 24" fill="currentColor" style={{ width: '1em', height: '1em' }}>
-                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                      </svg>
-                      <span className="truncate">{github}</span>
-                    </a>
-                  )}
-                  {!twitter && !github && (
-                    <div className="text-gray-500">Web3 Builder</div>
-                  )}
-                </div>
-
-                {/* Building on Section */}
-                <div className="flex-1 flex flex-col justify-center pb-[3%] pt-[5%]">
-                  {hasEcosystems ? (
-                    <div className="rounded-3xl p-[5.5%] border border-gray-800/50" style={{ backgroundColor: '#927EFF1A' }}>
-                      <h3 className="mb-[4.5%] font-semibold" style={{ color: '#9F8EFF', fontSize: '1.1em' }}>Building on</h3>
-                      <div className="flex flex-wrap gap-[2.8%]">
-                        {buildingOn.map((item) => (
-                          <span
-                            key={item}
-                            className="px-[5.5%] py-[2.2%] rounded-full text-white font-medium outline outline-1 outline-offset-[-1px] mb-[2.2%]"
-                            style={{ outlineColor: '#9F8EFF', fontSize: '0.95em' }}
-                          >
-                            {item}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex justify-center pb-[3%]">
-                      <Image
-                        src="/images/gmonad-bunny.png"
-                        alt="GMONAD bunny"
-                        width={300}
-                        height={350}
-                        className="object-contain w-[50%] h-auto"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement
-                          target.style.display = 'none'
-                        }}
-                      />
-                    </div>
-                  )}
-                </div>
-
-                {/* Footer Logo */}
-                <div className="flex justify-center items-center py-[2%]">
-                  <Image
-                    src="/images/monad_footer.svg"
-                    alt="Monad DevCard"
-                    width={180}
-                    height={24}
-                    style={{ height: '1.15em', width: 'auto', opacity: 0.9 }}
-                  />
-                </div>
-              </div>
+              {/* Front side (user info) */}
+              <MonadCardFront
+                ref={frontCardRef}
+                className="absolute inset-0 w-full h-full overflow-hidden"
+                style={{
+                  backfaceVisibility: 'hidden',
+                  WebkitBackfaceVisibility: 'hidden',
+                  transform: 'rotateY(180deg)',
+                }}
+                data-card-face="front"
+                name={name}
+                github={github}
+                twitter={twitter}
+                bio={bio}
+                avatar={avatar}
+                title={title}
+                buildingOn={buildingOn}
+              />
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="flex-shrink-0 w-full flex flex-col items-center pb-4 sm:pb-6 pt-2 sm:pt-4 gap-2 sm:gap-3 ignore-screenshot" data-html2canvas-ignore="true">
-        <p className="text-gray-500 text-xs sm:text-sm">Tap card to flip</p>
+        <div
+          className="shrink-0 w-full flex flex-col items-center pb-4 sm:pb-6 pt-2 sm:pt-4 gap-2 sm:gap-3 ignore-screenshot"
+          data-html2canvas-ignore="true"
+        >
+          <p className="text-gray-500 text-xs sm:text-sm">Tap card to flip</p>
 
-        <CardActionButtons
-          cardData={{
-            id: userId || undefined,
-            name,
-            github,
-            twitter,
-            bio,
-            avatar,
-            title,
-            buildingOn
-          }}
-          userName={cardUser?.nick_name || cardUser?.github_login || "user"}
+          <CardActionButtons
+            cardData={{
+              id: userId || undefined,
+              name,
+              github,
+              twitter,
+              bio,
+              avatar,
+              title,
+              buildingOn,
+            }}
+            userName={cardUser?.nick_name || cardUser?.github_login || 'user'}
+          />
+        </div>
+
+        <ProfileUpdateDialog
+          isOpen={showProfileDialog}
+          onClose={() => setShowProfileDialog(false)}
+          onUpdate={handleProfileUpdate}
+          currentName={cardUser.nick_name}
+          currentAvatar={cardUser.user_avatar}
+          currentBio={cardUser.user_bio}
         />
       </div>
-
-      <ProfileUpdateDialog
-        isOpen={showProfileDialog}
-        onClose={() => setShowProfileDialog(false)}
-        onUpdate={handleProfileUpdate}
-        currentName={cardUser.nick_name}
-        currentAvatar={cardUser.user_avatar}
-        currentBio={cardUser.user_bio}
-      />
     </div>
   )
 }
-
