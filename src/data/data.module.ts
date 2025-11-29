@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { InitDataService } from './services/init.services';
 import { DBModule } from '@/app/db/db.module';
 import { TotalService } from './services/total.services';
@@ -10,7 +10,7 @@ import { EcoService } from './services/eco.services';
 import { AuthModule } from '@/auth/auth.module';
 
 @Module({
-  imports: [DBModule, AuthModule],
+  imports: [DBModule, forwardRef(() => AuthModule)],
   providers: [
     InitDataService,
     TotalService,
