@@ -2,6 +2,7 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
+import LoadingScreen from "@/components/LoadingScreen"
 
 export default function Home() {
   const router = useRouter()
@@ -10,5 +11,5 @@ export default function Home() {
     router.push("/monad")
   }, [router])
 
-  return <div className="h-screen bg-black flex items-center justify-center text-white">Loading...</div>
+  return <LoadingScreen />
 }

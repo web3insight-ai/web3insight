@@ -7,22 +7,36 @@ import { getUserById } from "@/services/auth"
 import { ProfileUpdateDialog } from "@/components/ProfileUpdateDialog"
 import { CardActionButtons } from "@/components/CardActionButtons"
 import { ApiUser } from "@/types/api"
+import LoadingScreen from "@/components/LoadingScreen"
 
-export default function CardPage({ params }: { params: { user_id: string } }) {
+export default function CardPage({ params }: { params: Promise<{ user_id: string }> }) {
   const [isFlipped, setIsFlipped] = useState(false)
   const [cardUser, setCardUser] = useState<ApiUser | null>(null)
   const [loading, setLoading] = useState(true)
   const [showProfileDialog, setShowProfileDialog] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
   const { user: currentUser, authenticated } = useAuth()
   const cardRef = useRef<HTMLDivElement>(null)
+  const frontCardRef = useRef<HTMLDivElement>(null)
 
-  const isOwnCard = currentUser?.id === params.user_id
+  const isOwnCard = currentUser?.id === userId
+
+  useEffect(() => {
+    async function getParams() {
+      const resolvedParams = await params
+      setUserId(resolvedParams.user_id)
+    }
+    getParams()
+  }, [params])
 
   useEffect(() => {
     async function fetchCardUser() {
+      if (!userId) return
+
       try {
         setLoading(true)
-        const result = await getUserById(params.user_id)
+        const result = await getUserById(userId)
+
         if (result.success && result.data) {
           setCardUser(result.data)
         }
@@ -34,7 +48,7 @@ export default function CardPage({ params }: { params: { user_id: string } }) {
     }
 
     fetchCardUser()
-  }, [params.user_id])
+  }, [userId])
 
   const handleAvatarClick = () => {
     if (isOwnCard && authenticated) {
@@ -43,18 +57,13 @@ export default function CardPage({ params }: { params: { user_id: string } }) {
   }
 
   const handleProfileUpdate = () => {
-    // Refresh card user data
     if (isOwnCard && currentUser) {
       setCardUser(currentUser)
     }
   }
 
   if (loading) {
-    return (
-      <div className="h-dvh w-full bg-black flex items-center justify-center">
-        <div className="text-white">Loading...</div>
-      </div>
-    )
+    return <LoadingScreen />
   }
 
   if (!cardUser) {
@@ -65,26 +74,31 @@ export default function CardPage({ params }: { params: { user_id: string } }) {
     )
   }
 
-  // Card data from user
   const name = cardUser.nick_name || "Anonymous"
   const github = cardUser.github_login || ""
   const bio = cardUser.user_bio || "Building the future of Web3!"
   const avatar = cardUser.user_avatar || "/images/user-avatar-sample.png"
-  const twitter = cardUser.user_custom_x || "" // X (Twitter) handle
-  
-  // 从 user_custom_labels 获取生态系统
+  const twitter = cardUser.user_custom_x || ""
+
+  // Handle user_title - it might be an array or string from backend
+  let title = "BuilderHero @Monad"
+  if (cardUser.user_title) {
+    if (Array.isArray(cardUser.user_title) && cardUser.user_title.length > 0) {
+      title = cardUser.user_title[0]
+    } else if (typeof cardUser.user_title === 'string') {
+      title = cardUser.user_title
+    }
+  }
+
   let buildingOn: string[] = []
   if (cardUser.user_custom_labels && Array.isArray(cardUser.user_custom_labels) && cardUser.user_custom_labels.length > 0) {
     buildingOn = [...cardUser.user_custom_labels]
   }
-  
-  // 判断是否显示 Building on 区域：用户有 GitHub 绑定且有选择的生态系统
-  const hasGithubBinding = !!github
-  const hasEcosystems = hasGithubBinding && buildingOn.length > 0
+
+  const hasEcosystems = buildingOn.length > 1
 
   return (
     <div className="h-dvh w-full bg-black flex flex-col overflow-hidden md:items-center">
-      {/* Card container - takes all available space except bottom */}
       <div className="flex-1 w-full md:max-w-[420px] md:flex md:items-center md:justify-center">
         <div
           ref={cardRef}
@@ -105,7 +119,6 @@ export default function CardPage({ params }: { params: { user_id: string } }) {
               style={{ backfaceVisibility: "hidden" }}
             >
               <div className="w-full h-full bg-black relative">
-                {/* Top bar */}
                 <div className="absolute top-0 left-0 right-0 p-4 sm:p-6 flex items-center justify-between z-10">
                   <Image src="/images/monad.svg" alt="MONAD" width={80} height={20} className="h-5 w-auto" />
                   <div className="text-right text-xs sm:text-sm text-gray-400">
@@ -120,7 +133,6 @@ export default function CardPage({ params }: { params: { user_id: string } }) {
                   </div>
                 </div>
 
-                {/* Mascot */}
                 <Image
                   src="/images/monad-mascot.png"
                   alt="Monad mascot"
@@ -137,20 +149,21 @@ export default function CardPage({ params }: { params: { user_id: string } }) {
 
             {/* Front side (user info) */}
             <div
+              ref={frontCardRef}
               className="absolute inset-0 w-full h-full overflow-hidden bg-black"
               style={{
                 backfaceVisibility: "hidden",
                 transform: "rotateY(180deg)",
               }}
+              data-card-face="front"
             >
               <div className="w-full h-full flex flex-col px-5 pt-12 pb-0">
-                {/* BuilderHero Badge */}
+                {/* Title Badge */}
                 <div className="flex justify-center mb-6 relative">
                   <div className="relative w-full max-w-[340px]">
                     <div className="w-full px-6 py-2.5 rounded-full text-white text-base font-semibold text-center" style={{ background: 'linear-gradient(to right, #5EEAD4, #9F8EFF)' }}>
-                      BuilderHero @Monad
+                      {title}
                     </div>
-                    {/* Speech bubble tail */}
                     <div
                       className="absolute -bottom-2 right-12 w-4 h-4"
                       style={{
@@ -184,12 +197,10 @@ export default function CardPage({ params }: { params: { user_id: string } }) {
                   </div>
                 </div>
 
-                {/* Name - using DM Mono font */}
                 <h2 className="text-4xl font-bold text-center text-white tracking-wide" style={{ fontFamily: "'DM Mono', monospace" }}>
                   {name}
                 </h2>
 
-                {/* Bio */}
                 <p className="text-center text-white text-sm mt-3 px-6 line-clamp-2 leading-relaxed font-light" style={{ fontFamily: "'DM Sans', sans-serif" }}>
                   {bio}
                 </p>
@@ -240,31 +251,21 @@ export default function CardPage({ params }: { params: { user_id: string } }) {
                   )}
                 </div>
 
-                {/* Building on Section - centered vertically in remaining space */}
+                {/* Building on Section */}
                 <div className="flex-1 flex flex-col justify-center py-10">
                   {hasEcosystems ? (
                     <div className="bg-[#1C1C2E] rounded-2xl p-4 border border-gray-800/50 mx-2">
                       <h3 className="text-sm mb-2.5 font-medium" style={{ color: '#9F8EFF' }}>Building on</h3>
                       <div className="flex flex-wrap gap-2">
-                        {buildingOn.map((item, index) => (
+                        {buildingOn.map((item) => (
                           <span
                             key={item}
-                            className={`px-3 py-1 rounded-full text-xs text-white font-medium border-2 relative ${
-                              index === 0 && item === 'Monad' ? 'bg-gradient-to-r from-violet-500/20 to-slate-400/20' : ''
-                            }`}
-                            style={{ borderColor: '#9F8EFF' }}
+                            className="px-3 py-1 rounded-full text-xs text-white font-medium outline outline-1 outline-offset-[-1px]"
+                            style={{ outlineColor: '#9F8EFF' }}
                           >
                             {item}
-                            {index === 0 && item === 'Monad' && (
-                              <span className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-violet-500 to-slate-400 rounded-full flex items-center justify-center">
-                                <span className="text-white text-xs">✓</span>
-                              </span>
-                            )}
                           </span>
                         ))}
-                      </div>
-                      <div className="mt-2 text-xs text-gray-500 text-center">
-                        用户自定义生态标签 • Monad 优先
                       </div>
                     </div>
                   ) : (
@@ -284,7 +285,7 @@ export default function CardPage({ params }: { params: { user_id: string } }) {
                   )}
                 </div>
 
-                {/* Footer Logo - fixed at bottom */}
+                {/* Footer Logo */}
                 <div className="flex justify-center items-center h-12">
                   <Image
                     src="/images/monad_footer.svg"
@@ -300,19 +301,15 @@ export default function CardPage({ params }: { params: { user_id: string } }) {
         </div>
       </div>
 
-      {/* Bottom section - fixed height */}
-      <div className="flex-shrink-0 flex flex-col items-center pb-8 pt-4 gap-4">
-        {/* Tap card to flip */}
+      <div className="flex-shrink-0 flex flex-col items-center pb-8 pt-4 gap-4 ignore-screenshot" data-html2canvas-ignore="true">
         <p className="text-gray-500 text-sm">Tap card to flip</p>
 
-        {/* Action Buttons */}
-        <CardActionButtons 
-          cardRef={cardRef} 
+        <CardActionButtons
+          cardRef={frontCardRef}
           userName={cardUser?.nick_name || cardUser?.github_login || "user"}
         />
       </div>
 
-      {/* Profile Update Dialog */}
       <ProfileUpdateDialog
         isOpen={showProfileDialog}
         onClose={() => setShowProfileDialog(false)}
@@ -324,3 +321,4 @@ export default function CardPage({ params }: { params: { user_id: string } }) {
     </div>
   )
 }
+

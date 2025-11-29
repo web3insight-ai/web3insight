@@ -12,7 +12,7 @@ class HttpClient {
     options: RequestInit = {}
   ): Promise<ResponseResult<T>> {
     const fullURL = this.baseURL ? `${this.baseURL}${url}` : url
-    
+
     try {
       const response = await fetch(fullURL, {
         headers: {
@@ -23,7 +23,7 @@ class HttpClient {
       })
 
       const data = await response.json()
-      
+
       if (!response.ok) {
         return {
           success: false,
@@ -33,6 +33,12 @@ class HttpClient {
         }
       }
 
+      // 如果 API 响应已经是 ResponseResult 格式（包含 success 字段），直接返回
+      if (data && typeof data === 'object' && 'success' in data) {
+        return data as ResponseResult<T>
+      }
+
+      // 否则包装成 ResponseResult 格式
       return {
         success: true,
         code: "200",

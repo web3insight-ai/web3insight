@@ -23,7 +23,7 @@ export function useCardCapture(options: UseCardCaptureOptions = {}) {
   const canShare = typeof navigator !== "undefined" && "share" in navigator
 
   // Check if we're on a mobile device
-  const isMobile = typeof navigator !== "undefined" && 
+  const isMobile = typeof navigator !== "undefined" &&
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
 
   const captureElement = useCallback(async (element: HTMLElement): Promise<Blob | null> => {
@@ -51,34 +51,57 @@ export function useCardCapture(options: UseCardCaptureOptions = {}) {
       // Wait a bit for any animations to complete
       await new Promise(resolve => setTimeout(resolve, 200))
 
+      // Fixed output dimensions for card (86mm × 54mm at 300 DPI = 2709 × 1701px)
+      const outputWidth = 2709
+      const outputHeight = 1701
+
+      // Get the original element dimensions
+      const originalWidth = element.offsetWidth
+      const originalHeight = element.offsetHeight
+      const scaleX = outputWidth / originalWidth
+      const scaleY = outputHeight / originalHeight
+
       const canvas = await html2canvas(element, {
         quality,
         backgroundColor,
-        scale: window.devicePixelRatio || 2, // Use device pixel ratio for optimal quality
+        scale: 1,
         useCORS: true,
-        allowTaint: false,
-        foreignObjectRendering: true,
+        allowTaint: true, // Allow tainted canvas to avoid CORS issues
+        foreignObjectRendering: false,
         imageTimeout: 15000,
         removeContainer: true,
         logging: false,
-        width: element.offsetWidth,
-        height: element.offsetHeight,
-        // Ignore elements that might cause issues
-        ignoreElements: (element) => {
-          return element.classList?.contains('ignore-screenshot') || false
+        width: originalWidth,
+        height: originalHeight,
+        ignoreElements: (el) => {
+          return el.classList?.contains('ignore-screenshot') ||
+                 el.hasAttribute('data-html2canvas-ignore') ||
+                 false
         },
-        // Font handling
-        fontEmbedCSS: true,
-        // Better handling of CSS
-        windowWidth: element.offsetWidth,
-        windowHeight: element.offsetHeight,
       })
 
+      // Resize the canvas to the desired output dimensions
+      const outputCanvas = document.createElement('canvas')
+      outputCanvas.width = outputWidth
+      outputCanvas.height = outputHeight
+      const ctx = outputCanvas.getContext('2d')
+
+      if (ctx) {
+        // Fill background
+        ctx.fillStyle = backgroundColor
+        ctx.fillRect(0, 0, outputWidth, outputHeight)
+
+        // Draw the captured canvas scaled to fit
+        ctx.drawImage(canvas, 0, 0, originalWidth, originalHeight, 0, 0, outputWidth, outputHeight)
+      }
+
+      // Return blob from the scaled canvas
       return new Promise((resolve) => {
-        canvas.toBlob((blob) => {
+        outputCanvas.toBlob((blob) => {
           resolve(blob)
         }, "image/png", quality)
       })
+
     } catch (err) {
       console.error("Failed to capture element:", err)
       setError(err instanceof Error ? err.message : "Failed to capture image")
@@ -120,7 +143,7 @@ export function useCardCapture(options: UseCardCaptureOptions = {}) {
 
     try {
       const file = new File([blob], `${fileName}.png`, { type: "image/png" })
-      
+
       const shareOptions: ShareData = {
         title: shareData?.title || "My Monad Dev Card",
         text: shareData?.text || "Check out my developer card!",
@@ -158,7 +181,7 @@ export function useCardCapture(options: UseCardCaptureOptions = {}) {
           if (!blob) return false
 
           const file = new File([blob], `${fileName}.png`, { type: "image/png" })
-          
+
           // Try sharing with files (works on many mobile browsers)
           if (navigator.canShare && navigator.canShare({ files: [file] })) {
             await navigator.share({
@@ -172,21 +195,21 @@ export function useCardCapture(options: UseCardCaptureOptions = {}) {
           console.warn("Web Share API failed, falling back to download:", err)
         }
       }
-      
+
       // iOS Safari: Create a link that opens the image in a new tab
       // User can then long-press to save to photos
       const blob = await captureElement(element)
       if (!blob) return false
-      
+
       const url = URL.createObjectURL(blob)
       const link = document.createElement("a")
       link.href = url
       link.target = "_blank"
       link.download = `${fileName}.png`
-      
+
       // For mobile, we'll both download and open in new tab
       link.click()
-      
+
       // Also try to open in new window for iOS
       const newWindow = window.open(url, "_blank")
       if (newWindow) {
@@ -197,11 +220,11 @@ export function useCardCapture(options: UseCardCaptureOptions = {}) {
           }
         }, 1000)
       }
-      
+
       setTimeout(() => URL.revokeObjectURL(url), 10000)
       return true
     }
-    
+
     // Desktop fallback
     return downloadImage(element)
   }, [isMobile, canShare, captureElement, fileName, downloadImage])

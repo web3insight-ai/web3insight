@@ -18,7 +18,12 @@ export async function PUT(request: Request) {
 
     const profileData = await request.json()
 
-    // Update user profile using the backend token
+    const transformedData = {
+      ...profileData,
+      user_title: profileData.user_title
+        ? (Array.isArray(profileData.user_title) ? profileData.user_title : [profileData.user_title])
+        : []
+    }
     const response = await fetch(`${DATA_API_URL}/v1/auth/user`, {
       method: "POST",
       headers: {
@@ -26,7 +31,7 @@ export async function PUT(request: Request) {
         "Content-Type": "application/json",
         accept: "*/*",
       },
-      body: JSON.stringify(profileData),
+      body: JSON.stringify(transformedData),
     })
 
     if (!response.ok) {
@@ -42,30 +47,29 @@ export async function PUT(request: Request) {
 
     const userData = await response.json()
 
-    // 处理API返回的数据结构，支持嵌套的 profile 对象
     let processedUserData = userData
 
-    // 如果数据有嵌套的 profile 结构，展平它
     if (userData && userData.profile) {
       processedUserData = {
         id: userData.profile.user_id || userData.user_id,
         nick_name: userData.profile.user_nick_name,
         user_avatar: userData.profile.user_avatar,
         user_bio: userData.profile.user_bio,
+        user_title: Array.isArray(userData.profile.user_title) && userData.profile.user_title.length > 0
+          ? userData.profile.user_title[0]
+          : userData.profile.user_title || "",
         user_custom_x: userData.profile.user_custom_x,
         user_custom_labels: userData.profile.user_custom_labels,
         created_at: userData.profile.created_at,
         updated_at: userData.profile.updated_at,
-        // 保留原始的 profile 数据以备用
         profile: userData.profile,
         binds: userData.binds,
         role: userData.role
       }
     } else if (userData && !userData.id && userData.user_id) {
-      // 如果是扁平结构但使用 user_id 字段
       processedUserData = {
         ...userData,
-        id: userData.user_id  // 将 user_id 映射为 id
+        id: userData.user_id
       }
     }
 
