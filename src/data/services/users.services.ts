@@ -327,7 +327,30 @@ export class UsersService {
       return {};
     }
 
-    return analysis;
+    const ecoScore = (analysis.eco_score || {}) as any;
+    const allEcosystems = Array.isArray(ecoScore.ecosystems)
+      ? ecoScore.ecosystems
+      : [];
+
+    const ecosystemNames = allEcosystems
+      .map((ecosystem: any) => ecosystem?.ecosystem?.trim())
+      .filter((name: string | undefined | null): name is string => !!name);
+
+    const activeNames = await this.getActiveEcosystemNames(ecosystemNames);
+    const activeNameSet = new Set(activeNames);
+
+    const ecosystems = allEcosystems.filter((ecosystem: any) => {
+      const name = ecosystem?.ecosystem?.trim();
+      return name && activeNameSet.has(name);
+    });
+
+    return {
+      ...analysis,
+      eco_score: {
+        ...ecoScore,
+        ecosystems,
+      },
+    };
   }
 
   async getTopFormGithubUserName(username: string) {
@@ -355,6 +378,29 @@ export class UsersService {
     }
 
     return s;
+  }
+
+  private async getActiveEcosystemNames(names: string[]): Promise<string[]> {
+    const uniqueNames = Array.from(
+      new Set(
+        names
+          .map((name) => name?.trim())
+          .filter((name): name is string => !!name),
+      ),
+    );
+
+    if (uniqueNames.length === 0) {
+      return [];
+    }
+
+    const activeEcosystems = await this.db
+      .selectFrom('data.ecosystems')
+      .select(['name'])
+      .where('name', 'in', uniqueNames)
+      .where('active', '=', true)
+      .execute();
+
+    return activeEcosystems.map((ecosystem) => ecosystem.name);
   }
 
   private async getPrivyGithubUsername(uid: string): Promise<string | null> {
