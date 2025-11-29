@@ -180,6 +180,10 @@ export class UpdateUserReqDto {
   @IsOptional()
   @IsArray()
   user_custom_labels?: Array<string>;
+
+  @IsOptional()
+  @IsArray()
+  user_title?: string;
 }
 
 export class ReposCustomMarkReqDto {
