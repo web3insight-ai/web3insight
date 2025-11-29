@@ -45,9 +45,27 @@ export async function GET() {
 
     console.log("从 Web3Insight API 获取的用户数据:", userData)
 
-    // 处理API返回的数据结构，确保有正确的id字段
+    // 处理API返回的数据结构，支持嵌套的 profile 对象
     let processedUserData = userData
-    if (userData && !userData.id && userData.user_id) {
+
+    // 如果数据有嵌套的 profile 结构，展平它
+    if (userData && userData.profile) {
+      processedUserData = {
+        id: userData.profile.user_id || userData.user_id,
+        nick_name: userData.profile.user_nick_name,
+        user_avatar: userData.profile.user_avatar,
+        user_bio: userData.profile.user_bio,
+        user_custom_x: userData.profile.user_custom_x,
+        user_custom_labels: userData.profile.user_custom_labels,
+        created_at: userData.profile.created_at,
+        updated_at: userData.profile.updated_at,
+        // 保留原始的 profile 数据以备用
+        profile: userData.profile,
+        binds: userData.binds,
+        role: userData.role
+      }
+    } else if (userData && !userData.id && userData.user_id) {
+      // 如果是扁平结构但使用 user_id 字段
       processedUserData = {
         ...userData,
         id: userData.user_id  // 将 user_id 映射为 id

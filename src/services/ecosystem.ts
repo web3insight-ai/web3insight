@@ -13,13 +13,15 @@ export interface UserEcosystemData {
 }
 
 export interface GitHubUserData {
-  id: number
-  login: string
+  id?: number
+  login?: string
+  actor_id?: string
+  actor_login?: string
   name?: string
   bio?: string
-  public_repos: number
-  followers: number
-  following: number
+  public_repos?: number
+  followers?: number
+  following?: number
   repositories?: Array<{
     name: string
     description?: string
@@ -27,6 +29,11 @@ export interface GitHubUserData {
     topics?: string[]
   }>
   ecosystems?: string[]
+  eco_score?: {
+    ecosystems?: Array<{ ecosystem: string }>
+    total_score?: number
+    updated_at?: string
+  }
 }
 
 /**
@@ -54,13 +61,16 @@ export async function getUserEcosystems(
     // 如果有用户ID，调用 ID 接口
     if (githubUserId) {
       promises.push(
-        httpClient.get<GitHubUserData>(`/api/github/users/id/${githubUserId}`)
+        httpClient.get<any>(`/api/github/users/id/${githubUserId}`)
           .then(result => {
-            if (result.success && result.data) {
-              results.push(result.data)
-              console.log("✓ 通过 GitHub ID 获取到数据:", result.data.login)
+            console.log("📥 ID接口原始返回:", result)
+            // httpClient 返回的是包装后的 ResponseResult，其中 data 字段又是 API 路由返回的 ResponseResult
+            if (result.success && result.data && result.data.success && result.data.data) {
+              const userData = result.data.data as GitHubUserData
+              results.push(userData)
+              console.log("✓ 通过 GitHub ID 获取到数据:", userData.actor_login || userData.login)
             } else {
-              errors.push(`ID接口失败: ${result.message}`)
+              errors.push(`ID接口失败: ${result.message || result.data?.message}`)
             }
           })
           .catch(error => {
@@ -73,13 +83,16 @@ export async function getUserEcosystems(
     // 如果有用户名，调用用户名接口
     if (githubUsername) {
       promises.push(
-        httpClient.get<GitHubUserData>(`/api/github/users/username/${githubUsername}`)
+        httpClient.get<any>(`/api/github/users/username/${githubUsername}`)
           .then(result => {
-            if (result.success && result.data) {
-              results.push(result.data)
-              console.log("✓ 通过 GitHub username 获取到数据:", result.data.login)
+            console.log("📥 Username接口原始返回:", result)
+            // httpClient 返回的是包装后的 ResponseResult，其中 data 字段又是 API 路由返回的 ResponseResult
+            if (result.success && result.data && result.data.success && result.data.data) {
+              const userData = result.data.data as GitHubUserData
+              results.push(userData)
+              console.log("✓ 通过 GitHub username 获取到数据:", userData.actor_login || userData.login)
             } else {
-              errors.push(`用户名接口失败: ${result.message}`)
+              errors.push(`用户名接口失败: ${result.message || result.data?.message}`)
             }
           })
           .catch(error => {
@@ -102,23 +115,28 @@ export async function getUserEcosystems(
 
     // 合并所有用户数据
     const mergedUserData = mergeGitHubUserData(results)
-    console.log("合并后的用户数据:", {
+    console.log("🔀 合并后的用户数据:", {
       login: mergedUserData.login,
       repositoriesCount: mergedUserData.repositories?.length || 0,
-      ecosystemsCount: mergedUserData.ecosystems?.length || 0
+      ecosystemsCount: mergedUserData.ecosystems?.length || 0,
+      ecosystemsList: mergedUserData.ecosystems
     })
 
     // 从合并后的用户数据中提取生态系统信息
     const ecosystems = extractEcosystemsFromUserData(mergedUserData)
+    console.log("🎯 最终提取的生态系统列表:", ecosystems)
+
+    const resultData = {
+      ecosystems,
+      repositories: mergedUserData.repositories || []
+    }
+    console.log("📤 返回给前端的数据:", resultData)
 
     return {
       success: true,
       code: "200",
       message: `成功获取数据 (调用了${results.length}个接口)`,
-      data: {
-        ecosystems,
-        repositories: mergedUserData.repositories || []
-      }
+      data: resultData
     }
   } catch (error) {
     console.error("获取用户生态系统数据失败:", error)
@@ -138,25 +156,36 @@ function extractEcosystemsFromUserData(userData: GitHubUserData): string[] {
 
   // 如果API直接返回了生态系统数据
   if (userData.ecosystems && Array.isArray(userData.ecosystems)) {
+    console.log("📋 从API获取的生态系统数据:", userData.ecosystems)
     userData.ecosystems.forEach(eco => ecosystems.add(eco))
+  } else {
+    console.log("⚠️ API未返回生态系统数据")
   }
 
-  // 从仓库信息中推断生态系统
+  // 从仓库信息中推断生态系统（作为补充）
   if (userData.repositories && Array.isArray(userData.repositories)) {
     userData.repositories.forEach(repo => {
       // 根据仓库名称、描述、topics等推断生态系统
       const ecosystemsFromRepo = inferEcosystemsFromRepository(repo)
+      if (ecosystemsFromRepo.length > 0) {
+        console.log(`  从仓库 ${repo.name} 推断出:`, ecosystemsFromRepo)
+      }
       ecosystemsFromRepo.forEach(eco => ecosystems.add(eco))
     })
   }
 
-  // 从用户bio中推断
+  // 从用户bio中推断（作为补充）
   if (userData.bio) {
     const ecosystemsFromBio = inferEcosystemsFromText(userData.bio)
+    if (ecosystemsFromBio.length > 0) {
+      console.log("  从bio推断出:", ecosystemsFromBio)
+    }
     ecosystemsFromBio.forEach(eco => ecosystems.add(eco))
   }
 
-  return Array.from(ecosystems)
+  const finalList = Array.from(ecosystems)
+  console.log("🏁 extractEcosystemsFromUserData 最终结果:", finalList)
+  return finalList
 }
 
 /**
@@ -225,8 +254,11 @@ function mergeGitHubUserData(userDataArray: GitHubUserData[]): GitHubUserData {
     return userDataArray[0]
   }
 
-  // 使用第一个作为基础数据
+  // 使用第一个作为基础数据，统一 login 字段
   const mergedData = { ...userDataArray[0] }
+  if (!mergedData.login && mergedData.actor_login) {
+    mergedData.login = mergedData.actor_login
+  }
 
   // 合并仓库信息
   const allRepositories: any[] = []
@@ -273,24 +305,29 @@ function mergeGitHubUserData(userDataArray: GitHubUserData[]): GitHubUserData {
 
 /**
  * 获取推荐的Building on选项
- * 保证至少包含Monad，然后添加用户实际参与的项目
+ * 只有当用户有生态系统数据时才返回，Monad始终在第一位，最多显示 top 10
  */
 export function getBuildingOnOptions(userEcosystems: string[]): string[] {
-  // 基础选项，Monad始终存在
+  // 如果用户没有任何生态系统数据，返回空数组
+  if (!userEcosystems || userEcosystems.length === 0) {
+    console.log("⚠️ 用户没有生态系统数据，不显示 Building on 模块")
+    return []
+  }
+
+  // Monad始终在第一位
   const baseOptions = ['Monad']
 
-  // 其他可能的选项
-  const availableOptions = [
-    'Starknet', 'Ethereum', 'DeFiHackLabs',
-    'Hardhat', 'WTF.Academy', 'OpenBuild'
-  ]
-
-  // 用户实际参与的项目（去重）
+  // 过滤掉一些不适合作为标签的生态系统名称（已在API层过滤）
+  // 只保留不重复的生态系统
   const userOptions = userEcosystems.filter(eco =>
-    !baseOptions.includes(eco) && availableOptions.includes(eco)
+    !baseOptions.includes(eco)
   )
 
-  // 合并选项，去重
-  const allOptions = [...baseOptions, ...userOptions, ...availableOptions]
+  // 合并选项：Monad在第一位，然后是用户参与的其他生态系统，最多取前 10 个
+  const allOptions = [...baseOptions, ...userOptions].slice(0, 10)
+
+  console.log("✅ 用户有生态系统数据，生成 Building on 选项 (top 10):", allOptions)
+
+  // 去重并返回
   return [...new Set(allOptions)]
 }
