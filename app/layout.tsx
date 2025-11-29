@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Analytics } from "@vercel/analytics/next"
 import { PrivyProvider } from "@/providers/PrivyProvider"
+import { env } from "@/env"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -21,6 +22,13 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+        {env.NEXT_PUBLIC_UMAMI_WEBSITE_ID && env.NEXT_PUBLIC_UMAMI_URL && (
+          <script
+            defer
+            src={`${env.NEXT_PUBLIC_UMAMI_URL}/script.js`}
+            data-website-id={env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
+          />
+        )}
       </head>
       <body className="antialiased font-sans" style={{ fontFamily: "'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" }}>
         <PrivyProvider>
