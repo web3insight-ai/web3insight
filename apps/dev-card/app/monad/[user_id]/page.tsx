@@ -38,8 +38,6 @@ export default function CardPage({ params }: { params: Promise<{ user_id: string
         const result = await getUserById(userId)
 
         if (result.success && result.data) {
-          console.log("Card user data:", result.data)
-          console.log("GitHub login:", result.data.github_login)
           setCardUser(result.data)
         }
       } catch (error) {
@@ -79,7 +77,7 @@ export default function CardPage({ params }: { params: Promise<{ user_id: string
   const name = cardUser.nick_name || "Anonymous"
   const github = cardUser.github_login || ""
   const bio = cardUser.user_bio || "Building the future of Web3!"
-  const avatar = cardUser.user_avatar || "/images/user-avatar-sample.png"
+  const avatar = cardUser.user_avatar || "/images/monad-icon.svg"
   const twitter = cardUser.user_custom_x || ""
   const title = cardUser.user_title || "BuilderHero @Monad"
 
@@ -196,7 +194,7 @@ export default function CardPage({ params }: { params: Promise<{ user_id: string
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement
-                          target.src = "/images/user-avatar-sample.png"
+                          target.src = "/images/monad-icon.svg"
                         }}
                       />
                     </div>
@@ -258,15 +256,15 @@ export default function CardPage({ params }: { params: Promise<{ user_id: string
                 </div>
 
                 {/* Building on Section */}
-                <div className="flex-1 flex flex-col justify-center py-10">
+                <div className="flex-1 flex flex-col justify-end pb-6">
                   {hasEcosystems ? (
-                    <div className="bg-[#1C1C2E] rounded-2xl p-4 border border-gray-800/50 mx-2">
-                      <h3 className="text-sm mb-2.5 font-medium" style={{ color: '#9F8EFF' }}>Building on</h3>
-                      <div className="flex flex-wrap gap-2">
+                    <div className="bg-[#1C1C2E] rounded-2xl p-6 border border-gray-800/50 mx-4">
+                      <h3 className="text-base mb-3 font-semibold" style={{ color: '#9F8EFF' }}>Building on</h3>
+                      <div className="flex flex-wrap gap-2.5">
                         {buildingOn.map((item) => (
                           <span
                             key={item}
-                            className="px-3 py-1 rounded-full text-xs text-white font-medium outline outline-1 outline-offset-[-1px]"
+                            className="px-4 py-1.5 rounded-full text-sm text-white font-medium outline outline-1 outline-offset-[-1px]"
                             style={{ outlineColor: '#9F8EFF' }}
                           >
                             {item}

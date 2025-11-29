@@ -13,10 +13,6 @@ export function useAuth() {
 
   useEffect(() => {
     async function fetchUser() {
-      console.log('=== useAuth fetchUser 调试 ===')
-      console.log('ready:', ready)
-      console.log('authenticated:', authenticated)
-
       if (!ready) return
 
       try {
@@ -24,24 +20,18 @@ export function useAuth() {
         setError(null)
 
         if (!authenticated) {
-          console.log('⚠️ 用户未认证，设置 user 为 null')
           setUser(null)
           return
         }
 
-        console.log('📡 调用 getCurrentUser API...')
         const result = await getCurrentUser()
-        console.log('📥 getCurrentUser 返回结果:', result)
 
         if (result.success) {
-          console.log('✅ 设置 user 数据:', result.data)
           setUser(result.data || null)
         } else {
-          console.error('❌ getCurrentUser 失败:', result.message)
           setError(result.message)
         }
       } catch (err) {
-        console.error('❌ fetchUser 异常:', err)
         setError(err instanceof Error ? err.message : "Failed to fetch user")
       } finally {
         setLoading(false)
@@ -52,77 +42,58 @@ export function useAuth() {
   }, [ready, authenticated])
 
   const getDisplayAvatar = () => {
-    console.log('=== getDisplayAvatar 调试 ===')
-    console.log('1. user?.user_avatar:', user?.user_avatar)
-
-    // 1. 优先使用 Web3Insight API 的头像（但跳过默认头像）
-    if (user?.user_avatar && user.user_avatar !== '/images/user-avatar-sample.png') {
-      console.log('✅ 使用 Web3Insight API 头像:', user.user_avatar)
+    // 1. 优先使用 Web3Insight API 的头像（但跳过默认 Monad 图标）
+    if (user?.user_avatar && user.user_avatar !== '/images/monad-icon.svg') {
       return user.user_avatar
     }
 
     // 2. 兜底：使用 Privy 的头像信息
     if (privyUser) {
-      console.log('2. privyUser:', privyUser)
-      console.log('3. linkedAccounts:', privyUser.linkedAccounts)
-
       // GitHub 头像优先（尝试多个字段）
       const githubAccount = privyUser.linkedAccounts.find(acc => acc.type === 'github_oauth' || acc.type === 'github')
-      console.log('4. githubAccount:', githubAccount)
 
       if (githubAccount) {
         // 尝试 profile.profilePictureUrl
         if ('profile' in githubAccount && githubAccount.profile?.profilePictureUrl) {
-          console.log('✅ 使用 GitHub profile.profilePictureUrl:', githubAccount.profile.profilePictureUrl)
           return githubAccount.profile.profilePictureUrl
         }
         // 尝试 profile.avatar_url
         if ('profile' in githubAccount && githubAccount.profile?.avatar_url) {
-          console.log('✅ 使用 GitHub profile.avatar_url:', githubAccount.profile.avatar_url)
           return githubAccount.profile.avatar_url
         }
         // 尝试 profile.picture
         if ('profile' in githubAccount && githubAccount.profile?.picture) {
-          console.log('✅ 使用 GitHub profile.picture:', githubAccount.profile.picture)
           return githubAccount.profile.picture
         }
         // 尝试根据 GitHub username 构建 avatar URL
         if (githubAccount.username || ('profile' in githubAccount && githubAccount.profile?.username)) {
           const username = githubAccount.username || githubAccount.profile?.username
-          const avatarUrl = `https://github.com/${username}.png`
-          console.log('✅ 使用 GitHub username 构建头像:', avatarUrl)
-          return avatarUrl
+          return `https://github.com/${username}.png`
         }
       }
 
       // Google 头像次优先
       const googleAccount = privyUser.linkedAccounts.find(acc => acc.type === 'google_oauth' || acc.type === 'google')
-      console.log('5. googleAccount:', googleAccount)
 
       if (googleAccount) {
         if ('profile' in googleAccount && googleAccount.profile?.profilePictureUrl) {
-          console.log('✅ 使用 Google profile.profilePictureUrl:', googleAccount.profile.profilePictureUrl)
           return googleAccount.profile.profilePictureUrl
         }
         if ('profile' in googleAccount && googleAccount.profile?.picture) {
-          console.log('✅ 使用 Google profile.picture:', googleAccount.profile.picture)
           return googleAccount.profile.picture
         }
       }
 
       // 邮箱账户头像（如果有的话）
       const emailAccount = privyUser.linkedAccounts.find(acc => acc.type === 'email')
-      console.log('6. emailAccount:', emailAccount)
 
       if (emailAccount && 'profile' in emailAccount && emailAccount.profile?.profilePictureUrl) {
-        console.log('✅ 使用 Email profile.profilePictureUrl:', emailAccount.profile.profilePictureUrl)
         return emailAccount.profile.profilePictureUrl
       }
     }
 
-    // 3. 默认头像
-    console.log('⚠️ 使用默认头像')
-    return "/images/user-avatar-sample.png"
+    // 3. 默认使用 Monad 图标
+    return "/images/monad-icon.svg"
   }
 
   const getDisplayName = () => {

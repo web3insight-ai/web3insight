@@ -49,13 +49,13 @@ export function ProfileUpdateDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     try {
       setLoading(true)
       setError(null)
-      
+
       const updateData: UpdateUserProfileRequest = {}
-      
+
       if (formData.user_nick_name !== currentName) {
         updateData.user_nick_name = formData.user_nick_name
       }
@@ -65,9 +65,9 @@ export function ProfileUpdateDialog({
       if (formData.user_bio !== currentBio) {
         updateData.user_bio = formData.user_bio
       }
-      
+
       const result = await updateUserProfile(updateData)
-      
+
       if (result.success) {
         onUpdate()
         onClose()
@@ -85,7 +85,7 @@ export function ProfileUpdateDialog({
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-zinc-900 rounded-2xl p-6 w-full max-w-md border border-gray-700">
         <h2 className="text-xl font-bold text-white mb-4">Update Profile</h2>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Avatar */}
           <div>
@@ -104,7 +104,7 @@ export function ProfileUpdateDialog({
               style={{ borderColor: '#9F8EFF50' }}
             >
               <img
-                src={formData.user_avatar || "/images/user-avatar-sample.png"}
+                src={formData.user_avatar || "/images/monad-icon.svg"}
                 alt="Avatar preview"
                 className="w-full h-full object-cover"
               />

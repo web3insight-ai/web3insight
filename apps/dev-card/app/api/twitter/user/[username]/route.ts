@@ -43,8 +43,17 @@ export async function GET(
 
     const twitterData = await response.json()
 
-    const user = twitterData?.data?.user?.result?.legacy
+    const result = twitterData?.data?.user?.result
+    const user = result?.legacy
     const bio = user?.description || ""
+
+    // Get avatar from the correct path: data.user.result.avatar.image_url
+    let avatarUrl = result?.avatar?.image_url || user?.profile_image_url_https || ""
+
+    // Replace _normal with _400x400 for higher quality image
+    if (avatarUrl && avatarUrl.includes('_normal.')) {
+      avatarUrl = avatarUrl.replace('_normal.', '_400x400.')
+    }
 
     return NextResponse.json({
       success: true,
@@ -53,8 +62,8 @@ export async function GET(
       data: {
         username,
         bio,
-        name: user?.name || "",
-        profileImageUrl: user?.profile_image_url_https || "",
+        name: result?.core?.name || user?.name || "",
+        avatar: avatarUrl,
       },
     })
   } catch (error) {
