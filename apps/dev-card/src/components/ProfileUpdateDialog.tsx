@@ -131,7 +131,7 @@ export function ProfileUpdateDialog({
               onChange={(e) => setFormData(prev => ({ ...prev, user_bio: e.target.value }))}
               rows={3}
               className="w-full bg-black/60 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#9F8EFF] resize-none"
-              placeholder="Tell us about yourself..."
+              placeholder="Share your bio (max 50 chars)"
             />
           </div>
 
