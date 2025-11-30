@@ -7,8 +7,6 @@ services:
       dockerfile: Dockerfile
     container_name: web3insight-ai
     restart: unless-stopped
-    ports:
-      - "3000:3000"
     environment:
       # Data API Configuration
       - DATA_API_URL=${DATA_API_URL:-https://api.web3insight.ai}
