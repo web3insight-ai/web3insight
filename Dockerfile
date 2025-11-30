@@ -2,8 +2,8 @@
 FROM node:20-alpine AS deps
 RUN apk add --no-cache libc6-compat python3 make g++
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Install pnpm (use specific version from package.json)
+RUN corepack enable && corepack prepare pnpm@9.4.0 --activate
 
 WORKDIR /app
 
@@ -17,30 +17,50 @@ RUN pnpm install --frozen-lockfile
 FROM node:20-alpine AS builder
 RUN apk add --no-cache libc6-compat python3 make g++
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Install pnpm (use specific version from package.json)
+RUN corepack enable && corepack prepare pnpm@9.4.0 --activate
 
 WORKDIR /app
 
-# Copy pnpm configuration first
-COPY .npmrc ./
+# Copy package files first (needed for pnpm to recognize the workspace)
+COPY package.json pnpm-lock.yaml .npmrc ./
 
 # Copy dependencies from deps stage
 COPY --from=deps /app/node_modules ./node_modules
+
+# Copy source code and configuration files
 COPY . .
 
+# Build arguments for environment variables
+ARG AI_API_TOKEN
+ARG AI_API_URL
+ARG DATA_API_TOKEN
+ARG DATA_API_URL
+ARG OPENDIGGER_URL
+ARG OSSINSIGHT_URL
+ARG SESSION_SECRET
+ARG NEXT_PUBLIC_GITHUB_CLIENT_ID
+ARG NEXT_PUBLIC_ORIGIN_CLIENT_ID
+ARG NEXT_PUBLIC_PRIVY_APP_ID
+ARG NEXT_PUBLIC_UMAMI_WEBSITE_ID
+ARG NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
+
 # Set environment variables for build
-# Skip environment validation during build if needed
 ENV SKIP_ENV_VALIDATION=true
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
-ENV DATA_API_URL=https://api.web3insight.ai
-ENV DATA_API_TOKEN=dummy_token
-ENV OPENDIGGER_URL=https://oss.x-lab.info
-ENV OSSINSIGHT_URL=https://api.ossinsight.io
-ENV SESSION_SECRET=dummy_secret
-ENV NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=dummy_id
-ENV NEXT_PUBLIC_GITHUB_CLIENT_ID=dummy_client_id
+ENV AI_API_TOKEN=${AI_API_TOKEN}
+ENV AI_API_URL=${AI_API_URL}
+ENV DATA_API_TOKEN=${DATA_API_TOKEN}
+ENV DATA_API_URL=${DATA_API_URL:-https://api.web3insight.ai}
+ENV OPENDIGGER_URL=${OPENDIGGER_URL:-https://oss.x-lab.info/open_digger}
+ENV OSSINSIGHT_URL=${OSSINSIGHT_URL:-https://api.ossinsight.io}
+ENV SESSION_SECRET=${SESSION_SECRET:-dummy_secret}
+ENV NEXT_PUBLIC_GITHUB_CLIENT_ID=${NEXT_PUBLIC_GITHUB_CLIENT_ID}
+ENV NEXT_PUBLIC_ORIGIN_CLIENT_ID=${NEXT_PUBLIC_ORIGIN_CLIENT_ID}
+ENV NEXT_PUBLIC_PRIVY_APP_ID=${NEXT_PUBLIC_PRIVY_APP_ID}
+ENV NEXT_PUBLIC_UMAMI_WEBSITE_ID=${NEXT_PUBLIC_UMAMI_WEBSITE_ID}
+ENV NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=${NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID}
 
 # Build the application
 RUN pnpm build
@@ -74,6 +94,18 @@ EXPOSE 3000
 
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
+
+# Runtime environment variables (these can be overridden at container start)
+# Server-side only variables
+ENV AI_API_TOKEN=""
+ENV AI_API_URL=""
+ENV DATA_API_TOKEN=""
+ENV DATA_API_URL="https://api.web3insight.ai"
+ENV OPENDIGGER_URL="https://oss.x-lab.info/open_digger"
+ENV OSSINSIGHT_URL="https://api.ossinsight.io"
+ENV SESSION_SECRET=""
+
+# Note: NEXT_PUBLIC_* variables are baked into the build and cannot be changed at runtime
 
 # Start the application
 CMD ["node", "server.js"]

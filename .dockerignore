@@ -68,3 +68,4 @@ PRPs/
 .claude/
 .knosys/
 tsconfig.tsbuildinfo
+# Note: tsconfig.json is needed for build, only ignoring the build cache

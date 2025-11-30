@@ -21,9 +21,6 @@ export const env = createEnv({
     // Session configuration
     SESSION_SECRET: z.string().min(1).default("default-secret-change-me"),
 
-    // Privy configuration
-    PRIVY_APP_SECRET: z.string().min(1).optional(),
-
     // AI Services
     OPENAI_BASE_URL: z.string().url().optional(),
     OPENAI_API_KEY: z.string().min(1).optional(),
@@ -56,9 +53,7 @@ export const env = createEnv({
     // Privy configuration (client-side)
     NEXT_PUBLIC_PRIVY_APP_ID: z.string().min(1).optional(),
     // Origin SDK configuration (client-side)
-    NEXT_PUBLIC_ORIGIN_API_URL: z.string().url().optional(),
     NEXT_PUBLIC_ORIGIN_CLIENT_ID: z.string().min(1).optional(),
-    NEXT_PUBLIC_ORIGIN_SUBGRAPH_URL: z.string().url().optional(),
     // Umami Analytics configuration
     NEXT_PUBLIC_UMAMI_WEBSITE_ID: z.string().min(1),
   },
@@ -74,7 +69,6 @@ export const env = createEnv({
     OPENDIGGER_URL: process.env.OPENDIGGER_URL,
     OSSINSIGHT_URL: process.env.OSSINSIGHT_URL,
     SESSION_SECRET: process.env.SESSION_SECRET,
-    PRIVY_APP_SECRET: process.env.PRIVY_APP_SECRET,
     OPENAI_BASE_URL: process.env.OPENAI_BASE_URL,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     AI_API_URL: process.env.AI_API_URL,
@@ -85,10 +79,7 @@ export const env = createEnv({
     // Client vars
     NEXT_PUBLIC_GITHUB_CLIENT_ID: process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID,
     NEXT_PUBLIC_PRIVY_APP_ID: process.env.NEXT_PUBLIC_PRIVY_APP_ID,
-    NEXT_PUBLIC_ORIGIN_API_URL: process.env.NEXT_PUBLIC_ORIGIN_API_URL,
     NEXT_PUBLIC_ORIGIN_CLIENT_ID: process.env.NEXT_PUBLIC_ORIGIN_CLIENT_ID,
-    NEXT_PUBLIC_ORIGIN_SUBGRAPH_URL:
-      process.env.NEXT_PUBLIC_ORIGIN_SUBGRAPH_URL,
     NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID:
       process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID,
     NEXT_PUBLIC_UMAMI_WEBSITE_ID: process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID,
