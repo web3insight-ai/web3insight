@@ -10,8 +10,8 @@ WORKDIR /app
 # Copy package files and pnpm configuration
 COPY package.json pnpm-lock.yaml .npmrc ./
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+# Install ALL dependencies (including devDependencies for build)
+RUN pnpm install --frozen-lockfile --prod=false
 
 # Stage 2: Build the application
 FROM node:20-alpine AS builder
@@ -36,14 +36,12 @@ ARG AI_API_TOKEN
 ARG AI_API_URL
 ARG DATA_API_TOKEN
 ARG DATA_API_URL
-ARG OPENDIGGER_URL
 ARG OSSINSIGHT_URL
 ARG SESSION_SECRET
 ARG NEXT_PUBLIC_GITHUB_CLIENT_ID
 ARG NEXT_PUBLIC_ORIGIN_CLIENT_ID
 ARG NEXT_PUBLIC_PRIVY_APP_ID
 ARG NEXT_PUBLIC_UMAMI_WEBSITE_ID
-ARG NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
 
 # Set environment variables for build
 ENV SKIP_ENV_VALIDATION=true
@@ -53,14 +51,12 @@ ENV AI_API_TOKEN=${AI_API_TOKEN}
 ENV AI_API_URL=${AI_API_URL}
 ENV DATA_API_TOKEN=${DATA_API_TOKEN}
 ENV DATA_API_URL=${DATA_API_URL:-https://api.web3insight.ai}
-ENV OPENDIGGER_URL=${OPENDIGGER_URL:-https://oss.x-lab.info/open_digger}
 ENV OSSINSIGHT_URL=${OSSINSIGHT_URL:-https://api.ossinsight.io}
 ENV SESSION_SECRET=${SESSION_SECRET:-dummy_secret}
 ENV NEXT_PUBLIC_GITHUB_CLIENT_ID=${NEXT_PUBLIC_GITHUB_CLIENT_ID}
 ENV NEXT_PUBLIC_ORIGIN_CLIENT_ID=${NEXT_PUBLIC_ORIGIN_CLIENT_ID}
 ENV NEXT_PUBLIC_PRIVY_APP_ID=${NEXT_PUBLIC_PRIVY_APP_ID}
 ENV NEXT_PUBLIC_UMAMI_WEBSITE_ID=${NEXT_PUBLIC_UMAMI_WEBSITE_ID}
-ENV NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=${NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID}
 
 # Build the application
 RUN pnpm build
@@ -101,7 +97,6 @@ ENV AI_API_TOKEN=""
 ENV AI_API_URL=""
 ENV DATA_API_TOKEN=""
 ENV DATA_API_URL="https://api.web3insight.ai"
-ENV OPENDIGGER_URL="https://oss.x-lab.info/open_digger"
 ENV OSSINSIGHT_URL="https://api.ossinsight.io"
 ENV SESSION_SECRET=""
 

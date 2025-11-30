@@ -46,7 +46,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const host = headersList.get("host") || "localhost:3000";
   const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
   const url = `${protocol}://${host}`;
-  
+
   const request = new Request(url, {
     headers: headersList,
   });

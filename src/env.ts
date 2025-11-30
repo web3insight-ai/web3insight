@@ -12,10 +12,6 @@ export const env = createEnv({
     DATA_API_TOKEN: z.string().min(1),
 
     // External service URLs
-    OPENDIGGER_URL: z
-      .string()
-      .url()
-      .default("https://oss.x-lab.info/open_digger"),
     OSSINSIGHT_URL: z.string().url().default("https://api.ossinsight.io"),
 
     // Session configuration
@@ -46,8 +42,6 @@ export const env = createEnv({
    * `NEXT_PUBLIC_`.
    */
   client: {
-    // WalletConnect configuration
-    NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: z.string().min(1),
     // GitHub OAuth configuration
     NEXT_PUBLIC_GITHUB_CLIENT_ID: z.string().min(1),
     // Privy configuration (client-side)
@@ -66,7 +60,6 @@ export const env = createEnv({
     // Server vars
     DATA_API_URL: process.env.DATA_API_URL,
     DATA_API_TOKEN: process.env.DATA_API_TOKEN,
-    OPENDIGGER_URL: process.env.OPENDIGGER_URL,
     OSSINSIGHT_URL: process.env.OSSINSIGHT_URL,
     SESSION_SECRET: process.env.SESSION_SECRET,
     OPENAI_BASE_URL: process.env.OPENAI_BASE_URL,
@@ -80,8 +73,6 @@ export const env = createEnv({
     NEXT_PUBLIC_GITHUB_CLIENT_ID: process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID,
     NEXT_PUBLIC_PRIVY_APP_ID: process.env.NEXT_PUBLIC_PRIVY_APP_ID,
     NEXT_PUBLIC_ORIGIN_CLIENT_ID: process.env.NEXT_PUBLIC_ORIGIN_CLIENT_ID,
-    NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID:
-      process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID,
     NEXT_PUBLIC_UMAMI_WEBSITE_ID: process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID,
   },
   /**

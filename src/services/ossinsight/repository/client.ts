@@ -5,25 +5,37 @@ import HttpClient, {
 import { env } from "@/env";
 import type { DataValue, ResponseResult } from "@/types";
 
+// Define the shape expected from OSS Insight API
+interface OssInsightApiResponse {
+  data?: unknown;
+  message?: string;
+  requestedAt?: string;
+  finishedAt?: string;
+  expiresAt?: string;
+  [key: string]: unknown;
+}
+
 // OSS Insight API returns data in a specific structure, so we need to normalize it
 function normalizeResponse<VT extends DataValue = DataValue>(
   apiResponse: unknown,
 ): ResponseResult<VT> {
-  // OSS Insight API returns: { data: actualData, requestedAt, finishedAt, etc. }
+  const resp = apiResponse as OssInsightApiResponse | null | undefined;
   if (
-    apiResponse &&
-    apiResponse.data !== undefined &&
-    apiResponse.data !== null
+    resp &&
+    typeof resp === "object" &&
+    "data" in resp &&
+    resp.data !== undefined &&
+    resp.data !== null
   ) {
     return {
       success: true,
       code: "200",
       message: "OSS Insight data retrieved successfully",
-      data: apiResponse.data as VT,
+      data: resp.data as VT,
       extra: {
-        requestedAt: apiResponse.requestedAt,
-        finishedAt: apiResponse.finishedAt,
-        expiresAt: apiResponse.expiresAt,
+        requestedAt: resp.requestedAt,
+        finishedAt: resp.finishedAt,
+        expiresAt: resp.expiresAt,
       },
     };
   }
@@ -31,7 +43,10 @@ function normalizeResponse<VT extends DataValue = DataValue>(
   return {
     success: false,
     code: "404",
-    message: apiResponse?.message || "No data received from OSS Insight API",
+    message:
+      (resp && typeof resp === "object" && "message" in resp && typeof resp.message === "string"
+        ? resp.message
+        : undefined) || "No data received from OSS Insight API",
     data: undefined as VT,
     extra: {},
   };
