@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  web3insight-ai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: web3insight-ai
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # Data API Configuration
+      - DATA_API_URL=${DATA_API_URL:-https://api.web3insight.ai}
+      - DATA_API_TOKEN=${DATA_API_TOKEN}
+      # HTTP Configuration
+      - HTTP_TIMEOUT=${HTTP_TIMEOUT:-30000}
+      # Node Environment
+      - NODE_ENV=production
+      # Umami Analytics Configuration
+      - NEXT_PUBLIC_UMAMI_WEBSITE_ID=${NEXT_PUBLIC_UMAMI_WEBSITE_ID}
+      # Server Configuration
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+    env_file:
+      - .env.local
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - web3insight-network
+    # Uncomment if you need to persist data
+    # volumes:
+    #   - ./data:/app/data
+
+networks:
+  web3insight-network:
+    driver: bridge
+
