@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  web3insight:
+    image: web3insight:latest
+    container_name: web3insight
+    restart: unless-stopped
+    environment:
+      # Data API Configuration
+      - DATA_API_URL=${DATA_API_URL:-https://api.web3insight.ai}
+      - DATA_API_TOKEN=${DATA_API_TOKEN}
+      # OpenDigger Configuration
+      - OPENDIGGER_URL=${OPENDIGGER_URL:-https://oss.x-lab.info}
+      # OSS Insight Configuration
+      - OSSINSIGHT_URL=${OSSINSIGHT_URL:-https://api.ossinsight.io}
+      # HTTP Configuration
+      - HTTP_TIMEOUT=${HTTP_TIMEOUT:-30000}
+      # Node Environment
+      - NODE_ENV=production
+      # Session Configuration
+      - SESSION_SECRET=${SESSION_SECRET}
+      # AI Services Configuration
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - AI_API_URL=${AI_API_URL}
+      - AI_API_TOKEN=${AI_API_TOKEN}
+      # Public Configuration (client-side)
+      - NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=${NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID}
+      - NEXT_PUBLIC_GITHUB_CLIENT_ID=${NEXT_PUBLIC_GITHUB_CLIENT_ID}
+      - NEXT_PUBLIC_PRIVY_APP_ID=${NEXT_PUBLIC_PRIVY_APP_ID}
+      - NEXT_PUBLIC_ORIGIN_API_URL=${NEXT_PUBLIC_ORIGIN_API_URL}
+      - NEXT_PUBLIC_ORIGIN_CLIENT_ID=${NEXT_PUBLIC_ORIGIN_CLIENT_ID}
+      - NEXT_PUBLIC_ORIGIN_SUBGRAPH_URL=${NEXT_PUBLIC_ORIGIN_SUBGRAPH_URL}
+      - NEXT_PUBLIC_UMAMI_WEBSITE_ID=${NEXT_PUBLIC_UMAMI_WEBSITE_ID}
+      - ORIGIN_API_KEY=${ORIGIN_API_KEY}
+      # Server Configuration
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+    env_file:
+      - .env.local
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - web3insight-network
+    # Uncomment if you need to persist data
+    # volumes:
+    #   - ./data:/app/data
+
+networks:
+  web3insight-network:
+    driver: bridge

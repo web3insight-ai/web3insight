@@ -4,6 +4,7 @@ import { env } from "./src/env";
 void env;
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   typescript: {
     ignoreBuildErrors: true, // Temporarily ignore for migration validation
   },
@@ -36,15 +37,7 @@ const nextConfig: NextConfig = {
       });
     }
 
-    // Prevent WalletConnect and indexedDB-dependent packages from being bundled on server
-    if (isServer) {
-      config.externals.push({
-        "@walletconnect/core": "@walletconnect/core",
-        "@walletconnect/sign-client": "@walletconnect/sign-client",
-        "@walletconnect/universal-provider": "@walletconnect/universal-provider",
-        "@walletconnect/web3wallet": "@walletconnect/web3wallet",
-      });
-    }
+    // Note: WalletConnect modules should be bundled for production build
 
     // Ignore optional dependencies that cause build issues
     config.plugins = config.plugins || [];
