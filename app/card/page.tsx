@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Image from "next/image"
 import { Download, Share2 } from "lucide-react"
+import { motion } from "framer-motion"
 
 export default function CardPage() {
   const [isFlipped, setIsFlipped] = useState(false)
@@ -15,19 +16,38 @@ export default function CardPage() {
   const hasEcosystems = true
 
   return (
-    <div className="h-dvh w-full bg-black flex flex-col overflow-hidden md:items-center">
+    <motion.div
+      className="h-dvh w-full bg-black flex flex-col overflow-hidden md:items-center"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5 }}
+    >
       {/* Card container - takes all available space except bottom */}
-      <div className="flex-1 w-full md:max-w-[420px] md:flex md:items-center md:justify-center">
-        <div
+      <motion.div
+        className="flex-1 w-full md:max-w-[420px] md:flex md:items-center md:justify-center"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.6 }}
+      >
+        <motion.div
           className="relative w-full h-full md:h-auto md:aspect-[54/86] cursor-pointer"
           onClick={() => setIsFlipped(!isFlipped)}
           style={{ perspective: "1000px" }}
+          whileHover={{ scale: 1.02 }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
         >
-          <div
-            className="relative w-full h-full transition-transform duration-700"
+          <motion.div
+            className="relative w-full h-full"
             style={{
               transformStyle: "preserve-3d",
-              transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
+            }}
+            animate={{
+              rotateY: isFlipped ? 180 : 0
+            }}
+            transition={{
+              duration: 0.7,
+              ease: "easeInOut"
             }}
           >
             {/* Back side (default view - mascot) */}
@@ -179,32 +199,58 @@ export default function CardPage() {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </motion.div>
+        </motion.div>
+      </motion.div>
 
       {/* Bottom section - fixed height */}
-      <div className="flex-shrink-0 flex flex-col items-center pb-8 pt-4 gap-4">
+      <motion.div
+        className="flex-shrink-0 flex flex-col items-center pb-8 pt-4 gap-4"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.4, duration: 0.6 }}
+      >
         {/* Tap card to flip */}
-        <p className="text-gray-500 text-sm">Tap card to flip</p>
+        <motion.p
+          className="text-gray-500 text-sm"
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        >
+          Tap card to flip
+        </motion.p>
 
         {/* Buttons */}
         <div className="flex gap-3">
-          <button
-            className="px-5 py-2.5 text-sm text-white rounded-full transition-all flex items-center gap-2 font-medium shadow-lg hover:shadow-xl"
+          <motion.button
+            className="px-5 py-2.5 text-sm text-white rounded-full flex items-center gap-2 font-medium shadow-lg"
             style={{ background: 'linear-gradient(to right, rgba(94, 234, 212, 0.8), rgba(159, 142, 255, 0.8))' }}
-            onMouseEnter={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #5EEAD4, #9F8EFF)'}
-            onMouseLeave={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgba(94, 234, 212, 0.8), rgba(159, 142, 255, 0.8))'}
+            whileHover={{
+              scale: 1.05,
+              y: -2,
+              boxShadow: "0px 10px 30px rgba(159, 142, 255, 0.5)",
+              background: 'linear-gradient(to right, #5EEAD4, #9F8EFF)'
+            }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
           >
             <Download className="w-4 h-4" />
             Download
-          </button>
-          <button className="px-5 py-2.5 text-sm bg-gray-800/80 hover:bg-gray-700 text-white rounded-full transition-colors border border-gray-700 flex items-center gap-2 font-medium">
+          </motion.button>
+          <motion.button
+            className="px-5 py-2.5 text-sm bg-gray-800/80 text-white rounded-full border border-gray-700 flex items-center gap-2 font-medium"
+            whileHover={{
+              scale: 1.05,
+              y: -2,
+              backgroundColor: 'rgb(55, 65, 81)'
+            }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+          >
             <Share2 className="w-4 h-4" />
             Share
-          </button>
+          </motion.button>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }

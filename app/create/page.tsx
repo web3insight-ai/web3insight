@@ -5,6 +5,7 @@ import type React from "react"
 import { useState, useRef, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Image from "next/image"
+import { motion } from "framer-motion"
 
 const BUILDING_ON_OPTIONS = ["Monad", "Starknet", "Ethereum", "DeFiHackLabs", "Hardhat", "WTF.Academy", "OpenBuild"]
 
@@ -63,8 +64,19 @@ function CreateForm() {
   }
 
   return (
-    <div className="min-h-dvh bg-black text-white flex flex-col overflow-auto relative">
-      <div className="absolute top-0 left-0 right-0 h-[100px] md:h-[120px] z-0">
+    <motion.div
+      className="min-h-dvh bg-black text-white flex flex-col overflow-auto relative"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <motion.div
+        className="absolute top-0 left-0 right-0 h-[100px] md:h-[120px] z-0"
+        initial={{ scale: 1.1 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 1, ease: "easeOut" }}
+      >
         <Image
           src="/images/bg-synthwave.jpeg"
           alt="Synthwave background"
@@ -73,9 +85,14 @@ function CreateForm() {
           priority
         />
         <div className="absolute inset-0 backdrop-blur-sm bg-black/30" />
-      </div>
+      </motion.div>
 
-      <header className="shrink-0 relative z-20 flex items-center justify-center gap-1.5 md:gap-2 py-5 md:py-6">
+      <motion.header
+        className="shrink-0 relative z-20 flex items-center justify-center gap-1.5 md:gap-2 py-5 md:py-6"
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.6 }}
+      >
         <Image src="/images/monad.svg" alt="MONAD" width={80} height={20} className="h-4 md:h-5 w-auto" />
         <Image src="/images/seperator.svg" alt="" width={10} height={10} className="h-2.5 w-auto opacity-50" />
         <Image src="/images/openbuild-logo.svg" alt="OpenBuild" width={80} height={20} className="h-4 md:h-5 w-auto" />
@@ -87,24 +104,37 @@ function CreateForm() {
           height={20}
           className="h-4 md:h-5 w-auto"
         />
-      </header>
+      </motion.header>
 
       <div className="flex-1 relative z-10 bg-black rounded-t-3xl -mt-2 flex flex-col items-center px-4 py-8 md:py-10">
-        <div className="w-full max-w-[340px] flex flex-col max-h-[calc(100dvh-140px)] justify-center">
+        <motion.div
+          className="w-full max-w-[340px] flex flex-col max-h-[calc(100dvh-140px)] justify-center"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.6 }}
+        >
           <h1 className="text-xl md:text-2xl font-bold text-center mb-5">Create Dev Card</h1>
 
           {/* Avatar + Name/Github row */}
-          <div className="flex gap-3 mb-3">
+          <motion.div
+            className="flex gap-3 mb-3"
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+          >
             {/* Avatar */}
             <div className="flex flex-col">
               <label className="text-sm text-white mb-1.5 font-medium">
                 Avatar <span className="text-red-400">*</span>
               </label>
               <input type="file" ref={fileInputRef} onChange={handleAvatarChange} accept="image/*" className="hidden" />
-              <button
+              <motion.button
                 onClick={handleAvatarClick}
-                className="w-[110px] h-[110px] bg-black/60 rounded-xl border-2 hover:border-[#9F8EFF] transition-colors overflow-hidden"
+                className="w-[110px] h-[110px] bg-black/60 rounded-xl border-2 overflow-hidden"
                 style={{ borderColor: '#9F8EFF50' }}
+                whileHover={{ borderColor: '#9F8EFF', scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 300 }}
               >
                 <Image
                   src={formData.avatar || "/images/monad-icon.svg"}
@@ -113,7 +143,7 @@ function CreateForm() {
                   height={110}
                   className="w-full h-full object-cover"
                 />
-              </button>
+              </motion.button>
             </div>
 
             {/* Name + Github */}
@@ -122,35 +152,44 @@ function CreateForm() {
                 <label className="block text-sm text-white mb-1.5 font-medium">
                   Name <span className="text-red-400">*</span>
                 </label>
-                <input
+                <motion.input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
                   className="w-full bg-black/60 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#9F8EFF]"
                   placeholder="Your name"
+                  whileFocus={{ scale: 1.02, borderColor: '#9F8EFF' }}
+                  transition={{ type: "spring", stiffness: 300 }}
                 />
               </div>
               <div>
                 <label className="block text-sm text-white mb-1.5 font-medium">
                   Github <span className="text-red-400">*</span>
                 </label>
-                <input
+                <motion.input
                   type="text"
                   value={formData.github}
                   onChange={(e) => setFormData((prev) => ({ ...prev, github: e.target.value }))}
                   className="w-full bg-black/60 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#9F8EFF]"
                   placeholder="@username"
+                  whileFocus={{ scale: 1.02, borderColor: '#9F8EFF' }}
+                  transition={{ type: "spring", stiffness: 300 }}
                 />
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Twitter */}
-          <div className="mb-3">
+          <motion.div
+            className="mb-3"
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.5, duration: 0.5 }}
+          >
             <label className="block text-sm text-white mb-1.5 font-medium">
               Twitter <span className="text-red-400">*</span>
             </label>
-            <input
+            <motion.input
               type="text"
               value={formData.twitter}
               onChange={(e) =>
@@ -161,70 +200,101 @@ function CreateForm() {
               }
               className="w-full bg-black/60 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#9F8EFF]"
               placeholder="@username"
+              whileFocus={{ scale: 1.02, borderColor: '#9F8EFF' }}
+              transition={{ type: "spring", stiffness: 300 }}
             />
-          </div>
+          </motion.div>
 
           {/* Title */}
-          <div className="mb-3">
+          <motion.div
+            className="mb-3"
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+          >
             <label className="block text-sm text-white mb-1.5 font-medium">
               Title <span className="text-red-400">*</span>
             </label>
-            <input
+            <motion.input
               type="text"
               value={formData.title}
               onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
               className="w-full bg-black/60 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#9F8EFF]"
               placeholder="Your title"
+              whileFocus={{ scale: 1.02, borderColor: '#9F8EFF' }}
+              transition={{ type: "spring", stiffness: 300 }}
             />
-          </div>
+          </motion.div>
 
           {/* Bio */}
-          <div className="mb-3">
+          <motion.div
+            className="mb-3"
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.7, duration: 0.5 }}
+          >
             <label className="block text-sm text-white mb-1.5 font-medium">Bio</label>
-            <textarea
+            <motion.textarea
               value={formData.bio}
               onChange={(e) => setFormData((prev) => ({ ...prev, bio: e.target.value }))}
               rows={4}
               className="w-full bg-black/60 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#9F8EFF] resize-none"
               placeholder="Tell us about yourself..."
+              whileFocus={{ scale: 1.02, borderColor: '#9F8EFF' }}
+              transition={{ type: "spring", stiffness: 300 }}
             />
-          </div>
+          </motion.div>
 
           {/* Building on */}
-          <div className="mb-4">
+          <motion.div
+            className="mb-4"
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.8, duration: 0.5 }}
+          >
             <label className="block text-sm text-white mb-2 font-medium">Building on</label>
             <div className="flex flex-wrap gap-2">
-              {BUILDING_ON_OPTIONS.map((item) => (
-                <button
+              {BUILDING_ON_OPTIONS.map((item, index) => (
+                <motion.button
                   key={item}
                   onClick={() => toggleBuildingOn(item)}
-                  className="px-3 py-1.5 rounded-full text-sm font-medium transition-all border-2"
+                  className="px-3 py-1.5 rounded-full text-sm font-medium border-2"
                   style={{
                     borderColor: formData.buildingOn.includes(item) ? '#9F8EFF' : 'rgba(255,255,255,0.1)',
                     color: 'white',
                   }}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.9 + index * 0.05, type: "spring", stiffness: 200 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   {item}
-                </button>
+                </motion.button>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Create button */}
-          <button
+          <motion.button
             onClick={handleCreate}
-            className="w-full h-12 px-9 py-2 rounded-[50px] shadow-[0px_0px_10px_0px_rgba(159,142,255,0.50)] outline outline-2 outline-offset-[-2px] outline-indigo-300 inline-flex justify-center items-center gap-2.5 mt-auto mb-4 hover:shadow-[0px_0px_20px_0px_rgba(159,142,255,0.70)] hover:-translate-y-0.5 transition-all"
+            className="w-full h-12 px-9 py-2 rounded-[50px] shadow-[0px_0px_10px_0px_rgba(159,142,255,0.50)] outline outline-2 outline-offset-[-2px] outline-indigo-300 inline-flex justify-center items-center gap-2.5 mt-auto mb-4"
             style={{
               background: 'linear-gradient(to right, #5EEAD4, #9F8EFF)'
             }}
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 1.1, duration: 0.5 }}
+            whileHover={{ scale: 1.02, y: -2, boxShadow: "0px 0px 20px 0px rgba(159,142,255,0.70)" }}
+            whileTap={{ scale: 0.98 }}
           >
             <span className="text-center text-white text-base font-bold leading-7" style={{ fontFamily: "'DM Sans', sans-serif" }}>
               Create
             </span>
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   )
 }
 

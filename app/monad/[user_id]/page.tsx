@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/hooks/useAuth'
 import { getUserById } from '@/services/auth'
 import { ProfileUpdateDialog } from '@/components/ProfileUpdateDialog'
@@ -89,7 +90,12 @@ export default function CardPage({
   }
 
   return (
-    <div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5 }}
+    >
       <div className="flex-col print:flex hidden">
         <MonadCardBack className="h-dvh overflow-hidden bg-black" />
         <MonadCardFront
@@ -104,8 +110,13 @@ export default function CardPage({
         />
       </div>
       <div className="h-dvh w-full print:hidden bg-black flex flex-col overflow-hidden items-center">
-        <div className="flex-1 w-full min-h-0 flex items-center justify-center py-2 sm:py-4">
-          <div
+        <motion.div
+          className="flex-1 w-full min-h-0 flex items-center justify-center py-2 sm:py-4"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+        >
+          <motion.div
             className="relative w-[min(90vw,calc((100vh-160px)*1701/2709))] h-auto cursor-pointer"
             onClick={() => setIsFlipped(!isFlipped)}
             style={{
@@ -113,12 +124,20 @@ export default function CardPage({
               aspectRatio: '1701 / 2709',
               maxHeight: 'calc(100vh - 160px)',
             }}
+            whileHover={{ scale: 1.02 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
           >
-            <div
-              className="relative w-full h-full transition-transform duration-700"
+            <motion.div
+              className="relative w-full h-full"
               style={{
                 transformStyle: 'preserve-3d',
-                transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+              }}
+              animate={{
+                rotateY: isFlipped ? 180 : 0
+              }}
+              transition={{
+                duration: 0.7,
+                ease: "easeInOut"
               }}
             >
               {/* Back side (default view - mascot) */}
@@ -150,15 +169,24 @@ export default function CardPage({
                 title={title}
                 buildingOn={buildingOn}
               />
-            </div>
-          </div>
-        </div>
+            </motion.div>
+          </motion.div>
+        </motion.div>
 
-        <div
+        <motion.div
           className="shrink-0 w-full flex flex-col items-center pb-4 sm:pb-6 pt-2 sm:pt-4 gap-2 sm:gap-3 ignore-screenshot"
           data-html2canvas-ignore="true"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.4, duration: 0.6 }}
         >
-          <p className="text-gray-500 text-xs sm:text-sm">Tap card to flip</p>
+          <motion.p
+            className="text-gray-500 text-xs sm:text-sm"
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          >
+            Tap card to flip
+          </motion.p>
 
           <CardActionButtons
             cardData={{
@@ -173,7 +201,7 @@ export default function CardPage({
             }}
             userName={cardUser?.nick_name || cardUser?.github_login || 'user'}
           />
-        </div>
+        </motion.div>
 
         <ProfileUpdateDialog
           isOpen={showProfileDialog}
@@ -184,6 +212,6 @@ export default function CardPage({
           currentBio={cardUser.user_bio}
         />
       </div>
-    </div>
+    </motion.div>
   )
 }
