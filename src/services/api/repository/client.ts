@@ -15,8 +15,10 @@ const baseHttpClient = new HttpClient({
   normalizer: normalizeRestfulResponse,
 });
 
-// Get centralized timeout value
-const httpTimeout = env.HTTP_TIMEOUT;
+// Get centralized timeout value and ensure it's a number
+const httpTimeout = typeof env.HTTP_TIMEOUT === 'number'
+  ? env.HTTP_TIMEOUT
+  : parseInt(String(env.HTTP_TIMEOUT), 10);
 
 // Create wrapper with timeout configuration
 const httpClient = {
