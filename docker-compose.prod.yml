@@ -5,21 +5,8 @@ services:
     image: web3insight-ai:latest
     container_name: web3insight-ai-prod
     restart: always
-    environment:
-      # Data API Configuration
-      - DATA_API_URL=${DATA_API_URL}
-      - DATA_API_TOKEN=${DATA_API_TOKEN}
-      # HTTP Configuration
-      - HTTP_TIMEOUT=${HTTP_TIMEOUT:-30000}
-      # Node Environment
-      - NODE_ENV=production
-      # Umami Analytics Configuration
-      - NEXT_PUBLIC_UMAMI_WEBSITE_ID=${NEXT_PUBLIC_UMAMI_WEBSITE_ID}
-      # Server Configuration
-      - PORT=3000
-      - HOSTNAME=0.0.0.0
     env_file:
-      - .env.production
+      - .env
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:3000/"]
       interval: 30s
