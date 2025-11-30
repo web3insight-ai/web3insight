@@ -149,7 +149,8 @@ function CountryDistributionChart({
     [formattedData],
   );
 
-  const pieColors = useMemo(() => ['#4F46E5', '#6366F1', '#818CF8', '#A5B4FC', '#C7D2FE'], []);
+  // Use website's consistent teal color scheme (matching other charts like RepositoryTrending)
+  const pieColors = useMemo(() => ['#0D9488', '#14B8A6', '#2DD4BF', '#5EEAD4', '#99F6E4'], []);
 
   const pieSeriesData = useMemo<PieDatum[]>(
     () => leaderboardData.map(item => ({
@@ -211,9 +212,9 @@ function CountryDistributionChart({
       min: 0,
       max: maxValue || 1,
       stops: [
-        [0, '#E0E7FF'],
-        [0.5, '#6366F1'],
-        [1, '#312E81'],
+        [0, '#CCFBF1'],      // teal-100 - lightest
+        [0.5, '#0D9488'],    // teal-600 - matches other charts
+        [1, '#134E4A'],      // teal-900 - darkest
       ],
     },
     series: [
@@ -223,12 +224,12 @@ function CountryDistributionChart({
         data: mapSeriesData as SeriesMapDataOptions[],
         mapData: mapDataWorld as unknown as SeriesMapDataOptions[],
         joinBy: ['iso-a2', 'code'],
-        borderColor: '#94A3B8',
+        borderColor: '#94A3B8',      // slate-400 - subtle borders
         borderWidth: 0.5,
-        nullColor: '#F8FAFC',
+        nullColor: '#F8FAFC',         // slate-50 - no data
         states: {
           hover: {
-            color: '#818CF8',
+            color: '#14B8A6',         // teal-500 - hover highlight
           },
         },
         dataLabels: {

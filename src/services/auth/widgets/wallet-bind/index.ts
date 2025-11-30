@@ -1,1 +1,0 @@
-export { WalletBindWidget } from './WalletBindWidget';

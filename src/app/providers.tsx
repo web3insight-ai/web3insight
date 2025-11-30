@@ -6,7 +6,6 @@ import { Provider as JotaiProvider } from "jotai";
 
 import NavigationProgress from "$/NavigationProgress";
 import ClientOnly from "$/ClientOnly";
-import { WalletProvider } from "@/providers/WalletProvider";
 import { PrivyProvider } from "@/providers/PrivyProvider";
 import { PrivyAuthSync } from "@/providers/PrivyAuthSync";
 
@@ -22,10 +21,8 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
             disableTransitionOnChange
           >
             <ClientOnly>
-              <WalletProvider>
-                <NavigationProgress />
-                {children}
-              </WalletProvider>
+              <NavigationProgress />
+              {children}
             </ClientOnly>
           </ThemeProvider>
         </NextUIProvider>
