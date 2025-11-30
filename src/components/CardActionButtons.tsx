@@ -18,7 +18,7 @@ export function CardActionButtons({ cardData, userName }: CardActionButtonsProps
       {/* Print button */}
       <button
         onClick={handlePrint}
-        className="px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm text-white rounded-full transition-all flex items-center gap-1.5 sm:gap-2 font-medium shadow-lg hover:shadow-xl"
+        className="hidden px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm text-white rounded-full transition-all flex items-center gap-1.5 sm:gap-2 font-medium shadow-lg hover:shadow-xl"
         style={{
           background: 'linear-gradient(to right, rgba(94, 234, 212, 0.8), rgba(159, 142, 255, 0.8))'
         }}
