@@ -5,6 +5,7 @@ import type React from "react"
 import { useState, useRef, Suspense, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
+import { motion, AnimatePresence } from "framer-motion"
 import { useAuth } from "@/hooks/useAuth"
 import { updateUserProfile } from "@/services/auth"
 import { getUserEcosystems, getBuildingOnOptions, type UserEcosystemData } from "@/services/ecosystem"
@@ -385,9 +386,20 @@ function CreateForm() {
   }
 
   return (
-    <div className="min-h-dvh bg-black text-white flex flex-col relative">
+    <motion.div
+      className="min-h-dvh bg-black text-white flex flex-col relative"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5 }}
+    >
       {/* Fixed Header with Background */}
-      <div className="sticky top-0 z-30 bg-black">
+      <motion.div
+        className="sticky top-0 z-30 bg-black"
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ type: "spring", stiffness: 100, damping: 20 }}
+      >
         <div className="relative h-[80px] md:h-[100px]">
           <Image
             src="/images/bg-synthwave.jpeg"
@@ -411,28 +423,41 @@ function CreateForm() {
             className="h-4 md:h-5 w-auto"
           />
         </header>
-      </div>
+      </motion.div>
 
       {/* Scrollable Content */}
       <div className="flex-1 bg-black overflow-auto">
         <div className="flex flex-col items-center px-4 py-6 min-h-full">
-          <div className="w-full max-w-[340px] flex flex-col">
+          <motion.div
+            className="w-full max-w-[340px] flex flex-col"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+          >
 
 
           <h1 className="text-xl md:text-2xl font-bold text-center mb-6">Create Dev Card</h1>
 
           {/* Avatar + Name/Github row */}
-          <div className="flex gap-3 mb-3">
+          <motion.div
+            className="flex gap-3 mb-3"
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+          >
             {/* Avatar */}
             <div className="flex flex-col">
               <label className="text-sm text-white mb-1.5 font-medium">
                 Avatar <span className="text-red-400">*</span>
               </label>
               <input type="file" ref={fileInputRef} onChange={handleAvatarChange} accept="image/*" className="hidden" />
-              <button
+              <motion.button
                 onClick={handleAvatarClick}
-                className="w-[110px] h-[110px] bg-black/60 rounded-xl border-2 hover:border-[#9F8EFF] transition-colors overflow-hidden"
+                className="w-[110px] h-[110px] bg-black/60 rounded-xl border-2 overflow-hidden"
                 style={{ borderColor: '#9F8EFF50' }}
+                whileHover={{ borderColor: '#9F8EFF', scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 300 }}
               >
                 <Image
                   src={formData.avatar && formData.avatar.trim() !== '' ? formData.avatar : "/images/monad-icon.svg"}
@@ -445,7 +470,7 @@ function CreateForm() {
                     target.src = "/images/monad-icon.svg"
                   }}
                 />
-              </button>
+              </motion.button>
             </div>
 
             {/* Name + Github */}
@@ -454,38 +479,47 @@ function CreateForm() {
                 <label className="block text-sm text-white mb-1.5 font-medium">
                   Name <span className="text-red-400">*</span>
                 </label>
-                <input
+                <motion.input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
                   className="w-full bg-black/60 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#9F8EFF]"
                   placeholder="Your name"
+                  whileFocus={{ scale: 1.02, borderColor: '#9F8EFF' }}
+                  transition={{ type: "spring", stiffness: 300 }}
                 />
               </div>
               <div>
                 <label className="block text-sm text-white mb-1.5 font-medium">
                   Github <span className="text-red-400">*</span>
                 </label>
-                <input
+                <motion.input
                   type="text"
                   value={formData.github}
                   onChange={(e) => setFormData((prev) => ({ ...prev, github: e.target.value }))}
                   disabled={isDev}
                   className="w-full bg-black/60 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#9F8EFF] disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="@username"
+                  whileFocus={{ scale: 1.02, borderColor: '#9F8EFF' }}
+                  transition={{ type: "spring", stiffness: 300 }}
                 />
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Twitter */}
-          <div className="mb-3">
+          <motion.div
+            className="mb-3"
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+          >
             <label className="block text-sm text-white mb-1.5 font-medium">
               Twitter
               {!isDev && <span className="text-red-400 ml-1">*</span>}
             </label>
             <div className="relative">
-              <input
+              <motion.input
                 type="text"
                 value={formData.twitter}
                 onChange={(e) => {
@@ -497,23 +531,32 @@ function CreateForm() {
                 }}
                 className="w-full bg-black/60 border border-gray-700 rounded-lg px-3 py-2 pr-28 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#9F8EFF]"
                 placeholder="@username"
+                whileFocus={{ scale: 1.02, borderColor: '#9F8EFF' }}
+                transition={{ type: "spring", stiffness: 300 }}
               />
-              <button
+              <motion.button
                 type="button"
                 onClick={handleConnectTwitter}
                 disabled={connectingTwitter || !formData.twitter || twitterConnected}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-80"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
                   color: '#9F8EFF'
                 }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
               >
                 {connectingTwitter ? "Connecting" : twitterConnected ? "Connected" : "Connect"}
-              </button>
+              </motion.button>
             </div>
-          </div>
+          </motion.div>
 
           {/* Title */}
-          <div className="mb-3">
+          <motion.div
+            className="mb-3"
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.5, duration: 0.5 }}
+          >
             <div className="flex justify-between items-center mb-1.5">
               <label className="text-sm text-white font-medium">
                 Title <span className="text-red-400">*</span>
@@ -522,18 +565,25 @@ function CreateForm() {
                 {formData.title.length}/25
               </span>
             </div>
-            <input
+            <motion.input
               type="text"
               value={formData.title}
               onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
               maxLength={25}
               className="w-full bg-black/60 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#9F8EFF]"
               placeholder="BuilderHero @Monad"
+              whileFocus={{ scale: 1.02, borderColor: '#9F8EFF' }}
+              transition={{ type: "spring", stiffness: 300 }}
             />
-          </div>
+          </motion.div>
 
           {/* Bio */}
-          <div className="mb-3">
+          <motion.div
+            className="mb-3"
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+          >
             <div className="flex justify-between items-center mb-1.5">
               <label className="text-sm text-white font-medium">
                 Bio <span className="text-red-400">*</span>
@@ -542,73 +592,103 @@ function CreateForm() {
                 {formData.bio.length}/50
               </span>
             </div>
-            <textarea
+            <motion.textarea
               value={formData.bio}
               onChange={(e) => setFormData((prev) => ({ ...prev, bio: e.target.value }))}
               rows={4}
               maxLength={50}
               className="w-full bg-black/60 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#9F8EFF] resize-none"
               placeholder="Share your bio (max 50 chars)"
+              whileFocus={{ scale: 1.02, borderColor: '#9F8EFF' }}
+              transition={{ type: "spring", stiffness: 300 }}
             />
-          </div>
+          </motion.div>
 
           {/* Building on - 只有获取到真实数据时才显示 */}
-          {buildingOnOptions.length > 0 && (
-            <div className="mb-4">
-              <label className="block text-sm text-white mb-2 font-medium">
-                Building on
-                <span className="ml-2 text-xs text-gray-400 font-normal">
-                  (Selected: {formData.buildingOn.length}/6)
-                </span>
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {buildingOnOptions.map((item) => {
-                  const isSelected = formData.buildingOn.includes(item)
-                  const isMonad = item === 'Monad'
-                  const canSelect = isSelected || formData.buildingOn.length < 6
+          <AnimatePresence>
+            {buildingOnOptions.length > 0 && (
+              <motion.div
+                className="mb-4"
+                initial={{ x: -20, opacity: 0, height: 0 }}
+                animate={{ x: 0, opacity: 1, height: 'auto' }}
+                exit={{ x: -20, opacity: 0, height: 0 }}
+                transition={{ delay: 0.7, duration: 0.5 }}
+              >
+                <label className="block text-sm text-white mb-2 font-medium">
+                  Building on
+                  <span className="ml-2 text-xs text-gray-400 font-normal">
+                    (Selected: {formData.buildingOn.length}/6)
+                  </span>
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {buildingOnOptions.map((item, index) => {
+                    const isSelected = formData.buildingOn.includes(item)
+                    const isMonad = item === 'Monad'
+                    const canSelect = isSelected || formData.buildingOn.length < 6
 
-                  return (
-                    <button
-                      key={item}
-                      onClick={() => toggleBuildingOn(item)}
-                      disabled={!canSelect && !isSelected}
-                      className="px-3 py-1.5 rounded-full text-sm font-medium transition-all outline outline-1 outline-offset-[-1px]"
-                      style={{
-                        outlineColor: isSelected ? '#9F8EFF' : 'rgba(255,255,255,0.1)',
-                        color: 'white',
-                        opacity: isSelected ? 1 : (canSelect ? 0.7 : 0.3),
-                        cursor: (isMonad && isSelected) ? 'not-allowed' : (canSelect || isSelected ? 'pointer' : 'not-allowed')
-                      }}
-                    >
-                      {item}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          )}
+                    return (
+                      <motion.button
+                        key={item}
+                        onClick={() => toggleBuildingOn(item)}
+                        disabled={!canSelect && !isSelected}
+                        className="px-3 py-1.5 rounded-full text-sm font-medium outline outline-1 outline-offset-[-1px]"
+                        style={{
+                          outlineColor: isSelected ? '#9F8EFF' : 'rgba(255,255,255,0.1)',
+                          color: 'white',
+                          opacity: isSelected ? 1 : (canSelect ? 0.7 : 0.3),
+                          cursor: (isMonad && isSelected) ? 'not-allowed' : (canSelect || isSelected ? 'pointer' : 'not-allowed')
+                        }}
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: isSelected ? 1 : (canSelect ? 0.7 : 0.3) }}
+                        transition={{ delay: 0.8 + index * 0.05, type: "spring", stiffness: 200 }}
+                        whileHover={canSelect ? { scale: 1.05 } : {}}
+                        whileTap={canSelect ? { scale: 0.95 } : {}}
+                      >
+                        {item}
+                      </motion.button>
+                    )
+                  })}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          {error && (
-            <div className="text-red-400 text-sm text-center mb-4">{error}</div>
-          )}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                className="text-red-400 text-sm text-center mb-4"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+              >
+                {error}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Create button */}
-          <button
+          <motion.button
             onClick={handleCreate}
             disabled={loading || !formData.name || !formData.github || !formData.title || !formData.bio}
-            className="w-full h-12 px-9 py-2 rounded-[50px] shadow-[0px_0px_10px_0px_rgba(159,142,255,0.50)] outline outline-2 outline-offset-[-2px] outline-indigo-300 inline-flex justify-center items-center gap-2.5 mt-6 mb-8 hover:shadow-[0px_0px_20px_0px_rgba(159,142,255,0.70)] hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-12 px-9 py-2 rounded-[50px] shadow-[0px_0px_10px_0px_rgba(159,142,255,0.50)] outline outline-2 outline-offset-[-2px] outline-indigo-300 inline-flex justify-center items-center gap-2.5 mt-6 mb-8 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
               background: 'linear-gradient(to right, #5EEAD4, #9F8EFF)'
             }}
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.9, duration: 0.5 }}
+            whileHover={{ scale: 1.02, y: -2, boxShadow: "0px 0px 20px 0px rgba(159,142,255,0.70)" }}
+            whileTap={{ scale: 0.98 }}
           >
             <span className="text-center text-white text-base font-bold leading-7" style={{ fontFamily: "'DM Sans', sans-serif" }}>
               {loading ? "Creating..." : "Create"}
             </span>
-          </button>
-          </div>
+          </motion.button>
+          </motion.div>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
 

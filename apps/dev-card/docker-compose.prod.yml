@@ -5,23 +5,8 @@ services:
     image: web3insight-dev-card:latest
     container_name: web3insight-dev-card-prod
     restart: always
-    environment:
-      # Privy Configuration
-      - NEXT_PUBLIC_PRIVY_APP_ID=${NEXT_PUBLIC_PRIVY_APP_ID}
-      # Data API Configuration
-      - DATA_API_URL=${DATA_API_URL}
-      - DATA_API_TOKEN=${DATA_API_TOKEN}
-      # HTTP Configuration
-      - HTTP_TIMEOUT=${HTTP_TIMEOUT:-30000}
-      # Node Environment
-      - NODE_ENV=production
-      # Vercel Analytics Configuration
-      - NEXT_PUBLIC_VERCEL_ANALYTICS_ID=${NEXT_PUBLIC_VERCEL_ANALYTICS_ID}
-      # Server Configuration
-      - PORT=3000
-      - HOSTNAME=0.0.0.0
     env_file:
-      - .env.production
+      - .env
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:3000/"]
       interval: 30s
