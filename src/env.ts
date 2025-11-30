@@ -6,7 +6,7 @@ const envSchema = z.object({
   TWITTER_API_URL: z.string().url().default("https://rsshub-api.twitterdata.com"),
   NEXT_PUBLIC_PRIVY_APP_ID: z.string().optional(),
   NEXT_PUBLIC_UMAMI_WEBSITE_ID: z.string().optional(),
-  NEXT_PUBLIC_UMAMI_URL: z.string().url().optional(),
+  NEXT_PUBLIC_UMAMI_URL: z.string().url().default("https://umami.web3insight.ai"),
   PRIVY_APP_SECRET: z.string().optional(),
 })
 
@@ -24,6 +24,6 @@ export const env = {
   TWITTER_API_URL: process.env.TWITTER_API_URL || "https://rsshub-api.twitterdata.com",
   NEXT_PUBLIC_PRIVY_APP_ID: process.env.NEXT_PUBLIC_PRIVY_APP_ID || "",
   NEXT_PUBLIC_UMAMI_WEBSITE_ID: process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID || "",
-  NEXT_PUBLIC_UMAMI_URL: process.env.NEXT_PUBLIC_UMAMI_URL || "",
+  NEXT_PUBLIC_UMAMI_URL: process.env.NEXT_PUBLIC_UMAMI_URL || "https://umami.web3insight.ai",
   PRIVY_APP_SECRET: process.env.PRIVY_APP_SECRET || "",
 }
