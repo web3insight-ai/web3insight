@@ -7,8 +7,8 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json pnpm-lock.yaml ./
+# Copy package files and pnpm configuration
+COPY package.json pnpm-lock.yaml .npmrc ./
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
@@ -21,6 +21,9 @@ RUN apk add --no-cache libc6-compat python3 make g++
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 WORKDIR /app
+
+# Copy pnpm configuration first
+COPY .npmrc ./
 
 # Copy dependencies from deps stage
 COPY --from=deps /app/node_modules ./node_modules
