@@ -208,6 +208,33 @@ const MonadCardFront = forwardRef<HTMLDivElement, MonadCardFrontProps>(
                     </span>
                   ))}
                 </div>
+                <div className="mt-[4%] print:mt-[1.5mm]">
+                  <p
+                    className="text-center text-[0.8em] print:text-[5px] leading-relaxed"
+                    style={{
+                      color: '#9F8EFF',
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontWeight: 400,
+                    }}
+                  >
+                    View detailed insights at{' '}
+                    <a
+                      href="https://dash.web3insight.ai/devinsight"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline transition-colors"
+                      style={{ color: '#BBA9FF' }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.color = '#DDD0FF')
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.color = '#BBA9FF')
+                      }
+                    >
+                      DevInsight
+                    </a>
+                  </p>
+                </div>
               </div>
             ) : (
               <div className="flex justify-center pb-[3%]">
