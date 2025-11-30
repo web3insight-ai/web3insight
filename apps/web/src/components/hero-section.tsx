@@ -17,12 +17,32 @@ function formatNumber(num: number): string {
   }).format(num);
 }
 
+// Loading animation component
+function LoadingNumber() {
+  return (
+    <div className="flex items-center">
+      <div className="flex space-x-1.5">
+        <div className="w-2 h-2 bg-accent/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+        <div className="w-2 h-2 bg-accent/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+        <div className="w-2 h-2 bg-accent/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+      </div>
+    </div>
+  )
+}
+
 // Animated number component for hero stats
 function AnimatedHeroNumber({ value, suffix = "", isLoading }: { value: number; suffix?: string; isLoading?: boolean }) {
   const [displayValue, setDisplayValue] = useState(0)
   const hasAnimated = useRef(false)
 
   useEffect(() => {
+    // Reset animation when loading or value changes
+    if (isLoading) {
+      setDisplayValue(0)
+      hasAnimated.current = false
+      return
+    }
+
     if (value === 0) {
       setDisplayValue(0)
       hasAnimated.current = false
@@ -48,7 +68,12 @@ function AnimatedHeroNumber({ value, suffix = "", isLoading }: { value: number; 
     }, duration / steps)
 
     return () => clearInterval(timer)
-  }, [value])
+  }, [value, isLoading])
+
+  // Show loading dots when loading or waiting for data
+  if (isLoading || (displayValue === 0 && value > 0)) {
+    return <LoadingNumber />
+  }
 
   return (
     <span className="text-2xl font-bold text-foreground tabular-nums">
@@ -64,6 +89,13 @@ function AnimatedContributors({ value, isLoading }: { value: number; isLoading?:
   const hasAnimated = useRef(false)
 
   useEffect(() => {
+    // Reset animation when loading or value changes
+    if (isLoading) {
+      setDisplayValue(0)
+      hasAnimated.current = false
+      return
+    }
+
     if (value === 0) {
       setDisplayValue(0)
       hasAnimated.current = false
@@ -89,7 +121,12 @@ function AnimatedContributors({ value, isLoading }: { value: number; isLoading?:
     }, duration / steps)
 
     return () => clearInterval(timer)
-  }, [value])
+  }, [value, isLoading])
+
+  // Show loading dots when loading or waiting for data
+  if (isLoading || (displayValue === 0 && value > 0)) {
+    return <LoadingNumber />
+  }
 
   const formattedValue = displayValue >= 1000000
     ? `${(displayValue / 1000000).toFixed(1)}M+`
