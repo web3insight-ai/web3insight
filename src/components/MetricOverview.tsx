@@ -1,8 +1,12 @@
+"use client";
+
 import { Code2, Users, Zap, Database } from "lucide-react";
+import { motion } from "framer-motion";
 
 import MetricCard, { type MetricCardProps } from "$/controls/metric-card";
 import MetricOverviewSkeleton from "./loading/MetricOverviewSkeleton";
 import type { DataValue } from "@/types";
+import { staggerContainer, staggerItemScale } from "@/utils/animations";
 
 type MetricOverviewProps = {
   dataSource: Record<string, DataValue>;
@@ -48,17 +52,23 @@ function MetricOverview({ dataSource, isLoading = false }: MetricOverviewProps) 
   }
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-      {resolveMetrics(dataSource).map((metric, index) => (
-        <div
+    <motion.div
+      variants={staggerContainer}
+      initial="hidden"
+      animate="visible"
+      className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6"
+    >
+      {resolveMetrics(dataSource).map((metric) => (
+        <motion.div
           key={metric.label.replaceAll(" ", "")}
-          className="animate-slide-up"
-          style={{ animationDelay: `${index * 100}ms` }}
+          variants={staggerItemScale}
+          whileHover={{ y: -4, scale: 1.02 }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
         >
           <MetricCard {...metric} />
-        </div>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 }
 

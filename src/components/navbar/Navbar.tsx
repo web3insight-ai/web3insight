@@ -6,8 +6,10 @@ import Image from "next/image";
 import { useMediaQuery } from "react-responsive";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 
 import { getTitle } from "@/utils/app";
+import { fadeInDown } from "@/utils/animations";
 
 import SignedUserWidget from "~/auth/widgets/signed-user";
 
@@ -31,31 +33,52 @@ function Navbar({ className, children, user, extra }: NavbarProps) {
   const isDark = mounted && (theme === 'system' ? systemTheme === 'dark' : theme === 'dark');
 
   return (
-    <div className={clsx("flex items-center w-full px-6 py-4", className)}>
+    <motion.div
+      variants={fadeInDown}
+      initial="hidden"
+      animate="visible"
+      className={clsx("flex items-center w-full px-6 py-4", className)}
+    >
       {/* Left side - Logo */}
       <div className="flex items-center gap-3 flex-1">
         <Link className="flex items-center gap-3 group" title="Back to home" href="/">
-          {mounted ? (
-            <Image
-              src={isDark ? "/web3insight_logo_white.svg" : "/web3insight_logo.svg"}
-              width={isDesktop ? 150 : 120}
-              height={isDesktop ? 26 : 20}
-              alt={`${getTitle()} Logo`}
-              priority
-            />
-          ) : (
-            <div style={{ width: isDesktop ? 150 : 120, height: isDesktop ? 26 : 20 }} />
-          )}
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+          >
+            {mounted ? (
+              <Image
+                src={isDark ? "/web3insight_logo_white.svg" : "/web3insight_logo.svg"}
+                width={isDesktop ? 150 : 120}
+                height={isDesktop ? 26 : 20}
+                alt={`${getTitle()} Logo`}
+                priority
+              />
+            ) : (
+              <div style={{ width: isDesktop ? 150 : 120, height: isDesktop ? 26 : 20 }} />
+            )}
+          </motion.div>
         </Link>
       </div>
 
       {/* Center - Navigation Menu */}
-      <div className="flex items-center justify-center flex-1">
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, duration: 0.3 }}
+        className="flex items-center justify-center flex-1"
+      >
         {extra}
-      </div>
+      </motion.div>
 
       {/* Right side - User controls */}
-      <div className="flex items-center gap-3 flex-1 justify-end">
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.3 }}
+        className="flex items-center gap-3 flex-1 justify-end"
+      >
         {children}
         <SignedUserWidget
           user={user}
@@ -64,8 +87,8 @@ function Navbar({ className, children, user, extra }: NavbarProps) {
           onResetPassword={resetPassword}
         />
         <PrefersColorSchemeSelector />
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 

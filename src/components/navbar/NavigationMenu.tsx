@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Calendar, Database, Warehouse, Users, Brain } from "lucide-react";
 import clsx from "clsx";
+import { motion } from "framer-motion";
 
 const navigationItems = [
   {
@@ -12,13 +13,13 @@ const navigationItems = [
     icon: Warehouse,
   },
   {
-    name: "Repositories", 
+    name: "Repositories",
     href: "/repositories",
     icon: Database,
   },
   {
     name: "Developers",
-    href: "/developers", 
+    href: "/developers",
     icon: Users,
   },
   {
@@ -38,24 +39,32 @@ function NavigationMenu() {
 
   return (
     <nav className="flex items-center justify-center gap-0.5">
-      {navigationItems.map((item) => {
+      {navigationItems.map((item, index) => {
         const Icon = item.icon;
         const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-        
+
         return (
-          <Link
+          <motion.div
             key={item.name}
-            href={item.href}
-            className={clsx(
-              "flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-200",
-              isActive
-                ? "bg-primary/10 text-primary"
-                : "text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50",
-            )}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.05, duration: 0.3 }}
+            whileHover={{ y: -2 }}
+            whileTap={{ scale: 0.95 }}
           >
-            <Icon size={14} />
-            <span className="hidden lg:inline">{item.name}</span>
-          </Link>
+            <Link
+              href={item.href}
+              className={clsx(
+                "flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-200",
+                isActive
+                  ? "bg-primary/10 text-primary"
+                  : "text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50",
+              )}
+            >
+              <Icon size={14} />
+              <span className="hidden lg:inline">{item.name}</span>
+            </Link>
+          </motion.div>
         );
       })}
     </nav>

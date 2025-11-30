@@ -1,23 +1,38 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { fadeIn } from "@/utils/animations";
 
 interface FadeInProps {
   children: React.ReactNode;
   className?: string;
+  delay?: number;
+  duration?: number;
 }
 
-export default function FadeIn({ children, className = "" }: FadeInProps) {
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const id = requestAnimationFrame(() => setVisible(true));
-    return () => cancelAnimationFrame(id);
-  }, []);
-
+/**
+ * FadeIn component using Framer Motion
+ * Smoothly fades in content with optional delay
+ */
+export default function FadeIn({
+  children,
+  className = "",
+  delay = 0,
+  duration = 0.3,
+}: FadeInProps) {
   return (
-    <div className={["transition-opacity", "duration-300", visible ? "opacity-100" : "opacity-0", className].join(" ") }>
+    <motion.div
+      variants={fadeIn}
+      initial="hidden"
+      animate="visible"
+      transition={{
+        duration,
+        delay,
+        ease: "easeOut",
+      }}
+      className={className}
+    >
       {children}
-    </div>
+    </motion.div>
   );
 }

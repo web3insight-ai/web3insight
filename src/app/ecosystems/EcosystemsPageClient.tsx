@@ -5,6 +5,7 @@ import {
 } from "@nextui-org/react";
 import { Search, Warehouse, Database, Users, Code2, Zap } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { EcosystemType } from "~/ecosystem/typing";
 import { getFilterForType } from "~/ecosystem/helper";
@@ -12,6 +13,7 @@ import { EcosystemTypeFilter } from "$/ecosystem-type-filter";
 import type { EcoRankRecord } from "~/api/typing";
 import MetricCard, { type MetricCardProps } from "$/controls/metric-card";
 import TableHeader from "$/controls/table-header";
+import { staggerContainer, staggerItemScale, fadeInUp } from "@/utils/animations";
 
 interface EcosystemsPageProps {
   ecosystems: EcoRankRecord[];
@@ -117,7 +119,12 @@ export default function EcosystemsPageClient({
   return (
     <div className="w-full max-w-content mx-auto px-6 py-8">
       {/* Header and Overview */}
-      <div className="mb-8">
+      <motion.div
+        variants={fadeInUp}
+        initial="hidden"
+        animate="visible"
+        className="mb-8"
+      >
         <div className="flex items-center gap-3 mb-3">
           <div className="p-2 rounded-lg bg-primary/10">
             <Warehouse size={20} className="text-primary" />
@@ -127,20 +134,26 @@ export default function EcosystemsPageClient({
         <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
             Compare metrics across all blockchain and Web3 ecosystems
         </p>
-      </div>
+      </motion.div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10">
-        {resolveMetrics({ totalCoreDevelopers, totalDevelopers, totalEcosystems, totalRepositories }).map((metric, index) => (
-          <div
+      <motion.div
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10"
+      >
+        {resolveMetrics({ totalCoreDevelopers, totalDevelopers, totalEcosystems, totalRepositories }).map((metric) => (
+          <motion.div
             key={metric.label.replaceAll(" ", "")}
-            className="animate-slide-up"
-            style={{ animationDelay: `${index * 100}ms` }}
+            variants={staggerItemScale}
+            whileHover={{ y: -4, scale: 1.02 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
           >
             <MetricCard {...metric} />
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
       {/* Filters and Search */}
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -183,52 +196,56 @@ export default function EcosystemsPageClient({
               </tr>
             </thead>
             <tbody className="divide-y divide-border dark:divide-border-dark">
-              {paginatedItems.map((ecosystem, index) => {
-                const absoluteIndex = (page - 1) * rowsPerPage + index + 1;
-                return (
-                  <tr
-                    key={ecosystem.eco_name}
-                    className="hover:bg-surface dark:hover:bg-surface-dark transition-colors duration-200 group animate-fade-in"
-                    style={{ animationDelay: `${index * 50}ms` }}
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-medium transition-all duration-200 group-hover:scale-110 bg-gray-50 dark:bg-surface-dark text-gray-500 dark:text-gray-500`}>
-                          {absoluteIndex}
+              <AnimatePresence mode="wait">
+                {paginatedItems.map((ecosystem, index) => {
+                  const absoluteIndex = (page - 1) * rowsPerPage + index + 1;
+                  return (
+                    <motion.tr
+                      key={ecosystem.eco_name}
+                      className="hover:bg-surface dark:hover:bg-surface-dark transition-colors duration-200 group"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.03, duration: 0.3 }}
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-medium transition-all duration-200 group-hover:scale-110 bg-gray-50 dark:bg-surface-dark text-gray-500 dark:text-gray-500`}>
+                            {absoluteIndex}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <Link
+                          href={`/ecosystems/${encodeURIComponent(ecosystem.eco_name)}`}
+                          className="font-medium text-gray-900 dark:text-white hover:text-primary transition-colors duration-200"
+                        >
+                          {ecosystem.eco_name}
+                        </Link>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
+                          {Number(ecosystem.actors_core_total).toLocaleString()}
                         </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <Link
-                        href={`/ecosystems/${encodeURIComponent(ecosystem.eco_name)}`}
-                        className="font-medium text-gray-900 dark:text-white hover:text-primary transition-colors duration-200"
-                      >
-                        {ecosystem.eco_name}
-                      </Link>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
-                        {Number(ecosystem.actors_core_total).toLocaleString()}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
-                        {Number(ecosystem.actors_total).toLocaleString()}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
-                        {Number(ecosystem.actors_new_total).toLocaleString()}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
-                        {Number(ecosystem.repos_total).toLocaleString()}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
+                          {Number(ecosystem.actors_total).toLocaleString()}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
+                          {Number(ecosystem.actors_new_total).toLocaleString()}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
+                          {Number(ecosystem.repos_total).toLocaleString()}
+                        </span>
+                      </td>
+                    </motion.tr>
+                  );
+                })}
+              </AnimatePresence>
             </tbody>
           </table>
         </div>
