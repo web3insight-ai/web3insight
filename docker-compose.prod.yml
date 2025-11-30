@@ -5,33 +5,8 @@ services:
     image: web3insight:latest
     container_name: web3insight-prod
     restart: always
-    environment:
-      # Data API Configuration
-      - DATA_API_URL=${DATA_API_URL}
-      - DATA_API_TOKEN=${DATA_API_TOKEN}
-      # OSS Insight Configuration
-      - OSSINSIGHT_URL=${OSSINSIGHT_URL}
-      # HTTP Configuration
-      - HTTP_TIMEOUT=${HTTP_TIMEOUT:-30000}
-      # Node Environment
-      - NODE_ENV=production
-      # Session Configuration
-      - SESSION_SECRET=${SESSION_SECRET}
-      # AI Services Configuration
-      - OPENAI_BASE_URL=${OPENAI_BASE_URL}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - AI_API_URL=${AI_API_URL}
-      - AI_API_TOKEN=${AI_API_TOKEN}
-      # Public Configuration (client-side, baked into build)
-      - NEXT_PUBLIC_GITHUB_CLIENT_ID=${NEXT_PUBLIC_GITHUB_CLIENT_ID}
-      - NEXT_PUBLIC_PRIVY_APP_ID=${NEXT_PUBLIC_PRIVY_APP_ID}
-      - NEXT_PUBLIC_ORIGIN_CLIENT_ID=${NEXT_PUBLIC_ORIGIN_CLIENT_ID}
-      - NEXT_PUBLIC_UMAMI_WEBSITE_ID=${NEXT_PUBLIC_UMAMI_WEBSITE_ID}
-      # Server Configuration
-      - PORT=3000
-      - HOSTNAME=0.0.0.0
     env_file:
-      - .env.production
+      - .env
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:3000/"]
       interval: 30s

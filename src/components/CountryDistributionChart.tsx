@@ -149,8 +149,8 @@ function CountryDistributionChart({
     [formattedData],
   );
 
-  // Use website's consistent teal color scheme (matching other charts like RepositoryTrending)
-  const pieColors = useMemo(() => ['#0D9488', '#14B8A6', '#2DD4BF', '#5EEAD4', '#99F6E4'], []);
+  // Use medium green color scheme (matching DevInsight page)
+  const pieColors = useMemo(() => ['#0D9488', '#14B8A6', '#10B981', '#059669', '#0F766E'], []);
 
   const pieSeriesData = useMemo<PieDatum[]>(
     () => leaderboardData.map(item => ({
@@ -212,9 +212,9 @@ function CountryDistributionChart({
       min: 0,
       max: maxValue || 1,
       stops: [
-        [0, '#CCFBF1'],      // teal-100 - lightest
-        [0.5, '#0D9488'],    // teal-600 - matches other charts
-        [1, '#134E4A'],      // teal-900 - darkest
+        [0, '#D1FAE5'],      // emerald-100 - light green
+        [0.5, '#10B981'],    // emerald-500 - medium green
+        [1, '#059669'],      // emerald-600 - deeper green (not too dark)
       ],
     },
     series: [
@@ -229,7 +229,7 @@ function CountryDistributionChart({
         nullColor: '#F8FAFC',         // slate-50 - no data
         states: {
           hover: {
-            color: '#14B8A6',         // teal-500 - hover highlight
+            color: '#10B981',         // emerald-500 - hover highlight
           },
         },
         dataLabels: {
