@@ -1,16 +1,138 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { ArrowRight, Search, Globe } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useI18n } from "@/lib/i18n-context"
 import { motion } from "framer-motion"
 import { fadeInUp, stagger } from "@/components/ui/motion"
+import type { StatisticsData } from "@/services/api/typing"
+
+// Utility function to format numbers with comma separators
+function formatNumber(num: number): string {
+  return new Intl.NumberFormat('en-US', {
+    maximumFractionDigits: 0,
+    minimumFractionDigits: 0
+  }).format(num);
+}
+
+// Animated number component for hero stats
+function AnimatedHeroNumber({ value, suffix = "", isLoading }: { value: number; suffix?: string; isLoading?: boolean }) {
+  const [displayValue, setDisplayValue] = useState(0)
+  const hasAnimated = useRef(false)
+
+  useEffect(() => {
+    if (value === 0) {
+      setDisplayValue(0)
+      hasAnimated.current = false
+      return
+    }
+
+    if (hasAnimated.current) return
+    hasAnimated.current = true
+
+    const duration = 1000
+    const steps = 60
+    const increment = value / steps
+    let current = 0
+
+    const timer = setInterval(() => {
+      current += increment
+      if (current >= value) {
+        setDisplayValue(value)
+        clearInterval(timer)
+      } else {
+        setDisplayValue(Math.floor(current))
+      }
+    }, duration / steps)
+
+    return () => clearInterval(timer)
+  }, [value])
+
+  return (
+    <span className="text-2xl font-bold text-foreground tabular-nums">
+      {formatNumber(displayValue)}
+      {suffix}
+    </span>
+  )
+}
+
+// Animated contributors with M+ format
+function AnimatedContributors({ value, isLoading }: { value: number; isLoading?: boolean }) {
+  const [displayValue, setDisplayValue] = useState(0)
+  const hasAnimated = useRef(false)
+
+  useEffect(() => {
+    if (value === 0) {
+      setDisplayValue(0)
+      hasAnimated.current = false
+      return
+    }
+
+    if (hasAnimated.current) return
+    hasAnimated.current = true
+
+    const duration = 1000
+    const steps = 60
+    const increment = value / steps
+    let current = 0
+
+    const timer = setInterval(() => {
+      current += increment
+      if (current >= value) {
+        setDisplayValue(value)
+        clearInterval(timer)
+      } else {
+        setDisplayValue(Math.floor(current))
+      }
+    }, duration / steps)
+
+    return () => clearInterval(timer)
+  }, [value])
+
+  const formattedValue = displayValue >= 1000000
+    ? `${(displayValue / 1000000).toFixed(1)}M+`
+    : formatNumber(displayValue)
+
+  return (
+    <span className="text-xl font-bold text-foreground tabular-nums">
+      {formattedValue}
+    </span>
+  )
+}
 
 export function HeroSection() {
   const containerRef = useRef<HTMLDivElement>(null)
   const { t } = useI18n()
+  const [statsData, setStatsData] = useState<StatisticsData>({
+    ecosystem: 0,
+    repository: 0,
+    developer: 0,
+    coreDeveloper: 0,
+  })
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Fetch statistics data on component mount
+  useEffect(() => {
+    async function loadStats() {
+      try {
+        const response = await fetch('/api/statistics')
+        const result = await response.json()
+
+        if (result.success && result.data) {
+          setStatsData(result.data)
+        }
+      } catch (error) {
+        console.error('Failed to fetch statistics:', error)
+        // Keep default values if API fails
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadStats()
+  }, [])
 
   useEffect(() => {
     const container = containerRef.current
@@ -140,11 +262,15 @@ export function HeroSection() {
               {/* Stats cards */}
               <div className="p-4 bg-card border border-border rounded-lg">
                 <p className="text-xs text-muted-foreground mb-1">{t("hero.developers")}</p>
-                <p className="text-2xl font-bold text-foreground">34,702</p>
+                <div className="min-h-[32px] flex items-center">
+                  <AnimatedHeroNumber value={statsData.coreDeveloper} isLoading={isLoading} />
+                </div>
               </div>
               <div className="p-4 bg-card border border-border rounded-lg">
                 <p className="text-xs text-muted-foreground mb-1">{t("hero.ecosystems")}</p>
-                <p className="text-2xl font-bold text-foreground">7,019</p>
+                <div className="min-h-[32px] flex items-center">
+                  <AnimatedHeroNumber value={statsData.ecosystem} isLoading={isLoading} />
+                </div>
               </div>
 
               {/* Dotted pattern card */}
@@ -153,7 +279,9 @@ export function HeroSection() {
                 <div className="relative flex items-center justify-between">
                   <div>
                     <p className="text-xs text-muted-foreground mb-1">{t("hero.contributors")}</p>
-                    <p className="text-xl font-bold text-foreground">1.2M+</p>
+                    <div className="min-h-[28px] flex items-center">
+                      <AnimatedContributors value={statsData.developer} isLoading={isLoading} />
+                    </div>
                   </div>
                   <div className="w-16 h-16 rounded-full border-2 border-dashed border-border flex items-center justify-center">
                     <Globe className="w-8 h-8 text-accent" />
