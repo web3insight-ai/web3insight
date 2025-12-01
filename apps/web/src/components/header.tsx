@@ -32,12 +32,14 @@ export function Header() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border">
       <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-2">
-            <Image src="/web3insight_logo.svg" alt="Web3Insight Logo" width={229} height={26} className="h-6 w-auto" />
-          </Link>
+        <div className="flex items-center h-16">
+          <div className="flex-1 flex items-center">
+            <Link href="/" className="flex items-center gap-2">
+              <Image src="/web3insight_logo.svg" alt="Web3Insight Logo" width={229} height={26} className="h-6 w-auto" />
+            </Link>
+          </div>
 
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="flex-1 hidden md:flex items-center justify-center gap-8">
             <a
               href="#features"
               onClick={(e) => handleScrollTo(e, "features")}
@@ -78,7 +80,7 @@ export function Header() {
             </Link>
           </nav>
 
-          <div className="hidden md:flex items-center gap-3">
+          <div className="flex-1 hidden md:flex items-center justify-end gap-3">
             <LanguageSwitcher />
           </div>
 
