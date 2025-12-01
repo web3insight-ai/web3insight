@@ -208,9 +208,9 @@ const MonadCardFront = forwardRef<HTMLDivElement, MonadCardFrontProps>(
                     </span>
                   ))}
                 </div>
-                <div className="mt-[4%] print:mt-[1.5mm]">
+                <div className="mt-[4%] print:hidden">
                   <p
-                    className="text-center text-[0.8em] print:text-[5px] leading-relaxed"
+                    className="text-center text-[0.8em] leading-relaxed"
                     style={{
                       color: '#9F8EFF',
                       fontFamily: "'DM Sans', sans-serif",
