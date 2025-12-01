@@ -37,3 +37,15 @@ jobs:
           sbom: false
           tags: |
             ghcr.io/${{ github.event.repository.full_name }}:latest
+
+      - name: Deploy to server when tagged
+        uses: appleboy/ssh-action@master
+        # if: startsWith(github.ref, 'refs/tags/')
+        with:
+          host: ${{ secrets.WEBSITE_IP }}
+          username: root
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            cd ~/website/
+            docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }}
+            docker-compose pull && docker-compose up -d --remove-orphans && docker system prune -af
