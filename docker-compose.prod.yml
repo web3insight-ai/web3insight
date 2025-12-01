@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   web3insight-ai:
-    image: web3insight-ai:latest
+    image: ghcr.io/web3insight-ai/web3insight.ai:latest
     container_name: web3insight-ai-prod
     restart: always
     env_file:
