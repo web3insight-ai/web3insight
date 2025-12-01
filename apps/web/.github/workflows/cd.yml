@@ -9,7 +9,7 @@ on:
       - '**.md'
       - '*.yml'
 jobs:
-  amd64:
+  build-and-deploy:
     runs-on: ubuntu-latest
     permissions: write-all
 
