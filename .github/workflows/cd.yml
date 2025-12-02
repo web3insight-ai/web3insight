@@ -62,7 +62,7 @@ jobs:
           script: |
             cd ~/card/
             docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }}
-            docker-compose pull ghcr.io/${{ github.event.repository.full_name }}:prod && docker-compose up -d --remove-orphans && docker system prune -af
+            docker pull ghcr.io/${{ github.event.repository.full_name }}:prod && docker-compose up -d --remove-orphans && docker system prune -af
 
       - name: Deploy dev branch(dev) to server when dev branch
         uses: appleboy/ssh-action@master
@@ -75,4 +75,4 @@ jobs:
           script: |
             cd ~/card/
             docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }}
-            docker-compose pull ghcr.io/${{ github.event.repository.full_name }}:dev && docker-compose up -d --remove-orphans && docker system prune -af
+            docker pull ghcr.io/${{ github.event.repository.full_name }}:dev && docker-compose up -d --remove-orphans && docker system prune -af
