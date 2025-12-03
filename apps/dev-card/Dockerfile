@@ -31,6 +31,9 @@ COPY . .
 ENV SKIP_ENV_VALIDATION=true
 ENV NEXT_TELEMETRY_DISABLED=1
 
+ARG next_public_privy_app_id="placeholder_app_id"
+ENV NEXT_PUBLIC_PRIVY_APP_ID=${next_public_privy_app_id}
+
 # Build the application
 RUN pnpm build
 

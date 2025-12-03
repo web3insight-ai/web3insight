@@ -32,10 +32,12 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          platforms: linux/amd64, linux/arm64
+          platforms: linux/arm64
           push: true
           provenance: false
           sbom: false
+          build-args: |
+            next_public_privy_app_id=${{ secrets.NEXT_PUBLIC_PRIVY_APP_ID_PROD }}
           tags: |
             ghcr.io/${{ github.event.repository.full_name }}:prod
 
@@ -44,7 +46,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          platforms: linux/amd64, linux/arm64
+          platforms: linux/arm64
           push: true
           provenance: false
           sbom: false
