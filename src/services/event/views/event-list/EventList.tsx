@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import clsx from "clsx";
 import { Card, Button, Input, Pagination } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import { Calendar, Plus, Search, Eye } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { fetchList } from "../../repository/client";
+import { eventKeys } from "../../hooks";
 
 import type { EventDialogPayload, EventListViewWidgetProps } from "./typing";
 import CreatedTimeFieldWidget from "./CreatedTimeField";
@@ -19,15 +21,9 @@ interface EventData {
   created_at: string;
 }
 
-const initTimestamp = Date.now();
-
 function EventListView({ className }: EventListViewWidgetProps) {
-  const [dataSource, setDataSource] = useState<EventData[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [refetchTimestamp, setRefetchTimestamp] = useState(initTimestamp);
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
   const rowsPerPage = 25;
 
   const [visible, setVisible] = useState(false);
@@ -39,17 +35,22 @@ function EventListView({ className }: EventListViewWidgetProps) {
   const [navigatingEventId, setNavigatingEventId] = useState<number | null>(null);
 
   const router = useRouter();
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    setLoading(true);
-    fetchList({ pageNum: page, pageSize: rowsPerPage })
-      .then(res => {
-        // API already returns data sorted globally in descending order (newest first)
-        setDataSource(res.data);
-        setTotal(Number(res.extra?.total || 0));
-      })
-      .finally(() => setLoading(false));
-  }, [page, refetchTimestamp]);
+  // Use TanStack Query for data fetching
+  const { data, isLoading: loading } = useQuery({
+    queryKey: eventKeys.list({ pageNum: page, pageSize: rowsPerPage }),
+    queryFn: async () => {
+      const res = await fetchList({ pageNum: page, pageSize: rowsPerPage });
+      return {
+        data: res.data as EventData[],
+        total: Number(res.extra?.total || 0),
+      };
+    },
+  });
+
+  const dataSource = data?.data || [];
+  const total = data?.total || 0;
 
   const gotoDetail = async (id: number) => {
     setNavigatingEventId(id);
@@ -74,7 +75,8 @@ function EventListView({ className }: EventListViewWidgetProps) {
     setVisible(false);
 
     if (payload) {
-      setRefetchTimestamp(Date.now());
+      // Invalidate and refetch event list using TanStack Query
+      queryClient.invalidateQueries({ queryKey: eventKeys.lists() });
       setAddedResult(payload);
       setAddedResultVisible(true);
     }
