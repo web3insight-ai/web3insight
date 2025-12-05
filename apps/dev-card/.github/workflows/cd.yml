@@ -50,6 +50,8 @@ jobs:
           push: true
           provenance: false
           sbom: false
+          build-args: |
+            next_public_privy_app_id=${{ secrets.NEXT_PUBLIC_PRIVY_APP_ID_PROD }}
           tags: |
             ghcr.io/${{ github.event.repository.full_name }}:dev
 
