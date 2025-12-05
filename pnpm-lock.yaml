@@ -27,7 +27,7 @@ importers:
         specifier: 0.13.8
         version: 0.13.8(typescript@5.5.4)(zod@3.25.76)
       '@tanstack/react-query':
-        specifier: ^5.84.1
+        specifier: ^5.84.2
         version: 5.84.2(react@19.2.1)
       ai:
         specifier: ^3.3.6
@@ -54,7 +54,7 @@ importers:
         specifier: ^3.2.3
         version: 3.2.3(highcharts@12.4.0)(react@19.2.1)
       jose:
-        specifier: ^5.9.6
+        specifier: ^5.10.0
         version: 5.10.0
       jotai:
         specifier: ^2.9.2
@@ -3184,9 +3184,6 @@ packages:
 
   camelize@1.0.1:
     resolution: {integrity: sha512-dU+Tx2fsypxTgtLoE36npi3UqcjSSMNYfkqgmoEhtZrraP5VWq0K7FkWVTYa8eMPtnU/G2txVsfdCJTn9uzpuQ==}
-
-  caniuse-lite@1.0.30001714:
-    resolution: {integrity: sha512-mtgapdwDLSSBnCI3JokHM7oEQBLxiJKVRtg10AxM1AyeiKcM96f0Mkbqeq+1AbiCtvMcHRulAAEMu693JrSWqg==}
 
   caniuse-lite@1.0.30001759:
     resolution: {integrity: sha512-Pzfx9fOKoKvevQf8oCXoyNRQ5QyxJj+3O0Rqx2V5oxT61KGx8+n6hV/IUyJeifUci2clnmmKVpvtiqRzgiWjSw==}
@@ -12076,7 +12073,7 @@ snapshots:
   autoprefixer@10.4.20(postcss@8.4.41):
     dependencies:
       browserslist: 4.23.3
-      caniuse-lite: 1.0.30001714
+      caniuse-lite: 1.0.30001759
       fraction.js: 4.3.7
       normalize-range: 0.1.2
       picocolors: 1.0.1
@@ -12126,7 +12123,7 @@ snapshots:
 
   browserslist@4.23.3:
     dependencies:
-      caniuse-lite: 1.0.30001714
+      caniuse-lite: 1.0.30001759
       electron-to-chromium: 1.5.6
       node-releases: 2.0.18
       update-browserslist-db: 1.1.0(browserslist@4.23.3)
@@ -12184,8 +12181,6 @@ snapshots:
   camelcase@5.3.1: {}
 
   camelize@1.0.1: {}
-
-  caniuse-lite@1.0.30001714: {}
 
   caniuse-lite@1.0.30001759: {}
 

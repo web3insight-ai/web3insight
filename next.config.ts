@@ -8,9 +8,28 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true, // Temporarily ignore for migration validation
   },
-  eslint: {
-    ignoreDuringBuilds: true, // Temporarily ignore for migration validation
+  // Note: eslint config is no longer supported in next.config.ts in Next.js 16
+  // Use eslint command directly or configure in .eslintrc.cjs
+
+  // External packages that should not be bundled by server components
+  // This helps with pino, WalletConnect, and other Node.js-specific modules
+  serverExternalPackages: [
+    'pino',
+    'pino-pretty',
+    'thread-stream',
+    'sonic-boom',
+    'fastbench',
+    'encoding',
+  ],
+
+  // Turbopack configuration
+  turbopack: {
+    // Turbopack handles most optimizations automatically
+    // Note: Some dependencies (e.g., WalletConnect with pino) may have compatibility issues
+    // Use --webpack flag for production builds if needed
   },
+
+  // Keep webpack config for backward compatibility when using --webpack flag
   webpack: (config, { isServer, webpack }) => {
     config.resolve.fallback = {
       ...config.resolve.fallback,
@@ -40,7 +59,8 @@ const nextConfig: NextConfig = {
 
     return config;
   },
-  // Images domain configuration if needed
+
+  // Images domain configuration
   images: {
     remotePatterns: [
       {
