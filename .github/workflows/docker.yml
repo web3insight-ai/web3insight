@@ -2,12 +2,12 @@ name: Build docker images
 on:
   push:
     branches:
-      - 'master'
+      - "master"
     tags:
       - "*"
     paths-ignore:
-      - '**.md'
-      - '*.yml'
+      - "**.md"
+      - "*.yml"
 jobs:
   docker:
     runs-on: ubuntu-latest
@@ -36,7 +36,7 @@ jobs:
           provenance: false
           sbom: false
           build-args: |
-            NEXT_PUBLIC_PRIVY_APP_ID={{ secrets.NEXT_PUBLIC_PRIVY_APP_ID }}
-            NEXT_PUBLIC_UMAMI_WEBSITE_ID={{ secrets.NEXT_PUBLIC_UMAMI_WEBSITE_ID }}
+            NEXT_PUBLIC_PRIVY_APP_ID=${{ secrets.NEXT_PUBLIC_PRIVY_APP_ID }}
+            NEXT_PUBLIC_UMAMI_WEBSITE_ID=${{ secrets.NEXT_PUBLIC_UMAMI_WEBSITE_ID }}
           tags: |
             ghcr.io/${{ github.event.repository.full_name }}:latest
