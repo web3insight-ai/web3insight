@@ -1,6 +1,12 @@
-'use client';
+"use client";
 
-import { Avatar, Popover, PopoverTrigger, PopoverContent, Button } from "@nextui-org/react";
+import {
+  Avatar,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  Button,
+} from "@nextui-org/react";
 import { LogIn, LogOut, User, Layers, Calendar } from "lucide-react";
 import { usePrivy } from "@privy-io/react-auth";
 import { useRouter } from "next/navigation";
@@ -9,7 +15,11 @@ import { useState, useEffect } from "react";
 import type { SignedUserProps } from "./typing";
 import type { ApiUser } from "../../typing";
 import ActionItem from "./ActionItem";
-import { canManageEcosystems, canManageEvents, getPrivyUserDisplayInfo } from "../../helper";
+import {
+  canManageEcosystems,
+  canManageEvents,
+  getPrivyUserDisplayInfo,
+} from "../../helper";
 
 function SignedUser({ onSignIn }: SignedUserProps) {
   const { ready, authenticated, user: privyUser, logout } = usePrivy();
@@ -24,9 +34,9 @@ function SignedUser({ onSignIn }: SignedUserProps) {
     }
 
     // Fetch user data from backend
-    fetch('/api/auth/me', { credentials: 'include' })
-      .then(res => res.json())
-      .then(data => {
+    fetch("/api/auth/me", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => {
         if (data.success && data.data) {
           setBackendUser(data.data);
         }
@@ -47,7 +57,8 @@ function SignedUser({ onSignIn }: SignedUserProps) {
     const firstLetter = displayName.substring(0, 1).toUpperCase();
 
     // Check user roles from backend
-    const isAdmin = backendUser?.role?.allowed_roles?.includes('admin') || false;
+    const isAdmin =
+      backendUser?.role?.allowed_roles?.includes("admin") || false;
     const canManageEco = canManageEcosystems(backendUser);
     const canManageEvt = canManageEvents(backendUser);
 
@@ -57,19 +68,19 @@ function SignedUser({ onSignIn }: SignedUserProps) {
         await logout();
 
         // Clear backend session
-        await fetch('/api/auth/logout', {
-          method: 'POST',
+        await fetch("/api/auth/logout", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         });
 
         // Redirect and refresh
-        router.push('/');
+        router.push("/");
         router.refresh();
-      } catch (error) {
+      } catch {
         // Still redirect even if there's an error
-        router.push('/');
+        router.push("/");
         router.refresh();
       }
     };
@@ -87,7 +98,10 @@ function SignedUser({ onSignIn }: SignedUserProps) {
             as="button"
           />
         </PopoverTrigger>
-        <PopoverContent className="p-0 rounded-lg bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark" style={{ width: "240px" }}>
+        <PopoverContent
+          className="p-0 rounded-lg bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark"
+          style={{ width: "240px" }}
+        >
           <div className="flex flex-col">
             {/* User info section */}
             <div className="px-4 py-3 border-b border-border dark:border-border-dark bg-gray-50 dark:bg-surface-elevated rounded-t-lg">

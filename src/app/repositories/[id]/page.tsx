@@ -1,13 +1,16 @@
-import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { headers } from 'next/headers';
-import RepositoryDetailClient from './RepositoryDetailClient';
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { headers } from "next/headers";
+import RepositoryDetailClient from "./RepositoryDetailClient";
 import { getTitle } from "@/utils/app";
-import { fetchRepoRankList, fetchRepoActiveDeveloperList } from "~/api/repository";
+import {
+  fetchRepoRankList,
+  fetchRepoActiveDeveloperList,
+} from "~/api/repository";
 import { fetchRepoByName } from "~/github/repository";
 import { getUser } from "~/auth/repository";
 import type { RepoRankRecord } from "~/api/typing";
-import DefaultLayoutWrapper from '../../DefaultLayoutWrapper';
+import DefaultLayoutWrapper from "../../DefaultLayoutWrapper";
 import { env } from "@/env";
 
 interface RepositoryPageProps {
@@ -19,7 +22,10 @@ interface RepositoryPageProps {
   }>;
 }
 
-export async function generateMetadata({ params, searchParams }: RepositoryPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+  searchParams,
+}: RepositoryPageProps): Promise<Metadata> {
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
   const repoId = resolvedParams.id;
@@ -32,7 +38,9 @@ export async function generateMetadata({ params, searchParams }: RepositoryPageP
       // Try to fetch from rank list to get the name
       const rankListRes = await fetchRepoRankList();
       if (rankListRes.success && rankListRes.data) {
-        const repoRankData = rankListRes.data.list.find(repo => repo.repo_id === parseInt(repoId));
+        const repoRankData = rankListRes.data.list.find(
+          (repo) => repo.repo_id === parseInt(repoId),
+        );
         if (repoRankData) {
           repoName = repoRankData.repo_name;
         }
@@ -49,7 +57,7 @@ export async function generateMetadata({ params, searchParams }: RepositoryPageP
       },
       description: `Repository analytics and metrics for ${repoName}. Track development activity, contributors, and community engagement.`,
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       title: `Repository Details - ${getTitle()}`,
       description: "Web3 repository analytics and metrics",
@@ -57,7 +65,10 @@ export async function generateMetadata({ params, searchParams }: RepositoryPageP
   }
 }
 
-export default async function RepositoryDetailPage({ params, searchParams }: RepositoryPageProps) {
+export default async function RepositoryDetailPage({
+  params,
+  searchParams,
+}: RepositoryPageProps) {
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
   const repoId = resolvedParams.id;
@@ -91,7 +102,7 @@ export default async function RepositoryDetailPage({ params, searchParams }: Rep
       }
       return [];
     } catch (error) {
-      console.error('Error fetching active developer data:', error);
+      console.error("Error fetching active developer data:", error);
       return [];
     }
   }
@@ -120,7 +131,9 @@ export default async function RepositoryDetailPage({ params, searchParams }: Rep
         throw new Error("Failed to fetch repository data");
       }
 
-      repoRankData = rankListRes.data.list.find(repo => repo.repo_id === repoNumericId) || null;
+      repoRankData =
+        rankListRes.data.list.find((repo) => repo.repo_id === repoNumericId) ||
+        null;
 
       if (!repoRankData) {
         notFound();

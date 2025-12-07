@@ -95,9 +95,6 @@ echo ""
 # Check required environment variables
 echo -e "${BLUE}4. Checking Required Environment Variables...${NC}"
 check_env_var "DATA_API_TOKEN" "true"
-check_env_var "SESSION_SECRET" "true"
-check_env_var "NEXT_PUBLIC_GITHUB_CLIENT_ID" "true"
-check_env_var "NEXT_PUBLIC_UMAMI_WEBSITE_ID" "true"
 echo ""
 
 # Check optional environment variables
@@ -107,6 +104,7 @@ check_env_var "OSSINSIGHT_URL" "false"
 check_env_var "AI_API_URL" "false"
 check_env_var "AI_API_TOKEN" "false"
 check_env_var "NEXT_PUBLIC_PRIVY_APP_ID" "false"
+check_env_var "NEXT_PUBLIC_UMAMI_WEBSITE_ID" "false"
 check_env_var "NEXT_PUBLIC_ORIGIN_CLIENT_ID" "false"
 echo ""
 

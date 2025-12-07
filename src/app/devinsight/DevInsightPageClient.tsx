@@ -1,22 +1,41 @@
-'use client';
+"use client";
 
-import { Button, Card, CardBody, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react";
+import {
+  Button,
+  Card,
+  CardBody,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "@nextui-org/react";
 import { Brain, AlertCircle, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 
 import { analyzeGitHubUser } from "~/profile-analysis/repository";
-import type { AnalysisResult, BasicAnalysisResult, AnalysisStatus, GitHubUser } from "~/profile-analysis/typing";
+import type {
+  AnalysisResult,
+  BasicAnalysisResult,
+  AnalysisStatus,
+  GitHubUser,
+} from "~/profile-analysis/typing";
 import { hasAIData, hasEcosystemData } from "~/profile-analysis/helper";
 // Progress card removed per design; keep skeleton-only loading experience
-import { ProfileHeader, ProfileHeaderSkeleton } from "~/profile-analysis/views/profile-header";
+import {
+  ProfileHeader,
+  ProfileHeaderSkeleton,
+} from "~/profile-analysis/views/profile-header";
 import { KeyMetrics } from "~/profile-analysis/views/key-metrics";
 import { AnalysisTabs } from "~/profile-analysis/views/analysis-tabs";
-import { AIInsights, AIInsightsSkeleton } from "~/profile-analysis/views/ai-insights";
+import {
+  AIInsights,
+  AIInsightsSkeleton,
+} from "~/profile-analysis/views/ai-insights";
 import MetricOverviewSkeleton from "$/loading/MetricOverviewSkeleton";
 import ChartSkeleton from "$/loading/ChartSkeleton";
 import FadeIn from "$/FadeIn";
-
 
 interface DevInsightPageProps {
   requiresAuth: boolean;
@@ -31,10 +50,18 @@ export default function DevInsightPageClient({
   user: _user,
   githubHandle: serverGithubHandle,
 }: DevInsightPageProps) {
-  const { ready, authenticated, login, user: privyUser, linkGithub } = usePrivy();
+  const {
+    ready,
+    authenticated,
+    login,
+    user: privyUser,
+    linkGithub,
+  } = usePrivy();
 
   // Get GitHub handle from Privy linkedAccounts if not provided by server
-  const githubAccount = privyUser?.linkedAccounts?.find(acc => acc.type === 'github_oauth');
+  const githubAccount = privyUser?.linkedAccounts?.find(
+    (acc) => acc.type === "github_oauth",
+  );
   const privyGithubHandle = githubAccount?.username || null;
 
   // Use Privy GitHub handle if server didn't provide one
@@ -60,7 +87,7 @@ export default function DevInsightPageClient({
       await linkGithub();
       // Privy will handle the OAuth flow and update linkedAccounts automatically
       // The page will detect the new GitHub account via useEffect
-    } catch (error) {
+    } catch (_error) {
       // Error handled by Privy UI
     } finally {
       setIsLinkingGithub(false);
@@ -69,7 +96,8 @@ export default function DevInsightPageClient({
 
   // Analysis state
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisStatus, setAnalysisStatus] = useState<AnalysisStatus>("pending");
+  const [analysisStatus, setAnalysisStatus] =
+    useState<AnalysisStatus>("pending");
   const [_progress, setProgress] = useState(0);
   const [_statusMessage, setStatusMessage] = useState("");
   const [basicInfo, setBasicInfo] = useState<BasicAnalysisResult | null>(null);
@@ -112,7 +140,7 @@ export default function DevInsightPageClient({
   useEffect(() => {
     if (results?.data?.users?.[0]?.ai) {
       // Force a small state update to trigger re-render
-      setProgress(prev => prev === 100 ? 100 : 100);
+      setProgress((prev) => (prev === 100 ? 100 : 100));
     }
   }, [results]);
 
@@ -181,7 +209,9 @@ export default function DevInsightPageClient({
               <div className="p-2 rounded-lg bg-primary/10">
                 <Brain size={20} className="text-primary" />
               </div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">DevInsight</h1>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                DevInsight
+              </h1>
             </div>
             <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
               AI-powered Web3 development insights and analysis
@@ -199,7 +229,8 @@ export default function DevInsightPageClient({
                   Sign in to access DevInsight
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Connect your GitHub account to unlock AI-powered Web3 development insights
+                  Connect your GitHub account to unlock AI-powered Web3
+                  development insights
                 </p>
               </div>
             </div>
@@ -218,7 +249,9 @@ export default function DevInsightPageClient({
             <div className="p-2 rounded-lg bg-primary/10">
               <Brain size={20} className="text-primary" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white whitespace-nowrap">@{githubHandle} DevInsight</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white whitespace-nowrap">
+              @{githubHandle} DevInsight
+            </h1>
           </div>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
             AI-powered Web3 development insights and analysis
@@ -226,7 +259,6 @@ export default function DevInsightPageClient({
         </div>
 
         <div className="space-y-4">
-
           {/* Progress section intentionally removed; show skeletons only while analyzing */}
 
           {/* Error State */}
@@ -236,8 +268,12 @@ export default function DevInsightPageClient({
                 <div className="flex items-center gap-3">
                   <AlertCircle size={20} className="text-danger" />
                   <div>
-                    <h3 className="font-semibold text-danger mb-1">Analysis Failed</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{analysisError}</p>
+                    <h3 className="font-semibold text-danger mb-1">
+                      Analysis Failed
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                      {analysisError}
+                    </p>
                     <Button
                       color="danger"
                       variant="light"
@@ -274,7 +310,11 @@ export default function DevInsightPageClient({
                 <>
                   {/* Profile Header - Full Width */}
                   <FadeIn>
-                    <ProfileHeader user={currentUser} githubUsername={githubHandle} analysisId={analysisId} />
+                    <ProfileHeader
+                      user={currentUser}
+                      githubUsername={githubHandle}
+                      analysisId={analysisId}
+                    />
                   </FadeIn>
 
                   {/* Key Metrics */}
@@ -296,24 +336,32 @@ export default function DevInsightPageClient({
                   {/* Detailed Analysis */}
                   {hasEcosystemData(currentUser) && (
                     <FadeIn>
-                      <AnalysisTabs user={currentUser} githubUsername={githubHandle} />
+                      <AnalysisTabs
+                        user={currentUser}
+                        githubUsername={githubHandle}
+                      />
                     </FadeIn>
                   )}
                 </>
               )}
 
               {/* Loading State */}
-              {!hasEcosystemData(currentUser) && !analysisError && !isAnalyzing && (
+              {!hasEcosystemData(currentUser) &&
+                !analysisError &&
+                !isAnalyzing && (
                 <div className="glass-card dark:glass-card-dark p-4 text-center">
                   <div className="space-y-2">
                     <div className="flex items-center justify-center gap-2">
-                      <Loader2 size={14} className="animate-spin text-gray-400" />
+                      <Loader2
+                        size={14}
+                        className="animate-spin text-gray-400"
+                      />
                       <span className="text-sm text-gray-600 dark:text-gray-400">
-                        Analysis in progress...
+                          Analysis in progress...
                       </span>
                     </div>
                     <p className="text-xs text-gray-500 dark:text-gray-500">
-                      Usually takes 2-3 minutes
+                        Usually takes 2-3 minutes
                     </p>
                   </div>
                 </div>
@@ -341,21 +389,24 @@ export default function DevInsightPageClient({
           <ModalHeader className="flex flex-col gap-1">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-red-100 dark:bg-red-900/20 rounded-full">
-                <AlertCircle size={24} className="text-red-600 dark:text-red-400" />
+                <AlertCircle
+                  size={24}
+                  className="text-red-600 dark:text-red-400"
+                />
               </div>
-              <span className="text-xl font-semibold">GitHub Account Required</span>
+              <span className="text-xl font-semibold">
+                GitHub Account Required
+              </span>
             </div>
           </ModalHeader>
           <ModalBody>
             <p className="text-gray-600 dark:text-gray-400">
-              Connect your GitHub account to unlock AI-powered Web3 development insights
+              Connect your GitHub account to unlock AI-powered Web3 development
+              insights
             </p>
           </ModalBody>
           <ModalFooter>
-            <Button
-              variant="light"
-              onPress={() => setShowGitHubModal(false)}
-            >
+            <Button variant="light" onPress={() => setShowGitHubModal(false)}>
               Cancel
             </Button>
             <Button

@@ -1,4 +1,3 @@
-
 import type {
   ApiResponse,
   AnalysisRequest,
@@ -18,7 +17,6 @@ import type {
 async function analyzeUser(
   description: string = "DevInsight profile analysis",
 ): Promise<ApiResponse<AnalysisResponse>> {
-  
   const requestData: AnalysisRequest = {
     request_data: [], // API will derive from user token
     intent: "profile",
@@ -26,7 +24,6 @@ async function analyzeUser(
   };
 
   try {
-    
     // Use local API route instead of direct external API call
     const response = await fetch("/api/analysis/users", {
       method: "POST",
@@ -36,10 +33,9 @@ async function analyzeUser(
       body: JSON.stringify(requestData),
     });
 
-
     if (!response.ok) {
       await response.text();
-      
+
       return {
         success: false,
         code: `HTTP_${response.status}`,
@@ -50,21 +46,20 @@ async function analyzeUser(
 
     // Now the API returns the raw response directly, not wrapped
     const rawResult = await response.json();
-    
+
     // Wrap in our expected format
     const result: ApiResponse<AnalysisResponse> = {
       success: true,
-      code: "SUCCESS", 
+      code: "SUCCESS",
       message: "Analysis started successfully",
       data: {
         id: rawResult.id,
         users: { users: rawResult.users || [] },
       },
     };
-    
+
     return result;
   } catch (error) {
-    
     return {
       success: false,
       code: "API_ERROR",
@@ -91,8 +86,8 @@ async function fetchAnalysisResult(
     });
 
     // Now the API returns the raw response directly, not wrapped
-    const rawResult = await response.json() as RawAnalysisResult;
-    
+    const rawResult = (await response.json()) as RawAnalysisResult;
+
     // Wrap in our expected format
     const result: ApiResponse<RawAnalysisResult> = {
       success: true,
@@ -100,12 +95,12 @@ async function fetchAnalysisResult(
       message: "Data retrieved successfully",
       data: rawResult,
     };
-    
+
     return result;
   } catch (error) {
     return {
       success: false,
-      code: "API_ERROR", 
+      code: "API_ERROR",
       message: error instanceof Error ? error.message : "Unknown error",
       data: {
         id: "0",
@@ -123,7 +118,9 @@ async function fetchAnalysisResult(
   }
 }
 
-function mergeAnalysisUsers(rawResult: Partial<RawAnalysisResult>): GitHubUser[] {
+function mergeAnalysisUsers(
+  rawResult: Partial<RawAnalysisResult>,
+): GitHubUser[] {
   const githubUsers = rawResult.github?.users ?? [];
   const analyticsUsers = rawResult.data?.users ?? [];
 
@@ -165,7 +162,8 @@ function mergeAnalysisUsers(rawResult: Partial<RawAnalysisResult>): GitHubUser[]
           },
           skills: [],
           expertise_areas: [],
-          recommendation: "Continue developing your Web3 skills across multiple ecosystems.",
+          recommendation:
+            "Continue developing your Web3 skills across multiple ecosystems.",
           analysis_date: aiSection.timestamp,
           profileCard: {
             bio: aiProfile.bio,
@@ -220,7 +218,9 @@ export function buildAnalysisResultFromRaw(
 ): AnalysisResult {
   const mergedUsers = mergeAnalysisUsers(rawResult);
   const parsedId = Number(rawResult.id);
-  const resolvedAnalysisId = Number.isFinite(parsedId) ? parsedId : fallbackAnalysisId;
+  const resolvedAnalysisId = Number.isFinite(parsedId)
+    ? parsedId
+    : fallbackAnalysisId;
 
   return {
     data: { users: mergedUsers },
@@ -249,7 +249,6 @@ async function pollAnalysisResult(
         onProgress(retryCount + 1, response.data);
       }
 
-
       // Check if analysis is complete - response.data IS the actual API response now
       if (response.success && response.data) {
         const rawResult = response.data;
@@ -269,12 +268,11 @@ async function pollAnalysisResult(
         // Check if AI analysis is complete - verify actual AI data content
         // More flexible check for AI data availability
         const hasAIData = !!(
-          rawResult.ai && (
-            (rawResult.ai.data?.profile && rawResult.ai.data?.roastReport) ||  // New structure
-            (rawResult.ai.data?.profile) ||  // Profile only
-            (rawResult.ai.data?.roastReport) || // Roast report only
-            (rawResult.ai.success && rawResult.ai.data) // General AI data available
-          )
+          rawResult.ai &&
+          ((rawResult.ai.data?.profile && rawResult.ai.data?.roastReport) || // New structure
+            rawResult.ai.data?.profile || // Profile only
+            rawResult.ai.data?.roastReport || // Roast report only
+            (rawResult.ai.success && rawResult.ai.data)) // General AI data available
         );
 
         // IMPORTANT: If AI data is available, process and return immediately
@@ -283,7 +281,11 @@ async function pollAnalysisResult(
             success: true,
             code: "SUCCESS",
             message: "Analysis completed successfully",
-            data: buildAnalysisResultFromRaw(rawResult, "completed", analysisId),
+            data: buildAnalysisResultFromRaw(
+              rawResult,
+              "completed",
+              analysisId,
+            ),
           };
         }
 
@@ -298,13 +300,13 @@ async function pollAnalysisResult(
       retryCount++;
 
       if (retryCount < maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, interval));
+        await new Promise((resolve) => setTimeout(resolve, interval));
       }
-    } catch (error) {
+    } catch {
       retryCount++;
 
       if (retryCount < maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, interval));
+        await new Promise((resolve) => setTimeout(resolve, interval));
       }
     }
   }
@@ -313,7 +315,8 @@ async function pollAnalysisResult(
   return {
     success: false,
     code: "AI_ANALYSIS_TIMEOUT",
-    message: "AI analysis timeout: unable to fetch AI insights after maximum polling attempts. Basic analysis may be available.",
+    message:
+      "AI analysis timeout: unable to fetch AI insights after maximum polling attempts. Basic analysis may be available.",
     data: {
       data: { users: [] },
       status: "failed" as const,
@@ -332,15 +335,15 @@ export async function analyzeGitHubUser(
   onProgress?: ProgressCallback,
   onBasicInfo?: BasicDataCallback,
 ): Promise<ApiResponse<AnalysisResult>> {
-  
   try {
     if (onProgress) {
       onProgress("Initiating profile analysis...", 0);
     }
 
     // Step 1: Start analysis using profile intent for authenticated user
-    const analysisResponse = await analyzeUser(`DevInsight profile analysis for GitHub user: ${githubHandle}`);
-
+    const analysisResponse = await analyzeUser(
+      `DevInsight profile analysis for GitHub user: ${githubHandle}`,
+    );
 
     if (!analysisResponse.success) {
       return {
@@ -366,9 +369,8 @@ export async function analyzeGitHubUser(
       };
     }
 
-
     const analysisId = analysisResponse.data.id;
-    
+
     // Extract users from POST response structure - { users: { users: [...] } }
     const actualUsers = analysisResponse.data.users?.users || [];
 
@@ -410,7 +412,11 @@ export async function analyzeGitHubUser(
             // ignore merge errors
           }
 
-          onProgress(`Waiting for AI analysis completion (${attempt}/15)...`, progress, progressData);
+          onProgress(
+            `Waiting for AI analysis completion (${attempt}/15)...`,
+            progress,
+            progressData,
+          );
         }
       },
     );
@@ -427,11 +433,11 @@ export async function analyzeGitHubUser(
 
     return result;
   } catch (error) {
-    
     return {
       success: false,
-      code: "WORKFLOW_ERROR", 
-      message: error instanceof Error ? error.message : "Unknown workflow error",
+      code: "WORKFLOW_ERROR",
+      message:
+        error instanceof Error ? error.message : "Unknown workflow error",
       data: {
         data: { users: [] },
         status: "failed" as const,

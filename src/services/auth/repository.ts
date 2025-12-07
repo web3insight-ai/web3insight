@@ -18,7 +18,6 @@ const userCache: Record<string, { user: ApiUser; timestamp: number }> = {};
 const CACHE_TTL = 60 * 1000; // 60 seconds cache TTL
 
 const DATA_API_URL = env.DATA_API_URL;
-const GITHUB_CLIENT_ID = env.NEXT_PUBLIC_GITHUB_CLIENT_ID;
 
 function transformApiUserToCompatibleFormat(apiResponse: {
   profile: {
@@ -241,25 +240,13 @@ async function fetchCurrentUser(
     };
 
     return { ...defaultResult, data: user };
-  } catch (error) {
+  } catch (_error) {
     return defaultResult;
   }
 }
 
 async function getUser(request: Request): Promise<ApiUser | null> {
   return (await fetchCurrentUser(request)).data;
-}
-
-// Get GitHub OAuth URL
-function getGitHubAuthUrl(): string {
-  const baseUrl =
-    typeof window !== "undefined"
-      ? window.location.origin
-      : env.DATA_API_URL || "http://localhost:5173";
-  const redirectUri = `${baseUrl}/connect/github/redirect`;
-  return `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&scope=user:email&redirect_uri=${encodeURIComponent(
-    redirectUri,
-  )}`;
 }
 
 // Role-based access control helpers
@@ -390,7 +377,6 @@ export {
   signOut,
   fetchCurrentUser,
   getUser,
-  getGitHubAuthUrl,
   fetchMagic,
   bindWallet,
   hasRole,

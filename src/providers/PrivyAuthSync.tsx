@@ -40,7 +40,7 @@ export function PrivyAuthSync() {
         } else {
           hasAuthenticatedRef.current = false; // Allow retry
         }
-      } catch (error) {
+      } catch (_error) {
         hasAuthenticatedRef.current = false; // Allow retry
       }
     };
@@ -57,4 +57,3 @@ export function PrivyAuthSync() {
 
   return null; // This component doesn't render anything
 }
-

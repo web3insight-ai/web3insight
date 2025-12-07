@@ -1,13 +1,21 @@
-import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { headers } from 'next/headers';
-import DeveloperDetailClient from './DeveloperDetailClient';
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { headers } from "next/headers";
+import DeveloperDetailClient from "./DeveloperDetailClient";
 import { getTitle } from "@/utils/app";
 import type { Repository } from "~/repository/typing";
-import type { DeveloperActivity, DeveloperContribution } from "~/developer/typing";
-import { fetchOne, fetchRepositoryRankList, fetchActivityList, fetchContributionList } from "~/developer/repository";
+import type {
+  DeveloperActivity,
+  DeveloperContribution,
+} from "~/developer/typing";
+import {
+  fetchOne,
+  fetchRepositoryRankList,
+  fetchActivityList,
+  fetchContributionList,
+} from "~/developer/repository";
 import { getUser } from "~/auth/repository";
-import DefaultLayoutWrapper from '../../DefaultLayoutWrapper';
+import DefaultLayoutWrapper from "../../DefaultLayoutWrapper";
 import { env } from "@/env";
 
 interface DeveloperPageProps {
@@ -16,7 +24,9 @@ interface DeveloperPageProps {
   }>;
 }
 
-export async function generateMetadata({ params }: DeveloperPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: DeveloperPageProps): Promise<Metadata> {
   try {
     const resolvedParams = await params;
     const res = await fetchOne(resolvedParams.id);
@@ -39,7 +49,7 @@ export async function generateMetadata({ params }: DeveloperPageProps): Promise<
       title: baseTitle,
       description: "Web3 developer profile and analytics",
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       title: `Developer Profile - ${getTitle()}`,
       description: "Web3 developer profile and analytics",
@@ -47,7 +57,9 @@ export async function generateMetadata({ params }: DeveloperPageProps): Promise<
   }
 }
 
-export default async function DeveloperDetailPage({ params }: DeveloperPageProps) {
+export default async function DeveloperDetailPage({
+  params,
+}: DeveloperPageProps) {
   const resolvedParams = await params;
   const developerId = resolvedParams.id;
 

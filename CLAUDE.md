@@ -236,16 +236,15 @@ Environment variables are validated using `@t3-oss/env-nextjs` in `/src/env.ts`:
 - `DATA_API_TOKEN` - API authentication token
 - `OPENDIGGER_URL` - OpenDigger API URL
 - `OSSINSIGHT_URL` - OSS Insight API URL
-- `SESSION_SECRET` - Session encryption secret
 
 **Optional Server Variables**:
 - `OPENAI_BASE_URL`, `OPENAI_API_KEY` - OpenAI configuration
 - `AI_API_URL`, `AI_API_TOKEN` - Alternative AI service
 - `HTTP_TIMEOUT` - HTTP client timeout (default: 30000ms)
 
-**Required Client Variables** (prefixed with `NEXT_PUBLIC_`):
-- `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` - WalletConnect configuration
-- `NEXT_PUBLIC_GITHUB_CLIENT_ID` - GitHub OAuth configuration
+**Optional Client Variables** (prefixed with `NEXT_PUBLIC_`):
+- `NEXT_PUBLIC_PRIVY_APP_ID` - Privy authentication configuration
+- `NEXT_PUBLIC_UMAMI_WEBSITE_ID` - Umami analytics configuration
 
 The `predev` script automatically runs environment setup before starting development.
 

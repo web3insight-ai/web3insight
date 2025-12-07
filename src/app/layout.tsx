@@ -21,11 +21,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <script
-          defer
-          src="https://umami.web3insight.ai/script.js"
-          data-website-id={env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
-        />
+        {env.NEXT_PUBLIC_UMAMI_WEBSITE_ID && (
+          <script
+            defer
+            src="https://umami.web3insight.ai/script.js"
+            data-website-id={env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
+          />
+        )}
       </head>
       <body>
         <ClientProviders>{children}</ClientProviders>

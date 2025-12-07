@@ -3,10 +3,8 @@ import "server-only";
 import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
 
-import { env } from "@/env";
-
 const secret = new TextEncoder().encode(
-  env.SESSION_SECRET || "fallback-secret-key",
+  process.env.SESSION_SECRET || "default-session-secret-key",
 );
 const alg = "HS256";
 
@@ -95,14 +93,14 @@ async function createUserSession({
   return {
     headers: {
       "Set-Cookie": `web3insight_session=${token}; Path=/; HttpOnly; SameSite=Lax; ${
-        env.NODE_ENV === "production" ? "Secure;" : ""
+        process.env.NODE_ENV === "production" ? "Secure;" : ""
       } Max-Age=86400`,
     },
   };
 }
 
 // Server-only function - clears session cookies
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 async function clearSession(_session?: MockSession) {
   const cookieStore = await cookies();
 
