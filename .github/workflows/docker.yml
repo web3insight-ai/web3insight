@@ -2,7 +2,7 @@ name: Build docker images
 on:
   push:
     branches:
-      - "master"
+      - "*"
     tags:
       - "*"
     paths-ignore:
