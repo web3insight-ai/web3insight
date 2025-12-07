@@ -1,4 +1,4 @@
-FROM node:22-alpine AS base
+FROM node:24-alpine AS base
 
 RUN apk update && apk add --no-cache python3 make g++
 
