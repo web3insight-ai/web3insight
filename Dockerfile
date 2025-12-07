@@ -1,6 +1,6 @@
 # Stage 1: Install dependencies
 FROM node:20-alpine AS deps
-RUN apk add --no-cache libc6-compat python3 make g++
+RUN apk update && apk add --no-cache --no-scripts python3 make g++
 
 # Install pnpm (use specific version from package.json)
 RUN corepack enable && corepack prepare pnpm@9.4.0 --activate
@@ -15,7 +15,7 @@ RUN pnpm install --frozen-lockfile --prod=false
 
 # Stage 2: Build the application
 FROM node:20-alpine AS builder
-RUN apk add --no-cache libc6-compat python3 make g++
+RUN apk update && apk add --no-cache --no-scripts python3 make g++
 
 # Install pnpm (use specific version from package.json)
 RUN corepack enable && corepack prepare pnpm@9.4.0 --activate
