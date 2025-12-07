@@ -1,6 +1,6 @@
-FROM node:20-alpine AS base
+FROM node:24 AS base
 
-RUN apk update && apk add --no-cache python3 make g++
+RUN apt update && apt install -y python3 make g++
 
 RUN npm i -g pnpm
 
