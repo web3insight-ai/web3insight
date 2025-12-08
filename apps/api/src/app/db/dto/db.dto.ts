@@ -169,6 +169,15 @@ export interface ApiAuthMagic {
   uid: Int8;
 }
 
+export interface ApiDonateRepos {
+  created_at: Generated<Timestamp>;
+  repo_donate_data: Generated<Json>;
+  repo_id: Int8;
+  repo_info: Generated<Json>;
+  submitter_id: Generated<Int8>;
+  updated_at: Generated<Timestamp>;
+}
+
 export interface DB {
   'data.actors': DataActors;
   'data.events': DataEvent;
@@ -182,4 +191,5 @@ export interface DB {
   'api.auth_users_binds': ApiAuthUsersBinds;
   'api.auth_users_roles': ApiAuthUserRoles;
   'api.auth_magic': ApiAuthMagic;
+  'api.donate_repos': ApiDonateRepos;
 }
