@@ -438,7 +438,7 @@ export class AuthService {
   })
   async sign() {
     const claims = new JwtPayload();
-    claims.uid = '2';
+    claims.uid = '181259';
     claims.iss = 'web3insights.app';
     claims.exp = Math.floor(Date.now() / 1000) + 31536000;
     claims.type = 'admin';
@@ -446,7 +446,7 @@ export class AuthService {
       claims: {
         allowed_roles: ['user', 'admin'],
         default_role: 'user',
-        user_id: '1',
+        user_id: '181259',
       },
     };
 
