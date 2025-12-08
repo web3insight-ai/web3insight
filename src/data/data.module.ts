@@ -8,6 +8,7 @@ import { ReposService } from './services/repos.services';
 import { UsersService } from './services/users.services';
 import { EcoService } from './services/eco.services';
 import { AuthModule } from '@/auth/auth.module';
+import { DonateService } from './services/donate.services';
 
 @Module({
   imports: [DBModule, forwardRef(() => AuthModule)],
@@ -19,6 +20,7 @@ import { AuthModule } from '@/auth/auth.module';
     ReposService,
     UsersService,
     EcoService,
+    DonateService,
   ],
   exports: [
     InitDataService,
@@ -28,6 +30,7 @@ import { AuthModule } from '@/auth/auth.module';
     CacheDataService,
     UsersService,
     EcoService,
+    DonateService,
   ],
 })
 export class DataModule {}
