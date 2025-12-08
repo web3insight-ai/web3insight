@@ -11,6 +11,7 @@ import { CustomController } from './controller/custom.controller';
 import { AuthModule } from '@/auth/auth.module';
 import { AuthController } from './controller/auth.controller';
 import { RepoController } from './controller/repo.controller';
+import { DonateController } from './controller/donate.controller';
 
 @Module({
   controllers: [
@@ -21,6 +22,7 @@ import { RepoController } from './controller/repo.controller';
     CustomController,
     AuthController,
     RepoController,
+    DonateController,
   ],
   providers: [JwtService, GithubService],
   exports: [],
