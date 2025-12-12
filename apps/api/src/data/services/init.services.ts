@@ -364,6 +364,31 @@ export class InitDataService {
   })
   async exportNotFoundUpstreamRepos() {
     const outputPath = join(process.cwd(), 'upstream_repo_marks_404.txt');
+    const ecoPath = join(process.cwd(), 'eco.jsonl');
+
+    const repoCaseMap = new Map<string, string>();
+    try {
+      const ecoStream = fs.createReadStream(ecoPath, { encoding: 'utf-8' });
+      const ecoRl = readline.createInterface({
+        input: ecoStream,
+        crlfDelay: Infinity,
+      });
+      for await (const line of ecoRl) {
+        if (!line.trim()) continue;
+        try {
+          const item = JSON.parse(line) as { repo_url?: string };
+          if (!item?.repo_url) continue;
+          const originalName = convertGithubUrlToRepoName(item.repo_url);
+          repoCaseMap.set(originalName.toLowerCase(), originalName);
+        } catch {
+          continue;
+        }
+      }
+    } catch (err) {
+      console.warn(
+        `Failed to load eco.jsonl for original casing: ${(err as Error).message}`,
+      );
+    }
 
     const rows = await this.db
       .selectFrom('api.upstream_repos')
@@ -388,8 +413,13 @@ export class InitDataService {
           : [];
         if (branches.length > 0) return;
 
+        const repoKey = row.upstream_repo_name.toLowerCase();
+        const repoName = repoCaseMap.get(repoKey) ?? row.upstream_repo_name;
+        if (repoName.startsWith('http://') || repoName.startsWith('https://'))
+          return;
+
         if (!markToRepos.has(markName)) markToRepos.set(markName, new Set());
-        markToRepos.get(markName)?.add(row.upstream_repo_name);
+        markToRepos.get(markName)?.add(repoName);
       });
     }
 
