@@ -358,6 +358,63 @@ export class InitDataService {
   }
 
   @Command({
+    command: 'export:db:eco:upstream_repos:404',
+    description:
+      'Export lines as "<repo> <mark> https://github.com/<repo>" for rows whose api field is {"status":404} (skip ALL and marks with branches)',
+  })
+  async exportNotFoundUpstreamRepos() {
+    const outputPath = join(process.cwd(), 'upstream_repo_marks_404.txt');
+
+    const rows = await this.db
+      .selectFrom('api.upstream_repos')
+      .select(['upstream_repo_name', 'upstream_marks'])
+      .where('api', '=', { status: 404 })
+      .execute();
+
+    const markToRepos = new Map<string, Set<string>>();
+
+    for (const row of rows) {
+      const marks = row.upstream_marks as Record<
+        string,
+        { branch?: string[]; tags?: string[] }
+      >;
+      if (!marks || typeof marks !== 'object') continue;
+
+      Object.entries(marks).forEach(([markName, markValue]) => {
+        if (markName.toUpperCase() === 'ALL') return;
+
+        const branches = Array.isArray(markValue?.branch)
+          ? markValue.branch
+          : [];
+        if (branches.length > 0) return;
+
+        if (!markToRepos.has(markName)) markToRepos.set(markName, new Set());
+        markToRepos.get(markName)?.add(row.upstream_repo_name);
+      });
+    }
+
+    const lines: string[] = [];
+    const sortedMarks = Array.from(markToRepos.keys()).sort((a, b) =>
+      a.localeCompare(b, 'en', { sensitivity: 'base' }),
+    );
+
+    sortedMarks.forEach((mark) => {
+      const repos = Array.from(markToRepos.get(mark) ?? []).sort((a, b) =>
+        a.localeCompare(b, 'en', { sensitivity: 'base' }),
+      );
+      const markLabel = /[^A-Za-z0-9_-]/.test(mark) ? `"${mark}"` : mark;
+
+      repos.forEach((repo) => {
+        lines.push(`reprem ${markLabel} https://github.com/${repo}`);
+      });
+    });
+
+    await fs.promises.writeFile(outputPath, lines.join('\n'), 'utf-8');
+
+    console.log(`Exported ${lines.length} lines to ${outputPath}`);
+  }
+
+  @Command({
     command: 'sync:db:eco:ecosystems',
     description: 'Sync api.upstream_repos to data.repos',
   })
