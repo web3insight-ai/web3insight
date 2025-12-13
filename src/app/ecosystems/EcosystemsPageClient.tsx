@@ -1,8 +1,6 @@
-'use client';
+"use client";
 
-import {
-  Card, CardHeader, Input, Pagination,
-} from "@nextui-org/react";
+import { Card, CardHeader, Input, Pagination } from "@nextui-org/react";
 import { Search, Warehouse, Database, Users, Code2, Zap } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -13,7 +11,11 @@ import { EcosystemTypeFilter } from "$/ecosystem-type-filter";
 import type { EcoRankRecord } from "~/api/typing";
 import MetricCard, { type MetricCardProps } from "$/controls/metric-card";
 import TableHeader from "$/controls/table-header";
-import { staggerContainer, staggerItemScale, fadeInUp } from "@/utils/animations";
+import {
+  staggerContainer,
+  staggerItemScale,
+  fadeInUp,
+} from "@/utils/animations";
 
 interface EcosystemsPageProps {
   ecosystems: EcoRankRecord[];
@@ -43,7 +45,8 @@ function resolveMetrics(dataSource: {
       value: Number(dataSource.totalDevelopers).toLocaleString(),
       icon: <Users size={20} className="text-primary" />,
       iconBgClassName: "bg-primary/10",
-      tooltip: "Developers with activity (star not included) in this ecosystem (all time)",
+      tooltip:
+        "Developers with activity (star not included) in this ecosystem (all time)",
     },
     {
       label: "Ecosystems",
@@ -75,25 +78,39 @@ export default function EcosystemsPageClient({
 
   // Filtering state
   const [filterValue, setFilterValue] = useState("");
-  const [selectedType, setSelectedType] = useState<EcosystemType>(EcosystemType.PUBLIC_CHAIN);
+  const [selectedType, setSelectedType] = useState<EcosystemType>(
+    EcosystemType.PUBLIC_CHAIN,
+  );
 
   // Reset page when ecosystem type changes
   useEffect(() => {
     setPage(1);
   }, [selectedType]);
 
+  // First, create a map of ecosystem names to their global ranks (based on actors_core_total)
+  const ecosystemRanks = useMemo(() => {
+    const sorted = [...ecosystems].sort((a, b) => {
+      return Number(b.actors_core_total) - Number(a.actors_core_total);
+    });
+    const rankMap = new Map<string, number>();
+    sorted.forEach((eco, index) => {
+      rankMap.set(eco.eco_name, index + 1);
+    });
+    return rankMap;
+  }, [ecosystems]);
+
   // Filter ecosystems based on search query and type
   const filteredItems = useMemo(() => {
     let filtered = [...ecosystems];
 
     if (filterValue) {
-      filtered = filtered.filter(ecosystem =>
+      filtered = filtered.filter((ecosystem) =>
         ecosystem.eco_name.toLowerCase().includes(filterValue.toLowerCase()),
       );
     }
 
     // Filter by ecosystem type using the kind field
-    filtered = filtered.filter(ecosystem =>
+    filtered = filtered.filter((ecosystem) =>
       getFilterForType(selectedType, ecosystem.kind),
     );
 
@@ -129,10 +146,12 @@ export default function EcosystemsPageClient({
           <div className="p-2 rounded-lg bg-primary/10">
             <Warehouse size={20} className="text-primary" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">All Ecosystems</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            All Ecosystems
+          </h1>
         </div>
         <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
-            Compare metrics across all blockchain and Web3 ecosystems
+          Compare metrics across all blockchain and Web3 ecosystems
         </p>
       </motion.div>
 
@@ -143,7 +162,12 @@ export default function EcosystemsPageClient({
         animate="visible"
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10"
       >
-        {resolveMetrics({ totalCoreDevelopers, totalDevelopers, totalEcosystems, totalRepositories }).map((metric) => (
+        {resolveMetrics({
+          totalCoreDevelopers,
+          totalDevelopers,
+          totalEcosystems,
+          totalRepositories,
+        }).map((metric) => (
           <motion.div
             key={metric.label.replaceAll(" ", "")}
             variants={staggerItemScale}
@@ -179,7 +203,9 @@ export default function EcosystemsPageClient({
             <div className="p-2 rounded-lg bg-primary/10">
               <Warehouse size={18} className="text-primary" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Ecosystem Analytics</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+              Ecosystem Analytics
+            </h3>
           </div>
         </CardHeader>
 
@@ -187,18 +213,41 @@ export default function EcosystemsPageClient({
           <table className="w-full">
             <thead>
               <tr className="border-t border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider w-12">#</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider w-12">
+                  #
+                </th>
                 <TableHeader>Ecosystem</TableHeader>
-                <TableHeader align="right" tooltip="Developers with pull requests and push events in the past year">Devs</TableHeader>
-                <TableHeader align="right" tooltip="Developers with activity (star not included) in this ecosystem (all time)">Contributors</TableHeader>
-                <TableHeader align="right" tooltip="Developers with first activity in past 90 days">New</TableHeader>
-                <TableHeader align="right" tooltip="Total repositories in this ecosystem">Repos</TableHeader>
+                <TableHeader
+                  align="right"
+                  tooltip="Developers with pull requests and push events in the past year"
+                >
+                  Devs
+                </TableHeader>
+                <TableHeader
+                  align="right"
+                  tooltip="Developers with activity (star not included) in this ecosystem (all time)"
+                >
+                  Contributors
+                </TableHeader>
+                <TableHeader
+                  align="right"
+                  tooltip="Developers with first activity in past 90 days"
+                >
+                  New
+                </TableHeader>
+                <TableHeader
+                  align="right"
+                  tooltip="Total repositories in this ecosystem"
+                >
+                  Repos
+                </TableHeader>
               </tr>
             </thead>
             <tbody className="divide-y divide-border dark:divide-border-dark">
               <AnimatePresence mode="wait">
                 {paginatedItems.map((ecosystem, index) => {
-                  const absoluteIndex = (page - 1) * rowsPerPage + index + 1;
+                  const globalRank =
+                    ecosystemRanks.get(ecosystem.eco_name) || 0;
                   return (
                     <motion.tr
                       key={ecosystem.eco_name}
@@ -209,8 +258,10 @@ export default function EcosystemsPageClient({
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-medium transition-all duration-200 group-hover:scale-110 bg-gray-50 dark:bg-surface-dark text-gray-500 dark:text-gray-500`}>
-                            {absoluteIndex}
+                          <span
+                            className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-medium transition-all duration-200 group-hover:scale-110 bg-gray-50 dark:bg-surface-dark text-gray-500 dark:text-gray-500`}
+                          >
+                            {globalRank}
                           </span>
                         </div>
                       </td>
@@ -252,11 +303,7 @@ export default function EcosystemsPageClient({
 
         {pages > 1 && (
           <div className="px-6 py-4 border-t border-border dark:border-border-dark flex justify-center">
-            <Pagination
-              page={page}
-              total={pages}
-              onChange={setPage}
-            />
+            <Pagination page={page} total={pages} onChange={setPage} />
           </div>
         )}
       </Card>
