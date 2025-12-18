@@ -1,8 +1,11 @@
 import type { ResponseResult } from "@/types";
 
 import type {
-  EcoRequestParams, TotalResponseData, ListResponseData,
-  ActorRankRecord, ActorTrendRecord,
+  EcoRequestParams,
+  TotalResponseData,
+  ListResponseData,
+  ActorRankRecord,
+  ActorTrendRecord,
   ActorCountryRankResponse,
 } from "../typing";
 import httpClient from "./client";
@@ -12,13 +15,17 @@ async function fetchTotalCount(
 ): Promise<ResponseResult<TotalResponseData>> {
   const { eco = "ALL", scope = "ALL" } = params;
 
-  return httpClient.get("/v1/actors/total", { params: { eco_name: eco, scope } });
+  return httpClient.get("/v1/actors/total", {
+    params: { eco_name: eco, scope },
+  });
 }
 
 async function fetchGrowthCount(
   params: EcoRequestParams = { eco: "ALL" },
 ): Promise<ResponseResult<TotalResponseData>> {
-  return httpClient.get("/v1/actors/total/new/quarter/last", { params: { eco_name: params.eco } });
+  return httpClient.get("/v1/actors/total/new/quarter/last", {
+    params: { eco_name: params.eco },
+  });
 }
 
 async function fetchRankList(
@@ -32,11 +39,23 @@ async function fetchTrendList(
 ): Promise<ResponseResult<ListResponseData<ActorTrendRecord>>> {
   const { eco = "ALL", period = "month" } = params;
 
-  return httpClient.get("/v1/actors/total/date", { params: { eco_name: eco, period } });
+  return httpClient.get("/v1/actors/total/date", {
+    params: { eco_name: eco, period },
+  });
 }
 
-async function fetchCountryRankList(): Promise<ResponseResult<ActorCountryRankResponse>> {
-  return httpClient.get("/v1/actors/country/rank");
+async function fetchCountryRankList(
+  params: EcoRequestParams = { eco: "ALL" },
+): Promise<ResponseResult<ActorCountryRankResponse>> {
+  return httpClient.get("/v1/actors/country/rank", {
+    params: { eco_name: params.eco },
+  });
 }
 
-export { fetchTotalCount, fetchGrowthCount, fetchRankList, fetchTrendList, fetchCountryRankList };
+export {
+  fetchTotalCount,
+  fetchGrowthCount,
+  fetchRankList,
+  fetchTrendList,
+  fetchCountryRankList,
+};

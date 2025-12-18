@@ -1,21 +1,28 @@
-'use client';
+"use client";
 
-import { Warehouse, Github, Users , TrendingUp } from "lucide-react";
+import { Warehouse, Github, Users, TrendingUp } from "lucide-react";
 
 import { CardSkeleton, ChartSkeleton, TableSkeleton } from "$/loading";
-import ReactECharts from 'echarts-for-react';
+import ReactECharts from "echarts-for-react";
 import ChartTitle from "$/controls/chart-title";
 
 import RepositoryRankViewWidget from "~/repository/views/repository-rank";
 import DeveloperRankViewWidget from "~/developer/views/developer-rank";
 import RepositoryTrendingViewWidget from "~/repository/views/repository-trending";
+import CountryDistributionChart from "$/CountryDistributionChart";
 
 import ClientOnly from "$/ClientOnly";
 
 import { resolveChartOptions } from "./helper";
 import MetricOverview from "./MetricOverview";
 
-import type { ActorRankRecord, ActorTrendRecord, RepoRankRecord, RepoTrendingRecord } from "~/api/typing";
+import type {
+  ActorRankRecord,
+  ActorTrendRecord,
+  ActorCountryRankRecord,
+  RepoRankRecord,
+  RepoTrendingRecord,
+} from "~/api/typing";
 
 interface EcosystemStatistics {
   developerTotalCount: number | string;
@@ -26,6 +33,8 @@ interface EcosystemStatistics {
   repositoryTotalCount: number | string;
   repositories: RepoRankRecord[];
   trendingRepositories: RepoTrendingRecord[];
+  countryDistribution: ActorCountryRankRecord[];
+  countryDistributionTotal: number;
 }
 
 interface EcosystemDetailProps {
@@ -50,12 +59,17 @@ export default function EcosystemDetailClient({
               <Warehouse size={28} className="text-primary" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">{ecosystem}</h1>
-              <p className="text-lg text-gray-500 dark:text-gray-400">Ecosystem Analytics</p>
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
+                {ecosystem}
+              </h1>
+              <p className="text-lg text-gray-500 dark:text-gray-400">
+                Ecosystem Analytics
+              </p>
             </div>
           </div>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl leading-relaxed">
-            Comprehensive developer analytics and insights for the {ecosystem} ecosystem.
+            Comprehensive developer analytics and insights for the {ecosystem}{" "}
+            ecosystem.
           </p>
         </div>
 
@@ -67,6 +81,20 @@ export default function EcosystemDetailClient({
           )}
         </div>
         <div className="animate-slide-up" style={{ animationDelay: "200ms" }}>
+          {isLoading ? (
+            <ChartSkeleton
+              title="Global Contributor Distribution"
+              height="500px"
+            />
+          ) : (
+            <CountryDistributionChart
+              className="mb-4"
+              data={statistics!.countryDistribution}
+              totalDevelopers={statistics!.countryDistributionTotal}
+            />
+          )}
+        </div>
+        <div className="animate-slide-up" style={{ animationDelay: "250ms" }}>
           <ClientOnly>
             {isLoading ? (
               <ChartSkeleton title="Developer Activity Trend" height="320px" />
@@ -81,7 +109,7 @@ export default function EcosystemDetailClient({
                 <div className="h-56">
                   <ReactECharts
                     option={resolveChartOptions(statistics!.trend)}
-                    style={{ height: '100%', width: '100%' }}
+                    style={{ height: "100%", width: "100%" }}
                   />
                 </div>
               </div>
@@ -92,7 +120,10 @@ export default function EcosystemDetailClient({
           {isLoading ? (
             <CardSkeleton count={1} />
           ) : (
-            <RepositoryTrendingViewWidget className="mb-4" dataSource={statistics!.trendingRepositories} />
+            <RepositoryTrendingViewWidget
+              className="mb-4"
+              dataSource={statistics!.trendingRepositories}
+            />
           )}
         </div>
         <div className="animate-slide-up" style={{ animationDelay: "300ms" }}>
@@ -104,7 +135,10 @@ export default function EcosystemDetailClient({
               columns={6}
             />
           ) : (
-            <RepositoryRankViewWidget className="mb-4" dataSource={statistics!.repositories} />
+            <RepositoryRankViewWidget
+              className="mb-4"
+              dataSource={statistics!.repositories}
+            />
           )}
         </div>
         <div className="animate-slide-up" style={{ animationDelay: "400ms" }}>

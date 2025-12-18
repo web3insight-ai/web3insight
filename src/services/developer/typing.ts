@@ -1,5 +1,18 @@
 import type { User, Event } from "../github/typing";
 
+type EcosystemInfo = {
+  ecosystem: string;
+  totalScore?: number;
+  repoCount?: number;
+  firstActivityAt?: string;
+  lastActivityAt?: string;
+};
+
+type DeveloperEcosystems = {
+  ecosystems: EcosystemInfo[];
+  totalScore?: number;
+};
+
 type Developer = {
   id: User["id"];
   username: User["login"];
@@ -26,11 +39,18 @@ type DeveloperActivity = {
   id: string;
   description: string;
   date: string;
-}
+};
 
 type DeveloperContribution = {
   date: string;
   total: number;
 };
 
-export type { Developer, ActivityDescriptionResolver, DeveloperActivity, DeveloperContribution };
+export type {
+  Developer,
+  EcosystemInfo,
+  DeveloperEcosystems,
+  ActivityDescriptionResolver,
+  DeveloperActivity,
+  DeveloperContribution,
+};

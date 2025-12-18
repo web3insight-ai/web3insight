@@ -7,12 +7,14 @@ import type { Repository } from "~/repository/typing";
 import type {
   DeveloperActivity,
   DeveloperContribution,
+  DeveloperEcosystems,
 } from "~/developer/typing";
 import {
   fetchOne,
   fetchRepositoryRankList,
   fetchActivityList,
   fetchContributionList,
+  fetchEcosystems,
 } from "~/developer/repository";
 import { getUser } from "~/auth/repository";
 import DefaultLayoutWrapper from "../../DefaultLayoutWrapper";
@@ -80,6 +82,7 @@ export default async function DeveloperDetailPage({
     let contributions: DeveloperContribution[] = [];
     let repositories: Repository[] = [];
     let recentActivity: DeveloperActivity[] = [];
+    let ecosystems: DeveloperEcosystems | null = null;
 
     if (res.success && res.data) {
       try {
@@ -87,11 +90,13 @@ export default async function DeveloperDetailPage({
           fetchContributionList(res.data.id),
           fetchRepositoryRankList(res.data.username),
           fetchActivityList(res.data.username),
+          fetchEcosystems(res.data.id),
         ]);
 
         contributions = responses[0].data || [];
         repositories = responses[1].data || [];
         recentActivity = responses[2].data || [];
+        ecosystems = responses[3].data || null;
       } catch (error) {
         console.error(`[Route] Error during API calls:`, error);
         // Continue with empty data rather than throwing
@@ -105,6 +110,7 @@ export default async function DeveloperDetailPage({
       contributions,
       repositories,
       recentActivity,
+      ecosystems,
     };
 
     return (

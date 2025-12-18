@@ -14,8 +14,10 @@ import type {
   DeveloperActivity,
   DeveloperContribution,
   Developer,
+  DeveloperEcosystems,
 } from "~/developer/typing";
 import ProfileCardWidget from "~/developer/widgets/profile-card";
+import EcosystemListWidget from "~/developer/widgets/ecosystem-list";
 import ActivityListViewWidget from "~/developer/views/activity-list";
 import { ProgrammingLanguagesBar } from "../../../components/event/ProgrammingLanguagesBar";
 import { ProgrammingLanguagesPie } from "../../../components/event/ProgrammingLanguagesPie";
@@ -28,6 +30,7 @@ interface DeveloperDetailProps {
   contributions: DeveloperContribution[];
   repositories: Repository[];
   recentActivity: DeveloperActivity[];
+  ecosystems: DeveloperEcosystems | null;
 }
 
 export default function DeveloperDetailClient({
@@ -35,10 +38,14 @@ export default function DeveloperDetailClient({
   contributions,
   repositories,
   recentActivity,
+  ecosystems,
 }: DeveloperDetailProps) {
-  const { data: githubStats, loading: githubStatsLoading } = useGitHubStats(developer?.username || null);
+  const { data: githubStats, loading: githubStatsLoading } = useGitHubStats(
+    developer?.username || null,
+  );
   const githubLanguages = githubStats?.languages ?? [];
-  const shouldShowGitHubLanguages = githubStatsLoading || githubLanguages.length > 0;
+  const shouldShowGitHubLanguages =
+    githubStatsLoading || githubLanguages.length > 0;
 
   // Show loading skeleton while data is being fetched
   if (!developer) {
@@ -83,6 +90,14 @@ export default function DeveloperDetailClient({
         <div className="animate-fade-in">
           <ProfileCardWidget className="mb-4" developer={developer} />
         </div>
+        {ecosystems && ecosystems.ecosystems.length > 0 && (
+          <div className="animate-slide-up" style={{ animationDelay: "25ms" }}>
+            <EcosystemListWidget
+              className="mb-4"
+              ecosystems={ecosystems.ecosystems}
+            />
+          </div>
+        )}
         {shouldShowGitHubLanguages && (
           <div className="animate-slide-up" style={{ animationDelay: "50ms" }}>
             <div className="mb-4">
