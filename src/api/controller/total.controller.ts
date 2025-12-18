@@ -159,11 +159,11 @@ export class TotalController {
   })
   @ApiBearerAuth()
   @UseGuards(AppAuthGuard)
-  async getActorCountryRank() {
+  async getActorCountryRank(@Query() query: GetTotalReqDto) {
     try {
       const res = await this.cacheDataService.getCacheData(
         CacheKey.ActorCountryStats,
-        ECO_ALL,
+        query.eco_name,
       );
       return res?.cache_data as ActorCountryStatListDto;
     } catch (e: unknown) {
