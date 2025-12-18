@@ -11,7 +11,7 @@ import {
   ChevronDown,
   Layers,
   Lightbulb,
-  Store,
+  Compass,
   DollarSign,
 } from "lucide-react";
 import clsx from "clsx";
@@ -52,7 +52,7 @@ const navigationGroups: NavGroup[] = [
   },
   {
     name: "Plaza",
-    icon: Store,
+    icon: Compass,
     items: [
       { name: "x402", href: "/plaza/x402", icon: DollarSign, disabled: true },
     ],
