@@ -13,6 +13,8 @@ import {
   Lightbulb,
   Compass,
   DollarSign,
+  CreditCard,
+  ExternalLink,
 } from "lucide-react";
 import clsx from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,6 +26,7 @@ interface NavItem {
   href: string;
   icon: React.ComponentType<{ size?: number }>;
   disabled?: boolean;
+  external?: boolean;
 }
 
 interface NavGroup {
@@ -54,6 +57,12 @@ const navigationGroups: NavGroup[] = [
     name: "Plaza",
     icon: Compass,
     items: [
+      {
+        name: "DevCard",
+        href: "https://card.web3insight.ai/",
+        icon: CreditCard,
+        external: true,
+      },
       { name: "x402", href: "/plaza/x402", icon: DollarSign, disabled: true },
     ],
   },
@@ -131,6 +140,13 @@ function NavDropdown({ group, index }: { group: NavGroup; index: number }) {
                   );
                 }
 
+                const linkClassName = clsx(
+                  "flex items-center gap-2 px-3 py-2 rounded-md text-xs font-medium transition-all duration-200",
+                  isActive
+                    ? "bg-primary/10 text-primary"
+                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50",
+                );
+
                 return (
                   <motion.div
                     key={item.name}
@@ -138,19 +154,31 @@ function NavDropdown({ group, index }: { group: NavGroup; index: number }) {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: itemIndex * 0.03 }}
                   >
-                    <Link
-                      href={item.href}
-                      onClick={() => setIsOpen(false)}
-                      className={clsx(
-                        "flex items-center gap-2 px-3 py-2 rounded-md text-xs font-medium transition-all duration-200",
-                        isActive
-                          ? "bg-primary/10 text-primary"
-                          : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50",
-                      )}
-                    >
-                      <Icon size={14} />
-                      <span>{item.name}</span>
-                    </Link>
+                    {item.external ? (
+                      <a
+                        href={item.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setIsOpen(false)}
+                        className={linkClassName}
+                      >
+                        <Icon size={14} />
+                        <span>{item.name}</span>
+                        <ExternalLink
+                          size={10}
+                          className="ml-auto opacity-50"
+                        />
+                      </a>
+                    ) : (
+                      <Link
+                        href={item.href}
+                        onClick={() => setIsOpen(false)}
+                        className={linkClassName}
+                      >
+                        <Icon size={14} />
+                        <span>{item.name}</span>
+                      </Link>
+                    )}
                   </motion.div>
                 );
               })}
