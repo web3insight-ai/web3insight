@@ -30,33 +30,33 @@ export class TotalService {
     const sqlRawQuery = `
 WITH ecosystem_list AS (SELECT UNNEST($1::text[]) AS ecosystem_name),
 filtered_repos AS (
-    SELECT 
+    SELECT
         repo_id,
         jsonb_object_keys(upstream_marks) AS ecosystem
-    FROM 
+    FROM
         data.repos
-    WHERE 
+    WHERE
         repos.upstream_marks ?| (SELECT ARRAY_AGG(ecosystem_name) FROM ecosystem_list)
 ),
 repo_counts AS (
-    SELECT 
+    SELECT
         ecosystem,
         COUNT(DISTINCT repo_id) AS repo_count
-    FROM 
+    FROM
         filtered_repos
-    WHERE 
+    WHERE
         ecosystem IN (SELECT ecosystem_name FROM ecosystem_list)
-    GROUP BY 
+    GROUP BY
         ecosystem
 )
-SELECT 
+SELECT
     el.ecosystem_name,
     COALESCE(rc.repo_count, 0) AS repo_count
-FROM 
+FROM
     ecosystem_list el
 LEFT JOIN
     repo_counts rc ON el.ecosystem_name = rc.ecosystem
-ORDER BY 
+ORDER BY
     repo_count DESC;`;
     const query = CompiledQuery.raw(sqlRawQuery, [ecoNames]);
 
@@ -238,33 +238,87 @@ ORDER BY ecosystem_name, time_unit;
     }
   }
 
-  async actorCountryStats() {
+  async actorCountryStats(ecoNames: string[]) {
+    // Generate ecosystem-specific country stats
     const sqlRawQuery = `
-SELECT country,
-       COUNT(*) AS actor_count
+WITH ecosystem_list AS (SELECT UNNEST($1::text[]) AS ecosystem_name),
+     ecosystem_repos AS (
+         SELECT e.ecosystem_name, r.repo_id
+         FROM ecosystem_list e
+         JOIN data.repos r ON r.upstream_marks ? e.ecosystem_name
+     ),
+     ecosystem_actors AS (
+         SELECT DISTINCT er.ecosystem_name, ev.actor_id
+         FROM ecosystem_repos er
+         JOIN data.events ev ON ev.repo_id = er.repo_id
+         WHERE ev.event_type != 'WatchEvent'
+     ),
+     actor_countries AS (
+         SELECT ea.ecosystem_name, a.country, COUNT(DISTINCT ea.actor_id) AS actor_count
+         FROM ecosystem_actors ea
+         JOIN data.actors a ON a.actor_id = ea.actor_id
+         WHERE a.country IS NOT NULL AND a.country <> ''
+         GROUP BY ea.ecosystem_name, a.country
+     )
+SELECT ecosystem_name, country, actor_count
+FROM actor_countries
+ORDER BY ecosystem_name, actor_count DESC, country ASC;
+`;
+    const query = CompiledQuery.raw(sqlRawQuery, [ecoNames]);
+    const exec = await this.db.executeQuery(query);
+    const rows = exec.rows as (QueryActorCountryStat & {
+      ecosystem_name: string;
+    })[];
+
+    // Group results by ecosystem
+    const ecoResults = new Map<string, ActorCountryStatListDto>();
+    for (const row of rows) {
+      if (!ecoResults.has(row.ecosystem_name)) {
+        ecoResults.set(row.ecosystem_name, new ActorCountryStatListDto());
+      }
+      const result = ecoResults.get(row.ecosystem_name)!;
+      result.list.push({
+        country: row.country,
+        total: Number(row.actor_count ?? 0),
+      });
+      result.total += Number(row.actor_count ?? 0);
+    }
+
+    // Cache results for each ecosystem
+    for (const [ecoName, result] of ecoResults) {
+      await this.cacheDataService.updateCacheData(
+        CacheKey.ActorCountryStats,
+        result,
+        new Date().toISOString(),
+        ecoName,
+      );
+    }
+
+    // Also generate global stats
+    const globalSqlRawQuery = `
+SELECT country, COUNT(*) AS actor_count
 FROM data.actors
-WHERE country IS NOT NULL
-  AND country <> ''
+WHERE country IS NOT NULL AND country <> ''
 GROUP BY country
 ORDER BY actor_count DESC, country ASC;
 `;
-    const query = CompiledQuery.raw(sqlRawQuery);
-    const exec = await this.db.executeQuery(query);
-    const rows = exec.rows as QueryActorCountryStat[];
+    const globalQuery = CompiledQuery.raw(globalSqlRawQuery);
+    const globalExec = await this.db.executeQuery(globalQuery);
+    const globalRows = globalExec.rows as QueryActorCountryStat[];
 
-    const result = new ActorCountryStatListDto();
-    result.total = rows.reduce(
+    const globalResult = new ActorCountryStatListDto();
+    globalResult.total = globalRows.reduce(
       (sum, row) => sum + Number(row.actor_count ?? 0),
       0,
     );
-    result.list = rows.map((row) => ({
+    globalResult.list = globalRows.map((row) => ({
       country: row.country,
       total: Number(row.actor_count ?? 0),
     }));
 
     await this.cacheDataService.updateCacheData(
       CacheKey.ActorCountryStats,
-      result,
+      globalResult,
       new Date().toISOString(),
       ECO_ALL,
     );
@@ -346,7 +400,7 @@ WHERE r.repo_id = rj.repo_id;
     await this.reposTotal(ecoTypes);
     await this.actorsTotalNew(ecoTypes);
     await this.ecoTotal();
-    await this.actorCountryStats();
+    await this.actorCountryStats(ecoTypes);
     return null;
   }
 }
