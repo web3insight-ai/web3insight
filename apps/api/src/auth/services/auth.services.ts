@@ -4,7 +4,7 @@ import {
   UpdateUserReqDto,
 } from '@/api/dto/api.dto';
 import { KYSELY } from '@/app/db/db.provider';
-import { ApiAuthUsers, DB, Json } from '@/app/db/dto/db.dto';
+import { ApiAuthUsers, ApiAuthUsersInfo, DB, Json } from '@/app/db/dto/db.dto';
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Octokit } from '@octokit/rest';
@@ -157,6 +157,26 @@ export class AuthService {
     };
   }
 
+  async getUserInfoFormIdV2(uid: string, tag: string) {
+    const user = await this.db
+      .selectFrom('api.auth_users_info')
+      .selectAll()
+      .where('user_id', '=', uid)
+      .where('user_info_type', '=', tag)
+      .executeTakeFirst();
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const github = await this.userService.getPrivyGithubUsername(uid);
+
+    return {
+      profile: user,
+      github: github,
+    };
+  }
+
   async updateUserInfo(user: JwtPayload, body: UpdateUserReqDto) {
     const updatePayload = Object.fromEntries(
       Object.entries(body).filter(([, value]) => value !== undefined),
@@ -174,6 +194,39 @@ export class AuthService {
 
     await this.db
       .updateTable('api.auth_users')
+      .set({
+        ...updatePayload,
+        updated_at: new Date().toISOString(),
+      })
+      .where('user_id', '=', user.uid)
+      .execute();
+
+    return this.getUserInfo(user);
+  }
+
+  async updateUserInfoV2(
+    user: JwtPayload,
+    body: UpdateUserReqDto,
+    tag: string,
+  ) {
+    const updatePayload = Object.fromEntries(
+      Object.entries(body).filter(([, value]) => value !== undefined),
+    ) as Partial<Updateable<ApiAuthUsersInfo>>;
+
+    if (Array.isArray(updatePayload.user_custom_labels)) {
+      updatePayload.user_custom_labels = JSON.stringify(
+        updatePayload.user_custom_labels,
+      ) as Json;
+    }
+
+    updatePayload.user_info_type = tag;
+
+    if (Object.keys(updatePayload).length === 0) {
+      return this.getUserInfo(user);
+    }
+
+    await this.db
+      .updateTable('api.auth_users_info')
       .set({
         ...updatePayload,
         updated_at: new Date().toISOString(),
