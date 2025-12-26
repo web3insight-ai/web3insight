@@ -178,6 +178,19 @@ export interface ApiDonateRepos {
   updated_at: Generated<Timestamp>;
 }
 
+export interface ApiAuthUsersInfo {
+  created_at: Generated<Timestamp>;
+  updated_at: Generated<Timestamp>;
+  user_avatar: Generated<string>;
+  user_bio: Generated<string>;
+  user_custom_labels: Generated<Json>;
+  user_custom_x: Generated<string>;
+  user_id: Int8 | null;
+  user_info_type: Generated<string>;
+  user_nick_name: Generated<string>;
+  user_title: Generated<string>;
+}
+
 export interface DB {
   'data.actors': DataActors;
   'data.events': DataEvent;
@@ -192,4 +205,5 @@ export interface DB {
   'api.auth_users_roles': ApiAuthUserRoles;
   'api.auth_magic': ApiAuthMagic;
   'api.donate_repos': ApiDonateRepos;
+  'api.auth_users_info': ApiAuthUsersInfo;
 }

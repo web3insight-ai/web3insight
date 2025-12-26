@@ -7,6 +7,7 @@ import {
   Post,
   Req,
   UseGuards,
+  Version,
 } from '@nestjs/common';
 import {
   AuthBindWalletReqDto,
@@ -49,6 +50,34 @@ export class AuthController {
   })
   async getUserId(@Param('id') id: string) {
     return this.authServices.getUserInfoFormId(id);
+  }
+
+  @Post('user/info/:tag')
+  @ApiOperation({
+    summary:
+      'Update user profile, tag is custom event like monad_20251011/mantle_2025',
+    description: '',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AppAuthGuard)
+  @Version('2')
+  async updateUserV2(
+    @Param('tag') id: string,
+    @Req() req: RequestWithUser,
+    @Body() body: UpdateUserReqDto,
+  ) {
+    return this.authServices.updateUserInfo(req.user, body);
+  }
+
+  @Get('user/info/:tag/:id')
+  @Version('2')
+  @ApiOperation({
+    summary:
+      'Get user public profile, tag is custom event like monad_20251011/mantle_2025',
+    description: '',
+  })
+  async getUserIdV2(@Param('id') id: string, @Param('tag') tag: string) {
+    return this.authServices.getUserInfoFormIdV2(id, tag);
   }
 
   @Post('user')
