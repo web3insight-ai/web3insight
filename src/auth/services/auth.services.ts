@@ -225,14 +225,32 @@ export class AuthService {
       return this.getUserInfo(user);
     }
 
-    await this.db
-      .updateTable('api.auth_users_info')
-      .set({
-        ...updatePayload,
-        updated_at: new Date().toISOString(),
-      })
+    const existingRecord = await this.db
+      .selectFrom('api.auth_users_info')
+      .select(['user_id'])
       .where('user_id', '=', user.uid)
-      .execute();
+      .where('user_info_type', '=', tag)
+      .executeTakeFirst();
+
+    if (existingRecord) {
+      await this.db
+        .updateTable('api.auth_users_info')
+        .set({
+          ...updatePayload,
+          updated_at: new Date().toISOString(),
+        })
+        .where('user_id', '=', user.uid)
+        .where('user_info_type', '=', tag)
+        .execute();
+    } else {
+      await this.db
+        .insertInto('api.auth_users_info')
+        .values({
+          user_id: user.uid,
+          ...updatePayload,
+        })
+        .execute();
+    }
 
     return this.getUserInfo(user);
   }

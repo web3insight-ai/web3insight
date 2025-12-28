@@ -62,11 +62,11 @@ export class AuthController {
   @UseGuards(AppAuthGuard)
   @Version('2')
   async updateUserV2(
-    @Param('tag') id: string,
+    @Param('tag') tag: string,
     @Req() req: RequestWithUser,
     @Body() body: UpdateUserReqDto,
   ) {
-    return this.authServices.updateUserInfo(req.user, body);
+    return this.authServices.updateUserInfoV2(req.user, body, tag);
   }
 
   @Get('user/info/:tag/:id')
