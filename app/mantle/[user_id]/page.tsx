@@ -1,14 +1,14 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useRef, use } from 'react'
+import { motion } from 'framer-motion'
+import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/hooks/useAuth'
-import { getUserByIdAndEcosystem } from '@/services/auth'
+import { orpc } from '@/orpc/client'
 import { ProfileUpdateDialog } from '@/components/ProfileUpdateDialog'
 import { CardActionButtons } from '@/components/CardActionButtons'
 import MantleCardBack from '@/components/MantleCardBack'
 import MantleCardFront from '@/components/MantleCardFront'
-import { ApiUser } from '@/types/api'
 import LoadingScreen from '@/components/LoadingScreen'
 
 export default function CardPage({
@@ -16,52 +16,31 @@ export default function CardPage({
 }: {
   params: Promise<{ user_id: string }>
 }) {
-  const [isFlipped, setIsFlipped] = useState(true) // Default to front (user info)
-  const [cardUser, setCardUser] = useState<ApiUser | null>(null)
-  const [loading, setLoading] = useState(true)
+  const resolvedParams = use(params)
+  const userId = resolvedParams.user_id
+
+  const [isFlipped, setIsFlipped] = useState(true)
   const [showProfileDialog, setShowProfileDialog] = useState(false)
-  const [userId, setUserId] = useState<string | null>(null)
-  const { user: currentUser } = useAuth()
+  const { user: currentUser } = useAuth({ ecosystem: 'mantle' })
   const frontCardRef = useRef<HTMLDivElement>(null)
 
   const isOwnCard = currentUser?.id === userId
 
-  useEffect(() => {
-    async function getParams() {
-      const resolvedParams = await params
-      setUserId(resolvedParams.user_id)
-    }
-    getParams()
-  }, [params])
+  // Fetch card user data using TanStack Query + oRPC
+  const { data: cardUserResult, isLoading, refetch } = useQuery({
+    ...orpc.auth.getUserByIdAndEcosystem.queryOptions({
+      input: { ecosystem: 'mantle', id: userId },
+    }),
+    enabled: !!userId,
+  })
 
-  useEffect(() => {
-    async function fetchCardUser() {
-      if (!userId) return
-
-      try {
-        setLoading(true)
-        const result = await getUserByIdAndEcosystem('mantle', userId)
-
-        if (result.success && result.data) {
-          setCardUser(result.data)
-        }
-      } catch (error) {
-        console.error('Failed to fetch user:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchCardUser()
-  }, [userId])
+  const cardUser = cardUserResult?.success ? cardUserResult.data : null
 
   const handleProfileUpdate = () => {
-    if (isOwnCard && currentUser) {
-      setCardUser(currentUser)
-    }
+    refetch()
   }
 
-  if (loading) {
+  if (isLoading) {
     return <LoadingScreen variant="mantle" />
   }
 
