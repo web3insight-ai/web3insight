@@ -418,7 +418,7 @@ export function DevCardForm({ ecosystem }: DevCardFormProps) {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.9, duration: 0.5 }}
-              whileHover={{ scale: 1.02, y: -2, boxShadow: theme.hoverShadow }}
+              whileHover={{ scale: 1.02, y: -2, boxShadow: theme.hoverShadow, background: ecosystem === "mantle" ? "#65B3AF" : undefined }}
               whileTap={{ scale: 0.98 }}
             >
               <span
