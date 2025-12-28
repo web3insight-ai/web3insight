@@ -1,6 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Analytics } from "@vercel/analytics/next"
+import { QueryProvider } from "@/providers/QueryProvider"
 import { PrivyProvider } from "@/providers/PrivyProvider"
 import { env } from "@/env"
 import "./globals.css"
@@ -31,9 +32,11 @@ export default function RootLayout({
         )}
       </head>
       <body className="antialiased font-sans" style={{ fontFamily: "'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" }}>
-        <PrivyProvider>
-          {children}
-        </PrivyProvider>
+        <QueryProvider>
+          <PrivyProvider>
+            {children}
+          </PrivyProvider>
+        </QueryProvider>
         <Analytics />
       </body>
     </html>

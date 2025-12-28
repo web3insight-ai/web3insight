@@ -1,8 +1,12 @@
 "use client"
 
-import { useState, useRef } from "react"
-import { updateUserProfileByEcosystem } from "@/services/auth"
-import { UpdateUserProfileRequest } from "@/types/api"
+import { useRef, useEffect } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { orpc } from "@/orpc/client"
+import { profileUpdateFormSchema, type ProfileUpdateFormValues } from "@/schemas/form.schema"
+import type { Ecosystem } from "@/schemas/auth.schema"
 
 interface ProfileUpdateDialogProps {
   isOpen: boolean
@@ -11,7 +15,7 @@ interface ProfileUpdateDialogProps {
   currentName?: string
   currentAvatar?: string
   currentBio?: string
-  ecosystem: "monad" | "mantle"
+  ecosystem: Ecosystem
 }
 
 export function ProfileUpdateDialog({
@@ -23,14 +27,50 @@ export function ProfileUpdateDialog({
   currentBio,
   ecosystem,
 }: ProfileUpdateDialogProps) {
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [formData, setFormData] = useState({
-    user_nick_name: currentName || "",
-    user_avatar: currentAvatar || "",
-    user_bio: currentBio || "",
-  })
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const queryClient = useQueryClient()
+
+  // React Hook Form setup
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm<ProfileUpdateFormValues>({
+    resolver: zodResolver(profileUpdateFormSchema),
+    defaultValues: {
+      user_nick_name: currentName || "",
+      user_avatar: currentAvatar || "",
+      user_bio: currentBio || "",
+    },
+  })
+
+  // Reset form when dialog opens with new values
+  useEffect(() => {
+    if (isOpen) {
+      reset({
+        user_nick_name: currentName || "",
+        user_avatar: currentAvatar || "",
+        user_bio: currentBio || "",
+      })
+    }
+  }, [isOpen, currentName, currentAvatar, currentBio, reset])
+
+  const avatarValue = watch("user_avatar")
+
+  // Update profile mutation
+  const updateMutation = useMutation({
+    ...orpc.auth.updateProfile.mutationOptions(),
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: orpc.auth.key() })
+        onUpdate()
+        onClose()
+      }
+    },
+  })
 
   if (!isOpen) return null
 
@@ -43,52 +83,41 @@ export function ProfileUpdateDialog({
     if (file) {
       const reader = new FileReader()
       reader.onloadend = () => {
-        setFormData(prev => ({ ...prev, user_avatar: reader.result as string }))
+        setValue("user_avatar", reader.result as string)
       }
       reader.readAsDataURL(file)
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const onSubmit = async (data: ProfileUpdateFormValues) => {
+    // Only include changed fields
+    const updateData: ProfileUpdateFormValues = {}
 
-    try {
-      setLoading(true)
-      setError(null)
-
-      const updateData: UpdateUserProfileRequest = {}
-
-      if (formData.user_nick_name !== currentName) {
-        updateData.user_nick_name = formData.user_nick_name
-      }
-      if (formData.user_avatar !== currentAvatar) {
-        updateData.user_avatar = formData.user_avatar
-      }
-      if (formData.user_bio !== currentBio) {
-        updateData.user_bio = formData.user_bio
-      }
-
-      const result = await updateUserProfileByEcosystem(ecosystem, updateData)
-
-      if (result.success) {
-        onUpdate()
-        onClose()
-      } else {
-        setError(result.message)
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update profile")
-    } finally {
-      setLoading(false)
+    if (data.user_nick_name !== currentName) {
+      updateData.user_nick_name = data.user_nick_name
     }
+    if (data.user_avatar !== currentAvatar) {
+      updateData.user_avatar = data.user_avatar
+    }
+    if (data.user_bio !== currentBio) {
+      updateData.user_bio = data.user_bio
+    }
+
+    await updateMutation.mutateAsync({
+      ecosystem,
+      data: updateData,
+    })
   }
+
+  const accentColor = ecosystem === "monad" ? "#9F8EFF" : "#5EEAD4"
+  const defaultIcon = ecosystem === "monad" ? "/images/monad-icon.svg" : "/images/mantle-icon.png"
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-zinc-900 rounded-2xl p-6 w-full max-w-md border border-gray-700">
         <h2 className="text-xl font-bold text-white mb-4">Update Profile</h2>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Avatar */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Avatar</label>
@@ -102,13 +131,16 @@ export function ProfileUpdateDialog({
             <button
               type="button"
               onClick={handleAvatarClick}
-              className="w-20 h-20 bg-black/60 rounded-xl border-2 hover:border-[#9F8EFF] transition-colors overflow-hidden"
-              style={{ borderColor: '#9F8EFF50' }}
+              className="w-20 h-20 bg-black/60 rounded-xl border-2 hover:border-opacity-100 transition-colors overflow-hidden"
+              style={{ borderColor: `${accentColor}50` }}
             >
               <img
-                src={formData.user_avatar || "/images/monad-icon.svg"}
+                src={avatarValue || defaultIcon}
                 alt="Avatar preview"
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  ;(e.target as HTMLImageElement).src = defaultIcon
+                }}
               />
             </button>
           </div>
@@ -118,27 +150,37 @@ export function ProfileUpdateDialog({
             <label className="block text-sm font-medium text-gray-300 mb-2">Name</label>
             <input
               type="text"
-              value={formData.user_nick_name}
-              onChange={(e) => setFormData(prev => ({ ...prev, user_nick_name: e.target.value }))}
-              className="w-full bg-black/60 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#9F8EFF]"
+              {...register("user_nick_name")}
+              className="w-full bg-black/60 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none"
+              style={{ ["--focus-border" as string]: accentColor }}
               placeholder="Your name"
             />
+            {errors.user_nick_name && (
+              <span className="text-red-400 text-xs">{errors.user_nick_name.message}</span>
+            )}
           </div>
 
           {/* Bio */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Bio</label>
             <textarea
-              value={formData.user_bio}
-              onChange={(e) => setFormData(prev => ({ ...prev, user_bio: e.target.value }))}
+              {...register("user_bio")}
               rows={3}
-              className="w-full bg-black/60 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#9F8EFF] resize-none"
+              maxLength={50}
+              className="w-full bg-black/60 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none resize-none"
               placeholder="Share your bio (max 50 chars)"
             />
+            {errors.user_bio && (
+              <span className="text-red-400 text-xs">{errors.user_bio.message}</span>
+            )}
           </div>
 
-          {error && (
-            <div className="text-red-400 text-sm">{error}</div>
+          {updateMutation.error && (
+            <div className="text-red-400 text-sm">
+              {updateMutation.error instanceof Error
+                ? updateMutation.error.message
+                : "Failed to update profile"}
+            </div>
           )}
 
           <div className="flex gap-3 pt-2">
@@ -151,10 +193,16 @@ export function ProfileUpdateDialog({
             </button>
             <button
               type="submit"
-              disabled={loading}
-              className="flex-1 px-4 py-2 bg-gradient-to-r from-violet-500 to-slate-400 text-white rounded-lg hover:from-violet-600 hover:to-slate-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={updateMutation.isPending}
+              className="flex-1 px-4 py-2 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                background:
+                  ecosystem === "monad"
+                    ? "linear-gradient(to right, #8b5cf6, #64748b)"
+                    : "linear-gradient(to right, #5EEAD4, #10B981)",
+              }}
             >
-              {loading ? "Updating..." : "Update"}
+              {updateMutation.isPending ? "Updating..." : "Update"}
             </button>
           </div>
         </form>

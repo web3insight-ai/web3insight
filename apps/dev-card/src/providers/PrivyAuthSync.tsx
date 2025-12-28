@@ -3,7 +3,8 @@
 import { useEffect, useRef } from "react"
 import { usePrivy, useIdentityToken } from "@privy-io/react-auth"
 import { useRouter } from "next/navigation"
-import { signInWithPrivy } from "@/services/auth"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { orpc } from "@/orpc/client"
 
 /**
  * Component to sync Privy authentication with backend
@@ -13,7 +14,40 @@ export function PrivyAuthSync() {
   const { ready, authenticated, user } = usePrivy()
   const { identityToken } = useIdentityToken()
   const router = useRouter()
+  const queryClient = useQueryClient()
   const hasAuthenticatedRef = useRef(false)
+
+  // Use oRPC mutation for sign in
+  const signInMutation = useMutation({
+    ...orpc.auth.signInWithPrivy.mutationOptions(),
+    onSuccess: (result) => {
+      if (result.success) {
+        // Invalidate user queries to refetch with new auth
+        queryClient.invalidateQueries({ queryKey: orpc.auth.key() })
+
+        // Only redirect to create page if user clicked "Connect" from home page
+        if (typeof window !== "undefined") {
+          const shouldRedirectToCreate = localStorage.getItem("redirectToCreate")
+          const ecosystem = localStorage.getItem("redirectEcosystem") || "mantle"
+
+          if (shouldRedirectToCreate === "true") {
+            // Clear the flags
+            localStorage.removeItem("redirectToCreate")
+            localStorage.removeItem("redirectEcosystem")
+
+            // Redirect to appropriate ecosystem's create page
+            router.push(`/${ecosystem}/create`)
+            router.refresh()
+          }
+        }
+      } else {
+        hasAuthenticatedRef.current = false // Allow retry
+      }
+    },
+    onError: () => {
+      hasAuthenticatedRef.current = false // Allow retry
+    },
+  })
 
   useEffect(() => {
     // Only proceed if Privy is ready and user is authenticated
@@ -29,39 +63,9 @@ export function PrivyAuthSync() {
     // Mark as authenticated to prevent duplicate calls
     hasAuthenticatedRef.current = true
 
-    // Call backend authentication API
-    const authenticateWithBackend = async () => {
-      try {
-        const result = await signInWithPrivy(identityToken)
-
-        if (result.success) {
-          // Only redirect to create page if user clicked "Connect" from home page
-          // Check for the redirect flag in localStorage
-          if (typeof window !== 'undefined') {
-            const shouldRedirectToCreate = localStorage.getItem('redirectToCreate')
-            const ecosystem = localStorage.getItem('redirectEcosystem') || 'mantle'
-
-            if (shouldRedirectToCreate === 'true') {
-              // Clear the flags
-              localStorage.removeItem('redirectToCreate')
-              localStorage.removeItem('redirectEcosystem')
-
-              // Redirect to appropriate ecosystem's create page
-              router.push(`/${ecosystem}/create`)
-              // Also refresh to ensure auth state is updated
-              router.refresh()
-            }
-          }
-        } else {
-          hasAuthenticatedRef.current = false // Allow retry
-        }
-      } catch (error) {
-        hasAuthenticatedRef.current = false // Allow retry
-      }
-    }
-
-    authenticateWithBackend()
-  }, [ready, authenticated, user, identityToken, router])
+    // Call backend authentication API using oRPC mutation
+    signInMutation.mutate({ idToken: identityToken })
+  }, [ready, authenticated, user, identityToken])
 
   // Reset auth flag when user logs out
   useEffect(() => {
