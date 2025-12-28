@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
 import { useAuth } from "@/hooks/useAuth"
-import { updateUserProfile } from "@/services/auth"
+import { updateUserProfileByEcosystem } from "@/services/auth"
 import { getUserEcosystems, getBuildingOnOptions, type UserEcosystemData } from "@/services/ecosystem"
 import LoadingScreen from "@/components/LoadingScreen"
 
@@ -23,7 +23,7 @@ function CreateForm() {
     getGithubUsername,
     getEmail,
     privyUser,
-  } = useAuth()
+  } = useAuth({ ecosystem: "monad" })
 
   const [formData, setFormData] = useState({
     avatar: "",
@@ -84,14 +84,7 @@ function CreateForm() {
 
       let defaultBio = bio
       if (!bio && !user?.user_bio) {
-        const email = getEmail()
-        if (github) {
-          defaultBio = `Building amazing things with code! Find me on GitHub @${github}`
-        } else if (email) {
-          defaultBio = "Passionate developer creating innovative solutions!"
-        } else {
-          defaultBio = "Web3 developer passionate about building the future!"
-        }
+        defaultBio = "Building amazing things with code!"
       }
 
       // 从用户已保存的数据中读取生态系统选择，确保 Monad 始终在列表中
@@ -152,7 +145,7 @@ function CreateForm() {
 
           if (mounted) {
             setUserEcosystems(ecosystems)
-            const options = getBuildingOnOptions(ecosystems)
+            const options = getBuildingOnOptions(ecosystems, "monad")
             setBuildingOnOptions(options)
           }
         }
@@ -353,7 +346,7 @@ function CreateForm() {
         profileData.user_avatar = formData.avatar
       }
 
-      const result = await updateUserProfile(profileData)
+      const result = await updateUserProfileByEcosystem('monad', profileData)
 
       if (result.success) {
         const userId = result.data?.id || user?.id

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/hooks/useAuth'
-import { getUserById } from '@/services/auth'
+import { getUserByIdAndEcosystem } from '@/services/auth'
 import { ProfileUpdateDialog } from '@/components/ProfileUpdateDialog'
 import { CardActionButtons } from '@/components/CardActionButtons'
 import MonadCardBack from '@/components/MonadCardBack'
@@ -40,7 +40,7 @@ export default function CardPage({
 
       try {
         setLoading(true)
-        const result = await getUserById(userId)
+        const result = await getUserByIdAndEcosystem('monad', userId)
 
         if (result.success && result.data) {
           setCardUser(result.data)
@@ -210,6 +210,7 @@ export default function CardPage({
           currentName={cardUser.nick_name}
           currentAvatar={cardUser.user_avatar}
           currentBio={cardUser.user_bio}
+          ecosystem="monad"
         />
       </div>
     </motion.div>

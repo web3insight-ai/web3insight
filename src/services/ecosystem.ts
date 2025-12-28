@@ -241,16 +241,19 @@ function mergeGitHubUserData(userDataArray: GitHubUserData[]): GitHubUserData {
   return mergedData
 }
 
-export function getBuildingOnOptions(userEcosystems: string[]): string[] {
+export function getBuildingOnOptions(
+  userEcosystems: string[],
+  ecosystem: "monad" | "mantle" = "monad"
+): string[] {
   if (!userEcosystems || userEcosystems.length === 0) {
     return []
   }
 
-  const baseOptions = ['Monad']
+  const baseOption = ecosystem === "mantle" ? "Mantle" : "Monad"
   const userOptions = userEcosystems.filter(eco =>
-    !baseOptions.includes(eco)
+    eco !== baseOption
   ).slice(0, 10)
 
-  const allOptions = [...baseOptions, ...userOptions]
+  const allOptions = [baseOption, ...userOptions]
   return [...new Set(allOptions)]
 }

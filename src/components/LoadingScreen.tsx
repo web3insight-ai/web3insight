@@ -3,11 +3,33 @@
 import Image from "next/image"
 import { motion } from "framer-motion"
 
+type LoadingVariant = "monad" | "mantle"
+
 interface LoadingScreenProps {
   message?: string
+  variant?: LoadingVariant
 }
 
-export default function LoadingScreen({ message }: LoadingScreenProps) {
+const variantConfig = {
+  monad: {
+    icon: "/images/monad-icon.svg",
+    alt: "Monad",
+    glowColor: "rgba(111, 84, 255, 0.4)",
+    dropShadowBase: "drop-shadow(0 0 20px rgba(111,84,255,0.6))",
+    dropShadowPeak: "drop-shadow(0 0 30px rgba(111,84,255,0.9))",
+  },
+  mantle: {
+    icon: "/images/mantle-logo-white.png",
+    alt: "Mantle",
+    glowColor: "rgba(94, 234, 212, 0.4)",
+    dropShadowBase: "drop-shadow(0 0 20px rgba(94,234,212,0.6))",
+    dropShadowPeak: "drop-shadow(0 0 30px rgba(94,234,212,0.9))",
+  },
+}
+
+export default function LoadingScreen({ message, variant = "monad" }: LoadingScreenProps) {
+  const config = variantConfig[variant]
+
   return (
     <motion.div
       className="min-h-screen bg-black flex items-center justify-center overflow-hidden"
@@ -33,13 +55,13 @@ export default function LoadingScreen({ message }: LoadingScreenProps) {
           <div
             className="w-40 h-40 rounded-full"
             style={{
-              background: 'radial-gradient(circle, rgba(111, 84, 255, 0.4) 0%, transparent 70%)',
+              background: `radial-gradient(circle, ${config.glowColor} 0%, transparent 70%)`,
               filter: 'blur(20px)'
             }}
           />
         </motion.div>
 
-        {/* Monad Logo with float animation */}
+        {/* Logo with float animation */}
         <motion.div
           className="mb-3 relative inline-block"
           animate={{
@@ -55,9 +77,9 @@ export default function LoadingScreen({ message }: LoadingScreenProps) {
           <motion.div
             animate={{
               filter: [
-                'drop-shadow(0 0 20px rgba(111,84,255,0.6))',
-                'drop-shadow(0 0 30px rgba(111,84,255,0.9))',
-                'drop-shadow(0 0 20px rgba(111,84,255,0.6))'
+                config.dropShadowBase,
+                config.dropShadowPeak,
+                config.dropShadowBase
               ]
             }}
             transition={{
@@ -67,8 +89,8 @@ export default function LoadingScreen({ message }: LoadingScreenProps) {
             }}
           >
             <Image
-              src="/images/monad-icon.svg"
-              alt="Monad"
+              src={config.icon}
+              alt={config.alt}
               width={80}
               height={80}
               className="w-20 h-20"
@@ -94,4 +116,3 @@ export default function LoadingScreen({ message }: LoadingScreenProps) {
     </motion.div>
   )
 }
-
