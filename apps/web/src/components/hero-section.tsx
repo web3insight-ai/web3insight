@@ -1,13 +1,14 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { ArrowRight, Search, Globe } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useI18n } from "@/lib/i18n-context"
 import { motion } from "framer-motion"
 import { fadeInUp, stagger } from "@/components/ui/motion"
-import type { StatisticsData } from "@/services/api/typing"
+import { orpc } from "@/lib/query/utils"
 
 // Utility function to format numbers with comma separators
 function formatNumber(num: number): string {
@@ -142,34 +143,9 @@ function AnimatedContributors({ value, isLoading }: { value: number; isLoading?:
 export function HeroSection() {
   const containerRef = useRef<HTMLDivElement>(null)
   const { t } = useI18n()
-  const [statsData, setStatsData] = useState<StatisticsData>({
-    ecosystem: 0,
-    repository: 0,
-    developer: 0,
-    coreDeveloper: 0,
-  })
-  const [isLoading, setIsLoading] = useState(true)
 
-  // Fetch statistics data on component mount
-  useEffect(() => {
-    async function loadStats() {
-      try {
-        const response = await fetch('/api/statistics')
-        const result = await response.json()
-
-        if (result.success && result.data) {
-          setStatsData(result.data)
-        }
-      } catch (error) {
-        console.error('Failed to fetch statistics:', error)
-        // Keep default values if API fails
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    loadStats()
-  }, [])
+  // Fetch statistics using TanStack Query + oRPC
+  const { data: statsData, isLoading } = useQuery(orpc.statistics.get.queryOptions())
 
   useEffect(() => {
     const container = containerRef.current
@@ -300,13 +276,13 @@ export function HeroSection() {
               <div className="p-4 bg-card border border-border rounded-lg">
                 <p className="text-xs text-muted-foreground mb-1">{t("hero.developers")}</p>
                 <div className="min-h-[32px] flex items-center">
-                  <AnimatedHeroNumber value={statsData.coreDeveloper} isLoading={isLoading} />
+                  <AnimatedHeroNumber value={statsData?.coreDeveloper ?? 0} isLoading={isLoading} />
                 </div>
               </div>
               <div className="p-4 bg-card border border-border rounded-lg">
                 <p className="text-xs text-muted-foreground mb-1">{t("hero.ecosystems")}</p>
                 <div className="min-h-[32px] flex items-center">
-                  <AnimatedHeroNumber value={statsData.ecosystem} isLoading={isLoading} />
+                  <AnimatedHeroNumber value={statsData?.ecosystem ?? 0} isLoading={isLoading} />
                 </div>
               </div>
 
@@ -317,7 +293,7 @@ export function HeroSection() {
                   <div>
                     <p className="text-xs text-muted-foreground mb-1">{t("hero.contributors")}</p>
                     <div className="min-h-[28px] flex items-center">
-                      <AnimatedContributors value={statsData.developer} isLoading={isLoading} />
+                      <AnimatedContributors value={statsData?.developer ?? 0} isLoading={isLoading} />
                     </div>
                   </div>
                   <div className="w-16 h-16 rounded-full border-2 border-dashed border-border flex items-center justify-center">

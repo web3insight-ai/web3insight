@@ -4,6 +4,7 @@ import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import { I18nProvider } from "@/lib/i18n-context"
+import { QueryProvider } from "@/lib/query/provider"
 import { env } from "@/env"
 import "./globals.css"
 
@@ -41,7 +42,9 @@ export default function RootLayout({
         />
       </head>
       <body className={`${GeistSans.variable} ${GeistMono.variable} font-sans antialiased overflow-x-hidden`}>
-        <I18nProvider>{children}</I18nProvider>
+        <QueryProvider>
+          <I18nProvider>{children}</I18nProvider>
+        </QueryProvider>
         <Analytics />
       </body>
     </html>

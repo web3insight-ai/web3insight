@@ -1,9 +1,11 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { useI18n } from "@/lib/i18n-context"
 import { motion, useInView } from "framer-motion"
 import { fadeInUp, stagger } from "@/components/ui/motion"
+import { orpc } from "@/lib/query/utils"
 
 // Utility function to format numbers with comma separators
 function formatNumber(num: number): string {
@@ -11,14 +13,6 @@ function formatNumber(num: number): string {
     maximumFractionDigits: 0,
     minimumFractionDigits: 0
   }).format(num);
-}
-
-// Define StatisticsData type locally to match API response
-interface StatisticsData {
-  ecosystem: number;
-  repository: number;
-  developer: number;
-  coreDeveloper: number;
 }
 
 function CodeIcon({ className }: { className?: string }) {
@@ -175,40 +169,15 @@ function AnimatedNumber({ value, suffix, isLoading }: { value: number; suffix: s
 
 export function StatsSection() {
   const { t } = useI18n()
-  const [statsData, setStatsData] = useState<StatisticsData>({
-    ecosystem: 0,
-    repository: 0,
-    developer: 0,
-    coreDeveloper: 0,
-  })
-  const [isLoading, setIsLoading] = useState(true)
 
-  // Fetch statistics data on component mount
-  useEffect(() => {
-    async function loadStats() {
-      try {
-        const response = await fetch('/api/statistics')
-        const result = await response.json()
-
-        if (result.success && result.data) {
-          setStatsData(result.data)
-        }
-      } catch (error) {
-        console.error('Failed to fetch statistics:', error)
-        // Keep default values if API fails
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    loadStats()
-  }, [])
+  // Fetch statistics using TanStack Query + oRPC
+  const { data: statsData, isLoading } = useQuery(orpc.statistics.get.queryOptions())
 
   const stats = [
-    { labelKey: "stats.contributors", value: statsData.developer, suffix: "", icon: UsersIcon },
-    { labelKey: "stats.developers", value: statsData.coreDeveloper, suffix: "+", icon: CodeIcon },
-    { labelKey: "stats.ecosystems", value: statsData.ecosystem, suffix: "", icon: GlobeIcon },
-    { labelKey: "stats.repositories", value: statsData.repository, suffix: "", icon: PackageIcon },
+    { labelKey: "stats.contributors", value: statsData?.developer ?? 0, suffix: "", icon: UsersIcon },
+    { labelKey: "stats.developers", value: statsData?.coreDeveloper ?? 0, suffix: "+", icon: CodeIcon },
+    { labelKey: "stats.ecosystems", value: statsData?.ecosystem ?? 0, suffix: "", icon: GlobeIcon },
+    { labelKey: "stats.repositories", value: statsData?.repository ?? 0, suffix: "", icon: PackageIcon },
   ]
 
   return (
