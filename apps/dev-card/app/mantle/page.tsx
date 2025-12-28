@@ -154,7 +154,7 @@ export default function ConnectPage() {
             <motion.button
               onClick={handleConnect}
               className="px-6 py-2 bg-slate-400/40 rounded-xl inline-flex justify-center items-center gap-2"
-              whileHover={{ scale: 1.05, y: -2, backgroundColor: "rgba(148, 163, 184, 0.5)" }}
+              whileHover={{ scale: 1.05, y: -2, backgroundColor: "#65B3AF" }}
               whileTap={{ scale: 0.95 }}
               transition={{ type: "spring", stiffness: 400, damping: 17 }}
             >

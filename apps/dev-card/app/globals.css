@@ -4,6 +4,10 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  /* Privy modal customization */
+  --privy-color-background: #1A1A1A;
+  --privy-color-background-2: #1A1A1A;
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
