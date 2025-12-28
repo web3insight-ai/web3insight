@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { updateUserProfile } from "@/services/auth"
+import { updateUserProfileByEcosystem } from "@/services/auth"
 import { UpdateUserProfileRequest } from "@/types/api"
 
 interface ProfileUpdateDialogProps {
@@ -11,6 +11,7 @@ interface ProfileUpdateDialogProps {
   currentName?: string
   currentAvatar?: string
   currentBio?: string
+  ecosystem: "monad" | "mantle"
 }
 
 export function ProfileUpdateDialog({
@@ -20,6 +21,7 @@ export function ProfileUpdateDialog({
   currentName,
   currentAvatar,
   currentBio,
+  ecosystem,
 }: ProfileUpdateDialogProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -66,7 +68,7 @@ export function ProfileUpdateDialog({
         updateData.user_bio = formData.user_bio
       }
 
-      const result = await updateUserProfile(updateData)
+      const result = await updateUserProfileByEcosystem(ecosystem, updateData)
 
       if (result.success) {
         onUpdate()

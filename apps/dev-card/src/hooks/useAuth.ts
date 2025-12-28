@@ -5,7 +5,12 @@ import { usePrivy } from "@privy-io/react-auth"
 import { getCurrentUser } from "@/services/auth"
 import { ApiUser } from "@/types/api"
 
-export function useAuth() {
+interface UseAuthOptions {
+  ecosystem?: "monad" | "mantle"
+}
+
+export function useAuth(options?: UseAuthOptions) {
+  const { ecosystem } = options || {}
   const { ready, authenticated, user: privyUser, logout, login } = usePrivy()
   const [user, setUser] = useState<ApiUser | null>(null)
   const [loading, setLoading] = useState(true)
@@ -24,7 +29,7 @@ export function useAuth() {
           return
         }
 
-        const result = await getCurrentUser()
+        const result = await getCurrentUser(ecosystem)
 
         if (result.success) {
           setUser(result.data || null)
@@ -39,7 +44,7 @@ export function useAuth() {
     }
 
     fetchUser()
-  }, [ready, authenticated])
+  }, [ready, authenticated, ecosystem])
 
   const getDisplayAvatar = () => {
     // 1. 优先使用 Web3Insight API 的头像（但跳过默认 Monad 图标）
@@ -215,7 +220,7 @@ export function useAuth() {
     getWalletAddress,
     refetch: () => {
       if (authenticated) {
-        getCurrentUser().then(result => {
+        getCurrentUser(ecosystem).then(result => {
           if (result.success) {
             setUser(result.data || null)
           }

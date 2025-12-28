@@ -8,8 +8,8 @@ export default function Home() {
   const router = useRouter()
 
   useEffect(() => {
-    router.push("/monad")
+    router.push("/mantle")
   }, [router])
 
-  return <LoadingScreen />
+  return <LoadingScreen variant="mantle" />
 }

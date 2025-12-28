@@ -39,13 +39,15 @@ export function PrivyAuthSync() {
           // Check for the redirect flag in localStorage
           if (typeof window !== 'undefined') {
             const shouldRedirectToCreate = localStorage.getItem('redirectToCreate')
+            const ecosystem = localStorage.getItem('redirectEcosystem') || 'mantle'
 
             if (shouldRedirectToCreate === 'true') {
-              // Clear the flag
+              // Clear the flags
               localStorage.removeItem('redirectToCreate')
+              localStorage.removeItem('redirectEcosystem')
 
-              // Redirect to create page
-              router.push('/monad/create')
+              // Redirect to appropriate ecosystem's create page
+              router.push(`/${ecosystem}/create`)
               // Also refresh to ensure auth state is updated
               router.refresh()
             }

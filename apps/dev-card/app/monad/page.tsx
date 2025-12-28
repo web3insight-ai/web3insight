@@ -19,10 +19,16 @@ export default function ConnectPage() {
     }
   }, [])
 
-  // Redirect to create page if already logged in
+  // Redirect to create page if already logged in (returning user)
+  // New logins will be handled by PrivyAuthSync after backend auth completes
   useEffect(() => {
     if (ready && authenticated) {
-      router.push('/monad/create')
+      // Only redirect returning users, not new logins
+      // New logins have redirectToCreate flag set and will be handled by PrivyAuthSync
+      const isNewLogin = typeof window !== 'undefined' && localStorage.getItem('redirectToCreate') === 'true'
+      if (!isNewLogin) {
+        router.push('/monad/create')
+      }
     }
   }, [ready, authenticated, router])
 
@@ -40,6 +46,7 @@ export default function ConnectPage() {
       // Set flag to redirect to create page after login
       if (typeof window !== 'undefined') {
         localStorage.setItem('redirectToCreate', 'true')
+        localStorage.setItem('redirectEcosystem', 'monad')
       }
       // Trigger Privy login (userType already saved in localStorage)
       login()
