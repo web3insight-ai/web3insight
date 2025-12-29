@@ -151,18 +151,17 @@ export function useDevCardForm({ ecosystem }: UseDevCardFormOptions) {
         existingBuildingOn = [baseEcosystem, ...userLabels]
       }
 
-      // Reset form with populated values
-      form.reset({
-        avatar: finalAvatar,
-        name,
-        github,
-        twitter,
-        title,
-        bio: defaultBio,
-        buildingOn: existingBuildingOn,
-      })
+      // Use setValue instead of reset to ensure values are applied correctly
+      // This avoids issues with form.reset() timing in production
+      form.setValue("avatar", finalAvatar)
+      form.setValue("name", name)
+      form.setValue("github", github)
+      form.setValue("twitter", twitter)
+      form.setValue("title", title)
+      form.setValue("bio", defaultBio)
+      form.setValue("buildingOn", existingBuildingOn)
     }
-  }, [user, authenticated, baseEcosystem, privyUser])
+  }, [user, authenticated, baseEcosystem, privyUser, getDisplayAvatar, getDisplayName, getGithubUsername, form, ecosystem])
 
   // Redirect to home if not authenticated
   useEffect(() => {
