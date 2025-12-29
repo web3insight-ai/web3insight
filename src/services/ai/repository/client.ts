@@ -4,13 +4,12 @@ import { env } from "@/env";
 const openai = createOpenAI({
   baseURL: env.OPENAI_BASE_URL,
   apiKey: env.OPENAI_API_KEY,
-  // Use 'compatible' mode for OpenAI-compatible proxies (burn.hair, etc.)
-  // This uses the Chat Completions API instead of the Responses API
-  compatibility: "compatible",
 });
 
 export function getModel() {
-  return openai(env.OPENAI_MODEL);
+  // Use openai.chat() to force Chat Completions API (/v1/chat/completions)
+  // instead of the default Responses API (/v1/responses) which proxies don't support
+  return openai.chat(env.OPENAI_MODEL);
 }
 
 export { openai };

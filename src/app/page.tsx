@@ -120,12 +120,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     return (
       <DefaultLayoutWrapper user={user}>
         <div className="w-full max-w-content mx-auto px-6 py-8">
-          {/* AI Query Section - Client Component */}
-          <HomePageClient />
-
-          {/* Server-rendered content sections */}
+          {/* Global Contributor Map */}
           <Section
-            className="mt-12"
             title="Global Contributor Footprint"
             summary="Leading countries and regions by contributor counts"
           >
@@ -134,6 +130,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               totalDevelopers={countryDistributionTotal}
             />
           </Section>
+
+          {/* Metrics Overview - Client Component */}
+          <div className="mt-12">
+            <HomePageClient />
+          </div>
           <Section
             className="mt-16"
             title="Web3 Ecosystem Analytics"
@@ -199,16 +200,17 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     return (
       <DefaultLayoutWrapper user={user}>
         <div className="w-full max-w-content mx-auto px-6 py-8">
-          <HomePageClient />
-
           {/* Fallback sections with empty data */}
           <Section
-            className="mt-12"
             title="Global Contributor Footprint"
             summary="Leading countries and regions by contributor counts"
           >
             <CountryDistributionChart data={[]} totalDevelopers={0} />
           </Section>
+
+          <div className="mt-12">
+            <HomePageClient />
+          </div>
           <Section
             className="mt-16"
             title="Web3 Ecosystem Analytics"
