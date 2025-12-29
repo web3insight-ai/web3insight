@@ -6,6 +6,7 @@ import { Provider as JotaiProvider } from "jotai";
 
 import NavigationProgress from "$/NavigationProgress";
 import ClientOnly from "$/ClientOnly";
+import { AIAssistantWidget } from "$/index";
 import { PrivyProvider } from "@/providers/PrivyProvider";
 import { PrivyAuthSync } from "@/providers/PrivyAuthSync";
 import { QueryProvider } from "@/providers/QueryProvider";
@@ -24,6 +25,7 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
             >
               <ClientOnly>
                 <NavigationProgress />
+                <AIAssistantWidget />
                 {children}
               </ClientOnly>
             </ThemeProvider>
