@@ -162,7 +162,7 @@ export function useDevCardForm({ ecosystem }: UseDevCardFormOptions) {
         buildingOn: existingBuildingOn,
       })
     }
-  }, [user, authenticated, baseEcosystem])
+  }, [user, authenticated, baseEcosystem, privyUser])
 
   // Redirect to home if not authenticated
   useEffect(() => {
