@@ -26,7 +26,7 @@ export function AnnouncementBanner() {
         </Link>
         <button
           onClick={() => setIsVisible(false)}
-          className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-accent/60 hover:text-accent transition-colors"
+          className="absolute right-6 top-1/2 -translate-y-1/2 p-1 text-accent/60 hover:text-accent transition-colors"
           aria-label="Close banner"
         >
           <X className="w-4 h-4" />
