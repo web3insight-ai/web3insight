@@ -1,5 +1,6 @@
 "use client"
 
+import { useCallback } from "react"
 import { usePrivy } from "@privy-io/react-auth"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { orpc } from "@/orpc/client"
@@ -38,7 +39,7 @@ export function useAuth(options?: UseAuthOptions) {
     queryClient.invalidateQueries({ queryKey: orpc.auth.key() })
   }
 
-  const getDisplayAvatar = () => {
+  const getDisplayAvatar = useCallback(() => {
     // 1. Prefer Web3Insight API avatar (but skip default Monad icon)
     if (user?.user_avatar && user.user_avatar !== "/images/monad-icon.svg") {
       return user.user_avatar
@@ -98,9 +99,9 @@ export function useAuth(options?: UseAuthOptions) {
 
     // 3. Default to Monad icon
     return "/images/monad-icon.svg"
-  }
+  }, [user, privyUser])
 
-  const getDisplayName = () => {
+  const getDisplayName = useCallback(() => {
     // 1. Prefer Web3Insight API custom nickname
     if (user?.nick_name) {
       return user.nick_name
@@ -148,9 +149,9 @@ export function useAuth(options?: UseAuthOptions) {
     }
 
     return ""
-  }
+  }, [user, privyUser])
 
-  const getGithubUsername = () => {
+  const getGithubUsername = useCallback(() => {
     // 1. Prefer Web3Insight API GitHub username
     if (user?.github_login) {
       return user.github_login
@@ -173,7 +174,7 @@ export function useAuth(options?: UseAuthOptions) {
     }
 
     return ""
-  }
+  }, [user, privyUser])
 
   const getGithubUserId = () => {
     if (privyUser) {
