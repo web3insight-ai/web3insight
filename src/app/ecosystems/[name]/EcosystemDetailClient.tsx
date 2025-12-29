@@ -22,7 +22,7 @@ import type {
   ActorCountryRankRecord,
   RepoRankRecord,
   RepoTrendingRecord,
-} from "~/api/typing";
+} from "@/lib/api/types";
 
 interface EcosystemStatistics {
   developerTotalCount: number | string;

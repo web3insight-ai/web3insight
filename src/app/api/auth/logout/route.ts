@@ -4,8 +4,8 @@ import { signOut } from "~/auth/repository";
 export async function GET(request: Request) {
   // Check for client-side request
   const url = new URL(request.url);
-  const clientSide = url.searchParams.get('clientSide') === 'true';
-  const { data: cookieHeader, ...others } = await signOut(request);
+  const clientSide = url.searchParams.get("clientSide") === "true";
+  const { data: cookieHeader, ...others } = await signOut();
   const initOpts = {
     headers: {
       "Set-Cookie": cookieHeader,
@@ -26,7 +26,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const { data: cookieHeader, ...others } = await signOut(request);
+  const { data: cookieHeader, ...others } = await signOut();
   const initOpts = {
     headers: {
       "Set-Cookie": cookieHeader,
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     } else {
       // Fall back to form data if not JSON
       const formData = await request.formData();
-      clientSide = formData.get('clientSide') === 'true';
+      clientSide = formData.get("clientSide") === "true";
     }
 
     if (clientSide) {

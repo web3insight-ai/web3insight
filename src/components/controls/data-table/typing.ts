@@ -1,12 +1,24 @@
-import type { ReactNode } from "react";
-import type { ColumnProps, IDataTableComponent } from "petals-ui/dist/data-table";
+import type { ReactNode, Key } from "react";
 
 import type { DataValue } from "@/types";
 
-type TableColumn<T extends DataValue = Record<string, DataValue>> = Omit<ColumnProps, "render"> & {
+// Local column type
+interface ColumnProps {
+  name: string;
+  label?: string;
+  width?: string | number;
+  align?: "left" | "center" | "right";
+}
+
+type TableColumn<T = Record<string, DataValue>> = Omit<
+  ColumnProps,
+  "render"
+> & {
   span?: number;
+  key?: Key;
+  title?: ReactNode;
   render?: (
-    I_DO_NOT_KNOW_WHAT_THIS_FOR: DataValue,
+    value: DataValue,
     context: {
       row: T;
       column: TableColumn<T>;
@@ -15,14 +27,25 @@ type TableColumn<T extends DataValue = Record<string, DataValue>> = Omit<ColumnP
   ) => ReactNode;
 };
 
-type DataTableProps<T extends DataValue = Record<string, DataValue>> = Partial<Omit<IDataTableComponent, "dataSource" | "columns">> & {
+interface DataTableProps<T = Record<string, DataValue>> {
   className?: string;
   dataSource: T[];
   columns: TableColumn<T>[];
-};
+  loading?: boolean;
+  hidePagination?: boolean;
+  total?: number;
+  pageSize?: number;
+  currentPage?: number;
+  onCurrentChange?: (page: number) => void;
+}
 
-type PaginationProps = Pick<DataTableProps, "className" | "total" | "pageSize" | "currentPage" | "onCurrentChange"> & {
+interface PaginationProps {
+  className?: string;
   disabled?: boolean;
-};
+  total?: number;
+  pageSize?: number;
+  currentPage?: number;
+  onCurrentChange?: (page: number) => void;
+}
 
 export type { TableColumn, DataTableProps, PaginationProps };

@@ -1,15 +1,25 @@
-'use client';
+"use client";
 
 import { useState, useEffect, useRef, MouseEvent } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import {
-  Modal, ModalContent, ModalHeader, ModalBody, ModalFooter,
-  Textarea, Button, Chip,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Textarea,
+  Button,
+  Chip,
 } from "@nextui-org/react";
 import { Calendar, AlertTriangle, X } from "lucide-react";
 import { useAtom } from "jotai";
 
 import { addToastAtom } from "#/atoms";
 import FileUpload from "$/controls/file-upload";
+import { eventEditSchema, type EventEditInput } from "@/lib/form/schemas";
 import { updateOne } from "../../repository/client";
 import { resolveContestants } from "../event-list/helper";
 import ContestantListDialog from "../event-list/ContestantListDialog";
@@ -21,22 +31,82 @@ type EventEditDialogProps = {
   onClose: () => void;
   onSuccess?: () => void;
   event: EventReport | null;
-  onAnalysisStart?: (eventId: number, contestants: Contestant[], failedAccounts: string[]) => void;
+  onAnalysisStart?: (
+    eventId: number,
+    contestants: Contestant[],
+    failedAccounts: string[],
+  ) => void;
 };
 
-function EventEditDialog({ visible, onClose, event, onAnalysisStart }: EventEditDialogProps) {
+function EventEditDialog({
+  visible,
+  onClose,
+  event,
+  onAnalysisStart,
+}: EventEditDialogProps) {
   const [, addToast] = useAtom(addToastAtom);
-  const [description, setDescription] = useState("");
   const [currentParticipants, setCurrentParticipants] = useState<string[]>([]);
-  const [userInput, setUserInput] = useState("");
-  const [loading, setLoading] = useState(false);
-
   const uploadRef = useRef<HTMLInputElement>(null);
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors },
+  } = useForm<EventEditInput>({
+    resolver: zodResolver(eventEditSchema),
+    defaultValues: {
+      description: "",
+      userInput: "",
+    },
+  });
+
+  // Update event mutation
+  const updateMutation = useMutation({
+    mutationFn: async (data: {
+      id: number;
+      urls: string[];
+      description: string;
+    }) => {
+      return updateOne(data);
+    },
+    onSuccess: (result) => {
+      if (result.success) {
+        addToast({
+          type: "success",
+          title: "Event Updated",
+          message: "Event updated successfully. Analysis in progress...",
+        });
+
+        if (onAnalysisStart && event) {
+          onAnalysisStart(
+            Number(event.id),
+            result.data || [],
+            result.extra?.fail || [],
+          );
+        }
+      } else {
+        throw new Error(result.message || "Update failed");
+      }
+    },
+    onError: (error) => {
+      addToast({
+        type: "error",
+        title: "Update Failed",
+        message:
+          error instanceof Error ? error.message : "Failed to update event",
+      });
+    },
+  });
 
   // Initialize form with event data
   useEffect(() => {
     if (event && visible) {
-      setDescription(event.description || "");
+      reset({
+        description: event.description || "",
+        userInput: "",
+      });
 
       // Load original request_data if available, otherwise try to derive from contestants
       let participantList: string[] = [];
@@ -44,14 +114,14 @@ function EventEditDialog({ visible, onClose, event, onAnalysisStart }: EventEdit
       if (event.request_data && event.request_data.length > 0) {
         participantList = event.request_data;
       } else if (event.contestants && event.contestants.length > 0) {
-        // Fallback: extract GitHub usernames from contestants
-        participantList = event.contestants.map(contestant => contestant.username);
+        participantList = event.contestants.map(
+          (contestant) => contestant.username,
+        );
       }
 
       setCurrentParticipants(participantList);
-      setUserInput("");
     }
-  }, [event, visible]);
+  }, [event, visible, reset]);
 
   const handleCsvUpload = (evt: MouseEvent) => {
     evt.preventDefault();
@@ -62,7 +132,7 @@ function EventEditDialog({ visible, onClose, event, onAnalysisStart }: EventEdit
   const handleFileChange = (file: File) => {
     const reader = new FileReader();
     reader.onload = (e) => {
-      setUserInput(e.target?.result as string);
+      setValue("userInput", e.target?.result as string);
 
       if (uploadRef.current) {
         uploadRef.current.value = "";
@@ -72,82 +142,38 @@ function EventEditDialog({ visible, onClose, event, onAnalysisStart }: EventEdit
   };
 
   const closeDialog = () => {
-    setDescription("");
+    reset({ description: "", userInput: "" });
     setCurrentParticipants([]);
-    setUserInput("");
-    setLoading(false);
+    updateMutation.reset();
     onClose();
   };
 
   const removeParticipant = (index: number) => {
-    setCurrentParticipants(prev => prev.filter((_, i) => i !== index));
+    setCurrentParticipants((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleConfirm = async () => {
+  const onSubmit = async (data: EventEditInput) => {
     if (!event) return;
 
-    const resolvedDescription = description && description.trim();
-
-    if (!resolvedDescription) {
-      addToast({
-        type: 'error',
-        title: 'Validation Error',
-        message: 'Event name is required',
-      });
-      return;
-    }
-
     // Combine current participants with new additions
-    const newParticipants = resolveContestants(userInput);
+    const newParticipants = resolveContestants(data.userInput);
     const allParticipants = [...currentParticipants, ...newParticipants];
 
     if (allParticipants.length === 0) {
       addToast({
-        type: 'error',
-        title: 'Validation Error',
-        message: 'At least one participant is required',
+        type: "error",
+        title: "Validation Error",
+        message: "At least one participant is required",
       });
       return;
     }
 
-    setLoading(true);
-
-    try {
-      // Step 1: Update the event
-      const result = await updateOne({
-        id: Number(event.id),
-        urls: allParticipants,
-        description: resolvedDescription,
-      });
-
-      if (result.success) {
-        setLoading(false);
-        
-        addToast({
-          type: 'success',
-          title: 'Event Updated',
-          message: 'Event updated successfully. Analysis in progress...',
-        });
-
-        // Trigger the analysis dialog
-        if (onAnalysisStart) {
-          onAnalysisStart(Number(event.id), result.data || [], result.extra?.fail || []);
-        }
-      } else {
-        setLoading(false);
-        throw new Error(result.message || 'Update failed');
-      }
-    } catch (error) {
-      setLoading(false);
-
-      addToast({
-        type: 'error',
-        title: 'Update Failed',
-        message: error instanceof Error ? error.message : 'Failed to update event',
-      });
-    }
+    updateMutation.mutate({
+      id: Number(event.id),
+      urls: allParticipants,
+      description: data.description,
+    });
   };
-
 
   return (
     <Modal
@@ -164,12 +190,13 @@ function EventEditDialog({ visible, onClose, event, onAnalysisStart }: EventEdit
         backdrop: "bg-background-dark/50",
         header: "border-b border-border dark:border-border-dark",
         body: "p-0 overflow-hidden",
-        closeButton: "hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",
+        closeButton:
+          "hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",
       }}
     >
       <ModalContent className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark flex flex-col max-h-full">
         {() => (
-          <>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <ModalHeader className="flex items-center gap-3 px-6 py-5">
               <div className="p-2 rounded-lg bg-primary/10">
                 <Calendar size={20} className="text-primary" />
@@ -178,7 +205,12 @@ function EventEditDialog({ visible, onClose, event, onAnalysisStart }: EventEdit
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                   Edit Event
                   {event && (
-                    <Chip size="sm" variant="flat" color="primary" className="ml-2">
+                    <Chip
+                      size="sm"
+                      variant="flat"
+                      color="primary"
+                      className="ml-2"
+                    >
                       #{event.id}
                     </Chip>
                   )}
@@ -191,20 +223,28 @@ function EventEditDialog({ visible, onClose, event, onAnalysisStart }: EventEdit
 
             <ModalBody className="flex-1 overflow-y-auto">
               <div className="px-6 py-6 space-y-6 relative">
-
                 <div className="space-y-6">
-                  <Textarea
-                    value={description}
-                    placeholder="Enter event name (e.g., OpenBuild Hackathon)"
-                    label="Event Name"
-                    labelPlacement="outside"
-                    isRequired
-                    onValueChange={setDescription}
-                    classNames={{
-                      base: "w-full",
-                      label: "text-sm font-medium text-gray-700 dark:text-gray-300 mb-2",
-                      input: "bg-white dark:bg-surface-dark border-border dark:border-border-dark",
-                    }}
+                  <Controller
+                    name="description"
+                    control={control}
+                    render={({ field }) => (
+                      <Textarea
+                        {...field}
+                        placeholder="Enter event name (e.g., OpenBuild Hackathon)"
+                        label="Event Name"
+                        labelPlacement="outside"
+                        isRequired
+                        isInvalid={!!errors.description}
+                        errorMessage={errors.description?.message}
+                        classNames={{
+                          base: "w-full",
+                          label:
+                            "text-sm font-medium text-gray-700 dark:text-gray-300 mb-2",
+                          input:
+                            "bg-white dark:bg-surface-dark border-border dark:border-border-dark",
+                        }}
+                      />
+                    )}
                   />
 
                   <div>
@@ -241,19 +281,26 @@ function EventEditDialog({ visible, onClose, event, onAnalysisStart }: EventEdit
                     )}
                   </div>
 
-                  <Textarea
-                    value={userInput}
-                    placeholder="Enter GitHub username of new contestants, separated by comma"
-                    label="Add New Participants"
-                    labelPlacement="outside"
-                    minRows={5}
-                    maxRows={10}
-                    onValueChange={setUserInput}
-                    classNames={{
-                      base: "w-full",
-                      label: "text-sm font-medium text-gray-700 dark:text-gray-300 mb-2",
-                      input: "bg-white dark:bg-surface-dark border-border dark:border-border-dark",
-                    }}
+                  <Controller
+                    name="userInput"
+                    control={control}
+                    render={({ field }) => (
+                      <Textarea
+                        {...field}
+                        placeholder="Enter GitHub username of new contestants, separated by comma"
+                        label="Add New Participants"
+                        labelPlacement="outside"
+                        minRows={5}
+                        maxRows={10}
+                        classNames={{
+                          base: "w-full",
+                          label:
+                            "text-sm font-medium text-gray-700 dark:text-gray-300 mb-2",
+                          input:
+                            "bg-white dark:bg-surface-dark border-border dark:border-border-dark",
+                        }}
+                      />
+                    )}
                   />
 
                   <div className="flex items-center gap-3 pt-2">
@@ -279,12 +326,18 @@ function EventEditDialog({ visible, onClose, event, onAnalysisStart }: EventEdit
                   {/* Warning Notice */}
                   <div className="bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800 rounded-lg p-4">
                     <div className="flex items-start gap-2">
-                      <AlertTriangle size={16} className="text-warning-600 dark:text-warning-400 mt-0.5 shrink-0" />
+                      <AlertTriangle
+                        size={16}
+                        className="text-warning-600 dark:text-warning-400 mt-0.5 shrink-0"
+                      />
                       <div className="text-sm text-warning-700 dark:text-warning-300">
-                        <p className="font-medium mb-1">Analysis Re-run Notice</p>
+                        <p className="font-medium mb-1">
+                          Analysis Re-run Notice
+                        </p>
                         <p>
-                          Updating this event will trigger a complete re-analysis of all participants.
-                          This process may take several minutes to complete.
+                          Updating this event will trigger a complete
+                          re-analysis of all participants. This process may take
+                          several minutes to complete.
                         </p>
                       </div>
                     </div>
@@ -296,24 +349,25 @@ function EventEditDialog({ visible, onClose, event, onAnalysisStart }: EventEdit
             <ModalFooter className="border-t border-border dark:border-border-dark px-6 py-4">
               <div className="flex gap-3 w-full sm:w-auto sm:ml-auto">
                 <Button
+                  type="button"
                   variant="bordered"
-                  onClick={() => closeDialog()}
+                  onClick={closeDialog}
                   className="flex-1 sm:flex-none border-border dark:border-border-dark hover:bg-gray-50 dark:hover:bg-white/10"
                 >
-                  {loading ? "Close" : "Cancel"}
+                  {updateMutation.isPending ? "Close" : "Cancel"}
                 </Button>
                 <Button
+                  type="submit"
                   color="primary"
-                  isLoading={loading}
-                  onClick={handleConfirm}
-                  isDisabled={loading || !description.trim()}
+                  isLoading={updateMutation.isPending}
+                  isDisabled={updateMutation.isPending}
                   className="flex-1 sm:flex-none"
                 >
                   Update Event
                 </Button>
               </div>
             </ModalFooter>
-          </>
+          </form>
         )}
       </ModalContent>
     </Modal>
@@ -325,8 +379,12 @@ function EventEditDialogWrapper(props: EventEditDialogProps) {
   const [editVisible, setEditVisible] = useState(true);
   const [analysisVisible, setAnalysisVisible] = useState(false);
   const [analysisEventId, setAnalysisEventId] = useState(0);
-  const [analysisContestants, setAnalysisContestants] = useState<Contestant[]>([]);
-  const [analysisFailedAccounts, setAnalysisFailedAccounts] = useState<string[]>([]);
+  const [analysisContestants, setAnalysisContestants] = useState<Contestant[]>(
+    [],
+  );
+  const [analysisFailedAccounts, setAnalysisFailedAccounts] = useState<
+    string[]
+  >([]);
 
   // Reset editVisible when props.visible changes from false to true
   useEffect(() => {
@@ -340,7 +398,11 @@ function EventEditDialogWrapper(props: EventEditDialogProps) {
     props.onClose();
   };
 
-  const handleAnalysisStart = (eventId: number, contestants: Contestant[], failedAccounts: string[]) => {
+  const handleAnalysisStart = (
+    eventId: number,
+    contestants: Contestant[],
+    failedAccounts: string[],
+  ) => {
     setEditVisible(false);
     setAnalysisEventId(eventId);
     setAnalysisContestants(contestants);
@@ -351,7 +413,6 @@ function EventEditDialogWrapper(props: EventEditDialogProps) {
   const handleAnalysisGoto = () => {
     setAnalysisVisible(false);
     props.onClose();
-    // Trigger success callback to refresh the page
     if (props.onSuccess) {
       props.onSuccess();
     }

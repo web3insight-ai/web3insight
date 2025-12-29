@@ -1,16 +1,19 @@
 import type { EChartsOption } from "echarts";
 import dayjs from "dayjs";
 
-import type { ActorTrendRecord } from "~/api/typing";
+import type { ActorTrendRecord } from "@/lib/api/types";
 
 function resolveChartOptions(dataSource: ActorTrendRecord[]): EChartsOption {
   const xaxisData: string[] = [];
   const seriesData: number[] = [];
 
-  dataSource.slice().reverse().forEach(({ date, total }) => {
-    xaxisData.push(dayjs(date).format("MMM, YYYY"));
-    seriesData.push(total);
-  });
+  dataSource
+    .slice()
+    .reverse()
+    .forEach(({ date, total }) => {
+      xaxisData.push(dayjs(date).format("MMM, YYYY"));
+      seriesData.push(total);
+    });
 
   return {
     grid: {
@@ -24,7 +27,7 @@ function resolveChartOptions(dataSource: ActorTrendRecord[]): EChartsOption {
       data: xaxisData,
       axisLabel: {
         fontSize: 9,
-        color: '#6B7280',
+        color: "#6B7280",
         rotate: 45,
       },
       axisTick: { show: false },
@@ -33,19 +36,20 @@ function resolveChartOptions(dataSource: ActorTrendRecord[]): EChartsOption {
       type: "value",
       axisLabel: {
         fontSize: 9,
-        color: '#6B7280',
+        color: "#6B7280",
       },
       axisTick: { show: false },
       splitLine: {
         lineStyle: {
-          color: '#E5E7EB',
+          color: "#E5E7EB",
           opacity: 0.5,
         },
       },
     },
     tooltip: {
       fontSize: 10,
-      formatter: (params: { name: string; value: number }) => `${params.name}<br/>Activity: ${params.value}`,
+      formatter: (params: { name: string; value: number }) =>
+        `${params.name}<br/>Activity: ${params.value}`,
     },
     series: [
       {
@@ -54,10 +58,10 @@ function resolveChartOptions(dataSource: ActorTrendRecord[]): EChartsOption {
         smooth: true,
         lineStyle: {
           width: 2,
-          color: '#0D9488',
+          color: "#0D9488",
         },
         itemStyle: {
-          color: '#0D9488',
+          color: "#0D9488",
         },
         label: { show: false },
       },

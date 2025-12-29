@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { ChartSkeleton } from "$/loading";
 import RepositoryDetailView from "~/repository/views/repository-detail";
@@ -12,7 +12,7 @@ interface RepositoryDetailProps {
     forksCount: number;
     openIssuesCount: number;
     contributorCount: number;
-    details: Record<string, unknown>;
+    details: Record<string, unknown> | null;
   } | null;
   activeDevelopers: Array<{
     month: string;
@@ -20,7 +20,10 @@ interface RepositoryDetailProps {
   }> | null;
 }
 
-export default function RepositoryDetailClient({ repository, activeDevelopers }: RepositoryDetailProps) {
+export default function RepositoryDetailClient({
+  repository,
+  activeDevelopers,
+}: RepositoryDetailProps) {
   // Show loading skeleton while critical data is missing
   if (!repository || !repository.name) {
     return (
@@ -37,7 +40,10 @@ export default function RepositoryDetailClient({ repository, activeDevelopers }:
 
   return (
     <ClientOnly>
-      <RepositoryDetailView repository={repository} activeDevelopers={activeDevelopers} />
+      <RepositoryDetailView
+        repository={repository}
+        activeDevelopers={activeDevelopers}
+      />
     </ClientOnly>
   );
 }

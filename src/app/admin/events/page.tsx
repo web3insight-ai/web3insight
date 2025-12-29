@@ -1,26 +1,17 @@
-import { notFound } from 'next/navigation';
-import { headers } from 'next/headers';
+import { notFound } from "next/navigation";
 
 import { fetchCurrentUser } from "~/auth/repository";
 import { canManageEvents } from "~/auth/helper";
+import type { ApiUser } from "~/auth/typing";
 import EventListViewWidget from "~/event/views/event-list";
 
 export const metadata = {
-  title: 'Events Manager | Admin Panel',
-  description: 'Manage Web3 events and view analytics',
+  title: "Events Manager | Admin Panel",
+  description: "Manage Web3 events and view analytics",
 };
 
 async function getEventsData() {
-  const headersList = await headers();
-  const host = headersList.get('host') || 'localhost:3000';
-  const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
-  const url = `${protocol}://${host}/admin/events`;
-
-  const request = new Request(url, {
-    headers: Object.fromEntries(headersList.entries()),
-  });
-
-  const res = await fetchCurrentUser(request);
+  const res = await fetchCurrentUser();
 
   if (!canManageEvents(res.data)) {
     notFound();
@@ -29,11 +20,13 @@ async function getEventsData() {
   return { manager: res.data };
 }
 
-function AdminEventListPageContent({ manager }: { manager: Record<string, unknown> }) {
+function AdminEventListPageContent({ manager }: { manager: ApiUser | null }) {
   if (!manager) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-500 dark:text-gray-400">Unable to load manager information.</p>
+        <p className="text-gray-500 dark:text-gray-400">
+          Unable to load manager information.
+        </p>
       </div>
     );
   }

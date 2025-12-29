@@ -1,4 +1,4 @@
-import type { RepoRankRecord } from "../api/typing";
+import type { RepoRankRecord } from "@/lib/api/types";
 import type { Repository } from "./typing";
 
 const customMarkTextMap = {
@@ -16,21 +16,24 @@ const customMarkTextMap = {
 };
 
 function resolveCustomMarkText(mark: number | string): string {
-  if (mark === null || mark === undefined || mark === '') {
+  if (mark === null || mark === undefined || mark === "") {
     return "Unspecified";
   }
-  
-  const numericMark = typeof mark === 'string' ? parseInt(mark, 10) : mark;
-  
+
+  const numericMark = typeof mark === "string" ? parseInt(mark, 10) : mark;
+
   if (isNaN(numericMark)) {
     return "Unspecified";
   }
-  
-  return customMarkTextMap[numericMark as keyof typeof customMarkTextMap] || "Unspecified";
+
+  return (
+    customMarkTextMap[numericMark as keyof typeof customMarkTextMap] ||
+    "Unspecified"
+  );
 }
 
 function resolveDataSource(raw: RepoRankRecord[]): Repository[] {
-  return raw.map(repo => ({
+  return raw.map((repo) => ({
     id: repo.repo_id,
     name: repo.repo_name,
     fullName: repo.repo_name,

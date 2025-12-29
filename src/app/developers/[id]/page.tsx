@@ -3,19 +3,13 @@ import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import DeveloperDetailClient from "./DeveloperDetailClient";
 import { getTitle } from "@/utils/app";
+import { api } from "@/lib/api/client";
 import type { Repository } from "~/repository/typing";
 import type {
   DeveloperActivity,
   DeveloperContribution,
   DeveloperEcosystems,
 } from "~/developer/typing";
-import {
-  fetchOne,
-  fetchRepositoryRankList,
-  fetchActivityList,
-  fetchContributionList,
-  fetchEcosystems,
-} from "~/developer/repository";
 import { getUser } from "~/auth/repository";
 import DefaultLayoutWrapper from "../../DefaultLayoutWrapper";
 import { env } from "@/env";
@@ -31,7 +25,7 @@ export async function generateMetadata({
 }: DeveloperPageProps): Promise<Metadata> {
   try {
     const resolvedParams = await params;
-    const res = await fetchOne(resolvedParams.id);
+    const res = await api.developers.getOne(resolvedParams.id);
     const baseTitle = `Developer Profile - ${getTitle()}`;
 
     if (res.success && res.data) {
@@ -71,13 +65,13 @@ export default async function DeveloperDetailPage({
   const protocol = env.NODE_ENV === "development" ? "http" : "https";
   const url = `${protocol}://${host}/developers/${developerId}`;
 
-  const request = new Request(url, {
+  const _request = new Request(url, {
     headers: Object.fromEntries(headersList.entries()),
   });
-  const user = await getUser(request);
+  const user = await getUser();
 
   try {
-    const res = await fetchOne(developerId);
+    const res = await api.developers.getOne(developerId);
 
     let contributions: DeveloperContribution[] = [];
     let repositories: Repository[] = [];
@@ -87,10 +81,10 @@ export default async function DeveloperDetailPage({
     if (res.success && res.data) {
       try {
         const responses = await Promise.all([
-          fetchContributionList(res.data.id),
-          fetchRepositoryRankList(res.data.username),
-          fetchActivityList(res.data.username),
-          fetchEcosystems(res.data.id),
+          api.developers.getContributionList(res.data.id),
+          api.developers.getRepositoryRankList(res.data.username),
+          api.developers.getActivityList(res.data.username),
+          api.developers.getEcosystems(res.data.id),
         ]);
 
         contributions = responses[0].data || [];

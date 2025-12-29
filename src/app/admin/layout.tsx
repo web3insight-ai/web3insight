@@ -1,11 +1,11 @@
-import { notFound } from 'next/navigation';
-import { headers } from 'next/headers';
+import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 
 import { canManageEcosystems, canManageEvents } from "~/auth/helper";
 import { getUser } from "~/auth/repository";
 import { getEffectiveRole } from "@/utils/role";
-import AdminNavMenu from './AdminNavMenu';
-import AdminHeader from './AdminHeader';
+import AdminNavMenu from "./AdminNavMenu";
+import AdminHeader from "./AdminHeader";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -13,15 +13,15 @@ interface AdminLayoutProps {
 
 async function getAdminUser() {
   const headersList = await headers();
-  const host = headersList.get('host') || 'localhost:3000';
-  const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
+  const host = headersList.get("host") || "localhost:3000";
+  const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
   const url = `${protocol}://${host}/admin`;
 
-  const request = new Request(url, {
+  const _request = new Request(url, {
     headers: Object.fromEntries(headersList.entries()),
   });
 
-  const user = await getUser(request);
+  const user = await getUser();
 
   if (!canManageEcosystems(user) && !canManageEvents(user)) {
     notFound();
@@ -34,7 +34,9 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
   const user = await getAdminUser();
 
   // Get effective role (highest priority role from allowed roles)
-  const effectiveRole = user?.role ? getEffectiveRole(user.role.default_role, user.role.allowed_roles) : null;
+  const effectiveRole = user?.role
+    ? getEffectiveRole(user.role.default_role, user.role.allowed_roles)
+    : null;
 
   return (
     <div className="flex flex-col h-screen bg-background dark:bg-background-dark">
@@ -49,9 +51,7 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
 
         {/* Main Content */}
         <div className="flex-grow flex flex-col min-h-0 overflow-auto bg-background dark:bg-background-dark">
-          <div className="p-4 md:p-8">
-            {children}
-          </div>
+          <div className="p-4 md:p-8">{children}</div>
         </div>
       </main>
     </div>

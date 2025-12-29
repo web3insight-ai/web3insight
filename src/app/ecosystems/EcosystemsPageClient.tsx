@@ -2,13 +2,16 @@
 
 import { Card, CardHeader, Input, Pagination } from "@nextui-org/react";
 import { Search, Warehouse, Database, Users, Code2, Zap } from "lucide-react";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useEcosystemList, useOverviewStatistics } from "@/hooks/api";
 import { EcosystemType } from "~/ecosystem/typing";
 import { getFilterForType } from "~/ecosystem/helper";
 import { EcosystemTypeFilter } from "$/ecosystem-type-filter";
-import type { EcoRankRecord } from "~/api/typing";
 import MetricCard, { type MetricCardProps } from "$/controls/metric-card";
 import TableHeader from "$/controls/table-header";
 import {
@@ -17,14 +20,13 @@ import {
   fadeInUp,
 } from "@/utils/animations";
 
-interface EcosystemsPageProps {
-  ecosystems: EcoRankRecord[];
-  totalEcosystems: number;
-  totalRepositories: number;
-  totalDevelopers: number;
-  totalCoreDevelopers: number;
-  totalNewDevelopers: number;
-}
+// Local schema that includes the ecosystem type enum
+const ecosystemFilterSchema = z.object({
+  search: z.string(),
+  type: z.nativeEnum(EcosystemType),
+});
+
+type EcosystemFilterInput = z.infer<typeof ecosystemFilterSchema>;
 
 function resolveMetrics(dataSource: {
   totalCoreDevelopers: number;
@@ -65,21 +67,38 @@ function resolveMetrics(dataSource: {
   ];
 }
 
-export default function EcosystemsPageClient({
-  ecosystems,
-  totalEcosystems,
-  totalRepositories,
-  totalDevelopers,
-  totalCoreDevelopers,
-}: EcosystemsPageProps) {
+export default function EcosystemsPageClient() {
+  // TanStack Query hooks - data is hydrated from server prefetch
+  const { data: ecosystems = [] } = useEcosystemList();
+  const { data: statistics } = useOverviewStatistics();
+
+  const totalCoreDevelopers = statistics?.totalCoreDevelopers ?? 0;
+  const totalDevelopers = statistics?.totalDevelopers ?? 0;
+  const totalRepositories = statistics?.totalRepositories ?? 0;
+  const totalEcosystems = statistics?.totalEcosystems ?? 0;
+
+  // Form state using React Hook Form
+  const form = useForm<EcosystemFilterInput>({
+    resolver: zodResolver(ecosystemFilterSchema),
+    defaultValues: {
+      search: "",
+      type: EcosystemType.PUBLIC_CHAIN,
+    },
+  });
+
+  const searchValue = form.watch("search");
+  const selectedType = form.watch("type");
+
   // Pagination state
   const [page, setPage] = useState(1);
   const rowsPerPage = 25;
 
-  // Filtering state
-  const [filterValue, setFilterValue] = useState("");
-  const [selectedType, setSelectedType] = useState<EcosystemType>(
-    EcosystemType.PUBLIC_CHAIN,
+  // Handle type change from EcosystemTypeFilter component
+  const handleTypeChange = useCallback(
+    (type: EcosystemType) => {
+      form.setValue("type", type);
+    },
+    [form],
   );
 
   // Reset page when ecosystem type changes
@@ -103,9 +122,9 @@ export default function EcosystemsPageClient({
   const filteredItems = useMemo(() => {
     let filtered = [...ecosystems];
 
-    if (filterValue) {
+    if (searchValue) {
       filtered = filtered.filter((ecosystem) =>
-        ecosystem.eco_name.toLowerCase().includes(filterValue.toLowerCase()),
+        ecosystem.eco_name.toLowerCase().includes(searchValue.toLowerCase()),
       );
     }
 
@@ -115,7 +134,7 @@ export default function EcosystemsPageClient({
     );
 
     return filtered;
-  }, [ecosystems, filterValue, selectedType]);
+  }, [ecosystems, searchValue, selectedType]);
 
   // Sort filtered ecosystems by actors_total (descending)
   const sortedItems = useMemo(() => {
@@ -183,13 +202,13 @@ export default function EcosystemsPageClient({
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <EcosystemTypeFilter
           selectedType={selectedType}
-          onTypeChange={setSelectedType}
+          onTypeChange={handleTypeChange}
         />
         <div className="w-full sm:w-72">
           <Input
             placeholder="Search ecosystems..."
-            value={filterValue}
-            onChange={(e) => setFilterValue(e.target.value)}
+            value={searchValue}
+            onChange={(e) => form.setValue("search", e.target.value)}
             startContent={<Search size={18} className="text-gray-400" />}
             className="w-full"
           />

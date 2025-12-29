@@ -1,4 +1,4 @@
-import type { RepoTrendingRecord } from "../../../api/typing";
+import type { RepoTrendingRecord } from "@/lib/api/types";
 
 type RepositoryTrendingViewWidgetProps = {
   className?: string;

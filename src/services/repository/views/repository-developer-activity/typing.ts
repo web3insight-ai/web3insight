@@ -1,4 +1,4 @@
-import type { RepoDeveloperActivityRecord } from "../../../api/typing";
+import type { RepoDeveloperActivityRecord } from "@/lib/api/types";
 
 type RepositoryDeveloperActivityViewWidgetProps = {
   className?: string;

@@ -1,10 +1,14 @@
-import { notFound } from 'next/navigation';
-import { headers } from 'next/headers';
+import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import { Calendar } from "lucide-react";
 
 import { fetchCurrentUser } from "~/auth/repository";
 import { canManageEvents } from "~/auth/helper";
-import { fetchOne } from "~/event/repository";
+import { getSession } from "~/auth/helper/server";
+import { api } from "@/lib/api/client";
+import type { DataValue } from "@/types";
+import { resolveEventDetail } from "~/event/helper";
+import type { EventReport } from "~/event/typing";
 import EventDetailViewWidget from "~/event/views/event-detail";
 
 interface AdminEventDetailPageProps {
@@ -13,23 +17,39 @@ interface AdminEventDetailPageProps {
   }>;
 }
 
+async function fetchEventData(
+  eventId: number,
+): Promise<{ success: boolean; data: EventReport }> {
+  const session = await getSession();
+  const userToken = session.get("userToken") as string | undefined as
+    | string
+    | undefined;
+
+  if (!userToken) {
+    return { success: false, data: {} as EventReport };
+  }
+
+  const res = await api.custom.getAnalysisUser(userToken, eventId);
+
+  if (!res.success) {
+    return { success: false, data: {} as EventReport };
+  }
+
+  const eventReport = resolveEventDetail(res.data as Record<string, DataValue>);
+
+  return { success: true, data: eventReport };
+}
+
 export async function generateMetadata({ params }: AdminEventDetailPageProps) {
   const resolvedParams = await params;
   const eventId = Number(resolvedParams.id);
 
   try {
-    const headersList = await headers();
-    const host = headersList.get('host') || 'localhost:3000';
-    const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
-    const url = `${protocol}://${host}/admin/events/${eventId}`;
-
-    const request = new Request(url, {
-      headers: Object.fromEntries(headersList.entries()),
-    });
-
-    // Fetch event data to get the description/name
-    const eventRes = await fetchOne(request, eventId);
-    const eventName = eventRes.success ? (eventRes.data.description || "Unknown Event") : "Event";
+    const eventRes = await fetchEventData(eventId);
+    const eventName =
+      eventRes.success && eventRes.data
+        ? eventRes.data.description || "Unknown Event"
+        : "Event";
 
     return {
       title: `${eventName} (${eventId}) | Admin Panel`,
@@ -37,30 +57,29 @@ export async function generateMetadata({ params }: AdminEventDetailPageProps) {
     };
   } catch {
     return {
-      title: 'Event Details | Admin Panel',
-      description: 'Event details and analytics',
+      title: "Event Details | Admin Panel",
+      description: "Event details and analytics",
     };
   }
 }
 
 async function getEventDetailData(eventId: number) {
   const headersList = await headers();
-  const host = headersList.get('host') || 'localhost:3000';
-  const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
+  const host = headersList.get("host") || "localhost:3000";
+  const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
   const url = `${protocol}://${host}/admin/events/${eventId}`;
 
-  const request = new Request(url, {
+  const _request = new Request(url, {
     headers: Object.fromEntries(headersList.entries()),
   });
 
-  const res = await fetchCurrentUser(request);
+  const res = await fetchCurrentUser();
 
   if (!canManageEvents(res.data)) {
     notFound();
   }
 
-  // Fetch event data to get the description/name
-  const eventRes = await fetchOne(request, eventId);
+  const eventRes = await fetchEventData(eventId);
 
   if (!eventRes.success) {
     notFound();
@@ -72,7 +91,9 @@ async function getEventDetailData(eventId: number) {
   };
 }
 
-export default async function AdminEventDetailPage({ params }: AdminEventDetailPageProps) {
+export default async function AdminEventDetailPage({
+  params,
+}: AdminEventDetailPageProps) {
   const resolvedParams = await params;
   const eventId = Number(resolvedParams.id);
   const { eventName } = await getEventDetailData(eventId);
@@ -90,11 +111,14 @@ export default async function AdminEventDetailPage({ params }: AdminEventDetailP
               <h1 className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
                 {eventName}
               </h1>
-              <p className="text-lg text-gray-500 dark:text-gray-400">Event Details & Analytics</p>
+              <p className="text-lg text-gray-500 dark:text-gray-400">
+                Event Details & Analytics
+              </p>
             </div>
           </div>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl leading-relaxed">
-            Comprehensive analytics and insights for event participants and their contributions.
+            Comprehensive analytics and insights for event participants and
+            their contributions.
           </p>
         </div>
 

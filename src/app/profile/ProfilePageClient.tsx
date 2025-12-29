@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { Card, CardBody, Avatar, Button } from "@nextui-org/react";
 import Link from "next/link";
@@ -16,34 +16,41 @@ import { usePrivy } from "@privy-io/react-auth";
 
 import { getRoleName } from "@/utils/role";
 import { getPrivyUserDisplayInfo } from "~/auth/helper";
+import type { ApiUser } from "~/auth/typing";
 
 import Section from "$/section";
 import { PrivyAccountsWidget } from "~/auth/widgets/privy-accounts";
 
-interface ProfilePageProps {
-  user: Record<string, unknown>;
+export interface ProfilePageProps {
+  user: ApiUser | null;
   error: string | null;
   expired: boolean;
 }
 
 function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+  return new Date(dateString).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
-export default function ProfilePageClient({ user, error, expired }: ProfilePageProps) {
+export default function ProfilePageClient({
+  user,
+  error,
+  expired,
+}: ProfilePageProps) {
   const { ready, authenticated, login, user: privyUser } = usePrivy();
 
   // Get user display info from Privy based on login method
   const userInfo = getPrivyUserDisplayInfo(privyUser);
 
   // Get GitHub handle from Privy linked accounts for DevInsight button
-  const githubAccount = privyUser?.linkedAccounts?.find(acc => acc.type === 'github_oauth');
+  const githubAccount = privyUser?.linkedAccounts?.find(
+    (acc) => acc.type === "github_oauth",
+  );
   const githubHandle = githubAccount?.username || null;
 
   // Handle expired token - trigger Privy login
@@ -76,7 +83,8 @@ export default function ProfilePageClient({ user, error, expired }: ProfilePageP
                     Session Expired
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400 mb-6">
-                    {error || "Your session has expired. Please sign in again to access your profile."}
+                    {error ||
+                      "Your session has expired. Please sign in again to access your profile."}
                   </p>
                   <Button
                     color="primary"
@@ -94,7 +102,6 @@ export default function ProfilePageClient({ user, error, expired }: ProfilePageP
     );
   }
 
-
   return (
     <div className="min-h-dvh flex flex-col">
       <div className="w-full max-w-content mx-auto px-6 py-6">
@@ -103,14 +110,17 @@ export default function ProfilePageClient({ user, error, expired }: ProfilePageP
           summary="Manage your account information and settings"
         >
           <div className="max-w-4xl mx-auto space-y-6">
-
             {/* Profile Header Card */}
             <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">
               <CardBody className="p-6">
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
                   <div className="flex-shrink-0">
                     <Avatar
-                      src={userInfo.avatarUrl || user.avatar_url || user.profile?.user_avatar}
+                      src={
+                        userInfo.avatarUrl ||
+                        user.avatar_url ||
+                        user.profile?.user_avatar
+                      }
                       name={userInfo.displayName.substring(0, 1).toUpperCase()}
                       size="lg"
                       className="w-24 h-24 text-large"
@@ -141,7 +151,11 @@ export default function ProfilePageClient({ user, error, expired }: ProfilePageP
                       <div className="flex items-center justify-center md:justify-start gap-2">
                         <Calendar size={16} />
                         <span>
-                          Joined {formatDate(user.profile?.created_at || new Date().toISOString())}
+                          Joined{" "}
+                          {formatDate(
+                            user.profile?.created_at ||
+                              new Date().toISOString(),
+                          )}
                         </span>
                       </div>
                     </div>
@@ -157,7 +171,10 @@ export default function ProfilePageClient({ user, error, expired }: ProfilePageP
                 <CardBody className="p-6">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="p-2 bg-gray-100 dark:bg-surface-elevated rounded-lg">
-                      <UserIcon size={20} className="text-gray-600 dark:text-gray-400" />
+                      <UserIcon
+                        size={20}
+                        className="text-gray-600 dark:text-gray-400"
+                      />
                     </div>
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                       Account Information
@@ -198,9 +215,14 @@ export default function ProfilePageClient({ user, error, expired }: ProfilePageP
                       </p>
                       <div className="flex items-center gap-2">
                         <div className="flex items-center justify-center w-5 h-5 bg-gray-100 dark:bg-surface-elevated rounded-full">
-                          <CheckCircle size={12} className="text-gray-600 dark:text-gray-400" />
+                          <CheckCircle
+                            size={12}
+                            className="text-gray-600 dark:text-gray-400"
+                          />
                         </div>
-                        <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">Active</span>
+                        <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
+                          Active
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -212,7 +234,10 @@ export default function ProfilePageClient({ user, error, expired }: ProfilePageP
                 <CardBody className="p-6">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="p-2 bg-gray-100 dark:bg-surface-elevated rounded-lg">
-                      <Shield size={20} className="text-gray-600 dark:text-gray-400" />
+                      <Shield
+                        size={20}
+                        className="text-gray-600 dark:text-gray-400"
+                      />
                     </div>
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                       Roles & Permissions
@@ -247,7 +272,10 @@ export default function ProfilePageClient({ user, error, expired }: ProfilePageP
               <CardBody className="p-6">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="p-2 bg-gray-100 dark:bg-surface-elevated rounded-lg">
-                    <ExternalLink size={20} className="text-gray-600 dark:text-gray-400" />
+                    <ExternalLink
+                      size={20}
+                      className="text-gray-600 dark:text-gray-400"
+                    />
                   </div>
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                     Connected Accounts

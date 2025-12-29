@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
 import { useState } from "react";
 import { Database } from "lucide-react";
 
-import type { DataValue } from '@/types';
+import type { DataValue, ResponseResult } from "@/types";
+import type { Repository } from "~/repository/typing";
 import { getPageSize } from "~/ecosystem/helper";
-import { fetchManageableRepositoryList, updateManageableRepositoryMark } from "~/ecosystem/repository";
 import RepositoryListView from "~/repository/views/repository-list/RepositoryList";
 
 interface AdminEcosystemDetailClientProps {
   ecosystem: {
     name: string;
-    repositories: Record<string, unknown>[];
+    repositories: Repository[];
   };
   initialPagination: {
     total: number;
@@ -20,65 +20,113 @@ interface AdminEcosystemDetailClientProps {
   };
 }
 
+// Client-side API call helpers
+async function fetchRepoList(
+  params: Record<string, DataValue>,
+): Promise<ResponseResult<Repository[]>> {
+  const searchParams = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      searchParams.set(key, String(value));
+    }
+  });
+
+  const res = await fetch(`/api/ecosystem/repos?${searchParams.toString()}`);
+  return res.json();
+}
+
+async function updateRepoMark(data: {
+  eco: string;
+  id: number;
+  mark: number;
+}): Promise<ResponseResult<unknown>> {
+  const res = await fetch("/api/ecosystem/repos/mark", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  return res.json();
+}
+
 export default function AdminEcosystemDetailClient({
   ecosystem,
   initialPagination,
 }: AdminEcosystemDetailClientProps) {
-  const [dataSource, setDataSource] = useState(ecosystem.repositories);
+  const [dataSource, setDataSource] = useState<Repository[]>(
+    ecosystem.repositories,
+  );
   const [search, setSearch] = useState<Record<string, DataValue>>({});
   const [page, setPage] = useState(initialPagination);
   const [loading, setLoading] = useState(false);
 
   const pageSize = getPageSize();
 
-  const fetchData = ({ pageNum, ...search }: Record<string, DataValue>) => {
+  const fetchData = ({
+    pageNum,
+    ...searchParams
+  }: Record<string, DataValue>) => {
     setLoading(true);
+    const pageNumber = typeof pageNum === "number" ? pageNum : 1;
 
-    fetchManageableRepositoryList({
-      ...search,
+    fetchRepoList({
+      ...searchParams,
       eco: ecosystem.name,
       pageSize,
-      pageNum,
+      pageNum: pageNumber,
     })
-      .then(res => {
+      .then((res) => {
         if (res.success) {
-          setPage({ ...initialPagination, pageNum, total: res.extra?.total as number || 0 });
+          const extra = res.extra as { total?: number } | undefined;
+          setPage({
+            ...initialPagination,
+            pageNum: pageNumber,
+            total: Number(extra?.total) || 0,
+          });
           setDataSource(res.data);
         }
       })
       .finally(() => setLoading(false));
   };
 
-  const handlePageChange = (pageNum: number) => fetchData({ pageNum, ...search });
+  const handlePageChange = (pageNum: number) =>
+    fetchData({ pageNum, ...search });
 
   const handleSearch = (searchValue: Record<string, DataValue>) => {
     setSearch(searchValue);
     fetchData({ pageNum: 1, ...searchValue });
   };
 
-  const handleMark = (mark: number | string | undefined, record: Record<string, DataValue>) => {
+  const handleMark = (
+    mark: number | string | undefined,
+    record: Record<string, DataValue>,
+  ) => {
     const newMark = mark ? Number(mark) : 0;
-    
+    const recordId =
+      typeof record.id === "number" ? record.id : Number(record.id);
+    const originalMark =
+      typeof record.customMark === "number" ||
+      typeof record.customMark === "string"
+        ? record.customMark
+        : undefined;
+
     // Optimistically update the UI immediately
-    setDataSource(prevData => 
-      prevData.map(repo => 
-        repo.id === record.id 
-          ? { ...repo, customMark: newMark }
-          : repo,
+    setDataSource((prevData) =>
+      prevData.map((repo) =>
+        repo.id === recordId ? { ...repo, customMark: newMark } : repo,
       ),
     );
 
-    return updateManageableRepositoryMark({ eco: ecosystem.name, id: record.id, mark: newMark })
-      .then(res => {
+    return updateRepoMark({ eco: ecosystem.name, id: recordId, mark: newMark })
+      .then((res) => {
         if (res.success) {
           // Refresh data to sync with server state
           fetchData({ pageNum: page.pageNum, ...search });
         } else {
           // Revert optimistic update on failure
-          setDataSource(prevData => 
-            prevData.map(repo => 
-              repo.id === record.id 
-                ? { ...repo, customMark: record.customMark }
+          setDataSource((prevData) =>
+            prevData.map((repo) =>
+              repo.id === recordId
+                ? { ...repo, customMark: originalMark }
                 : repo,
             ),
           );
@@ -86,13 +134,11 @@ export default function AdminEcosystemDetailClient({
 
         return res;
       })
-      .catch(error => {
+      .catch((error) => {
         // Revert optimistic update on error
-        setDataSource(prevData => 
-          prevData.map(repo => 
-            repo.id === record.id 
-              ? { ...repo, customMark: record.customMark }
-              : repo,
+        setDataSource((prevData) =>
+          prevData.map((repo) =>
+            repo.id === recordId ? { ...repo, customMark: originalMark } : repo,
           ),
         );
         throw error;
@@ -108,7 +154,9 @@ export default function AdminEcosystemDetailClient({
             <div className="p-2 rounded-lg bg-primary/10">
               <Database size={20} className="text-primary" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{ecosystem.name}</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              {ecosystem.name}
+            </h1>
           </div>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
             Manage and mark repositories within the {ecosystem.name} ecosystem

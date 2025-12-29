@@ -1,10 +1,9 @@
-import type { Metadata } from 'next';
-import { redirect } from 'next/navigation';
-import ProfilePageClient from './ProfilePageClient';
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import ProfilePageClient from "./ProfilePageClient";
 import { getTitle } from "@/utils/app";
 import { fetchCurrentUser } from "~/auth/repository";
-import DefaultLayoutWrapper from '../DefaultLayoutWrapper';
-import { headers } from 'next/headers';
+import DefaultLayoutWrapper from "../DefaultLayoutWrapper";
 
 export const metadata: Metadata = {
   title: `My Profile | ${getTitle()}`,
@@ -13,12 +12,7 @@ export const metadata: Metadata = {
 
 export default async function ProfilePage() {
   // Get user data with proper error handling
-  const headersList = await headers();
-  const host = headersList.get("host") || "localhost:3000";
-  const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
-  const url = `${protocol}://${host}/profile`;
-  
-  const userResult = await fetchCurrentUser(new Request(url));
+  const userResult = await fetchCurrentUser();
 
   // Handle expired token (401)
   if (!userResult.success && userResult.code === "401") {

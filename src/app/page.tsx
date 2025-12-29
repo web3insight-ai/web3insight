@@ -1,10 +1,7 @@
-import { redirect } from 'next/navigation';
+import { redirect } from "next/navigation";
 import { getMetadata } from "@/utils/app";
-import { fetchStatisticsOverview, fetchStatisticsRank } from "~/statistics/repository";
-import { fetchWeeklyTrendingList, fetchWeeklyDeveloperActivityList } from "~/repository/repository";
-import { fetchActorCountryRankList } from "~/api/repository";
+import { api } from "@/lib/api/client";
 import { getUser } from "~/auth/repository";
-import { headers } from 'next/headers';
 import EcosystemRankViewWidget from "~/ecosystem/views/ecosystem-rank";
 import RepositoryRankViewWidget from "~/repository/views/repository-rank";
 import RepositoryTrendingViewWidget from "~/repository/views/repository-trending";
@@ -41,61 +38,83 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     redirect(`/connect/github/redirect?code=${code}`);
   }
 
-  // Get current user from session
-  const headersList = await headers();
-  const host = headersList.get("host") || "localhost:3000";
-  const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
-  const url = `${protocol}://${host}`;
-
-  const request = new Request(url, {
-    headers: headersList,
-  });
-  const user = await getUser(request);
+  const user = await getUser();
 
   try {
-    const [statisticsResult, rankResult, trendingResult, developerActivityResult, countryRankResult] = await Promise.all([
-      fetchStatisticsOverview(),
-      fetchStatisticsRank(),
-      fetchWeeklyTrendingList(),
-      fetchWeeklyDeveloperActivityList(),
-      fetchActorCountryRankList(),
+    // Fetch all rank data using the api client
+    const [
+      ecosystemRankResult,
+      repoRankResult,
+      actorRankResult,
+      trendingResult,
+      developerActivityResult,
+      countryRankResult,
+    ] = await Promise.all([
+      api.ecosystems.getRankList(),
+      api.repos.getRankList(),
+      api.actors.getRankList(),
+      api.repos.getTrendingList(),
+      api.repos.getDeveloperActivityList(),
+      api.actors.getCountryRank(),
     ]);
 
-    // Use fallback data if statistics fetch failed
-    // Client component will handle data fetching via API
-    // const statisticOverview = statisticsResult.success ? statisticsResult.data : {
-    //   ecosystem: 0,
-    //   repository: 0,
-    //   developer: 0,
-    //   coreDeveloper: 0,
-    // };
-
-    // Use fallback data if rank fetch failed
-    const statisticRank = rankResult.success ? rankResult.data : {
-      ecosystem: [],
-      repository: [],
-      developer: [],
-    };
-    const weeklyTrendingRepos = trendingResult.success ? trendingResult.data : [];
-    const weeklyDeveloperActivityRepos = developerActivityResult.success ? developerActivityResult.data : [];
-    const countryDistribution = countryRankResult.success ? (countryRankResult.data.list ?? []) : [];
-    const countryDistributionTotal = countryRankResult.success ? Number(countryRankResult.data.total ?? 0) : 0;
+    // Extract data with fallbacks
+    const ecosystemRank =
+      ecosystemRankResult.success && ecosystemRankResult.data
+        ? ecosystemRankResult.data.list
+        : [];
+    const repoRank =
+      repoRankResult.success && repoRankResult.data
+        ? repoRankResult.data.list
+        : [];
+    const developerRank =
+      actorRankResult.success && actorRankResult.data
+        ? actorRankResult.data.list.slice(0, 10)
+        : [];
+    const weeklyTrendingRepos =
+      trendingResult.success && trendingResult.data
+        ? trendingResult.data.list
+        : [];
+    const weeklyDeveloperActivityRepos =
+      developerActivityResult.success && developerActivityResult.data
+        ? developerActivityResult.data.list
+        : [];
+    const countryDistribution =
+      countryRankResult.success && countryRankResult.data
+        ? (countryRankResult.data.list ?? [])
+        : [];
+    const countryDistributionTotal =
+      countryRankResult.success && countryRankResult.data
+        ? Number(countryRankResult.data.total ?? 0)
+        : 0;
 
     // Log any failures for debugging
-    if (!statisticsResult.success) {
-      console.warn("Statistics overview fetch failed:", statisticsResult.message);
+    if (!ecosystemRankResult.success) {
+      console.warn("Ecosystem rank fetch failed:", ecosystemRankResult.message);
     }
-    if (!rankResult.success) {
-      console.warn("Statistics rank fetch failed:", rankResult.message);
+    if (!repoRankResult.success) {
+      console.warn("Repository rank fetch failed:", repoRankResult.message);
+    }
+    if (!actorRankResult.success) {
+      console.warn("Actor rank fetch failed:", actorRankResult.message);
     }
     if (!trendingResult.success) {
-      console.warn("Weekly trending repositories fetch failed:", trendingResult.message);
+      console.warn(
+        "Weekly trending repositories fetch failed:",
+        trendingResult.message,
+      );
     }
     if (!developerActivityResult.success) {
-      console.warn("Weekly developer activity fetch failed:", developerActivityResult.message);
+      console.warn(
+        "Weekly developer activity fetch failed:",
+        developerActivityResult.message,
+      );
     }
     if (!countryRankResult.success) {
-      console.warn("Country distribution fetch failed:", countryRankResult.message);
+      console.warn(
+        "Country distribution fetch failed:",
+        countryRankResult.message,
+      );
     }
 
     return (
@@ -120,7 +139,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             title="Web3 Ecosystem Analytics"
             summary="Comprehensive insights about major blockchain ecosystems"
           >
-            <EcosystemRankViewWidget dataSource={statisticRank.ecosystem} />
+            <EcosystemRankViewWidget dataSource={ecosystemRank} />
           </Section>
           <Section
             className="mt-16"
@@ -134,21 +153,23 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             title="Developer Participation Rank"
             summary="Repositories with the most active developers over the last 7 days"
           >
-            <RepositoryDeveloperActivityViewWidget dataSource={weeklyDeveloperActivityRepos} />
+            <RepositoryDeveloperActivityViewWidget
+              dataSource={weeklyDeveloperActivityRepos}
+            />
           </Section>
           <Section
             className="mt-16"
             title="Repository Activity"
             summary="Top repositories by developer engagement and contributions"
           >
-            <RepositoryRankViewWidget dataSource={statisticRank.repository} />
+            <RepositoryRankViewWidget dataSource={repoRank} />
           </Section>
           <Section
             className="mt-16"
             title="Top Developer Activity"
             summary="Leading contributors across Web3 ecosystems"
           >
-            <DeveloperRankViewWidget dataSource={statisticRank.developer} view="grid" />
+            <DeveloperRankViewWidget dataSource={developerRank} view="grid" />
           </Section>
 
           {/* Footer */}
@@ -156,11 +177,16 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             <div className="text-center">
               <p className="text-gray-600 dark:text-gray-400 mb-4">
                 Supported by{" "}
-                <a href="https://openbuild.xyz/" className="text-foreground dark:text-foreground font-medium hover:text-primary transition-colors">
+                <a
+                  href="https://openbuild.xyz/"
+                  className="text-foreground dark:text-foreground font-medium hover:text-primary transition-colors"
+                >
                   OpenBuild
                 </a>{" "}
               </p>
-              <p className="text-xs text-gray-400 dark:text-gray-600">© {new Date().getFullYear()} {title}. All rights reserved.</p>
+              <p className="text-xs text-gray-400 dark:text-gray-600">
+                © {new Date().getFullYear()} {title}. All rights reserved.
+              </p>
             </div>
           </footer>
         </div>
@@ -170,26 +196,12 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     // Extra safety net - if something else goes wrong, provide fallback data
     console.error("Loader error in home route:", error);
 
-    // Client component will handle fallback data
-    // const fallbackStatisticOverview = {
-    //   ecosystem: 0,
-    //   repository: 0,
-    //   developer: 0,
-    //   coreDeveloper: 0,
-    // };
-
-    const fallbackStatisticRank = {
-      ecosystem: [],
-      repository: [],
-      developer: [],
-    };
-
     return (
       <DefaultLayoutWrapper user={user}>
         <div className="w-full max-w-content mx-auto px-6 py-8">
           <HomePageClient />
 
-          {/* Fallback sections */}
+          {/* Fallback sections with empty data */}
           <Section
             className="mt-12"
             title="Global Contributor Footprint"
@@ -202,7 +214,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             title="Web3 Ecosystem Analytics"
             summary="Comprehensive insights about major blockchain ecosystems"
           >
-            <EcosystemRankViewWidget dataSource={fallbackStatisticRank.ecosystem} />
+            <EcosystemRankViewWidget dataSource={[]} />
           </Section>
           <Section
             className="mt-16"
@@ -223,14 +235,14 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             title="Repository Activity"
             summary="Top repositories by developer engagement and contributions"
           >
-            <RepositoryRankViewWidget dataSource={fallbackStatisticRank.repository} />
+            <RepositoryRankViewWidget dataSource={[]} />
           </Section>
           <Section
             className="mt-16"
             title="Top Developer Activity"
             summary="Leading contributors across Web3 ecosystems"
           >
-            <DeveloperRankViewWidget dataSource={fallbackStatisticRank.developer} view="grid" />
+            <DeveloperRankViewWidget dataSource={[]} view="grid" />
           </Section>
         </div>
       </DefaultLayoutWrapper>

@@ -1,77 +1,84 @@
-'use client';
+"use client";
 
-import type { ResponseResult } from "@/types/http";
-import type { DataValue } from "@/types";
-import type { EventReport } from "../typing";
+import type { ResponseResult, DataValue } from "@/types";
+import type { EventInsight, EventReport, Contestant } from "../typing";
 
-// Client-side event repository that uses API routes instead of server functions
-// This avoids importing server-only code in client components
+// Helper for API calls
+async function apiCall<T>(
+  url: string,
+  options?: RequestInit,
+): Promise<ResponseResult<T>> {
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options?.headers,
+    },
+  });
+  return res.json();
+}
 
-async function fetchList(params?: Record<string, DataValue>): Promise<ResponseResult<Record<string, unknown>[]>> {
+// Fetch list of events
+export async function fetchList(
+  params?: Record<string, DataValue>,
+): Promise<ResponseResult<EventInsight[]>> {
   const searchParams = new URLSearchParams();
-
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
-        searchParams.append(key, String(value));
+        searchParams.set(key, String(value));
       }
     });
   }
-
-  const response = await fetch(`/api/events?${searchParams}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  return response.json();
+  const queryString = searchParams.toString();
+  const url = queryString ? `/api/events?${queryString}` : "/api/events";
+  return apiCall(url);
 }
 
-async function fetchOne(id: number): Promise<ResponseResult<EventReport>> {
-  const response = await fetch(`/api/events/${id}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  return response.json();
+// Fetch single event detail (admin)
+export async function fetchOne(
+  id: number,
+): Promise<ResponseResult<EventReport>> {
+  return apiCall(`/api/events/${id}`);
 }
 
-async function fetchPublicEventDetail(id: number): Promise<ResponseResult<EventReport>> {
-  const response = await fetch(`/api/events/public/${id}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  return response.json();
+// Fetch public event detail
+export async function fetchPublicEventDetail(
+  id: number,
+): Promise<ResponseResult<EventReport>> {
+  return apiCall(`/api/events/public/${id}`);
 }
 
-async function insertOne(data: Record<string, unknown>): Promise<ResponseResult<Record<string, unknown>>> {
-  const response = await fetch('/api/event/contestants', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+// Extended response types for event mutations
+interface InsertOneResponse extends ResponseResult<Contestant[]> {
+  extra?: { eventId: number; fail: string[] };
+}
+
+interface UpdateOneResponse extends ResponseResult<Contestant[]> {
+  extra?: { fail: string[] };
+}
+
+// Create new event with contestants
+export async function insertOne(
+  data: Record<string, unknown>,
+): Promise<InsertOneResponse> {
+  const res = await fetch("/api/event/contestants", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-
-  return response.json();
+  return res.json();
 }
 
-async function updateOne(data: Record<string, unknown>): Promise<ResponseResult<Record<string, unknown>>> {
-  const response = await fetch(`/api/events/${data.id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
+// Update existing event
+export async function updateOne(
+  data: Record<string, unknown>,
+): Promise<UpdateOneResponse> {
+  const { id, ...rest } = data;
+  const res = await fetch(`/api/event/contestants/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(rest),
   });
-
-  return response.json();
+  return res.json();
 }
-
-export { fetchList, fetchOne, fetchPublicEventDetail, insertOne, updateOne };
