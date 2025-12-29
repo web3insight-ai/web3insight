@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
-import RepositoriesPageClient from "./RepositoriesPageClient";
+import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
+import { getQueryClient } from "@/lib/query/get-query-client";
 import {
-  fetchStatisticsRank,
-  fetchStatisticsOverview,
-} from "~/statistics/repository";
+  prefetchRepositories,
+  prefetchStatistics,
+} from "@/lib/query/server-prefetch";
 import { getUser } from "~/auth/repository";
 import { headers } from "next/headers";
 import DefaultLayoutWrapper from "../DefaultLayoutWrapper";
-import { env } from "@/env";
+import RepositoriesPageClient from "./RepositoriesPageClient";
 
 export const metadata: Metadata = {
   title: "All Repositories | Web3 Insights",
@@ -22,68 +23,27 @@ export default async function RepositoriesPage() {
   // Get current user from session
   const headersList = await headers();
   const host = headersList.get("host") || "localhost:3000";
-  const protocol = env.NODE_ENV === "development" ? "http" : "https";
+  const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
   const url = `${protocol}://${host}/repositories`;
 
-  const request = new Request(url, {
+  const _request = new Request(url, {
     headers: Object.fromEntries(headersList.entries()),
   });
-  const user = await getUser(request);
+  const user = await getUser();
 
-  try {
-    const [statisticsResult, rankResult] = await Promise.all([
-      fetchStatisticsOverview(),
-      fetchStatisticsRank(),
-    ]);
+  // Prefetch data for TanStack Query
+  const queryClient = getQueryClient();
 
-    const repositories = rankResult.success ? rankResult.data.repository : [];
-    const statisticOverview = statisticsResult.success
-      ? statisticsResult.data
-      : {
-        ecosystem: 0,
-        repository: 0,
-        developer: 0,
-        coreDeveloper: 0,
-      };
+  await Promise.all([
+    prefetchRepositories(queryClient),
+    prefetchStatistics(queryClient),
+  ]);
 
-    if (!statisticsResult.success) {
-      console.warn(
-        "Statistics overview fetch failed:",
-        statisticsResult.message,
-      );
-    }
-    if (!rankResult.success) {
-      console.warn("Statistics rank fetch failed:", rankResult.message);
-    }
-
-    const pageData = {
-      repositories,
-      totalRepositories: Number(statisticOverview.repository),
-      totalDevelopers: Number(statisticOverview.developer),
-      totalCoreDevelopers: Number(statisticOverview.coreDeveloper),
-      totalEcosystems: Number(statisticOverview.ecosystem),
-    };
-
-    return (
-      <DefaultLayoutWrapper user={user}>
-        <RepositoriesPageClient {...pageData} />
-      </DefaultLayoutWrapper>
-    );
-  } catch (error) {
-    console.error("Error in repositories route:", error);
-
-    const fallbackData = {
-      repositories: [],
-      totalRepositories: 0,
-      totalDevelopers: 0,
-      totalCoreDevelopers: 0,
-      totalEcosystems: 0,
-    };
-
-    return (
-      <DefaultLayoutWrapper user={user}>
-        <RepositoriesPageClient {...fallbackData} />
-      </DefaultLayoutWrapper>
-    );
-  }
+  return (
+    <DefaultLayoutWrapper user={user}>
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <RepositoriesPageClient />
+      </HydrationBoundary>
+    </DefaultLayoutWrapper>
+  );
 }

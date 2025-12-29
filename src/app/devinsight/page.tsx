@@ -1,32 +1,19 @@
-import type { Metadata } from 'next';
-import DevInsightPageClient from './DevInsightPageClient';
+import type { Metadata } from "next";
+import DevInsightPageClient from "./DevInsightPageClient";
 import { fetchCurrentUser } from "~/auth/repository";
 import { getGitHubHandle } from "~/profile-analysis/helper";
 import { getTitle } from "@/utils/app";
-import DefaultLayoutWrapper from '../DefaultLayoutWrapper';
-import { cookies, headers } from 'next/headers';
+import DefaultLayoutWrapper from "../DefaultLayoutWrapper";
 
 // Force dynamic rendering since this page requires authentication
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export async function generateMetadata(): Promise<Metadata> {
   const title = getTitle();
 
   try {
-    const cookieStore = await cookies();
-    const headersList = await headers();
-    const host = headersList.get("host") || "localhost:3000";
-    const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
-    const url = `${protocol}://${host}/devinsight`;
-    
-    const mockRequest = new Request(url, {
-      headers: {
-        Cookie: cookieStore.toString(),
-      },
-    });
-
-    const userResult = await fetchCurrentUser(mockRequest);
+    const userResult = await fetchCurrentUser();
 
     if (userResult.success && userResult.data) {
       const githubHandle = getGitHubHandle(userResult.data);
@@ -38,33 +25,21 @@ export async function generateMetadata(): Promise<Metadata> {
       }
     }
   } catch (error) {
-    console.error('Error generating metadata:', error);
+    console.error("Error generating metadata:", error);
   }
 
   // Fallback metadata
   return {
     title: "DevInsight | Web3 Insights",
-    description: "AI-powered DevInsight analysis of your Web3 development profile",
+    description:
+      "AI-powered DevInsight analysis of your Web3 development profile",
   };
 }
 
 export default async function DevInsightPage() {
   try {
-    // Create a mock Request object with cookies for authentication
-    const cookieStore = await cookies();
-    const headersList = await headers();
-    const host = headersList.get("host") || "localhost:3000";
-    const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
-    const url = `${protocol}://${host}/devinsight`;
-    
-    const mockRequest = new Request(url, {
-      headers: {
-        Cookie: cookieStore.toString(),
-      },
-    });
-
     // Get authenticated user data - required for DevInsight
-    const userResult = await fetchCurrentUser(mockRequest);
+    const userResult = await fetchCurrentUser();
 
     // If not authenticated, return null user to trigger login modal
     if (!userResult.success || !userResult.data) {

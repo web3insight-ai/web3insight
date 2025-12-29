@@ -9,149 +9,99 @@ import {
   ModalBody,
 } from "@nextui-org/react";
 import { ArrowRight, Search, Sparkles } from "lucide-react";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import Markdown from "react-markdown";
 import { usePrivy } from "@privy-io/react-auth";
 import { motion, AnimatePresence } from "framer-motion";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { MetricOverview } from "$/index";
 import { fadeInUp, fadeInDown, modalTransition } from "@/utils/animations";
+import { useOverviewStatistics } from "@/hooks/api";
+import { aiQuerySchema, type AIQueryInput } from "@/lib/form/schemas";
 
 export default function HomePageClient() {
   const { ready, authenticated, login } = usePrivy();
-  const [input, setInput] = useState("");
+
+  // Form state using React Hook Form + Zod
+  const form = useForm<AIQueryInput>({
+    resolver: zodResolver(aiQuerySchema),
+    defaultValues: {
+      query: "",
+    },
+    mode: "onChange",
+  });
+
+  // UI state
   const [output, setOutput] = useState<string>("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [asking, setAsking] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const modalBodyRef = useRef<HTMLDivElement>(null);
   const [userHasScrolled, setUserHasScrolled] = useState(false);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout>();
-  const [statisticOverview, setStatisticOverview] = useState({
-    ecosystem: 0,
-    repository: 0,
-    developer: 0,
-    coreDeveloper: 0,
-  });
-  const [isLoadingStats, setIsLoadingStats] = useState(true);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Load statistics overview on client side
-  useEffect(() => {
-    fetch("/api/statistics/overview")
-      .then((response) => response.json())
-      .then((result) => {
-        if (result.success) {
-          setStatisticOverview({
-            ecosystem: Number(result.data.ecosystem),
-            repository: Number(result.data.repository),
-            developer: Number(result.data.developer),
-            coreDeveloper: Number(result.data.coreDeveloper),
-          });
-        }
-      })
-      .catch((error) => {
-        console.error("Failed to load statistics overview:", error);
-      })
-      .finally(() => {
-        setIsLoadingStats(false);
-      });
-  }, []);
+  // Fetch statistics using TanStack Query
+  const { data: statisticsData, isLoading: isLoadingStats } =
+    useOverviewStatistics();
 
-  useEffect(() => {
-    if (!asking && errorMessage && ready && !authenticated) {
-      // Open Privy login when unauthorized
-      login();
-    }
-  }, [asking, errorMessage, ready, authenticated, login]);
-
-  // Check if user is at the bottom of the scrollable area
-  const isAtBottom = (element: HTMLElement) => {
-    const threshold = 50; // pixels from bottom
-    return (
-      element.scrollHeight - element.scrollTop - element.clientHeight <
-      threshold
-    );
+  const statisticOverview = {
+    ecosystem: statisticsData?.totalEcosystems ?? 0,
+    repository: statisticsData?.totalRepositories ?? 0,
+    developer: statisticsData?.totalDevelopers ?? 0,
+    coreDeveloper: statisticsData?.totalCoreDevelopers ?? 0,
   };
 
-  // Smart auto-scroll function
-  const autoScroll = () => {
-    if (!modalBodyRef.current || userHasScrolled) return;
-
-    const modalBody = modalBodyRef.current;
-    const shouldScroll = isAtBottom(modalBody);
-
-    if (shouldScroll) {
-      // Clear any pending scroll
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
+  // AI Query mutation
+  const aiQueryMutation = useMutation({
+    mutationFn: async (data: AIQueryInput) => {
+      const response = await fetch("/api/ai/query", {
+        method: "POST",
+        body: new URLSearchParams({ query: data.query }),
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Accept: "text/event-stream",
+        },
+      });
+      return response;
+    },
+    onMutate: () => {
+      setOutput("");
+      setIsStreaming(true);
+      setIsModalOpen(true);
+      setUserHasScrolled(false);
+      setErrorMessage(null);
+    },
+    onSuccess: async (response) => {
+      if (!response.ok) {
+        setErrorMessage("Authentication required");
+        setIsStreaming(false);
+        return;
       }
 
-      // Use requestAnimationFrame for smooth scrolling
-      requestAnimationFrame(() => {
-        modalBody.scrollTo({
-          top: modalBody.scrollHeight,
-          behavior: "smooth",
-        });
-      });
-    }
-  };
+      const reader = response.body?.getReader();
+      if (!reader) {
+        setIsStreaming(false);
+        return;
+      }
 
-  // Handle scroll events to detect user interaction
-  const handleScroll = () => {
-    if (!modalBodyRef.current) return;
+      const decoder = new TextDecoder("utf-8");
+      let buffer = "";
 
-    const isNearBottom = isAtBottom(modalBodyRef.current);
-
-    // User has scrolled up if not at bottom
-    if (!isNearBottom && isStreaming) {
-      setUserHasScrolled(true);
-    } else if (isNearBottom) {
-      setUserHasScrolled(false);
-    }
-  };
-
-  const onClickHandle = () => {
-    setOutput("");
-    setIsStreaming(true);
-    setIsModalOpen(true);
-    setUserHasScrolled(false);
-    setAsking(true);
-    setErrorMessage(null);
-    const controller = new AbortController();
-
-    fetch("/api/ai/query", {
-      method: "POST",
-      body: new URLSearchParams({ query: input }),
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Accept: "text/event-stream",
-      },
-      signal: controller.signal,
-    })
-      .then(async (res) => {
-        setAsking(false);
-
-        if (!res.ok) {
-          setErrorMessage("Authentication required");
-          setIsStreaming(false);
-          return;
-        }
-
-        const reader = res.body?.getReader();
-        const decoder = new TextDecoder("utf-8");
-        let buffer = "";
-        if (!reader) return;
-
+      try {
         while (true) {
-          const { value, done } = await reader!.read();
+          const { value, done } = await reader.read();
           if (done) break;
+
           buffer += decoder.decode(value, { stream: true });
           const lines = buffer.split("\n");
 
           for (let line of lines) {
             line = line.trim();
             if (!line.startsWith("data:")) continue;
+
             const jsonStr = line.replace(/^data:\s*/, "");
             if (jsonStr === "[DONE]") {
               setIsStreaming(false);
@@ -162,27 +112,80 @@ export default function HomePageClient() {
               const parsed = JSON.parse(jsonStr);
               const piece = parsed?.data?.answer || "";
               setOutput((prev) => prev + piece);
-              // Use our smart auto-scroll
               autoScroll();
-            } catch (_e) {
+            } catch {
               // Ignore JSON parsing errors during streaming
             }
           }
 
           buffer = lines[lines.length - 1];
         }
-      })
-      .catch(() => {
+      } finally {
         setIsStreaming(false);
-        setAsking(false);
-      });
+      }
+    },
+    onError: () => {
+      setIsStreaming(false);
+    },
+  });
 
-    return () => controller.abort();
-  };
+  // Handle auth prompt when unauthorized
+  useEffect(() => {
+    if (!aiQueryMutation.isPending && errorMessage && ready && !authenticated) {
+      login();
+    }
+  }, [aiQueryMutation.isPending, errorMessage, ready, authenticated, login]);
+
+  // Check if user is at the bottom of the scrollable area
+  const isAtBottom = useCallback((element: HTMLElement) => {
+    const threshold = 50;
+    return (
+      element.scrollHeight - element.scrollTop - element.clientHeight <
+      threshold
+    );
+  }, []);
+
+  // Smart auto-scroll function
+  const autoScroll = useCallback(() => {
+    if (!modalBodyRef.current || userHasScrolled) return;
+
+    const modalBody = modalBodyRef.current;
+    const shouldScroll = isAtBottom(modalBody);
+
+    if (shouldScroll) {
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+
+      requestAnimationFrame(() => {
+        modalBody.scrollTo({
+          top: modalBody.scrollHeight,
+          behavior: "smooth",
+        });
+      });
+    }
+  }, [userHasScrolled, isAtBottom]);
+
+  // Handle scroll events to detect user interaction
+  const handleScroll = useCallback(() => {
+    if (!modalBodyRef.current) return;
+
+    const isNearBottom = isAtBottom(modalBodyRef.current);
+
+    if (!isNearBottom && isStreaming) {
+      setUserHasScrolled(true);
+    } else if (isNearBottom) {
+      setUserHasScrolled(false);
+    }
+  }, [isAtBottom, isStreaming]);
+
+  // Form submit handler
+  const onSubmit = form.handleSubmit((data) => {
+    aiQueryMutation.mutate(data);
+  });
 
   const handleExampleClick = (example: string) => {
-    setInput(example);
-    // Use setTimeout to ensure input is set before submitting
+    form.setValue("query", example, { shouldValidate: true });
     setTimeout(() => {
       if (formRef.current) {
         const submitButton = formRef.current.querySelector(
@@ -192,6 +195,9 @@ export default function HomePageClient() {
       }
     }, 0);
   };
+
+  const isSubmitting = aiQueryMutation.isPending;
+  const queryValue = form.watch("query");
 
   return (
     <>
@@ -239,19 +245,12 @@ export default function HomePageClient() {
           <div className="absolute inset-0 bg-gradient-radial opacity-30 blur-2xl" />
 
           <div className="relative">
-            <form
-              ref={formRef}
-              onSubmit={(e) => {
-                e.preventDefault();
-                onClickHandle();
-              }}
-            >
+            <form ref={formRef} onSubmit={onSubmit}>
               <div className="relative">
                 <Input
-                  name="query"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  required
+                  {...form.register("query")}
+                  value={queryValue}
+                  onChange={(e) => form.setValue("query", e.target.value)}
                   fullWidth
                   size="md"
                   placeholder="Ask about ecosystems, developers, or repositories..."
@@ -264,10 +263,10 @@ export default function HomePageClient() {
                 />
                 <button
                   type="submit"
-                  disabled={asking || !input.trim()}
+                  disabled={isSubmitting || !queryValue?.trim()}
                   className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-primary hover:bg-primary/90 text-white rounded-md flex items-center justify-center transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {asking ? (
+                  {isSubmitting ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : (
                     <ArrowRight size={16} />
@@ -277,6 +276,11 @@ export default function HomePageClient() {
               {errorMessage && (
                 <p className="text-xs text-danger mt-2 text-center animate-fade-in">
                   {errorMessage}
+                </p>
+              )}
+              {form.formState.errors.query && (
+                <p className="text-xs text-danger mt-2 text-center animate-fade-in">
+                  {form.formState.errors.query.message}
                 </p>
               )}
             </form>

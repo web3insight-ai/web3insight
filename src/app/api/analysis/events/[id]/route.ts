@@ -24,13 +24,13 @@ export async function GET(
     }
 
     // For event analysis, try user authentication first, fallback to server token
-    const userResult = await fetchCurrentUser(request);
+    const userResult = await fetchCurrentUser();
     let authToken: string | undefined;
 
     if (userResult.success) {
       // Use user token if authenticated
-      const session = await getSession(request);
-      authToken = session.get("userToken");
+      const session = await getSession();
+      authToken = session.get("userToken") as string | undefined;
     }
 
     // Fallback to server token for public event analysis

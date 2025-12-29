@@ -1,27 +1,40 @@
 import { pick } from "@/utils";
 import { fetchCurrentUser } from "~/auth/repository";
+import type { ApiUser } from "~/auth/typing";
 
-export async function GET(request: Request) {
-  const { data, extra, ...others } = await fetchCurrentUser(request);
-  const resolved = { ...others, data, extra: { ...extra, authenticated: !!data } };
+export async function GET() {
+  const result = await fetchCurrentUser();
+  const { data, extra, ..._others } = result;
+  const resolved: {
+    data?: Partial<ApiUser>;
+    extra: Record<string, unknown>;
+    code?: string;
+    success: boolean;
+    message?: string;
+  } = {
+    success: result.success,
+    message: result.message,
+    data: undefined,
+    extra: { ...(extra || {}), authenticated: !!data },
+  };
 
   if (data) {
     // Return more user fields including role information
-    resolved.data = pick(data as Record<string, unknown>, [
+    resolved.data = pick(data, [
       "id",
       "username",
       "email",
       "confirmed",
       "avatar_url",
-      "role",  // Include role information
+      "role", // Include role information
       "binds", // Include connected accounts
       "profile", // Include profile data
-    ]) as Record<string, unknown>;
+    ]);
   } else {
     resolved.code = "401";
   }
 
-  return Response.json(resolved, { status: Number(resolved.code) });
+  return Response.json(resolved, { status: Number(resolved.code || "200") });
 }
 
 export async function OPTIONS() {

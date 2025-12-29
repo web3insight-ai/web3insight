@@ -1,26 +1,50 @@
-'use client';
+"use client";
 
 import {
-  Card, CardHeader, Input, Dropdown, DropdownTrigger,
-  DropdownMenu, DropdownItem, Button, Pagination, Modal, ModalContent, ModalHeader, ModalBody,
+  Card,
+  CardHeader,
+  Input,
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+  Button,
+  Pagination,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
 } from "@nextui-org/react";
-import { Filter, SortAsc, SortDesc, Search, Users, Code2, Zap, Database } from "lucide-react";
-import { useState, useMemo } from "react";
+import {
+  Filter,
+  SortAsc,
+  SortDesc,
+  Search,
+  Users,
+  Code2,
+  Zap,
+  Database,
+} from "lucide-react";
+import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import type { ActorRankRecord } from "~/api/typing";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useDeveloperList, useOverviewStatistics } from "@/hooks/api";
+import type { ActorRankRecord } from "@/lib/api/types";
 import RepoLinkWidget from "~/repository/widgets/repo-link";
 import MetricCard, { type MetricCardProps } from "$/controls/metric-card";
 import TableHeader from "$/controls/table-header";
-import { staggerContainer, staggerItemScale, fadeInUp, modalTransition } from "@/utils/animations";
-
-interface DevelopersPageProps {
-  developers: ActorRankRecord[];
-  activeDevelopers: number;
-  coreDevelopers: number;
-  totalRepositories: number;
-  totalEcosystems: number;
-}
+import {
+  staggerContainer,
+  staggerItemScale,
+  fadeInUp,
+  modalTransition,
+} from "@/utils/animations";
+import {
+  developerSearchSchema,
+  type DeveloperSearchInput,
+} from "@/lib/form/schemas";
 
 function resolveMetrics(dataSource: {
   coreDevelopers: number;
@@ -41,7 +65,8 @@ function resolveMetrics(dataSource: {
       value: Number(dataSource.activeDevelopers).toLocaleString(),
       icon: <Users size={20} className="text-primary" />,
       iconBgClassName: "bg-primary/10",
-      tooltip: "Developers with activity (star not included) in this ecosystem (all time)",
+      tooltip:
+        "Developers with activity (star not included) in this ecosystem (all time)",
     },
     {
       label: "Ecosystems",
@@ -60,54 +85,65 @@ function resolveMetrics(dataSource: {
   ];
 }
 
-export default function DevelopersPageClient({
-  developers,
-  coreDevelopers,
-  activeDevelopers,
-  totalRepositories,
-  totalEcosystems,
-}: DevelopersPageProps) {
+export default function DevelopersPageClient() {
+  // TanStack Query hooks - data is hydrated from server prefetch
+  const { data: developers = [] } = useDeveloperList();
+  const { data: statistics } = useOverviewStatistics();
+
+  const coreDevelopers = statistics?.totalCoreDevelopers ?? 0;
+  const activeDevelopers = statistics?.totalDevelopers ?? 0;
+  const totalRepositories = statistics?.totalRepositories ?? 0;
+  const totalEcosystems = statistics?.totalEcosystems ?? 0;
+
+  // Form state using React Hook Form
+  const form = useForm<DeveloperSearchInput>({
+    resolver: zodResolver(developerSearchSchema),
+    defaultValues: {
+      search: "",
+      sortBy: "total_commit_count",
+      sortDirection: "desc",
+    },
+  });
+
+  const searchValue = form.watch("search");
+  const sortBy = form.watch("sortBy");
+  const sortDirection = form.watch("sortDirection");
+
   // Pagination state
   const [page, setPage] = useState(1);
   const rowsPerPage = 25;
 
   // Modal state for showing all repos
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedDeveloper, setSelectedDeveloper] = useState<ActorRankRecord | null>(null);
-
-  // Filtering and sorting state
-  const [filterValue, setFilterValue] = useState("");
-  const [sortDescriptor, setSortDescriptor] = useState({
-    column: "total_commit_count",
-    direction: "descending",
-  });
+  const [selectedDeveloper, setSelectedDeveloper] =
+    useState<ActorRankRecord | null>(null);
 
   // Filter developers based on search query
   const filteredItems = useMemo(() => {
     let filtered = [...developers];
 
-    if (filterValue) {
-      filtered = filtered.filter(developer =>
-        developer.actor_login.toLowerCase().includes(filterValue.toLowerCase()),
+    if (searchValue) {
+      filtered = filtered.filter((developer) =>
+        developer.actor_login.toLowerCase().includes(searchValue.toLowerCase()),
       );
     }
 
     return filtered;
-  }, [developers, filterValue]);
+  }, [developers, searchValue]);
 
   // Sort filtered developers
   const sortedItems = useMemo(() => {
     return [...filteredItems].sort((a, b) => {
-      const first = a[sortDescriptor.column as keyof ActorRankRecord];
-      const second = b[sortDescriptor.column as keyof ActorRankRecord];
+      const first = a[sortBy as keyof ActorRankRecord];
+      const second = b[sortBy as keyof ActorRankRecord];
 
       if (first === undefined || second === undefined) return 0;
 
       const cmp = first < second ? -1 : first > second ? 1 : 0;
 
-      return sortDescriptor.direction === "descending" ? -cmp : cmp;
+      return sortDirection === "desc" ? -cmp : cmp;
     });
-  }, [filteredItems, sortDescriptor]);
+  }, [filteredItems, sortBy, sortDirection]);
 
   // Calculate pagination
   const paginatedItems = useMemo(() => {
@@ -119,20 +155,29 @@ export default function DevelopersPageClient({
   const pages = Math.ceil(sortedItems.length / rowsPerPage);
 
   // Handle sorting change
-  const handleSortChange = (column: string) => {
-    setSortDescriptor(prev => ({
-      column,
-      direction: prev.column === column && prev.direction === "ascending"
-        ? "descending"
-        : "ascending",
-    }));
-  };
+  const handleSortChange = useCallback(
+    (column: string) => {
+      const currentSortBy = form.getValues("sortBy");
+      const currentDirection = form.getValues("sortDirection");
+
+      if (currentSortBy === column) {
+        form.setValue(
+          "sortDirection",
+          currentDirection === "asc" ? "desc" : "asc",
+        );
+      } else {
+        form.setValue("sortBy", column as DeveloperSearchInput["sortBy"]);
+        form.setValue("sortDirection", "desc");
+      }
+    },
+    [form],
+  );
 
   // Handle showing all repos
-  const handleShowAllRepos = (developer: ActorRankRecord) => {
+  const handleShowAllRepos = useCallback((developer: ActorRankRecord) => {
     setSelectedDeveloper(developer);
     setIsModalOpen(true);
-  };
+  }, []);
 
   return (
     <div className="min-h-dvh bg-background dark:bg-background-dark pb-24">
@@ -148,7 +193,9 @@ export default function DevelopersPageClient({
             <div className="p-2 rounded-lg bg-primary/10">
               <Users size={20} className="text-primary" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white whitespace-nowrap">All Developers</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white whitespace-nowrap">
+              All Developers
+            </h1>
           </div>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
             Top contributors and developers across Web3 ecosystems
@@ -162,7 +209,12 @@ export default function DevelopersPageClient({
           animate="visible"
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10"
         >
-          {resolveMetrics({ coreDevelopers, activeDevelopers, totalEcosystems, totalRepositories }).map((metric) => (
+          {resolveMetrics({
+            coreDevelopers,
+            activeDevelopers,
+            totalEcosystems,
+            totalRepositories,
+          }).map((metric) => (
             <motion.div
               key={metric.label.replaceAll(" ", "")}
               variants={staggerItemScale}
@@ -179,8 +231,8 @@ export default function DevelopersPageClient({
           <div className="w-full sm:w-72">
             <Input
               placeholder="Search developers..."
-              value={filterValue}
-              onChange={(e) => setFilterValue(e.target.value)}
+              value={searchValue}
+              onChange={(e) => form.setValue("search", e.target.value)}
               startContent={<Search size={18} className="text-gray-400" />}
               className="w-full"
             />
@@ -188,28 +240,37 @@ export default function DevelopersPageClient({
           <div className="flex gap-2">
             <Dropdown>
               <DropdownTrigger>
-                <Button
-                  variant="flat"
-                  startContent={<Filter size={18} />}
-                >
+                <Button variant="flat" startContent={<Filter size={18} />}>
                   Sort By
                 </Button>
               </DropdownTrigger>
               <DropdownMenu aria-label="Sort options">
-                <DropdownItem key="actor_login" onClick={() => handleSortChange("actor_login")}>
+                <DropdownItem
+                  key="actor_login"
+                  onClick={() => handleSortChange("actor_login")}
+                >
                   <div className="flex items-center justify-between w-full">
                     <span>Developer Name</span>
-                    {sortDescriptor.column === "actor_login" && (
-                      sortDescriptor.direction === "ascending" ? <SortAsc size={16} /> : <SortDesc size={16} />
-                    )}
+                    {sortBy === "actor_login" &&
+                      (sortDirection === "asc" ? (
+                        <SortAsc size={16} />
+                      ) : (
+                        <SortDesc size={16} />
+                      ))}
                   </div>
                 </DropdownItem>
-                <DropdownItem key="total_commit_count" onClick={() => handleSortChange("total_commit_count")}>
+                <DropdownItem
+                  key="total_commit_count"
+                  onClick={() => handleSortChange("total_commit_count")}
+                >
                   <div className="flex items-center justify-between w-full">
                     <span>Contribution Score</span>
-                    {sortDescriptor.column === "total_commit_count" && (
-                      sortDescriptor.direction === "ascending" ? <SortAsc size={16} /> : <SortDesc size={16} />
-                    )}
+                    {sortBy === "total_commit_count" &&
+                      (sortDirection === "asc" ? (
+                        <SortAsc size={16} />
+                      ) : (
+                        <SortDesc size={16} />
+                      ))}
                   </div>
                 </DropdownItem>
               </DropdownMenu>
@@ -224,7 +285,9 @@ export default function DevelopersPageClient({
               <div className="p-2 rounded-lg bg-primary/10">
                 <Users size={18} className="text-primary" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">Developer Analytics</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                Developer Analytics
+              </h3>
             </div>
           </CardHeader>
 
@@ -232,10 +295,16 @@ export default function DevelopersPageClient({
             <table className="w-full">
               <thead>
                 <tr className="border-t border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider w-12">#</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider w-12">
+                    #
+                  </th>
                   <TableHeader>Developer</TableHeader>
-                  <TableHeader tooltip="Weighted contribution score based on PRs and recent activity. Recent contributions are weighted higher than older ones.">Contribution Score</TableHeader>
-                  <TableHeader tooltip="Most active repositories this developer contributes to">Top Repos</TableHeader>
+                  <TableHeader tooltip="Weighted contribution score based on PRs and recent activity. Recent contributions are weighted higher than older ones.">
+                    Contribution Score
+                  </TableHeader>
+                  <TableHeader tooltip="Most active repositories this developer contributes to">
+                    Top Repos
+                  </TableHeader>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border dark:divide-border-dark">
@@ -252,7 +321,9 @@ export default function DevelopersPageClient({
                       >
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-medium transition-all duration-200 group-hover:scale-110 bg-gray-50 dark:bg-gray-900/10 text-gray-500 dark:text-gray-500`}>
+                            <span
+                              className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-medium transition-all duration-200 group-hover:scale-110 bg-gray-50 dark:bg-gray-900/10 text-gray-500 dark:text-gray-500`}
+                            >
                               {absoluteIndex}
                             </span>
                           </div>
@@ -262,12 +333,14 @@ export default function DevelopersPageClient({
                             href={`/developers/${developer.actor_id}`}
                             className="font-medium text-gray-900 dark:text-white hover:text-primary transition-colors duration-200"
                           >
-                          @{developer.actor_login}
+                            @{developer.actor_login}
                           </Link>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
-                            {Number(developer.total_commit_count).toLocaleString()}
+                            {Number(
+                              developer.total_commit_count,
+                            ).toLocaleString()}
                           </span>
                         </td>
                         <td className="px-6 py-4">
@@ -282,7 +355,9 @@ export default function DevelopersPageClient({
                                   repoId={repo.repo_id}
                                   className="text-gray-700 dark:text-gray-300 hover:text-primary"
                                 />
-                                <span className="ml-1 text-gray-500 dark:text-gray-500">{repo.commit_count}</span>
+                                <span className="ml-1 text-gray-500 dark:text-gray-500">
+                                  {repo.commit_count}
+                                </span>
                               </div>
                             ))}
                             {developer.top_repos.length > 3 && (
@@ -290,7 +365,7 @@ export default function DevelopersPageClient({
                                 onClick={() => handleShowAllRepos(developer)}
                                 className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium text-primary hover:bg-primary/10 transition-colors cursor-pointer"
                               >
-                              +{developer.top_repos.length - 3} more
+                                +{developer.top_repos.length - 3} more
                               </button>
                             )}
                           </div>
@@ -305,11 +380,7 @@ export default function DevelopersPageClient({
 
           {pages > 1 && (
             <div className="px-6 py-4 border-t border-border dark:border-border-dark flex justify-center">
-              <Pagination
-                page={page}
-                total={pages}
-                onChange={setPage}
-              />
+              <Pagination page={page} total={pages} onChange={setPage} />
             </div>
           )}
         </Card>
@@ -323,11 +394,19 @@ export default function DevelopersPageClient({
             onClose={() => setIsModalOpen(false)}
             size="md"
           >
-            <ModalContent as={motion.div} variants={modalTransition} initial="hidden" animate="visible" exit="exit">
+            <ModalContent
+              as={motion.div}
+              variants={modalTransition}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+            >
               <ModalHeader className="flex flex-col gap-1">
                 <h3 className="text-lg font-semibold">All Repositories</h3>
                 {selectedDeveloper && (
-                  <p className="text-sm text-gray-500">@{selectedDeveloper.actor_login}</p>
+                  <p className="text-sm text-gray-500">
+                    @{selectedDeveloper.actor_login}
+                  </p>
                 )}
               </ModalHeader>
               <ModalBody className="pb-6">

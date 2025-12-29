@@ -3,13 +3,9 @@ import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import RepositoryDetailClient from "./RepositoryDetailClient";
 import { getTitle } from "@/utils/app";
-import {
-  fetchRepoRankList,
-  fetchRepoActiveDeveloperList,
-} from "~/api/repository";
-import { fetchRepoByName } from "~/github/repository";
+import { api } from "@/lib/api/client";
 import { getUser } from "~/auth/repository";
-import type { RepoRankRecord } from "~/api/typing";
+import type { RepoRankRecord } from "@/lib/api/types";
 import DefaultLayoutWrapper from "../../DefaultLayoutWrapper";
 import { env } from "@/env";
 
@@ -36,7 +32,7 @@ export async function generateMetadata({
       repoName = resolvedSearchParams.name;
     } else {
       // Try to fetch from rank list to get the name
-      const rankListRes = await fetchRepoRankList();
+      const rankListRes = await api.repos.getRankList();
       if (rankListRes.success && rankListRes.data) {
         const repoRankData = rankListRes.data.list.find(
           (repo) => repo.repo_id === parseInt(repoId),
@@ -89,14 +85,14 @@ export default async function RepositoryDetailPage({
   const protocol = env.NODE_ENV === "development" ? "http" : "https";
   const url = `${protocol}://${host}/repositories/${repoId}`;
 
-  const request = new Request(url, {
+  const _request = new Request(url, {
     headers: Object.fromEntries(headersList.entries()),
   });
-  const user = await getUser(request);
+  const user = await getUser();
 
   async function fetchActiveDeveloperData(repoId: number) {
     try {
-      const response = await fetchRepoActiveDeveloperList(repoId);
+      const response = await api.repos.getActiveDeveloperList(repoId);
       if (response.success && response.data?.list) {
         return response.data.list;
       }
@@ -125,7 +121,7 @@ export default async function RepositoryDetailPage({
       };
     } else {
       // Otherwise, try to fetch from rank list
-      const rankListRes = await fetchRepoRankList();
+      const rankListRes = await api.repos.getRankList();
 
       if (!rankListRes.success || !rankListRes.data) {
         throw new Error("Failed to fetch repository data");
@@ -144,12 +140,20 @@ export default async function RepositoryDetailPage({
 
     try {
       const [repoDetailsRes, activeDevelopers] = await Promise.all([
-        fetchRepoByName(repoName),
+        api.github.getRepoByName(repoName),
         fetchActiveDeveloperData(repoNumericId),
       ]);
 
       // Use GitHub API data as primary source for repository metrics
-      let repositoryData = {
+      let repositoryData: {
+        id: number;
+        name: string;
+        starCount: number;
+        forksCount: number;
+        openIssuesCount: number;
+        contributorCount: number;
+        details: Record<string, unknown> | null;
+      } = {
         id: repoRankData!.repo_id,
         name: repoName,
         starCount: repoRankData!.star_count,
@@ -169,7 +173,7 @@ export default async function RepositoryDetailPage({
           forksCount: githubRepo.forks_count,
           openIssuesCount: githubRepo.open_issues_count,
           contributorCount: 0, // Not displayed in UI
-          details: githubRepo as Record<string, unknown>, // Pass the entire GitHub repo object as details
+          details: githubRepo as unknown as Record<string, unknown>, // Pass the entire GitHub repo object as details
         };
       }
 

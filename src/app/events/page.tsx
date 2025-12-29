@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import EventsPageClient from "./EventsPageClient";
-import { fetchPublicEventInsights } from "~/event/repository/public";
+import { api } from "@/lib/api/client";
 import { getUser } from "~/auth/repository";
 import { headers } from "next/headers";
 import DefaultLayoutWrapper from "../DefaultLayoutWrapper";
@@ -22,13 +22,13 @@ export default async function EventsPage() {
   const protocol = env.NODE_ENV === "development" ? "http" : "https";
   const url = `${protocol}://${host}/events`;
 
-  const request = new Request(url, {
+  const _request = new Request(url, {
     headers: Object.fromEntries(headersList.entries()),
   });
-  const user = await getUser(request);
+  const user = await getUser();
 
   try {
-    const eventInsightsResult = await fetchPublicEventInsights({
+    const eventInsightsResult = await api.events.getPublicList({
       take: 100, // Fetch more for the dedicated page
       intent: "hackathon",
     });

@@ -1,7 +1,4 @@
 import type { ResponseResult } from "@/types";
-import { isServerSide, generateFailedResponse } from "@/clients/http";
-import httpClient from "@/clients/http/default";
-
 import { getSession, clearSession } from "./helper/server";
 
 import type {
@@ -11,8 +8,23 @@ import type {
   MagicResponse,
   WalletBindRequest,
   WalletBindResponse,
+  UserBind,
 } from "./typing";
 import { env } from "@/env";
+
+// Helper function to generate failed response
+function generateFailedResponse<T = unknown>(
+  message: string,
+  code: string = "500",
+  data?: T,
+): ResponseResult<T> {
+  return {
+    success: false,
+    message,
+    code,
+    data: data as T,
+  };
+}
 
 const userCache: Record<string, { user: ApiUser; timestamp: number }> = {};
 const CACHE_TTL = 60 * 1000; // 60 seconds cache TTL
@@ -46,9 +58,15 @@ function transformApiUserToCompatibleFormat(apiResponse: {
       bind.bind_type === "email",
   );
 
+  // Transform binds to proper UserBind type
+  const typedBinds: UserBind[] = binds.map((bind) => ({
+    bind_key: bind.bind_key,
+    bind_type: bind.bind_type as "github" | "email" | "wallet",
+  }));
+
   return {
     profile,
-    binds,
+    binds: typedBinds,
     role,
     id: profile.user_id,
     username: githubBind?.bind_key || profile.user_nick_name,
@@ -60,14 +78,10 @@ function transformApiUserToCompatibleFormat(apiResponse: {
   };
 }
 
-// GitHub OAuth login flow
+// GitHub OAuth login flow (server-side only)
 async function signInWithGitHub(
   code: string,
 ): Promise<ResponseResult<ApiAuthResponse>> {
-  if (!isServerSide()) {
-    return httpClient.post("/api/auth/login", { code, clientSide: true });
-  }
-
   try {
     if (!code) {
       return generateFailedResponse(
@@ -121,7 +135,7 @@ async function signInWithGitHub(
       console.error("Failed to fetch user profile:", await userResponse.text());
       return generateFailedResponse(
         "Failed to fetch user profile",
-        userResponse.status,
+        userResponse.status.toString(),
       );
     }
 
@@ -151,14 +165,12 @@ async function signInWithGitHub(
   }
 }
 
-// Log the user out
-async function signOut(request?: Request): Promise<ResponseResult> {
-  if (!isServerSide()) {
-    return httpClient.post("/api/auth/logout", { clientSide: true });
-  }
-
-  const session = await getSession(request!);
-  const userToken = session.get("userToken");
+// Log the user out (server-side only)
+async function signOut(): Promise<ResponseResult<string>> {
+  const session = await getSession();
+  const userToken = session.get("userToken") as string | undefined as
+    | string
+    | undefined;
 
   // Clear from cache if exists
   if (userToken && userCache[userToken]) {
@@ -176,16 +188,12 @@ async function signOut(request?: Request): Promise<ResponseResult> {
   };
 }
 
-// Get the authenticated user from the session
-async function fetchCurrentUser(
-  request?: Request,
-): Promise<ResponseResult<ApiUser | null>> {
-  if (!isServerSide()) {
-    return httpClient.get("/api/auth/me");
-  }
-
-  const session = await getSession(request!);
-  const userToken = session.get("userToken");
+// Get the authenticated user from the session (server-side only)
+async function fetchCurrentUser(): Promise<ResponseResult<ApiUser | null>> {
+  const session = await getSession();
+  const userToken = session.get("userToken") as string | undefined as
+    | string
+    | undefined;
 
   const defaultResult = { success: true, code: "200", message: "", data: null };
 
@@ -245,8 +253,8 @@ async function fetchCurrentUser(
   }
 }
 
-async function getUser(request: Request): Promise<ApiUser | null> {
-  return (await fetchCurrentUser(request)).data;
+async function getUser(): Promise<ApiUser | null> {
+  return (await fetchCurrentUser()).data;
 }
 
 // Role-based access control helpers
@@ -269,16 +277,12 @@ function isManageable(user: ApiUser | null): boolean {
   return isServices(user) || isAdmin(user);
 }
 
-// Get magic string for wallet binding
-async function fetchMagic(
-  request?: Request,
-): Promise<ResponseResult<MagicResponse>> {
-  if (!isServerSide()) {
-    return httpClient.get("/api/auth/magic");
-  }
-
-  const session = await getSession(request!);
-  const userToken = session.get("userToken");
+// Get magic string for wallet binding (server-side only)
+async function fetchMagic(): Promise<ResponseResult<MagicResponse>> {
+  const session = await getSession();
+  const userToken = session.get("userToken") as string | undefined as
+    | string
+    | undefined;
 
   if (!userToken) {
     return generateFailedResponse("Not authenticated", "401");
@@ -317,17 +321,14 @@ async function fetchMagic(
   }
 }
 
-// Bind wallet address to user account
+// Bind wallet address to user account (server-side only)
 async function bindWallet(
   walletBindData: WalletBindRequest,
-  request?: Request,
 ): Promise<ResponseResult<WalletBindResponse>> {
-  if (!isServerSide()) {
-    return httpClient.post("/api/auth/bind/wallet", walletBindData);
-  }
-
-  const session = await getSession(request!);
-  const userToken = session.get("userToken");
+  const session = await getSession();
+  const userToken = session.get("userToken") as string | undefined as
+    | string
+    | undefined;
 
   if (!userToken) {
     return generateFailedResponse("Not authenticated", "401");

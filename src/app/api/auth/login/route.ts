@@ -8,22 +8,36 @@ export async function POST(request: Request) {
   const res = await signInWithGitHub(code);
 
   if (!res.success) {
-    return Response.json({ ...res, data: undefined }, { status: Number(res.code) });
+    return Response.json(
+      { ...res, data: undefined },
+      { status: Number(res.code) },
+    );
   }
 
   const { token, user } = res.data;
   if (!user || !user.id) {
-    return Response.json({ success: false, message: "User data missing", data: undefined }, { status: 500 });
+    return Response.json(
+      { success: false, message: "User data missing", data: undefined },
+      { status: 500 },
+    );
   }
-  const initOpts = await createUserSession({ request, userToken: token, userId: user.id });
+  const initOpts = await createUserSession({
+    userToken: token,
+    userId: user.id,
+  });
 
   if (clientSide) {
-    return Response.json({
-      ...res,
-      data: {
-        user: user ? pick(user, ["id", "username", "email", "avatar_url"]) : null,
+    return Response.json(
+      {
+        ...res,
+        data: {
+          user: user
+            ? pick(user, ["id", "username", "email", "avatar_url"])
+            : null,
+        },
       },
-    }, initOpts);
+      initOpts,
+    );
   } else {
     // For server-side redirect, return the redirect response
     return new Response(null, {

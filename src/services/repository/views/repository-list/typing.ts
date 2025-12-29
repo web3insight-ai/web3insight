@@ -1,12 +1,9 @@
 import type { DataValue, ResponseResult } from "@/types";
+import type { RepoListSearchInput } from "@/lib/form/schemas";
 
 import type { Repository } from "../../typing";
 
-type SearchValue = {
-  search: string;
-  order: "id" | "org";
-  direction: "asc" | "desc";
-};
+type SearchValue = RepoListSearchInput;
 
 type SelectableFilterWidgetProps<V extends DataValue = DataValue> = {
   value: V;
@@ -15,7 +12,7 @@ type SelectableFilterWidgetProps<V extends DataValue = DataValue> = {
 
 type FormSearchWidgetProps = {
   onSearch: (value: SearchValue) => void;
-}
+};
 
 type MarkDialogProps = {
   record: Repository;
@@ -34,7 +31,16 @@ type RepositoryListViewWidgetProps = Pick<FormSearchWidgetProps, "onSearch"> & {
   };
   loading: boolean;
   onCurrentChange: (currentPage: number) => void;
-  onMark: (mark: string | number | undefined, record: Repository) => Promise<ResponseResult>;
+  onMark: (
+    mark: string | number | undefined,
+    record: Repository,
+  ) => Promise<ResponseResult>;
 };
 
-export type { SearchValue, SelectableFilterWidgetProps, FormSearchWidgetProps, MarkDialogProps, RepositoryListViewWidgetProps };
+export type {
+  SearchValue,
+  SelectableFilterWidgetProps,
+  FormSearchWidgetProps,
+  MarkDialogProps,
+  RepositoryListViewWidgetProps,
+};

@@ -30,12 +30,12 @@ export async function POST(
     const body = (await request.json().catch(() => ({}))) as ShareRequestBody;
     const share = body.share ?? false;
 
-    const userResult = await fetchCurrentUser(request);
+    const userResult = await fetchCurrentUser();
     let authToken: string | undefined;
 
     if (userResult.success) {
-      const session = await getSession(request);
-      authToken = session.get("userToken");
+      const session = await getSession();
+      authToken = session.get("userToken") as string | undefined;
     }
 
     if (!authToken) {
@@ -71,7 +71,8 @@ export async function POST(
         {
           success: false,
           code: `HTTP_${response.status}`,
-          message: errorText || `HTTP ${response.status}: ${response.statusText}`,
+          message:
+            errorText || `HTTP ${response.status}: ${response.statusText}`,
           data: null,
         },
         { status: response.status },
