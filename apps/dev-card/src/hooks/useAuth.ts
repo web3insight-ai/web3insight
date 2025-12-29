@@ -116,30 +116,34 @@ export function useAuth(options?: UseAuthOptions) {
       )
       const emailAccount = privyUser.linkedAccounts.find((acc) => acc.type === "email")
 
-      // 2.1 GitHub display name (real name)
-      if (githubAccount && "profile" in githubAccount && githubAccount.profile?.name) {
-        return githubAccount.profile.name
+      // 2.1 GitHub display name (real name) or username
+      if (githubAccount) {
+        // Try profile.name first (real name)
+        if ("profile" in githubAccount && githubAccount.profile?.name) {
+          return githubAccount.profile.name
+        }
+        // Fallback to username (same logic as getDisplayAvatar)
+        const username =
+          (githubAccount as any).username ||
+          ("profile" in githubAccount && githubAccount.profile?.username)
+        if (username) {
+          return username
+        }
       }
 
-      // 2.2 GitHub username (handle)
-      if (githubAccount && "username" in githubAccount && githubAccount.username) {
-        return githubAccount.username
-      }
-      if (githubAccount && "profile" in githubAccount && githubAccount.profile?.username) {
-        return githubAccount.profile.username
-      }
-
-      // 2.3 Google display name
-      if (googleAccount && "name" in googleAccount && googleAccount.name) {
-        return googleAccount.name
-      }
-      if (googleAccount && "profile" in googleAccount && googleAccount.profile?.name) {
-        return googleAccount.profile.name
+      // 2.2 Google display name
+      if (googleAccount) {
+        if ("name" in googleAccount && (googleAccount as any).name) {
+          return (googleAccount as any).name
+        }
+        if ("profile" in googleAccount && googleAccount.profile?.name) {
+          return googleAccount.profile.name
+        }
       }
 
-      // 2.4 Email username as fallback (remove domain part)
-      if (emailAccount && "address" in emailAccount && emailAccount.address) {
-        return emailAccount.address.split("@")[0]
+      // 2.3 Email username as fallback (remove domain part)
+      if (emailAccount && "address" in emailAccount && (emailAccount as any).address) {
+        return (emailAccount as any).address.split("@")[0]
       }
     }
 
@@ -158,13 +162,12 @@ export function useAuth(options?: UseAuthOptions) {
         (acc) => acc.type === "github_oauth" || acc.type === "github"
       )
       if (githubAccount) {
-        // Prefer profile.username
-        if ("profile" in githubAccount && githubAccount.profile?.username) {
-          return githubAccount.profile.username
-        }
-        // Fallback to username field
-        if ("username" in githubAccount && githubAccount.username) {
-          return githubAccount.username
+        // Try multiple ways to get username (same logic as getDisplayAvatar)
+        const username =
+          (githubAccount as any).username ||
+          ("profile" in githubAccount && githubAccount.profile?.username)
+        if (username) {
+          return username
         }
       }
     }
