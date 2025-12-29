@@ -8,14 +8,14 @@ import {
   ModalHeader,
   ModalBody,
 } from "@nextui-org/react";
-import { ArrowRight, Search, Sparkles } from "lucide-react";
+import { ArrowRight, Search, Sparkles, StopCircle } from "lucide-react";
 import { useEffect, useState, useRef, useCallback } from "react";
-import Markdown from "react-markdown";
+import { Streamdown } from "streamdown";
+import { useCompletion } from "@ai-sdk/react";
 import { usePrivy } from "@privy-io/react-auth";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
 import { MetricOverview } from "$/index";
 import { fadeInUp, fadeInDown, modalTransition } from "@/utils/animations";
 import { useOverviewStatistics } from "@/hooks/api";
@@ -24,7 +24,7 @@ import { aiQuerySchema, type AIQueryInput } from "@/lib/form/schemas";
 export default function HomePageClient() {
   const { ready, authenticated, login } = usePrivy();
 
-  // Form state using React Hook Form + Zod
+  // Form state using React Hook Form + Zod for validation
   const form = useForm<AIQueryInput>({
     resolver: zodResolver(aiQuerySchema),
     defaultValues: {
@@ -33,9 +33,26 @@ export default function HomePageClient() {
     mode: "onChange",
   });
 
+  // AI completion hook from Vercel AI SDK
+  const {
+    completion,
+    complete,
+    isLoading,
+    stop,
+    error: completionError,
+  } = useCompletion({
+    api: "/api/ai/query",
+    streamProtocol: "text",
+    onFinish: () => {
+      setUserHasScrolled(false);
+    },
+    onError: (err: Error) => {
+      console.error("AI completion error:", err);
+      setErrorMessage("Failed to get AI response. Please try again.");
+    },
+  });
+
   // UI state
-  const [output, setOutput] = useState<string>("");
-  const [isStreaming, setIsStreaming] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -54,87 +71,12 @@ export default function HomePageClient() {
     coreDeveloper: statisticsData?.totalCoreDevelopers ?? 0,
   };
 
-  // AI Query mutation
-  const aiQueryMutation = useMutation({
-    mutationFn: async (data: AIQueryInput) => {
-      const response = await fetch("/api/ai/query", {
-        method: "POST",
-        body: new URLSearchParams({ query: data.query }),
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Accept: "text/event-stream",
-        },
-      });
-      return response;
-    },
-    onMutate: () => {
-      setOutput("");
-      setIsStreaming(true);
-      setIsModalOpen(true);
-      setUserHasScrolled(false);
-      setErrorMessage(null);
-    },
-    onSuccess: async (response) => {
-      if (!response.ok) {
-        setErrorMessage("Authentication required");
-        setIsStreaming(false);
-        return;
-      }
-
-      const reader = response.body?.getReader();
-      if (!reader) {
-        setIsStreaming(false);
-        return;
-      }
-
-      const decoder = new TextDecoder("utf-8");
-      let buffer = "";
-
-      try {
-        while (true) {
-          const { value, done } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split("\n");
-
-          for (let line of lines) {
-            line = line.trim();
-            if (!line.startsWith("data:")) continue;
-
-            const jsonStr = line.replace(/^data:\s*/, "");
-            if (jsonStr === "[DONE]") {
-              setIsStreaming(false);
-              return;
-            }
-
-            try {
-              const parsed = JSON.parse(jsonStr);
-              const piece = parsed?.data?.answer || "";
-              setOutput((prev) => prev + piece);
-              autoScroll();
-            } catch {
-              // Ignore JSON parsing errors during streaming
-            }
-          }
-
-          buffer = lines[lines.length - 1];
-        }
-      } finally {
-        setIsStreaming(false);
-      }
-    },
-    onError: () => {
-      setIsStreaming(false);
-    },
-  });
-
   // Handle auth prompt when unauthorized
   useEffect(() => {
-    if (!aiQueryMutation.isPending && errorMessage && ready && !authenticated) {
+    if (!isLoading && errorMessage && ready && !authenticated) {
       login();
     }
-  }, [aiQueryMutation.isPending, errorMessage, ready, authenticated, login]);
+  }, [isLoading, errorMessage, ready, authenticated, login]);
 
   // Check if user is at the bottom of the scrollable area
   const isAtBottom = useCallback((element: HTMLElement) => {
@@ -166,22 +108,32 @@ export default function HomePageClient() {
     }
   }, [userHasScrolled, isAtBottom]);
 
+  // Auto-scroll when completion updates
+  useEffect(() => {
+    if (completion && isLoading) {
+      autoScroll();
+    }
+  }, [completion, isLoading, autoScroll]);
+
   // Handle scroll events to detect user interaction
   const handleScroll = useCallback(() => {
     if (!modalBodyRef.current) return;
 
     const isNearBottom = isAtBottom(modalBodyRef.current);
 
-    if (!isNearBottom && isStreaming) {
+    if (!isNearBottom && isLoading) {
       setUserHasScrolled(true);
     } else if (isNearBottom) {
       setUserHasScrolled(false);
     }
-  }, [isAtBottom, isStreaming]);
+  }, [isAtBottom, isLoading]);
 
   // Form submit handler
-  const onSubmit = form.handleSubmit((data) => {
-    aiQueryMutation.mutate(data);
+  const onSubmit = form.handleSubmit(async (data) => {
+    setErrorMessage(null);
+    setIsModalOpen(true);
+    setUserHasScrolled(false);
+    await complete(data.query);
   });
 
   const handleExampleClick = (example: string) => {
@@ -196,7 +148,13 @@ export default function HomePageClient() {
     }, 0);
   };
 
-  const isSubmitting = aiQueryMutation.isPending;
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    if (isLoading) {
+      stop();
+    }
+  };
+
   const queryValue = form.watch("query");
 
   return (
@@ -263,10 +221,10 @@ export default function HomePageClient() {
                 />
                 <button
                   type="submit"
-                  disabled={isSubmitting || !queryValue?.trim()}
+                  disabled={isLoading || !queryValue?.trim()}
                   className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-primary hover:bg-primary/90 text-white rounded-md flex items-center justify-center transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isSubmitting ? (
+                  {isLoading ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : (
                     <ArrowRight size={16} />
@@ -276,6 +234,11 @@ export default function HomePageClient() {
               {errorMessage && (
                 <p className="text-xs text-danger mt-2 text-center animate-fade-in">
                   {errorMessage}
+                </p>
+              )}
+              {completionError && (
+                <p className="text-xs text-danger mt-2 text-center animate-fade-in">
+                  {completionError.message}
                 </p>
               )}
               {form.formState.errors.query && (
@@ -321,10 +284,7 @@ export default function HomePageClient() {
         {isModalOpen && (
           <Modal
             isOpen={isModalOpen}
-            onClose={() => {
-              setIsModalOpen(false);
-              setIsStreaming(false);
-            }}
+            onClose={handleModalClose}
             size="3xl"
             scrollBehavior="inside"
             classNames={{
@@ -344,9 +304,21 @@ export default function HomePageClient() {
               animate="visible"
               exit="exit"
             >
-              <ModalHeader className="flex items-center gap-2 px-6 py-4">
-                <Sparkles size={20} className="text-primary" />
-                <span className="text-lg font-semibold">Web3Insights</span>
+              <ModalHeader className="flex items-center justify-between px-6 py-4">
+                <div className="flex items-center gap-2">
+                  <Sparkles size={20} className="text-primary" />
+                  <span className="text-lg font-semibold">Web3Insights</span>
+                </div>
+                {isLoading && (
+                  <button
+                    type="button"
+                    onClick={stop}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-danger hover:bg-danger/10 rounded-md transition-colors"
+                  >
+                    <StopCircle size={14} />
+                    Stop
+                  </button>
+                )}
               </ModalHeader>
               <ModalBody className="p-0">
                 <div
@@ -359,19 +331,17 @@ export default function HomePageClient() {
                     <div className="absolute inset-0 answer-card-pattern opacity-50" />
 
                     <div className="p-8 relative z-10">
-                      {isStreaming && output.length === 0 && (
+                      {isLoading && completion.length === 0 && (
                         <div className="space-y-3">
                           <Skeleton className="h-4 w-3/4 rounded-lg" />
                           <Skeleton className="h-4 w-full rounded-lg" />
                           <Skeleton className="h-4 w-5/6 rounded-lg" />
                         </div>
                       )}
-                      {output.length > 0 && (
+                      {completion.length > 0 && (
                         <div className="prose-enhanced animate-fade-in">
-                          <div
-                            className={isStreaming ? "typewriter-cursor" : ""}
-                          >
-                            <Markdown
+                          <div className={isLoading ? "typewriter-cursor" : ""}>
+                            <Streamdown
                               components={{
                                 h1: ({ children }) => (
                                   <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
@@ -425,8 +395,8 @@ export default function HomePageClient() {
                                 ),
                               }}
                             >
-                              {output}
-                            </Markdown>
+                              {completion}
+                            </Streamdown>
                           </div>
                         </div>
                       )}

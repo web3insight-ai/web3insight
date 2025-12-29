@@ -14,11 +14,10 @@ export const env = createEnv({
     // External service URLs
     OSSINSIGHT_URL: z.string().url().default("https://api.ossinsight.io"),
 
-    // AI Services
-    OPENAI_BASE_URL: z.string().url().optional(),
-    OPENAI_API_KEY: z.string().min(1).optional(),
-    AI_API_URL: z.string().url().optional(),
-    AI_API_TOKEN: z.string().min(1).optional(),
+    // AI Services (OpenAI-compatible API)
+    OPENAI_BASE_URL: z.string().url().default("https://burn.hair/v1"),
+    OPENAI_API_KEY: z.string().min(1),
+    OPENAI_MODEL: z.string().default("gpt-4o"),
 
     // HTTP timeout configuration (in milliseconds)
     HTTP_TIMEOUT: z
@@ -55,8 +54,7 @@ export const env = createEnv({
     OSSINSIGHT_URL: process.env.OSSINSIGHT_URL,
     OPENAI_BASE_URL: process.env.OPENAI_BASE_URL,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
-    AI_API_URL: process.env.AI_API_URL,
-    AI_API_TOKEN: process.env.AI_API_TOKEN,
+    OPENAI_MODEL: process.env.OPENAI_MODEL,
     HTTP_TIMEOUT: process.env.HTTP_TIMEOUT,
     NODE_ENV: process.env.NODE_ENV,
 

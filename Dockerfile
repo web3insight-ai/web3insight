@@ -32,8 +32,9 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Build arguments for environment variables
-ARG AI_API_TOKEN
-ARG AI_API_URL
+ARG OPENAI_API_KEY
+ARG OPENAI_BASE_URL
+ARG OPENAI_MODEL
 ARG DATA_API_TOKEN
 ARG DATA_API_URL
 ARG OSSINSIGHT_URL
@@ -44,8 +45,9 @@ ARG NEXT_PUBLIC_UMAMI_WEBSITE_ID
 ENV SKIP_ENV_VALIDATION=true
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
-ENV AI_API_TOKEN=${AI_API_TOKEN}
-ENV AI_API_URL=${AI_API_URL}
+ENV OPENAI_API_KEY=${OPENAI_API_KEY}
+ENV OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://burn.hair/v1}
+ENV OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o}
 ENV DATA_API_TOKEN=${DATA_API_TOKEN}
 ENV DATA_API_URL=${DATA_API_URL:-https://api.web3insight.ai}
 ENV OSSINSIGHT_URL=${OSSINSIGHT_URL:-https://api.ossinsight.io}
@@ -87,8 +89,9 @@ ENV HOSTNAME="0.0.0.0"
 
 # Runtime environment variables (these can be overridden at container start)
 # Server-side only variables
-ENV AI_API_TOKEN=""
-ENV AI_API_URL=""
+ENV OPENAI_API_KEY=""
+ENV OPENAI_BASE_URL="https://burn.hair/v1"
+ENV OPENAI_MODEL="gpt-4o"
 ENV DATA_API_TOKEN=""
 ENV DATA_API_URL="https://api.web3insight.ai"
 ENV OSSINSIGHT_URL="https://api.ossinsight.io"

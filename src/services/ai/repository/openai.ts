@@ -1,16 +1,23 @@
-import { generateText as generateTextFromAi } from "ai";
+import { generateText as generateTextFromAi, type ModelMessage } from "ai";
 import { isAddress } from "viem";
 
 import type { DataValue } from "@/types";
 
 import type { AnalysisType } from "../typing";
 import { generateAnalysisPrompt } from "../helper";
-import { openai } from "./client";
+import { getModel } from "./client";
 
-const model = openai("gpt-4o");
+interface GenerateTextOptions {
+  messages: ModelMessage[];
+  maxTokens?: number;
+  topP?: number;
+}
 
-async function generateText(opts: Record<string, DataValue>) {
-  return generateTextFromAi({ model, ...opts });
+async function generateText(opts: GenerateTextOptions) {
+  return generateTextFromAi({
+    model: getModel(),
+    ...opts,
+  });
 }
 
 async function getSearchKeyword(question: string) {
@@ -55,7 +62,7 @@ async function getSearchKeyword(question: string) {
   return result.text.trim();
 }
 
-async function analyzeInfo( info: DataValue, type: AnalysisType ) {
+async function analyzeInfo(info: DataValue, type: AnalysisType) {
   const stringified = JSON.stringify(info);
 
   let prompt;
@@ -95,7 +102,6 @@ async function analyzeInfo( info: DataValue, type: AnalysisType ) {
 }
 
 async function fetchAnalysisPrompt(info: DataValue, keyword: string) {
-  // Determine type based on keyword format
   let type: AnalysisType;
 
   if (isAddress(keyword) || keyword.endsWith(".eth")) {
