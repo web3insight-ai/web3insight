@@ -165,6 +165,7 @@ export default function AIAssistantWidget() {
     setErrorMessage(null);
     setUserHasScrolled(false);
     setHasSubmitted(true);
+    form.setValue("query", "");
     await complete(data.query);
   });
 
