@@ -141,7 +141,7 @@ export default function CardPage({
                     text={shareText}
                     ecosystem="monad"
                   />
-                  <CreateCardButton ecosystem="monad" inviteCode={userId} />
+                  {!isOwnCard && <CreateCardButton ecosystem="monad" inviteCode={userId} />}
                   <MintNFTButton ecosystem="monad" />
                 </motion.div>
               )}
