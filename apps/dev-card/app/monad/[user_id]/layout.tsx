@@ -34,9 +34,9 @@ export async function generateMetadata({
   const description = bio.length > 160 ? bio.slice(0, 157) + "..." : bio
 
   // Determine base URL for OG image
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "https://devcard.web3insight.ai"
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+    || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
+    || "https://card.web3insight.ai"
 
   const ogImageUrl = `${baseUrl}/api/og/monad/${user_id}`
   const pageUrl = `${baseUrl}/monad/${user_id}`
