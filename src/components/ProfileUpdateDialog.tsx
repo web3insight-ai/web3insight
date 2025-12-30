@@ -166,9 +166,9 @@ export function ProfileUpdateDialog({
             <textarea
               {...register("user_bio")}
               rows={3}
-              maxLength={50}
+              maxLength={100}
               className="w-full bg-black/60 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none resize-none"
-              placeholder="Share your bio (max 50 chars)"
+              placeholder="Share your bio (max 100 chars)"
             />
             {errors.user_bio && (
               <span className="text-red-400 text-xs">{errors.user_bio.message}</span>

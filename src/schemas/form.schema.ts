@@ -13,7 +13,7 @@ export const devCardFormSchema = z.object({
   bio: z
     .string()
     .min(1, "Bio is required")
-    .max(50, "Bio must be 50 characters or less"),
+    .max(100, "Bio must be 100 characters or less"),
   buildingOn: z
     .array(z.string())
     .min(1, "At least one ecosystem must be selected")
@@ -32,7 +32,7 @@ export type DevCardFormValues = z.infer<typeof devCardFormSchema>
 export const profileUpdateFormSchema = z.object({
   user_nick_name: z.string().optional(),
   user_avatar: z.string().optional(),
-  user_bio: z.string().max(50, "Bio must be 50 characters or less").optional(),
+  user_bio: z.string().max(100, "Bio must be 100 characters or less").optional(),
 })
 
 export type ProfileUpdateFormValues = z.infer<typeof profileUpdateFormSchema>

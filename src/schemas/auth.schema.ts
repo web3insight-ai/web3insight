@@ -57,7 +57,7 @@ export type PrivyAuthInput = z.infer<typeof privyAuthInputSchema>
 export const updateProfileDataSchema = z.object({
   user_nick_name: z.string().optional(),
   user_avatar: z.string().optional(),
-  user_bio: z.string().max(50, "Bio must be 50 characters or less").optional(),
+  user_bio: z.string().max(100, "Bio must be 100 characters or less").optional(),
   user_title: z.string().max(25, "Title must be 25 characters or less").optional(),
   user_custom_x: z.string().optional(),
   user_custom_labels: z.array(z.string()).max(6).optional(),
