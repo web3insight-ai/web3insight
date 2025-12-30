@@ -209,8 +209,39 @@ export class AuthService {
     body: UpdateUserReqDto,
     tag: string,
   ) {
+    const { invite_code, ...userInfoFields } = body;
+
+    if (invite_code) {
+      const existingInvite = await this.db
+        .selectFrom('api.users_invite')
+        .select(['id'])
+        .where('invite_uid', '=', user.uid)
+        .where('invite_source_type', '=', tag)
+        .executeTakeFirst();
+
+      if (!existingInvite) {
+        const inviterExists = await this.db
+          .selectFrom('api.auth_users')
+          .select(['user_id'])
+          .where('user_id', '=', invite_code)
+          .executeTakeFirst();
+
+        if (inviterExists && invite_code !== user.uid) {
+          await this.db
+            .insertInto('api.users_invite')
+            .values({
+              invite_source_id: invite_code,
+              invite_source_type: tag,
+              invite_source_uid: invite_code,
+              invite_uid: user.uid,
+            })
+            .execute();
+        }
+      }
+    }
+
     const updatePayload = Object.fromEntries(
-      Object.entries(body).filter(([, value]) => value !== undefined),
+      Object.entries(userInfoFields).filter(([, value]) => value !== undefined),
     ) as Partial<Updateable<ApiAuthUsersInfo>>;
 
     if (Array.isArray(updatePayload.user_custom_labels)) {
