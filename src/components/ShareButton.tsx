@@ -51,23 +51,14 @@ export function ShareButton({
     <div className="relative">
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
-        className="p-2.5 transition-colors rounded-full"
+        className="w-12 py-1.5 transition-colors rounded-lg flex flex-col items-center gap-0.5"
         style={{ color: accentColor }}
-        whileHover={{ scale: 1.15, backgroundColor: bgColor }}
+        whileHover={{ scale: 1.05, backgroundColor: bgColor }}
         whileTap={{ scale: 0.95 }}
-        animate={{
-          opacity: [0.7, 1, 0.7],
-        }}
-        transition={{
-          opacity: {
-            duration: 2.5,
-            repeat: Infinity,
-            ease: "easeInOut",
-          },
-        }}
         aria-label="Share"
       >
-        <Share2 className="w-5 h-5" />
+        <Share2 className="w-4 h-4" />
+        <span className="text-[9px] opacity-70">Share</span>
       </motion.button>
 
       <AnimatePresence>

@@ -7,6 +7,8 @@ import { useAuth } from '@/hooks/useAuth'
 import { orpc } from '@/orpc/client'
 import { ProfileUpdateDialog } from '@/components/ProfileUpdateDialog'
 import { ShareButton } from '@/components/ShareButton'
+import { CreateCardButton } from '@/components/CreateCardButton'
+import { MintNFTButton } from '@/components/MintNFTButton'
 import MantleCardBack from '@/components/MantleCardBack'
 import MantleCardFront from '@/components/MantleCardFront'
 import LoadingScreen from '@/components/LoadingScreen'
@@ -109,9 +111,9 @@ export default function CardPage({
             whileHover={{ scale: 1.02 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
           >
-            {/* Share button on card top right */}
+            {/* Action buttons on card top right */}
             <div
-              className="absolute top-3 right-3 z-20 ignore-screenshot"
+              className="absolute top-2 right-2 z-20 ignore-screenshot flex flex-col items-center gap-0.5"
               data-html2canvas-ignore="true"
               onClick={(e) => e.stopPropagation()}
             >
@@ -120,6 +122,8 @@ export default function CardPage({
                 text={shareText}
                 ecosystem="mantle"
               />
+              <CreateCardButton ecosystem="mantle" />
+              <MintNFTButton ecosystem="mantle" />
             </div>
             <motion.div
               className="relative w-full h-full"
