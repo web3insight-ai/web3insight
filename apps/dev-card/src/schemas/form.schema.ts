@@ -18,6 +18,7 @@ export const devCardFormSchema = z.object({
     .array(z.string())
     .min(1, "At least one ecosystem must be selected")
     .max(6, "Maximum 6 ecosystems allowed"),
+  inviteCode: z.string().optional(),
 })
 
 // Non-developer users require Twitter

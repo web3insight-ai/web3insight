@@ -55,6 +55,17 @@ export function useDevCardForm({ ecosystem }: UseDevCardFormOptions) {
     privyUser,
   } = useAuth({ ecosystem })
 
+  // Get invite code from localStorage
+  const [storedInviteCode] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem(`devcard-invite-code-${ecosystem}`) || ""
+    }
+    return ""
+  })
+
+  // Track if invite code is locked (already saved to backend)
+  const [inviteCodeLocked, setInviteCodeLocked] = useState(false)
+
   // React Hook Form setup
   const form = useForm<DevCardFormValues>({
     resolver: zodResolver(schema),
@@ -66,6 +77,7 @@ export function useDevCardForm({ ecosystem }: UseDevCardFormOptions) {
       title: "",
       bio: "",
       buildingOn: [baseEcosystem],
+      inviteCode: "",
     },
     mode: "onBlur",
   })
@@ -103,6 +115,8 @@ export function useDevCardForm({ ecosystem }: UseDevCardFormOptions) {
     ...orpc.auth.updateProfile.mutationOptions(),
     onSuccess: (result) => {
       if (result.success && result.data?.id) {
+        // Clear invite code from localStorage after successful save
+        localStorage.removeItem(`devcard-invite-code-${ecosystem}`)
         queryClient.invalidateQueries({ queryKey: orpc.auth.key() })
         router.push(`/${ecosystem}/${result.data.id}`)
       }
@@ -160,8 +174,25 @@ export function useDevCardForm({ ecosystem }: UseDevCardFormOptions) {
       form.setValue("title", title)
       form.setValue("bio", defaultBio)
       form.setValue("buildingOn", existingBuildingOn)
+
+      // Handle invite code logic
+      // Priority: inviter.invite_source_uid > invite_code > localStorage
+      // If user has inviter relationship, use invite_source_uid and lock
+      const inviterSourceUid = user.inviter?.invite_source_uid || user.inviter?.invite_source_id
+      if (inviterSourceUid) {
+        form.setValue("inviteCode", inviterSourceUid)
+        setInviteCodeLocked(true)
+      } else if (user.invite_code) {
+        // Fallback to invite_code field if exists
+        form.setValue("inviteCode", user.invite_code)
+        setInviteCodeLocked(true)
+      } else if (storedInviteCode) {
+        // If no saved invite code, use the one from localStorage
+        form.setValue("inviteCode", storedInviteCode)
+        setInviteCodeLocked(false)
+      }
     }
-  }, [user, authenticated, baseEcosystem, privyUser, getDisplayAvatar, getDisplayName, getGithubUsername, form, ecosystem])
+  }, [user, authenticated, baseEcosystem, privyUser, getDisplayAvatar, getDisplayName, getGithubUsername, form, ecosystem, storedInviteCode])
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -241,7 +272,7 @@ export function useDevCardForm({ ecosystem }: UseDevCardFormOptions) {
       return
     }
 
-    const profileData = {
+    const profileData: Record<string, unknown> = {
       user_nick_name: data.name,
       user_bio: data.bio,
       user_title: data.title,
@@ -251,6 +282,11 @@ export function useDevCardForm({ ecosystem }: UseDevCardFormOptions) {
       user_avatar: data.avatar && data.avatar !== `/images/${ecosystem}-icon.svg` && data.avatar !== "/images/monad-icon.svg"
         ? data.avatar
         : undefined,
+    }
+
+    // Only include invite_code if not already locked (saved to backend)
+    if (!inviteCodeLocked && data.inviteCode) {
+      profileData.invite_code = data.inviteCode
     }
 
     try {
@@ -279,5 +315,6 @@ export function useDevCardForm({ ecosystem }: UseDevCardFormOptions) {
     handleAvatarChange,
     connectTwitter,
     toggleBuildingOn,
+    inviteCodeLocked,
   }
 }

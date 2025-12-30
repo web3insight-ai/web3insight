@@ -27,6 +27,25 @@ const protectedProcedure = baseProcedure.use(async ({ context, next }) => {
   })
 })
 
+// Helper function to process inviter data from API response
+function processInviterData(inviterData: any): z.infer<typeof apiUserSchema>["inviter"] {
+  if (!inviterData) return null
+
+  // Handle invite relationship structure from API
+  // API returns: { id, invite_source_uid, invite_source_id, invite_source_type, invite_uid, ... }
+  return {
+    id: inviterData.id || "",
+    invite_source_uid: inviterData.invite_source_uid,
+    invite_source_id: inviterData.invite_source_id,
+    invite_source_type: inviterData.invite_source_type,
+    invite_uid: inviterData.invite_uid,
+    // These may be populated later from fetching inviter's profile
+    nick_name: inviterData.nick_name || inviterData.user_nick_name,
+    user_avatar: inviterData.user_avatar,
+    github_login: inviterData.github_login || inviterData.github || "",
+  }
+}
+
 // Helper function to process user data from API response
 function processUserData(userData: any): z.infer<typeof apiUserSchema> | null {
   if (!userData) return null
@@ -47,6 +66,9 @@ function processUserData(userData: any): z.infer<typeof apiUserSchema> | null {
       }
     }
 
+    // Process inviter data if available
+    const inviter = processInviterData(userData.inviter)
+
     return {
       id: userData.profile.user_id || userData.user_id,
       nick_name: userData.profile.user_nick_name,
@@ -55,6 +77,8 @@ function processUserData(userData: any): z.infer<typeof apiUserSchema> | null {
       user_title: userData.profile.user_title || "",
       user_custom_x: userData.profile.user_custom_x,
       user_custom_labels: userData.profile.user_custom_labels,
+      invite_code: userData.profile.invite_code,
+      inviter,
       github_login: githubLogin,
       created_at: userData.profile.created_at,
       updated_at: userData.profile.updated_at,
@@ -63,6 +87,14 @@ function processUserData(userData: any): z.infer<typeof apiUserSchema> | null {
 
   if (!userData.id && userData.user_id) {
     return { ...userData, id: userData.user_id }
+  }
+
+  // Handle flat structure with inviter
+  if (userData.inviter) {
+    return {
+      ...userData,
+      inviter: processInviterData(userData.inviter),
+    }
   }
 
   return userData

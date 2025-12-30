@@ -4,6 +4,21 @@ import { z } from "zod"
 export const ecosystemSchema = z.enum(["monad", "mantle"])
 export type Ecosystem = z.infer<typeof ecosystemSchema>
 
+// Inviter schema (invite relationship info)
+export const inviterSchema = z.object({
+  id: z.string(),
+  invite_source_uid: z.string().optional(),
+  invite_source_id: z.string().optional(),
+  invite_source_type: z.string().optional(),
+  invite_uid: z.string().optional(),
+  // These are populated from fetching the inviter's profile
+  nick_name: z.string().optional(),
+  user_avatar: z.string().optional(),
+  github_login: z.string().optional(),
+})
+
+export type Inviter = z.infer<typeof inviterSchema>
+
 // API User schema
 export const apiUserSchema = z.object({
   id: z.string(),
@@ -15,6 +30,8 @@ export const apiUserSchema = z.object({
   google_email: z.string().optional(),
   user_custom_x: z.string().optional(),
   user_custom_labels: z.array(z.string()).optional(),
+  invite_code: z.string().optional(),
+  inviter: inviterSchema.nullable().optional(),
   created_at: z.string().optional(),
   updated_at: z.string().optional(),
 })
@@ -45,6 +62,7 @@ export const updateProfileDataSchema = z.object({
   user_custom_x: z.string().optional(),
   user_custom_labels: z.array(z.string()).max(6).optional(),
   github_login: z.string().optional(),
+  invite_code: z.string().optional(),
 })
 
 export const updateProfileInputSchema = z.object({
