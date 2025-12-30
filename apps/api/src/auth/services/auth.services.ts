@@ -170,11 +170,34 @@ export class AuthService {
     }
 
     const github = await this.userService.getPrivyGithubUsername(uid);
+    const inviter = await this.getInviterByUid(uid, tag);
 
     return {
       profile: user,
       github: github,
+      inviter: inviter,
     };
+  }
+
+  /**
+   * 获取用户的邀请人信息
+   * @param uid 用户ID
+   * @param tag 邀请来源类型
+   * @returns 邀请信息，如果没有邀请人则返回 null
+   */
+  async getInviterByUid(uid: string, tag: string) {
+    const invite = await this.db
+      .selectFrom('api.users_invite')
+      .selectAll()
+      .where('invite_uid', '=', uid)
+      .where('invite_source_type', '=', tag)
+      .executeTakeFirst();
+
+    if (!invite) {
+      return null;
+    }
+
+    return invite;
   }
 
   async updateUserInfo(user: JwtPayload, body: UpdateUserReqDto) {
