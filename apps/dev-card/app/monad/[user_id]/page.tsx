@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, use } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/hooks/useAuth'
 import { orpc } from '@/orpc/client'
@@ -123,20 +123,28 @@ export default function CardPage({
             whileHover={{ scale: 1.02 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
           >
-            {/* Action buttons on card top right */}
-            <div
-              className="absolute top-2 right-2 z-20 ignore-screenshot flex flex-col items-center gap-0.5"
-              data-html2canvas-ignore="true"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <ShareButton
-                title={shareTitle}
-                text={shareText}
-                ecosystem="monad"
-              />
-              <CreateCardButton ecosystem="monad" inviteCode={userId} />
-              <MintNFTButton ecosystem="monad" />
-            </div>
+            {/* Action buttons on card top right - only show when front side is visible */}
+            <AnimatePresence>
+              {isFlipped && (
+                <motion.div
+                  className="absolute top-2 right-2 z-20 ignore-screenshot flex flex-col items-center gap-0.5"
+                  data-html2canvas-ignore="true"
+                  onClick={(e) => e.stopPropagation()}
+                  initial={{ opacity: 0, rotateY: 90, scale: 0.8 }}
+                  animate={{ opacity: 1, rotateY: 0, scale: 1 }}
+                  exit={{ opacity: 0, rotateY: -90, scale: 0.8 }}
+                  transition={{ duration: 0.35, delay: 0.35, ease: "easeOut" }}
+                >
+                  <ShareButton
+                    title={shareTitle}
+                    text={shareText}
+                    ecosystem="monad"
+                  />
+                  <CreateCardButton ecosystem="monad" inviteCode={userId} />
+                  <MintNFTButton ecosystem="monad" />
+                </motion.div>
+              )}
+            </AnimatePresence>
             <motion.div
               className="relative w-full h-full"
               style={{
