@@ -558,4 +558,86 @@ export class AuthService {
 
     console.log('JWT:', jwt);
   }
+
+  @Command({
+    command: 'export:invites',
+    description: 'Export invite relationships with user bindings from Privy',
+  })
+  async exportInvites() {
+    const invites = await this.db
+      .selectFrom('api.users_invite')
+      .selectAll()
+      .execute();
+
+    console.log(`Found ${invites.length} invite records`);
+
+    const result = [];
+
+    for (const invite of invites) {
+      // Get inviter's privy_did
+      const inviterPrivyBind = await this.db
+        .selectFrom('api.auth_users_binds')
+        .select(['bind_openid'])
+        .where('bind_uid', '=', String(invite.invite_source_uid))
+        .where('bind_type', '=', 'privy')
+        .executeTakeFirst();
+
+      // Get invitee's privy_did
+      const inviteePrivyBind = await this.db
+        .selectFrom('api.auth_users_binds')
+        .select(['bind_openid'])
+        .where('bind_uid', '=', String(invite.invite_uid))
+        .where('bind_type', '=', 'privy')
+        .executeTakeFirst();
+
+      // Get bindings from Privy
+      const inviterBindings = inviterPrivyBind
+        ? await this.getPrivyUserBindings(inviterPrivyBind.bind_openid)
+        : null;
+
+      const inviteeBindings = inviteePrivyBind
+        ? await this.getPrivyUserBindings(inviteePrivyBind.bind_openid)
+        : null;
+
+      // Extract emails and github usernames
+      const inviterEmails =
+        inviterBindings?.linked_accounts
+          .filter((acc) => acc.type === 'email')
+          .map((acc) => (acc as any).address)
+          .filter(Boolean) || [];
+
+      const inviterGithub = inviterBindings?.linked_accounts.find(
+        (acc) => acc.type === 'github_oauth',
+      );
+
+      const inviteeEmails =
+        inviteeBindings?.linked_accounts
+          .filter((acc) => acc.type === 'email')
+          .map((acc) => (acc as any).address)
+          .filter(Boolean) || [];
+
+      const inviteeGithub = inviteeBindings?.linked_accounts.find(
+        (acc) => acc.type === 'github_oauth',
+      );
+
+      result.push({
+        invite_id: invite.id,
+        invite_source_type: invite.invite_source_type,
+        inviter: {
+          uid: invite.invite_source_uid,
+          emails: inviterEmails,
+          github_username: inviterGithub?.username || null,
+        },
+        invitee: {
+          uid: invite.invite_uid,
+          emails: inviteeEmails,
+          github_username: inviteeGithub?.username || null,
+        },
+        created_at: invite.created_at,
+        updated_at: invite.updated_at,
+      });
+    }
+
+    console.log(JSON.stringify(result, null, 2));
+  }
 }
