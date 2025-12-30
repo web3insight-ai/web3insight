@@ -3,16 +3,21 @@
 import { Printer } from "lucide-react"
 import { motion } from "framer-motion"
 import type { CardData } from "@/components/CardTemplate"
+import { ShareButton } from "@/components/ShareButton"
 
 interface CardActionButtonsProps {
   cardData: CardData
   userName?: string
+  ecosystem?: "mantle" | "monad"
 }
 
-export function CardActionButtons({ cardData, userName }: CardActionButtonsProps) {
+export function CardActionButtons({ cardData, userName, ecosystem = "mantle" }: CardActionButtonsProps) {
   const handlePrint = () => {
     window.print()
   }
+
+  const shareTitle = `Check out ${userName ? `${userName}'s` : "my"} Web3 Dev Card!`
+  const shareText = `${userName || "I"} just created a Web3 Dev Card on @Web3InsightAI. Get yours now!`
 
   return (
     <motion.div
@@ -21,6 +26,13 @@ export function CardActionButtons({ cardData, userName }: CardActionButtonsProps
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: 0.3, duration: 0.5 }}
     >
+      {/* Share button */}
+      <ShareButton
+        title={shareTitle}
+        text={shareText}
+        ecosystem={ecosystem}
+      />
+
       {/* Print button */}
       <motion.button
         onClick={handlePrint}
