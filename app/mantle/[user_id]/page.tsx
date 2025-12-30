@@ -81,8 +81,9 @@ export default function CardPage({
     buildingOn = [...cardUser.user_custom_labels]
   }
 
-  const shareTitle = `Check out ${cardUser?.nick_name || cardUser?.github_login || 'my'}'s Web3 Dev Card!`
-  const shareText = `${cardUser?.nick_name || cardUser?.github_login || 'I'} just created a Web3 Dev Card on @Web3InsightAI. Get yours now!`
+  const userName = cardUser?.nick_name || cardUser?.github_login || 'I'
+  const shareTitle = `${userName} just minted a Mantle DevCard! Join the Mantle Global Hackathon 2025 and win rewards!`
+  const shareText = `#BuildOnMantle @Mantle_Official @0xMantleCN @OpenBuildxyz @Web3insightAI`
 
   return (
     <motion.div

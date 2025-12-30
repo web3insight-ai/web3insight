@@ -16,8 +16,14 @@ export function CardActionButtons({ cardData, userName, ecosystem = "mantle" }: 
     window.print()
   }
 
-  const shareTitle = `Check out ${userName ? `${userName}'s` : "my"} Web3 Dev Card!`
-  const shareText = `${userName || "I"} just created a Web3 Dev Card on @Web3InsightAI. Get yours now!`
+  const isMantle = ecosystem === "mantle"
+  const displayName = userName || "I"
+  const shareTitle = isMantle
+    ? `${displayName} just minted a Mantle DevCard! Join the Mantle Global Hackathon 2025 and win rewards!`
+    : `${displayName} just minted a Monad DevCard! Join the Monad ecosystem!`
+  const shareText = isMantle
+    ? `#BuildOnMantle @Mantle_Official @0xMantleCN @OpenBuildxyz @Web3insightAI`
+    : `@monad_xyz @Web3insightAI`
 
   return (
     <motion.div

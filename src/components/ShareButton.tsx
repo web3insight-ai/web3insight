@@ -13,8 +13,8 @@ interface ShareButtonProps {
 
 export function ShareButton({
   url,
-  title = "Check out my Web3 Dev Card!",
-  text = "I just created my Web3 Dev Card. Get yours now!",
+  title = "I just minted a Mantle DevCard! Join the Mantle Global Hackathon 2025 and win rewards!",
+  text = "#BuildOnMantle @Mantle_Official @0xMantleCN @OpenBuildxyz @Web3insightAI",
   ecosystem = "mantle",
 }: ShareButtonProps) {
   const [isOpen, setIsOpen] = useState(false)
@@ -28,8 +28,9 @@ export function ShareButton({
 
   const handleTwitterShare = () => {
     const twitterUrl = new URL("https://twitter.com/intent/tweet")
-    twitterUrl.searchParams.set("text", `${title}\n\n${text}`)
-    twitterUrl.searchParams.set("url", shareUrl)
+    // Format: title + empty line + URL + empty line + hashtags/tags
+    const fullText = `${title}\n\n${shareUrl}\n\n${text}`
+    twitterUrl.searchParams.set("text", fullText)
     window.open(twitterUrl.toString(), "_blank", "noopener,noreferrer")
     setIsOpen(false)
   }
