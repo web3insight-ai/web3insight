@@ -30,7 +30,7 @@ export async function generateMetadata({
 
   const name = userData?.profile?.user_nick_name || userData?.nick_name || "Web3 Builder"
   const bio = userData?.profile?.user_bio || userData?.user_bio || "Building the future of Web3!"
-  const title = `${name}'s Dev Card | Mantle`
+  const title = `${name}'s Dev Card @ Mantle`
   const description = bio.length > 160 ? bio.slice(0, 157) + "..." : bio
 
   // Determine base URL for OG image
