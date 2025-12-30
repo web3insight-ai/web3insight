@@ -324,14 +324,14 @@ export function DevCardForm({ ecosystem }: DevCardFormProps) {
                 <label className="text-sm text-white font-medium">
                   Bio <span className="text-red-400">*</span>
                 </label>
-                <span className="text-xs text-gray-400">{bioValue?.length || 0}/50</span>
+                <span className="text-xs text-gray-400">{bioValue?.length || 0}/100</span>
               </div>
               <motion.textarea
                 {...register("bio")}
                 rows={4}
-                maxLength={50}
+                maxLength={100}
                 className="w-full bg-black/60 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none resize-none"
-                placeholder="Share your bio (max 50 chars)"
+                placeholder="Share your bio (max 100 chars)"
                 whileFocus={{ scale: 1.02, borderColor: theme.accentColor }}
                 transition={{ type: "spring", stiffness: 300 }}
               />
