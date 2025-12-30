@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/hooks/useAuth'
 import { orpc } from '@/orpc/client'
 import { ProfileUpdateDialog } from '@/components/ProfileUpdateDialog'
-import { CardActionButtons } from '@/components/CardActionButtons'
+import { ShareButton } from '@/components/ShareButton'
 import MantleCardBack from '@/components/MantleCardBack'
 import MantleCardFront from '@/components/MantleCardFront'
 import LoadingScreen from '@/components/LoadingScreen'
@@ -68,6 +68,9 @@ export default function CardPage({
     buildingOn = [...cardUser.user_custom_labels]
   }
 
+  const shareTitle = `Check out ${cardUser?.nick_name || cardUser?.github_login || 'my'}'s Web3 Dev Card!`
+  const shareText = `${cardUser?.nick_name || cardUser?.github_login || 'I'} just created a Web3 Dev Card on @Web3InsightAI. Get yours now!`
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -106,6 +109,18 @@ export default function CardPage({
             whileHover={{ scale: 1.02 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
           >
+            {/* Share button on card top right */}
+            <div
+              className="absolute top-3 right-3 z-20 ignore-screenshot"
+              data-html2canvas-ignore="true"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ShareButton
+                title={shareTitle}
+                text={shareText}
+                ecosystem="mantle"
+              />
+            </div>
             <motion.div
               className="relative w-full h-full"
               style={{
@@ -153,7 +168,7 @@ export default function CardPage({
         </motion.div>
 
         <motion.div
-          className="shrink-0 w-full flex flex-col items-center pb-4 sm:pb-6 pt-2 sm:pt-4 gap-2 sm:gap-3 ignore-screenshot"
+          className="shrink-0 w-full flex flex-col items-center pb-4 sm:pb-6 pt-2 sm:pt-4 ignore-screenshot"
           data-html2canvas-ignore="true"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -166,20 +181,6 @@ export default function CardPage({
           >
             Tap card to flip
           </motion.p>
-
-          <CardActionButtons
-            cardData={{
-              id: userId || undefined,
-              name,
-              github,
-              twitter,
-              bio,
-              avatar,
-              title,
-              buildingOn,
-            }}
-            userName={cardUser?.nick_name || cardUser?.github_login || 'user'}
-          />
         </motion.div>
 
         <ProfileUpdateDialog
