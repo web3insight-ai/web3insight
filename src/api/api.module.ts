@@ -5,7 +5,6 @@ import { DataModule } from '@/data/data.module';
 import { RankController } from './controller/rank.controller';
 import { AdminController } from './controller/admin.controller';
 import { GithubController } from './controller/github.controller';
-import { GithubService } from './services/github.services';
 import { DBModule } from '@/app/db/db.module';
 import { CustomController } from './controller/custom.controller';
 import { AuthModule } from '@/auth/auth.module';
@@ -24,7 +23,7 @@ import { DonateController } from './controller/donate.controller';
     RepoController,
     DonateController,
   ],
-  providers: [JwtService, GithubService],
+  providers: [JwtService],
   exports: [],
   imports: [DataModule, DBModule, AuthModule],
 })

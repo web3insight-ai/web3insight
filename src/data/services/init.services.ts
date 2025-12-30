@@ -10,10 +10,10 @@ import { DB } from '@/app/db/dto/db.dto';
 import {
   askForConfirmation,
   chunkArray,
-  convertGithubUrlToRepoName,
 } from '@/helper';
 import { isDeepStrictEqual } from 'util';
 import { TokenPoolService } from '@/app/db/pool.services';
+import { GithubService } from '@/api/services/github.services';
 
 interface RawRepoData {
   eco_name: string;
@@ -35,7 +35,10 @@ interface QueryEcosystem {
 export class InitDataService {
   @Inject(KYSELY) private readonly db!: Kysely<DB>;
 
-  constructor(private tokenPoolService: TokenPoolService) {}
+  constructor(
+    private tokenPoolService: TokenPoolService,
+    private githubService: GithubService,
+  ) {}
 
   private repoMap: Map<string, RepoData> = new Map();
   private dataPath = join(process.cwd(), 'eco.jsonl');
@@ -88,12 +91,16 @@ export class InitDataService {
 
     console.log('Load eco data len:', this.repoMap.size);
 
-    const localRepos = Array.from(this.repoMap.values()).map((repo) => ({
-      ...repo,
-      upstream_repo_name: convertGithubUrlToRepoName(
-        repo.upstream_repo_name || '',
-      ),
-    }));
+    const localRepos = Array.from(this.repoMap.values()).map((repo) => {
+      const normalized =
+        this.githubService.normalizeRepoFullName(
+          repo.upstream_repo_name || '',
+        ) || repo.upstream_repo_name;
+      return {
+        ...repo,
+        upstream_repo_name: normalized,
+      };
+    });
     const localRepoNames = new Set(
       localRepos.map((repo) => repo.upstream_repo_name),
     );
@@ -378,7 +385,11 @@ export class InitDataService {
         try {
           const item = JSON.parse(line) as { repo_url?: string };
           if (!item?.repo_url) continue;
-          const originalName = convertGithubUrlToRepoName(item.repo_url);
+          const originalName =
+            this.githubService.normalizeRepoFullName(item.repo_url || '') ||
+            item.repo_url ||
+            '';
+          if (!originalName) continue;
           repoCaseMap.set(originalName.toLowerCase(), originalName);
         } catch {
           continue;

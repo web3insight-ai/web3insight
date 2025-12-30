@@ -1,28 +1,19 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { KYSELY } from '@/app/db/db.provider';
 import { DB } from '@/app/db/dto/db.dto';
 import { Kysely } from 'kysely';
 import { TokenPoolService } from '@/app/db/pool.services';
 import { Buffer } from 'buffer';
+import { GithubService } from '@/api/services/github.services';
 
 @Injectable()
 export class DonateService {
   @Inject(KYSELY) private readonly db!: Kysely<DB>;
 
-  constructor(private readonly tokenPoolService: TokenPoolService) {}
-
-  private parseRepoFullName(repoFullName: string) {
-    const [owner, repo] = repoFullName.split('/');
-    if (!owner || !repo) {
-      throw new BadRequestException('Invalid repository name');
-    }
-    return { owner, repo };
-  }
+  constructor(
+    private readonly tokenPoolService: TokenPoolService,
+    private readonly githubService: GithubService,
+  ) {}
 
   private async fetchDonationData(
     owner: string,
@@ -71,7 +62,7 @@ export class DonateService {
   }
 
   async create(repoFullName: string, submitterId: string) {
-    const { owner, repo } = this.parseRepoFullName(repoFullName);
+    const { owner, repo } = this.githubService.parseRepoFullName(repoFullName);
     const client = await this.tokenPoolService.getClient();
     const { data: repoInfo } = await client.rest.repos.get({ owner, repo });
     const repoDonateData = await this.fetchDonationData(

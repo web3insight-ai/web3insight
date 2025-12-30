@@ -24,6 +24,8 @@ class GitHubTokenInfo {
 
 export type RepoInfo =
   RestEndpointMethodTypes['repos']['get']['response']['data'];
+export type RepoContributor =
+  RestEndpointMethodTypes['repos']['listContributors']['response']['data'][number];
 
 @Injectable()
 @Console()

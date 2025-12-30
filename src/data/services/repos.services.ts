@@ -1,10 +1,17 @@
 import { KYSELY } from '@/app/db/db.provider';
 import { DB } from '@/app/db/dto/db.dto';
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Workbook } from 'exceljs';
 import { Kysely } from 'kysely';
 import { Command, Console } from 'nestjs-console';
+import { isAbsolute, join, parse } from 'path';
 import { ECO_ALL } from '../dto/data.dto';
-import { RepoInfo, TokenPoolService } from '@/app/db/pool.services';
+import {
+  RepoContributor,
+  RepoInfo,
+  TokenPoolService,
+} from '@/app/db/pool.services';
+import { GithubService } from '@/api/services/github.services';
 import {
   BaseIdReqAndResDto,
   GetReposMarkResDto,
@@ -21,8 +28,35 @@ import { chunkArray } from '@/helper';
 @Console()
 export class ReposService {
   @Inject(KYSELY) private readonly db!: Kysely<DB>;
+  private readonly contributorPageSize = 100;
+  private readonly contributorMaxRetries = 3;
+  private readonly contributorCsvFields = [
+    'login',
+    'id',
+    'node_id',
+    'avatar_url',
+    'gravatar_id',
+    'url',
+    'html_url',
+    'followers_url',
+    'following_url',
+    'gists_url',
+    'starred_url',
+    'subscriptions_url',
+    'organizations_url',
+    'repos_url',
+    'events_url',
+    'received_events_url',
+    'type',
+    'user_view_type',
+    'site_admin',
+    'contributions',
+  ];
 
-  constructor(private tokenPoolService: TokenPoolService) {}
+  constructor(
+    private tokenPoolService: TokenPoolService,
+    private githubService: GithubService,
+  ) {}
 
   async getReposByEcoName(params: ReposOrderReqDto) {
     let query = this.db.selectFrom('data.repos');
@@ -160,6 +194,202 @@ export class ReposService {
     const repoInfo = results.flat();
 
     return repoInfo;
+  }
+
+  async getRepoCommitUsers(repoList: string[]): Promise<RepoContributor[]> {
+    const normalized = repoList
+      .map((repo) => this.githubService.normalizeRepoFullName(repo))
+      .filter((repo): repo is string => !!repo);
+    const uniqueRepos = Array.from(new Set(normalized));
+    const contributors = new Map<string, RepoContributor>();
+
+    for (const repoFullName of uniqueRepos) {
+      const [owner, repo] = repoFullName.split('/');
+      if (!owner || !repo) {
+        continue;
+      }
+
+      let page = 1;
+      while (true) {
+        const data = await this.fetchContributorsPage(owner, repo, page);
+        if (!data || data.length === 0) {
+          break;
+        }
+
+        for (const contributor of data) {
+          const key = contributor.id
+            ? contributor.id.toString()
+            : contributor.login;
+          if (!key || contributors.has(key)) {
+            continue;
+          }
+          contributors.set(key, contributor);
+        }
+
+        if (data.length < this.contributorPageSize) {
+          break;
+        }
+        page += 1;
+      }
+    }
+
+    return Array.from(contributors.values());
+  }
+
+  private async fetchContributorsPage(
+    owner: string,
+    repo: string,
+    page: number,
+  ): Promise<RepoContributor[] | null> {
+    for (let attempt = 0; attempt <= this.contributorMaxRetries; attempt += 1) {
+      try {
+        const client = await this.tokenPoolService.getClient();
+        const response = await client.rest.repos.listContributors({
+          owner,
+          repo,
+          per_page: this.contributorPageSize,
+          page,
+        });
+        return response.data;
+      } catch (error) {
+        if (this.githubService.isRepoNotFound(error)) {
+          return null;
+        }
+        if (
+          this.githubService.isRetryableNetworkError(error) &&
+          attempt < this.contributorMaxRetries
+        ) {
+          continue;
+        }
+        console.log(
+          `Failed to fetch contributors for ${owner}/${repo}:`,
+          error,
+        );
+        return null;
+      }
+    }
+    return null;
+  }
+
+  @Command({
+    command: 'github:repos:contributors <repos...>',
+    description: 'List unique contributors for given GitHub repos',
+  })
+  async listRepoCommitUsersCli(repos: string[]) {
+    const repoInputs = repos
+      .flatMap((repo) => repo.split(','))
+      .map((repo) => repo.trim())
+      .filter(Boolean);
+    const users = await this.getRepoCommitUsers(repoInputs);
+    console.log(JSON.stringify(users, null, 2));
+    return users;
+  }
+
+  @Command({
+    command: 'github:repos:contributors:file <file>',
+    description: 'Export contributors for GitHub repos from CSV or Excel',
+  })
+  async listRepoCommitUsersFromFileCli(file: string) {
+    const filePath = isAbsolute(file) ? file : join(process.cwd(), file);
+    const repoInputs = await this.loadReposFromFile(filePath);
+    if (repoInputs.length === 0) {
+      console.log('No repositories found in file.');
+      return [];
+    }
+    const outputPath = this.getContributorsCsvPath(filePath);
+    const normalized = repoInputs
+      .map((repo) => this.githubService.normalizeRepoFullName(repo))
+      .filter((repo): repo is string => !!repo);
+    const uniqueRepos = Array.from(new Set(normalized));
+
+    const workbook = new Workbook();
+    const sheet = workbook.addWorksheet('contributors');
+    sheet.addRow([...this.contributorCsvFields, 'repo']);
+
+    let rowCount = 0;
+    for (const repoFullName of uniqueRepos) {
+      const [owner, repo] = repoFullName.split('/');
+      if (!owner || !repo) {
+        continue;
+      }
+
+      let page = 1;
+      while (true) {
+        const data = await this.fetchContributorsPage(owner, repo, page);
+        if (!data || data.length === 0) {
+          break;
+        }
+
+        for (const contributor of data) {
+          sheet.addRow(this.buildContributorRow(contributor, repoFullName));
+          rowCount += 1;
+        }
+
+        if (data.length < this.contributorPageSize) {
+          break;
+        }
+        page += 1;
+      }
+    }
+
+    await workbook.csv.writeFile(outputPath);
+    console.log(`Exported ${rowCount} rows to ${outputPath}`);
+    return rowCount;
+  }
+
+  private async loadReposFromFile(filePath: string): Promise<string[]> {
+    const workbook = new Workbook();
+    const lowerPath = filePath.toLowerCase();
+
+    if (lowerPath.endsWith('.csv')) {
+      await workbook.csv.readFile(filePath);
+    } else if (lowerPath.endsWith('.xlsx')) {
+      await workbook.xlsx.readFile(filePath);
+    } else {
+      throw new Error('Unsupported file type. Use .csv or .xlsx');
+    }
+
+    const sheet = workbook.worksheets[0];
+    if (!sheet) {
+      return [];
+    }
+
+    const repos: string[] = [];
+    sheet.eachRow((row, index) => {
+      const value = String(row.getCell(1).text ?? '').trim();
+      if (!value) {
+        return;
+      }
+      const lowerValue = value.toLowerCase();
+      if (
+        index === 1 &&
+        ['repo', 'repo_name', 'repository', 'url', 'repo_url'].includes(
+          lowerValue,
+        )
+      ) {
+        return;
+      }
+      repos.push(value);
+    });
+
+    return repos;
+  }
+
+  private getContributorsCsvPath(filePath: string) {
+    const info = parse(filePath);
+    const dir = info.dir || process.cwd();
+    return join(dir, `${info.name}.contributors.csv`);
+  }
+
+  private buildContributorRow(
+    contributor: RepoContributor,
+    repoFullName: string,
+  ) {
+    const row = this.contributorCsvFields.map(
+      (field) => (contributor as Record<string, unknown>)[field] ?? '',
+    );
+    row.push(repoFullName);
+    return row;
   }
 
   async getRepoActiveDevelopers(repoId: number): Promise<RepoActiveDevDto> {

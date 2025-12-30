@@ -150,4 +150,13 @@ export class CustomController {
   async external3(@Param('username') username: string) {
     return await this.userServices.getTopFormGithubUserName(username);
   }
+
+  @Get('event/users/:x')
+  @ApiOperation({
+    summary: 'Get analysis users by github username or id',
+    description: '',
+  })
+  async eventUsers(@Param('x') identifier: string) {
+    return await this.userServices.getEventUsers(identifier);
+  }
 }

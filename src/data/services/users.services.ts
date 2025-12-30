@@ -12,6 +12,7 @@ import { KYSELY } from '@/app/db/db.provider';
 import { ApiAnalysisUsers, DB } from '@/app/db/dto/db.dto';
 import { TokenPoolService } from '@/app/db/pool.services';
 import { AuthService } from '@/auth/services/auth.services';
+import { GithubService } from '@/api/services/github.services';
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { CompiledQuery, Kysely } from 'kysely';
@@ -23,6 +24,7 @@ export class UsersService {
   constructor(
     @Inject(KYSELY) private readonly db: Kysely<DB>,
     private readonly tokenPoolService: TokenPoolService,
+    private readonly githubService: GithubService,
     private eventEmitter: EventEmitter2,
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
@@ -33,7 +35,9 @@ export class UsersService {
     uid: string,
     ref: string = '',
   ) {
-    const usernames = body.request_data.map((url) => this.extractUsername(url));
+    const usernames = body.request_data.map((url) =>
+      this.githubService.extractUsername(url),
+    );
 
     if (body.intent === Intent.Profile) {
       const existing = await this.db
@@ -360,25 +364,45 @@ export class UsersService {
     return await this.getTopFormUserId(response.data.id.toString());
   }
 
-  private extractUsername(input: string): string | null {
-    const s = input.trim();
-    if (!s) return null;
-
-    if (!s.includes('/') && !s.startsWith('@')) return s;
-
-    if (s.startsWith('@')) return s.slice(1) || null;
-
-    try {
-      const url = new URL(s.includes('://') ? s : 'https://' + s);
-      if (url.hostname === 'github.com' || url.hostname === 'www.github.com') {
-        const p = url.pathname.split('/')[1];
-        return p || null;
-      }
-    } catch {
-      /* ignore */
+  async getEventUsers(identifier: string) {
+    const rawIdentifier = identifier?.trim();
+    if (!rawIdentifier) {
+      throw new Error('identifier is required');
     }
 
-    return s;
+    const normalizedIdentifier =
+      this.githubService.extractUsername(rawIdentifier) ?? rawIdentifier;
+    const isGithubId = /^\d+$/.test(normalizedIdentifier);
+    const match = isGithubId
+      ? { id: Number(normalizedIdentifier) }
+      : { login: normalizedIdentifier };
+    const conditions = [{ users: [match] }, [match]];
+
+    const results = new Map<string, { id: number; description: string }>();
+
+    for (const condition of conditions) {
+      const rows = await this.db
+        .selectFrom('api.analysis_users')
+        .select(['id', 'description'])
+        .where('github', '@>', JSON.stringify(condition))
+        .where('intent', '=', Intent.Hackathon)
+        .execute();
+
+      for (const row of rows) {
+        const rowId = Number(row.id);
+        if (results.has(String(rowId))) {
+          continue;
+        }
+        results.set(String(rowId), {
+          id: rowId,
+          description: row.description ?? '',
+        });
+      }
+    }
+
+    return {
+      list: Array.from(results.values()),
+    };
   }
 
   private async getActiveEcosystemNames(names: string[]): Promise<string[]> {
