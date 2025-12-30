@@ -113,7 +113,7 @@ export function DevCardForm({ ecosystem }: DevCardFormProps) {
 
   return (
     <motion.div
-      className="min-h-dvh bg-black text-white flex flex-col relative"
+      className={`min-h-dvh bg-black text-white flex flex-col relative ${ecosystem === 'mantle' ? 'pt-9' : ''}`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}

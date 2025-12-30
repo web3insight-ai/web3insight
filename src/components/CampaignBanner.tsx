@@ -83,15 +83,15 @@ export function CampaignBanner({ ecosystem = "mantle" }: CampaignBannerProps) {
       />
 
       {/* Content */}
-      <div className="relative flex items-center gap-2">
-        <span className="text-[#5EEAD4] text-sm font-semibold tracking-wide">
+      <div className="relative flex items-center gap-1 sm:gap-2 whitespace-nowrap">
+        <span className="text-[#5EEAD4] text-[11px] sm:text-sm font-semibold tracking-wide">
           Mantle DevCard Campaign Live
         </span>
-        <span className="text-white/60 text-sm">—</span>
-        <span className="text-white text-sm font-medium">
-          Click to Win $2,000
+        <span className="text-white/60 text-[11px] sm:text-sm">—</span>
+        <span className="text-white text-[11px] sm:text-sm font-medium">
+          Win $2,000
         </span>
-        <ExternalLink className="w-3.5 h-3.5 text-[#5EEAD4]/70" />
+        <ExternalLink className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#5EEAD4]/70" />
       </div>
     </motion.a>
   )
