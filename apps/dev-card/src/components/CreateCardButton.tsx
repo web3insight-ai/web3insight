@@ -85,14 +85,14 @@ export function CreateCardButton({ ecosystem = "mantle", inviteCode }: CreateCar
       <AnimatePresence>
         {isHovered && (
           <motion.div
-            className="absolute right-full top-1/2 mr-3 whitespace-nowrap"
+            className="absolute right-full top-1/2 mr-2 whitespace-nowrap"
             initial={{ opacity: 0, x: 10, y: "-50%" }}
             animate={{ opacity: 1, x: 0, y: "-50%" }}
             exit={{ opacity: 0, x: 10 }}
             transition={{ duration: 0.2 }}
           >
             <div
-              className="px-3 py-2 rounded-lg text-xs font-medium flex items-center gap-1"
+              className="px-3 py-2 rounded-lg text-xs font-medium"
               style={{
                 background: "rgba(0, 0, 0, 0.9)",
                 border: `1px solid ${accentColor}`,
@@ -100,8 +100,7 @@ export function CreateCardButton({ ecosystem = "mantle", inviteCode }: CreateCar
                 boxShadow: `0 0 15px ${glowColor}`,
               }}
             >
-              <span>Create Your Own Dev Card</span>
-              <ChevronRight className="w-3 h-3" />
+              Create Your Own Dev Card
             </div>
             {/* Tooltip arrow */}
             <div
@@ -118,24 +117,26 @@ export function CreateCardButton({ ecosystem = "mantle", inviteCode }: CreateCar
         )}
       </AnimatePresence>
 
-      {/* Floating hint arrow that pulses */}
-      <motion.div
-        className="absolute -left-6 top-1/2 -translate-y-1/2"
-        animate={{
-          x: [0, -4, 0],
-          opacity: [0.6, 1, 0.6],
-        }}
-        transition={{
-          duration: 1.5,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      >
-        <ChevronRight
-          className="w-4 h-4"
-          style={{ color: accentColor }}
-        />
-      </motion.div>
+      {/* Floating hint arrow that pulses - hidden when hovered */}
+      {!isHovered && (
+        <motion.div
+          className="absolute -left-6 top-1/2 -translate-y-1/2"
+          animate={{
+            x: [0, -4, 0],
+            opacity: [0.6, 1, 0.6],
+          }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        >
+          <ChevronRight
+            className="w-4 h-4"
+            style={{ color: accentColor }}
+          />
+        </motion.div>
+      )}
     </div>
   )
 }
