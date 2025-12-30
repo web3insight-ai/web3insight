@@ -141,7 +141,7 @@ export default function CardPage({
                     text={shareText}
                     ecosystem="mantle"
                   />
-                  <CreateCardButton ecosystem="mantle" inviteCode={userId} />
+                  {!isOwnCard && <CreateCardButton ecosystem="mantle" inviteCode={userId} />}
                   <MintNFTButton ecosystem="mantle" />
                 </motion.div>
               )}
