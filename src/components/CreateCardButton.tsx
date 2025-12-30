@@ -5,17 +5,25 @@ import { motion } from "framer-motion"
 
 interface CreateCardButtonProps {
   ecosystem?: "mantle" | "monad"
+  inviteCode?: string
 }
 
-export function CreateCardButton({ ecosystem = "mantle" }: CreateCardButtonProps) {
+export function CreateCardButton({ ecosystem = "mantle", inviteCode }: CreateCardButtonProps) {
   const isMantle = ecosystem === "mantle"
   const accentColor = isMantle ? "#5EEAD4" : "#9F8EFF"
   const bgColor = isMantle ? "rgba(101, 179, 175, 0.15)" : "rgba(159, 142, 255, 0.15)"
   const createUrl = `/${ecosystem}`
 
+  const handleClick = () => {
+    if (inviteCode) {
+      localStorage.setItem(`devcard-invite-code-${ecosystem}`, inviteCode)
+    }
+  }
+
   return (
     <motion.a
       href={createUrl}
+      onClick={handleClick}
       className="w-12 py-1.5 transition-colors rounded-lg flex flex-col items-center gap-0.5"
       style={{ color: accentColor }}
       whileHover={{ scale: 1.05, backgroundColor: bgColor }}

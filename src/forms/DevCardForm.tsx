@@ -68,6 +68,7 @@ export function DevCardForm({ ecosystem }: DevCardFormProps) {
     handleAvatarChange,
     connectTwitter,
     toggleBuildingOn,
+    inviteCodeLocked,
   } = useDevCardForm({ ecosystem })
 
   const {
@@ -81,6 +82,7 @@ export function DevCardForm({ ecosystem }: DevCardFormProps) {
   const titleValue = watch("title")
   const bioValue = watch("bio")
   const buildingOnValue = watch("buildingOn")
+  const inviteCodeValue = watch("inviteCode")
 
   // Handle Twitter connect
   const handleConnectTwitter = async () => {
@@ -394,6 +396,33 @@ export function DevCardForm({ ecosystem }: DevCardFormProps) {
               )}
             </AnimatePresence>
 
+            {/* Invite Code */}
+            <motion.div
+              className="mb-4"
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.75, duration: 0.5 }}
+            >
+              <label className="block text-sm text-white mb-1.5 font-medium">
+                Invite Code
+                <span className="ml-2 text-xs text-gray-400 font-normal">(Optional)</span>
+              </label>
+              <motion.input
+                type="text"
+                {...register("inviteCode")}
+                disabled={inviteCodeLocked}
+                className="w-full bg-black/60 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                placeholder="Enter invite code"
+                whileFocus={inviteCodeLocked ? {} : { scale: 1.02, borderColor: theme.accentColor }}
+                transition={{ type: "spring", stiffness: 300 }}
+              />
+              {inviteCodeLocked && inviteCodeValue && (
+                <span className="text-xs text-gray-400 mt-1 block">
+                  Invite code is locked after first save
+                </span>
+              )}
+            </motion.div>
+
             {/* Error message */}
             <AnimatePresence>
               {errors.root && (
@@ -413,12 +442,22 @@ export function DevCardForm({ ecosystem }: DevCardFormProps) {
             <motion.button
               type="submit"
               disabled={isSubmitting}
-              className={`w-full h-12 px-9 py-2 rounded-[50px] shadow-[${theme.shadow}] outline outline-2 outline-offset-[-2px] outline-${theme.outlineColor} inline-flex justify-center items-center gap-2.5 mt-6 mb-8 disabled:opacity-50 disabled:cursor-not-allowed`}
-              style={{ background: theme.gradient, boxShadow: theme.shadow }}
+              className="w-full h-12 px-9 py-2 rounded-[50px] outline outline-2 outline-offset-[-2px] inline-flex justify-center items-center gap-2.5 mt-6 mb-8 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                background: theme.gradient,
+                boxShadow: theme.shadow,
+                outlineColor: theme.accentColor,
+              }}
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.9, duration: 0.5 }}
-              whileHover={{ scale: 1.02, y: -2, boxShadow: theme.hoverShadow, background: ecosystem === "mantle" ? "#65B3AF" : undefined }}
+              whileHover={{
+                scale: 1.02,
+                y: -2,
+                boxShadow: theme.hoverShadow,
+                background: ecosystem === "mantle" ? "#65B3AF" : undefined,
+                transition: { duration: 0.15 },
+              }}
               whileTap={{ scale: 0.98 }}
             >
               <span

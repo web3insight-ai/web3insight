@@ -4,6 +4,13 @@ import { forwardRef, type HTMLAttributes } from 'react'
 import Image from 'next/image'
 import { cn } from '../../lib/utils'
 
+interface InviterInfo {
+  id: string
+  nick_name?: string
+  user_avatar?: string
+  github_login?: string
+}
+
 interface MonadCardFrontProps extends HTMLAttributes<HTMLDivElement> {
   name: string
   github: string
@@ -12,6 +19,7 @@ interface MonadCardFrontProps extends HTMLAttributes<HTMLDivElement> {
   avatar: string
   title: string
   buildingOn: string[]
+  inviter?: InviterInfo | null
 }
 
 const MonadCardFront = forwardRef<HTMLDivElement, MonadCardFrontProps>(
@@ -24,6 +32,7 @@ const MonadCardFront = forwardRef<HTMLDivElement, MonadCardFrontProps>(
       avatar,
       title,
       buildingOn,
+      inviter,
       className,
       style,
       ...rest
@@ -31,6 +40,7 @@ const MonadCardFront = forwardRef<HTMLDivElement, MonadCardFrontProps>(
     ref,
   ) => {
     const hasEcosystems = buildingOn.length > 1
+    const inviterName = inviter?.nick_name || inviter?.github_login
 
     return (
       <div
@@ -180,6 +190,31 @@ const MonadCardFront = forwardRef<HTMLDivElement, MonadCardFrontProps>(
               <div className="text-gray-500">Web3 Builder</div>
             )}
           </div>
+
+          {/* Invited by Section */}
+          {inviterName && (
+            <div className="flex justify-center items-center mt-[1.5%] text-[0.8em] print:text-[6px] print:mt-[0.5mm]">
+              <span className="text-gray-400">Invited by </span>
+              <a
+                href={`/monad/${inviter?.id}`}
+                className="flex items-center gap-1 ml-1 transition-colors"
+                style={{ color: '#9F8EFF' }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#BBA9FF')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = '#9F8EFF')}
+              >
+                {inviter?.user_avatar && (
+                  <Image
+                    src={inviter.user_avatar}
+                    alt={inviterName}
+                    width={16}
+                    height={16}
+                    className="w-[1.2em] h-[1.2em] rounded-full object-cover"
+                  />
+                )}
+                <span className="font-medium">{inviterName}</span>
+              </a>
+            </div>
+          )}
 
           {/* Building on Section */}
           <div className="flex-1 flex flex-col print:justify-normal justify-center pb-[3%] pt-[5%] print:pt-[1mm] print:pb-[1mm] print:mt-[4mm]">

@@ -38,6 +38,17 @@ export default function CardPage({
 
   const cardUser = cardUserResult?.success ? cardUserResult.data : null
 
+  // Fetch inviter profile if inviter exists
+  const inviterId = cardUser?.inviter?.id
+  const { data: inviterResult } = useQuery({
+    ...orpc.auth.getUserByIdAndEcosystem.queryOptions({
+      input: { ecosystem: 'mantle', id: inviterId! },
+    }),
+    enabled: !!inviterId,
+  })
+
+  const inviter = inviterResult?.success ? inviterResult.data : null
+
   const handleProfileUpdate = () => {
     refetch()
   }
@@ -91,6 +102,7 @@ export default function CardPage({
           avatar={avatar}
           title={title}
           buildingOn={buildingOn}
+          inviter={inviter}
         />
       </div>
       <div className="h-dvh w-full print:hidden bg-black flex flex-col overflow-hidden items-center">
@@ -122,7 +134,7 @@ export default function CardPage({
                 text={shareText}
                 ecosystem="mantle"
               />
-              <CreateCardButton ecosystem="mantle" />
+              <CreateCardButton ecosystem="mantle" inviteCode={userId} />
               <MintNFTButton ecosystem="mantle" />
             </div>
             <motion.div
@@ -166,6 +178,7 @@ export default function CardPage({
                 avatar={avatar}
                 title={title}
                 buildingOn={buildingOn}
+                inviter={inviter}
               />
             </motion.div>
           </motion.div>
