@@ -44,7 +44,7 @@ export default function ConnectPage() {
 
   return (
     <motion.div
-      className="min-h-dvh bg-black text-white relative overflow-hidden"
+      className="min-h-dvh bg-black text-white relative overflow-hidden pt-9"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}

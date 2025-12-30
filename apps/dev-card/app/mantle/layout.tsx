@@ -8,9 +8,7 @@ export default function MantleLayout({
   return (
     <>
       <CampaignBanner ecosystem="mantle" />
-      <div className="pt-9">
-        {children}
-      </div>
+      {children}
     </>
   )
 }

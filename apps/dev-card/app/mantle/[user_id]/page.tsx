@@ -106,7 +106,7 @@ export default function CardPage({
           inviter={inviter}
         />
       </div>
-      <div className="h-dvh w-full print:hidden bg-black flex flex-col overflow-hidden items-center">
+      <div className="h-dvh w-full print:hidden bg-black flex flex-col overflow-hidden items-center pt-9">
         <motion.div
           className="flex-1 w-full min-h-0 flex items-center justify-center py-2 sm:py-4"
           initial={{ y: 20, opacity: 0 }}
@@ -114,12 +114,12 @@ export default function CardPage({
           transition={{ delay: 0.2, duration: 0.6 }}
         >
           <motion.div
-            className="relative w-[min(90vw,calc((100vh-160px)*1701/2709))] h-auto cursor-pointer"
+            className="relative w-[min(90vw,calc((100vh-200px)*1701/2709))] h-auto cursor-pointer"
             onClick={() => setIsFlipped(!isFlipped)}
             style={{
               perspective: '1000px',
               aspectRatio: '1701 / 2709',
-              maxHeight: 'calc(100vh - 160px)',
+              maxHeight: 'calc(100vh - 200px)',
             }}
             whileHover={{ scale: 1.02 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
