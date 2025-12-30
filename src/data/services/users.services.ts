@@ -15,7 +15,7 @@ import { AuthService } from '@/auth/services/auth.services';
 import { GithubService } from '@/api/services/github.services';
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
-import { CompiledQuery, Kysely } from 'kysely';
+import { Kysely } from 'kysely';
 import { Command, Console } from 'nestjs-console';
 
 @Injectable()
@@ -130,7 +130,7 @@ export class UsersService {
         .execute();
     }
 
-    this.eventEmitter.emit('api.custom.analysis.created', res);
+    this.eventEmitter.emit('api.custom.analysis.createdv2', res);
 
     return res;
   }
@@ -453,127 +453,98 @@ export class UsersService {
     return githubAccount?.username || null;
   }
 
-  @OnEvent('api.custom.analysis.created', { async: true })
-  async handleOrderCreatedEvent(payload: CustomUploadResDto) {
-    const sqlRawQuery = `
-WITH user_ids AS (SELECT UNNEST($1::bigint[]) AS actor_id),
-     repo_base_scores AS (SELECT e.actor_id,
-                                 e.repo_id,
-                                 r.repo_name,
-                                 MAX(CASE WHEN e.event_type = 'PushEvent' THEN 1 ELSE 0 END)          AS has_commit,
-                                 COUNT(CASE WHEN e.event_type = 'PullRequestEvent' THEN 1 ELSE 0 END) AS pr_count,
-                                 MIN(e.created_at)                                                    AS first_activity_at,
-                                 MAX(e.created_at)                                                    AS last_activity_at
-                          FROM data.events e
-                                   JOIN data.repos r ON e.repo_id = r.repo_id
-                                   JOIN user_ids u ON e.actor_id = u.actor_id
-                          WHERE e.event_type IN ('PushEvent', 'PullRequestEvent')
-                          GROUP BY e.actor_id, e.repo_id, r.repo_name),
-     repo_scores AS (SELECT actor_id,
-                            repo_id,
-                            repo_name,
-                            has_commit * 1 + pr_count * 2 AS total_score,
-                            first_activity_at,
-                            last_activity_at
-                     FROM repo_base_scores),
-     repo_ecosystems AS (SELECT DISTINCT ON (r.repo_id, ecosystem_key) r.repo_id,
-                                                                       jsonb_object_keys(r.upstream_marks) AS ecosystem_key
-                         FROM data.repos r
-                                  JOIN repo_scores rs ON r.repo_id = rs.repo_id
-                         WHERE r.upstream_marks != '{}'::jsonb),
-     user_total_score AS (SELECT actor_id,
-
-                                 SUM(total_score) AS user_score
-
-                          FROM repo_scores
-
-                          GROUP BY actor_id),
-
-     repo_ecosystem_scores AS (SELECT rs.actor_id,
-                                      rs.repo_name,
-                                      re.ecosystem_key,
-                                      rs.total_score,
-                                      rs.first_activity_at,
-                                      rs.last_activity_at
-                               FROM repo_scores rs
-                                        JOIN repo_ecosystems re ON rs.repo_id = re.repo_id
-                               WHERE rs.total_score > 0),
-     unique_ecosystem_repos AS (SELECT DISTINCT actor_id,
-                                                ecosystem_key,
-                                                repo_name,
-                                                total_score,
-                                                first_activity_at,
-                                                last_activity_at
-                                FROM repo_ecosystem_scores),
-     ecosystem_repos AS (SELECT actor_id,
-                                ecosystem_key,
-                                jsonb_agg(
-                                        jsonb_build_object(
-                                                'repo_name', repo_name,
-                                                'score', total_score,
-                                                'first_activity_at', first_activity_at,
-                                                'last_activity_at', last_activity_at
-                                        )
-                                        ORDER BY total_score DESC
-                                )                      AS repo_details,
-                                SUM(total_score)       AS ecosystem_total_score,
-                                MIN(first_activity_at) AS ecosystem_first_activity_at,
-                                MAX(last_activity_at)  AS ecosystem_last_activity_at
-                         FROM unique_ecosystem_repos
-                         GROUP BY actor_id, ecosystem_key)
-SELECT u.actor_id,
-       s.user_score,
-       COALESCE(
-               (SELECT jsonb_agg(
-                               jsonb_build_object(
-                                       'ecosystem', ecosystem_key,
-                                       'repos', repo_details,
-                                       'total_score', ecosystem_total_score,
-                                       'first_activity_at', ecosystem_first_activity_at,
-                                       'last_activity_at', ecosystem_last_activity_at
-                               ) ORDER BY ecosystem_total_score DESC
-                       )
-                FROM ecosystem_repos er
-                WHERE er.actor_id = u.actor_id),
-               '[]'::jsonb
-       ) AS ecosystem_scores
-FROM user_ids u
-         JOIN user_total_score s ON u.actor_id = s.actor_id
-ORDER BY s.user_score DESC;`;
-
+  @OnEvent('api.custom.analysis.createdv2', { async: true })
+  async handleOrderCreatedEventV2(payload: CustomUploadResDto) {
     const ids = payload.users.map((user: { id: any }) => user.id);
-    const query = CompiledQuery.raw(sqlRawQuery, [ids]);
-    const results = await this.db.executeQuery(query);
 
-    const ecosystems = results.rows.flatMap((item: any) => {
+    const actors = await this.db
+      .selectFrom('data.actors')
+      .select(['actor_id', 'eco_score'])
+      .where('actor_id', 'in', ids)
+      .execute();
+
+    const rows = actors
+      .filter((actor) => actor.eco_score && typeof actor.eco_score === 'object')
+      .map((actor) => {
+        const ecoScore = actor.eco_score as any;
+        const ecosystems = Array.isArray(ecoScore.ecosystems)
+          ? ecoScore.ecosystems
+          : [];
+
+        return {
+          actor_id: actor.actor_id,
+          user_score: ecoScore.total_score || 0,
+          ecosystem_scores: ecosystems.map((eco: any) => ({
+            ecosystem: eco.ecosystem,
+            repos: Array.isArray(eco.repos) ? eco.repos : [],
+            total_score: eco.total_score || 0,
+            first_activity_at: eco.first_activity_at,
+            last_activity_at: eco.last_activity_at,
+          })),
+        };
+      });
+
+    const ecosystems = rows.flatMap((item: any) => {
       return item.ecosystem_scores.map((ecosystem: any) => ecosystem.ecosystem);
     });
 
     const uniqueEcosystems = Array.from(new Set(ecosystems));
 
-    let rows = results.rows;
+    let filteredRows = rows;
 
     if (uniqueEcosystems.length > 0) {
       const ecosystemDB = await this.db
         .selectFrom('data.ecosystems')
         .where('name', 'in', uniqueEcosystems)
+        .where('active', '=', true)
         .selectAll()
         .execute();
 
-      rows = results.rows.filter((item: any) => {
-        item.ecosystem_scores = item.ecosystem_scores.filter(
-          (ecosystem: any) => {
-            const dbEcosystem = ecosystemDB.find(
-              (dbItem) => dbItem.name === ecosystem.ecosystem,
-            );
-            return dbEcosystem && dbEcosystem.active;
-          },
-        );
-        return true;
-      });
+      const activeEcosystemNames = new Set(
+        ecosystemDB.map((item) => item.name),
+      );
+
+      filteredRows = rows
+        .map((item: any) => {
+          const filteredEcosystemScores = item.ecosystem_scores.filter(
+            (ecosystem: any) =>
+              ecosystem.ecosystem &&
+              activeEcosystemNames.has(ecosystem.ecosystem),
+          );
+
+          const uniqueRepos = new Map<string, number>();
+          filteredEcosystemScores.forEach((eco: any) => {
+            if (Array.isArray(eco.repos)) {
+              eco.repos.forEach((repo: any) => {
+                if (repo.repo_name && repo.score) {
+                  const existingScore = uniqueRepos.get(repo.repo_name);
+                  if (!existingScore || repo.score > existingScore) {
+                    uniqueRepos.set(repo.repo_name, repo.score);
+                  }
+                }
+              });
+            }
+          });
+
+          const newUserScore = Array.from(uniqueRepos.values()).reduce(
+            (sum: number, score: number) => sum + score,
+            0,
+          );
+
+          const sortedEcosystemScores = [...filteredEcosystemScores].sort(
+            (a: any, b: any) => b.total_score - a.total_score,
+          );
+
+          return {
+            ...item,
+            user_score: newUserScore,
+            ecosystem_scores: sortedEcosystemScores,
+          };
+        })
+        .sort((a: any, b: any) => b.user_score - a.user_score);
     }
 
-    const data: any = { users: rows };
+    const data: any = { users: filteredRows };
 
     const totalUsers = data.users.length;
 
@@ -583,13 +554,14 @@ ORDER BY s.user_score DESC;`;
 
     const usersWithoutContributions = totalUsers - usersWithContributions;
 
-    const contributionPercentage = (usersWithContributions / totalUsers) * 100;
+    const contributionPercentage =
+      totalUsers > 0 ? (usersWithContributions / totalUsers) * 100 : 0;
 
     const ecosystemCounts: { [key: string]: number } = {};
 
     data.users.forEach((user: any) => {
       if (user.ecosystem_scores) {
-        user.ecosystem_scores.forEach((ecosystem) => {
+        user.ecosystem_scores.forEach((ecosystem: any) => {
           if (ecosystem.ecosystem) {
             ecosystemCounts[ecosystem.ecosystem] =
               (ecosystemCounts[ecosystem.ecosystem] || 0) + 1;
@@ -609,7 +581,7 @@ ORDER BY s.user_score DESC;`;
 
     const body = JSON.stringify(data);
 
-    if (rows.length > 0) {
+    if (filteredRows.length > 0) {
       const update = this.db
         .updateTable('api.analysis_users')
         .where('id', '=', String(payload.id))
