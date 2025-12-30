@@ -184,6 +184,10 @@ export class UpdateUserReqDto {
   @IsOptional()
   @IsString()
   user_title?: string;
+
+  @IsOptional()
+  @IsString()
+  invite_code?: string;
 }
 
 export class ReposCustomMarkReqDto {
