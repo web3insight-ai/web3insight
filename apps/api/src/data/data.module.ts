@@ -9,6 +9,7 @@ import { UsersService } from './services/users.services';
 import { EcoService } from './services/eco.services';
 import { AuthModule } from '@/auth/auth.module';
 import { DonateService } from './services/donate.services';
+import { GithubService } from '@/api/services/github.services';
 
 @Module({
   imports: [DBModule, forwardRef(() => AuthModule)],
@@ -21,6 +22,7 @@ import { DonateService } from './services/donate.services';
     UsersService,
     EcoService,
     DonateService,
+    GithubService,
   ],
   exports: [
     InitDataService,
@@ -31,6 +33,7 @@ import { DonateService } from './services/donate.services';
     UsersService,
     EcoService,
     DonateService,
+    GithubService,
   ],
 })
 export class DataModule {}
