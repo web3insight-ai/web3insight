@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useState } from "react"
 import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
 import { useDevCardForm } from "./hooks/useDevCardForm"
@@ -50,7 +50,6 @@ const themeConfig = {
 }
 
 export function DevCardForm({ ecosystem }: DevCardFormProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const [twitterConnected, setTwitterConnected] = useState(false)
 
   const theme = themeConfig[ecosystem]
@@ -65,10 +64,10 @@ export function DevCardForm({ ecosystem }: DevCardFormProps) {
     isDev,
     baseEcosystem,
     authenticated,
-    handleAvatarChange,
     connectTwitter,
     toggleBuildingOn,
     inviteCodeLocked,
+    isUpdate,
   } = useDevCardForm({ ecosystem })
 
   const {
@@ -88,14 +87,6 @@ export function DevCardForm({ ecosystem }: DevCardFormProps) {
   const handleConnectTwitter = async () => {
     const success = await connectTwitter()
     setTwitterConnected(success)
-  }
-
-  // Handle file input change
-  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      handleAvatarChange(file)
-    }
   }
 
   if (isLoading) {
@@ -160,7 +151,7 @@ export function DevCardForm({ ecosystem }: DevCardFormProps) {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.6 }}
           >
-            <h1 className="text-xl md:text-2xl font-bold text-center mb-6">Create Dev Card</h1>
+            <h1 className="text-xl md:text-2xl font-bold text-center mb-6">{isUpdate ? "Update" : "Create"} Dev Card</h1>
 
             {/* Avatar + Name/Github row */}
             <motion.div
@@ -172,23 +163,11 @@ export function DevCardForm({ ecosystem }: DevCardFormProps) {
               {/* Avatar */}
               <div className="flex flex-col">
                 <label className="text-sm text-white mb-1.5 font-medium">
-                  Avatar <span className="text-red-400">*</span>
+                  Avatar
                 </label>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={onFileChange}
-                  accept="image/*"
-                  className="hidden"
-                />
-                <motion.button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
+                <div
                   className="w-[110px] h-[110px] bg-black/60 rounded-xl border-2 overflow-hidden"
                   style={{ borderColor: `${theme.accentColor}50` }}
-                  whileHover={{ borderColor: theme.accentColor, scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: "spring", stiffness: 300 }}
                 >
                   <Image
                     src={avatarValue && avatarValue.trim() !== "" ? avatarValue : theme.defaultIcon}
@@ -200,10 +179,7 @@ export function DevCardForm({ ecosystem }: DevCardFormProps) {
                       ;(e.target as HTMLImageElement).src = theme.defaultIcon
                     }}
                   />
-                </motion.button>
-                {errors.avatar && (
-                  <span className="text-red-400 text-xs mt-1">{errors.avatar.message}</span>
-                )}
+                </div>
               </div>
 
               {/* Name + Github */}
@@ -464,7 +440,7 @@ export function DevCardForm({ ecosystem }: DevCardFormProps) {
                 className="text-center text-white text-base font-bold leading-7"
                 style={{ fontFamily: "'DM Sans', sans-serif" }}
               >
-                {isSubmitting ? "Creating..." : "Create"}
+                {isSubmitting ? (isUpdate ? "Updating..." : "Creating...") : (isUpdate ? "Update" : "Create")}
               </span>
             </motion.button>
           </motion.form>
