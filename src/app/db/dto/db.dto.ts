@@ -33,6 +33,8 @@ export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
+export type Numeric = ColumnType<string, number | string, number | string>;
+
 export interface DataActors {
   actor_id: Int8;
   actor_login: string | null;
@@ -191,6 +193,16 @@ export interface ApiAuthUsersInfo {
   user_title: Generated<string>;
 }
 
+export interface ApiUsersInvite {
+  created_at: Generated<Int8 | null>;
+  id: Generated<Int8>;
+  invite_source_id: Numeric;
+  invite_source_type: string;
+  invite_source_uid: Numeric;
+  invite_uid: Numeric;
+  updated_at: Generated<Int8 | null>;
+}
+
 export interface DB {
   'data.actors': DataActors;
   'data.events': DataEvent;
@@ -206,4 +218,5 @@ export interface DB {
   'api.auth_magic': ApiAuthMagic;
   'api.donate_repos': ApiDonateRepos;
   'api.auth_users_info': ApiAuthUsersInfo;
+  'api.users_invite': ApiUsersInvite;
 }
