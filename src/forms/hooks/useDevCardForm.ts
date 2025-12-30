@@ -66,6 +66,9 @@ export function useDevCardForm({ ecosystem }: UseDevCardFormOptions) {
   // Track if invite code is locked (already saved to backend)
   const [inviteCodeLocked, setInviteCodeLocked] = useState(false)
 
+  // Track if user has existing card data (for showing Update vs Create)
+  const [isUpdate, setIsUpdate] = useState(false)
+
   // React Hook Form setup
   const form = useForm<DevCardFormValues>({
     resolver: zodResolver(schema),
@@ -191,6 +194,10 @@ export function useDevCardForm({ ecosystem }: UseDevCardFormOptions) {
         form.setValue("inviteCode", storedInviteCode)
         setInviteCodeLocked(false)
       }
+
+      // Check if user has existing card data (title or bio indicates they've created a card before)
+      const hasExistingData = !!(user.user_title || user.user_bio)
+      setIsUpdate(hasExistingData)
     }
   }, [user, authenticated, baseEcosystem, privyUser, getDisplayAvatar, getDisplayName, getGithubUsername, form, ecosystem, storedInviteCode])
 
@@ -316,5 +323,6 @@ export function useDevCardForm({ ecosystem }: UseDevCardFormOptions) {
     connectTwitter,
     toggleBuildingOn,
     inviteCodeLocked,
+    isUpdate,
   }
 }
