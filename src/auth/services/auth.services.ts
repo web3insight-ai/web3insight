@@ -8,6 +8,7 @@ import { ApiAuthUsers, ApiAuthUsersInfo, DB, Json } from '@/app/db/dto/db.dto';
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Octokit } from '@octokit/rest';
+import { Workbook } from 'exceljs';
 import { Kysely, Updateable } from 'kysely';
 import { Command, Console } from 'nestjs-console';
 import { ExtraClaims, JwtPayload } from '../auth.jwt.dto';
@@ -16,6 +17,7 @@ import { ethers } from 'ethers';
 import { PrivyClient } from '@privy-io/node';
 import { LinkedAccount } from '@privy-io/node/resources/users';
 import { UsersService } from '@/data/services/users.services';
+import { join } from 'path';
 
 interface OAuth2TokenResponse {
   access_token: string;
@@ -583,18 +585,54 @@ export class AuthService {
   }
 
   @Command({
-    command: 'export:invites',
-    description: 'Export invite relationships with user bindings from Privy',
+    command: 'export:invites [invite_source_type]',
+    description:
+      'Export invite relationships with user bindings from Privy (optional invite_source_type filter)',
   })
-  async exportInvites() {
-    const invites = await this.db
-      .selectFrom('api.users_invite')
-      .selectAll()
-      .execute();
+  async exportInvites(inviteSourceType?: string) {
+    let query = this.db.selectFrom('api.users_invite').selectAll();
+    const filterValue = inviteSourceType?.trim();
+    if (filterValue) {
+      query = query.where('invite_source_type', '=', filterValue);
+    }
+    const invites = await query.execute();
 
     console.log(`Found ${invites.length} invite records`);
 
-    const result = [];
+    const privyBindingsCache = new Map<
+      string,
+      Promise<{ user_id: string; linked_accounts: LinkedAccount[] } | null>
+    >();
+    const getCachedBindings = async (userDid?: string | null) => {
+      if (!userDid) {
+        return null;
+      }
+      if (privyBindingsCache.has(userDid)) {
+        return privyBindingsCache.get(userDid) ?? null;
+      }
+      const fetchPromise = this.getPrivyUserBindings(userDid).catch((error) => {
+        privyBindingsCache.delete(userDid);
+        throw error;
+      });
+      privyBindingsCache.set(userDid, fetchPromise);
+      return fetchPromise;
+    };
+
+    const workbook = new Workbook();
+    const sheet = workbook.addWorksheet('invites');
+    sheet.addRow([
+      'invite_id',
+      'invite_source_type',
+      'inviter_uid',
+      'inviter_emails',
+      'inviter_github_username',
+      'invitee_uid',
+      'invitee_emails',
+      'invitee_github_username',
+      'created_at',
+      'updated_at',
+    ]);
+    let rowCount = 0;
 
     for (const invite of invites) {
       // Get inviter's privy_did
@@ -615,11 +653,11 @@ export class AuthService {
 
       // Get bindings from Privy
       const inviterBindings = inviterPrivyBind
-        ? await this.getPrivyUserBindings(inviterPrivyBind.bind_openid)
+        ? await getCachedBindings(inviterPrivyBind.bind_openid)
         : null;
 
       const inviteeBindings = inviteePrivyBind
-        ? await this.getPrivyUserBindings(inviteePrivyBind.bind_openid)
+        ? await getCachedBindings(inviteePrivyBind.bind_openid)
         : null;
 
       // Extract emails and github usernames
@@ -643,24 +681,23 @@ export class AuthService {
         (acc) => acc.type === 'github_oauth',
       );
 
-      result.push({
-        invite_id: invite.id,
-        invite_source_type: invite.invite_source_type,
-        inviter: {
-          uid: invite.invite_source_uid,
-          emails: inviterEmails,
-          github_username: inviterGithub?.username || null,
-        },
-        invitee: {
-          uid: invite.invite_uid,
-          emails: inviteeEmails,
-          github_username: inviteeGithub?.username || null,
-        },
-        created_at: invite.created_at,
-        updated_at: invite.updated_at,
-      });
+      sheet.addRow([
+        invite.id ?? '',
+        invite.invite_source_type ?? '',
+        invite.invite_source_uid ?? '',
+        inviterEmails.join(';'),
+        inviterGithub?.username || '',
+        invite.invite_uid ?? '',
+        inviteeEmails.join(';'),
+        inviteeGithub?.username || '',
+        invite.created_at ?? '',
+        invite.updated_at ?? '',
+      ]);
+      rowCount += 1;
     }
 
-    console.log(JSON.stringify(result, null, 2));
+    const outputPath = join(process.cwd(), 'invites.csv');
+    await workbook.csv.writeFile(outputPath);
+    console.log(`Exported ${rowCount} rows to ${outputPath}`);
   }
 }
