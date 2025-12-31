@@ -27,12 +27,12 @@ const translations: Record<Locale, Record<string, string>> = {
     "hero.viewGithub": "View on GitHub",
     "hero.askAnything": "Ask anything about Web3",
     "hero.aiPowered": "AI-powered insights",
-    "hero.developers": "Developers",
+    "hero.developers": "Core Developer",
     "hero.ecosystems": "Ecosystems",
     "hero.contributors": "Contributors",
 
     // Stats
-    "stats.developers": "Developers",
+    "stats.developers": "Core Developer",
     "stats.contributors": "Contributors",
     "stats.ecosystems": "Ecosystems",
     "stats.repositories": "Repositories",
@@ -104,12 +104,12 @@ const translations: Record<Locale, Record<string, string>> = {
     "hero.viewGithub": "GitHub 仓库",
     "hero.askAnything": "关于 Web3 的任何问题",
     "hero.aiPowered": "AI 驱动洞察",
-    "hero.developers": "开发者",
+    "hero.developers": "核心开发者",
     "hero.ecosystems": "生态系统",
     "hero.contributors": "贡献者",
 
     // Stats
-    "stats.developers": "开发者",
+    "stats.developers": "核心开发者",
     "stats.contributors": "贡献者",
     "stats.ecosystems": "生态系统",
     "stats.repositories": "代码仓库",
