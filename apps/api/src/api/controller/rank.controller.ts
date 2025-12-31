@@ -128,4 +128,41 @@ export class RankController {
       }
     }
   }
+
+  @Get('years/rank/report')
+  @ApiOperation({
+    summary: 'Get last year rank report',
+    description: '',
+  })
+  getReport() {
+    return {
+      years_dev_zh: [
+        {
+          year: 2021,
+          active_dev: 1617,
+          growth_percentage: 55.93,
+        },
+        {
+          year: 2022,
+          active_dev: 2219,
+          growth_percentage: 37.23,
+        },
+        {
+          year: 2023,
+          active_dev: 1989,
+          growth_percentage: -10.37,
+        },
+        {
+          year: 2024,
+          active_dev: 2376,
+          growth_percentage: 19.46,
+        },
+        {
+          year: 2025,
+          active_dev: 1711,
+          growth_percentage: -27.99,
+        },
+      ],
+    };
+  }
 }
