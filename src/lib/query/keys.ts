@@ -92,6 +92,17 @@ export const queryKeys = {
     analysisUser: (id: number) =>
       [...queryKeys.custom.all, "analysisUser", id] as const,
   },
+
+  // --------------------------------------------------------------------------
+  // x402 Donate
+  // --------------------------------------------------------------------------
+  donate: {
+    all: ["donate"] as const,
+    list: () => [...queryKeys.donate.all, "list"] as const,
+    detail: (id: number) => [...queryKeys.donate.all, "detail", id] as const,
+    detailByName: (name: string) =>
+      [...queryKeys.donate.all, "detailByName", name] as const,
+  },
 };
 
 // Type helper for query keys

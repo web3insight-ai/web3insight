@@ -63,7 +63,7 @@ const navigationGroups: NavGroup[] = [
         icon: CreditCard,
         external: true,
       },
-      { name: "x402", href: "/plaza/x402", icon: DollarSign, disabled: true },
+      { name: "x402", href: "/plaza/x402", icon: DollarSign },
     ],
   },
 ];

@@ -35,6 +35,7 @@ import type {
   DeveloperActivity,
   DeveloperContribution,
   DeveloperRepository,
+  DonateRepo,
 } from "./types";
 import { isNumeric } from "@/utils";
 
@@ -740,6 +741,43 @@ export const api = {
       fetchApi(`/v1/github/proxy/users/${login}/events/public`, {
         params: { per_page: 20 },
       }),
+  },
+
+  // --------------------------------------------------------------------------
+  // x402 Donate
+  // --------------------------------------------------------------------------
+  donate: {
+    list: (): Promise<ResponseResult<DonateRepo[]>> =>
+      fetchApi("/v1/donate/repos"),
+
+    getById: (id: number): Promise<ResponseResult<DonateRepo>> =>
+      fetchApi(`/v1/donate/repos/${id}`),
+
+    getByName: (name: string): Promise<ResponseResult<DonateRepo>> =>
+      fetchApi(`/v1/donate/repos/name/${encodeURIComponent(name)}`),
+
+    submit: (
+      userToken: string,
+      repoFullName: string,
+    ): Promise<ResponseResult<DonateRepo>> => {
+      const authFetch = createAuthenticatedFetch(userToken);
+      return authFetch("/v1/donate/repos", {
+        method: "POST",
+        body: { repo_full_name: repoFullName },
+      });
+    },
+
+    update: (
+      userToken: string,
+      id: number,
+      repoDonateData: Record<string, unknown>,
+    ): Promise<ResponseResult<DonateRepo>> => {
+      const authFetch = createAuthenticatedFetch(userToken);
+      return authFetch(`/v1/donate/repos/${id}`, {
+        method: "POST",
+        body: { repo_donate_data: repoDonateData },
+      });
+    },
   },
 
   // --------------------------------------------------------------------------

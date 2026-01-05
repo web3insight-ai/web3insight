@@ -6,11 +6,22 @@ import {
   PopoverTrigger,
   PopoverContent,
   Button,
+  Chip,
 } from "@nextui-org/react";
-import { LogIn, LogOut, User, Layers, Calendar } from "lucide-react";
-import { usePrivy } from "@privy-io/react-auth";
+import {
+  LogIn,
+  LogOut,
+  User,
+  Layers,
+  Calendar,
+  Wallet,
+  Copy,
+  Check,
+  Shield,
+} from "lucide-react";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 import type { SignedUserProps } from "./typing";
 import type { ApiUser } from "../../typing";
@@ -21,10 +32,48 @@ import {
   getPrivyUserDisplayInfo,
 } from "../../helper";
 
+// Chain ID to name mapping
+const CHAIN_NAMES: Record<number, string> = {
+  1: "Ethereum",
+  8453: "Base",
+  84532: "Base Sepolia",
+  10: "Optimism",
+  42161: "Arbitrum",
+  137: "Polygon",
+};
+
 function SignedUser({ onSignIn }: SignedUserProps) {
   const { ready, authenticated, user: privyUser, logout } = usePrivy();
+  const { wallets } = useWallets();
   const router = useRouter();
   const [backendUser, setBackendUser] = useState<ApiUser | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [currentChainId, setCurrentChainId] = useState<number | null>(null);
+
+  // Get the Privy embedded wallet
+  const embeddedWallet = wallets.find((w) => w.walletClientType === "privy");
+  const walletAddress = embeddedWallet?.address;
+
+  // Fetch current chain ID
+  useEffect(() => {
+    if (!embeddedWallet) {
+      setCurrentChainId(null);
+      return;
+    }
+
+    const fetchChainId = async () => {
+      try {
+        const provider = await embeddedWallet.getEthereumProvider();
+        const chainIdHex = await provider.request({ method: "eth_chainId" });
+        const chainId = parseInt(chainIdHex as string, 16);
+        setCurrentChainId(chainId);
+      } catch {
+        setCurrentChainId(null);
+      }
+    };
+
+    fetchChainId();
+  }, [embeddedWallet]);
 
   // Fetch backend user data
   useEffect(() => {
@@ -45,6 +94,17 @@ function SignedUser({ onSignIn }: SignedUserProps) {
         // Silent error handling
       });
   }, [authenticated]);
+
+  const handleCopyAddress = useCallback(async () => {
+    if (!walletAddress) return;
+    try {
+      await navigator.clipboard.writeText(walletAddress);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Silent error
+    }
+  }, [walletAddress]);
 
   // Only show if Privy is authenticated
   const isPrivyAuthenticated = ready && authenticated && privyUser;
@@ -85,6 +145,14 @@ function SignedUser({ onSignIn }: SignedUserProps) {
       }
     };
 
+    const truncatedAddress = walletAddress
+      ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
+      : null;
+
+    const chainName = currentChainId
+      ? CHAIN_NAMES[currentChainId] || `Chain ${currentChainId}`
+      : null;
+
     return (
       <Popover placement="bottom-end">
         <PopoverTrigger>
@@ -112,6 +180,34 @@ function SignedUser({ onSignIn }: SignedUserProps) {
                 {userInfo.primaryAccount}
               </p>
             </div>
+
+            {/* Wallet section */}
+            {truncatedAddress && (
+              <div className="px-4 py-3 border-b border-border dark:border-border-dark">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Wallet size={14} className="text-gray-400" />
+                    <span className="text-xs text-gray-500">Privy Wallet</span>
+                  </div>
+                  {chainName && (
+                    <Chip size="sm" variant="flat" className="text-xs h-5">
+                      {chainName}
+                    </Chip>
+                  )}
+                </div>
+                <button
+                  onClick={handleCopyAddress}
+                  className="flex items-center gap-1.5 text-sm font-mono text-gray-700 dark:text-gray-300 hover:text-primary transition-colors"
+                >
+                  {truncatedAddress}
+                  {copied ? (
+                    <Check size={12} className="text-green-500" />
+                  ) : (
+                    <Copy size={12} className="text-gray-400" />
+                  )}
+                </button>
+              </div>
+            )}
 
             {/* Menu items */}
             <div className="py-2">

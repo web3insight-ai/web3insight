@@ -143,3 +143,74 @@ export const repoMarkSchema = z.object({
 });
 
 export type RepoMarkInput = z.infer<typeof repoMarkSchema>;
+
+// ============================================================================
+// x402 Donate Forms
+// ============================================================================
+
+/**
+ * Schema for submitting a repository for donation
+ */
+export const donateRepoSubmitSchema = z.object({
+  repo_full_name: z
+    .string()
+    .min(1, "Repository name is required")
+    .regex(
+      /^[\w.-]+\/[\w.-]+$/,
+      "Invalid format. Use: owner/repo (e.g., ethereum/go-ethereum)",
+    ),
+});
+
+export type DonateRepoSubmitInput = z.infer<typeof donateRepoSubmitSchema>;
+
+/**
+ * Schema for generating donation.json configuration
+ */
+export const donationConfigSchema = z.object({
+  payTo: z
+    .string()
+    .min(1, "Wallet address is required")
+    .regex(/^0x[a-fA-F0-9]{40}$/, "Invalid EVM wallet address"),
+  title: z
+    .string()
+    .max(100, "Title must be less than 100 characters")
+    .optional(),
+  description: z
+    .string()
+    .max(500, "Description must be less than 500 characters")
+    .optional(),
+  creator: z
+    .string()
+    .max(100, "Creator name must be less than 100 characters")
+    .optional(),
+  defaultAmount: z
+    .string()
+    .optional()
+    .transform((val) => (val ? parseFloat(val) : undefined))
+    .pipe(z.number().positive("Amount must be positive").optional()),
+  network: z.string().optional(),
+});
+
+// Form input type (before transform) - use for React Hook Form
+export type DonationConfigFormValues = z.input<typeof donationConfigSchema>;
+
+// Output type (after transform) - use for generated config
+export type DonationConfigInput = z.infer<typeof donationConfigSchema>;
+
+/**
+ * Schema for donation amount selection
+ */
+export const donateAmountSchema = z.object({
+  amount: z
+    .string()
+    .min(1, "Amount is required")
+    .transform((val) => parseFloat(val))
+    .pipe(
+      z
+        .number()
+        .positive("Amount must be positive")
+        .max(10000, "Maximum donation is 10,000 USDC"),
+    ),
+});
+
+export type DonateAmountInput = z.infer<typeof donateAmountSchema>;

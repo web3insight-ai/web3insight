@@ -85,3 +85,16 @@ export async function prefetchStatistics(queryClient: QueryClient) {
     },
   });
 }
+
+/**
+ * Prefetch donate repo list for SSR
+ */
+export async function prefetchDonateRepos(queryClient: QueryClient) {
+  await queryClient.prefetchQuery({
+    queryKey: queryKeys.donate.list(),
+    queryFn: async () => {
+      const result = await api.donate.list();
+      return result.success ? result.data : [];
+    },
+  });
+}

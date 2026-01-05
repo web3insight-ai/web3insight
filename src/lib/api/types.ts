@@ -376,3 +376,48 @@ export interface DeveloperRepository {
     contributor: number;
   };
 }
+
+// ============================================================================
+// x402 Donate Types
+// ============================================================================
+
+/**
+ * Configuration from .x402/donation.json file
+ */
+export interface DonationConfig {
+  payTo: string;
+  recipients?: { address: string; basisPoints: number }[];
+  title?: string;
+  description?: string;
+  creator?: string;
+  defaultAmount?: number;
+  network?: string;
+  links?: string[];
+}
+
+/**
+ * Repository info stored in donate_repos table
+ */
+export interface DonateRepoInfo {
+  id: number;
+  full_name: string;
+  description: string | null;
+  html_url: string;
+  owner: {
+    login: string;
+    avatar_url: string;
+  };
+  stargazers_count: number;
+}
+
+/**
+ * Donate repo record from API
+ */
+export interface DonateRepo {
+  repo_id: number;
+  repo_info: DonateRepoInfo;
+  repo_donate_data: DonationConfig | null;
+  submitter_id: number;
+  created_at: string;
+  updated_at: string;
+}
