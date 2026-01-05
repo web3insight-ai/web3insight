@@ -2,9 +2,9 @@
 
 import { useState, useMemo } from "react";
 import { Button, Card, CardBody, Chip } from "@nextui-org/react";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Copy, Check, FileJson, Info } from "lucide-react";
+import { Copy, Check, FileJson, Info, Plus, Trash2 } from "lucide-react";
 import { FormInput, FormTextarea, FormSelect } from "@/lib/form/components";
 import {
   donationConfigSchema,
@@ -25,12 +25,19 @@ export function GenerateConfigForm({ defaultValues }: GenerateConfigFormProps) {
       payTo: "",
       title: "",
       description: "",
-      creator: "",
+      creatorHandle: "",
+      creatorAvatar: "",
       defaultAmount: "",
       network: "base",
+      links: [],
       ...defaultValues,
     },
     mode: "onChange",
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: methods.control,
+    name: "links",
   });
 
   const watchedValues = methods.watch();
@@ -42,23 +49,32 @@ export function GenerateConfigForm({ defaultValues }: GenerateConfigFormProps) {
     if (watchedValues.payTo) {
       config.payTo = watchedValues.payTo;
     }
+    if (watchedValues.defaultAmount) {
+      config.defaultAmount = watchedValues.defaultAmount;
+    }
     if (watchedValues.title) {
       config.title = watchedValues.title;
     }
     if (watchedValues.description) {
       config.description = watchedValues.description;
     }
-    if (watchedValues.creator) {
-      config.creator = watchedValues.creator;
-    }
-    if (watchedValues.defaultAmount) {
-      const amount = parseFloat(watchedValues.defaultAmount);
-      if (!isNaN(amount) && amount > 0) {
-        config.defaultAmount = amount;
+    // Build creator object if either field is present
+    if (watchedValues.creatorHandle || watchedValues.creatorAvatar) {
+      const creator: { handle?: string; avatar?: string } = {};
+      if (watchedValues.creatorHandle) {
+        creator.handle = watchedValues.creatorHandle;
       }
+      if (watchedValues.creatorAvatar) {
+        creator.avatar = watchedValues.creatorAvatar;
+      }
+      config.creator = creator;
     }
-    if (watchedValues.network) {
-      config.network = watchedValues.network;
+    // Build links array if any links exist
+    const validLinks = watchedValues.links?.filter(
+      (link) => link.url && link.label,
+    );
+    if (validLinks && validLinks.length > 0) {
+      config.links = validLinks;
     }
 
     return JSON.stringify(config, null, 2);
@@ -104,26 +120,6 @@ export function GenerateConfigForm({ defaultValues }: GenerateConfigFormProps) {
                 placeholder="0x..."
               />
 
-              <FormInput<DonationConfigFormValues>
-                name="title"
-                label="Title (Optional)"
-                placeholder="My Awesome Project"
-              />
-
-              <FormTextarea<DonationConfigFormValues>
-                name="description"
-                label="Description (Optional)"
-                placeholder="Brief description of your project..."
-                minRows={2}
-                maxRows={4}
-              />
-
-              <FormInput<DonationConfigFormValues>
-                name="creator"
-                label="Creator Name (Optional)"
-                placeholder="Your name or organization"
-              />
-
               <div className="grid grid-cols-2 gap-4">
                 <FormInput<DonationConfigFormValues>
                   name="defaultAmount"
@@ -140,6 +136,85 @@ export function GenerateConfigForm({ defaultValues }: GenerateConfigFormProps) {
                     label: n.label,
                   }))}
                 />
+              </div>
+
+              <FormInput<DonationConfigFormValues>
+                name="title"
+                label="Title (Optional)"
+                placeholder="My Awesome Project"
+              />
+
+              <FormTextarea<DonationConfigFormValues>
+                name="description"
+                label="Description (Optional)"
+                placeholder="Brief description of your project..."
+                minRows={2}
+                maxRows={4}
+              />
+
+              {/* Creator Section */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Creator (Optional)
+                </label>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormInput<DonationConfigFormValues>
+                    name="creatorHandle"
+                    label="Handle"
+                    placeholder="pseudoyu"
+                  />
+                  <FormInput<DonationConfigFormValues>
+                    name="creatorAvatar"
+                    label="Avatar URL"
+                    placeholder="https://..."
+                  />
+                </div>
+              </div>
+
+              {/* Links Section */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Links (Optional)
+                  </label>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="flat"
+                    isDisabled={fields.length >= 5}
+                    onPress={() => append({ url: "", label: "" })}
+                    startContent={<Plus size={14} />}
+                  >
+                    Add Link
+                  </Button>
+                </div>
+                {fields.map((field, index) => (
+                  <div key={field.id} className="flex gap-2 items-start">
+                    <div className="flex-1 grid grid-cols-2 gap-2">
+                      <FormInput<DonationConfigFormValues>
+                        name={`links.${index}.label`}
+                        label="Label"
+                        placeholder="Repository"
+                      />
+                      <FormInput<DonationConfigFormValues>
+                        name={`links.${index}.url`}
+                        label="URL"
+                        placeholder="https://github.com/..."
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      isIconOnly
+                      size="sm"
+                      variant="flat"
+                      color="danger"
+                      className="mt-6"
+                      onPress={() => remove(index)}
+                    >
+                      <Trash2 size={14} />
+                    </Button>
+                  </div>
+                ))}
               </div>
             </form>
           </FormProvider>

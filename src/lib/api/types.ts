@@ -382,6 +382,22 @@ export interface DeveloperRepository {
 // ============================================================================
 
 /**
+ * Creator info in donation config
+ */
+export interface DonationCreator {
+  handle: string;
+  avatar?: string;
+}
+
+/**
+ * Link info in donation config
+ */
+export interface DonationLink {
+  url: string;
+  label: string;
+}
+
+/**
  * Configuration from .x402/donation.json file
  */
 export interface DonationConfig {
@@ -389,10 +405,10 @@ export interface DonationConfig {
   recipients?: { address: string; basisPoints: number }[];
   title?: string;
   description?: string;
-  creator?: string;
-  defaultAmount?: number;
+  creator?: DonationCreator;
+  defaultAmount?: number | string;
   network?: string;
-  links?: string[];
+  links?: DonationLink[];
 }
 
 /**

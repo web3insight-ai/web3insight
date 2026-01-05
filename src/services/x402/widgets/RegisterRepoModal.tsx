@@ -10,8 +10,7 @@ import {
   ModalFooter,
   Avatar,
   Input,
-  Select,
-  SelectItem,
+  Textarea,
 } from "@nextui-org/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,21 +26,19 @@ import {
   RefreshCw,
   Star,
   ExternalLink,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import {
   donateRepoSubmitSchema,
   type DonateRepoSubmitInput,
 } from "@/lib/form/schemas";
 import {
+  useCheckDonateRepo,
   useSubmitDonateRepo,
   useInvalidateDonateList,
 } from "@/hooks/api/useDonate";
 import type { DonationConfig, DonateRepo } from "@/lib/api/types";
-import {
-  SUPPORTED_NETWORKS,
-  DEFAULT_NETWORK,
-  type NetworkKey,
-} from "../typing";
 
 interface RegisterRepoModalProps {
   isOpen: boolean;
@@ -81,10 +78,12 @@ export function RegisterRepoModal({
   // Config form values for generating config
   const [configValues, setConfigValues] = useState({
     payTo: "",
+    defaultAmount: "",
     title: "",
     description: "",
-    defaultAmount: "",
-    network: DEFAULT_NETWORK as NetworkKey,
+    creatorHandle: "",
+    creatorAvatar: "",
+    links: [] as { url: string; label: string }[],
   });
 
   const {
@@ -99,6 +98,7 @@ export function RegisterRepoModal({
     mode: "onChange",
   });
 
+  const checkMutation = useCheckDonateRepo();
   const submitMutation = useSubmitDonateRepo();
 
   // Check if donation config exists and is valid
@@ -118,13 +118,22 @@ export function RegisterRepoModal({
   const generatedConfig = useMemo(() => {
     const config: Record<string, unknown> = {};
     if (configValues.payTo) config.payTo = configValues.payTo;
+    if (configValues.defaultAmount)
+      config.defaultAmount = configValues.defaultAmount;
     if (configValues.title) config.title = configValues.title;
     if (configValues.description) config.description = configValues.description;
-    if (configValues.defaultAmount) {
-      const amount = parseFloat(configValues.defaultAmount);
-      if (!isNaN(amount) && amount > 0) config.defaultAmount = amount;
+    // Build creator object
+    if (configValues.creatorHandle || configValues.creatorAvatar) {
+      const creator: { handle?: string; avatar?: string } = {};
+      if (configValues.creatorHandle)
+        creator.handle = configValues.creatorHandle;
+      if (configValues.creatorAvatar)
+        creator.avatar = configValues.creatorAvatar;
+      config.creator = creator;
     }
-    config.network = configValues.network;
+    // Build links array
+    const validLinks = configValues.links.filter((l) => l.url && l.label);
+    if (validLinks.length > 0) config.links = validLinks;
     return JSON.stringify(config, null, 2);
   }, [configValues]);
 
@@ -164,12 +173,12 @@ export function RegisterRepoModal({
     }
   };
 
-  // Step 1: Check repository
+  // Step 1: Check repository (does NOT write to database)
   const handleCheckRepo = async (data: DonateRepoSubmitInput) => {
     setSubmitError(null);
 
     try {
-      const result = await submitMutation.mutateAsync(data);
+      const result = await checkMutation.mutateAsync(data);
       const repoData = (result.data ?? result) as DonateRepo;
       const isSuccess = result.success !== false && repoData?.repo_id;
 
@@ -179,15 +188,20 @@ export function RegisterRepoModal({
         // Pre-fill config if no donation.json found
         if (!hasDonationConfig(repoData.repo_donate_data)) {
           const repoInfo = repoData.repo_info;
+          const repoFullName = repoInfo?.full_name || data.repo_full_name;
           setConfigValues({
             payTo: "",
-            title:
-              repoInfo?.full_name?.split("/")[1] ||
-              data.repo_full_name.split("/")[1] ||
-              "",
-            description: repoInfo?.description || "",
             defaultAmount: "",
-            network: DEFAULT_NETWORK,
+            title: repoFullName.split("/")[1] || "",
+            description: repoInfo?.description || "",
+            creatorHandle: repoFullName.split("/")[0] || "",
+            creatorAvatar: repoInfo?.owner?.avatar_url || "",
+            links: [
+              {
+                url: repoInfo?.html_url || `https://github.com/${repoFullName}`,
+                label: "Repository",
+              },
+            ],
           });
         }
 
@@ -202,7 +216,7 @@ export function RegisterRepoModal({
     }
   };
 
-  // Step 2: Verify (re-check for donation.json)
+  // Step 2: Verify (re-check for donation.json, then write to database if found)
   const handleVerify = async () => {
     if (!checkedRepo) return;
     setSubmitError(null);
@@ -210,18 +224,27 @@ export function RegisterRepoModal({
     try {
       const repoName =
         checkedRepo.repo_info?.full_name || getValues("repo_full_name");
-      const result = await submitMutation.mutateAsync({
+
+      // First, check if donation.json exists now
+      const checkResult = await checkMutation.mutateAsync({
         repo_full_name: repoName,
       });
-      const repoData = (result.data ?? result) as DonateRepo;
+      const checkData = (checkResult.data ?? checkResult) as DonateRepo;
 
-      if (repoData?.repo_id) {
-        setCheckedRepo(repoData);
+      if (checkData?.repo_id) {
+        setCheckedRepo(checkData);
 
-        if (hasDonationConfig(repoData.repo_donate_data)) {
-          // Refetch list and wait for it
-          await invalidateDonateList(repoData);
-          setCurrentStep("success");
+        if (hasDonationConfig(checkData.repo_donate_data)) {
+          // donation.json found! Now actually register the repo
+          const submitResult = await submitMutation.mutateAsync({
+            repo_full_name: repoName,
+          });
+          const repoData = (submitResult.data ?? submitResult) as DonateRepo;
+
+          if (repoData?.repo_id) {
+            await invalidateDonateList(repoData);
+            setCurrentStep("success");
+          }
         } else {
           setSubmitError(
             "No donation.json found. Please add the file and try again.",
@@ -233,13 +256,18 @@ export function RegisterRepoModal({
     }
   };
 
-  // Complete registration (when config already exists)
+  // Complete registration (when config already exists from check)
   const handleComplete = async () => {
     if (!checkedRepo) return;
     setSubmitError(null);
 
+    // Only proceed if donation config exists
+    if (!hasDonationConfig(checkedRepo.repo_donate_data)) {
+      setSubmitError("No donation.json found");
+      return;
+    }
+
     try {
-      // Call API again to ensure repo is registered
       const repoName =
         checkedRepo.repo_info?.full_name || getValues("repo_full_name");
       const result = await submitMutation.mutateAsync({
@@ -247,7 +275,6 @@ export function RegisterRepoModal({
       });
       const repoData = (result.data ?? result) as DonateRepo;
 
-      // Refetch list after successful registration and wait for it
       await invalidateDonateList(repoData?.repo_id ? repoData : checkedRepo);
       setCurrentStep("success");
     } catch (err) {
@@ -263,16 +290,26 @@ export function RegisterRepoModal({
       setSubmitError(null);
       setConfigValues({
         payTo: "",
+        defaultAmount: "",
         title: "",
         description: "",
-        defaultAmount: "",
-        network: DEFAULT_NETWORK,
+        creatorHandle: "",
+        creatorAvatar: "",
+        links: [],
       });
+      checkMutation.reset();
       submitMutation.reset();
       onSuccess?.();
     }
     onClose();
-  }, [currentStep, onClose, onSuccess, resetForm, submitMutation]);
+  }, [
+    currentStep,
+    onClose,
+    onSuccess,
+    resetForm,
+    checkMutation,
+    submitMutation,
+  ]);
 
   const handleBack = () => {
     setSubmitError(null);
@@ -353,6 +390,7 @@ export function RegisterRepoModal({
       onClose={handleModalClose}
       placement="center"
       size="lg"
+      scrollBehavior="inside"
       isDismissable={currentStep === "input" || currentStep === "success"}
       hideCloseButton={currentStep === "confirm"}
     >
@@ -395,8 +433,8 @@ export function RegisterRepoModal({
               <Button
                 color="primary"
                 onPress={() => handleSubmit(handleCheckRepo)()}
-                isLoading={submitMutation.isPending}
-                isDisabled={!isValid || submitMutation.isPending}
+                isLoading={checkMutation.isPending}
+                isDisabled={!isValid || checkMutation.isPending}
               >
                 Continue
               </Button>
@@ -492,41 +530,26 @@ export function RegisterRepoModal({
                   </div>
 
                   {/* Config Generator */}
-                  <div className="space-y-3">
-                    <Input
-                      size="sm"
-                      label="Wallet Address"
-                      placeholder="0x..."
-                      value={configValues.payTo}
-                      onChange={(e) =>
-                        setConfigValues({
-                          ...configValues,
-                          payTo: e.target.value,
-                        })
-                      }
-                      variant="bordered"
-                      labelPlacement="outside"
-                    />
-                    <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-4">
+                    {/* Row 1: Wallet + Amount */}
+                    <div className="grid grid-cols-2 gap-3">
                       <Input
                         size="sm"
-                        label="Title"
-                        placeholder="Project name"
-                        value={configValues.title}
+                        label="Wallet Address"
+                        placeholder="0x..."
+                        value={configValues.payTo}
                         onChange={(e) =>
                           setConfigValues({
                             ...configValues,
-                            title: e.target.value,
+                            payTo: e.target.value,
                           })
                         }
                         variant="bordered"
-                        labelPlacement="outside"
                       />
                       <Input
                         size="sm"
                         label="Default Amount"
-                        placeholder="5"
-                        type="number"
+                        placeholder="0.1"
                         value={configValues.defaultAmount}
                         onChange={(e) =>
                           setConfigValues({
@@ -535,29 +558,148 @@ export function RegisterRepoModal({
                           })
                         }
                         variant="bordered"
-                        labelPlacement="outside"
                       />
-                      <Select
+                    </div>
+
+                    {/* Row 2: Title */}
+                    <Input
+                      size="sm"
+                      label="Title"
+                      placeholder="Project name"
+                      value={configValues.title}
+                      onChange={(e) =>
+                        setConfigValues({
+                          ...configValues,
+                          title: e.target.value,
+                        })
+                      }
+                      variant="bordered"
+                    />
+
+                    {/* Row 3: Description */}
+                    <Textarea
+                      size="sm"
+                      label="Description"
+                      placeholder="Brief description of your project"
+                      value={configValues.description}
+                      onChange={(e) =>
+                        setConfigValues({
+                          ...configValues,
+                          description: e.target.value,
+                        })
+                      }
+                      variant="bordered"
+                      minRows={3}
+                      maxRows={3}
+                    />
+
+                    {/* Row 4: Creator Handle + Avatar */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <Input
                         size="sm"
-                        label="Network"
-                        selectedKeys={[configValues.network]}
-                        onSelectionChange={(keys) => {
-                          const value = Array.from(keys)[0] as NetworkKey;
-                          if (value)
+                        label="Creator Handle"
+                        placeholder="github-username"
+                        value={configValues.creatorHandle}
+                        onChange={(e) =>
+                          setConfigValues({
+                            ...configValues,
+                            creatorHandle: e.target.value,
+                          })
+                        }
+                        variant="bordered"
+                      />
+                      <Input
+                        size="sm"
+                        label="Creator Avatar"
+                        placeholder="https://..."
+                        value={configValues.creatorAvatar}
+                        onChange={(e) =>
+                          setConfigValues({
+                            ...configValues,
+                            creatorAvatar: e.target.value,
+                          })
+                        }
+                        variant="bordered"
+                      />
+                    </div>
+
+                    {/* Row 5: Links */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Links
+                        </span>
+                        <Button
+                          size="sm"
+                          variant="flat"
+                          isDisabled={configValues.links.length >= 5}
+                          onPress={() =>
                             setConfigValues({
                               ...configValues,
-                              network: value,
-                            });
-                        }}
-                        variant="bordered"
-                        labelPlacement="outside"
-                      >
-                        {SUPPORTED_NETWORKS.map((net) => (
-                          <SelectItem key={net.value} textValue={net.label}>
-                            {net.label}
-                          </SelectItem>
-                        ))}
-                      </Select>
+                              links: [
+                                ...configValues.links,
+                                { url: "", label: "" },
+                              ],
+                            })
+                          }
+                          startContent={<Plus size={14} />}
+                          className="h-7"
+                        >
+                          Add Link
+                        </Button>
+                      </div>
+                      {configValues.links.map((link, index) => (
+                        <div key={index} className="flex gap-2 items-center">
+                          <Input
+                            size="sm"
+                            placeholder="Label"
+                            value={link.label}
+                            onChange={(e) => {
+                              const newLinks = [...configValues.links];
+                              newLinks[index].label = e.target.value;
+                              setConfigValues({
+                                ...configValues,
+                                links: newLinks,
+                              });
+                            }}
+                            variant="bordered"
+                            className="w-28"
+                          />
+                          <Input
+                            size="sm"
+                            placeholder="https://..."
+                            value={link.url}
+                            onChange={(e) => {
+                              const newLinks = [...configValues.links];
+                              newLinks[index].url = e.target.value;
+                              setConfigValues({
+                                ...configValues,
+                                links: newLinks,
+                              });
+                            }}
+                            variant="bordered"
+                            className="flex-1"
+                          />
+                          <Button
+                            size="sm"
+                            variant="light"
+                            isIconOnly
+                            color="danger"
+                            onPress={() => {
+                              const newLinks = configValues.links.filter(
+                                (_, i) => i !== index,
+                              );
+                              setConfigValues({
+                                ...configValues,
+                                links: newLinks,
+                              });
+                            }}
+                            className="h-8 w-8 min-w-0"
+                          >
+                            <Trash2 size={14} />
+                          </Button>
+                        </div>
+                      ))}
                     </div>
                   </div>
 
@@ -627,9 +769,13 @@ export function RegisterRepoModal({
                 <Button
                   color="primary"
                   onPress={handleVerify}
-                  isLoading={submitMutation.isPending}
+                  isLoading={
+                    checkMutation.isPending || submitMutation.isPending
+                  }
                   startContent={
-                    !submitMutation.isPending && <RefreshCw size={14} />
+                    !(checkMutation.isPending || submitMutation.isPending) && (
+                      <RefreshCw size={14} />
+                    )
                   }
                 >
                   Verify

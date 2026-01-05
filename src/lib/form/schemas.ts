@@ -164,6 +164,14 @@ export const donateRepoSubmitSchema = z.object({
 export type DonateRepoSubmitInput = z.infer<typeof donateRepoSubmitSchema>;
 
 /**
+ * Schema for donation link
+ */
+export const donationLinkSchema = z.object({
+  url: z.string().url("Invalid URL format"),
+  label: z.string().min(1, "Label is required").max(50, "Label too long"),
+});
+
+/**
  * Schema for generating donation.json configuration
  */
 export const donationConfigSchema = z.object({
@@ -179,16 +187,21 @@ export const donationConfigSchema = z.object({
     .string()
     .max(500, "Description must be less than 500 characters")
     .optional(),
-  creator: z
+  creatorHandle: z
     .string()
-    .max(100, "Creator name must be less than 100 characters")
+    .max(100, "Handle must be less than 100 characters")
     .optional(),
-  defaultAmount: z
+  creatorAvatar: z
     .string()
+    .url("Invalid avatar URL")
     .optional()
-    .transform((val) => (val ? parseFloat(val) : undefined))
-    .pipe(z.number().positive("Amount must be positive").optional()),
+    .or(z.literal("")),
+  defaultAmount: z.string().optional(),
   network: z.string().optional(),
+  links: z
+    .array(donationLinkSchema)
+    .max(5, "Maximum 5 links allowed")
+    .optional(),
 });
 
 // Form input type (before transform) - use for React Hook Form

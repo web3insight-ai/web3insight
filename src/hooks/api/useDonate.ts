@@ -28,6 +28,10 @@ interface SubmitDonateRepoParams {
   repo_full_name: string;
 }
 
+interface CheckDonateRepoParams {
+  repo_full_name: string;
+}
+
 // ============================================================================
 // Query Options Factory
 // ============================================================================
@@ -117,8 +121,31 @@ export function useSuspenseDonateRepoList() {
 // ============================================================================
 
 /**
- * Hook to submit a repository for donation
- * Note: Does NOT auto-invalidate list cache - call invalidateDonateList() manually when registration is complete
+ * Hook to check a repository without writing to database
+ * Use this in Step 1 to verify repo exists and check for donation.json
+ */
+export function useCheckDonateRepo() {
+  return useMutation({
+    mutationFn: async (
+      params: CheckDonateRepoParams,
+    ): Promise<ResponseResult<DonateRepo>> => {
+      const response = await fetch("/api/donate/repos/check", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(params),
+      });
+
+      const json = await response.json();
+      return json;
+    },
+  });
+}
+
+/**
+ * Hook to submit a repository for donation (writes to database)
+ * Only call this after verifying donation.json exists
  */
 export function useSubmitDonateRepo() {
   return useMutation({

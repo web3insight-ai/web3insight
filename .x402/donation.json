@@ -1,0 +1,20 @@
+{
+  "payTo": "0x30286DD245338292F319809935a1037CcD4573Ea",
+  "defaultAmount": "0.1",
+  "title": "Web3Insight",
+  "description": "Discover, analyze, and connect with Web3 developers. Powered by GitHub data and on-chain activity for ecosystem growth.",
+  "creator": {
+    "handle": "pseudoyu",
+    "avatar": "https://avatars.githubusercontent.com/u/69753389?v=4"
+  },
+  "links": [
+    {
+      "url": "https://github.com/web3insight-ai/web3insight",
+      "label": "Repository"
+    },
+    {
+      "url": "https://web3insight.ai/",
+      "label": "Website"
+    }
+  ]
+}
