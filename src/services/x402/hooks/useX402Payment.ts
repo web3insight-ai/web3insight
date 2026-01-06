@@ -2,18 +2,60 @@
 
 import { useState, useCallback } from "react";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
-import { createWalletClient, custom, parseUnits, type Address } from "viem";
+import {
+  createWalletClient,
+  createPublicClient,
+  custom,
+  http,
+  parseUnits,
+  formatUnits,
+  type Address,
+  type Hex,
+} from "viem";
 import { base, baseSepolia } from "viem/chains";
 import type {
   PaymentStatus,
   PaymentParams,
   PaymentResult,
   NetworkKey,
+  X402Authorization,
+  X402PaymentPayload,
 } from "../typing";
-import { USDC_ADDRESSES, CHAIN_IDS, DEFAULT_NETWORK } from "../typing";
+import {
+  USDC_ADDRESSES,
+  CHAIN_IDS,
+  DEFAULT_NETWORK,
+  USDC_DOMAINS,
+} from "../typing";
+
+// x402 Facilitator URL
+const FACILITATOR_URL = "https://facilitator.x402x.dev";
+
+// ERC20 balanceOf ABI
+const ERC20_BALANCE_ABI = [
+  {
+    name: "balanceOf",
+    type: "function",
+    inputs: [{ name: "account", type: "address" }],
+    outputs: [{ name: "balance", type: "uint256" }],
+    stateMutability: "view",
+  },
+] as const;
+
+/**
+ * Generate a random nonce for EIP-3009
+ */
+function generateNonce(): Hex {
+  const randomBytes = new Uint8Array(32);
+  crypto.getRandomValues(randomBytes);
+  return `0x${Array.from(randomBytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("")}` as Hex;
+}
 
 /**
  * Hook for x402 payment integration with Privy wallet
+ * Uses EIP-3009 transferWithAuthorization for gasless USDC payments
  */
 export function useX402Payment() {
   const { ready, authenticated } = usePrivy();
@@ -34,7 +76,7 @@ export function useX402Payment() {
       const wallet = getActiveWallet();
 
       if (!wallet) {
-        setError("No wallet connected. Please connect a wallet first.");
+        setError("Please connect a wallet first");
         setStatus("error");
         return null;
       }
@@ -56,6 +98,7 @@ export function useX402Payment() {
         const chain = networkKey === "base" ? base : baseSepolia;
         const targetChainId = CHAIN_IDS[networkKey];
         const usdcAddress = USDC_ADDRESSES[networkKey];
+        const usdcDomain = USDC_DOMAINS[networkKey];
 
         if (!usdcAddress || !targetChainId) {
           throw new Error(`Unsupported network: ${network}`);
@@ -73,21 +116,23 @@ export function useX402Payment() {
         if (currentChainId !== targetChainId) {
           try {
             await wallet.switchChain(targetChainId);
-            // Small delay to ensure chain switch is complete
             await new Promise((resolve) => setTimeout(resolve, 500));
           } catch (_switchError) {
             const networkName = networkKey === "base" ? "Base" : "Base Sepolia";
-            throw new Error(
-              `Please switch to ${networkName} network in your wallet`,
-            );
+            throw new Error(`Please switch to ${networkName} network`);
           }
         }
 
-        // Create viem wallet client (re-get provider after chain switch)
+        // Create clients
         const updatedProvider = await wallet.getEthereumProvider();
         const walletClient = createWalletClient({
           chain,
           transport: custom(updatedProvider),
+        });
+
+        const publicClient = createPublicClient({
+          chain,
+          transport: http(),
         });
 
         // Get the wallet address
@@ -96,36 +141,146 @@ export function useX402Payment() {
           throw new Error("Could not get wallet address");
         }
 
-        setStatus("signing");
-
         // Parse amount to USDC atomic units (6 decimals)
         const amountInAtomicUnits = parseUnits(amount, 6);
 
-        // For now, we'll do a simple ERC20 transfer
-        // In production, this would use the x402 protocol's execute flow
-        // with the @x402x/client library
-        const txHash = await walletClient.writeContract({
+        // Check USDC balance before signing
+        const balance = await publicClient.readContract({
           address: usdcAddress,
-          abi: [
-            {
-              name: "transfer",
-              type: "function",
-              inputs: [
-                { name: "to", type: "address" },
-                { name: "value", type: "uint256" },
-              ],
-              outputs: [{ type: "bool" }],
-            },
-          ],
-          functionName: "transfer",
-          args: [payTo as Address, amountInAtomicUnits],
+          abi: ERC20_BALANCE_ABI,
+          functionName: "balanceOf",
+          args: [address],
+        });
+
+        if (balance < amountInAtomicUnits) {
+          const balanceFormatted = formatUnits(balance, 6);
+          throw new Error(
+            `Insufficient USDC balance. You have ${balanceFormatted} USDC, need ${amount} USDC`,
+          );
+        }
+
+        setStatus("signing");
+
+        // Create EIP-3009 authorization
+        const validAfter = Math.floor(Date.now() / 1000);
+        const validBefore = validAfter + 3600; // Valid for 1 hour
+        const nonce = generateNonce();
+
+        const authorization: X402Authorization = {
+          from: address,
+          to: payTo as Address,
+          value: amountInAtomicUnits.toString(),
+          validAfter: validAfter.toString(),
+          validBefore: validBefore.toString(),
+          nonce,
+        };
+
+        // EIP-712 typed data for TransferWithAuthorization
+        const typedData = {
+          domain: usdcDomain,
+          types: {
+            TransferWithAuthorization: [
+              { name: "from", type: "address" },
+              { name: "to", type: "address" },
+              { name: "value", type: "uint256" },
+              { name: "validAfter", type: "uint256" },
+              { name: "validBefore", type: "uint256" },
+              { name: "nonce", type: "bytes32" },
+            ],
+          },
+          primaryType: "TransferWithAuthorization" as const,
+          message: {
+            from: authorization.from,
+            to: authorization.to,
+            value: BigInt(authorization.value),
+            validAfter: BigInt(authorization.validAfter),
+            validBefore: BigInt(authorization.validBefore),
+            nonce: authorization.nonce,
+          },
+        };
+
+        // Sign the typed data (gasless - user only signs)
+        const signature = await walletClient.signTypedData({
           account: address,
+          ...typedData,
         });
 
         setStatus("submitting");
 
-        // Wait a moment for the transaction to be submitted
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        // Create x402 payment payload
+        const paymentPayload: X402PaymentPayload = {
+          x402Version: 1,
+          scheme: "exact",
+          network: networkKey === "base" ? "base" : "base-sepolia",
+          payload: {
+            signature,
+            authorization: {
+              from: authorization.from,
+              to: authorization.to,
+              value: authorization.value,
+              validAfter: authorization.validAfter,
+              validBefore: authorization.validBefore,
+              nonce: authorization.nonce,
+            },
+          },
+        };
+
+        // Send to facilitator for settlement
+        const facilitatorResponse = await fetch(`${FACILITATOR_URL}/settle`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            paymentPayload,
+            paymentRequirements: {
+              scheme: "exact",
+              network: paymentPayload.network,
+              maxAmountRequired: authorization.value,
+              resource: `donate:${payTo}`,
+              description: "Donation via x402",
+              mimeType: "application/json",
+              payTo: payTo,
+              extra: {
+                name: usdcDomain.name,
+                version: usdcDomain.version,
+                address: usdcAddress,
+              },
+            },
+          }),
+        });
+
+        const responseText = await facilitatorResponse.text();
+        let settlementResult;
+
+        try {
+          settlementResult = JSON.parse(responseText);
+        } catch {
+          console.error("Facilitator response:", responseText);
+          throw new Error("Invalid facilitator response");
+        }
+
+        if (!facilitatorResponse.ok) {
+          throw new Error(
+            settlementResult?.error ||
+              settlementResult?.message ||
+              `Facilitator error: ${facilitatorResponse.status}`,
+          );
+        }
+
+        if (!settlementResult.success) {
+          throw new Error(
+            settlementResult.errorReason ||
+              settlementResult.error ||
+              "Settlement failed",
+          );
+        }
+
+        const txHash = settlementResult.transaction || settlementResult.txHash;
+        if (!txHash) {
+          console.error("Settlement result:", settlementResult);
+          throw new Error("No transaction hash returned");
+        }
 
         const paymentResult: PaymentResult = {
           txHash,
@@ -138,8 +293,19 @@ export function useX402Payment() {
         setStatus("success");
         return paymentResult;
       } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Payment failed";
+        let errorMessage = "Payment failed";
+        if (err instanceof Error) {
+          if (
+            err.message.includes("rejected") ||
+            err.message.includes("denied")
+          ) {
+            errorMessage = "User rejected the request";
+          } else if (err.message.includes("Insufficient")) {
+            errorMessage = err.message;
+          } else {
+            errorMessage = err.message.split("Docs:")[0]?.trim() || err.message;
+          }
+        }
         setError(errorMessage);
         setStatus("error");
         return null;

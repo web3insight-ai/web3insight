@@ -11,6 +11,7 @@ import {
   Input,
   Select,
   SelectItem,
+  Chip,
 } from "@nextui-org/react";
 import { usePrivy } from "@privy-io/react-auth";
 import {
@@ -20,6 +21,7 @@ import {
   AlertCircle,
   ExternalLink,
   Loader2,
+  Zap,
 } from "lucide-react";
 import { useX402Payment, getExplorerUrl } from "../hooks/useX402Payment";
 import { PRESET_AMOUNTS, DEFAULT_NETWORK, SUPPORTED_NETWORKS } from "../typing";
@@ -41,7 +43,9 @@ export function DonateButton({
   const [selectedAmount, setSelectedAmount] = useState<number | null>(
     defaultAmount || null,
   );
-  const [customAmount, setCustomAmount] = useState("");
+  const [customAmount, setCustomAmount] = useState(
+    defaultAmount ? defaultAmount.toString() : "",
+  );
   const [selectedNetwork, setSelectedNetwork] = useState<NetworkKey>(
     (network as NetworkKey) || DEFAULT_NETWORK,
   );
@@ -58,7 +62,7 @@ export function DonateButton({
   const handleClose = () => {
     setIsOpen(false);
     setSelectedAmount(defaultAmount || null);
-    setCustomAmount("");
+    setCustomAmount(defaultAmount ? defaultAmount.toString() : "");
     setSelectedNetwork((network as NetworkKey) || DEFAULT_NETWORK);
     reset();
   };
@@ -96,25 +100,31 @@ export function DonateButton({
         <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
           <Loader2 size={16} className="animate-spin text-gray-500" />
           <span className="text-sm text-gray-600 dark:text-gray-400">
-              Preparing transaction...
+              Preparing authorization...
           </span>
         </div>
       );
     case "signing":
       return (
-        <div className="flex items-center gap-3 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-          <Loader2 size={16} className="animate-spin text-amber-500" />
-          <span className="text-sm text-amber-700 dark:text-amber-300">
-              Sign in your wallet...
-          </span>
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-3 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+            <Loader2 size={16} className="animate-spin text-amber-500" />
+            <span className="text-sm text-amber-700 dark:text-amber-300">
+                Sign the authorization in your wallet...
+            </span>
+          </div>
+          <div className="flex items-center gap-2 px-3 text-xs text-gray-500 dark:text-gray-400">
+            <Zap size={12} className="text-green-500" />
+            <span>No gas fee required - you only need USDC</span>
+          </div>
         </div>
       );
     case "submitting":
       return (
-        <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-          <Loader2 size={16} className="animate-spin text-gray-500" />
-          <span className="text-sm text-gray-600 dark:text-gray-400">
-              Submitting...
+        <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+          <Loader2 size={16} className="animate-spin text-blue-500" />
+          <span className="text-sm text-blue-700 dark:text-blue-300">
+              Processing payment via x402 facilitator...
           </span>
         </div>
       );
@@ -124,7 +134,7 @@ export function DonateButton({
           <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
             <CheckCircle size={16} className="text-green-500" />
             <span className="text-sm text-green-700 dark:text-green-300">
-                Donation successful
+                Donation successful!
             </span>
           </div>
           {result && (
@@ -151,8 +161,8 @@ export function DonateButton({
             <p className="text-sm text-red-700 dark:text-red-300">
                 Transaction failed
             </p>
-            <p className="text-xs text-red-500 dark:text-red-400 mt-0.5">
-              {error || "Please try again"}
+            <p className="text-xs text-red-500 dark:text-red-400 mt-0.5 line-clamp-2">
+              {error?.split("Docs:")[0]?.trim() || "Please try again"}
             </p>
           </div>
         </div>
@@ -180,13 +190,28 @@ export function DonateButton({
       <Modal isOpen={isOpen} onClose={handleClose} placement="center" size="sm">
         <ModalContent>
           <ModalHeader className="flex flex-col gap-0.5 pb-2">
-            <span className="text-base font-semibold">
-              {title ? `Support ${title}` : "Make a Donation"}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-base font-semibold">
+                {title ? `Support ${title}` : "Make a Donation"}
+              </span>
+              <Chip
+                size="sm"
+                variant="flat"
+                color="success"
+                startContent={<Zap size={10} />}
+                classNames={{
+                  base: "h-5 px-1.5",
+                  content: "text-[10px] font-medium",
+                }}
+              >
+                Gasless
+              </Chip>
+            </div>
             <span className="text-xs font-normal text-gray-500 dark:text-gray-400">
               Send USDC on{" "}
               {SUPPORTED_NETWORKS.find((n) => n.value === selectedNetwork)
-                ?.label || "Base"}
+                ?.label || "Base"}{" "}
+              via x402
             </span>
           </ModalHeader>
 
@@ -273,6 +298,14 @@ export function DonateButton({
                   <p className="text-xs font-mono text-gray-600 dark:text-gray-400 break-all mt-0.5">
                     {payTo}
                   </p>
+                </div>
+
+                {/* Gasless info */}
+                <div className="flex items-center gap-2 p-2.5 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                  <Zap size={14} className="text-green-500" />
+                  <span className="text-xs text-green-700 dark:text-green-300">
+                    x402 gasless payment - only USDC needed
+                  </span>
                 </div>
               </div>
             )}
