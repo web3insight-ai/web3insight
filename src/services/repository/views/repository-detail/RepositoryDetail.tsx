@@ -119,13 +119,10 @@ function RepositoryDetail({
           className="animate-slide-up mb-4"
           style={{ animationDelay: "40ms" }}
         >
-          <div className="border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle">
+          <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 p-4">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-2">
-                <UserCheck
-                  size={14}
-                  className="text-gray-600 dark:text-gray-400"
-                />
+                <UserCheck size={14} className="text-gray-400" />
                 <div>
                   <h3 className="text-sm font-medium text-gray-900 dark:text-white">
                     Active Developers
@@ -246,13 +243,13 @@ function RepositoryDetail({
                         data: activeDeveloperChartValues,
                         type: "bar",
                         itemStyle: {
-                          color: "#0EA5E9",
+                          color: "#0D9488",
                         },
                         barWidth: "45%",
                         emphasis: {
                           focus: "series",
                           itemStyle: {
-                            color: "#0284C7",
+                            color: "#0F766E",
                           },
                         },
                         label: {

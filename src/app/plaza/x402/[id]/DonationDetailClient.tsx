@@ -545,11 +545,11 @@ export default function DonationDetailClient({
                       {
                         data: activeDeveloperChartValues,
                         type: "bar",
-                        itemStyle: { color: "#0EA5E9" },
+                        itemStyle: { color: "#0D9488" },
                         barWidth: "45%",
                         emphasis: {
                           focus: "series",
-                          itemStyle: { color: "#0284C7" },
+                          itemStyle: { color: "#0F766E" },
                         },
                         label: {
                           show: true,

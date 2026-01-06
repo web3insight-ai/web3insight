@@ -1,5 +1,8 @@
 import { Code2, Cpu } from "lucide-react";
-import { useGitHubStats, type GitHubLanguage } from "../../hooks/useGitHubStats";
+import {
+  useGitHubStats,
+  type GitHubLanguage,
+} from "../../hooks/useGitHubStats";
 
 interface ProgrammingLanguagesBarProps {
   username?: string | null;
@@ -15,9 +18,16 @@ export function ProgrammingLanguagesBar({
   loading: forcedLoading,
 }: ProgrammingLanguagesBarProps) {
   const shouldFetch = !providedLanguages && !!username;
-  const { data: githubData, loading } = useGitHubStats(shouldFetch ? (username ?? null) : null);
+  const { data: githubData, loading } = useGitHubStats(
+    shouldFetch ? (username ?? null) : null,
+  );
   const languages = providedLanguages ?? githubData?.languages ?? [];
-  const isLoading = typeof forcedLoading === "boolean" ? forcedLoading : (shouldFetch ? loading : false);
+  const isLoading =
+    typeof forcedLoading === "boolean"
+      ? forcedLoading
+      : shouldFetch
+        ? loading
+        : false;
   const hasLanguages = languages.length > 0;
 
   if (!isLoading && !hasLanguages) {
@@ -25,10 +35,14 @@ export function ProgrammingLanguagesBar({
   }
 
   return (
-    <div className={`border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle ${className}`}>
+    <div
+      className={`rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 p-4 ${className}`}
+    >
       <div className="flex items-center gap-2 mb-4">
-        <Code2 size={14} className="text-gray-600 dark:text-gray-400" />
-        <h4 className="text-sm font-medium text-gray-900 dark:text-white">Programming Languages</h4>
+        <Code2 size={14} className="text-gray-400" />
+        <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+          Programming Languages
+        </h4>
         {hasLanguages && (
           <span className="text-xs text-gray-500 dark:text-gray-400 ml-auto">
             {languages.length}
@@ -39,14 +53,25 @@ export function ProgrammingLanguagesBar({
       {hasLanguages ? (
         <div className="space-y-3">
           {languages.slice(0, 5).map((language, index) => {
-            const percentage = parseFloat(language.percentage.replace('%', ''));
-            const skillLevel = percentage >= 80 ? "Expert" : percentage >= 65 ? "Proficient" : "Familiar";
+            const percentage = parseFloat(language.percentage.replace("%", ""));
+            const skillLevel =
+              percentage >= 80
+                ? "Expert"
+                : percentage >= 65
+                  ? "Proficient"
+                  : "Familiar";
 
             return (
-              <div key={`language-${language.name}-${index}`} className="space-y-2">
+              <div
+                key={`language-${language.name}-${index}`}
+                className="space-y-2"
+              >
                 <div className="flex items-center">
                   <div className="flex items-center gap-2">
-                    <Cpu size={12} className="text-gray-500 dark:text-gray-400" />
+                    <Cpu
+                      size={12}
+                      className="text-gray-500 dark:text-gray-400"
+                    />
                     <span className="font-medium text-sm text-gray-900 dark:text-white">
                       {language.name}
                     </span>

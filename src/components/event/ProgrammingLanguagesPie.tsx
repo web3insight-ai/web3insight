@@ -1,6 +1,9 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { Code2 } from "lucide-react";
-import { useGitHubStats, type GitHubLanguage } from "../../hooks/useGitHubStats";
+import {
+  useGitHubStats,
+  type GitHubLanguage,
+} from "../../hooks/useGitHubStats";
 
 interface ProgrammingLanguagesPieProps {
   username?: string | null;
@@ -26,14 +29,21 @@ export function ProgrammingLanguagesPie({
   loading: forcedLoading,
 }: ProgrammingLanguagesPieProps) {
   const shouldFetch = !providedLanguages && !!username;
-  const { data: githubData, loading } = useGitHubStats(shouldFetch ? (username ?? null) : null);
+  const { data: githubData, loading } = useGitHubStats(
+    shouldFetch ? (username ?? null) : null,
+  );
   const languages = providedLanguages ?? githubData?.languages ?? [];
-  const isLoading = typeof forcedLoading === "boolean" ? forcedLoading : (shouldFetch ? loading : false);
+  const isLoading =
+    typeof forcedLoading === "boolean"
+      ? forcedLoading
+      : shouldFetch
+        ? loading
+        : false;
   const hasLanguages = languages.length > 0;
   const chartData = hasLanguages
-    ? languages.slice(0, 6).map(lang => ({
+    ? languages.slice(0, 6).map((lang) => ({
       name: lang.name,
-      value: parseFloat(lang.percentage.replace('%', '')),
+      value: parseFloat(lang.percentage.replace("%", "")),
       percentage: lang.percentage,
     }))
     : [];
@@ -42,7 +52,13 @@ export function ProgrammingLanguagesPie({
     return null;
   }
 
-  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { name: string; percentage: string } }> }) => {
+  const CustomTooltip = ({
+    active,
+    payload,
+  }: {
+    active?: boolean;
+    payload?: Array<{ payload: { name: string; percentage: string } }>;
+  }) => {
     if (active && payload && payload.length) {
       const data = payload[0];
       return (
@@ -60,10 +76,14 @@ export function ProgrammingLanguagesPie({
   };
 
   return (
-    <div className={`border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle ${className}`}>
+    <div
+      className={`rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 p-4 ${className}`}
+    >
       <div className="flex items-center gap-2 mb-4">
-        <Code2 size={14} className="text-gray-600 dark:text-gray-400" />
-        <h4 className="text-sm font-medium text-gray-900 dark:text-white">Language Distribution</h4>
+        <Code2 size={14} className="text-gray-400" />
+        <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+          Language Distribution
+        </h4>
         {hasLanguages && (
           <span className="text-xs text-gray-500 dark:text-gray-400 ml-auto">
             Top {Math.min(6, languages.length)}
@@ -89,7 +109,10 @@ export function ProgrammingLanguagesPie({
                   strokeWidth={1}
                 >
                   {chartData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
@@ -100,7 +123,10 @@ export function ProgrammingLanguagesPie({
           {/* Language List */}
           <div className="space-y-2">
             {chartData.map((lang, index) => (
-              <div key={lang.name} className="flex items-center justify-between text-xs">
+              <div
+                key={lang.name}
+                className="flex items-center justify-between text-xs"
+              >
                 <div className="flex items-center gap-2">
                   <div
                     className="w-2.5 h-2.5 rounded-full border border-gray-300 dark:border-gray-600"
