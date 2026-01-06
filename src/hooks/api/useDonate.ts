@@ -173,41 +173,35 @@ export function useInvalidateDonateList() {
   const queryClient = useQueryClient();
 
   return async (optimisticRepo?: DonateRepo) => {
-    if (optimisticRepo) {
-      queryClient.setQueryData<DonateRepo[]>(
-        queryKeys.donate.list(),
-        (previousData) => {
-          const list = previousData ?? [];
-          const existingIndex = list.findIndex(
-            (repo) => repo.repo_id === optimisticRepo.repo_id,
-          );
+    // Get current cache data first
+    const currentData = queryClient.getQueryData<DonateRepo[]>(
+      queryKeys.donate.list(),
+    );
 
-          if (existingIndex >= 0) {
-            const next = [...list];
-            next[existingIndex] = optimisticRepo;
-            return next;
-          }
-
-          return [optimisticRepo, ...list];
-        },
+    // Optimistic update: add new repo to existing list
+    if (optimisticRepo && currentData) {
+      const existingIndex = currentData.findIndex(
+        (repo) => repo.repo_id === optimisticRepo.repo_id,
       );
+
+      if (existingIndex >= 0) {
+        const next = [...currentData];
+        next[existingIndex] = optimisticRepo;
+        queryClient.setQueryData(queryKeys.donate.list(), next);
+      } else {
+        queryClient.setQueryData(queryKeys.donate.list(), [
+          optimisticRepo,
+          ...currentData,
+        ]);
+      }
     }
 
     // Small delay to ensure database transaction is committed
     await new Promise((resolve) => setTimeout(resolve, 300));
 
-    // Fetch fresh data directly
-    const response = await fetch("/api/donate/repos");
-    const json: DonateReposApiResponse = await response.json();
-    const newData = json.data ?? [];
-
-    const mergedData =
-      optimisticRepo &&
-      !newData.some((repo) => repo.repo_id === optimisticRepo.repo_id)
-        ? [optimisticRepo, ...newData]
-        : newData;
-
-    // Manually set the query data to ensure cache is updated
-    queryClient.setQueryData(queryKeys.donate.list(), mergedData);
+    // Invalidate and refetch to get the full list from server
+    await queryClient.invalidateQueries({
+      queryKey: queryKeys.donate.list(),
+    });
   };
 }

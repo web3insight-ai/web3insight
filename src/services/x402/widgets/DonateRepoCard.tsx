@@ -74,12 +74,12 @@ export function DonateRepoCard({ repo }: DonateRepoCardProps) {
           radius="lg"
           className="flex-shrink-0"
         />
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 overflow-hidden">
           <a
             href={repoUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white hover:text-primary transition-colors"
+            className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white hover:text-primary transition-colors max-w-full"
           >
             <span className="truncate">{repoDisplayName}</span>
             <ExternalLink size={12} className="flex-shrink-0 text-gray-300" />
