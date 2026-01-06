@@ -59,14 +59,13 @@ export const donateQueryOptions = {
     }),
 
   /**
-   * Get donate repo by name
+   * Get donate repo by ID
    */
-  byName: (name: string) =>
+  byId: (id: number | string) =>
     queryOptions({
-      queryKey: queryKeys.donate.detailByName(name),
+      queryKey: queryKeys.donate.detail(String(id)),
       queryFn: async (): Promise<DonateRepo | null> => {
-        const encodedName = encodeURIComponent(name);
-        const response = await fetch(`/api/donate/repos/name/${encodedName}`);
+        const response = await fetch(`/api/donate/repos/${id}`);
         const json: DonateRepoApiResponse = await response.json();
 
         if (!json.success) {
@@ -76,7 +75,7 @@ export const donateQueryOptions = {
         return json.data ?? null;
       },
       staleTime: 2 * 60 * 1000, // 2 minutes
-      enabled: !!name,
+      enabled: !!id,
     }),
 };
 
@@ -102,10 +101,10 @@ export function useDonateRepoList() {
 }
 
 /**
- * Hook to get donate repo by name
+ * Hook to get donate repo by ID
  */
-export function useDonateRepoByName(name: string) {
-  return useQuery(donateQueryOptions.byName(name));
+export function useDonateRepoById(id: number | string) {
+  return useQuery(donateQueryOptions.byId(id));
 }
 
 // ============================================================================

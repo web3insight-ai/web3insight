@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Avatar, Link } from "@nextui-org/react";
 import { Star, ExternalLink, LinkIcon } from "lucide-react";
 import { DonateButton } from "./DonateButton";
@@ -46,6 +47,7 @@ function getLinkDisplayText(link: DonationLink): string {
 }
 
 export function DonateRepoCard({ repo }: DonateRepoCardProps) {
+  const router = useRouter();
   const { repo_info, repo_donate_data } = repo;
   const hasDonationConfig = repo_donate_data?.payTo;
   const creator = repo_donate_data?.creator;
@@ -64,8 +66,27 @@ export function DonateRepoCard({ repo }: DonateRepoCardProps) {
   // Reason: Use creator avatar if available, otherwise fall back to repo owner avatar
   const displayAvatar = creator?.avatar || repo_info.owner.avatar_url;
 
+  const handleCardClick = () => {
+    router.push(`/plaza/x402/${repo.repo_id}`);
+  };
+
+  // Reason: Prevent card navigation when clicking on interactive elements
+  const stopPropagation = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
-    <div className="group p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 hover:border-gray-300 dark:hover:border-gray-600 transition-colors">
+    <div
+      className="group p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-md transition-all cursor-pointer"
+      onClick={handleCardClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          handleCardClick();
+        }
+      }}
+    >
       {/* Header: Avatar + Repo Name (from links) + Star */}
       <div className="flex items-center gap-3 mb-2">
         <Avatar
@@ -79,6 +100,7 @@ export function DonateRepoCard({ repo }: DonateRepoCardProps) {
             href={repoUrl}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={stopPropagation}
             className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white hover:text-primary transition-colors max-w-full"
           >
             <span className="truncate">{repoDisplayName}</span>
@@ -99,6 +121,7 @@ export function DonateRepoCard({ repo }: DonateRepoCardProps) {
             href={`https://github.com/${creator.handle}`}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={stopPropagation}
             className="text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-primary transition-colors"
           >
             @{creator.handle}
@@ -122,7 +145,10 @@ export function DonateRepoCard({ repo }: DonateRepoCardProps) {
 
       {/* Other Links (Website, etc.) - excluding Repository links */}
       {otherLinks.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mb-3 ml-11">
+        <div
+          className="flex flex-wrap gap-1.5 mb-3 ml-11"
+          onClick={stopPropagation}
+        >
           {otherLinks.map((link, index) => (
             <Link
               key={index}
@@ -139,7 +165,10 @@ export function DonateRepoCard({ repo }: DonateRepoCardProps) {
       )}
 
       {/* Footer: Meta + Action */}
-      <div className="flex items-center justify-between ml-11">
+      <div
+        className="flex items-center justify-between ml-11"
+        onClick={stopPropagation}
+      >
         {hasDonationConfig ? (
           <>
             <div className="flex items-center gap-3 text-xs text-gray-400">

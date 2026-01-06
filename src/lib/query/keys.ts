@@ -99,9 +99,8 @@ export const queryKeys = {
   donate: {
     all: ["donate"] as const,
     list: () => [...queryKeys.donate.all, "list"] as const,
-    detail: (id: number) => [...queryKeys.donate.all, "detail", id] as const,
-    detailByName: (name: string) =>
-      [...queryKeys.donate.all, "detailByName", name] as const,
+    detail: (id: number | string) =>
+      [...queryKeys.donate.all, "detail", id] as const,
   },
 };
 
