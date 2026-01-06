@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Button,
   Modal,
@@ -14,6 +14,7 @@ import {
   Chip,
 } from "@nextui-org/react";
 import { usePrivy } from "@privy-io/react-auth";
+import { useAtom } from "jotai";
 import {
   Heart,
   Wallet,
@@ -26,6 +27,7 @@ import {
 import { useX402Payment, getExplorerUrl } from "../hooks/useX402Payment";
 import { PRESET_AMOUNTS, DEFAULT_NETWORK, SUPPORTED_NETWORKS } from "../typing";
 import type { DonateButtonProps, NetworkKey } from "../typing";
+import { addToastAtom } from "#/atoms";
 
 export function DonateButton({
   payTo,
@@ -38,6 +40,7 @@ export function DonateButton({
   const { ready, authenticated, login } = usePrivy();
   const { execute, reset, status, error, result, isConnected, activeWallet } =
     useX402Payment();
+  const [, addToast] = useAtom(addToastAtom);
 
   const [isOpen, setIsOpen] = useState(false);
   const [selectedAmount, setSelectedAmount] = useState<number | null>(
@@ -49,6 +52,23 @@ export function DonateButton({
   const [selectedNetwork, setSelectedNetwork] = useState<NetworkKey>(
     (network as NetworkKey) || DEFAULT_NETWORK,
   );
+
+  // Show toast on status change
+  useEffect(() => {
+    if (status === "success" && result) {
+      addToast({
+        type: "success",
+        title: "Donation successful!",
+        message: `Sent $${result.amount} USDC`,
+      });
+    } else if (status === "error" && error) {
+      addToast({
+        type: "error",
+        title: "Donation failed",
+        message: error,
+      });
+    }
+  }, [status, result, error, addToast]);
 
   const handleOpen = () => {
     if (!authenticated) {
