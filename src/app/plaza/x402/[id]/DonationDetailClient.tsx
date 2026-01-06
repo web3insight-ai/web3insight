@@ -231,7 +231,8 @@ export default function DonationDetailClient({
       : null;
 
   const activeDeveloperAxisLabels = monthKeys.map(formatMonthLabel);
-  const hasActiveDeveloperData = activeDevelopers.length > 0;
+  // Reason: Check if there's any non-zero value in the chart data
+  const hasActiveDeveloperData = activeDeveloperChartValues.some((v) => v > 0);
   const maxActiveDeveloperValue = Math.max(...activeDeveloperChartValues, 0);
   const computedYAxisMax =
     maxActiveDeveloperValue > 0
@@ -440,22 +441,19 @@ export default function DonationDetailClient({
           )}
         </div>
 
-        {/* Active Developers Chart */}
-        <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 mb-4">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-2">
-              <UserCheck
-                size={14}
-                className="text-gray-600 dark:text-gray-400"
-              />
-              <div>
-                <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-                  Active Developers
-                </h3>
-                {latestActiveDeveloper && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {formatMonthLabel(latestActiveDeveloper.month)}
-                    {hasActiveDeveloperData && (
+        {/* Active Developers Chart - only show when there's data */}
+        {hasActiveDeveloperData && (
+          <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 mb-4">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-2">
+                <UserCheck size={14} className="text-gray-400" />
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                    Active Developers
+                  </h3>
+                  {latestActiveDeveloper && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {formatMonthLabel(latestActiveDeveloper.month)}
                       <span className="ml-2 text-gray-600 dark:text-gray-400">
                         {averageActiveDevelopers !== null && (
                           <span>
@@ -480,100 +478,96 @@ export default function DonationDetailClient({
                           </span>
                         </span>
                       </span>
-                    )}
-                    {!hasActiveDeveloperData && (
-                      <span className="ml-2">
-                        Months: {monthKeys.length} No analytics data.
-                      </span>
-                    )}
-                  </p>
-                )}
+                    </p>
+                  )}
+                </div>
               </div>
+              {latestActiveDeveloper && (
+                <div className="text-right">
+                  <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+                    {latestActiveDeveloper.developers}
+                  </p>
+                  {previousActiveDeveloper &&
+                    activeDeveloperChange !== null && (
+                    <p
+                      className={`text-xs font-medium ${
+                        activeDeveloperChange >= 0
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-rose-600 dark:text-rose-400"
+                      }`}
+                    >
+                      {activeDeveloperChange >= 0 ? "▲" : "▼"}{" "}
+                      {Math.abs(activeDeveloperChange)} vs{" "}
+                      {formatMonthLabel(previousActiveDeveloper.month)}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
-            {latestActiveDeveloper && (
-              <div className="text-right">
-                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
-                  {latestActiveDeveloper.developers}
-                </p>
-                {previousActiveDeveloper && activeDeveloperChange !== null && (
-                  <p
-                    className={`text-xs font-medium ${
-                      activeDeveloperChange >= 0
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : "text-rose-600 dark:text-rose-400"
-                    }`}
-                  >
-                    {activeDeveloperChange >= 0 ? "▲" : "▼"}{" "}
-                    {Math.abs(activeDeveloperChange)} vs{" "}
-                    {formatMonthLabel(previousActiveDeveloper.month)}
-                  </p>
-                )}
+            <ClientOnly>
+              <div className="mt-4 h-[280px]">
+                <ReactECharts
+                  option={{
+                    grid: {
+                      left: "6%",
+                      right: "3%",
+                      top: "10%",
+                      bottom: "2%",
+                      containLabel: true,
+                    },
+                    tooltip: { trigger: "axis", fontSize: 10 },
+                    xAxis: {
+                      type: "category",
+                      data: activeDeveloperAxisLabels,
+                      axisLabel: {
+                        interval: 0,
+                        rotate: 45,
+                        fontSize: 9,
+                        color: "#1F2937",
+                        margin: 12,
+                      },
+                      axisTick: { show: false },
+                    },
+                    yAxis: {
+                      type: "value",
+                      name: "Developers",
+                      nameTextStyle: { fontSize: 9, color: "#1F2937" },
+                      axisLabel: { fontSize: 9, color: "#1F2937" },
+                      axisTick: { show: false },
+                      min: 0,
+                      max: computedYAxisMax,
+                      boundaryGap: [0, 0.1],
+                      splitLine: {
+                        lineStyle: { color: "#E5E7EB", opacity: 0.5 },
+                      },
+                    },
+                    series: [
+                      {
+                        data: activeDeveloperChartValues,
+                        type: "bar",
+                        itemStyle: { color: "#0EA5E9" },
+                        barWidth: "45%",
+                        emphasis: {
+                          focus: "series",
+                          itemStyle: { color: "#0284C7" },
+                        },
+                        label: {
+                          show: true,
+                          position: "top",
+                          formatter: ({ value }: { value: number }) =>
+                            (value ?? 0).toString(),
+                          fontSize: 10,
+                          color: "#0F172A",
+                        },
+                      },
+                    ],
+                  }}
+                  style={{ height: "100%", width: "100%" }}
+                />
               </div>
-            )}
+            </ClientOnly>
           </div>
-          <ClientOnly>
-            <div className="mt-4 h-[280px]">
-              <ReactECharts
-                option={{
-                  grid: {
-                    left: "6%",
-                    right: "3%",
-                    top: "10%",
-                    bottom: "2%",
-                    containLabel: true,
-                  },
-                  tooltip: { trigger: "axis", fontSize: 10 },
-                  xAxis: {
-                    type: "category",
-                    data: activeDeveloperAxisLabels,
-                    axisLabel: {
-                      interval: 0,
-                      rotate: 45,
-                      fontSize: 9,
-                      color: "#1F2937",
-                      margin: 12,
-                    },
-                    axisTick: { show: false },
-                  },
-                  yAxis: {
-                    type: "value",
-                    name: "Developers",
-                    nameTextStyle: { fontSize: 9, color: "#1F2937" },
-                    axisLabel: { fontSize: 9, color: "#1F2937" },
-                    axisTick: { show: false },
-                    min: 0,
-                    max: computedYAxisMax,
-                    boundaryGap: [0, 0.1],
-                    splitLine: {
-                      lineStyle: { color: "#E5E7EB", opacity: 0.5 },
-                    },
-                  },
-                  series: [
-                    {
-                      data: activeDeveloperChartValues,
-                      type: "bar",
-                      itemStyle: { color: "#0EA5E9" },
-                      barWidth: "45%",
-                      emphasis: {
-                        focus: "series",
-                        itemStyle: { color: "#0284C7" },
-                      },
-                      label: {
-                        show: true,
-                        position: "top",
-                        formatter: ({ value }: { value: number }) =>
-                          (value ?? 0).toString(),
-                        fontSize: 10,
-                        color: "#0F172A",
-                      },
-                    },
-                  ],
-                }}
-                style={{ height: "100%", width: "100%" }}
-              />
-            </div>
-          </ClientOnly>
-        </div>
+        )}
 
         {/* Creator Profile Section */}
         {developer && (
