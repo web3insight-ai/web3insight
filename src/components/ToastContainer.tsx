@@ -1,65 +1,77 @@
+"use client";
+
 import { useAtom } from "jotai";
-import { Card, CardBody, Button } from "@nextui-org/react";
+import { CheckCircle, XCircle, AlertTriangle, Info, X } from "lucide-react";
 import { toastsAtom, removeToastAtom, type Toast } from "#/atoms";
 
 function ToastItem({ toast }: { toast: Toast }) {
   const [, removeToast] = useAtom(removeToastAtom);
 
-  const getToastColor = (type: Toast['type']) => {
-    switch (type) {
-    case 'success':
-      return 'success';
-    case 'error':
-      return 'danger';
-    case 'warning':
-      return 'warning';
-    case 'info':
-    default:
-      return 'primary';
-    }
+  const styles = {
+    success: {
+      bg: "bg-green-50 dark:bg-green-900/20",
+      border: "border-green-200 dark:border-green-800",
+      icon: (
+        <CheckCircle size={16} className="text-green-600 dark:text-green-400" />
+      ),
+      title: "text-green-800 dark:text-green-200",
+      message: "text-green-600 dark:text-green-400",
+    },
+    error: {
+      bg: "bg-red-50 dark:bg-red-900/20",
+      border: "border-red-200 dark:border-red-800",
+      icon: <XCircle size={16} className="text-red-600 dark:text-red-400" />,
+      title: "text-red-800 dark:text-red-200",
+      message: "text-red-600 dark:text-red-400",
+    },
+    warning: {
+      bg: "bg-amber-50 dark:bg-amber-900/20",
+      border: "border-amber-200 dark:border-amber-800",
+      icon: (
+        <AlertTriangle
+          size={16}
+          className="text-amber-600 dark:text-amber-400"
+        />
+      ),
+      title: "text-amber-800 dark:text-amber-200",
+      message: "text-amber-600 dark:text-amber-400",
+    },
+    info: {
+      bg: "bg-blue-50 dark:bg-blue-900/20",
+      border: "border-blue-200 dark:border-blue-800",
+      icon: <Info size={16} className="text-blue-600 dark:text-blue-400" />,
+      title: "text-blue-800 dark:text-blue-200",
+      message: "text-blue-600 dark:text-blue-400",
+    },
   };
 
-  const getToastIcon = (type: Toast['type']) => {
-    switch (type) {
-    case 'success':
-      return '✅';
-    case 'error':
-      return '❌';
-    case 'warning':
-      return '⚠️';
-    case 'info':
-    default:
-      return 'ℹ️';
-    }
-  };
+  const style = styles[toast.type] || styles.info;
 
   return (
-    <Card
-      className={`mb-2 shadow-lg border-l-4 border-l-${getToastColor(toast.type)} animate-in slide-in-from-right duration-300`}
+    <div
+      className={`
+        mb-2 p-3 rounded-lg border shadow-sm
+        ${style.bg} ${style.border}
+        animate-in slide-in-from-right-5 fade-in duration-200
+      `}
     >
-      <CardBody className="flex flex-row items-start justify-between p-4">
-        <div className="flex items-start space-x-3">
-          <span className="text-lg">{getToastIcon(toast.type)}</span>
-          <div className="flex-1">
-            <h4 className="font-semibold text-sm">{toast.title}</h4>
-            {toast.message && (
-              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                {toast.message}
-              </p>
-            )}
-          </div>
+      <div className="flex items-start gap-2.5">
+        <div className="flex-shrink-0 mt-0.5">{style.icon}</div>
+        <div className="flex-1 min-w-0">
+          <p className={`text-sm font-medium ${style.title}`}>{toast.title}</p>
+          {toast.message && (
+            <p className={`text-xs mt-0.5 ${style.message}`}>{toast.message}</p>
+          )}
         </div>
-        <Button
-          isIconOnly
-          size="sm"
-          variant="light"
+        <button
+          type="button"
           onClick={() => removeToast(toast.id)}
-          className="ml-2"
+          className="flex-shrink-0 p-0.5 rounded hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
         >
-          ✕
-        </Button>
-      </CardBody>
-    </Card>
+          <X size={14} className="text-gray-400" />
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -71,7 +83,7 @@ export default function ToastContainer() {
   }
 
   return (
-    <div className="fixed top-4 right-4 z-50 w-80 max-w-sm">
+    <div className="fixed top-4 right-4 z-50 w-72">
       {toasts.map((toast) => (
         <ToastItem key={toast.id} toast={toast} />
       ))}
