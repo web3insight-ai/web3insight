@@ -7,29 +7,28 @@ import {
   createPublicClient,
   custom,
   http,
-  parseUnits,
   formatUnits,
   type Address,
-  type Hex,
+  publicActions,
 } from "viem";
 import { base, baseSepolia } from "viem/chains";
+import {
+  createX402Client,
+  parseDefaultAssetAmount,
+  getTransferHookAddress,
+  encodeRecipientsForHook,
+  getPrimaryRecipient,
+  validateRecipientConfig,
+  getNetworkConfig,
+  type Recipient,
+} from "../lib/x402";
 import type {
   PaymentStatus,
   PaymentParams,
   PaymentResult,
   NetworkKey,
-  X402Authorization,
-  X402PaymentPayload,
 } from "../typing";
-import {
-  USDC_ADDRESSES,
-  CHAIN_IDS,
-  DEFAULT_NETWORK,
-  USDC_DOMAINS,
-} from "../typing";
-
-// x402 Facilitator URL
-const FACILITATOR_URL = "https://facilitator.x402x.dev";
+import { DEFAULT_NETWORK, getNetworkCaip2, getNetworkChainId } from "../typing";
 
 // ERC20 balanceOf ABI
 const ERC20_BALANCE_ABI = [
@@ -43,21 +42,23 @@ const ERC20_BALANCE_ABI = [
 ] as const;
 
 /**
- * Generate a random nonce for EIP-3009
+ * Get viem chain from network key
  */
-function generateNonce(): Hex {
-  const randomBytes = new Uint8Array(32);
-  crypto.getRandomValues(randomBytes);
-  return `0x${Array.from(randomBytes)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("")}` as Hex;
+function getChainFromNetwork(network: NetworkKey) {
+  return network === "base" ? base : baseSepolia;
+}
+
+export interface UseX402PaymentOptions {
+  network?: NetworkKey;
+  onSuccess?: (result: PaymentResult) => void;
+  onError?: (error: string) => void;
 }
 
 /**
  * Hook for x402 payment integration with Privy wallet
- * Uses EIP-3009 transferWithAuthorization for gasless USDC payments
+ * Uses official @x402x/client for gasless USDC payments
  */
-export function useX402Payment() {
+export function useX402Payment(options?: UseX402PaymentOptions) {
   const { ready, authenticated } = usePrivy();
   const { wallets } = useWallets();
   const [status, setStatus] = useState<PaymentStatus>("idle");
@@ -72,20 +73,46 @@ export function useX402Payment() {
   }, [wallets]);
 
   const execute = useCallback(
-    async ({ amount, payTo, network = DEFAULT_NETWORK }: PaymentParams) => {
+    async ({
+      amount,
+      payTo,
+      recipients,
+      network = options?.network || DEFAULT_NETWORK,
+    }: PaymentParams) => {
       const wallet = getActiveWallet();
 
       if (!wallet) {
-        setError("Please connect a wallet first");
+        const errorMsg = "Please connect a wallet first";
+        setError(errorMsg);
         setStatus("error");
+        options?.onError?.(errorMsg);
         return null;
       }
 
       // Validate payTo address
       if (!payTo || !/^0x[a-fA-F0-9]{40}$/.test(payTo)) {
-        setError("Invalid recipient address");
+        const errorMsg = "Invalid recipient address";
+        setError(errorMsg);
         setStatus("error");
+        options?.onError?.(errorMsg);
         return null;
+      }
+
+      // Validate recipient configuration if provided
+      if (recipients && recipients.length > 0) {
+        const recipientList: Recipient[] = recipients.map((r) => ({
+          address: r.address as Address,
+          basisPoints: r.basisPoints,
+        }));
+        const validation = validateRecipientConfig(recipientList);
+        if (!validation.valid) {
+          const errorMsg =
+            validation.error || "Invalid recipient configuration";
+          setError(errorMsg);
+          setStatus("error");
+          options?.onError?.(errorMsg);
+          return null;
+        }
       }
 
       try {
@@ -93,16 +120,14 @@ export function useX402Payment() {
         setError(null);
         setResult(null);
 
-        // Get the chain based on network
         const networkKey = network as NetworkKey;
-        const chain = networkKey === "base" ? base : baseSepolia;
-        const targetChainId = CHAIN_IDS[networkKey];
-        const usdcAddress = USDC_ADDRESSES[networkKey];
-        const usdcDomain = USDC_DOMAINS[networkKey];
+        const chain = getChainFromNetwork(networkKey);
+        const targetChainId = getNetworkChainId(networkKey);
+        const caip2Network = getNetworkCaip2(networkKey);
 
-        if (!usdcAddress || !targetChainId) {
-          throw new Error(`Unsupported network: ${network}`);
-        }
+        // Get network config from @x402x/extensions
+        const networkConfig = getNetworkConfig(caip2Network);
+        const usdcAddress = networkConfig.defaultAsset.address as Address;
 
         // Get wallet provider
         const provider = await wallet.getEthereumProvider();
@@ -123,26 +148,34 @@ export function useX402Payment() {
           }
         }
 
-        // Create clients
+        // Create viem clients from Privy provider
         const updatedProvider = await wallet.getEthereumProvider();
-        const walletClient = createWalletClient({
-          chain,
-          transport: custom(updatedProvider),
-        });
 
         const publicClient = createPublicClient({
           chain,
           transport: http(),
         });
 
-        // Get the wallet address
-        const [address] = await walletClient.getAddresses();
+        // Get the wallet address first
+        // Reason: x402xClient requires wallet client to have an account set
+        const accounts = (await updatedProvider.request({
+          method: "eth_accounts",
+        })) as Address[];
+
+        const address = accounts[0];
         if (!address) {
           throw new Error("Could not get wallet address");
         }
 
-        // Parse amount to USDC atomic units (6 decimals)
-        const amountInAtomicUnits = parseUnits(amount, 6);
+        // Create wallet client with account and extend with public actions (required for x402x client)
+        const walletClient = createWalletClient({
+          account: address,
+          chain,
+          transport: custom(updatedProvider),
+        }).extend(publicActions);
+
+        // Parse amount to atomic units using x402x extensions
+        const atomicAmount = parseDefaultAssetAmount(amount, caip2Network);
 
         // Check USDC balance before signing
         const balance = await publicClient.readContract({
@@ -152,7 +185,7 @@ export function useX402Payment() {
           args: [address],
         });
 
-        if (balance < amountInAtomicUnits) {
+        if (balance < BigInt(atomicAmount)) {
           const balanceFormatted = formatUnits(balance, 6);
           throw new Error(
             `Insufficient USDC balance. You have ${balanceFormatted} USDC, need ${amount} USDC`,
@@ -161,129 +194,34 @@ export function useX402Payment() {
 
         setStatus("signing");
 
-        // Create EIP-3009 authorization
-        const validAfter = Math.floor(Date.now() / 1000);
-        const validBefore = validAfter + 3600; // Valid for 1 hour
-        const nonce = generateNonce();
+        // Create x402 client (synchronous in v2)
+        const client = createX402Client(walletClient, caip2Network);
 
-        const authorization: X402Authorization = {
-          from: address,
-          to: payTo as Address,
-          value: amountInAtomicUnits.toString(),
-          validAfter: validAfter.toString(),
-          validBefore: validBefore.toString(),
-          nonce,
-        };
+        // Prepare hook data
+        const recipientList: Recipient[] =
+          recipients?.map((r) => ({
+            address: r.address as Address,
+            basisPoints: r.basisPoints,
+          })) || [];
 
-        // EIP-712 typed data for TransferWithAuthorization
-        const typedData = {
-          domain: usdcDomain,
-          types: {
-            TransferWithAuthorization: [
-              { name: "from", type: "address" },
-              { name: "to", type: "address" },
-              { name: "value", type: "uint256" },
-              { name: "validAfter", type: "uint256" },
-              { name: "validBefore", type: "uint256" },
-              { name: "nonce", type: "bytes32" },
-            ],
-          },
-          primaryType: "TransferWithAuthorization" as const,
-          message: {
-            from: authorization.from,
-            to: authorization.to,
-            value: BigInt(authorization.value),
-            validAfter: BigInt(authorization.validAfter),
-            validBefore: BigInt(authorization.validBefore),
-            nonce: authorization.nonce,
-          },
-        };
-
-        // Sign the typed data (gasless - user only signs)
-        const signature = await walletClient.signTypedData({
-          account: address,
-          ...typedData,
-        });
+        const hookData = encodeRecipientsForHook(recipientList);
+        const primaryRecipient =
+          recipients && recipients.length > 0
+            ? getPrimaryRecipient(recipientList, payTo as Address)
+            : (payTo as Address);
 
         setStatus("submitting");
 
-        // Create x402 payment payload
-        const paymentPayload: X402PaymentPayload = {
-          x402Version: 1,
-          scheme: "exact",
-          network: networkKey === "base" ? "base" : "base-sepolia",
-          payload: {
-            signature,
-            authorization: {
-              from: authorization.from,
-              to: authorization.to,
-              value: authorization.value,
-              validAfter: authorization.validAfter,
-              validBefore: authorization.validBefore,
-              nonce: authorization.nonce,
-            },
-          },
-        };
-
-        // Send to facilitator for settlement
-        const facilitatorResponse = await fetch(`${FACILITATOR_URL}/settle`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            paymentPayload,
-            paymentRequirements: {
-              scheme: "exact",
-              network: paymentPayload.network,
-              maxAmountRequired: authorization.value,
-              resource: `donate:${payTo}`,
-              description: "Donation via x402",
-              mimeType: "application/json",
-              payTo: payTo,
-              extra: {
-                name: usdcDomain.name,
-                version: usdcDomain.version,
-                address: usdcAddress,
-              },
-            },
-          }),
+        // Execute payment using official x402x client
+        const executeResult = await client.execute({
+          hook: getTransferHookAddress(caip2Network),
+          hookData,
+          amount: atomicAmount,
+          payTo: primaryRecipient,
         });
 
-        const responseText = await facilitatorResponse.text();
-        let settlementResult;
-
-        try {
-          settlementResult = JSON.parse(responseText);
-        } catch {
-          console.error("Facilitator response:", responseText);
-          throw new Error("Invalid facilitator response");
-        }
-
-        if (!facilitatorResponse.ok) {
-          throw new Error(
-            settlementResult?.error ||
-              settlementResult?.message ||
-              `Facilitator error: ${facilitatorResponse.status}`,
-          );
-        }
-
-        if (!settlementResult.success) {
-          throw new Error(
-            settlementResult.errorReason ||
-              settlementResult.error ||
-              "Settlement failed",
-          );
-        }
-
-        const txHash = settlementResult.transaction || settlementResult.txHash;
-        if (!txHash) {
-          console.error("Settlement result:", settlementResult);
-          throw new Error("No transaction hash returned");
-        }
-
         const paymentResult: PaymentResult = {
-          txHash,
+          txHash: executeResult.txHash,
           amount,
           recipient: payTo,
           network,
@@ -291,6 +229,7 @@ export function useX402Payment() {
 
         setResult(paymentResult);
         setStatus("success");
+        options?.onSuccess?.(paymentResult);
         return paymentResult;
       } catch (err) {
         let errorMessage = "Payment failed";
@@ -308,10 +247,11 @@ export function useX402Payment() {
         }
         setError(errorMessage);
         setStatus("error");
+        options?.onError?.(errorMessage);
         return null;
       }
     },
-    [getActiveWallet],
+    [getActiveWallet, options],
   );
 
   const reset = useCallback(() => {

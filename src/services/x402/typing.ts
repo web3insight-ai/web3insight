@@ -154,10 +154,18 @@ export interface DonateButtonProps {
 
 export const PRESET_AMOUNTS = [1, 5, 10, 25] as const;
 
+// x402 v2 uses CAIP-2 network identifiers
 export const SUPPORTED_NETWORKS = [
-  { value: "base", label: "Base", chainId: 8453, isTestnet: false },
+  {
+    value: "base",
+    caip2: "eip155:8453",
+    label: "Base",
+    chainId: 8453,
+    isTestnet: false,
+  },
   {
     value: "base-sepolia",
+    caip2: "eip155:84532",
     label: "Base Sepolia",
     chainId: 84532,
     isTestnet: true,
@@ -167,32 +175,26 @@ export const SUPPORTED_NETWORKS = [
 export const DEFAULT_NETWORK = "base";
 
 export type NetworkKey = (typeof SUPPORTED_NETWORKS)[number]["value"];
+export type NetworkCaip2 = (typeof SUPPORTED_NETWORKS)[number]["caip2"];
 
-// USDC contract addresses per network
-export const USDC_ADDRESSES: Record<NetworkKey, Address> = {
-  base: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-  "base-sepolia": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
-};
+/**
+ * Get CAIP-2 network identifier from network key
+ */
+export function getNetworkCaip2(network: NetworkKey): NetworkCaip2 {
+  const found = SUPPORTED_NETWORKS.find((n) => n.value === network);
+  if (!found) {
+    throw new Error(`Unsupported network: ${network}`);
+  }
+  return found.caip2;
+}
 
-// Chain IDs per network
-export const CHAIN_IDS: Record<NetworkKey, number> = {
-  base: 8453,
-  "base-sepolia": 84532,
-};
-
-// USDC EIP-712 Domain configuration per network
-// These are the official USDC contract domain configurations
-export const USDC_DOMAINS: Record<NetworkKey, USDCDomain> = {
-  base: {
-    name: "USD Coin",
-    version: "2",
-    chainId: 8453,
-    verifyingContract: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-  },
-  "base-sepolia": {
-    name: "USD Coin",
-    version: "2",
-    chainId: 84532,
-    verifyingContract: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
-  },
-};
+/**
+ * Get chain ID from network key
+ */
+export function getNetworkChainId(network: NetworkKey): number {
+  const found = SUPPORTED_NETWORKS.find((n) => n.value === network);
+  if (!found) {
+    throw new Error(`Unsupported network: ${network}`);
+  }
+  return found.chainId;
+}
