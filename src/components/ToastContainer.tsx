@@ -1,7 +1,14 @@
 "use client";
 
 import { useAtom } from "jotai";
-import { CheckCircle, XCircle, AlertTriangle, Info, X } from "lucide-react";
+import {
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  Info,
+  X,
+  ExternalLink,
+} from "lucide-react";
 import { toastsAtom, removeToastAtom, type Toast } from "#/atoms";
 
 function ToastItem({ toast }: { toast: Toast }) {
@@ -61,6 +68,17 @@ function ToastItem({ toast }: { toast: Toast }) {
           <p className={`text-sm font-medium ${style.title}`}>{toast.title}</p>
           {toast.message && (
             <p className={`text-xs mt-0.5 ${style.message}`}>{toast.message}</p>
+          )}
+          {toast.link && (
+            <a
+              href={toast.link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-xs mt-1 text-primary hover:underline"
+            >
+              {toast.link.text}
+              <ExternalLink size={10} />
+            </a>
           )}
         </div>
         <button

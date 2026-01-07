@@ -2,15 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
-import {
-  createWalletClient,
-  createPublicClient,
-  custom,
-  http,
-  formatUnits,
-  type Address,
-  publicActions,
-} from "viem";
+import { createWalletClient, custom, type Address, publicActions } from "viem";
 import { base, baseSepolia } from "viem/chains";
 import {
   createX402Client,
@@ -19,7 +11,6 @@ import {
   encodeRecipientsForHook,
   getPrimaryRecipient,
   validateRecipientConfig,
-  getNetworkConfig,
   type Recipient,
 } from "../lib/x402";
 import type {
@@ -29,17 +20,6 @@ import type {
   NetworkKey,
 } from "../typing";
 import { DEFAULT_NETWORK, getNetworkCaip2, getNetworkChainId } from "../typing";
-
-// ERC20 balanceOf ABI
-const ERC20_BALANCE_ABI = [
-  {
-    name: "balanceOf",
-    type: "function",
-    inputs: [{ name: "account", type: "address" }],
-    outputs: [{ name: "balance", type: "uint256" }],
-    stateMutability: "view",
-  },
-] as const;
 
 /**
  * Get viem chain from network key
@@ -125,10 +105,6 @@ export function useX402Payment(options?: UseX402PaymentOptions) {
         const targetChainId = getNetworkChainId(networkKey);
         const caip2Network = getNetworkCaip2(networkKey);
 
-        // Get network config from @x402x/extensions
-        const networkConfig = getNetworkConfig(caip2Network);
-        const usdcAddress = networkConfig.defaultAsset.address as Address;
-
         // Get wallet provider
         const provider = await wallet.getEthereumProvider();
 
@@ -151,11 +127,6 @@ export function useX402Payment(options?: UseX402PaymentOptions) {
         // Create viem clients from Privy provider
         const updatedProvider = await wallet.getEthereumProvider();
 
-        const publicClient = createPublicClient({
-          chain,
-          transport: http(),
-        });
-
         // Get the wallet address first
         // Reason: x402xClient requires wallet client to have an account set
         const accounts = (await updatedProvider.request({
@@ -176,21 +147,6 @@ export function useX402Payment(options?: UseX402PaymentOptions) {
 
         // Parse amount to atomic units using x402x extensions
         const atomicAmount = parseDefaultAssetAmount(amount, caip2Network);
-
-        // Check USDC balance before signing
-        const balance = await publicClient.readContract({
-          address: usdcAddress,
-          abi: ERC20_BALANCE_ABI,
-          functionName: "balanceOf",
-          args: [address],
-        });
-
-        if (balance < BigInt(atomicAmount)) {
-          const balanceFormatted = formatUnits(balance, 6);
-          throw new Error(
-            `Insufficient USDC balance. You have ${balanceFormatted} USDC, need ${amount} USDC`,
-          );
-        }
 
         setStatus("signing");
 
@@ -234,15 +190,24 @@ export function useX402Payment(options?: UseX402PaymentOptions) {
       } catch (err) {
         let errorMessage = "Payment failed";
         if (err instanceof Error) {
-          if (
-            err.message.includes("rejected") ||
-            err.message.includes("denied")
-          ) {
+          const msg = err.message.toLowerCase();
+          if (msg.includes("rejected") || msg.includes("denied")) {
             errorMessage = "User rejected the request";
-          } else if (err.message.includes("Insufficient")) {
+          } else if (msg.includes("insufficient") || msg.includes("balance")) {
+            // Reason: Facilitator returns insufficient balance error including fee
+            errorMessage =
+              "Insufficient USDC balance (including ~10% facilitator fee)";
+          } else if (msg.includes("timeout")) {
+            errorMessage = "Transaction timed out. Please try again.";
+          } else if (msg.includes("network") || msg.includes("chain")) {
             errorMessage = err.message;
           } else {
+            // Clean up error message by removing docs links and extra info
             errorMessage = err.message.split("Docs:")[0]?.trim() || err.message;
+            // Truncate very long error messages
+            if (errorMessage.length > 100) {
+              errorMessage = errorMessage.slice(0, 100) + "...";
+            }
           }
         }
         setError(errorMessage);

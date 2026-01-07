@@ -20,6 +20,10 @@ export interface Toast {
   type: ToastType;
   title: string;
   message?: string;
+  link?: {
+    url: string;
+    text: string;
+  };
   duration?: number;
 }
 

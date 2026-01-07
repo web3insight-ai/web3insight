@@ -60,6 +60,11 @@ export function DonateButton({
         type: "success",
         title: "Donation successful!",
         message: `Sent $${result.amount} USDC`,
+        link: {
+          url: getExplorerUrl(result.txHash, result.network),
+          text: "View transaction",
+        },
+        duration: 8000, // Longer duration to allow clicking the link
       });
     } else if (status === "error" && error) {
       addToast({
@@ -320,11 +325,41 @@ export function DonateButton({
                   </p>
                 </div>
 
+                {/* Fee breakdown */}
+                {selectedAmount && (
+                  <div className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-1.5">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-gray-500 dark:text-gray-400">
+                        Amount
+                      </span>
+                      <span className="text-gray-700 dark:text-gray-300">
+                        ${selectedAmount.toFixed(2)} USDC
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-gray-500 dark:text-gray-400">
+                        Facilitator fee (~10%)
+                      </span>
+                      <span className="text-gray-700 dark:text-gray-300">
+                        ~${(selectedAmount * 0.1).toFixed(2)} USDC
+                      </span>
+                    </div>
+                    <div className="border-t border-gray-200 dark:border-gray-700 pt-1.5 flex justify-between text-xs font-medium">
+                      <span className="text-gray-600 dark:text-gray-300">
+                        Estimated total
+                      </span>
+                      <span className="text-gray-800 dark:text-gray-200">
+                        ~${(selectedAmount * 1.1).toFixed(2)} USDC
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 {/* Gasless info */}
                 <div className="flex items-center gap-2 p-2.5 bg-green-50 dark:bg-green-900/20 rounded-lg">
                   <Zap size={14} className="text-green-500" />
                   <span className="text-xs text-green-700 dark:text-green-300">
-                    x402 gasless payment - only USDC needed
+                    Gasless payment via x402 - only USDC needed
                   </span>
                 </div>
               </div>
