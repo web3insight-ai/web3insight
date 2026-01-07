@@ -113,11 +113,19 @@ export async function GET() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${env.DATA_API_TOKEN}`,
       },
+      // Reason: Disable Next.js caching to ensure fresh data on every request
+      cache: "no-store",
     });
 
     const data = await response.json();
 
-    return NextResponse.json(data, { status: response.status });
+    // Reason: Add cache-control headers to prevent browser/CDN caching of stale data
+    return NextResponse.json(data, {
+      status: response.status,
+      headers: {
+        "Cache-Control": "no-store, max-age=0",
+      },
+    });
   } catch (error) {
     console.error("[API] List donate repos error:", error);
     return NextResponse.json(

@@ -44,18 +44,34 @@ export const donateQueryOptions = {
     queryOptions({
       queryKey: queryKeys.donate.list(),
       queryFn: async (): Promise<DonateRepo[]> => {
-        const response = await fetch("/api/donate/repos");
+        const response = await fetch("/api/donate/repos", {
+          // Reason: Prevent browser caching issues
+          cache: "no-store",
+          headers: {
+            "Cache-Control": "no-cache",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error: ${response.status}`);
+        }
+
         const json: DonateReposApiResponse = await response.json();
 
+        // Reason: Throw error on API failure so TanStack Query can handle retry
         if (!json.success) {
-          console.warn("Donate repos API error:", json.message);
+          throw new Error(json.message || "Failed to fetch donate repos");
         }
 
         return json.data ?? [];
       },
-      staleTime: 2 * 60 * 1000, // 2 minutes
-      // Keep previous data visible while refetching
-      placeholderData: (previousData) => previousData,
+      staleTime: 30 * 1000, // 30 seconds
+      gcTime: 5 * 60 * 1000, // 5 minutes garbage collection
+      // Reason: Always refetch when mounting after navigation to ensure fresh data
+      refetchOnMount: "always",
+      // Reason: Retry failed requests up to 3 times
+      retry: 3,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
     }),
 
   /**
@@ -177,30 +193,30 @@ export function useInvalidateDonateList() {
       queryKeys.donate.list(),
     );
 
-    // Optimistic update: add new repo to existing list
-    if (optimisticRepo && currentData) {
-      const existingIndex = currentData.findIndex(
+    // Optimistic update: add new repo to existing list immediately
+    if (optimisticRepo) {
+      const existingData = currentData ?? [];
+      const existingIndex = existingData.findIndex(
         (repo) => repo.repo_id === optimisticRepo.repo_id,
       );
 
       if (existingIndex >= 0) {
-        const next = [...currentData];
+        const next = [...existingData];
         next[existingIndex] = optimisticRepo;
         queryClient.setQueryData(queryKeys.donate.list(), next);
       } else {
         queryClient.setQueryData(queryKeys.donate.list(), [
           optimisticRepo,
-          ...currentData,
+          ...existingData,
         ]);
       }
     }
 
-    // Small delay to ensure database transaction is committed
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    // Invalidate and refetch to get the full list from server
+    // Reason: Invalidate and refetch immediately to ensure cache consistency
+    // The database transaction should be committed by the time API response returns
     await queryClient.invalidateQueries({
       queryKey: queryKeys.donate.list(),
+      refetchType: "active",
     });
   };
 }

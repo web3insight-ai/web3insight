@@ -1,28 +1,81 @@
 "use client";
 
-import { Skeleton } from "@nextui-org/react";
-import { Inbox } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { Skeleton, Button } from "@nextui-org/react";
+import { Inbox, RefreshCw } from "lucide-react";
 import { useDonateRepoList } from "@/hooks/api/useDonate";
 import { DonateRepoCard } from "./DonateRepoCard";
 
 export function DonateRepoList() {
-  const { data: repos = [], isLoading, error } = useDonateRepoList();
+  const {
+    data: repos = [],
+    isPending,
+    isFetching,
+    fetchStatus,
+    isError,
+    error,
+    refetch,
+    dataUpdatedAt,
+  } = useDonateRepoList();
 
-  if (isLoading) {
+  // Reason: Track if we've completed at least one CLIENT-SIDE fetch (not SSR hydration)
+  const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
+  const wasFetchingRef = useRef(false);
+
+  useEffect(() => {
+    // Reason: Detect transition from fetching -> idle to know when a real fetch completed
+    // This avoids treating SSR hydration as a completed fetch
+    if (fetchStatus === "fetching") {
+      wasFetchingRef.current = true;
+    } else if (fetchStatus === "idle" && wasFetchingRef.current) {
+      setHasFetchedOnce(true);
+      wasFetchingRef.current = false;
+    }
+  }, [fetchStatus]);
+
+  // Reason: Also consider it fetched if we have data with a recent timestamp
+  // (within last 5 seconds, indicating fresh fetch not stale SSR data)
+  const hasFreshData = repos.length > 0 && dataUpdatedAt > Date.now() - 5000;
+
+  const hasValidData = hasFetchedOnce || hasFreshData;
+
+  // Reason: Show skeleton when:
+  // 1. isPending = no cached data, waiting for first fetch
+  // 2. !hasValidData = haven't completed a valid fetch yet
+  // 3. isFetching && repos.length === 0 = fetching with empty cache
+  const showSkeleton =
+    isPending || !hasValidData || (isFetching && repos.length === 0);
+
+  if (showSkeleton) {
     return <DonateRepoListSkeleton />;
   }
 
-  if (error) {
+  // Reason: Show error state with retry button when fetch fails and no cached data
+  if (isError && repos.length === 0) {
     return (
       <div className="py-12 text-center">
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          Failed to load repositories. Please try again.
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+          Failed to load repositories.
+          {error?.message && (
+            <span className="block text-xs mt-1 text-gray-400">
+              {error.message}
+            </span>
+          )}
         </p>
+        <Button
+          size="sm"
+          variant="flat"
+          onPress={() => refetch()}
+          startContent={<RefreshCw size={14} />}
+        >
+          Try Again
+        </Button>
       </div>
     );
   }
 
-  if (repos.length === 0) {
+  // Reason: Only show empty state after we've confirmed there's truly no data
+  if (hasValidData && repos.length === 0) {
     return (
       <div className="py-16 text-center">
         <Inbox

@@ -88,13 +88,30 @@ export async function prefetchStatistics(queryClient: QueryClient) {
 
 /**
  * Prefetch donate repo list for SSR
+ * Reason: Server prefetch to enable instant page loads with hydration
  */
 export async function prefetchDonateRepos(queryClient: QueryClient) {
-  await queryClient.prefetchQuery({
-    queryKey: queryKeys.donate.list(),
-    queryFn: async () => {
-      const result = await api.donate.list();
-      return result.success ? result.data : [];
-    },
-  });
+  try {
+    await queryClient.prefetchQuery({
+      queryKey: queryKeys.donate.list(),
+      queryFn: async () => {
+        const result = await api.donate.list();
+        if (!result.success) {
+          // Reason: Throw error so TanStack Query knows the fetch failed
+          // This prevents hydrating with empty data on error
+          console.error(
+            "[SSR] Failed to prefetch donate repos:",
+            result.message,
+          );
+          throw new Error(result.message || "Failed to fetch donate repos");
+        }
+        return result.data ?? [];
+      },
+      // Reason: Short stale time to ensure client refetches fresh data
+      staleTime: 30 * 1000,
+    });
+  } catch (error) {
+    // Reason: Log but don't throw - let client-side fetch handle the data
+    console.error("[SSR] Error prefetching donate repos:", error);
+  }
 }
