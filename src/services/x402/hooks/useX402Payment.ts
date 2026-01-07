@@ -194,9 +194,8 @@ export function useX402Payment(options?: UseX402PaymentOptions) {
           if (msg.includes("rejected") || msg.includes("denied")) {
             errorMessage = "User rejected the request";
           } else if (msg.includes("insufficient") || msg.includes("balance")) {
-            // Reason: Facilitator returns insufficient balance error including fee
-            errorMessage =
-              "Insufficient USDC balance (including ~10% facilitator fee)";
+            // Reason: Facilitator may charge a small fee on top of the amount
+            errorMessage = "Insufficient USDC balance";
           } else if (msg.includes("timeout")) {
             errorMessage = "Transaction timed out. Please try again.";
           } else if (msg.includes("network") || msg.includes("chain")) {
