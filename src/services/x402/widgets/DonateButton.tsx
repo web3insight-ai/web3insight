@@ -20,7 +20,6 @@ import {
   Wallet,
   CheckCircle,
   AlertCircle,
-  ExternalLink,
   Loader2,
   Zap,
 } from "lucide-react";
@@ -53,7 +52,7 @@ export function DonateButton({
     (network as NetworkKey) || DEFAULT_NETWORK,
   );
 
-  // Show toast on status change
+  // Show toast and close modal on completion
   useEffect(() => {
     if (status === "success" && result) {
       addToast({
@@ -64,16 +63,22 @@ export function DonateButton({
           url: getExplorerUrl(result.txHash, result.network),
           text: "View transaction",
         },
-        duration: 8000, // Longer duration to allow clicking the link
+        duration: 8000,
       });
+      // Close modal and reset state
+      setIsOpen(false);
+      setTimeout(() => reset(), 100);
     } else if (status === "error" && error) {
       addToast({
         type: "error",
         title: "Donation failed",
         message: error,
       });
+      // Close modal and reset state
+      setIsOpen(false);
+      setTimeout(() => reset(), 100);
     }
-  }, [status, result, error, addToast]);
+  }, [status, result, error, addToast, reset]);
 
   const handleOpen = () => {
     if (!authenticated) {
@@ -155,24 +160,11 @@ export function DonateButton({
       );
     case "success":
       return (
-        <div className="space-y-3">
-          <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-            <CheckCircle size={16} className="text-green-500" />
-            <span className="text-sm text-green-700 dark:text-green-300">
-                Donation successful!
-            </span>
-          </div>
-          {result && (
-            <a
-              href={getExplorerUrl(result.txHash, result.network)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-xs text-primary hover:underline"
-            >
-                View transaction
-              <ExternalLink size={12} />
-            </a>
-          )}
+        <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+          <CheckCircle size={16} className="text-green-500" />
+          <span className="text-sm text-green-700 dark:text-green-300">
+              Donation successful!
+          </span>
         </div>
       );
     case "error":
@@ -212,7 +204,14 @@ export function DonateButton({
         Donate
       </Button>
 
-      <Modal isOpen={isOpen} onClose={handleClose} placement="center" size="sm">
+      <Modal
+        isOpen={isOpen}
+        onClose={handleClose}
+        placement="center"
+        size="sm"
+        isDismissable={!isProcessing}
+        hideCloseButton={isProcessing}
+      >
         <ModalContent>
           <ModalHeader className="flex flex-col gap-0.5 pb-2">
             <div className="flex items-center gap-2">
@@ -362,17 +361,6 @@ export function DonateButton({
                     : "Select amount"}
                 </Button>
               </>
-            )}
-
-            {status === "success" && (
-              <Button
-                size="sm"
-                color="primary"
-                onPress={handleClose}
-                className="w-full"
-              >
-                Done
-              </Button>
             )}
 
             {status === "error" && (
