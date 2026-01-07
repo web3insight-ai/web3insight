@@ -63,8 +63,8 @@ export function DonateRepoCard({ repo }: DonateRepoCardProps) {
   // Reason: Filter out repository links, show only other links (website, etc.)
   const otherLinks = links.filter((link) => !isRepoLink(link));
 
-  // Reason: Use creator avatar if available, otherwise fall back to repo owner avatar
-  const displayAvatar = creator?.avatar || repo_info.owner.avatar_url;
+  // Reason: Use repo owner avatar (org/user) to match detail page
+  const displayAvatar = repo_info.owner.avatar_url;
 
   const handleCardClick = () => {
     router.push(`/plaza/x402/${repo.repo_id}`);
