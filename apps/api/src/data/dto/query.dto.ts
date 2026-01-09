@@ -68,3 +68,25 @@ export class QueryActorCountryStat {
   country: string;
   actor_count: number;
 }
+
+export class QueryYearlyDeveloperStat {
+  activity_year: number;
+  active_developers: number;
+  new_developers: number;
+  active_developers_yearly_growth_rate: number | null;
+  new_developers_yearly_growth_rate: number | null;
+}
+
+export class QueryChineseEcosystemParticipation {
+  ecosystem_name: string;
+  active: boolean | null;
+  kind: string | null;
+  developer_count: number;
+}
+
+export class QueryChineseEcosystemNewDevelopers {
+  ecosystem_name: string;
+  active: boolean | null;
+  kind: string | null;
+  new_developer_count: number;
+}

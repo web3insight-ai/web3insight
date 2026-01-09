@@ -134,35 +134,20 @@ export class RankController {
     summary: 'Get last year rank report',
     description: '',
   })
-  getReport() {
-    return {
-      years_dev_zh: [
-        {
-          year: 2021,
-          active_dev: 1617,
-          growth_percentage: 55.93,
-        },
-        {
-          year: 2022,
-          active_dev: 2219,
-          growth_percentage: 37.23,
-        },
-        {
-          year: 2023,
-          active_dev: 1989,
-          growth_percentage: -10.37,
-        },
-        {
-          year: 2024,
-          active_dev: 2376,
-          growth_percentage: 19.46,
-        },
-        {
-          year: 2025,
-          active_dev: 1711,
-          growth_percentage: -27.99,
-        },
-      ],
-    };
+  async getReport() {
+    try {
+      const res = await this.cacheDataService.getCacheData(
+        CacheKey.YearsChineseSummary,
+      );
+      if (!res) {
+        throw new HttpException('Cache not found', 404);
+      }
+      return res.cache_data;
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        throw new HttpException(e.message, 400);
+      }
+      throw e;
+    }
   }
 }

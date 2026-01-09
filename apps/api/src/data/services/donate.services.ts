@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { KYSELY } from '@/app/db/db.provider';
 import { DB } from '@/app/db/dto/db.dto';
 import { Kysely } from 'kysely';

@@ -13,6 +13,7 @@ export const CacheKey = {
   ActorScoreRank: 'actor_score_rank',
   EcoRepoRank: 'eco_repo_rank',
   ActorCountryStats: 'actor_country_stats',
+  YearsChineseSummary: 'years_chinese_summary',
 } as const;
 
 export type CacheKeyType = typeof CacheKey;
