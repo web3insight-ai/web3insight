@@ -7,10 +7,7 @@ import { Command, Console } from 'nestjs-console';
 import { KYSELY } from '@/app/db/db.provider';
 import { CompiledQuery, Kysely } from 'kysely';
 import { DB } from '@/app/db/dto/db.dto';
-import {
-  askForConfirmation,
-  chunkArray,
-} from '@/helper';
+import { askForConfirmation, chunkArray } from '@/helper';
 import { isDeepStrictEqual } from 'util';
 import { TokenPoolService } from '@/app/db/pool.services';
 import { GithubService } from '@/api/services/github.services';
