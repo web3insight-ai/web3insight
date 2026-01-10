@@ -6,6 +6,7 @@ import { DB } from '@/app/db/dto/db.dto';
 import {
   QueryChineseEcosystemParticipation,
   QueryChineseEcosystemNewDevelopers,
+  QueryChineseRepoParticipation,
   QueryYearlyDeveloperStat,
 } from '../dto/query.dto';
 import { CacheDataService } from './cache.services';
@@ -222,17 +223,85 @@ ORDER BY nd.new_developer_count DESC, eco.name ASC;
     console.log(JSON.stringify(stats, null, 2));
   }
 
-  async syncChineseYearlyCaches(targetYear: number = 2025) {
-    const [yearlyStats, participation, newDevelopers] = await Promise.all([
-      this.getChineseDeveloperYearlyStats(targetYear),
-      this.getChineseEcosystemParticipationDistribution(targetYear),
-      this.getChineseEcosystemNewDevelopersDistribution(targetYear),
+  async getChineseTopReposByParticipation(
+    targetYear: number = 2025,
+    limit: number = 300,
+  ): Promise<QueryChineseRepoParticipation[]> {
+    const sqlRawQuery = `
+WITH target_countries AS (SELECT UNNEST($1::text[]) AS country_code),
+     chinese_actors AS (SELECT a.actor_id
+                        FROM data.actors a
+                        WHERE a.country IN (SELECT country_code FROM target_countries)),
+
+     ecosystem_repos AS (SELECT r.repo_id,
+                                ek.ecosystem_key AS ecosystem_name
+                         FROM data.repos r
+                                  CROSS JOIN LATERAL jsonb_object_keys(r.upstream_marks) AS ek(ecosystem_key)
+                         WHERE r.upstream_marks <> '{}'::jsonb),
+
+     ecosystem_repo_ids AS (SELECT DISTINCT repo_id
+                            FROM ecosystem_repos),
+
+     repo_actor_events AS (SELECT ev.repo_id,
+                                  ev.actor_id
+                           FROM data.events ev
+                                    JOIN ecosystem_repo_ids er ON er.repo_id = ev.repo_id
+                                    JOIN chinese_actors ca ON ca.actor_id = ev.actor_id
+                           WHERE ev.event_type IN ('PullRequestEvent', 'PushEvent')
+                             AND ev.created_at >= MAKE_DATE($2, 1, 1)
+                             AND ev.created_at < MAKE_DATE($2 + 1, 1, 1)),
+
+     repo_developer_counts AS (SELECT repo_id,
+                                      COUNT(DISTINCT actor_id) AS developer_count
+                               FROM repo_actor_events
+                               GROUP BY repo_id)
+
+SELECT r.repo_id,
+       r.repo_name,
+       rdc.developer_count
+FROM repo_developer_counts rdc
+         JOIN data.repos r ON r.repo_id = rdc.repo_id
+ORDER BY rdc.developer_count DESC, r.repo_name ASC
+LIMIT $3;
+`;
+    const query = CompiledQuery.raw(sqlRawQuery, [
+      this.chineseCountryCodes,
+      targetYear,
+      limit,
     ]);
+
+    const results = await this.db.executeQuery(query);
+    return results.rows as QueryChineseRepoParticipation[];
+  }
+
+  @Command({
+    command: 'years:print:cn-repos-top',
+    description:
+      'Print top repos by Chinese developer participation (PR/Push, default target year 2025)',
+  })
+  async printChineseTopReposByParticipation() {
+    const targetYear = 2025;
+    const stats = await this.getChineseTopReposByParticipation(targetYear);
+    console.log(
+      `Chinese developer top repos for ${targetYear} (PR/Push participation):`,
+    );
+    console.log(JSON.stringify(stats, null, 2));
+  }
+
+  async syncChineseYearlyCaches(targetYear: number = 2025) {
+    const [yearlyStats, participation, newDevelopers, topRepos] =
+      await Promise.all([
+        this.getChineseDeveloperYearlyStats(targetYear),
+        this.getChineseEcosystemParticipationDistribution(targetYear),
+        this.getChineseEcosystemNewDevelopersDistribution(targetYear),
+        this.getChineseTopReposByParticipation(targetYear),
+      ]);
 
     const payload = {
       yearly_stats: yearlyStats,
       eco_participation: participation,
       eco_new_developers: newDevelopers,
+      top_repos: topRepos,
       target_year: targetYear,
     };
 

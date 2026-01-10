@@ -90,3 +90,9 @@ export class QueryChineseEcosystemNewDevelopers {
   kind: string | null;
   new_developer_count: number;
 }
+
+export class QueryChineseRepoParticipation {
+  repo_id: number;
+  repo_name: string;
+  developer_count: number;
+}
