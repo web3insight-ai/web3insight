@@ -129,6 +129,7 @@ export interface ApiAuthUsers {
   user_custom_x: Generated<string>;
   user_custom_labels: Generated<Json>;
   user_title: Generated<string>;
+  mark: Generated<Json>;
 }
 
 export interface ApiAuthUsersBinds {
