@@ -11,9 +11,10 @@ import { AuthModule } from '@/auth/auth.module';
 import { DonateService } from './services/donate.services';
 import { GithubService } from '@/api/services/github.services';
 import { YearsService } from './services/years.services';
+import { AIModule } from '@/ai/ai.module';
 
 @Module({
-  imports: [DBModule, forwardRef(() => AuthModule)],
+  imports: [DBModule, forwardRef(() => AuthModule), AIModule],
   providers: [
     InitDataService,
     TotalService,

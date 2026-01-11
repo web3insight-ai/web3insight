@@ -13,7 +13,8 @@ import { ApiAnalysisUsers, DB } from '@/app/db/dto/db.dto';
 import { TokenPoolService } from '@/app/db/pool.services';
 import { AuthService } from '@/auth/services/auth.services';
 import { GithubService } from '@/api/services/github.services';
-import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { DeveloperAnalysisService } from '@/ai/services/developer-analysis.service';
+import { Inject, Injectable, forwardRef, Logger } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { Kysely } from 'kysely';
 import { Command, Console } from 'nestjs-console';
@@ -21,6 +22,8 @@ import { Command, Console } from 'nestjs-console';
 @Injectable()
 @Console()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     @Inject(KYSELY) private readonly db: Kysely<DB>,
     private readonly tokenPoolService: TokenPoolService,
@@ -28,6 +31,7 @@ export class UsersService {
     private eventEmitter: EventEmitter2,
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
+    private readonly developerAnalysisService: DeveloperAnalysisService,
   ) {}
 
   async uploadAndGetUsers(
@@ -602,27 +606,48 @@ export class UsersService {
       .where('id', '=', String(payload.id))
       .executeTakeFirstOrThrow();
 
-    const ai = await fetch(
-      'https://n8n.pseudoyu.com/webhook/developer/profile',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newData),
-      },
-    );
+    // 使用本地 AI 服务替代 n8n webhook 调用
+    try {
+      this.logger.log(`Starting AI analysis for user analysis id: ${payload.id}`);
 
-    const aiData = await ai.json();
+      const analysisData = {
+        id: String(newData.id),
+        intent: newData.intent,
+        request_data: newData.request_data as { urls: string[] },
+        github: newData.github as { users: any[] },
+        data: newData.data as { users: any[] },
+        created_at: newData.created_at?.toISOString() || '',
+        updated_at: newData.updated_at?.toISOString() || '',
+        description: newData.description || '',
+        submitter_id: newData.submitter_id || '',
+        public: newData.public || false,
+      };
 
-    const update = this.db
-      .updateTable('api.analysis_users')
-      .where('id', '=', String(payload.id))
-      .set({
-        ai: JSON.stringify(aiData),
-      })
-      .returningAll();
-    await this.db.executeQuery(update);
+      const aiData = await this.developerAnalysisService.analyze(analysisData);
+
+      this.logger.log(`AI analysis completed for user analysis id: ${payload.id}`);
+
+      const update = this.db
+        .updateTable('api.analysis_users')
+        .where('id', '=', String(payload.id))
+        .set({
+          ai: JSON.stringify(aiData),
+        })
+        .returningAll();
+      await this.db.executeQuery(update);
+    } catch (error) {
+      this.logger.error(`AI analysis failed for user analysis id: ${payload.id}`, error);
+      // 即使 AI 分析失败，也不影响其他数据的保存
+      // 记录空的 AI 数据
+      const update = this.db
+        .updateTable('api.analysis_users')
+        .where('id', '=', String(payload.id))
+        .set({
+          ai: JSON.stringify({ success: false, error: String(error) }),
+        })
+        .returningAll();
+      await this.db.executeQuery(update);
+    }
   }
 
   @Command({
