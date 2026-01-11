@@ -206,7 +206,7 @@ export class DeveloperAnalysisService {
         const firstActivity = new Date(e.first_activity_at);
         const lastActivity = new Date(e.last_activity_at);
 
-        // 计算月数（用于计算每月 PR 数）
+        // 计算月数（用于计算月均贡献分数）
         const monthsBetween =
           (lastActivity.getTime() - firstActivity.getTime()) /
             (1000 * 60 * 60 * 24 * 30) +
@@ -215,8 +215,8 @@ export class DeveloperAnalysisService {
         return {
           ecosystem_name: e.ecosystem || '',
           repo_cnt: e.repos?.length || 0,
-          pr_cnt: e.total_score || 0,
-          pr_cnt_per_month: ((e.total_score || 0) / monthsBetween).toFixed(2),
+          contribution_score: e.total_score || 0,
+          score_per_month: ((e.total_score || 0) / monthsBetween).toFixed(2),
           first_activity: e.first_activity_at?.split('T')[0] || '',
           days_from_first_activity: `${Math.floor((now.getTime() - firstActivity.getTime()) / (1000 * 60 * 60 * 24))} days ago`,
           last_activity: e.last_activity_at?.split('T')[0] || '',
