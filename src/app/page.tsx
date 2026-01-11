@@ -120,15 +120,15 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     return (
       <DefaultLayoutWrapper user={user}>
         <div className="w-full max-w-content mx-auto px-6 py-8">
-          {/* Global Contributor Map */}
-          <CountryDistributionChart
-            data={countryDistribution}
-            totalDevelopers={countryDistributionTotal}
-          />
-
           {/* Metrics Overview - Client Component */}
+          <HomePageClient />
+
+          {/* Global Contributor Map */}
           <div className="mt-12">
-            <HomePageClient />
+            <CountryDistributionChart
+              data={countryDistribution}
+              totalDevelopers={countryDistributionTotal}
+            />
           </div>
           <Section
             className="mt-16"
@@ -196,10 +196,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       <DefaultLayoutWrapper user={user}>
         <div className="w-full max-w-content mx-auto px-6 py-8">
           {/* Fallback sections with empty data */}
-          <CountryDistributionChart data={[]} totalDevelopers={0} />
+          <HomePageClient />
 
           <div className="mt-12">
-            <HomePageClient />
+            <CountryDistributionChart data={[]} totalDevelopers={0} />
           </div>
           <Section
             className="mt-16"
