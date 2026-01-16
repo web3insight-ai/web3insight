@@ -1,6 +1,6 @@
 'use client'
 
-import { forwardRef, HTMLAttributes } from 'react'
+import { forwardRef, memo, HTMLAttributes } from 'react'
 import Image from 'next/image'
 import { cn } from '../../lib/utils'
 
@@ -69,4 +69,7 @@ const MonadCardBack = forwardRef<HTMLDivElement, MonadCardBackProps>(
   },
 )
 
-export default MonadCardBack
+MonadCardBack.displayName = 'MonadCardBack'
+
+// Memoize to prevent re-renders during card flip animations
+export default memo(MonadCardBack)

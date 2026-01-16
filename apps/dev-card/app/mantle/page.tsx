@@ -5,16 +5,15 @@ import { useRouter } from "next/navigation"
 import { usePrivy } from "@privy-io/react-auth"
 import Image from "next/image"
 import { motion } from "framer-motion"
+import { setUserType } from "@/lib/userTypeEvents"
 
 export default function ConnectPage() {
   const router = useRouter()
   const { login, ready, authenticated } = usePrivy()
 
-  // Initialize and save user type to localStorage on mount (always dev for Mantle)
+  // Initialize and save user type on mount (always dev for Mantle)
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('userType', 'dev')
-    }
+    setUserType('dev')
   }, [])
 
   // Redirect to create page if already logged in (returning user)

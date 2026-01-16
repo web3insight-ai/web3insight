@@ -11,7 +11,22 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    unoptimized: true,
+    remotePatterns: [
+      {
+        // Allow all HTTPS images - users can set any avatar URL
+        protocol: 'https',
+        hostname: '**',
+      },
+    ],
+    formats: ['image/webp', 'image/avif'],
+  },
+  // Optimize barrel file imports for better tree-shaking
+  experimental: {
+    optimizePackageImports: [
+      'lucide-react',
+      'framer-motion',
+      'date-fns',
+    ],
   },
   // Add empty turbopack config to satisfy Next.js but we'll use webpack flag
   turbopack: {},

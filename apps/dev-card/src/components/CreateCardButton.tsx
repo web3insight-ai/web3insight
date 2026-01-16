@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback, memo, useMemo } from "react"
 import { Sparkles, ChevronRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -9,21 +9,25 @@ interface CreateCardButtonProps {
   inviteCode?: string
 }
 
-export function CreateCardButton({ ecosystem = "mantle", inviteCode }: CreateCardButtonProps) {
+export const CreateCardButton = memo(function CreateCardButton({ ecosystem = "mantle", inviteCode }: CreateCardButtonProps) {
   const [isHovered, setIsHovered] = useState(false)
   const isMantle = ecosystem === "mantle"
-  const accentColor = isMantle ? "#5EEAD4" : "#9F8EFF"
-  const glowColor = isMantle ? "rgba(94, 234, 212, 0.6)" : "rgba(159, 142, 255, 0.6)"
-  const bgGradient = isMantle
-    ? "linear-gradient(135deg, rgba(94, 234, 212, 0.2) 0%, rgba(94, 234, 212, 0.1) 100%)"
-    : "linear-gradient(135deg, rgba(159, 142, 255, 0.2) 0%, rgba(159, 142, 255, 0.1) 100%)"
-  const createUrl = `/${ecosystem}`
 
-  const handleClick = () => {
+  // Memoize computed styles to avoid recalculation on re-renders
+  const { accentColor, glowColor, bgGradient, createUrl } = useMemo(() => ({
+    accentColor: isMantle ? "#5EEAD4" : "#9F8EFF",
+    glowColor: isMantle ? "rgba(94, 234, 212, 0.6)" : "rgba(159, 142, 255, 0.6)",
+    bgGradient: isMantle
+      ? "linear-gradient(135deg, rgba(94, 234, 212, 0.2) 0%, rgba(94, 234, 212, 0.1) 100%)"
+      : "linear-gradient(135deg, rgba(159, 142, 255, 0.2) 0%, rgba(159, 142, 255, 0.1) 100%)",
+    createUrl: `/${ecosystem}`,
+  }), [isMantle, ecosystem])
+
+  const handleClick = useCallback(() => {
     if (inviteCode) {
       localStorage.setItem(`devcard-invite-code-${ecosystem}`, inviteCode)
     }
-  }
+  }, [inviteCode, ecosystem])
 
   return (
     <div className="relative">
@@ -139,4 +143,4 @@ export function CreateCardButton({ ecosystem = "mantle", inviteCode }: CreateCar
       )}
     </div>
   )
-}
+})

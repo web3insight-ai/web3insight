@@ -1,6 +1,6 @@
 'use client'
 
-import { forwardRef, HTMLAttributes } from 'react'
+import { forwardRef, memo, HTMLAttributes } from 'react'
 import Image from 'next/image'
 import { cn } from '../../lib/utils'
 
@@ -71,4 +71,5 @@ const MantleCardBack = forwardRef<HTMLDivElement, MantleCardBackProps>(
 
 MantleCardBack.displayName = 'MantleCardBack'
 
-export default MantleCardBack
+// Memoize to prevent re-renders during card flip animations
+export default memo(MantleCardBack)

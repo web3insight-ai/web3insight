@@ -4,45 +4,37 @@ import { PrivyProvider as PrivyAuthProvider } from "@privy-io/react-auth"
 import { env } from "@/env"
 import { PrivyAuthSync } from "./PrivyAuthSync"
 import { useState, useEffect } from "react"
+import { USER_TYPE_CHANGE_EVENT, getUserType } from "@/lib/userTypeEvents"
 
 function PrivyConfiguredProvider({ children }: { children: React.ReactNode }) {
   const appId = env.NEXT_PUBLIC_PRIVY_APP_ID
 
   // State to track user type and trigger re-render when it changes
-  const [userType, setUserType] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('userType') || 'dev' // Default to 'dev'
-    }
-    return 'dev'
-  })
+  const [userType, setUserType] = useState<string>(() => getUserType())
 
-  // Listen for localStorage changes
+  // Listen for userType changes via custom event (same tab) and storage event (cross-tab)
   useEffect(() => {
-    const handleStorageChange = () => {
-      if (typeof window !== 'undefined') {
-        const newType = localStorage.getItem('userType') || 'dev'
-        setUserType(newType)
+    // Handle cross-tab changes via storage event
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'userType') {
+        setUserType(e.newValue || 'dev')
       }
     }
 
-    // Listen to storage events (for changes from other tabs/windows)
-    window.addEventListener('storage', handleStorageChange)
+    // Handle same-tab changes via custom event (replaces 100ms polling)
+    const handleUserTypeChange = (e: Event) => {
+      const customEvent = e as CustomEvent<string>
+      setUserType(customEvent.detail || 'dev')
+    }
 
-    // Also poll for changes in the same tab (since storage event doesn't fire in same tab)
-    const interval = setInterval(() => {
-      if (typeof window !== 'undefined') {
-        const currentType = localStorage.getItem('userType') || 'dev'
-        if (currentType !== userType) {
-          setUserType(currentType)
-        }
-      }
-    }, 100) // Check every 100ms
+    window.addEventListener('storage', handleStorageChange)
+    window.addEventListener(USER_TYPE_CHANGE_EVENT, handleUserTypeChange)
 
     return () => {
       window.removeEventListener('storage', handleStorageChange)
-      clearInterval(interval)
+      window.removeEventListener(USER_TYPE_CHANGE_EVENT, handleUserTypeChange)
     }
-  }, [userType])
+  }, [])
 
   if (!appId) {
     console.warn("NEXT_PUBLIC_PRIVY_APP_ID is not configured - Privy features will be disabled")

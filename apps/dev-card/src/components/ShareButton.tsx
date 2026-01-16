@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback, memo, useMemo } from "react"
 import { Share2, Twitter, Link2, Check } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -11,7 +11,7 @@ interface ShareButtonProps {
   ecosystem?: "mantle" | "monad"
 }
 
-export function ShareButton({
+export const ShareButton = memo(function ShareButton({
   url,
   title = "I just minted a Mantle DevCard! Join the Mantle Global Hackathon 2025 and win rewards!",
   text = "#BuildOnMantle @Mantle_Official @0xMantleCN @OpenBuildxyz @Web3insightAI",
@@ -22,20 +22,25 @@ export function ShareButton({
 
   const shareUrl = url || (typeof window !== "undefined" ? window.location.href : "")
   const isMantle = ecosystem === "mantle"
-  const accentColor = isMantle ? "#5EEAD4" : "#9F8EFF"
-  const bgColor = isMantle ? "rgba(101, 179, 175, 0.15)" : "rgba(159, 142, 255, 0.15)"
-  const borderColor = isMantle ? "rgba(94, 234, 212, 0.3)" : "rgba(159, 142, 255, 0.3)"
 
-  const handleTwitterShare = () => {
+  // Memoize computed colors to avoid recalculation on re-renders
+  const { accentColor, bgColor, borderColor } = useMemo(() => ({
+    accentColor: isMantle ? "#5EEAD4" : "#9F8EFF",
+    bgColor: isMantle ? "rgba(101, 179, 175, 0.15)" : "rgba(159, 142, 255, 0.15)",
+    borderColor: isMantle ? "rgba(94, 234, 212, 0.3)" : "rgba(159, 142, 255, 0.3)",
+  }), [isMantle])
+
+  // Memoize handlers to prevent recreation on every render
+  const handleTwitterShare = useCallback(() => {
     const twitterUrl = new URL("https://twitter.com/intent/tweet")
     // Format: title + empty line + URL + empty line + hashtags/tags
     const fullText = `${title}\n\n${shareUrl}\n\n${text}`
     twitterUrl.searchParams.set("text", fullText)
     window.open(twitterUrl.toString(), "_blank", "noopener,noreferrer")
     setIsOpen(false)
-  }
+  }, [title, shareUrl, text])
 
-  const handleCopyLink = async () => {
+  const handleCopyLink = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(shareUrl)
       setCopied(true)
@@ -46,7 +51,7 @@ export function ShareButton({
     } catch (err) {
       console.error("Failed to copy link:", err)
     }
-  }
+  }, [shareUrl])
 
   return (
     <div className="relative">
@@ -127,4 +132,4 @@ export function ShareButton({
       </AnimatePresence>
     </div>
   )
-}
+})
