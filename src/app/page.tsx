@@ -8,9 +8,9 @@ import RepositoryTrendingViewWidget from "~/repository/views/repository-trending
 import RepositoryDeveloperActivityViewWidget from "~/repository/views/repository-developer-activity";
 import DeveloperRankViewWidget from "~/developer/views/developer-rank";
 import Section from "$/section";
-import CountryDistributionChart from "$/CountryDistributionChart";
 import DefaultLayoutWrapper from "./DefaultLayoutWrapper";
 import HomePageClient from "./HomePageClient";
+import CountryDistributionChart from "$/CountryDistributionChart";
 
 const { title, tagline, description } = getMetadata();
 

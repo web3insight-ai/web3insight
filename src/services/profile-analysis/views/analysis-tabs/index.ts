@@ -1,1 +1,1 @@
-export * from "./AnalysisTabs";
+export { AnalysisTabs } from "./AnalysisTabs";

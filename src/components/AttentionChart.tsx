@@ -1,98 +1,121 @@
-import React from "react";
-import ReactECharts from "echarts-for-react";
+"use client";
+
+import { useMemo } from "react";
 import { useMediaQuery } from "react-responsive";
+import {
+  ComposedChart,
+  Bar,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
 interface AttentionChartProps {
   data: Record<string, number>;
   repoName: string;
 }
 
-const AttentionChart: React.FC<AttentionChartProps> = ({ data, repoName }) => {
+function AttentionChart({ data, repoName }: AttentionChartProps) {
   const isMobile = useMediaQuery({ maxWidth: 767 });
-  const keys = Object.keys(data).filter((k) => k.length === 7);
-  const values = keys.map((k) => data[k]);
 
-  const accValue = values.reduce((acc: number[], curr) => {
-    const last = acc.length > 0 ? acc[acc.length - 1] : 0;
-    acc.push(last + curr);
-    return acc;
-  }, []);
+  const chartData = useMemo(() => {
+    const keys = Object.keys(data).filter((k) => k.length === 7);
+    let accumulated = 0;
 
-  const option = {
-    title: {
-      text: `Attention for ${repoName}`,
-      left: "center",
-      textStyle: {
-        fontSize: isMobile ? 14 : 18,
-      },
-    },
-    grid: {
-      top: isMobile ? 60 : 80,
-      bottom: isMobile ? 60 : 80,
-      left: isMobile ? 40 : 80,
-      right: isMobile ? 20 : 40,
-    },
-    xAxis: {
-      type: "category" as const,
-      data: keys,
-      axisLabel: {
-        rotate: isMobile ? 45 : 0,
-        fontSize: isMobile ? 10 : 12,
-      },
-    },
-    yAxis: [
-      {
-        type: "value" as const,
-        axisLabel: {
-          fontSize: isMobile ? 10 : 12,
-        },
-      },
-      {
-        type: "value" as const,
-        axisLabel: {
-          fontSize: isMobile ? 10 : 12,
-        },
-      },
-    ],
-    series: [
-      {
-        type: "bar",
-        data: values,
-        name: "Attention",
-      },
-      {
-        type: "line",
-        yAxisIndex: 1,
-        data: accValue,
-        smooth: true,
-        name: "Accumulated Attention",
-      },
-    ],
-    tooltip: {
-      trigger: "axis",
-    },
-    legend: {
-      data: ["Attention", "Accumulated Attention"],
-      top: "bottom",
-      textStyle: {
-        fontSize: isMobile ? 10 : 12,
-      },
-    },
-    dataZoom: [
-      {
-        type: "inside",
-        start: 0,
-        end: isMobile ? 50 : 100,
-      },
-    ],
-  };
+    return keys.map((key) => {
+      accumulated += data[key];
+      return {
+        month: key,
+        attention: data[key],
+        accumulated,
+      };
+    });
+  }, [data]);
+
+  if (chartData.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[300px] md:h-[400px] text-gray-500">
+        No Attention data available
+      </div>
+    );
+  }
 
   return (
-    <ReactECharts
-      option={option}
-      style={{ height: isMobile ? "300px" : "400px", width: "100%" }}
-    />
+    <div className="w-full">
+      <h3
+        className="text-center font-medium mb-4"
+        style={{ fontSize: isMobile ? 14 : 18 }}
+      >
+        Attention for {repoName}
+      </h3>
+      <ResponsiveContainer width="100%" height={isMobile ? 300 : 400}>
+        <ComposedChart
+          data={chartData}
+          margin={{
+            top: 20,
+            right: isMobile ? 20 : 40,
+            left: isMobile ? 40 : 80,
+            bottom: isMobile ? 80 : 60,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+          <XAxis
+            dataKey="month"
+            tick={{ fontSize: isMobile ? 10 : 12 }}
+            angle={isMobile ? -45 : 0}
+            textAnchor={isMobile ? "end" : "middle"}
+            height={isMobile ? 60 : 30}
+          />
+          <YAxis
+            yAxisId="left"
+            tick={{ fontSize: isMobile ? 10 : 12 }}
+            orientation="left"
+          />
+          <YAxis
+            yAxisId="right"
+            tick={{ fontSize: isMobile ? 10 : 12 }}
+            orientation="right"
+          />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: "#fff",
+              border: "1px solid #e5e7eb",
+              borderRadius: 8,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            }}
+            formatter={(value: number, name: string) => [
+              value.toFixed(2),
+              name === "attention" ? "Attention" : "Accumulated Attention",
+            ]}
+          />
+          <Legend
+            wrapperStyle={{ fontSize: isMobile ? 10 : 12 }}
+            verticalAlign="bottom"
+          />
+          <Bar
+            yAxisId="left"
+            dataKey="attention"
+            fill="#10B981"
+            radius={[4, 4, 0, 0]}
+            name="Attention"
+          />
+          <Line
+            yAxisId="right"
+            type="monotone"
+            dataKey="accumulated"
+            stroke="#0D9488"
+            strokeWidth={2}
+            dot={false}
+            name="Accumulated Attention"
+          />
+        </ComposedChart>
+      </ResponsiveContainer>
+    </div>
   );
-};
+}
 
 export default AttentionChart;

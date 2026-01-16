@@ -1,2 +1,2 @@
-export * from "./ProfileHeader";
-export * from "./ProfileHeaderSkeleton";
+export { ProfileHeader } from "./ProfileHeader";
+export { ProfileHeaderSkeleton } from "./ProfileHeaderSkeleton";

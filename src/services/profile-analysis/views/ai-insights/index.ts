@@ -1,2 +1,2 @@
-export * from "./AIInsights";
-export * from "./AIInsightsSkeleton";
+export { AIInsights } from "./AIInsights";
+export { AIInsightsSkeleton } from "./AIInsightsSkeleton";

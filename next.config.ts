@@ -4,22 +4,34 @@ import { env } from "./src/env";
 void env;
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
+  output: "standalone",
   typescript: {
     ignoreBuildErrors: true, // Temporarily ignore for migration validation
   },
   // Note: eslint config is no longer supported in next.config.ts in Next.js 16
   // Use eslint command directly or configure in .eslintrc.cjs
 
+  // Optimize barrel file imports for better tree-shaking
+  // Automatically transforms imports to direct imports at build time
+  experimental: {
+    optimizePackageImports: [
+      "lucide-react",
+      "@nextui-org/react",
+      "recharts",
+      "framer-motion",
+      "date-fns",
+    ],
+  },
+
   // External packages that should not be bundled by server components
   // This helps with pino, WalletConnect, and other Node.js-specific modules
   serverExternalPackages: [
-    'pino',
-    'pino-pretty',
-    'thread-stream',
-    'sonic-boom',
-    'fastbench',
-    'encoding',
+    "pino",
+    "pino-pretty",
+    "thread-stream",
+    "sonic-boom",
+    "fastbench",
+    "encoding",
   ],
 
   // Turbopack configuration

@@ -26,9 +26,6 @@ function generateFailedResponse<T = unknown>(
   };
 }
 
-const userCache: Record<string, { user: ApiUser; timestamp: number }> = {};
-const CACHE_TTL = 60 * 1000; // 60 seconds cache TTL
-
 const DATA_API_URL = env.DATA_API_URL;
 
 function transformApiUserToCompatibleFormat(apiResponse: {
@@ -142,12 +139,6 @@ async function signInWithGitHub(
     const userData = await userResponse.json();
     const user = transformApiUserToCompatibleFormat(userData);
 
-    // Cache the result
-    userCache[authData.token] = {
-      user,
-      timestamp: Date.now(),
-    };
-
     return {
       success: true,
       code: "200",
@@ -168,14 +159,6 @@ async function signInWithGitHub(
 // Log the user out (server-side only)
 async function signOut(): Promise<ResponseResult<string>> {
   const session = await getSession();
-  const userToken = session.get("userToken") as string | undefined as
-    | string
-    | undefined;
-
-  // Clear from cache if exists
-  if (userToken && userCache[userToken]) {
-    delete userCache[userToken];
-  }
 
   // Clear the session
   const cookieHeader = await clearSession(session);
@@ -202,30 +185,21 @@ async function fetchCurrentUser(): Promise<ResponseResult<ApiUser | null>> {
     return defaultResult;
   }
 
-  // Check cache first
-  const now = Date.now();
-  const cachedData = userCache[userToken];
-  if (cachedData && now - cachedData.timestamp < CACHE_TTL) {
-    return { ...defaultResult, data: cachedData.user };
-  }
-
   try {
     // Fetch current user data using the token
+    // Use Next.js fetch caching with 60s revalidation (replaces manual cache)
     const response = await fetch(`${DATA_API_URL}/v1/auth/user`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${userToken}`,
         accept: "*/*",
       },
+      next: { revalidate: 60 },
     });
 
     if (!response.ok) {
       // Handle specific 401 (unauthorized) responses - token expired
       if (response.status === 401) {
-        // Clear expired token from cache
-        if (userToken && userCache[userToken]) {
-          delete userCache[userToken];
-        }
         return {
           success: false,
           code: "401",
@@ -240,12 +214,6 @@ async function fetchCurrentUser(): Promise<ResponseResult<ApiUser | null>> {
 
     const userData = await response.json();
     const user = transformApiUserToCompatibleFormat(userData);
-
-    // Cache the result
-    userCache[userToken] = {
-      user,
-      timestamp: now,
-    };
 
     return { ...defaultResult, data: user };
   } catch (_error) {
@@ -355,11 +323,6 @@ async function bindWallet(
     }
 
     const data = await response.json();
-
-    // Invalidate user cache after successful binding
-    if (userToken && userCache[userToken]) {
-      delete userCache[userToken];
-    }
 
     return {
       success: true,

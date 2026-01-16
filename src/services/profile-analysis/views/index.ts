@@ -1,19 +1,20 @@
-export * from "./analysis-progress";
-export * from "./stats-dashboard"; 
-export * from "./ecosystem-chart";
-export * from "./skill-radar-chart";
-export * from "./activity-heatmap";
-export * from "./ai-profile-display";
+// Named exports for better tree-shaking (avoid export *)
+export { AnalysisProgress } from "./analysis-progress";
+export { StatsDashboard } from "./stats-dashboard";
+export { EcosystemChart } from "./ecosystem-chart";
+export { SkillRadarChart } from "./skill-radar-chart";
+export { ActivityHeatmap } from "./activity-heatmap";
+export { AIProfileDisplay } from "./ai-profile-display";
 
-// New ecosystem-focused visualization components
-export * from "./ecosystem-insights";
-export * from "./repository-breakdown";
-export * from "./activity-analytics";
-export * from "./technical-breakdown";
-export * from "./repository-contributions";
+// Ecosystem-focused visualization components
+export { EcosystemInsights } from "./ecosystem-insights";
+export { RepositoryBreakdown } from "./repository-breakdown";
+export { ActivityAnalytics } from "./activity-analytics";
+export { TechnicalBreakdown } from "./technical-breakdown";
+export { RepositoryContributions } from "./repository-contributions";
 
-// New simplified components following Apple HIG
-export * from "./profile-header";
-export * from "./key-metrics";
-export * from "./analysis-tabs";
-export * from "./ai-insights";
+// Simplified components following Apple HIG
+export { ProfileHeader, ProfileHeaderSkeleton } from "./profile-header";
+export { KeyMetrics } from "./key-metrics";
+export { AnalysisTabs } from "./analysis-tabs";
+export { AIInsights, AIInsightsSkeleton } from "./ai-insights";

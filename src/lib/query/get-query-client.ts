@@ -4,11 +4,20 @@ function makeQueryClient() {
   return new QueryClient({
     defaultOptions: {
       queries: {
-        // With SSR, we usually want to set some default staleTime
-        // above 0 to avoid refetching immediately on the client
-        staleTime: 60 * 1000, // 1 minute
+        // Increased stale times for better performance:
+        // - Dashboard data (ecosystems, repos, developers) changes slowly
+        // - Reduces unnecessary API calls and server load
+        staleTime: 5 * 60 * 1000, // 5 minutes
+        gcTime: 30 * 60 * 1000, // 30 minutes cache retention
         refetchOnWindowFocus: false,
-        retry: 1,
+        retry: (failureCount, error) => {
+          // Don't retry on 4xx errors
+          if (error && typeof error === "object" && "status" in error) {
+            const status = (error as { status: number }).status;
+            if (status >= 400 && status < 500) return false;
+          }
+          return failureCount < 2;
+        },
       },
       mutations: {
         retry: 0,

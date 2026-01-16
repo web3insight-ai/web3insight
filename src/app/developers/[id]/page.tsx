@@ -4,12 +4,6 @@ import { headers } from "next/headers";
 import DeveloperDetailClient from "./DeveloperDetailClient";
 import { getTitle } from "@/utils/app";
 import { api } from "@/lib/api/client";
-import type { Repository } from "~/repository/typing";
-import type {
-  DeveloperActivity,
-  DeveloperContribution,
-  DeveloperEcosystems,
-} from "~/developer/typing";
 import { getUser } from "~/auth/repository";
 import DefaultLayoutWrapper from "../../DefaultLayoutWrapper";
 import { env } from "@/env";
@@ -71,40 +65,44 @@ export default async function DeveloperDetailPage({
   const user = await getUser();
 
   try {
+    // Start developer fetch - this is the primary dependency
     const res = await api.developers.getOne(developerId);
 
-    let contributions: DeveloperContribution[] = [];
-    let repositories: Repository[] = [];
-    let recentActivity: DeveloperActivity[] = [];
-    let ecosystems: DeveloperEcosystems | null = null;
-
-    if (res.success && res.data) {
-      try {
-        const responses = await Promise.all([
-          api.developers.getContributionList(res.data.id),
-          api.developers.getRepositoryRankList(res.data.username),
-          api.developers.getActivityList(res.data.username),
-          api.developers.getEcosystems(res.data.id),
-        ]);
-
-        contributions = responses[0].data || [];
-        repositories = responses[1].data || [];
-        recentActivity = responses[2].data || [];
-        ecosystems = responses[3].data || null;
-      } catch (error) {
-        console.error(`[Route] Error during API calls:`, error);
-        // Continue with empty data rather than throwing
+    if (!res.success || !res.data) {
+      if (res.code === "404") {
+        notFound();
       }
-    } else if (res.code === "404") {
-      notFound();
+      // Return page with null developer if fetch failed
+      return (
+        <DefaultLayoutWrapper user={user}>
+          <DeveloperDetailClient
+            developer={null}
+            contributions={[]}
+            repositories={[]}
+            recentActivity={[]}
+            ecosystems={null}
+          />
+        </DefaultLayoutWrapper>
+      );
     }
 
+    const developer = res.data;
+
+    // Now fetch all dependent data in parallel (eliminates waterfall)
+    const [contributionsRes, repositoriesRes, activityRes, ecosystemsRes] =
+      await Promise.all([
+        api.developers.getContributionList(developer.id),
+        api.developers.getRepositoryRankList(developer.username),
+        api.developers.getActivityList(developer.username),
+        api.developers.getEcosystems(developer.id),
+      ]);
+
     const pageData = {
-      developer: res.data,
-      contributions,
-      repositories,
-      recentActivity,
-      ecosystems,
+      developer,
+      contributions: contributionsRes.data || [],
+      repositories: repositoriesRes.data || [],
+      recentActivity: activityRes.data || [],
+      ecosystems: ecosystemsRes.data || null,
     };
 
     return (

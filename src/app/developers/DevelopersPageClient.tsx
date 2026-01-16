@@ -105,9 +105,8 @@ export default function DevelopersPageClient() {
     },
   });
 
-  const searchValue = form.watch("search");
-  const sortBy = form.watch("sortBy");
-  const sortDirection = form.watch("sortDirection");
+  // Single watch call to reduce re-renders (instead of 3 separate calls)
+  const { search: searchValue, sortBy, sortDirection } = form.watch();
 
   // Pagination state
   const [page, setPage] = useState(1);
@@ -179,6 +178,25 @@ export default function DevelopersPageClient() {
     setIsModalOpen(true);
   }, []);
 
+  // Handle search input change
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      form.setValue("search", e.target.value);
+      setPage(1); // Reset to first page on search
+    },
+    [form],
+  );
+
+  // Handle page change
+  const handlePageChange = useCallback((newPage: number) => {
+    setPage(newPage);
+  }, []);
+
+  // Handle modal close
+  const handleModalClose = useCallback(() => {
+    setIsModalOpen(false);
+  }, []);
+
   return (
     <div className="min-h-dvh bg-background dark:bg-background-dark pb-24">
       <div className="w-full max-w-content mx-auto px-6 pt-8">
@@ -232,7 +250,7 @@ export default function DevelopersPageClient() {
             <Input
               placeholder="Search developers..."
               value={searchValue}
-              onChange={(e) => form.setValue("search", e.target.value)}
+              onChange={handleSearchChange}
               startContent={<Search size={18} className="text-gray-400" />}
               className="w-full"
             />
@@ -380,7 +398,11 @@ export default function DevelopersPageClient() {
 
           {pages > 1 && (
             <div className="px-6 py-4 border-t border-border dark:border-border-dark flex justify-center">
-              <Pagination page={page} total={pages} onChange={setPage} />
+              <Pagination
+                page={page}
+                total={pages}
+                onChange={handlePageChange}
+              />
             </div>
           )}
         </Card>
@@ -389,11 +411,7 @@ export default function DevelopersPageClient() {
       {/* Modal for showing all repositories */}
       <AnimatePresence>
         {isModalOpen && (
-          <Modal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            size="md"
-          >
+          <Modal isOpen={isModalOpen} onClose={handleModalClose} size="md">
             <ModalContent
               as={motion.div}
               variants={modalTransition}

@@ -1,1 +1,1 @@
-export * from "./KeyMetrics";
+export { KeyMetrics } from "./KeyMetrics";

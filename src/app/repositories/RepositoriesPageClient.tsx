@@ -95,9 +95,8 @@ export default function RepositoriesPageClient() {
     },
   });
 
-  const searchValue = form.watch("search");
-  const sortBy = form.watch("sortBy");
-  const sortDirection = form.watch("sortDirection");
+  // Single watch call to reduce re-renders (instead of 3 separate calls)
+  const { search: searchValue, sortBy, sortDirection } = form.watch();
 
   // Pagination state
   const [page, setPage] = useState(1);
@@ -151,6 +150,20 @@ export default function RepositoriesPageClient() {
   }, [sortedItems, page, rowsPerPage]);
 
   const pages = Math.ceil(sortedItems.length / rowsPerPage);
+
+  // Handle search input change
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      form.setValue("search", e.target.value);
+      setPage(1);
+    },
+    [form],
+  );
+
+  // Handle pagination change
+  const handlePageChange = useCallback((newPage: number) => {
+    setPage(newPage);
+  }, []);
 
   // Handle sorting change
   const handleSortChange = useCallback(
@@ -214,7 +227,7 @@ export default function RepositoriesPageClient() {
             <Input
               placeholder="Search repositories..."
               value={searchValue}
-              onChange={(e) => form.setValue("search", e.target.value)}
+              onChange={handleSearchChange}
               startContent={<Search size={18} className="text-gray-400" />}
               className="w-full"
             />
@@ -382,7 +395,11 @@ export default function RepositoriesPageClient() {
 
           {pages > 1 && (
             <div className="px-6 py-4 border-t border-border dark:border-border-dark flex justify-center">
-              <Pagination page={page} total={pages} onChange={setPage} />
+              <Pagination
+                page={page}
+                total={pages}
+                onChange={handlePageChange}
+              />
             </div>
           )}
         </Card>

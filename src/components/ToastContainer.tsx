@@ -1,5 +1,6 @@
 "use client";
 
+import { memo, useCallback } from "react";
 import { useAtom } from "jotai";
 import {
   CheckCircle,
@@ -11,8 +12,13 @@ import {
 } from "lucide-react";
 import { toastsAtom, removeToastAtom, type Toast } from "#/atoms";
 
-function ToastItem({ toast }: { toast: Toast }) {
+// Memoized toast item to prevent re-renders when other toasts change
+const ToastItem = memo(function ToastItem({ toast }: { toast: Toast }) {
   const [, removeToast] = useAtom(removeToastAtom);
+
+  const handleRemove = useCallback(() => {
+    removeToast(toast.id);
+  }, [removeToast, toast.id]);
 
   const styles = {
     success: {
@@ -83,7 +89,7 @@ function ToastItem({ toast }: { toast: Toast }) {
         </div>
         <button
           type="button"
-          onClick={() => removeToast(toast.id)}
+          onClick={handleRemove}
           className="flex-shrink-0 p-0.5 rounded hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
         >
           <X size={14} className="text-gray-400" />
@@ -91,7 +97,7 @@ function ToastItem({ toast }: { toast: Toast }) {
       </div>
     </div>
   );
-}
+});
 
 export default function ToastContainer() {
   const [toasts] = useAtom(toastsAtom);

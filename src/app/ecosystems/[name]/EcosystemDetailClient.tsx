@@ -1,17 +1,32 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Warehouse, Github, Users, TrendingUp } from "lucide-react";
 
 import { CardSkeleton, ChartSkeleton, TableSkeleton } from "$/loading";
-import ReactECharts from "echarts-for-react";
 import ChartTitle from "$/controls/chart-title";
 
 import RepositoryRankViewWidget from "~/repository/views/repository-rank";
 import DeveloperRankViewWidget from "~/developer/views/developer-rank";
 import RepositoryTrendingViewWidget from "~/repository/views/repository-trending";
-import CountryDistributionChart from "$/CountryDistributionChart";
 
 import ClientOnly from "$/ClientOnly";
+
+// Dynamic imports for heavy chart components
+const ReactECharts = dynamic(() => import("echarts-for-react"), {
+  ssr: false,
+  loading: () => <ChartSkeleton title="Loading chart..." height="224px" />,
+});
+
+const CountryDistributionChart = dynamic(
+  () => import("$/CountryDistributionChart"),
+  {
+    ssr: false,
+    loading: () => (
+      <ChartSkeleton title="Global Contributor Distribution" height="500px" />
+    ),
+  },
+);
 
 import { resolveChartOptions } from "./helper";
 import MetricOverview from "./MetricOverview";
