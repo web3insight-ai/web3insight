@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
-import { useInView } from "framer-motion"
+import { useInView, type UseInViewOptions } from "framer-motion"
 
 interface UseAnimatedNumberOptions {
   /** Animation duration in milliseconds (default: 1000) */
@@ -9,7 +9,7 @@ interface UseAnimatedNumberOptions {
   /** Whether to wait for element to be in viewport (default: false) */
   waitForInView?: boolean
   /** Margin for intersection observer (default: "-10% 0px -10% 0px") */
-  inViewMargin?: string
+  inViewMargin?: UseInViewOptions["margin"]
 }
 
 interface UseAnimatedNumberResult {
@@ -43,7 +43,7 @@ export function useAnimatedNumber(
   isLoading: boolean = false,
   options: UseAnimatedNumberOptions = {}
 ): UseAnimatedNumberResult {
-  const { duration = 1000, waitForInView = false, inViewMargin = "-10% 0px -10% 0px" } = options
+  const { duration = 1000, waitForInView = false, inViewMargin } = options
 
   const [displayValue, setDisplayValue] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
