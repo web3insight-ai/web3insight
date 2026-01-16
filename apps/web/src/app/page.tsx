@@ -1,11 +1,24 @@
+import { Suspense } from "react"
+import dynamic from "next/dynamic"
 import { Header } from "@/components/header"
 import { AnnouncementBanner } from "@/components/announcement-banner"
 import { HeroSection } from "@/components/hero-section"
 import { StatsSection } from "@/components/stats-section"
-import { FeaturesSection } from "@/components/features-section"
-import { UseCasesSection } from "@/components/use-cases-section"
-import { PartnersSection } from "@/components/partners-section"
 import { Footer } from "@/components/footer"
+
+// Dynamic imports for below-the-fold components to reduce initial bundle size
+const FeaturesSection = dynamic(
+  () => import("@/components/features-section").then((mod) => mod.FeaturesSection),
+  { ssr: true }
+)
+const UseCasesSection = dynamic(
+  () => import("@/components/use-cases-section").then((mod) => mod.UseCasesSection),
+  { ssr: true }
+)
+const PartnersSection = dynamic(
+  () => import("@/components/partners-section").then((mod) => mod.PartnersSection),
+  { ssr: true }
+)
 
 export default function HomePage() {
   return (
@@ -13,12 +26,22 @@ export default function HomePage() {
       <Header />
       <AnnouncementBanner />
       <div className="pt-10">
-        <HeroSection />
+        <Suspense fallback={<div className="h-96" />}>
+          <HeroSection />
+        </Suspense>
       </div>
-      <StatsSection />
-      <FeaturesSection />
-      <UseCasesSection />
-      <PartnersSection />
+      <Suspense fallback={<div className="h-48" />}>
+        <StatsSection />
+      </Suspense>
+      <Suspense fallback={null}>
+        <FeaturesSection />
+      </Suspense>
+      <Suspense fallback={null}>
+        <UseCasesSection />
+      </Suspense>
+      <Suspense fallback={null}>
+        <PartnersSection />
+      </Suspense>
       <Footer />
     </main>
   )

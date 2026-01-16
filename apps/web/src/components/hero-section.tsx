@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useRef, useEffect } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { ArrowRight, Search, Globe } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -9,14 +9,7 @@ import { useI18n } from "@/lib/i18n-context"
 import { motion } from "framer-motion"
 import { fadeInUp, stagger } from "@/components/ui/motion"
 import { orpc } from "@/lib/query/utils"
-
-// Utility function to format numbers with comma separators
-function formatNumber(num: number): string {
-  return new Intl.NumberFormat('en-US', {
-    maximumFractionDigits: 0,
-    minimumFractionDigits: 0
-  }).format(num);
-}
+import { useAnimatedNumber, formatNumber } from "@/lib/hooks/useAnimatedNumber"
 
 // Loading animation component
 function LoadingNumber() {
@@ -33,43 +26,7 @@ function LoadingNumber() {
 
 // Animated number component for hero stats
 function AnimatedHeroNumber({ value, suffix = "", isLoading }: { value: number; suffix?: string; isLoading?: boolean }) {
-  const [displayValue, setDisplayValue] = useState(0)
-  const hasAnimated = useRef(false)
-
-  useEffect(() => {
-    // Reset animation when loading or value changes
-    if (isLoading) {
-      setDisplayValue(0)
-      hasAnimated.current = false
-      return
-    }
-
-    if (value === 0) {
-      setDisplayValue(0)
-      hasAnimated.current = false
-      return
-    }
-
-    if (hasAnimated.current) return
-    hasAnimated.current = true
-
-    const duration = 1000
-    const steps = 60
-    const increment = value / steps
-    let current = 0
-
-    const timer = setInterval(() => {
-      current += increment
-      if (current >= value) {
-        setDisplayValue(value)
-        clearInterval(timer)
-      } else {
-        setDisplayValue(Math.floor(current))
-      }
-    }, duration / steps)
-
-    return () => clearInterval(timer)
-  }, [value, isLoading])
+  const { displayValue } = useAnimatedNumber(value, isLoading, { duration: 1000 })
 
   // Show loading dots when loading or waiting for data
   if (isLoading || (displayValue === 0 && value > 0)) {
@@ -86,43 +43,7 @@ function AnimatedHeroNumber({ value, suffix = "", isLoading }: { value: number; 
 
 // Animated contributors with M+ format
 function AnimatedContributors({ value, isLoading }: { value: number; isLoading?: boolean }) {
-  const [displayValue, setDisplayValue] = useState(0)
-  const hasAnimated = useRef(false)
-
-  useEffect(() => {
-    // Reset animation when loading or value changes
-    if (isLoading) {
-      setDisplayValue(0)
-      hasAnimated.current = false
-      return
-    }
-
-    if (value === 0) {
-      setDisplayValue(0)
-      hasAnimated.current = false
-      return
-    }
-
-    if (hasAnimated.current) return
-    hasAnimated.current = true
-
-    const duration = 1000
-    const steps = 60
-    const increment = value / steps
-    let current = 0
-
-    const timer = setInterval(() => {
-      current += increment
-      if (current >= value) {
-        setDisplayValue(value)
-        clearInterval(timer)
-      } else {
-        setDisplayValue(Math.floor(current))
-      }
-    }, duration / steps)
-
-    return () => clearInterval(timer)
-  }, [value, isLoading])
+  const { displayValue } = useAnimatedNumber(value, isLoading, { duration: 1000 })
 
   // Show loading dots when loading or waiting for data
   if (isLoading || (displayValue === 0 && value > 0)) {

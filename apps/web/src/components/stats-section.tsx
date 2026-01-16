@@ -1,19 +1,11 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { useI18n } from "@/lib/i18n-context"
-import { motion, useInView } from "framer-motion"
+import { motion } from "framer-motion"
 import { fadeInUp, stagger } from "@/components/ui/motion"
 import { orpc } from "@/lib/query/utils"
-
-// Utility function to format numbers with comma separators
-function formatNumber(num: number): string {
-  return new Intl.NumberFormat('en-US', {
-    maximumFractionDigits: 0,
-    minimumFractionDigits: 0
-  }).format(num);
-}
+import { useAnimatedNumber, formatNumber } from "@/lib/hooks/useAnimatedNumber"
 
 function CodeIcon({ className }: { className?: string }) {
   return (
@@ -91,7 +83,6 @@ function PackageIcon({ className }: { className?: string }) {
 function LoadingNumber() {
   return (
     <div className="flex items-center">
-      {/* Loading dots animation */}
       <div className="flex space-x-1.5">
         <div className="w-2 h-2 bg-accent/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
         <div className="w-2 h-2 bg-accent/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -102,54 +93,12 @@ function LoadingNumber() {
 }
 
 function AnimatedNumber({ value, suffix, isLoading }: { value: number; suffix: string; isLoading?: boolean }) {
-  const [displayValue, setDisplayValue] = useState(0)
-  const ref = useRef<HTMLDivElement>(null)
-  const isInView = useInView(ref, { once: true, margin: "-10% 0px -10% 0px" })
-  const hasAnimated = useRef(false)
+  const { displayValue, ref, isInView } = useAnimatedNumber(value, isLoading, {
+    waitForInView: true,
+    duration: 2000,
+  })
 
-  useEffect(() => {
-    // Reset animation when loading state changes or value changes
-    if (isLoading) {
-      setDisplayValue(0)
-      hasAnimated.current = false
-      return
-    }
-
-    if (!isInView) return
-
-    // If value is 0, set display value immediately
-    if (value === 0) {
-      setDisplayValue(0)
-      hasAnimated.current = true
-      return
-    }
-
-    if (hasAnimated.current || value <= 0) return
-    hasAnimated.current = true
-
-    const duration = 2000
-    const steps = 60
-    const increment = value / steps
-    let current = 0
-
-    const timer = setInterval(() => {
-      current += increment
-      if (current >= value) {
-        setDisplayValue(value)
-        clearInterval(timer)
-      } else {
-        setDisplayValue(Math.floor(current))
-      }
-    }, duration / steps)
-
-    return () => clearInterval(timer)
-  }, [value, isLoading, isInView])
-
-  const shouldShowLoading =
-    isLoading ||
-    !isInView ||
-    value <= 0 ||
-    (displayValue === 0 && value > 0)
+  const shouldShowLoading = isLoading || !isInView || value <= 0 || (displayValue === 0 && value > 0)
 
   if (shouldShowLoading) {
     return (
