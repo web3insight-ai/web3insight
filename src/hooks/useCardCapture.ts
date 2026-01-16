@@ -2,9 +2,12 @@
 
 import { useCallback, useMemo, useState } from "react"
 import { createRoot } from "react-dom/client"
-import html2canvas from "html2canvas"
 import * as htmlToImage from "html-to-image"
 import { CardTemplate, type CardData } from "@/components/CardTemplate"
+
+// Dynamic import for html2canvas - only loaded when primary method fails
+// This reduces initial bundle size by ~60KB
+const loadHtml2Canvas = () => import("html2canvas").then((m) => m.default)
 
 interface UseCardCaptureOptions {
   fileName?: string
@@ -92,6 +95,9 @@ export function useCardCapture(options: UseCardCaptureOptions = {}) {
   }, [backgroundColor, outputSize.height, outputSize.width, quality, shouldIncludeNode])
 
   const captureWithHtml2Canvas = useCallback(async (element: HTMLElement) => {
+    // Dynamically load html2canvas only when needed (fallback)
+    const html2canvas = await loadHtml2Canvas()
+
     const originalWidth = element.offsetWidth
     const originalHeight = element.offsetHeight
     const canvas = await html2canvas(element, {

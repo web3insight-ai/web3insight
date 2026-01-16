@@ -5,18 +5,16 @@ import { useRouter } from "next/navigation"
 import { usePrivy } from "@privy-io/react-auth"
 import Image from "next/image"
 import { motion } from "framer-motion"
+import { setUserType } from "@/lib/userTypeEvents"
 
 export default function ConnectPage() {
   const router = useRouter()
   const [isDev, setIsDev] = useState(true)
   const { login, ready, authenticated } = usePrivy()
 
-  // Initialize and save user type to localStorage on mount
+  // Initialize and save user type on mount
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Set default to "dev"
-      localStorage.setItem('userType', 'dev')
-    }
+    setUserType('dev')
   }, [])
 
   // Redirect to create page if already logged in (returning user)
@@ -32,13 +30,10 @@ export default function ConnectPage() {
     }
   }, [ready, authenticated, router])
 
-  // Update localStorage whenever isDev changes
+  // Update userType whenever isDev changes
   const handleTypeChange = (isDevOption: boolean) => {
     setIsDev(isDevOption)
-    const type = isDevOption ? "dev" : "not-dev"
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('userType', type)
-    }
+    setUserType(isDevOption ? "dev" : "not-dev")
   }
 
   const handleConnect = async () => {

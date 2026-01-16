@@ -76,12 +76,15 @@ export function DevCardForm({ ecosystem }: DevCardFormProps) {
     watch,
   } = form
 
-  const avatarValue = watch("avatar")
-  const twitterValue = watch("twitter")
-  const titleValue = watch("title")
-  const bioValue = watch("bio")
-  const buildingOnValue = watch("buildingOn")
-  const inviteCodeValue = watch("inviteCode")
+  // Single watch call to avoid multiple subscriptions causing redundant re-renders
+  const {
+    avatar: avatarValue,
+    twitter: twitterValue,
+    title: titleValue,
+    bio: bioValue,
+    buildingOn: buildingOnValue,
+    inviteCode: inviteCodeValue,
+  } = watch()
 
   // Handle Twitter connect
   const handleConnectTwitter = async () => {
