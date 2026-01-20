@@ -17,11 +17,52 @@ import { AssistantMessage } from "./assistant-message";
 import { UserMessage } from "./user-message";
 import { Composer } from "./composer";
 
-const EXAMPLE_QUERIES = [
-  "top ecosystems of web3",
-  "how many core devs of ethereum",
-  "top contributor of solana",
-];
+// Grouped by category with rotation for variety
+const QUERY_CATEGORIES = {
+  overview: [
+    "give me an overview of web3 development",
+    "what's the total developer count in web3",
+  ],
+  ecosystems: [
+    "top ecosystems of web3",
+    "compare ethereum and solana ecosystems",
+    "which ecosystem has the most core developers",
+  ],
+  trending: [
+    "trending repos this week",
+    "hottest repos by developer activity",
+    "which repos gained most stars in 7 days",
+  ],
+  developers: [
+    "top contributors of ethereum",
+    "tell me about developer vitalik",
+    "developer distribution by country",
+  ],
+  profiles: [
+    "analyze pseudoyu's web3 contributions",
+    "what ecosystems does gakonst contribute to",
+  ],
+  reports: ["show me the yearly web3 report", "what projects accept donations"],
+};
+
+// Get diverse examples (one from different categories)
+const getExampleQueries = () => {
+  const categories = Object.values(QUERY_CATEGORIES);
+  const selected: string[] = [];
+  const usedCats = new Set<number>();
+
+  while (selected.length < 4 && usedCats.size < categories.length) {
+    const catIdx = Math.floor(Math.random() * categories.length);
+    if (!usedCats.has(catIdx)) {
+      usedCats.add(catIdx);
+      const cat = categories[catIdx];
+      selected.push(cat[Math.floor(Math.random() * cat.length)]);
+    }
+  }
+  return selected;
+};
+
+const EXAMPLE_QUERIES = getExampleQueries();
 
 interface ThreadProps {
   onMinimize: () => void;
@@ -98,7 +139,7 @@ const Thread: FC<ThreadProps> = ({ onMinimize, onClose }) => {
       </div>
 
       {/* Messages Area */}
-      <ThreadPrimitive.Viewport className="flex-1 overflow-y-auto min-h-[200px] max-h-[calc(70vh-120px)]">
+      <ThreadPrimitive.Viewport className="flex-1 overflow-y-auto min-h-[280px] max-h-[calc(80vh-120px)]">
         <ThreadPrimitive.Empty>
           <div className="p-4">
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">

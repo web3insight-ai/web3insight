@@ -292,6 +292,14 @@ export const api = {
   },
 
   // --------------------------------------------------------------------------
+  // Rankings (Yearly Reports)
+  // --------------------------------------------------------------------------
+  rankings: {
+    getYearlyReport: (): Promise<ResponseResult<unknown>> =>
+      fetchApi("/v1/years/rank/report"),
+  },
+
+  // --------------------------------------------------------------------------
   // Statistics (Aggregated data)
   // --------------------------------------------------------------------------
   statistics: {
@@ -674,6 +682,10 @@ export const api = {
 
     getPublicDetail: (id: number | string): Promise<ResponseResult<unknown>> =>
       fetchApi(`/v1/custom/analysis/users/${id}`),
+
+    // Get event-specific developer profile by username or GitHub ID
+    getEventDeveloper: (identifier: string): Promise<ResponseResult<unknown>> =>
+      fetchApi(`/v1/event/users/${identifier}`),
   },
 
   // --------------------------------------------------------------------------

@@ -93,7 +93,7 @@ const AssistantModal: FC<AssistantModalProps> = ({ open, onOpenChange }) => {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="fixed bottom-6 right-6 z-50 w-96 max-h-[70vh] flex flex-col bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark rounded-xl shadow-2xl overflow-hidden"
+            className="fixed bottom-6 right-6 z-50 w-[480px] max-h-[80vh] flex flex-col bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark rounded-xl shadow-2xl overflow-hidden"
           >
             <Thread onMinimize={handleMinimize} onClose={handleClose} />
           </motion.div>
