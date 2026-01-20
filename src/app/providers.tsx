@@ -16,6 +16,7 @@ const AIAssistantWidget = dynamic(() => import("$/AIAssistantWidget"), {
 import { PrivyProvider } from "@/providers/PrivyProvider";
 import { PrivyAuthSync } from "@/providers/PrivyAuthSync";
 import { QueryProvider } from "@/providers/QueryProvider";
+import { AIAssistantProvider } from "@/providers/AssistantRuntimeProvider";
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {
   return (
@@ -31,7 +32,9 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
             >
               <ClientOnly>
                 <NavigationProgress />
-                <AIAssistantWidget />
+                <AIAssistantProvider>
+                  <AIAssistantWidget />
+                </AIAssistantProvider>
                 <ToastContainer />
                 {children}
               </ClientOnly>
