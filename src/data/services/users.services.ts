@@ -16,8 +16,41 @@ import { GithubService } from '@/api/services/github.services';
 import { DeveloperAnalysisService } from '@/ai/services/developer-analysis.service';
 import { Inject, Injectable, forwardRef, Logger } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
+import { Workbook } from 'exceljs';
+import { existsSync } from 'fs';
 import { Kysely } from 'kysely';
 import { Command, Console } from 'nestjs-console';
+import { isAbsolute, join, parse } from 'path';
+
+type UserTopLangsResult = {
+  username: string;
+  languages: string[];
+  error?: string;
+};
+
+type LanguageRankingItem = {
+  language: string;
+  count: number;
+  percentage: number;
+};
+
+type TopLangsOverallAnalysis = {
+  total_users: number;
+  users_with_languages: number;
+  users_without_languages: number;
+  language_ranking: LanguageRankingItem[];
+};
+
+type TopLangsExportResult = {
+  output_path: string;
+  language_ranking_path: string;
+  total_users: number;
+  users_with_languages: number;
+  users_without_languages: number;
+  failed_users: { username: string; error: string }[];
+  language_ranking: LanguageRankingItem[];
+  overall_analysis: TopLangsOverallAnalysis;
+};
 
 @Injectable()
 @Console()
@@ -255,6 +288,98 @@ export class UsersService {
     return analysis;
   }
 
+  async exportTopLangsByAnalysisId(
+    analysisId: string | number,
+    outputPath?: string,
+  ): Promise<TopLangsExportResult & { analysis_id: string }> {
+    const analysisIdValue = String(analysisId).trim();
+    if (!analysisIdValue) {
+      throw new Error('analysisId is required');
+    }
+
+    const analysis = await this.db
+      .selectFrom('api.analysis_users')
+      .select(['id', 'github'])
+      .where('id', '=', analysisIdValue)
+      .executeTakeFirst();
+
+    if (!analysis) {
+      throw new Error('Analysis not found');
+    }
+
+    const usernames = this.extractUsernamesFromGithubPayload(analysis.github);
+    if (usernames.length === 0) {
+      throw new Error('No GitHub users found in analysis github data');
+    }
+
+    const defaultName = `analysis_${analysisIdValue}_top_langs.csv`;
+    const result = await this.exportTopLangsByUsernames(
+      usernames,
+      outputPath ?? defaultName,
+    );
+
+    return { analysis_id: String(analysis.id), ...result };
+  }
+
+  async exportTopLangsByUsernames(
+    usernames: string[],
+    outputPath?: string,
+  ): Promise<TopLangsExportResult> {
+    const normalized = this.normalizeUsernames(usernames);
+    if (normalized.length === 0) {
+      throw new Error('No GitHub usernames provided');
+    }
+
+    const targetPath = (() => {
+      const candidate = outputPath?.trim()
+        ? outputPath.trim()
+        : `user_top_langs_${Date.now()}.csv`;
+      return isAbsolute(candidate) ? candidate : join(process.cwd(), candidate);
+    })();
+
+    const rankingPath = this.getLanguageRankingPath(targetPath);
+
+    if (existsSync(targetPath)) {
+      const cachedResults = await this.readTopLangsCsv(targetPath);
+      const distribution = this.buildLanguageDistribution(cachedResults);
+      await this.writeLanguageRankingCsv(
+        distribution.language_ranking,
+        rankingPath,
+      );
+      return this.buildTopLangsExportResult(
+        cachedResults,
+        targetPath,
+        distribution,
+        rankingPath,
+      );
+    }
+
+    const results: UserTopLangsResult[] = [];
+    const batchSize = 5;
+
+    for (let i = 0; i < normalized.length; i += batchSize) {
+      const batch = normalized.slice(i, i + batchSize);
+      const batchResults = await Promise.all(
+        batch.map((username) => this.fetchUserTopLanguages(username)),
+      );
+      results.push(...batchResults);
+    }
+
+    await this.writeTopLangsCsv(results, targetPath);
+    const distribution = this.buildLanguageDistribution(results);
+    await this.writeLanguageRankingCsv(
+      distribution.language_ranking,
+      rankingPath,
+    );
+
+    return this.buildTopLangsExportResult(
+      results,
+      targetPath,
+      distribution,
+      rankingPath,
+    );
+  }
+
   async getTopFormUserName(username: string) {
     const analysis = await this.db
       .selectFrom('api.analysis_users')
@@ -324,6 +449,326 @@ export class UsersService {
       top_ecosystems: topEcosystems,
       total_ecosystems: userEcosystemData.ecosystem_scores.length,
     };
+  }
+
+  private extractUsernamesFromGithubPayload(payload: unknown): string[] {
+    if (!payload) {
+      return [];
+    }
+
+    let data: unknown = payload;
+    if (typeof data === 'string') {
+      try {
+        data = JSON.parse(data);
+      } catch {
+        return [];
+      }
+    }
+
+    const users = Array.isArray(data)
+      ? data
+      : Array.isArray((data as { users?: unknown[] }).users)
+        ? (data as { users: unknown[] }).users
+        : [];
+
+    return users
+      .map((user) => {
+        if (!user || typeof user !== 'object') {
+          return '';
+        }
+        const record = user as { login?: string; username?: string };
+        const login =
+          typeof record.login === 'string' ? record.login : record.username;
+        return typeof login === 'string' ? login : '';
+      })
+      .filter((login): login is string => !!login);
+  }
+
+  private normalizeUsernames(usernames: string[]): string[] {
+    const normalized = usernames
+      .map((username) => {
+        if (!username) {
+          return '';
+        }
+        const extracted = this.githubService.extractUsername(username);
+        return (extracted ?? username).trim();
+      })
+      .filter((username): username is string => !!username);
+
+    const seen = new Set<string>();
+    const unique: string[] = [];
+    for (const username of normalized) {
+      const key = username.toLowerCase();
+      if (seen.has(key)) {
+        continue;
+      }
+      seen.add(key);
+      unique.push(username);
+    }
+    return unique;
+  }
+
+  private async fetchUserTopLanguages(
+    username: string,
+  ): Promise<UserTopLangsResult> {
+    const trimmed = username.trim();
+    if (!trimmed) {
+      return {
+        username: username ?? '',
+        languages: [],
+        error: 'Empty username',
+      };
+    }
+
+    const url = `https://yu-readme.vercel.app/api/top-langs/?username=${encodeURIComponent(
+      trimmed,
+    )}`;
+
+    try {
+      const response = await fetch(url, { method: 'GET' });
+      if (!response.ok) {
+        return {
+          username: trimmed,
+          languages: [],
+          error: `Request failed (${response.status})`,
+        };
+      }
+
+      const svg = await response.text();
+      const languages = this.parseTopLangsSvg(svg);
+      if (languages.length === 0) {
+        const messageMatch = svg.match(
+          /data-testid="message"[\s\S]*?<tspan[^>]*>([^<]+)<\/tspan>/i,
+        );
+        const fallbackMatch = svg.match(/Something went wrong[^<]*/i);
+        const message = messageMatch
+          ? this.decodeHtmlEntities(messageMatch[1].trim())
+          : fallbackMatch
+            ? fallbackMatch[0].trim()
+            : '';
+        return {
+          username: trimmed,
+          languages: [],
+          error: message || 'No languages parsed from SVG',
+        };
+      }
+
+      return { username: trimmed, languages };
+    } catch (error) {
+      return {
+        username: trimmed,
+        languages: [],
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
+  }
+
+  private parseTopLangsSvg(svg: string): string[] {
+    if (!svg) {
+      return [];
+    }
+
+    const matches = svg.matchAll(
+      /data-testid="lang-name"[^>]*>([^<]+)<\/text>/g,
+    );
+    const names: string[] = [];
+    const seen = new Set<string>();
+
+    for (const match of matches) {
+      const name = this.decodeHtmlEntities(match[1].trim());
+      if (!name) {
+        continue;
+      }
+      const key = name.toLowerCase();
+      if (seen.has(key)) {
+        continue;
+      }
+      seen.add(key);
+      names.push(name);
+    }
+
+    return names;
+  }
+
+  private decodeHtmlEntities(value: string): string {
+    return value
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;|&apos;/g, "'")
+      .replace(/&#x([0-9a-fA-F]+);/g, (_match, hex) =>
+        String.fromCharCode(parseInt(hex, 16)),
+      )
+      .replace(/&#(\d+);/g, (_match, num) =>
+        String.fromCharCode(parseInt(num, 10)),
+      );
+  }
+
+  private buildLanguageDistribution(
+    results: UserTopLangsResult[],
+  ): TopLangsOverallAnalysis {
+    const totalUsers = results.length;
+    let usersWithLanguages = 0;
+    const counts = new Map<string, number>();
+
+    for (const result of results) {
+      if (result.languages.length > 0) {
+        usersWithLanguages += 1;
+      }
+      const uniqueLangs = new Set(
+        result.languages.map((lang) => lang.trim()).filter(Boolean),
+      );
+      for (const lang of uniqueLangs) {
+        counts.set(lang, (counts.get(lang) ?? 0) + 1);
+      }
+    }
+
+    const ranking = Array.from(counts.entries())
+      .map(([language, count]) => ({
+        language,
+        count,
+        percentage:
+          totalUsers > 0
+            ? Number(((count / totalUsers) * 100).toFixed(2))
+            : 0,
+      }))
+      .sort(
+        (a, b) => b.count - a.count || a.language.localeCompare(b.language),
+      );
+
+    return {
+      total_users: totalUsers,
+      users_with_languages: usersWithLanguages,
+      users_without_languages: totalUsers - usersWithLanguages,
+      language_ranking: ranking,
+    };
+  }
+
+  private buildTopLangsExportResult(
+    results: UserTopLangsResult[],
+    outputPath: string,
+    distribution: TopLangsOverallAnalysis,
+    rankingPath: string,
+  ): TopLangsExportResult {
+    const failedUsers = results
+      .filter((result) => result.error)
+      .map((result) => ({
+        username: result.username,
+        error: result.error ?? '',
+      }));
+
+    return {
+      output_path: outputPath,
+      language_ranking_path: rankingPath,
+      total_users: distribution.total_users,
+      users_with_languages: distribution.users_with_languages,
+      users_without_languages: distribution.users_without_languages,
+      failed_users: failedUsers,
+      language_ranking: distribution.language_ranking,
+      overall_analysis: distribution,
+    };
+  }
+
+  private async writeTopLangsCsv(
+    results: UserTopLangsResult[],
+    outputPath: string,
+  ) {
+    const workbook = new Workbook();
+    const sheet = workbook.addWorksheet('user_languages');
+    sheet.addRow(['username', 'languages', 'language_count', 'error']);
+
+    for (const result of results) {
+      sheet.addRow([
+        result.username,
+        result.languages.join('|'),
+        result.languages.length,
+        result.error ?? '',
+      ]);
+    }
+
+    await workbook.csv.writeFile(outputPath);
+  }
+
+  private async writeLanguageRankingCsv(
+    ranking: LanguageRankingItem[],
+    outputPath: string,
+  ) {
+    const workbook = new Workbook();
+    const sheet = workbook.addWorksheet('language_ranking');
+    sheet.addRow(['rank', 'language', 'user_count', 'percentage']);
+
+    ranking.forEach((item, index) => {
+      sheet.addRow([index + 1, item.language, item.count, item.percentage]);
+    });
+
+    await workbook.csv.writeFile(outputPath);
+  }
+
+  private getLanguageRankingPath(outputPath: string): string {
+    const info = parse(outputPath);
+    const dir = info.dir || process.cwd();
+    const baseName = info.name || 'language_ranking';
+    return join(dir, `${baseName}.language_ranking.csv`);
+  }
+
+  private async readTopLangsCsv(
+    outputPath: string,
+  ): Promise<UserTopLangsResult[]> {
+    const workbook = new Workbook();
+    await workbook.csv.readFile(outputPath);
+    const sheet = workbook.worksheets[0];
+    if (!sheet) {
+      return [];
+    }
+
+    const results: UserTopLangsResult[] = [];
+    sheet.eachRow((row, index) => {
+      if (index === 1) {
+        return;
+      }
+      const username = String(row.getCell(1).text ?? '').trim();
+      if (!username) {
+        return;
+      }
+      const languagesText = String(row.getCell(2).text ?? '').trim();
+      const errorText = String(row.getCell(4).text ?? '').trim();
+      const languages = languagesText
+        ? languagesText
+            .split('|')
+            .map((lang) => lang.trim())
+            .filter(Boolean)
+        : [];
+      results.push({
+        username,
+        languages,
+        error: errorText || undefined,
+      });
+    });
+
+    return results;
+  }
+
+  private formatTopLangsHumanReadable(result: TopLangsExportResult): string {
+    const lines: string[] = [];
+    lines.push('Top languages analysis');
+    lines.push(`Users: ${result.total_users}`);
+    lines.push(`Users with languages: ${result.users_with_languages}`);
+    lines.push(`Users without languages: ${result.users_without_languages}`);
+    lines.push(`Users CSV: ${result.output_path}`);
+    lines.push(`Language ranking CSV: ${result.language_ranking_path}`);
+    if (result.failed_users.length > 0) {
+      lines.push(`Failed users: ${result.failed_users.length}`);
+    }
+    if (result.language_ranking.length > 0) {
+      lines.push('Language ranking (top 20):');
+      result.language_ranking.slice(0, 20).forEach((item, index) => {
+        lines.push(
+          `${index + 1}. ${item.language} - ${item.count} (${item.percentage}%)`,
+        );
+      });
+    }
+    return lines.join('\n');
   }
 
   async getTopFormUserId(id: string) {
@@ -608,7 +1053,9 @@ export class UsersService {
 
     // 使用本地 AI 服务替代 n8n webhook 调用
     try {
-      this.logger.log(`Starting AI analysis for user analysis id: ${payload.id}`);
+      this.logger.log(
+        `Starting AI analysis for user analysis id: ${payload.id}`,
+      );
 
       const analysisData = {
         id: String(newData.id),
@@ -625,7 +1072,9 @@ export class UsersService {
 
       const aiData = await this.developerAnalysisService.analyze(analysisData);
 
-      this.logger.log(`AI analysis completed for user analysis id: ${payload.id}`);
+      this.logger.log(
+        `AI analysis completed for user analysis id: ${payload.id}`,
+      );
 
       const update = this.db
         .updateTable('api.analysis_users')
@@ -636,7 +1085,10 @@ export class UsersService {
         .returningAll();
       await this.db.executeQuery(update);
     } catch (error) {
-      this.logger.error(`AI analysis failed for user analysis id: ${payload.id}`, error);
+      this.logger.error(
+        `AI analysis failed for user analysis id: ${payload.id}`,
+        error,
+      );
       // 即使 AI 分析失败，也不影响其他数据的保存
       // 记录空的 AI 数据
       const update = this.db
@@ -665,6 +1117,20 @@ export class UsersService {
     id.id = res.id;
 
     await this.analysisUsers(id);
+  }
+
+  @Command({
+    command: 'users:top-langs:analysis <analysisId> [outputPath]',
+    description:
+      'Export GitHub top languages for analysis users to CSV (reuse existing file if present)',
+  })
+  async exportTopLangsByAnalysisCli(analysisId: string, outputPath?: string) {
+    const result = await this.exportTopLangsByAnalysisId(
+      analysisId,
+      outputPath,
+    );
+    console.log(this.formatTopLangsHumanReadable(result));
+    return result;
   }
 }
 
