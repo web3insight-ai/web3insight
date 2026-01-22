@@ -668,6 +668,39 @@ export class AuthService {
     return { success: true };
   }
 
+  async getOpenBuildUserRecord(uid: string) {
+    const bind = await this.db
+      .selectFrom('api.auth_users_binds')
+      .select(['bind_secret'])
+      .where('bind_uid', '=', uid)
+      .where('bind_type', '=', 'openbuild')
+      .executeTakeFirst();
+
+    const accessToken = bind?.bind_secret?.trim();
+    if (!accessToken) {
+      throw new Error('OpenBuild account not bound');
+    }
+
+    const response = await fetch(
+      'https://api.openbuild.xyz/ts/v1/oauth/user/record',
+      {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => null);
+      const message = error?.message || response.statusText;
+      throw new Error(`OpenBuild OAuth record error: ${message}`);
+    }
+
+    return response.json();
+  }
+
   async privyTokenAuth(privyToken: string) {
     const client = this.createPrivyClient();
 

@@ -142,4 +142,15 @@ export class AuthController {
   ) {
     return this.authServices.bindOpenBuildOAuth(req.user.uid, body.code);
   }
+
+  @Get('openbuild/record')
+  @ApiOperation({
+    summary: 'Get openbuild user record',
+    description: '',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AppAuthGuard)
+  async getOpenBuildRecord(@Req() req: RequestWithUser) {
+    return this.authServices.getOpenBuildUserRecord(req.user.uid);
+  }
 }
