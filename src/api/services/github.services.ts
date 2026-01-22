@@ -1,6 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { TokenPoolService } from '@/app/db/pool.services';
 import { Request } from 'express';
+import type { RestEndpointMethodTypes } from '@octokit/rest';
+
+export type GithubUserProfile =
+  RestEndpointMethodTypes['users']['getByUsername']['response']['data'];
 
 @Injectable()
 export class GithubService {
@@ -47,6 +51,19 @@ export class GithubService {
     }
 
     return s;
+  }
+
+  async getUserProfileByUsername(username: string): Promise<GithubUserProfile> {
+    const trimmed = username.trim();
+    if (!trimmed) {
+      throw new BadRequestException('GitHub username is required');
+    }
+
+    const client = await this.tokenPool.getClient();
+    const response = await client.rest.users.getByUsername({
+      username: trimmed,
+    });
+    return response.data;
   }
 
   normalizeRepoFullName(repo: string): string | null {
