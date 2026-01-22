@@ -12,6 +12,7 @@ import {
 import {
   AuthBindWalletReqDto,
   LoginReqDto,
+  OpenBuildBindReqDto,
   PrivyReqDto,
   UpdateUserReqDto,
 } from '../dto/api.dto';
@@ -126,5 +127,19 @@ export class AuthController {
   })
   async privyTokenAuth(@Body() body: PrivyReqDto) {
     return this.authServices.privyTokenAuth(body.id_token);
+  }
+
+  @Post('bind/openbuild')
+  @ApiOperation({
+    summary: 'Bind openbuild oauth',
+    description: '',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AppAuthGuard)
+  async bindOpenBuild(
+    @Req() req: RequestWithUser,
+    @Body() body: OpenBuildBindReqDto,
+  ) {
+    return this.authServices.bindOpenBuildOAuth(req.user.uid, body.code);
   }
 }

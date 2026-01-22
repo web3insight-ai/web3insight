@@ -37,10 +37,17 @@
 
 ## 数据库 api schema（业务查询规则）
 
-1. 优先使用 Kysely 查询构建器完成功能。
+1. 使用 Kysely 查询构建器完成功能。
 2. api.auth_users 为用户表。
 3. api.auth_users_binds 为用户授权绑定表，目前使用 privy 第三方管理授权。
 
 ## 重要文件
 
 - `src/app/db/dto/db.dto.ts` 数据库表结构定义
+- `src/api/services/github.services.ts` GitHub API 数据获取，统一封装。
+
+## 第三方库文档
+
+- Kysely https://kysely.dev/llms-full.txt
+
+未查找到示例或者参考代码以及未提供 llms.txt 的情况下，询问是否使用 context7 mcp（use context7） 获取文档。

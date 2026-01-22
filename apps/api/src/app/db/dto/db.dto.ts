@@ -192,6 +192,7 @@ export interface ApiAuthUsersInfo {
   user_info_type: Generated<string>;
   user_nick_name: Generated<string>;
   user_title: Generated<string>;
+  mark: Generated<Json>;
 }
 
 export interface ApiUsersInvite {
@@ -201,6 +202,7 @@ export interface ApiUsersInvite {
   invite_source_type: string;
   invite_source_uid: Numeric;
   invite_uid: Numeric;
+  mark: Generated<Json>;
   updated_at: Generated<Int8 | null>;
 }
 

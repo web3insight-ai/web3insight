@@ -146,6 +146,11 @@ export class LoginReqDto {
   code: string = '';
 }
 
+export class OpenBuildBindReqDto {
+  @IsString()
+  code: string = '';
+}
+
 export class PrivyReqDto {
   @IsString()
   id_token: string = '';
