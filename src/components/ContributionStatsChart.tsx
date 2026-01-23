@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { Users } from 'lucide-react';
+import React from "react";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { Users } from "lucide-react";
 
 interface ContributionStatsProps {
   usersWithContributions: number;
@@ -21,25 +21,29 @@ const ContributionStatsChart: React.FC<ContributionStatsProps> = ({
 
   const pieData = [
     {
-      name: 'With Contributions',
+      name: "With Contributions",
       value: usersWithContributions,
-      color: '#0D9488', // teal-600
+      color: "#0D9488", // teal-600
       percentage: contributionPercentage,
     },
     {
-      name: 'Without Contributions',
+      name: "Without Contributions",
       value: usersWithoutContributions,
-      color: '#e5e7eb', // gray-200
+      color: "#e5e7eb", // gray-200
       percentage: 100 - contributionPercentage,
     },
   ];
 
   return (
-    <div className={`border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle ${className}`}>
+    <div
+      className={`border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle ${className}`}
+    >
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
         <Users size={14} className="text-gray-600 dark:text-gray-400" />
-        <h3 className="text-sm font-medium text-gray-900 dark:text-white">Web3 Contribution Analysis</h3>
+        <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+          Web3 Contribution Analysis
+        </h3>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         {/* Pie Chart - Left */}
@@ -82,7 +86,9 @@ const ContributionStatsChart: React.FC<ContributionStatsProps> = ({
             <div className="text-lg font-semibold text-gray-900 dark:text-white">
               {totalUsers}
             </div>
-            <div className="text-xs text-gray-600 dark:text-gray-400">Total Participants</div>
+            <div className="text-xs text-gray-600 dark:text-gray-400">
+              Total Participants
+            </div>
           </div>
 
           {/* Contribution Breakdown */}
@@ -90,7 +96,9 @@ const ContributionStatsChart: React.FC<ContributionStatsProps> = ({
             <div className="flex items-center justify-between p-2 border border-gray-200 dark:border-gray-600 rounded-lg text-xs">
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 rounded-full bg-teal-600" />
-                <span className="text-gray-600 dark:text-gray-400">Contributors</span>
+                <span className="text-gray-600 dark:text-gray-400">
+                  With Contributions
+                </span>
               </div>
               <span className="font-medium text-gray-900 dark:text-white">
                 {usersWithContributions} ({contributionPercentage.toFixed(1)}%)
@@ -100,10 +108,13 @@ const ContributionStatsChart: React.FC<ContributionStatsProps> = ({
               <div className="flex items-center justify-between p-2 border border-gray-200 dark:border-gray-600 rounded-lg text-xs">
                 <div className="flex items-center gap-1">
                   <div className="w-2 h-2 rounded-full bg-gray-300" />
-                  <span className="text-gray-600 dark:text-gray-400">No Contributions</span>
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Without Contributions
+                  </span>
                 </div>
                 <span className="font-medium text-gray-900 dark:text-white">
-                  {usersWithoutContributions} ({(100 - contributionPercentage).toFixed(1)}%)
+                  {usersWithoutContributions} (
+                  {(100 - contributionPercentage).toFixed(1)}%)
                 </span>
               </div>
             )}
