@@ -10,6 +10,8 @@ import {
   updateProfileDataSchema,
   twitterUserDataSchema,
   githubUserDataSchema,
+  openbuildBindInputSchema,
+  ecosystemScoreItemSchema,
 } from "@/schemas/auth.schema"
 
 // Create base procedure with context
@@ -223,6 +225,14 @@ const getCurrentUser = baseProcedure
       return { success: true, code: "200", message: "", data: null }
     }
 
+    // Check if OpenBuild is bound from v1 binds data
+    let openbuildBound = false
+    if (userData.binds && Array.isArray(userData.binds)) {
+      openbuildBound = userData.binds.some(
+        (bind: any) => bind.bind_type === "openbuild"
+      )
+    }
+
     // Use v2 API for ecosystem-specific data
     const v2Response = await fetch(
       `${context.dataApiUrl}/v2/auth/user/info/${input.ecosystem}/${userId}`,
@@ -260,6 +270,7 @@ const getCurrentUser = baseProcedure
           user_custom_x: "",
           user_custom_labels: [],
           github_login: githubLogin,
+          openbuild_bound: openbuildBound,
         },
       }
     }
@@ -271,7 +282,7 @@ const getCurrentUser = baseProcedure
       success: true,
       code: "200",
       message: "",
-      data: processedV2Data,
+      data: processedV2Data ? { ...processedV2Data, openbuild_bound: openbuildBound } : null,
     }
   })
 
@@ -551,6 +562,248 @@ const getTwitterUser = baseProcedure
     }
   })
 
+// OpenBuild procedures
+const bindOpenBuild = protectedProcedure
+  .input(openbuildBindInputSchema)
+  .output(
+    z.object({
+      success: z.boolean(),
+      code: z.string(),
+      message: z.string(),
+    })
+  )
+  .handler(async ({ input, context }) => {
+    const response = await fetch(
+      `${context.dataApiUrl}/v1/auth/bind/openbuild`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${context.authToken}`,
+          "Content-Type": "application/json",
+          accept: "*/*",
+        },
+        body: JSON.stringify({ code: input.code }),
+      }
+    )
+
+    if (!response.ok) {
+      const error = await response.text()
+      return {
+        success: false,
+        code: response.status.toString(),
+        message: `Failed to bind OpenBuild: ${error}`,
+      }
+    }
+
+    return {
+      success: true,
+      code: "200",
+      message: "OpenBuild account bound successfully",
+    }
+  })
+
+const getOpenBuildRecord = protectedProcedure
+  .output(
+    z.object({
+      success: z.boolean(),
+      code: z.string(),
+      message: z.string(),
+      data: z.any().optional(),
+    })
+  )
+  .handler(async ({ context }) => {
+    const response = await fetch(
+      `${context.dataApiUrl}/v1/auth/openbuild/record`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${context.authToken}`,
+          accept: "*/*",
+        },
+      }
+    )
+
+    if (!response.ok) {
+      const error = await response.text()
+      return {
+        success: false,
+        code: response.status.toString(),
+        message: `Failed to fetch OpenBuild record: ${error}`,
+      }
+    }
+
+    const data = await response.json()
+
+    return {
+      success: true,
+      code: "200",
+      message: "OpenBuild record retrieved successfully",
+      data,
+    }
+  })
+
+// Full GitHub user data with ecosystem scores
+const getFullGitHubUser = baseProcedure
+  .input(z.object({ username: z.string() }))
+  .output(
+    z.object({
+      success: z.boolean(),
+      code: z.string(),
+      message: z.string(),
+      data: z.any().optional(),
+    })
+  )
+  .handler(async ({ input, context }) => {
+    const response = await fetch(
+      `${context.dataApiUrl}/v2/external/github/users/username/${input.username}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          accept: "*/*",
+        },
+      }
+    )
+
+    if (!response.ok) {
+      const error = await response.text()
+      return {
+        success: false,
+        code: response.status.toString(),
+        message: `Failed to fetch GitHub user data: ${error}`,
+      }
+    }
+
+    const githubData = await response.json()
+
+    // Process ecosystem scores
+    let ecosystemNames: string[] = []
+    let ecosystemScores: z.infer<typeof ecosystemScoreItemSchema>[] = []
+    if (githubData.eco_score?.ecosystems) {
+      const filtered = githubData.eco_score.ecosystems.filter(
+        (eco: any) =>
+          eco.ecosystem && eco.ecosystem !== "ALL" && eco.ecosystem !== "General"
+      )
+      ecosystemNames = filtered.map((eco: any) => eco.ecosystem)
+      ecosystemScores = filtered.map((eco: any) => ({
+        ecosystem: eco.ecosystem,
+        total_score: eco.total_score || 0,
+        repos: eco.repos || [],
+        last_activity_at: eco.last_activity_at,
+        first_activity_at: eco.first_activity_at,
+      }))
+    }
+
+    return {
+      success: true,
+      code: "200",
+      message: "Full GitHub user data retrieved successfully",
+      data: {
+        ...githubData,
+        ecosystems: ecosystemNames,
+        ecosystem_scores: ecosystemScores,
+      },
+    }
+  })
+
+// Analysis procedures
+const startAnalysis = protectedProcedure
+  .input(
+    z.object({
+      githubUrl: z.string(),
+    })
+  )
+  .output(
+    z.object({
+      success: z.boolean(),
+      code: z.string(),
+      message: z.string(),
+      data: z.object({
+        id: z.union([z.string(), z.number()]),
+      }).optional(),
+    })
+  )
+  .handler(async ({ input, context }) => {
+    const response = await fetch(
+      `${context.dataApiUrl}/v1/custom/analysis/users`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${context.authToken}`,
+          "Content-Type": "application/json",
+          accept: "*/*",
+        },
+        body: JSON.stringify({
+          intent: "profile",
+          request_data: [input.githubUrl],
+          description: "DevCard analysis",
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      const error = await response.text()
+      return {
+        success: false,
+        code: response.status.toString(),
+        message: `Failed to start analysis: ${error}`,
+      }
+    }
+
+    const data = await response.json()
+
+    return {
+      success: true,
+      code: "200",
+      message: "Analysis started",
+      data: { id: data.id },
+    }
+  })
+
+const getAnalysisResult = baseProcedure
+  .input(
+    z.object({
+      id: z.union([z.string(), z.number()]),
+    })
+  )
+  .output(
+    z.object({
+      success: z.boolean(),
+      code: z.string(),
+      message: z.string(),
+      data: z.any().optional(),
+    })
+  )
+  .handler(async ({ input, context }) => {
+    const response = await fetch(
+      `${context.dataApiUrl}/v1/custom/analysis/users/${input.id}`,
+      {
+        method: "GET",
+        headers: {
+          accept: "*/*",
+        },
+      }
+    )
+
+    if (!response.ok) {
+      const error = await response.text()
+      return {
+        success: false,
+        code: response.status.toString(),
+        message: `Failed to fetch analysis result: ${error}`,
+      }
+    }
+
+    const data = await response.json()
+
+    return {
+      success: true,
+      code: "200",
+      message: "Analysis result retrieved",
+      data,
+    }
+  })
+
 // Create the router
 export const router = {
   auth: {
@@ -559,13 +812,20 @@ export const router = {
     logout,
     updateProfile,
     getUserByIdAndEcosystem,
+    bindOpenBuild,
+    getOpenBuildRecord,
   },
   github: {
     getUserByUsername: getGitHubUserByUsername,
     getUserById: getGitHubUserById,
+    getFullUser: getFullGitHubUser,
   },
   twitter: {
     getUserByUsername: getTwitterUser,
+  },
+  analysis: {
+    start: startAnalysis,
+    getResult: getAnalysisResult,
   },
 }
 

@@ -8,7 +8,7 @@ interface ShareButtonProps {
   url?: string
   title?: string
   text?: string
-  ecosystem?: "mantle" | "monad"
+  ecosystem?: "mantle" | "monad" | "openbuild"
 }
 
 export const ShareButton = memo(function ShareButton({
@@ -21,14 +21,29 @@ export const ShareButton = memo(function ShareButton({
   const [copied, setCopied] = useState(false)
 
   const shareUrl = url || (typeof window !== "undefined" ? window.location.href : "")
-  const isMantle = ecosystem === "mantle"
 
   // Memoize computed colors to avoid recalculation on re-renders
-  const { accentColor, bgColor, borderColor } = useMemo(() => ({
-    accentColor: isMantle ? "#5EEAD4" : "#9F8EFF",
-    bgColor: isMantle ? "rgba(101, 179, 175, 0.15)" : "rgba(159, 142, 255, 0.15)",
-    borderColor: isMantle ? "rgba(94, 234, 212, 0.3)" : "rgba(159, 142, 255, 0.3)",
-  }), [isMantle])
+  const { accentColor, bgColor, borderColor } = useMemo(() => {
+    if (ecosystem === "openbuild") {
+      return {
+        accentColor: "#01DB83",
+        bgColor: "rgba(1, 219, 131, 0.15)",
+        borderColor: "rgba(1, 219, 131, 0.3)",
+      }
+    }
+    if (ecosystem === "mantle") {
+      return {
+        accentColor: "#5EEAD4",
+        bgColor: "rgba(101, 179, 175, 0.15)",
+        borderColor: "rgba(94, 234, 212, 0.3)",
+      }
+    }
+    return {
+      accentColor: "#9F8EFF",
+      bgColor: "rgba(159, 142, 255, 0.15)",
+      borderColor: "rgba(159, 142, 255, 0.3)",
+    }
+  }, [ecosystem])
 
   // Memoize handlers to prevent recreation on every render
   const handleTwitterShare = useCallback(() => {
@@ -87,7 +102,7 @@ export const ShareButton = memo(function ShareButton({
               transition={{ duration: 0.15 }}
               className="absolute top-full mt-2 right-0 z-50 min-w-[160px] rounded-xl shadow-xl overflow-hidden"
               style={{
-                backgroundColor: isMantle ? "#0a1a1a" : "#0f0a1a",
+                backgroundColor: ecosystem === "monad" ? "#0f0a1a" : "#0a1a1a",
                 border: `1px solid ${borderColor}`,
               }}
             >

@@ -8,7 +8,7 @@ import { ShareButton } from "@/components/ShareButton"
 interface CardActionButtonsProps {
   cardData: CardData
   userName?: string
-  ecosystem?: "mantle" | "monad"
+  ecosystem?: "mantle" | "monad" | "openbuild"
 }
 
 export function CardActionButtons({ cardData, userName, ecosystem = "mantle" }: CardActionButtonsProps) {
@@ -16,14 +16,17 @@ export function CardActionButtons({ cardData, userName, ecosystem = "mantle" }: 
     window.print()
   }
 
-  const isMantle = ecosystem === "mantle"
   const displayName = userName || "I"
-  const shareTitle = isMantle
+  const shareTitle = ecosystem === "mantle"
     ? `${displayName} just minted a Mantle DevCard! Join the Mantle Global Hackathon 2025 and win rewards!`
-    : `${displayName} just minted a Monad DevCard! Join the Monad ecosystem!`
-  const shareText = isMantle
+    : ecosystem === "openbuild"
+      ? `${displayName} just created an OpenBuild DevCard! Join the Web3 builder community!`
+      : `${displayName} just minted a Monad DevCard! Join the Monad ecosystem!`
+  const shareText = ecosystem === "mantle"
     ? `#BuildOnMantle @Mantle_Official @0xMantleCN @OpenBuildxyz @Web3insightAI`
-    : `@monad_xyz @Web3insightAI`
+    : ecosystem === "openbuild"
+      ? `#OpenBuild @OpenBuildxyz @Web3insightAI`
+      : `@monad_xyz @Web3insightAI`
 
   return (
     <motion.div

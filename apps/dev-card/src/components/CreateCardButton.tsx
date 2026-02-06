@@ -5,23 +5,38 @@ import { Sparkles, ChevronRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
 interface CreateCardButtonProps {
-  ecosystem?: "mantle" | "monad"
+  ecosystem?: "mantle" | "monad" | "openbuild"
   inviteCode?: string
 }
 
 export const CreateCardButton = memo(function CreateCardButton({ ecosystem = "mantle", inviteCode }: CreateCardButtonProps) {
   const [isHovered, setIsHovered] = useState(false)
-  const isMantle = ecosystem === "mantle"
 
   // Memoize computed styles to avoid recalculation on re-renders
-  const { accentColor, glowColor, bgGradient, createUrl } = useMemo(() => ({
-    accentColor: isMantle ? "#5EEAD4" : "#9F8EFF",
-    glowColor: isMantle ? "rgba(94, 234, 212, 0.6)" : "rgba(159, 142, 255, 0.6)",
-    bgGradient: isMantle
-      ? "linear-gradient(135deg, rgba(94, 234, 212, 0.2) 0%, rgba(94, 234, 212, 0.1) 100%)"
-      : "linear-gradient(135deg, rgba(159, 142, 255, 0.2) 0%, rgba(159, 142, 255, 0.1) 100%)",
-    createUrl: `/${ecosystem}`,
-  }), [isMantle, ecosystem])
+  const { accentColor, glowColor, bgGradient, createUrl } = useMemo(() => {
+    if (ecosystem === "openbuild") {
+      return {
+        accentColor: "#01DB83",
+        glowColor: "rgba(1, 219, 131, 0.6)",
+        bgGradient: "linear-gradient(135deg, rgba(1, 219, 131, 0.2) 0%, rgba(1, 219, 131, 0.1) 100%)",
+        createUrl: `/${ecosystem}`,
+      }
+    }
+    if (ecosystem === "mantle") {
+      return {
+        accentColor: "#5EEAD4",
+        glowColor: "rgba(94, 234, 212, 0.6)",
+        bgGradient: "linear-gradient(135deg, rgba(94, 234, 212, 0.2) 0%, rgba(94, 234, 212, 0.1) 100%)",
+        createUrl: `/${ecosystem}`,
+      }
+    }
+    return {
+      accentColor: "#9F8EFF",
+      glowColor: "rgba(159, 142, 255, 0.6)",
+      bgGradient: "linear-gradient(135deg, rgba(159, 142, 255, 0.2) 0%, rgba(159, 142, 255, 0.1) 100%)",
+      createUrl: `/${ecosystem}`,
+    }
+  }, [ecosystem])
 
   const handleClick = useCallback(() => {
     if (inviteCode) {

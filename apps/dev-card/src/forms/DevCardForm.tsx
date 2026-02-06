@@ -47,6 +47,21 @@ const themeConfig = {
     ],
     placeholder: "BuilderHero @Mantle",
   },
+  openbuild: {
+    accentColor: "#01DB83",
+    gradient: "#01a36399",
+    shadow: "0px 0px 10px 0px rgba(1,219,131,0.50)",
+    hoverShadow: "0px 0px 20px 0px rgba(1,219,131,0.70)",
+    outlineColor: "green-400",
+    defaultIcon: "/images/openbuild-icon.svg",
+    headerBg: "/images/openbuild-homepage-bg.png",
+    logos: [
+      { src: "/images/openbuild-logo.svg", alt: "OpenBuild" },
+      { src: "/images/seperator.svg", alt: "", isSeparator: true },
+      { src: "/images/web3insight_logo.svg", alt: "web3insight" },
+    ],
+    placeholder: "BuilderHero @OpenBuild",
+  },
 }
 
 export function DevCardForm({ ecosystem }: DevCardFormProps) {
@@ -68,6 +83,9 @@ export function DevCardForm({ ecosystem }: DevCardFormProps) {
     toggleBuildingOn,
     inviteCodeLocked,
     isUpdate,
+    connectOpenBuild,
+    isBindingOpenBuild,
+    openbuildBound,
   } = useDevCardForm({ ecosystem })
 
   const {
@@ -265,6 +283,50 @@ export function DevCardForm({ ecosystem }: DevCardFormProps) {
               )}
             </motion.div>
 
+            {/* OpenBuild Connect - only for openbuild ecosystem */}
+            {ecosystem === "openbuild" && (
+              <motion.div
+                className="mb-3"
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.45, duration: 0.5 }}
+              >
+                <label className="block text-sm text-white mb-1.5 font-medium">
+                  OpenBuild
+                </label>
+                <div className="relative">
+                  <div
+                    className="w-full bg-black/60 border border-gray-700 rounded-lg px-3 py-2 pr-28 text-white text-sm flex items-center"
+                    style={{ minHeight: "38px" }}
+                  >
+                    {openbuildBound ? (
+                      <span className="text-gray-300 flex items-center gap-1.5">
+                        <svg className="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        Account linked
+                      </span>
+                    ) : isBindingOpenBuild ? (
+                      <span className="text-gray-500">Binding...</span>
+                    ) : (
+                      <span className="text-gray-500">Connect your OpenBuild account</span>
+                    )}
+                  </div>
+                  <motion.button
+                    type="button"
+                    onClick={connectOpenBuild}
+                    disabled={isBindingOpenBuild || openbuildBound}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ color: theme.accentColor }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    {isBindingOpenBuild ? "Binding..." : openbuildBound ? "Connected" : "Connect"}
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
+
             {/* Title */}
             <motion.div
               className="mb-3"
@@ -434,7 +496,7 @@ export function DevCardForm({ ecosystem }: DevCardFormProps) {
                 scale: 1.02,
                 y: -2,
                 boxShadow: theme.hoverShadow,
-                background: ecosystem === "mantle" ? "#65B3AF" : undefined,
+                background: ecosystem === "mantle" ? "#65B3AF" : ecosystem === "openbuild" ? "#01a363" : undefined,
                 transition: { duration: 0.15 },
               }}
               whileTap={{ scale: 0.98 }}

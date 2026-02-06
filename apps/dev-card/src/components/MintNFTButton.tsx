@@ -5,14 +5,13 @@ import { IdCard } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
 interface MintNFTButtonProps {
-  ecosystem?: "mantle" | "monad"
+  ecosystem?: "mantle" | "monad" | "openbuild"
 }
 
 export function MintNFTButton({ ecosystem = "mantle" }: MintNFTButtonProps) {
   const [showTooltip, setShowTooltip] = useState(false)
-  const isMantle = ecosystem === "mantle"
-  const accentColor = isMantle ? "#5EEAD4" : "#9F8EFF"
-  const bgColor = isMantle ? "rgba(101, 179, 175, 0.15)" : "rgba(159, 142, 255, 0.15)"
+  const accentColor = ecosystem === "openbuild" ? "#01DB83" : ecosystem === "mantle" ? "#5EEAD4" : "#9F8EFF"
+  const bgColor = ecosystem === "openbuild" ? "rgba(1, 219, 131, 0.15)" : ecosystem === "mantle" ? "rgba(101, 179, 175, 0.15)" : "rgba(159, 142, 255, 0.15)"
 
   const handleClick = () => {
     setShowTooltip(true)
@@ -40,7 +39,7 @@ export function MintNFTButton({ ecosystem = "mantle" }: MintNFTButtonProps) {
           <motion.div
             className="absolute right-full mr-2 top-1/2 -translate-y-1/2 px-2.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap"
             style={{
-              backgroundColor: isMantle ? "#0a1a1a" : "#0f0a1a",
+              backgroundColor: ecosystem === "monad" ? "#0f0a1a" : "#0a1a1a",
               color: "#888",
               border: `1px solid ${accentColor}30`,
             }}

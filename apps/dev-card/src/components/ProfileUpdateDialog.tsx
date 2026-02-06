@@ -109,8 +109,8 @@ export function ProfileUpdateDialog({
     })
   }
 
-  const accentColor = ecosystem === "monad" ? "#9F8EFF" : "#5EEAD4"
-  const defaultIcon = ecosystem === "monad" ? "/images/monad-icon.svg" : "/images/mantle-icon.png"
+  const accentColor = ecosystem === "monad" ? "#9F8EFF" : ecosystem === "openbuild" ? "#01DB83" : "#5EEAD4"
+  const defaultIcon = ecosystem === "monad" ? "/images/monad-icon.svg" : ecosystem === "openbuild" ? "/images/openbuild-icon.svg" : "/images/mantle-icon.png"
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -199,7 +199,9 @@ export function ProfileUpdateDialog({
                 background:
                   ecosystem === "monad"
                     ? "linear-gradient(to right, #8b5cf6, #64748b)"
-                    : "linear-gradient(to right, #5EEAD4, #10B981)",
+                    : ecosystem === "openbuild"
+                      ? "linear-gradient(to right, #01DB83, #01a363)"
+                      : "linear-gradient(to right, #5EEAD4, #10B981)",
               }}
             >
               {updateMutation.isPending ? "Updating..." : "Update"}

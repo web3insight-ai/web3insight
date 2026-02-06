@@ -3,7 +3,7 @@
 import Image from "next/image"
 import { motion } from "framer-motion"
 
-type LoadingVariant = "monad" | "mantle"
+type LoadingVariant = "monad" | "mantle" | "openbuild"
 
 interface LoadingScreenProps {
   message?: string
@@ -24,6 +24,13 @@ const variantConfig = {
     glowColor: "rgba(94, 234, 212, 0.4)",
     dropShadowBase: "drop-shadow(0 0 20px rgba(94,234,212,0.6))",
     dropShadowPeak: "drop-shadow(0 0 30px rgba(94,234,212,0.9))",
+  },
+  openbuild: {
+    icon: "/images/openbuild-icon.svg",
+    alt: "OpenBuild",
+    glowColor: "rgba(1, 219, 131, 0.4)",
+    dropShadowBase: "drop-shadow(0 0 20px rgba(1,219,131,0.6))",
+    dropShadowPeak: "drop-shadow(0 0 30px rgba(1,219,131,0.9))",
   },
 }
 
