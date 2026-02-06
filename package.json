@@ -64,6 +64,7 @@
     "react-markdown": "^9.0.1",
     "react-responsive": "^10.0.0",
     "recharts": "^3.1.2",
+    "remark-gfm": "^4.0.1",
     "server-only": "^0.0.1",
     "sonic-boom": "^4.2.0",
     "streamdown": "^1.6.10",
