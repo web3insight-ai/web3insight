@@ -1,9 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef, useCallback } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useAuth } from "@/hooks/useAuth"
 import { orpc } from "@/orpc/client"
@@ -20,7 +20,7 @@ interface UseDevCardFormOptions {
 
 // Helper function to get building options from ecosystems
 function getBuildingOnOptions(ecosystems: string[], ecosystem: Ecosystem): string[] {
-  const baseOption = ecosystem === "mantle" ? "Mantle" : "Monad"
+  const baseOption = ecosystem === "mantle" ? "Mantle" : ecosystem === "openbuild" ? "OpenBuild" : "Monad"
   const filtered = ecosystems.filter((e) => e !== baseOption).slice(0, 10)
   return [baseOption, ...filtered]
 }
@@ -38,7 +38,7 @@ export function useDevCardForm({ ecosystem }: UseDevCardFormOptions) {
   })
 
   const isDev = userType === "dev"
-  const baseEcosystem = ecosystem === "mantle" ? "Mantle" : "Monad"
+  const baseEcosystem = ecosystem === "mantle" ? "Mantle" : ecosystem === "openbuild" ? "OpenBuild" : "Monad"
 
   // Select schema based on user type
   const schema = isDev ? devCardFormSchema : devCardFormSchemaWithTwitter
@@ -130,6 +130,87 @@ export function useDevCardForm({ ecosystem }: UseDevCardFormOptions) {
   const twitterMutation = useMutation({
     ...orpc.twitter.getUserByUsername.mutationOptions(),
   })
+
+  // OpenBuild OAuth binding
+  const searchParams = useSearchParams()
+  const [openbuildBound, setOpenbuildBound] = useState(false)
+  const openbuildBindProcessedRef = useRef(false)
+
+  const bindOpenBuildMutation = useMutation({
+    ...orpc.auth.bindOpenBuild.mutationOptions(),
+    onSuccess: (result) => {
+      if (result.success) {
+        setOpenbuildBound(true)
+        // Invalidate current user to refresh openbuild_bound flag
+        queryClient.invalidateQueries({ queryKey: orpc.auth.key() })
+      }
+    },
+  })
+
+  // Detect bound status from user data (comes from /v1/auth/user binds)
+  useEffect(() => {
+    if (ecosystem !== "openbuild") return
+    if (user?.openbuild_bound) {
+      setOpenbuildBound(true)
+    }
+  }, [ecosystem, user])
+
+  // Handle OpenBuild OAuth callback code
+  useEffect(() => {
+    if (ecosystem !== "openbuild") return
+    if (openbuildBindProcessedRef.current) return
+    if (!authenticated) return
+
+    const code = searchParams.get("code")
+    if (!code) return
+
+    openbuildBindProcessedRef.current = true
+
+    // Clean the URL
+    const url = new URL(window.location.href)
+    url.searchParams.delete("code")
+    router.replace(url.pathname, { scroll: false })
+
+    // Restore form state from localStorage
+    const savedFormState = localStorage.getItem("openbuild-form-state")
+    if (savedFormState) {
+      try {
+        const parsed = JSON.parse(savedFormState)
+        if (parsed.name) form.setValue("name", parsed.name)
+        if (parsed.github) form.setValue("github", parsed.github)
+        if (parsed.twitter) form.setValue("twitter", parsed.twitter)
+        if (parsed.title) form.setValue("title", parsed.title)
+        if (parsed.bio) form.setValue("bio", parsed.bio)
+        if (parsed.buildingOn) form.setValue("buildingOn", parsed.buildingOn)
+        if (parsed.inviteCode) form.setValue("inviteCode", parsed.inviteCode)
+      } catch {
+        // Ignore parse errors
+      }
+      localStorage.removeItem("openbuild-form-state")
+    }
+
+    // Bind the OpenBuild account
+    bindOpenBuildMutation.mutate({ code })
+  }, [ecosystem, authenticated, searchParams])
+
+  // Connect OpenBuild - redirect to OAuth
+  const connectOpenBuild = useCallback(() => {
+    // Save current form state to localStorage
+    const formValues = form.getValues()
+    localStorage.setItem("openbuild-form-state", JSON.stringify({
+      name: formValues.name,
+      github: formValues.github,
+      twitter: formValues.twitter,
+      title: formValues.title,
+      bio: formValues.bio,
+      buildingOn: formValues.buildingOn,
+      inviteCode: formValues.inviteCode,
+    }))
+
+    const clientId = process.env.NEXT_PUBLIC_OPENBUILD_CLIENT_ID || "fd7705df-1934-412f-9e88-8b2a4c540dd1"
+    const redirectUri = encodeURIComponent(`${window.location.origin}/openbuild/create`)
+    window.location.href = `https://openbuild.xyz/oauth?client_id=${clientId}&redirect_uri=${redirectUri}`
+  }, [form])
 
   // Populate form with user data when authenticated
   useEffect(() => {
@@ -324,5 +405,9 @@ export function useDevCardForm({ ecosystem }: UseDevCardFormOptions) {
     toggleBuildingOn,
     inviteCodeLocked,
     isUpdate,
+    // OpenBuild OAuth
+    connectOpenBuild,
+    isBindingOpenBuild: bindOpenBuildMutation.isPending,
+    openbuildBound,
   }
 }

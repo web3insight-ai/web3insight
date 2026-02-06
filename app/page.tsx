@@ -40,6 +40,23 @@ const campaigns = [
       bg: "#0a0f0f",
     },
   },
+  {
+    id: "openbuild",
+    name: "OpenBuild",
+    tagline: "Dev Card",
+    description: "Join the OpenBuild community and showcase your Web3 builder identity",
+    href: "/openbuild",
+    logo: "/images/openbuild-logo.svg",
+    preview: "/images/openbuild-card-bg.jpg",
+    theme: {
+      primary: "#01DB83",
+      glow: "rgba(1, 219, 131, 0.4)",
+      shadow: "0px 12px 32px rgba(1, 219, 131, 0.4)",
+      hoverShadow: "0px 20px 48px rgba(1, 219, 131, 0.6)",
+      borderGradient: "linear-gradient(to bottom, #01DB83, #01DB83)",
+      bg: "#001d15",
+    },
+  },
 ]
 
 // 动画变体
@@ -133,7 +150,7 @@ export default function Home() {
 
         {/* Campaign Cards */}
         <motion.div
-          className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-10 lg:gap-16 w-full max-w-4xl"
+          className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8 lg:gap-12 w-full max-w-5xl flex-wrap"
           variants={itemVariants}
         >
           {campaigns.map((campaign, index) => (

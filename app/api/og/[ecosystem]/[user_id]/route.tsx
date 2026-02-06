@@ -30,9 +30,8 @@ export async function GET(
   const avatar = userData?.profile?.user_avatar || userData?.user_avatar || ""
   const github = userData?.github || userData?.profile?.github_login || ""
 
-  const isMantle = ecosystem === "mantle"
-  const accentColor = isMantle ? "#5EEAD4" : "#9F8EFF"
-  const bgColor = isMantle ? "#0a0f0f" : "#0a0a0f"
+  const accentColor = ecosystem === "mantle" ? "#5EEAD4" : ecosystem === "openbuild" ? "#01DB83" : "#9F8EFF"
+  const bgColor = ecosystem === "mantle" ? "#0a0f0f" : ecosystem === "openbuild" ? "#001d15" : "#0a0a0f"
 
   return new ImageResponse(
     (
@@ -57,9 +56,11 @@ export async function GET(
             left: 0,
             right: 0,
             bottom: 0,
-            background: isMantle
+            background: ecosystem === "mantle"
               ? "radial-gradient(ellipse at 50% 0%, rgba(94, 234, 212, 0.15) 0%, transparent 50%)"
-              : "radial-gradient(ellipse at 50% 0%, rgba(159, 142, 255, 0.15) 0%, transparent 50%)",
+              : ecosystem === "openbuild"
+                ? "radial-gradient(ellipse at 50% 0%, rgba(1, 219, 131, 0.15) 0%, transparent 50%)"
+                : "radial-gradient(ellipse at 50% 0%, rgba(159, 142, 255, 0.15) 0%, transparent 50%)",
           }}
         />
 
@@ -194,7 +195,7 @@ export async function GET(
           }}
         >
           <span style={{ color: accentColor, fontWeight: 600 }}>
-            {isMantle ? "Mantle" : "Monad"} DevCard
+            {ecosystem === "mantle" ? "Mantle" : ecosystem === "openbuild" ? "OpenBuild" : "Monad"} DevCard
           </span>
           <span>•</span>
           <span>Powered by Web3Insight</span>

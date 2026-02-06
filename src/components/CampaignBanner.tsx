@@ -4,7 +4,7 @@ import { motion } from "framer-motion"
 import { ExternalLink } from "lucide-react"
 
 interface CampaignBannerProps {
-  ecosystem?: "mantle" | "monad"
+  ecosystem?: "mantle" | "monad" | "openbuild"
 }
 
 export function CampaignBanner({ ecosystem = "mantle" }: CampaignBannerProps) {
