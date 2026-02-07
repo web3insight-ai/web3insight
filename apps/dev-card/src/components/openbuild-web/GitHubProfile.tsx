@@ -59,10 +59,10 @@ export function GitHubProfile({
             </span>
           ) : null}
         </div>
-        <div className="flex items-center gap-3 text-sm text-[#01db83]">
-          <button className="flex items-center gap-1 hover:opacity-70 transition-opacity">
+        <div className="flex items-center gap-4 text-sm text-[#01db83]">
+          <button className="flex items-center gap-1.5 hover:opacity-70 transition-opacity">
             <svg
-              className="w-3.5 h-3.5"
+              className="w-4 h-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -81,10 +81,10 @@ export function GitHubProfile({
               href={`https://github.com/${login}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 hover:opacity-70 transition-opacity"
+              className="flex items-center gap-1.5 hover:opacity-70 transition-opacity"
             >
               <svg
-                className="w-3.5 h-3.5"
+                className="w-4 h-4"
                 viewBox="0 0 24 24"
                 fill="currentColor"
               >
@@ -98,27 +98,32 @@ export function GitHubProfile({
 
       {/* Stats row - matching DevInsight ProfileHeader pattern */}
       <div
-        className="flex items-center gap-6 mt-2 text-xs"
+        className="flex items-center flex-wrap gap-x-6 gap-y-1 mt-2 text-xs"
         style={{ fontFamily: "'DM Sans', sans-serif" }}
       >
-        <span className="text-gray-500">
-          <strong className="text-[#1a1a1a] text-sm">
-            {formatNumber(publicRepos)}
-          </strong>{' '}
-          Repositories
-        </span>
-        <span className="text-gray-500">
-          <strong className="text-[#1a1a1a] text-sm">
-            {formatNumber(followers)}
-          </strong>{' '}
-          Followers
-        </span>
-        <span className="text-gray-500">
-          <strong className="text-[#1a1a1a] text-sm">
-            {formatNumber(following)}
-          </strong>{' '}
-          Following
-        </span>
+        {/* Only show repos/followers/following if at least one is non-zero */}
+        {(publicRepos > 0 || followers > 0 || following > 0) && (
+          <>
+            <span className="text-gray-500">
+              <strong className="text-[#1a1a1a] text-sm">
+                {formatNumber(publicRepos)}
+              </strong>{' '}
+              Repositories
+            </span>
+            <span className="text-gray-500">
+              <strong className="text-[#1a1a1a] text-sm">
+                {formatNumber(followers)}
+              </strong>{' '}
+              Followers
+            </span>
+            <span className="text-gray-500">
+              <strong className="text-[#1a1a1a] text-sm">
+                {formatNumber(following)}
+              </strong>{' '}
+              Following
+            </span>
+          </>
+        )}
 
         {/* GitHub Activity Stats from useGitHubStats */}
         {githubLoading ? (
@@ -229,7 +234,7 @@ export function GitHubProfile({
                 className="flex items-center gap-1.5 text-xs text-gray-500"
               >
                 <span
-                  className="w-2 h-2 rounded-full flex-shrink-0"
+                  className="w-2 h-2 rounded-full shrink-0"
                   style={{ backgroundColor: getLanguageColor(lang.name) }}
                 />
                 {lang.name}{' '}

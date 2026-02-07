@@ -109,11 +109,11 @@ function WebPageContent({ userId }: { userId: string }) {
         {/* Return button - positioned over the hero */}
         <Link
           href={`/openbuild/${userId}`}
-          className="absolute top-[24px] left-[40px] z-10 flex items-center gap-1 px-2.5 py-0.5 rounded border border-black/10 text-[#1a1a1a]/60 text-xs hover:bg-white/50 transition-colors"
+          className="absolute top-[24px] md:top-[36px] left-[20px] md:left-[56px] z-10 flex items-center gap-1.5 px-3 py-1 rounded-[4px] border border-black/10 text-black/60 text-[14px] hover:bg-white/50 transition-colors"
           style={{ fontFamily: "'Nunito Sans', sans-serif" }}
         >
           <svg
-            className="w-3 h-3"
+            className="w-3.5 h-3.5"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -130,16 +130,16 @@ function WebPageContent({ userId }: { userId: string }) {
       </div>
 
       {/* White card overlapping the hero - avatar protrudes into hero */}
-      <div className="max-w-[800px] mx-auto mt-[-152px] relative z-10 mb-6">
+      <div className="md:w-[900px] w-full max-w-[calc(100%-32px)] mx-auto mt-[-130px] md:mt-[-184px] relative z-10 mb-6">
         {/* Profile section: avatar + name + bio + social links */}
-        <div className="flex flex-col items-center">
-          {/* Avatar - positioned in the hero area */}
-          <div className="w-[80px] h-[80px] rounded-full bg-black flex items-center justify-center overflow-hidden shadow-lg z-20 relative">
+        <div className="flex flex-col items-center gap-[16px]">
+          {/* Avatar - positioned in the hero area, 100px circle */}
+          <div className="w-[100px] h-[100px] rounded-full bg-black flex items-center justify-center overflow-hidden z-20 relative">
             <Image
               src={avatar}
               alt={name}
-              width={80}
-              height={80}
+              width={100}
+              height={100}
               className="w-full h-full object-cover"
               onError={(e) => {
                 const target = e.target as HTMLImageElement
@@ -148,11 +148,11 @@ function WebPageContent({ userId }: { userId: string }) {
             />
           </div>
 
-          {/* White card background - overlaps bottom 32px of avatar */}
-          <div className="bg-white rounded-[20px] shadow-sm w-full mt-[-32px] pt-[44px] px-6 md:px-8 pb-5 md:pb-6">
+          {/* White card background - overlaps bottom 40px of avatar */}
+          <div className="bg-white rounded-[16px] md:rounded-[24px] w-full mt-[-56px] pt-[56px] px-5 md:px-[50px] pb-6 md:pb-8">
             {/* Name */}
             <h1
-              className="text-[22px] font-bold text-[#1a1a1a] text-center leading-6"
+              className="text-[28px] font-bold text-[#1a1a1a] text-center leading-[20px]"
               style={{ fontFamily: "'DM Sans', sans-serif" }}
             >
               {name}
@@ -161,7 +161,7 @@ function WebPageContent({ userId }: { userId: string }) {
             {/* Bio */}
             {bio && (
               <p
-                className="text-[#1a1a1a] text-sm text-center max-w-[380px] mx-auto mt-3 leading-5"
+                className="text-[#1a1a1a] text-[16px] text-center mx-auto mt-4 leading-[20px]"
                 style={{ fontFamily: "'DM Sans', sans-serif" }}
               >
                 {bio}
@@ -169,7 +169,7 @@ function WebPageContent({ userId }: { userId: string }) {
             )}
 
             {/* Social links */}
-            <div className="flex items-center justify-center gap-2.5 mt-3 text-sm">
+            <div className="flex items-center justify-center gap-[11px] mt-4 text-[16px]">
               {twitter && (
                 <a
                   href={`https://twitter.com/${twitter}`}
@@ -179,7 +179,7 @@ function WebPageContent({ userId }: { userId: string }) {
                   style={{ fontFamily: "'DM Sans', sans-serif" }}
                 >
                   <svg
-                    className="w-[15px] h-[15px]"
+                    className="w-[19px] h-[19px]"
                     viewBox="0 0 24 24"
                     fill="currentColor"
                   >
@@ -189,18 +189,18 @@ function WebPageContent({ userId }: { userId: string }) {
                 </a>
               )}
               {twitter && github && (
-                <span className="text-[#1a1a1a] opacity-20">|</span>
+                <span className="text-[#1a1a1a]/20 text-[15px]">|</span>
               )}
               {github && (
                 <a
                   href={`https://github.com/${github}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-[#01db83] hover:opacity-70 transition-opacity"
+                  className="flex items-center gap-1.5 text-[#01db83] hover:opacity-70 transition-opacity"
                   style={{ fontFamily: "'DM Sans', sans-serif" }}
                 >
                   <svg
-                    className="w-[15px] h-[15px]"
+                    className="w-[19px] h-[19px]"
                     viewBox="0 0 24 24"
                     fill="currentColor"
                   >
@@ -211,76 +211,85 @@ function WebPageContent({ userId }: { userId: string }) {
               )}
             </div>
 
-            {/* Tabs - centered */}
-            <div className="flex items-center justify-center mt-8 mb-5">
+            {/* Tabs row - always left-aligned with Sort by on right */}
+            <div className="flex items-center justify-between mt-8 mb-5">
               <TabNavigation
                 activeTab={activeTab}
                 onTabChange={setActiveTab}
               />
+              {/* Sort by dropdown */}
+              <div className="flex items-center gap-2 border border-gray-200 rounded-md px-3 py-1.5 text-[14px] text-[#1a1a1a]/60 cursor-pointer hover:bg-gray-50 transition-colors"
+                style={{ fontFamily: "'Nunito Sans', sans-serif" }}
+              >
+                <span>Sort by</span>
+                <svg className="w-3 h-3 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
             </div>
 
-        {/* Building on tab */}
-        {activeTab === 'building' && (
-          <div>
-            {/* GitHub profile */}
-            {fullGithubData ? (
-              <GitHubProfile
-                login={
-                  fullGithubData.login ||
-                  fullGithubData.actor_login ||
-                  github
-                }
-                name={fullGithubData.name || name}
-                bio={fullGithubData.bio || bio}
-                publicRepos={fullGithubData.public_repos}
-                followers={fullGithubData.followers}
-                following={fullGithubData.following}
-                company={fullGithubData.company}
-                location={fullGithubData.location}
-                createdAt={fullGithubData.created_at}
-              />
-            ) : github ? (
-              <div className="border-b border-gray-200 pb-6">
-                <div className="animate-pulse flex flex-col gap-2">
-                  <div className="h-5 bg-gray-200 rounded w-40" />
-                  <div className="h-4 bg-gray-200 rounded w-72" />
-                  <div className="h-3 bg-gray-200 rounded w-56" />
-                </div>
-              </div>
-            ) : (
-              <div className="border-b border-gray-200 pb-6 text-gray-400 text-sm text-center py-8">
-                No GitHub account linked
+            {/* Building on tab */}
+            {activeTab === 'building' && (
+              <div className="animate-[fadeIn_200ms_ease-in-out]">
+                {/* GitHub profile */}
+                {fullGithubData ? (
+                  <GitHubProfile
+                    login={
+                      fullGithubData.login ||
+                      fullGithubData.actor_login ||
+                      github
+                    }
+                    name={fullGithubData.name || name}
+                    bio={fullGithubData.bio || bio}
+                    publicRepos={fullGithubData.public_repos}
+                    followers={fullGithubData.followers}
+                    following={fullGithubData.following}
+                    company={fullGithubData.company}
+                    location={fullGithubData.location}
+                    createdAt={fullGithubData.created_at}
+                  />
+                ) : github ? (
+                  <div className="border-b border-gray-200 pb-6">
+                    <div className="animate-pulse flex flex-col gap-2">
+                      <div className="h-5 bg-gray-200 rounded w-40" />
+                      <div className="h-4 bg-gray-200 rounded w-72" />
+                      <div className="h-3 bg-gray-200 rounded w-56" />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="border-b border-gray-200 pb-6 text-gray-400 text-sm text-center py-8">
+                    No GitHub account linked
+                  </div>
+                )}
+
+                {/* Ecosystem Analysis */}
+                <EcosystemAnalysis ecosystemScores={ecosystemScores} />
+
+                {/* AI Analysis Report */}
+                {roastReport && <AIAnalysisReport report={roastReport} />}
+
+                {/* Ecosystem Distribution */}
+                {ecosystemScores.length > 0 && (
+                  <EcosystemDistribution ecosystemScores={ecosystemScores} />
+                )}
               </div>
             )}
 
-            {/* Ecosystem Analysis */}
-            <EcosystemAnalysis ecosystemScores={ecosystemScores} />
-
-            {/* AI Analysis Report */}
-            {roastReport && <AIAnalysisReport report={roastReport} />}
-
-            {/* Ecosystem Distribution */}
-            {ecosystemScores.length > 0 && (
-              <EcosystemDistribution ecosystemScores={ecosystemScores} />
-            )}
-          </div>
-        )}
-
-        {/* Activity tab */}
-        {activeTab === 'activity' && (
-          <div>
-            {!authenticated ? (
-              <div className="flex flex-col items-center justify-center py-16 text-gray-400">
-                <p className="text-sm font-medium">Login required</p>
-                <p className="text-xs mt-1">
-                  Sign in to view OpenBuild activity records
-                </p>
+            {/* Activity tab */}
+            {activeTab === 'activity' && (
+              <div className="animate-[fadeIn_200ms_ease-in-out]">
+                {!authenticated ? (
+                  <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+                    <p className="text-sm font-medium">Login required</p>
+                    <p className="text-xs mt-1">
+                      Sign in to view OpenBuild activity records
+                    </p>
+                  </div>
+                ) : (
+                  <ActivityList records={openbuildRecords} />
+                )}
               </div>
-            ) : (
-              <ActivityList records={openbuildRecords} />
             )}
-          </div>
-        )}
           </div>
         </div>
       </div>
@@ -288,7 +297,7 @@ function WebPageContent({ userId }: { userId: string }) {
       {/* Footer */}
       <div className="flex items-center justify-center gap-1 py-5">
         <span
-          className="text-[#1a1a1a] opacity-40 text-[11px]"
+          className="text-[#1a1a1a] opacity-40 text-[12px]"
           style={{ fontFamily: "'Nunito Sans', sans-serif" }}
         >
           Powered by
@@ -296,9 +305,9 @@ function WebPageContent({ userId }: { userId: string }) {
         <Image
           src="/images/footer-web3insight-logo.svg"
           alt="Web3.insight()"
-          width={90}
-          height={10}
-          className="h-[10px] w-auto"
+          width={106}
+          height={12}
+          className="h-[12px] w-auto"
         />
       </div>
     </div>
