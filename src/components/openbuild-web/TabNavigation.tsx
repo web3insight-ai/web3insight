@@ -15,25 +15,30 @@ const tabs: { id: TabType; label: string }[] = [
 export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
   return (
     <div
-      className="inline-flex items-center gap-1 p-[3px] rounded-md border border-[rgba(132,132,132,0.25)]"
+      className="relative inline-flex items-center gap-[6px] p-[4px] rounded-[8px] border border-[rgba(132,132,132,0.25)] h-[36px] z-20"
       style={{ backgroundColor: 'rgba(255,255,255,0.19)' }}
     >
-      {tabs.map((tab) => (
-        <button
-          key={tab.id}
-          onClick={() => onTabChange(tab.id)}
-          className="px-3 py-[3px] rounded-[5px] text-xs font-medium transition-all"
-          style={{
-            fontFamily: "'DM Sans', sans-serif",
-            letterSpacing: '-0.28px',
-            backgroundColor:
-              activeTab === tab.id ? '#1a1a1a' : 'transparent',
-            color: activeTab === tab.id ? '#ffffff' : '#1a1a1a',
-          }}
-        >
-          {tab.label}
-        </button>
-      ))}
+      {tabs.map((tab) => {
+        const isActive = activeTab === tab.id
+        return (
+          <button
+            key={tab.id}
+            onClick={() => onTabChange(tab.id)}
+            className={`relative z-10 h-[28px] flex items-center justify-center px-[12px] text-[14px] cursor-pointer transition-all duration-200 ease-in-out ${
+              isActive
+                ? 'bg-[#1a1a1a] text-white rounded-[6px] font-medium'
+                : 'text-[#1a1a1a] rounded-[40px] font-normal hover:bg-black/5'
+            }`}
+            style={{
+              fontFamily: "'DM Sans', sans-serif",
+              letterSpacing: '-0.28px',
+              lineHeight: '18px',
+            }}
+          >
+            {tab.label}
+          </button>
+        )
+      })}
     </div>
   )
 }

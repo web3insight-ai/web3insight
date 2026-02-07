@@ -29,7 +29,7 @@ export function EcosystemDistribution({ ecosystemScores }: EcosystemDistribution
   }
 
   return (
-    <div className="py-6">
+    <div className="pt-6 pb-2">
       <h3 className="flex items-center gap-2 text-base font-bold text-[#1a1a1a] mb-6" style={{ fontFamily: "'DM Sans', sans-serif" }}>
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
@@ -75,9 +75,7 @@ export function EcosystemDistribution({ ecosystemScores }: EcosystemDistribution
                   <span className="text-[#1a1a1a]">{avgScore}</span>
                 </div>
                 <div className="flex items-center gap-1 mt-1">
-                  <span
-                    className={`inline-block w-1.5 h-1.5 rounded-full ${status.active ? 'bg-[#01DB83]' : 'bg-gray-300'}`}
-                  />
+                  <span className={`text-xs ${status.active ? 'text-[#01DB83]' : 'text-gray-400'}`}>↝</span>
                   <span className="text-gray-500 text-xs">{status.label}</span>
                 </div>
               </div>

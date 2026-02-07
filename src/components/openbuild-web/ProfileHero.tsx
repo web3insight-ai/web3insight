@@ -4,7 +4,7 @@ import Image from 'next/image'
 
 export function ProfileHero() {
   return (
-    <div className="relative h-[200px]">
+    <div className="relative h-[180px] md:h-[240px]">
       {/* Hero background - single composited image matching Figma */}
       <Image
         src="/images/openbuild-web-hero-bg.png"

@@ -134,6 +134,18 @@
   perspective: 1000px;
 }
 
+/* Tab content fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @page {
   size: 54mm 86mm;
   margin: 0; /* 尽量去掉边距，具体还看打印机设置 */
