@@ -360,6 +360,12 @@ export function useDevCardForm({ ecosystem }: UseDevCardFormOptions) {
       return
     }
 
+    // OpenBuild binding is mandatory for openbuild ecosystem
+    if (ecosystem === "openbuild" && !openbuildBound) {
+      connectOpenBuild()
+      return
+    }
+
     const profileData: Record<string, unknown> = {
       user_nick_name: data.name,
       user_bio: data.bio,
