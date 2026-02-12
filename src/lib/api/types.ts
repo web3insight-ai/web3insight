@@ -437,3 +437,43 @@ export interface DonateRepo {
   created_at: string;
   updated_at: string;
 }
+
+// ============================================================================
+// Yearly Report Types
+// ============================================================================
+
+export interface YearlyDeveloperStat {
+  activity_year: number;
+  active_developers: number;
+  new_developers: number;
+  active_developers_yearly_growth_rate: number | null;
+  new_developers_yearly_growth_rate: number | null;
+}
+
+export interface EcosystemParticipation {
+  ecosystem_name: string;
+  active: boolean | null;
+  kind: string | null;
+  developer_count: number;
+}
+
+export interface EcosystemNewDevelopers {
+  ecosystem_name: string;
+  active: boolean | null;
+  kind: string | null;
+  new_developer_count: number;
+}
+
+export interface RepoParticipation {
+  repo_id: number;
+  repo_name: string;
+  developer_count: number;
+}
+
+export interface YearlyReportData {
+  yearly_stats: YearlyDeveloperStat[];
+  eco_participation: EcosystemParticipation[];
+  eco_new_developers: EcosystemNewDevelopers[];
+  top_repos: RepoParticipation[];
+  target_year: number;
+}

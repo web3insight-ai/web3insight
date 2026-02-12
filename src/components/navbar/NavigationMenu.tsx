@@ -15,6 +15,7 @@ import {
   DollarSign,
   CreditCard,
   ExternalLink,
+  FileBarChart,
 } from "lucide-react";
 import clsx from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
@@ -51,6 +52,7 @@ const navigationGroups: NavGroup[] = [
     items: [
       { name: "EventInsight", href: "/events", icon: Calendar },
       { name: "DevInsight", href: "/devinsight", icon: Brain },
+      { name: "Report", href: "/report", icon: FileBarChart },
     ],
   },
   {

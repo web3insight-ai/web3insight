@@ -36,6 +36,7 @@ import type {
   DeveloperContribution,
   DeveloperRepository,
   DonateRepo,
+  YearlyReportData,
 } from "./types";
 import { isNumeric } from "@/utils";
 
@@ -295,7 +296,7 @@ export const api = {
   // Rankings (Yearly Reports)
   // --------------------------------------------------------------------------
   rankings: {
-    getYearlyReport: (): Promise<ResponseResult<unknown>> =>
+    getYearlyReport: (): Promise<ResponseResult<YearlyReportData>> =>
       fetchApi("/v1/years/rank/report"),
   },
 
