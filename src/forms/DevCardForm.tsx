@@ -292,7 +292,7 @@ export function DevCardForm({ ecosystem }: DevCardFormProps) {
                 transition={{ delay: 0.45, duration: 0.5 }}
               >
                 <label className="block text-sm text-white mb-1.5 font-medium">
-                  OpenBuild
+                  OpenBuild <span className="text-red-400">*</span>
                 </label>
                 <div className="relative">
                   <div
