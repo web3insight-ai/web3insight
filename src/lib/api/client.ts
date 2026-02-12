@@ -80,7 +80,7 @@ async function fetchApi<T>(
       ...headers,
     },
     body: body ? JSON.stringify(body) : undefined,
-    signal: signal ?? AbortSignal.timeout(env.HTTP_TIMEOUT),
+    signal: signal ?? AbortSignal.timeout(Number(env.HTTP_TIMEOUT)),
   });
 
   if (!response.ok) {
