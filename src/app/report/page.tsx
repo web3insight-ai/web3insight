@@ -3,6 +3,8 @@ import { getUser } from "~/auth/repository";
 import DefaultLayoutWrapper from "../DefaultLayoutWrapper";
 import YearlyReport from "~/report/views/yearly-report";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "2025 Annual Report | Web3 Insight",
   description:
@@ -11,9 +13,14 @@ export const metadata = {
 
 export default async function ReportPage() {
   const user = await getUser();
-  const result = await api.rankings.getYearlyReport();
 
-  const reportData = result.success && result.data ? result.data : null;
+  let reportData = null;
+  try {
+    const result = await api.rankings.getYearlyReport();
+    reportData = result.success && result.data ? result.data : null;
+  } catch (error) {
+    console.error("Failed to fetch yearly report:", error);
+  }
 
   return (
     <DefaultLayoutWrapper user={user}>
