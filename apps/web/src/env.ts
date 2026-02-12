@@ -16,7 +16,7 @@ export const env = createEnv({
       .string()
       .transform((val) => parseInt(val, 10))
       .pipe(z.number().positive())
-      .default("30000"),
+      .default(30000),
 
     NODE_ENV: z
       .enum(["development", "test", "production"])
