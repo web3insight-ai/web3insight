@@ -23,6 +23,22 @@ export default function YearlyReport({ data }: YearlyReportProps) {
     [data],
   );
 
+  const publicChainParticipation = useMemo(
+    () =>
+      data
+        ? data.eco_participation.filter((eco) => eco.kind === "Public Chain")
+        : [],
+    [data],
+  );
+
+  const publicChainNewDevelopers = useMemo(
+    () =>
+      data
+        ? data.eco_new_developers.filter((eco) => eco.kind === "Public Chain")
+        : [],
+    [data],
+  );
+
   const metrics: MetricCardProps[] = useMemo(
     () => [
       {
@@ -45,10 +61,11 @@ export default function YearlyReport({ data }: YearlyReportProps) {
       },
       {
         label: "Ecosystems",
-        value: data ? data.eco_participation.length.toLocaleString() : "—",
+        value: publicChainParticipation.length.toLocaleString(),
         icon: <Database size={20} className="text-warning" />,
         iconBgClassName: "bg-warning/10",
-        tooltip: "Number of ecosystems with Chinese developer participation",
+        tooltip:
+          "Number of public chain ecosystems with Chinese developer participation",
       },
       {
         label: "Top Repos",
@@ -58,7 +75,7 @@ export default function YearlyReport({ data }: YearlyReportProps) {
         tooltip: "Repositories with the most Chinese developer contributions",
       },
     ],
-    [latestStats, data],
+    [latestStats, data, publicChainParticipation],
   );
 
   if (!data) {
@@ -113,34 +130,34 @@ export default function YearlyReport({ data }: YearlyReportProps) {
         </Section>
       )}
 
-      {/* Section 2: Ecosystem Participation */}
-      {data.eco_participation.length > 0 && (
+      {/* Section 2: Ecosystem Participation (Public Chains Only) */}
+      {publicChainParticipation.length > 0 && (
         <Section
           className="mt-16"
           title="Ecosystem Participation"
-          summary="Where Chinese developers are most active"
+          summary="Where Chinese developers are most active across public chains"
         >
           <EcosystemBarChart
-            data={data.eco_participation}
+            data={publicChainParticipation}
             title="Developer Distribution"
-            subtitle="Active developers per ecosystem"
+            subtitle="Active developers per public chain"
             icon={<Network size={18} className="text-primary" />}
             valueKey="developer_count"
           />
         </Section>
       )}
 
-      {/* Section 3: New Developer Distribution */}
-      {data.eco_new_developers.length > 0 && (
+      {/* Section 3: New Developer Distribution (Public Chains Only) */}
+      {publicChainNewDevelopers.length > 0 && (
         <Section
           className="mt-16"
           title="New Developer Distribution"
-          summary="Which ecosystems attracted the most newcomers"
+          summary="Which public chains attracted the most newcomers"
         >
           <EcosystemBarChart
-            data={data.eco_new_developers}
+            data={publicChainNewDevelopers}
             title="New Developer Inflow"
-            subtitle="First-time contributors per ecosystem"
+            subtitle="First-time contributors per public chain"
             icon={<Sprout size={18} className="text-success" />}
             valueKey="new_developer_count"
           />
