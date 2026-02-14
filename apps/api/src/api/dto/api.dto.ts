@@ -3,6 +3,7 @@ import {
   IsEnum,
   IsInt,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
   Max,
@@ -193,6 +194,11 @@ export class UpdateUserReqDto {
   @IsOptional()
   @IsString()
   invite_code?: string;
+}
+
+export class UpdateUserExtraReqDto {
+  @IsObject()
+  user_extra: Record<string, unknown> = {};
 }
 
 export class ReposCustomMarkReqDto {

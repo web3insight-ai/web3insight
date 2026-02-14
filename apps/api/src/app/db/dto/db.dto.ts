@@ -193,6 +193,7 @@ export interface ApiAuthUsersInfo {
   user_nick_name: Generated<string>;
   user_title: Generated<string>;
   mark: Generated<Json>;
+  user_extra: Generated<Json>;
 }
 
 export interface ApiUsersInvite {
