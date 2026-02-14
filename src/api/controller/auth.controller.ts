@@ -14,6 +14,7 @@ import {
   LoginReqDto,
   OpenBuildBindReqDto,
   PrivyReqDto,
+  UpdateUserExtraReqDto,
   UpdateUserReqDto,
 } from '../dto/api.dto';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
@@ -42,6 +43,32 @@ export class AuthController {
   @UseGuards(AppAuthGuard)
   async getUser(@Req() req: RequestWithUser) {
     return this.authServices.getUserInfo(req.user);
+  }
+
+  @Get('user/info/:tag/extra')
+  @ApiOperation({
+    summary: 'Get user extra profile by user_info_type',
+    description: '',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AppAuthGuard)
+  async getUserExtra(@Req() req: RequestWithUser, @Param('tag') tag: string) {
+    return this.authServices.getUserExtra(req.user, tag);
+  }
+
+  @Post('user/info/:tag/extra')
+  @ApiOperation({
+    summary: 'Update user extra profile by user_info_type',
+    description: '',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AppAuthGuard)
+  async updateUserExtra(
+    @Param('tag') tag: string,
+    @Req() req: RequestWithUser,
+    @Body() body: UpdateUserExtraReqDto,
+  ) {
+    return this.authServices.updateUserExtra(req.user, tag, body);
   }
 
   @Get('user/public/:id')

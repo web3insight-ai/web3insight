@@ -1,6 +1,7 @@
 import {
   AuthBindWalletReqDto,
   LoginReqDto,
+  UpdateUserExtraReqDto,
   UpdateUserReqDto,
 } from '@/api/dto/api.dto';
 import { KYSELY } from '@/app/db/db.provider';
@@ -157,6 +158,70 @@ export class AuthService {
       binds: binds,
       role: extraClaims,
     };
+  }
+
+  async getUserExtra(user: JwtPayload, tag: string) {
+    const normalizedTag = tag?.trim();
+    if (!normalizedTag) {
+      throw new Error('user_info_type is required');
+    }
+
+    const userInfo = await this.db
+      .selectFrom('api.auth_users_info')
+      .select(['user_info_type', 'user_extra', 'updated_at'])
+      .where('user_id', '=', user.uid)
+      .where('user_info_type', '=', normalizedTag)
+      .executeTakeFirst();
+
+    return {
+      user_id: user.uid,
+      user_info_type: normalizedTag,
+      user_extra: userInfo?.user_extra ?? {},
+      updated_at: userInfo?.updated_at ?? null,
+    };
+  }
+
+  async updateUserExtra(
+    user: JwtPayload,
+    tag: string,
+    body: UpdateUserExtraReqDto,
+  ) {
+    const normalizedTag = tag?.trim();
+    if (!normalizedTag) {
+      throw new Error('user_info_type is required');
+    }
+
+    const userExtraPayload = JSON.stringify(body.user_extra ?? {}) as Json;
+
+    const existingRecord = await this.db
+      .selectFrom('api.auth_users_info')
+      .select(['user_id'])
+      .where('user_id', '=', user.uid)
+      .where('user_info_type', '=', normalizedTag)
+      .executeTakeFirst();
+
+    if (existingRecord) {
+      await this.db
+        .updateTable('api.auth_users_info')
+        .set({
+          user_extra: userExtraPayload,
+          updated_at: new Date().toISOString(),
+        })
+        .where('user_id', '=', user.uid)
+        .where('user_info_type', '=', normalizedTag)
+        .execute();
+    } else {
+      await this.db
+        .insertInto('api.auth_users_info')
+        .values({
+          user_id: user.uid,
+          user_info_type: normalizedTag,
+          user_extra: userExtraPayload,
+        })
+        .execute();
+    }
+
+    return this.getUserExtra(user, normalizedTag);
   }
 
   async getUserInfoFormId(uid: string) {
