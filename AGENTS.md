@@ -35,3 +35,21 @@
 - Store secrets in `.env.local`; never commit or capture them in screenshots.
 - `env.ts` plus `@t3-oss/env-nextjs` enforces runtime schemas—run `pnpm env` to confirm expected keys before shipping.
 - When adding external integrations, document required scopes, rate limits, and auth nuances in `config/` or the PR summary so downstream agents stay aligned.
+
+## Cursor Cloud specific instructions
+
+### Environment variables
+- A `.env.local` file must exist with at minimum `SKIP_ENV_VALIDATION=1` set so the dev server starts without all secrets.
+- If `DATA_API_URL` and `DATA_API_TOKEN` are available (injected as VM secrets), add them to `.env.local` to get real backend data.
+- `OPENAI_API_KEY` is required for the AI chat feature (`/api/ai/chat`) but not for general browsing; use `SKIP_ENV_VALIDATION=1` to bypass its validation.
+
+### Running the dev server
+- `pnpm dev` starts Next.js 16 with Turbopack on port 3000. The `predev` hook automatically runs `pnpm env` first.
+- The app is a pure frontend; no local databases or Docker services are needed.
+
+### Lint / typecheck
+- `pnpm lint` should exit cleanly with no warnings.
+- `pnpm typecheck` exits 0 via `|| true`; expect third-party type errors from `recharts`, `@nextui-org/react`, and event service types — these are known and non-blocking.
+
+### Build script warnings
+- `pnpm install` may warn about ignored build scripts (sharp, unrs-resolver, etc.). These are optional and do not block development. Do not run `pnpm approve-builds` interactively.
