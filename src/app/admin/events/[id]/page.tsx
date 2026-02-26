@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { headers } from "next/headers";
+
 import { Calendar } from "lucide-react";
 
 import { fetchCurrentUser } from "~/auth/repository";
@@ -64,15 +64,6 @@ export async function generateMetadata({ params }: AdminEventDetailPageProps) {
 }
 
 async function getEventDetailData(eventId: number) {
-  const headersList = await headers();
-  const host = headersList.get("host") || "localhost:3000";
-  const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
-  const url = `${protocol}://${host}/admin/events/${eventId}`;
-
-  const _request = new Request(url, {
-    headers: Object.fromEntries(headersList.entries()),
-  });
-
   const res = await fetchCurrentUser();
 
   if (!canManageEvents(res.data)) {

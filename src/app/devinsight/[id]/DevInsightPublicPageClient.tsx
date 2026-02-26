@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { Card, CardBody } from "@nextui-org/react";
+import { Card, CardBody } from "@/components/ui";
 import { Brain, AlertCircle, Loader2 } from "lucide-react";
 import type { GitHubUser } from "~/profile-analysis/typing";
 import { hasAIData, hasEcosystemData } from "~/profile-analysis/helper";
@@ -27,10 +27,10 @@ export default function DevInsightPublicPageClient({
   isPublic,
   error,
 }: DevInsightPublicPageClientProps) {
-
   const currentUser = users[0] ?? null;
   const sanitizedHandle = githubHandle || currentUser?.login || undefined;
-  const displayHandle = sanitizedHandle || (analysisId ? `analysis-${analysisId}` : "DevInsight");
+  const displayHandle =
+    sanitizedHandle || (analysisId ? `analysis-${analysisId}` : "DevInsight");
 
   if (error || !isPublic) {
     return (
@@ -57,7 +57,9 @@ export default function DevInsightPublicPageClient({
       <div className="min-h-dvh bg-background dark:bg-background-dark flex items-center justify-center px-6">
         <div className="flex flex-col items-center gap-4 text-gray-600 dark:text-gray-400">
           <Loader2 size={36} className="animate-spin text-primary" />
-          <p className="text-sm">DevInsight analysis is generating. Please check back soon.</p>
+          <p className="text-sm">
+            DevInsight analysis is generating. Please check back soon.
+          </p>
         </div>
       </div>
     );
@@ -71,7 +73,9 @@ export default function DevInsightPublicPageClient({
             <div className="p-2 rounded-lg bg-primary/10">
               <Brain size={20} className="text-primary" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white whitespace-nowrap">@{displayHandle} DevInsight</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white whitespace-nowrap">
+              @{displayHandle} DevInsight
+            </h1>
           </div>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
             AI-powered Web3 development insights and analysis.
@@ -79,9 +83,11 @@ export default function DevInsightPublicPageClient({
         </div>
 
         <div className="space-y-4">
-
           <FadeIn>
-            <ProfileHeader user={currentUser} githubUsername={sanitizedHandle} />
+            <ProfileHeader
+              user={currentUser}
+              githubUsername={sanitizedHandle}
+            />
           </FadeIn>
 
           {hasEcosystemData(currentUser) && (
@@ -98,7 +104,10 @@ export default function DevInsightPublicPageClient({
 
           {hasEcosystemData(currentUser) && (
             <FadeIn>
-              <AnalysisTabs user={currentUser} githubUsername={sanitizedHandle} />
+              <AnalysisTabs
+                user={currentUser}
+                githubUsername={sanitizedHandle}
+              />
             </FadeIn>
           )}
         </div>

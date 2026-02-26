@@ -1,6 +1,6 @@
 import { useState } from "react";
 import clsx from "clsx";
-import { Card } from "@nextui-org/react";
+import { Card } from "@/components/ui";
 
 import TableViewWidget from "$/widgets/view/table";
 
@@ -10,12 +10,22 @@ import type { ManagerListViewWidgetProps } from "./typing";
 import EcosystemField from "./EcosystemField";
 import AssignDialog from "./AssignDialog";
 
-function ManagerListView({ className, dataSource, metadata, onAssign }: ManagerListViewWidgetProps) {
+function ManagerListView({
+  className,
+  dataSource,
+  metadata,
+  onAssign,
+}: ManagerListViewWidgetProps) {
   const [visible, setVisible] = useState(false);
   const [manager, setManager] = useState({} as Manager);
 
   return (
-    <Card className={clsx("h-full bg-white dark:bg-gray-800 shadow-sm border-none hover:shadow-md transition-all duration-300", className)}>
+    <Card
+      className={clsx(
+        "h-full bg-white dark:bg-gray-800 shadow-sm border-none hover:shadow-md transition-all duration-300",
+        className,
+      )}
+    >
       <TableViewWidget
         dataSource={dataSource}
         fields={[
@@ -40,7 +50,7 @@ function ManagerListView({ className, dataSource, metadata, onAssign }: ManagerL
           {
             text: "Assign",
             name: "assign",
-            execute: record => {
+            execute: (record) => {
               setManager(record as Manager);
               setVisible(true);
             },
@@ -53,7 +63,7 @@ function ManagerListView({ className, dataSource, metadata, onAssign }: ManagerL
         ecosystems={metadata.ecosystems}
         visible={visible}
         onClose={() => setVisible(false)}
-        onChange={assigned => onAssign(assigned, manager)}
+        onChange={(assigned) => onAssign(assigned, manager)}
       />
     </Card>
   );

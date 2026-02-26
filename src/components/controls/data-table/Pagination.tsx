@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { Pagination as NextUiPagination } from "@nextui-org/react";
+import { Pagination as NextUiPagination } from "@/components/ui";
 
 import type { PaginationProps } from "./typing";
 import { resolveItemCountRange } from "./helper";
@@ -12,11 +12,20 @@ function Pagination({
   disabled,
   onCurrentChange,
 }: PaginationProps) {
-  const [startCount, endCount] = resolveItemCountRange(currentPage, total, pageSize);
+  const [startCount, endCount] = resolveItemCountRange(
+    currentPage,
+    total,
+    pageSize,
+  );
   const totalPages = Math.ceil(total / pageSize);
 
   return (
-    <div className={clsx("flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 bg-surface dark:bg-surface-dark border-t border-border dark:border-border-dark", className)}>
+    <div
+      className={clsx(
+        "flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 bg-surface dark:bg-surface-dark border-t border-border dark:border-border-dark",
+        className,
+      )}
+    >
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2 text-sm">
           <span className="text-gray-500 dark:text-gray-400">Showing</span>
@@ -30,7 +39,7 @@ function Pagination({
           <span className="text-gray-500 dark:text-gray-400">results</span>
         </div>
       </div>
-      
+
       {totalPages > 1 && (
         <div className="flex items-center gap-3">
           <span className="text-sm text-gray-500 dark:text-gray-400 hidden sm:block">

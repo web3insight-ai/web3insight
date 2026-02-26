@@ -1,4 +1,4 @@
-import { Card, CardBody, Skeleton } from "@nextui-org/react";
+import { Card, CardBody, Skeleton } from "@/components/ui";
 
 interface CardSkeletonProps {
   count?: number;
@@ -8,8 +8,8 @@ function CardSkeleton({ count = 4 }: CardSkeletonProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
       {Array.from({ length: count }).map((_, index) => (
-        <Card 
-          key={index} 
+        <Card
+          key={index}
           className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark"
         >
           <CardBody className="p-6">

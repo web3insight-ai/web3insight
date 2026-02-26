@@ -7,7 +7,7 @@ import {
   PopoverContent,
   Button,
   Chip,
-} from "@nextui-org/react";
+} from "@/components/ui";
 import {
   LogIn,
   LogOut,
@@ -154,7 +154,7 @@ function SignedUser({ onSignIn }: SignedUserProps) {
       : null;
 
     return (
-      <Popover placement="bottom-end">
+      <Popover>
         <PopoverTrigger>
           <Avatar
             src={avatarUrl}
@@ -167,8 +167,10 @@ function SignedUser({ onSignIn }: SignedUserProps) {
           />
         </PopoverTrigger>
         <PopoverContent
-          className="p-0 rounded-lg bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark"
-          style={{ width: "240px" }}
+          className="p-0 w-[240px]"
+          side="bottom"
+          align="end"
+          sideOffset={10}
         >
           <div className="flex flex-col">
             {/* User info section */}

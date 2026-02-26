@@ -27,13 +27,11 @@ export default function RepositoryDetailClient({
   // Show loading skeleton while critical data is missing
   if (!repository || !repository.name) {
     return (
-      <div className="min-h-dvh bg-background dark:bg-background-dark py-8">
-        <div className="w-full max-w-content mx-auto px-6">
-          <div className="mb-8">
-            <ChartSkeleton title="Loading repository..." height="120px" />
-          </div>
-          <ChartSkeleton title="Active Developers" height="280px" />
+      <div className="w-full max-w-content mx-auto px-6 py-8">
+        <div className="mb-8">
+          <ChartSkeleton title="Loading repository..." height="120px" />
         </div>
+        <ChartSkeleton title="Active Developers" height="280px" />
       </div>
     );
   }

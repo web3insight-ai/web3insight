@@ -1,13 +1,17 @@
-import { Card, CardBody, Skeleton } from "@nextui-org/react";
+import { Card, CardBody, Skeleton } from "@/components/ui";
 import { Brain } from "lucide-react";
 
 interface AIInsightsSkeletonProps {
   className?: string;
 }
 
-export function AIInsightsSkeleton({ className = "" }: AIInsightsSkeletonProps) {
+export function AIInsightsSkeleton({
+  className = "",
+}: AIInsightsSkeletonProps) {
   return (
-    <Card className={`bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark ${className}`}>
+    <Card
+      className={`bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark ${className}`}
+    >
       <CardBody className="p-4 md:p-5 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -33,4 +37,3 @@ export function AIInsightsSkeleton({ className = "" }: AIInsightsSkeletonProps) 
     </Card>
   );
 }
-

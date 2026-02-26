@@ -39,14 +39,14 @@ export async function generateMetadata({
   if (analysis?.github?.users?.[0]) {
     const handle = analysis.github.users[0].login;
     return {
-      title: `${handle} DevInsight | ${baseTitle}`,
+      title: `${handle} DevInsight`,
       description: `Public DevInsight analysis for GitHub user ${handle}.`,
     };
   }
 
   return {
-    title: `DevInsight ${id} | ${baseTitle}`,
-    description: "Shared DevInsight analysis on Web3 Insight.",
+    title: `DevInsight ${id}`,
+    description: `Shared DevInsight analysis on ${baseTitle}.`,
   };
 }
 

@@ -1,18 +1,14 @@
 import type { Config } from "tailwindcss";
-import { nextui } from "@nextui-org/react";
 
 export default {
-  content: [
-    "./src/**/*.{js,ts,jsx,tsx}",
-    "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ["./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
       fontFamily: {
         sans: [
+          "var(--font-inter)",
           "-apple-system",
           "BlinkMacSystemFont",
-          "Inter",
           "SF Pro Display",
           "Segoe UI",
           "Roboto",
@@ -24,6 +20,10 @@ export default {
           DEFAULT: "#FFFFFF",
           dark: "#0F0F0F",
         },
+        foreground: {
+          DEFAULT: "#000000",
+          dark: "#FFFFFF",
+        },
         surface: {
           DEFAULT: "#FAFAFA",
           dark: "#1A1A1A",
@@ -32,6 +32,26 @@ export default {
         border: {
           DEFAULT: "rgba(0, 0, 0, 0.06)",
           dark: "rgba(255, 255, 255, 0.08)",
+        },
+        primary: {
+          DEFAULT: "#0F766E",
+          foreground: "#FFFFFF",
+        },
+        secondary: {
+          DEFAULT: "#6366F1",
+          foreground: "#FFFFFF",
+        },
+        success: {
+          DEFAULT: "#059669",
+          foreground: "#FFFFFF",
+        },
+        warning: {
+          DEFAULT: "#D97706",
+          foreground: "#FFFFFF",
+        },
+        danger: {
+          DEFAULT: "#DC2626",
+          foreground: "#FFFFFF",
         },
       },
       spacing: {
@@ -111,40 +131,5 @@ export default {
     },
   },
   darkMode: ["selector", '[data-theme="dark"]'],
-  plugins: [
-    nextui({
-      themes: {
-        light: {
-          colors: {
-            background: "#FFFFFF",
-            foreground: "#000000",
-            primary: {
-              DEFAULT: "#0F766E",
-              foreground: "#FFFFFF",
-            },
-            focus: "#0F766E",
-            success: "#059669",
-            warning: "#D97706",
-            danger: "#DC2626",
-            secondary: "#6366F1",
-          },
-        },
-        dark: {
-          colors: {
-            background: "#0F0F0F",
-            foreground: "#FFFFFF",
-            primary: {
-              DEFAULT: "#14B8A6",
-              foreground: "#FFFFFF",
-            },
-            focus: "#14B8A6",
-            success: "#10B981",
-            warning: "#F59E0B",
-            danger: "#EF4444",
-            secondary: "#818CF8",
-          },
-        },
-      },
-    }),
-  ],
+  plugins: [],
 } satisfies Config;

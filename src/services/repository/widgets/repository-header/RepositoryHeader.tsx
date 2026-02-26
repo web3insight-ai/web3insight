@@ -1,5 +1,5 @@
 import { Github, Globe, Star, GitFork, AlertCircle } from "lucide-react";
-import { Chip } from "@nextui-org/react";
+import { Chip } from "@/components/ui";
 
 import type { RepositoryHeaderProps } from "./typing";
 

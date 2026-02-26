@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { Spinner } from "@nextui-org/react";
+import { Spinner } from "@/components/ui";
 
 import type { DataValue } from "@/types";
 import type { DataTableProps, TableColumn } from "./typing";

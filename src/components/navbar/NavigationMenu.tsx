@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import clsx from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
-import { Popover, PopoverTrigger, PopoverContent } from "@nextui-org/react";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui";
 import { useState } from "react";
 
 interface NavItem {
@@ -86,16 +86,11 @@ function NavDropdown({ group, index }: { group: NavGroup; index: number }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.3 }}
     >
-      <Popover
-        placement="bottom"
-        isOpen={isOpen}
-        onOpenChange={setIsOpen}
-        offset={8}
-      >
+      <Popover isOpen={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger>
           <button
             className={clsx(
-              "flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-200",
+              "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200",
               isGroupActive
                 ? "bg-primary/10 text-primary"
                 : "text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50",
@@ -112,7 +107,11 @@ function NavDropdown({ group, index }: { group: NavGroup; index: number }) {
             />
           </button>
         </PopoverTrigger>
-        <PopoverContent className="p-1 min-w-[160px] bg-white dark:bg-surface-dark shadow-lg border border-border dark:border-border-dark rounded-lg">
+        <PopoverContent
+          className="p-1.5 min-w-[180px]"
+          side="bottom"
+          sideOffset={10}
+        >
           <AnimatePresence>
             <div className="flex flex-col gap-0.5">
               {group.items.map((item, itemIndex) => {
@@ -143,10 +142,10 @@ function NavDropdown({ group, index }: { group: NavGroup; index: number }) {
                 }
 
                 const linkClassName = clsx(
-                  "flex items-center gap-2 px-3 py-2 rounded-md text-xs font-medium transition-all duration-200",
+                  "flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-150",
                   isActive
                     ? "bg-primary/10 text-primary"
-                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50",
+                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800",
                 );
 
                 return (

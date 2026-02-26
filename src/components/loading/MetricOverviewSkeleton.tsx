@@ -1,4 +1,4 @@
-import { Card, CardBody, Skeleton } from "@nextui-org/react";
+import { Card, CardBody, Skeleton } from "@/components/ui";
 
 function MetricOverviewSkeleton() {
   return (

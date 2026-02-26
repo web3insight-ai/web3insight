@@ -35,3 +35,23 @@
 - Store secrets in `.env.local`; never commit or capture them in screenshots.
 - `env.ts` plus `@t3-oss/env-nextjs` enforces runtime schemas—run `pnpm env` to confirm expected keys before shipping.
 - When adding external integrations, document required scopes, rate limits, and auth nuances in `config/` or the PR summary so downstream agents stay aligned.
+
+## Cursor Cloud specific instructions
+
+### Service overview
+This repo is a **Next.js 16 frontend** (Turbopack dev server). It has no local database or Docker dependencies — all data comes from an external backend API (`DATA_API_URL`).
+
+### Required environment variables
+`DATA_API_TOKEN` and `OPENAI_API_KEY` are mandatory (validated by `src/env.ts` via `@t3-oss/env-nextjs`). Set `SKIP_ENV_VALIDATION=true` in `.env.local` to bypass validation when secrets are unavailable. `DATA_API_URL`, `OSSINSIGHT_URL`, and `OPENAI_BASE_URL` have working defaults.
+
+### Running the dev server
+`pnpm dev` starts the Turbopack dev server on port 3000. The `predev` script (`npm run env`) runs automatically and is safe to let execute.
+
+### Lint / typecheck
+- `pnpm lint` — ESLint (must pass cleanly).
+- `pnpm typecheck` — exits 0 via `|| true`; third-party type errors are expected and documented in `CLAUDE.md`.
+
+### Gotchas
+- pnpm may warn about ignored build scripts (sharp, bufferutil, etc.). These are non-blocking for dev; do not run `pnpm approve-builds` interactively.
+- The pre-commit hook runs `lint-staged` (Prettier + ESLint). Ensure code is formatted before committing.
+- There is no automated test runner yet; validation relies on `pnpm lint` and `pnpm typecheck`.

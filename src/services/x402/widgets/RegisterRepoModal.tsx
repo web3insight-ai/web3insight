@@ -11,7 +11,7 @@ import {
   Avatar,
   Input,
   Textarea,
-} from "@nextui-org/react";
+} from "@/components/ui";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { usePrivy } from "@privy-io/react-auth";

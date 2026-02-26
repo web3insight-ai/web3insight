@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import { headers } from "next/headers";
 
 import { canManageEcosystems, canManageEvents } from "~/auth/helper";
 import { getUser } from "~/auth/repository";
@@ -12,15 +11,6 @@ interface AdminLayoutProps {
 }
 
 async function getAdminUser() {
-  const headersList = await headers();
-  const host = headersList.get("host") || "localhost:3000";
-  const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
-  const url = `${protocol}://${host}/admin`;
-
-  const _request = new Request(url, {
-    headers: Object.fromEntries(headersList.entries()),
-  });
-
   const user = await getUser();
 
   if (!canManageEcosystems(user) && !canManageEvents(user)) {

@@ -7,7 +7,7 @@ import {
   ModalContent,
   ModalHeader,
   ModalBody,
-} from "@nextui-org/react";
+} from "@/components/ui";
 import { Users, ArrowRight, Trophy, Medal, Award } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";

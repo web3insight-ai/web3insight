@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { Avatar } from "@nextui-org/react";
+import { Avatar } from "@/components/ui";
 import { Github } from "lucide-react";
 
 import type { ProfileCardWidgetProps } from "./typing";

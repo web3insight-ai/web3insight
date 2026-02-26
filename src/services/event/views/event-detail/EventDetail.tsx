@@ -1,8 +1,17 @@
-'use client';
+"use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardHeader, Avatar, Button } from "@nextui-org/react";
-import { Calendar, Users, Trophy, Medal, Award, ChevronDown, ChevronUp, Edit3 } from "lucide-react";
+import { Card, CardHeader, Avatar, Button } from "@/components/ui";
+import {
+  Calendar,
+  Users,
+  Trophy,
+  Medal,
+  Award,
+  ChevronDown,
+  ChevronUp,
+  Edit3,
+} from "lucide-react";
 
 import ReactECharts from "echarts-for-react";
 
@@ -45,32 +54,36 @@ function ContestantProgrammingLanguages({ username }: { username: string }) {
         Programming Languages
       </h5>
       <div className="grid gap-4 lg:grid-cols-2">
-        <ProgrammingLanguagesBar
-          languages={languages}
-          loading={loading}
-        />
-        <ProgrammingLanguagesPie
-          languages={languages}
-          loading={loading}
-        />
+        <ProgrammingLanguagesBar languages={languages} loading={loading} />
+        <ProgrammingLanguagesPie languages={languages} loading={loading} />
       </div>
     </div>
   );
 }
 
-function EventDetailView({ id, mode = 'admin', showParticipants }: EventDetailViewWidgetProps) {
-  const isAdminMode = mode === 'admin';
+function EventDetailView({
+  id,
+  mode = "admin",
+  showParticipants,
+}: EventDetailViewWidgetProps) {
+  const isAdminMode = mode === "admin";
   const shouldShowParticipants = showParticipants ?? isAdminMode;
   const [loading, setLoading] = useState(false);
-  const [contestants, setContestants] = useState<EventReport["contestants"]>([]);
-  const [expandedContestants, setExpandedContestants] = useState<Set<string>>(new Set());
+  const [contestants, setContestants] = useState<EventReport["contestants"]>(
+    [],
+  );
+  const [expandedContestants, setExpandedContestants] = useState<Set<string>>(
+    new Set(),
+  );
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [eventData, setEventData] = useState<EventReport | null>(null);
   const [loadingEventData, setLoadingEventData] = useState(false);
-  const [analysisData, setAnalysisData] = useState<EventAnalysisData | null>(null);
+  const [analysisData, setAnalysisData] = useState<EventAnalysisData | null>(
+    null,
+  );
   const [loadingAnalysis, setLoadingAnalysis] = useState(false);
 
-  const formatDisplayName = (contestant: typeof contestants[0]) => {
+  const formatDisplayName = (contestant: (typeof contestants)[0]) => {
     if (!contestant.nickname || contestant.nickname === contestant.username) {
       return contestant.username || "Unknown User";
     }
@@ -92,9 +105,9 @@ function EventDetailView({ id, mode = 'admin', showParticipants }: EventDetailVi
       setLoadingAnalysis(true);
       try {
         const response = await fetch(`/api/analysis/events/${id}`, {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         });
 
@@ -104,13 +117,15 @@ function EventDetailView({ id, mode = 'admin', showParticipants }: EventDetailVi
             setAnalysisData({
               ecosystem_ranking: result.data.ecosystem_ranking || [],
               contribution_percentage: result.data.contribution_percentage || 0,
-              users_with_contributions: result.data.users_with_contributions || 0,
-              users_without_contributions: result.data.users_without_contributions || 0,
+              users_with_contributions:
+                result.data.users_with_contributions || 0,
+              users_without_contributions:
+                result.data.users_without_contributions || 0,
             });
           }
         }
       } catch (error) {
-        console.error('[Event Detail] Error fetching analysis data:', error);
+        console.error("[Event Detail] Error fetching analysis data:", error);
       } finally {
         setLoadingAnalysis(false);
       }
@@ -121,7 +136,7 @@ function EventDetailView({ id, mode = 'admin', showParticipants }: EventDetailVi
         const detailFetcher = isAdminMode ? fetchOne : fetchPublicEventDetail;
 
         await Promise.all([
-          detailFetcher(id).then(res => {
+          detailFetcher(id).then((res) => {
             if (res.success && res.data) {
               const detail = res.data as EventReport;
               setContestants(detail.contestants || []);
@@ -129,7 +144,10 @@ function EventDetailView({ id, mode = 'admin', showParticipants }: EventDetailVi
                 setEventData(detail);
               }
             } else {
-              console.error(`[Event Detail] Failed to fetch event data:`, res.message);
+              console.error(
+                `[Event Detail] Failed to fetch event data:`,
+                res.message,
+              );
               if (isAdminMode) {
                 alert(res.message);
               }
@@ -162,7 +180,7 @@ function EventDetailView({ id, mode = 'admin', showParticipants }: EventDetailVi
         setEventData(result.data);
       }
     } catch (error) {
-      console.error('[EventDetailView] Error fetching event data:', error);
+      console.error("[EventDetailView] Error fetching event data:", error);
     } finally {
       setLoadingEventData(false);
     }
@@ -190,7 +208,9 @@ function EventDetailView({ id, mode = 'admin', showParticipants }: EventDetailVi
       <div className="flex items-center justify-center min-h-96">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-500 dark:text-gray-400">Loading event details...</p>
+          <p className="text-gray-500 dark:text-gray-400">
+            Loading event details...
+          </p>
         </div>
       </div>
     );
@@ -200,9 +220,16 @@ function EventDetailView({ id, mode = 'admin', showParticipants }: EventDetailVi
     return (
       <div className="flex items-center justify-center min-h-96">
         <div className="text-center">
-          <Calendar size={48} className="mx-auto mb-4 text-gray-300 dark:text-gray-600" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No contestants found</h3>
-          <p className="text-gray-500 dark:text-gray-400">This event doesn&apos;t have any contestants yet.</p>
+          <Calendar
+            size={48}
+            className="mx-auto mb-4 text-gray-300 dark:text-gray-600"
+          />
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            No contestants found
+          </h3>
+          <p className="text-gray-500 dark:text-gray-400">
+            This event doesn&apos;t have any contestants yet.
+          </p>
         </div>
       </div>
     );
@@ -221,11 +248,15 @@ function EventDetailView({ id, mode = 'admin', showParticipants }: EventDetailVi
   const getRankIcon = (index: number) => {
     switch (index) {
     case 0:
-      return <Trophy size={16} className="text-yellow-600 dark:text-yellow-400" />;
+      return (
+        <Trophy size={16} className="text-yellow-600 dark:text-yellow-400" />
+      );
     case 1:
       return <Medal size={16} className="text-gray-500 dark:text-gray-400" />;
     case 2:
-      return <Award size={16} className="text-orange-600 dark:text-orange-400" />;
+      return (
+        <Award size={16} className="text-orange-600 dark:text-orange-400" />
+      );
     default:
       return <span className="text-xs font-semibold">{index + 1}</span>;
     }
@@ -255,8 +286,12 @@ function EventDetailView({ id, mode = 'admin', showParticipants }: EventDetailVi
                 <Users size={18} className="text-primary" />
               </div>
               <div>
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Event Overview</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{contestants.length} contestants participating</p>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                  Event Overview
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {contestants.length} contestants participating
+                </p>
               </div>
             </div>
             {isAdminMode && (
@@ -282,7 +317,10 @@ function EventDetailView({ id, mode = 'admin', showParticipants }: EventDetailVi
         <div className="space-y-4">
           {/* Analytics Overview */}
           <EventAnalyticsOverview
-            totalUsers={analysisData.users_with_contributions + analysisData.users_without_contributions}
+            totalUsers={
+              analysisData.users_with_contributions +
+              analysisData.users_without_contributions
+            }
             usersWithContributions={analysisData.users_with_contributions}
             usersWithoutContributions={analysisData.users_without_contributions}
             contributionPercentage={analysisData.contribution_percentage}
@@ -314,7 +352,9 @@ function EventDetailView({ id, mode = 'admin', showParticipants }: EventDetailVi
               <div className="p-2 rounded-lg bg-secondary/10">
                 <Users size={18} className="text-secondary" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">Event Participants</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                Event Participants
+              </h3>
             </div>
           </CardHeader>
 
@@ -323,7 +363,11 @@ function EventDetailView({ id, mode = 'admin', showParticipants }: EventDetailVi
               const isExpanded = expandedContestants.has(String(contestant.id));
 
               return (
-                <div key={contestant.id} className="animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
+                <div
+                  key={contestant.id}
+                  className="animate-fade-in"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
                   {/* Participant Row */}
                   <button
                     className="w-full px-6 py-4 text-left hover:bg-surface dark:hover:bg-surface-dark transition-colors duration-200 focus:outline-none focus:bg-surface dark:focus:bg-surface-dark"
@@ -333,7 +377,9 @@ function EventDetailView({ id, mode = 'admin', showParticipants }: EventDetailVi
                   >
                     <div className="flex items-center gap-4">
                       {/* Rank Badge */}
-                      <div className={`w-8 h-8 rounded-full border flex items-center justify-center text-xs font-medium ${getRankBadgeStyles(index)}`}>
+                      <div
+                        className={`w-8 h-8 rounded-full border flex items-center justify-center text-xs font-medium ${getRankBadgeStyles(index)}`}
+                      >
                         {getRankIcon(index)}
                       </div>
 
@@ -353,62 +399,71 @@ function EventDetailView({ id, mode = 'admin', showParticipants }: EventDetailVi
                               {formatDisplayName(contestant)}
                             </h4>
                             <p className="text-xs text-gray-500 dark:text-gray-400">
-                            Rank #{index + 1} • {contestant.analytics.length} ecosystems
+                              Rank #{index + 1} • {contestant.analytics.length}{" "}
+                              ecosystems
                             </p>
                           </div>
 
                           {/* Top Ecosystem Scores - Horizontal Display */}
                           <div className="flex items-center gap-2 ml-2">
                             <div className="hidden lg:flex items-center gap-1.5 max-w-2xl overflow-hidden">
-                              {contestant.analytics.slice(0, 3).map((eco, ecoIndex) => (
-                                <div
-                                  key={`${eco.name}-${ecoIndex}`}
-                                  className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 dark:bg-gray-800 rounded-md flex-shrink-0"
-                                  title={`${eco.name}: ${eco.score}`}
-                                >
-                                  <div className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
-                                  <span className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                                    {eco.name}
-                                  </span>
-                                  <span className="text-xs font-semibold text-primary flex-shrink-0">
-                                    {eco.score}
-                                  </span>
-                                </div>
-                              ))}
+                              {contestant.analytics
+                                .slice(0, 3)
+                                .map((eco, ecoIndex) => (
+                                  <div
+                                    key={`${eco.name}-${ecoIndex}`}
+                                    className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 dark:bg-gray-800 rounded-md flex-shrink-0"
+                                    title={`${eco.name}: ${eco.score}`}
+                                  >
+                                    <div className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                                      {eco.name}
+                                    </span>
+                                    <span className="text-xs font-semibold text-primary flex-shrink-0">
+                                      {eco.score}
+                                    </span>
+                                  </div>
+                                ))}
                               {contestant.analytics.length > 3 && (
                                 <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
-                                +{contestant.analytics.length - 3}
+                                  +{contestant.analytics.length - 3}
                                 </span>
                               )}
                             </div>
 
                             {/* Medium screens: Show abbreviated names */}
                             <div className="hidden sm:flex lg:hidden items-center gap-1.5 max-w-lg overflow-hidden">
-                              {contestant.analytics.slice(0, 3).map((eco, ecoIndex) => {
-                              // Smart abbreviation for medium screens
-                                const abbrevName = eco.name.length > 8
-                                  ? eco.name.split(' ').map(word => word.slice(0, 3)).join(' ')
-                                  : eco.name;
+                              {contestant.analytics
+                                .slice(0, 3)
+                                .map((eco, ecoIndex) => {
+                                  // Smart abbreviation for medium screens
+                                  const abbrevName =
+                                    eco.name.length > 8
+                                      ? eco.name
+                                        .split(" ")
+                                        .map((word) => word.slice(0, 3))
+                                        .join(" ")
+                                      : eco.name;
 
-                                return (
-                                  <div
-                                    key={`${eco.name}-${ecoIndex}`}
-                                    className="flex items-center gap-1 px-2 py-1 bg-gray-50 dark:bg-gray-800 rounded-md flex-shrink-0"
-                                    title={`${eco.name}: ${eco.score}`}
-                                  >
-                                    <div className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
-                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                                      {abbrevName}
-                                    </span>
-                                    <span className="text-xs font-semibold text-primary flex-shrink-0">
-                                      {eco.score}
-                                    </span>
-                                  </div>
-                                );
-                              })}
+                                  return (
+                                    <div
+                                      key={`${eco.name}-${ecoIndex}`}
+                                      className="flex items-center gap-1 px-2 py-1 bg-gray-50 dark:bg-gray-800 rounded-md flex-shrink-0"
+                                      title={`${eco.name}: ${eco.score}`}
+                                    >
+                                      <div className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                                      <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                                        {abbrevName}
+                                      </span>
+                                      <span className="text-xs font-semibold text-primary flex-shrink-0">
+                                        {eco.score}
+                                      </span>
+                                    </div>
+                                  );
+                                })}
                               {contestant.analytics.length > 3 && (
                                 <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
-                                +{contestant.analytics.length - 3}
+                                  +{contestant.analytics.length - 3}
                                 </span>
                               )}
                             </div>
@@ -423,9 +478,15 @@ function EventDetailView({ id, mode = 'admin', showParticipants }: EventDetailVi
                             {/* Expand/Collapse Icon */}
                             <div className="flex items-center text-gray-400 dark:text-gray-500">
                               {isExpanded ? (
-                                <ChevronUp size={18} className="transition-transform duration-200" />
+                                <ChevronUp
+                                  size={18}
+                                  className="transition-transform duration-200"
+                                />
                               ) : (
-                                <ChevronDown size={18} className="transition-transform duration-200" />
+                                <ChevronDown
+                                  size={18}
+                                  className="transition-transform duration-200"
+                                />
                               )}
                             </div>
                           </div>
@@ -443,25 +504,34 @@ function EventDetailView({ id, mode = 'admin', showParticipants }: EventDetailVi
                         {/* Profile Section - Full Width */}
                         <div>
                           <h5 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                          Developer Profile
+                            Developer Profile
                           </h5>
                           <ProfileCardWidget developer={contestant} />
                         </div>
 
                         {/* Programming Languages Section - Two Column Layout */}
-                        <ContestantProgrammingLanguages username={contestant.username} />
+                        <ContestantProgrammingLanguages
+                          username={contestant.username}
+                        />
 
                         {/* Ecosystem Scores Chart - Full Width */}
                         <div>
                           <div className="border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle">
                             <div className="flex items-center gap-2 mb-3">
-                              <Trophy size={14} className="text-gray-600 dark:text-gray-400" />
-                              <h3 className="text-sm font-medium text-gray-900 dark:text-white">Ecosystem Scores</h3>
+                              <Trophy
+                                size={14}
+                                className="text-gray-600 dark:text-gray-400"
+                              />
+                              <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                                Ecosystem Scores
+                              </h3>
                             </div>
                             <div className="h-40">
                               <ReactECharts
-                                option={resolveChartOptions(contestant.analytics)}
-                                style={{ height: '100%', width: '100%' }}
+                                option={resolveChartOptions(
+                                  contestant.analytics,
+                                )}
+                                style={{ height: "100%", width: "100%" }}
                               />
                             </div>
                           </div>
@@ -469,7 +539,9 @@ function EventDetailView({ id, mode = 'admin', showParticipants }: EventDetailVi
 
                         {/* Repository Scores Section - Full Width */}
                         <div>
-                          <RepoScoreListCard dataSource={contestant.analytics} />
+                          <RepoScoreListCard
+                            dataSource={contestant.analytics}
+                          />
                         </div>
                       </div>
                     </div>
