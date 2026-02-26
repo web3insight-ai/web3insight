@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Skeleton, Button } from "@nextui-org/react";
+import { Skeleton, Button } from "@/components/ui";
 import { Inbox, RefreshCw } from "lucide-react";
 import { useDonateRepoList } from "@/hooks/api/useDonate";
 import { DonateRepoCard } from "./DonateRepoCard";

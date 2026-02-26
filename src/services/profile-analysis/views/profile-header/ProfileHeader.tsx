@@ -1,5 +1,20 @@
-import { Avatar, Button, Input, Switch, Popover, PopoverTrigger, PopoverContent } from "@nextui-org/react";
-import { Github, Building, ExternalLink, Share2, Copy, Loader2 } from "lucide-react";
+import {
+  Avatar,
+  Button,
+  Input,
+  Switch,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui";
+import {
+  Github,
+  Building,
+  ExternalLink,
+  Share2,
+  Copy,
+  Loader2,
+} from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAtom } from "jotai";
@@ -15,19 +30,22 @@ interface ProfileHeaderProps {
   analysisId?: number | null;
 }
 
-
-
 function formatNumber(num: number): string {
   if (num >= 1000000) {
-    return (num / 1000000).toFixed(1) + 'M';
+    return (num / 1000000).toFixed(1) + "M";
   }
   if (num >= 1000) {
-    return (num / 1000).toFixed(1) + 'K';
+    return (num / 1000).toFixed(1) + "K";
   }
   return num.toString();
 }
 
-export function ProfileHeader({ user, githubUsername, className = "", analysisId }: ProfileHeaderProps) {
+export function ProfileHeader({
+  user,
+  githubUsername,
+  className = "",
+  analysisId,
+}: ProfileHeaderProps) {
   const { data: githubData } = useGitHubStats(githubUsername || null);
   const [, addToast] = useAtom(addToastAtom);
 
@@ -44,7 +62,10 @@ export function ProfileHeader({ user, githubUsername, className = "", analysisId
     }
   }, []);
 
-  const sharePath = useMemo(() => (analysisId ? `/devinsight/${analysisId}` : ""), [analysisId]);
+  const sharePath = useMemo(
+    () => (analysisId ? `/devinsight/${analysisId}` : ""),
+    [analysisId],
+  );
 
   const shareUrl = useMemo(() => {
     if (!sharePath) return "";
@@ -80,14 +101,17 @@ export function ProfileHeader({ user, githubUsername, className = "", analysisId
           throw new Error(message);
         }
 
-        const data = await response.json() as { public?: boolean };
+        const data = (await response.json()) as { public?: boolean };
 
         if (!isCancelled && typeof data.public === "boolean") {
           setIsPublic(data.public);
         }
       } catch (error) {
         if (!isCancelled) {
-          const message = error instanceof Error ? error.message : "Failed to load share status";
+          const message =
+            error instanceof Error
+              ? error.message
+              : "Failed to load share status";
           setShareError(message);
           console.error("[ProfileHeader] loadShareStatus error", error);
         }
@@ -105,57 +129,74 @@ export function ProfileHeader({ user, githubUsername, className = "", analysisId
     };
   }, [analysisId]);
 
-  const handleShareToggle = useCallback(async (value: boolean) => {
-    if (!analysisId) {
-      return;
-    }
-
-    setShareUpdating(true);
-    setShareError(null);
-
-    try {
-      const response = await fetch(`/api/analysis/users/${analysisId}/share`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ share: value }),
-      });
-
-      if (!response.ok) {
-        const errorBody = await response.json().catch(() => null) as { message?: string } | null;
-        const message = errorBody?.message || `Failed to update share setting (${response.status})`;
-        throw new Error(message);
+  const handleShareToggle = useCallback(
+    async (value: boolean) => {
+      if (!analysisId) {
+        return;
       }
 
-      setIsPublic(value);
+      setShareUpdating(true);
+      setShareError(null);
 
-      addToast({
-        type: "success",
-        title: value ? "DevInsight shared" : "DevInsight private",
-        message: value
-          ? "Your DevInsight analysis is now publicly accessible."
-          : "Public access has been disabled.",
-      });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to update share setting";
-      setShareError(message);
-      addToast({
-        type: "error",
-        title: "Unable to update share",
-        message,
-      });
-    } finally {
-      setShareUpdating(false);
-    }
-  }, [analysisId, addToast]);
+      try {
+        const response = await fetch(
+          `/api/analysis/users/${analysisId}/share`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ share: value }),
+          },
+        );
+
+        if (!response.ok) {
+          const errorBody = (await response.json().catch(() => null)) as {
+            message?: string;
+          } | null;
+          const message =
+            errorBody?.message ||
+            `Failed to update share setting (${response.status})`;
+          throw new Error(message);
+        }
+
+        setIsPublic(value);
+
+        addToast({
+          type: "success",
+          title: value ? "DevInsight shared" : "DevInsight private",
+          message: value
+            ? "Your DevInsight analysis is now publicly accessible."
+            : "Public access has been disabled.",
+        });
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Failed to update share setting";
+        setShareError(message);
+        addToast({
+          type: "error",
+          title: "Unable to update share",
+          message,
+        });
+      } finally {
+        setShareUpdating(false);
+      }
+    },
+    [analysisId, addToast],
+  );
 
   const handleCopyLink = useCallback(async () => {
     if (!analysisId) {
       return;
     }
 
-    const link = shareUrl || (typeof window !== "undefined" ? `${window.location.origin}${sharePath}` : sharePath);
+    const link =
+      shareUrl ||
+      (typeof window !== "undefined"
+        ? `${window.location.origin}${sharePath}`
+        : sharePath);
 
     try {
       await navigator.clipboard.writeText(link);
@@ -175,7 +216,9 @@ export function ProfileHeader({ user, githubUsername, className = "", analysisId
   }, [analysisId, addToast, sharePath, shareUrl]);
 
   return (
-    <div className={`bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark compact-card ${className}`}>
+    <div
+      className={`bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark compact-card ${className}`}
+    >
       <div className="flex items-center gap-3">
         {/* Avatar - Prominent */}
         <Avatar
@@ -207,7 +250,8 @@ export function ProfileHeader({ user, githubUsername, className = "", analysisId
                   showArrow
                   backdrop="transparent"
                   classNames={{
-                    content: "p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-lg",
+                    content:
+                      "p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-lg",
                   }}
                 >
                   <PopoverTrigger>
@@ -216,7 +260,7 @@ export function ProfileHeader({ user, githubUsername, className = "", analysisId
                       color="primary"
                       size="sm"
                       startContent={
-                        (shareUpdating || shareStatusLoading) ? (
+                        shareUpdating || shareStatusLoading ? (
                           <Loader2 size={14} className="animate-spin" />
                         ) : (
                           <Share2 size={14} />
@@ -266,7 +310,8 @@ export function ProfileHeader({ user, githubUsername, className = "", analysisId
                               variant="bordered"
                               className="flex-1"
                               classNames={{
-                                inputWrapper: "bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-600 h-8",
+                                inputWrapper:
+                                  "bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-600 h-8",
                                 input: "text-xs font-mono",
                               }}
                               aria-label="Public URL for sharing"
@@ -317,23 +362,38 @@ export function ProfileHeader({ user, githubUsername, className = "", analysisId
           {/* Stats Row - Clean and Consistent */}
           <div className="flex items-center gap-6 text-xs">
             <span className="text-gray-600 dark:text-gray-400">
-              <strong className="text-gray-900 dark:text-white text-sm">{formatNumber(user.public_repos)}</strong> Repositories
+              <strong className="text-gray-900 dark:text-white text-sm">
+                {formatNumber(user.public_repos)}
+              </strong>{" "}
+              Repositories
             </span>
             <span className="text-gray-600 dark:text-gray-400">
-              <strong className="text-gray-900 dark:text-white text-sm">{formatNumber(user.followers)}</strong> Followers
+              <strong className="text-gray-900 dark:text-white text-sm">
+                {formatNumber(user.followers)}
+              </strong>{" "}
+              Followers
             </span>
             <span className="text-gray-600 dark:text-gray-400">
-              <strong className="text-gray-900 dark:text-white text-sm">{formatNumber(user.following)}</strong> Following
+              <strong className="text-gray-900 dark:text-white text-sm">
+                {formatNumber(user.following)}
+              </strong>{" "}
+              Following
             </span>
 
             {/* GitHub Activity Stats - No Icons for Consistency */}
             {githubData?.stats && (
               <>
                 <span className="text-gray-600 dark:text-gray-400">
-                  <strong className="text-gray-900 dark:text-white text-sm">{githubData.stats.totalStars}</strong> Stars
+                  <strong className="text-gray-900 dark:text-white text-sm">
+                    {githubData.stats.totalStars}
+                  </strong>{" "}
+                  Stars
                 </span>
                 <span className="text-gray-600 dark:text-gray-400">
-                  <strong className="text-gray-900 dark:text-white text-sm">{githubData.stats.totalCommits}</strong> Commits (2025)
+                  <strong className="text-gray-900 dark:text-white text-sm">
+                    {githubData.stats.totalCommits}
+                  </strong>{" "}
+                  Commits (2025)
                 </span>
               </>
             )}

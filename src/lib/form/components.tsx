@@ -1,7 +1,7 @@
 "use client";
 
 import { forwardRef } from "react";
-import { Input, Select, SelectItem, Textarea } from "@nextui-org/react";
+import { Input, Select, SelectItem, Textarea } from "@/components/ui";
 import {
   useFormContext,
   Controller,

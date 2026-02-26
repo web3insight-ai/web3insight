@@ -1,7 +1,6 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { NextUIProvider } from "@nextui-org/react";
 import { ThemeProvider } from "next-themes";
 import { Provider as JotaiProvider } from "jotai";
 
@@ -9,7 +8,6 @@ import NavigationProgress from "$/NavigationProgress";
 import ClientOnly from "$/ClientOnly";
 import ToastContainer from "$/ToastContainer";
 
-// Lazy load heavy AI widget (reduces initial bundle by ~50KB)
 const AIAssistantWidget = dynamic(() => import("$/AIAssistantWidget"), {
   ssr: false,
 });
@@ -24,22 +22,20 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
       <JotaiProvider>
         <PrivyProvider>
           <PrivyAuthSync />
-          <NextUIProvider>
-            <ThemeProvider
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <ClientOnly>
-                <NavigationProgress />
-                <AIAssistantProvider>
-                  <AIAssistantWidget />
-                </AIAssistantProvider>
-                <ToastContainer />
-                {children}
-              </ClientOnly>
-            </ThemeProvider>
-          </NextUIProvider>
+          <ThemeProvider
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <ClientOnly>
+              <NavigationProgress />
+              <AIAssistantProvider>
+                <AIAssistantWidget />
+              </AIAssistantProvider>
+              <ToastContainer />
+              {children}
+            </ClientOnly>
+          </ThemeProvider>
         </PrivyProvider>
       </JotaiProvider>
     </QueryProvider>

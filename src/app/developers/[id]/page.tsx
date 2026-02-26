@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { headers } from "next/headers";
 import DeveloperDetailClient from "./DeveloperDetailClient";
-import { getTitle } from "@/utils/app";
 import { api } from "@/lib/api/client";
 import { getUser } from "~/auth/repository";
 import DefaultLayoutWrapper from "../../DefaultLayoutWrapper";
-import { env } from "@/env";
 
 interface DeveloperPageProps {
   params: Promise<{
@@ -20,28 +17,23 @@ export async function generateMetadata({
   try {
     const resolvedParams = await params;
     const res = await api.developers.getOne(resolvedParams.id);
-    const baseTitle = `Developer Profile - ${getTitle()}`;
 
     if (res.success && res.data) {
       const developerHandle = `@${res.data.username}`;
-      const title = `${developerHandle} ${baseTitle}`;
 
       return {
-        title,
-        openGraph: {
-          title,
-        },
+        title: `${developerHandle} - Developer Profile`,
         description: `Developer profile and contribution analytics for ${developerHandle}. Track ecosystem contributions and activity.`,
       };
     }
 
     return {
-      title: baseTitle,
+      title: "Developer Profile",
       description: "Web3 developer profile and analytics",
     };
   } catch (_error) {
     return {
-      title: `Developer Profile - ${getTitle()}`,
+      title: "Developer Profile",
       description: "Web3 developer profile and analytics",
     };
   }
@@ -52,16 +44,6 @@ export default async function DeveloperDetailPage({
 }: DeveloperPageProps) {
   const resolvedParams = await params;
   const developerId = resolvedParams.id;
-
-  // Get current user from session
-  const headersList = await headers();
-  const host = headersList.get("host") || "localhost:3000";
-  const protocol = env.NODE_ENV === "development" ? "http" : "https";
-  const url = `${protocol}://${host}/developers/${developerId}`;
-
-  const _request = new Request(url, {
-    headers: Object.fromEntries(headersList.entries()),
-  });
   const user = await getUser();
 
   try {

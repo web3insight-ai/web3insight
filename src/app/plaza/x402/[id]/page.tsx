@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { headers } from "next/headers";
 import DonationDetailClient from "./DonationDetailClient";
 import { getTitle } from "@/utils/app";
 import { getUser } from "~/auth/repository";
@@ -87,15 +86,6 @@ export default async function DonationDetailPage({
     notFound();
   }
 
-  // Get current user from session
-  const headersList = await headers();
-  const host = headersList.get("host") || "localhost:3000";
-  const protocol = env.NODE_ENV === "development" ? "http" : "https";
-  const url = `${protocol}://${host}/plaza/x402/${id}`;
-
-  const _request = new Request(url, {
-    headers: Object.fromEntries(headersList.entries()),
-  });
   const user = await getUser();
 
   const donateRepo = await fetchDonateRepo(id);

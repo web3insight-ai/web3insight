@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Chip } from "@nextui-org/react";
+import { Button, Chip } from "@/components/ui";
 import { Brain, Sparkles, Target } from "lucide-react";
 import { useAtom } from "jotai";
 
@@ -82,7 +82,9 @@ export function AIInsights({ user, className = "" }: AIInsightsProps) {
             {hasNewRoastReport && (
               <div className="border-l-3 border-l-primary pl-3">
                 <p className="chinese-content text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-                  {aiProfile.roastReport?.[language] ?? aiProfile.roastReport?.english ?? aiProfile.roastReport?.chinese}
+                  {aiProfile.roastReport?.[language] ??
+                    aiProfile.roastReport?.english ??
+                    aiProfile.roastReport?.chinese}
                 </p>
               </div>
             )}
@@ -100,28 +102,36 @@ export function AIInsights({ user, className = "" }: AIInsightsProps) {
                 {/* Analysis Content - Compact */}
                 <div className="space-y-3 text-sm">
                   <div className="border-l-2 border-l-gray-200 dark:border-l-gray-700 pl-3">
-                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Overall Performance</h4>
+                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                      Overall Performance
+                    </h4>
                     <p className="chinese-content leading-relaxed text-gray-700 dark:text-gray-300">
                       {aiProfile.roast_report?.overall_roast}
                     </p>
                   </div>
 
                   <div className="border-l-2 border-l-gray-200 dark:border-l-gray-700 pl-3">
-                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Activity Level</h4>
+                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                      Activity Level
+                    </h4>
                     <p className="chinese-content leading-relaxed text-gray-700 dark:text-gray-300">
                       {aiProfile.roast_report?.activity_roast}
                     </p>
                   </div>
 
                   <div className="border-l-2 border-l-gray-200 dark:border-l-gray-700 pl-3">
-                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Ecosystem Choice</h4>
+                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                      Ecosystem Choice
+                    </h4>
                     <p className="chinese-content leading-relaxed text-gray-700 dark:text-gray-300">
                       {aiProfile.roast_report?.ecosystem_roast}
                     </p>
                   </div>
 
                   <div className="border-l-2 border-l-gray-200 dark:border-l-gray-700 pl-3">
-                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Technical Skills</h4>
+                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                      Technical Skills
+                    </h4>
                     <p className="chinese-content leading-relaxed text-gray-700 dark:text-gray-300">
                       {aiProfile.roast_report?.technical_roast}
                     </p>
@@ -130,25 +140,34 @@ export function AIInsights({ user, className = "" }: AIInsightsProps) {
 
                 {/* Summary */}
                 <div className="bg-gray-100 dark:bg-gray-700/50 rounded-lg p-3 mt-4 border dark:border-gray-600">
-                  <h4 className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-2">Summary</h4>
+                  <h4 className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-2">
+                    Summary
+                  </h4>
                   <p className="chinese-content text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                     {aiProfile.roast_report?.final_verdict}
                   </p>
                 </div>
 
                 {/* Suggestions */}
-                {aiProfile.roast_report?.constructive_sarcasm && aiProfile.roast_report.constructive_sarcasm.length > 0 && (
+                {aiProfile.roast_report?.constructive_sarcasm &&
+                  aiProfile.roast_report.constructive_sarcasm.length > 0 && (
                   <div className="mt-4">
-                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Improvement Suggestions</h4>
+                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                        Improvement Suggestions
+                    </h4>
                     <div className="space-y-2">
-                      {aiProfile.roast_report?.constructive_sarcasm.slice(0, 2).map((suggestion, index) => (
-                        <div key={index} className="flex items-start gap-2">
-                          <span className="text-xs text-gray-400 mt-0.5">{index + 1}.</span>
-                          <p className="chinese-content text-xs leading-relaxed text-gray-600 dark:text-gray-400">
-                            {suggestion}
-                          </p>
-                        </div>
-                      ))}
+                      {aiProfile.roast_report?.constructive_sarcasm
+                        .slice(0, 2)
+                        .map((suggestion, index) => (
+                          <div key={index} className="flex items-start gap-2">
+                            <span className="text-xs text-gray-400 mt-0.5">
+                              {index + 1}.
+                            </span>
+                            <p className="chinese-content text-xs leading-relaxed text-gray-600 dark:text-gray-400">
+                              {suggestion}
+                            </p>
+                          </div>
+                        ))}
                     </div>
                   </div>
                 )}
@@ -169,7 +188,9 @@ export function AIInsights({ user, className = "" }: AIInsightsProps) {
                   </h3>
                   <div className="flex items-center gap-3">
                     <Chip
-                      color={getInvolvementLevelColor(aiProfile.web3_involvement.level)}
+                      color={getInvolvementLevelColor(
+                        aiProfile.web3_involvement.level,
+                      )}
                       variant="flat"
                       size="lg"
                       className="font-semibold"
@@ -200,7 +221,9 @@ export function AIInsights({ user, className = "" }: AIInsightsProps) {
 
               <div className="space-y-3">
                 <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-sm">
-                  {showFullSummary ? aiProfile.summary : `${aiProfile.summary.slice(0, 200)}${aiProfile.summary.length > 200 ? '...' : ''}`}
+                  {showFullSummary
+                    ? aiProfile.summary
+                    : `${aiProfile.summary.slice(0, 200)}${aiProfile.summary.length > 200 ? "..." : ""}`}
                 </p>
 
                 {aiProfile.summary.length > 200 && (
@@ -210,7 +233,7 @@ export function AIInsights({ user, className = "" }: AIInsightsProps) {
                     onPress={() => setShowFullSummary(!showFullSummary)}
                     className="text-primary"
                   >
-                    {showFullSummary ? 'Show Less' : 'Read More'}
+                    {showFullSummary ? "Show Less" : "Read More"}
                   </Button>
                 )}
               </div>
@@ -240,7 +263,12 @@ export function AIInsights({ user, className = "" }: AIInsightsProps) {
                   </Chip>
                 ))}
                 {aiProfile.skills.length > 8 && (
-                  <Chip color="default" variant="bordered" size="sm" className="text-xs">
+                  <Chip
+                    color="default"
+                    variant="bordered"
+                    size="sm"
+                    className="text-xs"
+                  >
                     +{aiProfile.skills.length - 8} more
                   </Chip>
                 )}
@@ -268,7 +296,6 @@ export function AIInsights({ user, className = "" }: AIInsightsProps) {
           )}
         </div>
       )}
-
     </div>
   );
 }

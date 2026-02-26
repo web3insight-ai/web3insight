@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Card } from "@nextui-org/react";
+import { Card } from "@/components/ui";
 import { Warehouse, ArrowRight } from "lucide-react";
 import { useState, useMemo } from "react";
 import { EcosystemType } from "~/ecosystem/typing";

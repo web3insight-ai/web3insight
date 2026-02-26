@@ -6,7 +6,7 @@ import YearlyReport from "~/report/views/yearly-report";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "2025 Annual Report | Web3 Insight",
+  title: "2025 Annual Report",
   description:
     "Chinese Web3 developer ecosystem annual report - developer growth, ecosystem participation, and top repositories.",
 };

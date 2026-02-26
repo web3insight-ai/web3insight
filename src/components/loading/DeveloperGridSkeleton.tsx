@@ -1,4 +1,4 @@
-import { Card, Skeleton } from "@nextui-org/react";
+import { Card, Skeleton } from "@/components/ui";
 
 function DeveloperGridSkeleton() {
   return (

@@ -1,4 +1,4 @@
-import { Card, CardBody, Progress, Chip } from "@nextui-org/react";
+import { Card, CardBody, Progress, Chip } from "@/components/ui";
 import { Brain, CheckCircle, AlertCircle, Clock, Loader2 } from "lucide-react";
 import FadeIn from "$/FadeIn";
 
@@ -11,11 +11,11 @@ interface AnalysisProgressProps {
   estimatedTime?: string;
 }
 
-export function AnalysisProgress({ 
-  status, 
-  progress, 
-  message, 
-  estimatedTime, 
+export function AnalysisProgress({
+  status,
+  progress,
+  message,
+  estimatedTime,
 }: AnalysisProgressProps) {
   const getStatusIcon = () => {
     switch (status) {
@@ -92,9 +92,18 @@ export function AnalysisProgress({
               <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                 <Loader2
                   size={14}
-                  className={status === "analyzing" ? "animate-spin text-primary" : "text-success"}
+                  className={
+                    status === "analyzing"
+                      ? "animate-spin text-primary"
+                      : "text-success"
+                  }
                 />
-                <span>{message || (status === "analyzing" ? "Loading analysis..." : "Analysis complete")}</span>
+                <span>
+                  {message ||
+                    (status === "analyzing"
+                      ? "Loading analysis..."
+                      : "Analysis complete")}
+                </span>
               </div>
             </div>
 

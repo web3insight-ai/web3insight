@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
-import { Card, CardHeader, Input, Pagination, Button } from "@nextui-org/react";
+import { Card, CardHeader, Input, Pagination, Button } from "@/components/ui";
 import { Search, Warehouse, Settings } from "lucide-react";
 
 import { EcosystemType } from "../typing";

@@ -1,8 +1,17 @@
-'use client';
+"use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Card, CardHeader, Avatar, Badge, Button } from "@nextui-org/react";
-import { Users, Trophy, Medal, Award, ChevronDown, ChevronUp, RefreshCw, Edit3 } from "lucide-react";
+import { Card, CardHeader, Avatar, Chip, Button } from "@/components/ui";
+import {
+  Users,
+  Trophy,
+  Medal,
+  Award,
+  ChevronDown,
+  ChevronUp,
+  RefreshCw,
+  Edit3,
+} from "lucide-react";
 
 import AnalysisProgress from "$/loading/AnalysisProgress";
 import AnalysisSkeleton from "$/loading/AnalysisSkeleton";
@@ -22,7 +31,9 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
   const [loading, setLoading] = useState(true);
   const [contestants, setContestants] = useState<PartialContestant[]>([]);
   const [analysisComplete, setAnalysisComplete] = useState(false);
-  const [expandedContestants, setExpandedContestants] = useState<Set<string>>(new Set());
+  const [expandedContestants, setExpandedContestants] = useState<Set<string>>(
+    new Set(),
+  );
   const [overallProgress, setOverallProgress] = useState(0);
   const [pollingActive, setPollingActive] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -36,7 +47,9 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
     try {
       const result = await fetchOne(id);
       if (result.success && result.data.contestants) {
-        const updatedContestants = createPartialContestants(result.data.contestants);
+        const updatedContestants = createPartialContestants(
+          result.data.contestants,
+        );
         setContestants(updatedContestants);
 
         const newOverallProgress = calculateOverallProgress(updatedContestants);
@@ -48,7 +61,10 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
         }
       }
     } catch (error) {
-      console.error('[Progressive Event Detail] Error polling analysis updates:', error);
+      console.error(
+        "[Progressive Event Detail] Error polling analysis updates:",
+        error,
+      );
     }
   }, [analysisComplete, id]);
 
@@ -61,7 +77,10 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
         setEventData(result.data);
       }
     } catch (error) {
-      console.error('[ProgressiveEventDetail] Error fetching event data:', error);
+      console.error(
+        "[ProgressiveEventDetail] Error fetching event data:",
+        error,
+      );
     } finally {
       setLoadingEventData(false);
     }
@@ -86,16 +105,24 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
         const result = await fetchOne(id);
         if (result.success && result.data.contestants) {
           // Convert real contestants to partial contestants for progressive display
-          const partialContestants = createPartialContestants(result.data.contestants);
+          const partialContestants = createPartialContestants(
+            result.data.contestants,
+          );
           setContestants(partialContestants);
           setOverallProgress(calculateOverallProgress(partialContestants));
           setPollingActive(true);
         } else {
-          console.error(`[Progressive Event Detail] Failed to fetch event data:`, result.message);
+          console.error(
+            `[Progressive Event Detail] Failed to fetch event data:`,
+            result.message,
+          );
         }
         setLoading(false);
       } catch (error) {
-        console.error(`[Progressive Event Detail] Error fetching event data:`, error);
+        console.error(
+          `[Progressive Event Detail] Error fetching event data:`,
+          error,
+        );
         setLoading(false);
       }
     };
@@ -125,11 +152,15 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
   const getRankIcon = (index: number) => {
     switch (index) {
     case 0:
-      return <Trophy size={16} className="text-yellow-600 dark:text-yellow-400" />;
+      return (
+        <Trophy size={16} className="text-yellow-600 dark:text-yellow-400" />
+      );
     case 1:
       return <Medal size={16} className="text-gray-500 dark:text-gray-400" />;
     case 2:
-      return <Award size={16} className="text-orange-600 dark:text-orange-400" />;
+      return (
+        <Award size={16} className="text-orange-600 dark:text-orange-400" />
+      );
     default:
       return <span className="text-xs font-semibold">{index + 1}</span>;
     }
@@ -150,9 +181,14 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
                 <Users size={18} className="text-primary" />
               </div>
               <div>
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Event Analysis</h3>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                  Event Analysis
+                </h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {contestants.length} contestants • {analysisComplete ? "Analysis complete" : "Analysis in progress"}
+                  {contestants.length} contestants •{" "}
+                  {analysisComplete
+                    ? "Analysis complete"
+                    : "Analysis in progress"}
                 </p>
               </div>
             </div>
@@ -162,14 +198,14 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
                 <AnalysisProgress
                   status="analyzing"
                   progress={overallProgress}
-                  message={`${contestants.filter(c => c.analysisStatus === "completed").length}/${contestants.length} completed`}
+                  message={`${contestants.filter((c) => c.analysisStatus === "completed").length}/${contestants.length} completed`}
                 />
               )}
 
               {analysisComplete && (
-                <Badge color="success" variant="flat">
+                <Chip color="success" variant="flat">
                   ✓ Complete
-                </Badge>
+                </Chip>
               )}
 
               <Button
@@ -192,7 +228,9 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
       <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">
         <CardHeader className="px-6 py-4 border-b border-border dark:border-border-dark">
           <div className="flex items-center justify-between w-full">
-            <h4 className="font-medium text-gray-900 dark:text-white">Contestants</h4>
+            <h4 className="font-medium text-gray-900 dark:text-white">
+              Contestants
+            </h4>
             {pollingActive && (
               <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                 <RefreshCw size={14} className="animate-spin" />
@@ -204,13 +242,17 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
 
         <div className="divide-y divide-border dark:divide-border-dark">
           {contestants.map((contestant, index) => {
-            const isExpanded = expandedContestants.has(contestant.id.toString());
+            const isExpanded = expandedContestants.has(
+              contestant.id.toString(),
+            );
 
             return (
               <div key={contestant.id} className="p-6">
                 <div className="flex items-start gap-4">
                   {/* Rank Badge */}
-                  <div className={`flex items-center justify-center w-8 h-8 rounded-full border ${contestant.analysisStatus === "completed" ? "bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-900/30 dark:to-yellow-800/30 text-yellow-700 dark:text-yellow-400 border-yellow-300 dark:border-yellow-700" : "bg-gray-50 dark:bg-gray-900/20 text-gray-600 dark:text-gray-500 border-gray-200 dark:border-gray-800"}`}>
+                  <div
+                    className={`flex items-center justify-center w-8 h-8 rounded-full border ${contestant.analysisStatus === "completed" ? "bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-900/30 dark:to-yellow-800/30 text-yellow-700 dark:text-yellow-400 border-yellow-300 dark:border-yellow-700" : "bg-gray-50 dark:bg-gray-900/20 text-gray-600 dark:text-gray-500 border-gray-200 dark:border-gray-800"}`}
+                  >
                     {getRankIcon(index)}
                   </div>
 
@@ -237,10 +279,16 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
                       <Button
                         variant="light"
                         size="sm"
-                        onClick={() => toggleContestant(contestant.id.toString())}
+                        onClick={() =>
+                          toggleContestant(contestant.id.toString())
+                        }
                         className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                       >
-                        {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        {isExpanded ? (
+                          <ChevronUp size={16} />
+                        ) : (
+                          <ChevronDown size={16} />
+                        )}
                       </Button>
                     </div>
 
@@ -256,36 +304,47 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
                     {/* Expanded Analysis Details */}
                     {isExpanded && (
                       <div className="mt-4 pt-4 border-t border-border dark:border-border-dark">
-                        {contestant.analysisStatus === "completed" && contestant.analytics ? (
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {contestant.analytics.map((analytics) => (
-                              <div key={analytics.name} className="p-4 border border-border dark:border-border-dark rounded-lg">
-                                <h6 className="font-medium text-gray-900 dark:text-white mb-2">
-                                  {analytics.name}
-                                </h6>
-                                <div className="text-2xl font-bold text-primary mb-2">
-                                  {analytics.score || 0}
-                                </div>
-                                {analytics.repos && (
-                                  <div className="space-y-1">
-                                    {analytics.repos.slice(0, 3).map((repo) => (
-                                      <div key={repo.fullName} className="flex justify-between text-sm">
-                                        <span className="text-gray-600 dark:text-gray-400 truncate">
-                                          {repo.fullName}
-                                        </span>
-                                        <span className="text-gray-500 dark:text-gray-500 ml-2">
-                                          {repo.score}
-                                        </span>
-                                      </div>
-                                    ))}
+                        {contestant.analysisStatus === "completed" &&
+                        contestant.analytics ? (
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              {contestant.analytics.map((analytics) => (
+                                <div
+                                  key={analytics.name}
+                                  className="p-4 border border-border dark:border-border-dark rounded-lg"
+                                >
+                                  <h6 className="font-medium text-gray-900 dark:text-white mb-2">
+                                    {analytics.name}
+                                  </h6>
+                                  <div className="text-2xl font-bold text-primary mb-2">
+                                    {analytics.score || 0}
                                   </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <AnalysisSkeleton showUserInfo={false} showEcosystemCards userCount={1} />
-                        )}
+                                  {analytics.repos && (
+                                    <div className="space-y-1">
+                                      {analytics.repos.slice(0, 3).map((repo) => (
+                                        <div
+                                          key={repo.fullName}
+                                          className="flex justify-between text-sm"
+                                        >
+                                          <span className="text-gray-600 dark:text-gray-400 truncate">
+                                            {repo.fullName}
+                                          </span>
+                                          <span className="text-gray-500 dark:text-gray-500 ml-2">
+                                            {repo.score}
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <AnalysisSkeleton
+                              showUserInfo={false}
+                              showEcosystemCards
+                              userCount={1}
+                            />
+                          )}
                       </div>
                     )}
                   </div>

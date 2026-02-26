@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { Modal, ModalBody, ModalContent, ModalHeader } from "@nextui-org/react";
+import { Modal, ModalBody, ModalContent, ModalHeader } from "@/components/ui";
 import { useEffect } from "react";
 import { useAtom } from "jotai";
 import { authModalOpenAtom } from "#/atoms";
@@ -47,7 +47,8 @@ function AuthFormDialogView() {
         backdrop: "bg-background-dark/50",
         header: "border-b border-border dark:border-border-dark",
         body: "p-0",
-        closeButton: "hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",
+        closeButton:
+          "hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",
       }}
     >
       <ModalContent className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
@@ -89,13 +90,15 @@ function AuthFormDialogView() {
                         Connect Your Account
                       </h3>
                       <p className="text-gray-600 dark:text-gray-400 text-sm">
-                        Access Web3 analytics and insights with multiple login options
+                        Access Web3 analytics and insights with multiple login
+                        options
                       </p>
                     </div>
 
                     {/* Info text */}
                     <p className="text-xs text-gray-500 dark:text-gray-400 pt-2">
-                      Privy login modal will appear shortly. You can sign in with email, wallet, GitHub, or Google.
+                      Privy login modal will appear shortly. You can sign in
+                      with email, wallet, GitHub, or Google.
                     </p>
 
                     {/* Minimal Footer */}

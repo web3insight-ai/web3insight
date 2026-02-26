@@ -1,16 +1,31 @@
 import { useState, useMemo } from "react";
 import {
-  Modal, ModalContent, ModalHeader, ModalBody, ModalFooter,
-  Select, SelectItem, Button,
-} from "@nextui-org/react";
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Select,
+  SelectItem,
+  Button,
+} from "@/components/ui";
 
 import type { AssignDialogProps } from "./typing";
 
-function AssignDialog({ record, ecosystems, visible, onClose, onChange }: AssignDialogProps) {
+function AssignDialog({
+  record,
+  ecosystems,
+  visible,
+  onClose,
+  onChange,
+}: AssignDialogProps) {
   const [assigned, setAssigned] = useState<string[] | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const computedAssigned = useMemo(() => assigned || record.ecosystems || [], [assigned, record]);
+  const computedAssigned = useMemo(
+    () => assigned || record.ecosystems || [],
+    [assigned, record],
+  );
 
   const closeDialog = () => {
     setAssigned(null);
@@ -21,7 +36,7 @@ function AssignDialog({ record, ecosystems, visible, onClose, onChange }: Assign
     setLoading(true);
 
     onChange(assigned || [])
-      .then(res => {
+      .then((res) => {
         if (res.success) {
           closeDialog();
         } else {
@@ -45,19 +60,24 @@ function AssignDialog({ record, ecosystems, visible, onClose, onChange }: Assign
         {() => (
           <>
             <ModalHeader className="flex flex-col gap-1">
-              <div>Assign ecosystems for <code>{record.username}</code></div>
+              <div>
+                Assign ecosystems for <code>{record.username}</code>
+              </div>
             </ModalHeader>
             <ModalBody>
               <Select
                 selectedKeys={computedAssigned}
                 placeholder="Choose ecosystems"
                 selectionMode="multiple"
-                onChange={e => {
+                onChange={(e) => {
                   setAssigned(e.target.value.split(","));
                 }}
               >
-                {ecosystems.map(eco => (
-                  <SelectItem key={`${eco.replaceAll(" ", "")}`} textValue={eco}>
+                {ecosystems.map((eco) => (
+                  <SelectItem
+                    key={`${eco.replaceAll(" ", "")}`}
+                    textValue={eco}
+                  >
                     {eco}
                   </SelectItem>
                 ))}

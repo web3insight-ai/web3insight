@@ -1,5 +1,12 @@
-import { Card, CardBody, Chip } from "@nextui-org/react";
-import { BarChart3, Users, GitBranch, Calendar, TrendingUp, Zap } from "lucide-react";
+import { Card, CardBody, Chip } from "@/components/ui";
+import {
+  BarChart3,
+  Users,
+  GitBranch,
+  Calendar,
+  TrendingUp,
+  Zap,
+} from "lucide-react";
 
 import type { AIProfile } from "../../typing";
 
@@ -8,8 +15,15 @@ interface StatsDashboardProps {
   className?: string;
 }
 
-export function StatsDashboard({ aiProfile, className = "" }: StatsDashboardProps) {
-  if (!aiProfile.profileCard && !aiProfile.activityTimeline && !aiProfile.web3_involvement) {
+export function StatsDashboard({
+  aiProfile,
+  className = "",
+}: StatsDashboardProps) {
+  if (
+    !aiProfile.profileCard &&
+    !aiProfile.activityTimeline &&
+    !aiProfile.web3_involvement
+  ) {
     return null;
   }
 
@@ -65,11 +79,15 @@ export function StatsDashboard({ aiProfile, className = "" }: StatsDashboardProp
   ];
 
   return (
-    <Card className={`bg-white dark:bg-surface-dark shadow-subtle ${className}`}>
+    <Card
+      className={`bg-white dark:bg-surface-dark shadow-subtle ${className}`}
+    >
       <CardBody className="p-6">
         <div className="flex items-center gap-3 mb-4 pb-2 border-b-2 border-gray-200 dark:border-gray-700">
           <BarChart3 className="text-primary" size={16} />
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">KEY METRICS</h3>
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+            KEY METRICS
+          </h3>
           <div className="ml-auto">
             <Chip color="primary" variant="flat" size="sm">
               DASHBOARD
@@ -82,20 +100,28 @@ export function StatsDashboard({ aiProfile, className = "" }: StatsDashboardProp
             const percentage = Math.min((stat.value / stat.max) * 100, 100);
 
             return (
-              <div key={stat.label} className="bg-gray-50 dark:bg-surface-dark border-2 border-border dark:border-border-dark p-4 rounded-lg">
+              <div
+                key={stat.label}
+                className="bg-gray-50 dark:bg-surface-dark border-2 border-border dark:border-border-dark p-4 rounded-lg"
+              >
                 {/* Header */}
                 <div className="flex items-center justify-between mb-3">
                   <stat.icon size={16} style={{ color: stat.rawColor }} />
                   <Chip color={stat.color} variant="flat" size="sm">
                     <span className="text-xs font-bold">
-                      {stat.value >= 1000 ? `${(stat.value / 1000).toFixed(1)}K` : stat.value}
+                      {stat.value >= 1000
+                        ? `${(stat.value / 1000).toFixed(1)}K`
+                        : stat.value}
                     </span>
                   </Chip>
                 </div>
 
                 {/* Progress Circle */}
                 <div className="relative w-16 h-16 mx-auto mb-2">
-                  <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 64 64">
+                  <svg
+                    className="w-16 h-16 transform -rotate-90"
+                    viewBox="0 0 64 64"
+                  >
                     {/* Background circle */}
                     <circle
                       cx="32"

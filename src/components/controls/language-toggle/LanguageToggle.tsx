@@ -1,4 +1,4 @@
-import { Button } from "@nextui-org/react";
+import { Button } from "@/components/ui";
 import { useAtom } from "jotai";
 import { Languages } from "lucide-react";
 import { languageAtom } from "#/atoms";
@@ -12,7 +12,7 @@ export function LanguageToggle({ className = "" }: LanguageToggleProps) {
   const [language, setLanguage] = useAtom(languageAtom);
 
   const toggleLanguage = () => {
-    const newLanguage = language === 'english' ? 'chinese' : 'english';
+    const newLanguage = language === "english" ? "chinese" : "english";
     setLanguage(newLanguage);
     // Store user's manual preference
     setStoredLanguagePreference(newLanguage);
@@ -26,7 +26,7 @@ export function LanguageToggle({ className = "" }: LanguageToggleProps) {
       className={`text-xs gap-1 ${className}`}
       startContent={<Languages size={12} />}
     >
-      {language === 'english' ? '中文' : 'EN'}
+      {language === "english" ? "中文" : "EN"}
     </Button>
   );
 }

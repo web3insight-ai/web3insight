@@ -2,7 +2,7 @@
 
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Input, Button, Select, SelectItem } from "@nextui-org/react";
+import { Input, Button, Select, SelectItem } from "@/components/ui";
 
 import {
   repoListSearchSchema,

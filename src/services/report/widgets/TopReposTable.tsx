@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Input, Pagination } from "@nextui-org/react";
+import { Input, Pagination } from "@/components/ui";
 import { Search, GitFork, Users, ExternalLink } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { fadeInUp, createViewportAnimation } from "@/utils/animations";

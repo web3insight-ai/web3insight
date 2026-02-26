@@ -1,4 +1,4 @@
-import { Progress } from "@nextui-org/react";
+import { Progress } from "@/components/ui";
 import { Clock, CheckCircle, AlertCircle } from "lucide-react";
 
 type AnalysisStatus = "pending" | "analyzing" | "completed" | "failed";
@@ -11,12 +11,12 @@ interface AnalysisProgressProps {
   className?: string;
 }
 
-function AnalysisProgress({ 
-  status, 
-  progress = 0, 
-  estimatedTime, 
-  message, 
-  className = "", 
+function AnalysisProgress({
+  status,
+  progress = 0,
+  estimatedTime,
+  message,
+  className = "",
 }: AnalysisProgressProps) {
   const getStatusConfig = () => {
     switch (status) {
@@ -29,7 +29,9 @@ function AnalysisProgress({
       };
     case "analyzing":
       return {
-        icon: <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent" />,
+        icon: (
+          <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent" />
+        ),
         text: message || "Analyzing repository contributions...",
         color: "primary" as const,
         showProgress: true,
@@ -73,7 +75,7 @@ function AnalysisProgress({
           </span>
         )}
       </div>
-      
+
       {config.showProgress && (
         <Progress
           size="sm"

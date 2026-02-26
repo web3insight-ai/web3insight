@@ -30,7 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   // Fallback metadata
   return {
-    title: "DevInsight | Web3 Insights",
+    title: "DevInsight",
     description:
       "AI-powered DevInsight analysis of your Web3 development profile",
   };

@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Card, CardBody } from "@nextui-org/react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Card, CardBody } from "@/components/ui";
 import { CheckCircle } from "lucide-react";
 
 export default function AuthSuccessPage() {
@@ -11,7 +11,7 @@ export default function AuthSuccessPage() {
   useEffect(() => {
     // Redirect to home after a short delay to show success message
     const timer = setTimeout(() => {
-      router.push('/');
+      router.push("/");
     }, 2000);
 
     return () => clearTimeout(timer);
@@ -27,7 +27,8 @@ export default function AuthSuccessPage() {
               Authentication Successful!
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              You have been successfully authenticated. Redirecting you to the home page...
+              You have been successfully authenticated. Redirecting you to the
+              home page...
             </p>
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto" />
           </CardBody>

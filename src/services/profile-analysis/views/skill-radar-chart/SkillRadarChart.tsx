@@ -1,4 +1,4 @@
-import { Card, CardBody, Chip } from "@nextui-org/react";
+import { Card, CardBody, Chip } from "@/components/ui";
 import { Code, Database, Wrench, Globe, Zap } from "lucide-react";
 
 import type { AIProfile } from "../../typing";
@@ -8,7 +8,10 @@ interface SkillRadarChartProps {
   className?: string;
 }
 
-export function SkillRadarChart({ aiProfile, className = "" }: SkillRadarChartProps) {
+export function SkillRadarChart({
+  aiProfile,
+  className = "",
+}: SkillRadarChartProps) {
   if (!aiProfile.technicalStack) return null;
 
   const { skills, languages } = aiProfile.technicalStack;
@@ -30,12 +33,18 @@ export function SkillRadarChart({ aiProfile, className = "" }: SkillRadarChartPr
     {
       name: "FRAMEWORKS",
       icon: Wrench,
-      score: Math.min(90, 50 + (skills?.filter(s =>
-        s.toLowerCase().includes('development') ||
-        s.toLowerCase().includes('infrastructure') ||
-        s.toLowerCase().includes('node') ||
-        s.toLowerCase().includes('data'),
-      ).length || 0) * 15), // Base 50 + framework bonus
+      score: Math.min(
+        90,
+        50 +
+          (skills?.filter(
+            (s) =>
+              s.toLowerCase().includes("development") ||
+              s.toLowerCase().includes("infrastructure") ||
+              s.toLowerCase().includes("node") ||
+              s.toLowerCase().includes("data"),
+          ).length || 0) *
+            15,
+      ), // Base 50 + framework bonus
       color: "#f59e0b",
     },
     {
@@ -47,22 +56,32 @@ export function SkillRadarChart({ aiProfile, className = "" }: SkillRadarChartPr
     {
       name: "DEFI",
       icon: Zap,
-      score: Math.min(80, 45 + (skills?.filter(s =>
-        s.toLowerCase().includes('cross-chain') ||
-        s.toLowerCase().includes('oracle') ||
-        s.toLowerCase().includes('indexing') ||
-        s.toLowerCase().includes('smart'),
-      ).length || 0) * 10), // Base 45 + DeFi-related skills
+      score: Math.min(
+        80,
+        45 +
+          (skills?.filter(
+            (s) =>
+              s.toLowerCase().includes("cross-chain") ||
+              s.toLowerCase().includes("oracle") ||
+              s.toLowerCase().includes("indexing") ||
+              s.toLowerCase().includes("smart"),
+          ).length || 0) *
+            10,
+      ), // Base 45 + DeFi-related skills
       color: "#ef4444",
     },
   ];
 
   return (
-    <Card className={`bg-white dark:bg-surface-dark shadow-subtle ${className}`}>
+    <Card
+      className={`bg-white dark:bg-surface-dark shadow-subtle ${className}`}
+    >
       <CardBody className="p-6">
         <div className="flex items-center gap-3 mb-4 pb-2 border-b-2 border-border dark:border-border-dark">
           <Code className="text-primary" size={16} />
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">SKILL RADAR</h3>
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+            SKILL RADAR
+          </h3>
           <div className="ml-auto">
             <Chip color="primary" variant="flat" size="sm">
               ANALYSIS
@@ -86,7 +105,7 @@ export function SkillRadarChart({ aiProfile, className = "" }: SkillRadarChartPr
                       height: `${ring * 20}px`,
                       left: `${-ring * 10}px`,
                       top: `${-ring * 10}px`,
-                      borderRadius: '50%',
+                      borderRadius: "50%",
                     }}
                   />
                 ))}
@@ -95,7 +114,7 @@ export function SkillRadarChart({ aiProfile, className = "" }: SkillRadarChartPr
 
             {/* Skill Points */}
             {skillCategories.map((skill, index) => {
-              const angle = (index * 72) - 90; // 360/5 = 72 degrees between points
+              const angle = index * 72 - 90; // 360/5 = 72 degrees between points
               const radian = (angle * Math.PI) / 180;
               const radius = (skill.score / 100) * 90; // Max radius 90px
               const x = Math.cos(radian) * radius;
@@ -107,10 +126,10 @@ export function SkillRadarChart({ aiProfile, className = "" }: SkillRadarChartPr
                   className="absolute flex flex-col items-center"
                   style={{
                     transform: `translate(${x}px, ${y}px)`,
-                    left: '50%',
-                    top: '50%',
-                    marginLeft: '-25px',
-                    marginTop: '-25px',
+                    left: "50%",
+                    top: "50%",
+                    marginLeft: "-25px",
+                    marginTop: "-25px",
                   }}
                 >
                   <div
@@ -139,7 +158,10 @@ export function SkillRadarChart({ aiProfile, className = "" }: SkillRadarChartPr
           {/* Legend */}
           <div className="mt-6 flex flex-wrap gap-4 justify-center">
             {skillCategories.map((skill, index) => (
-              <div key={`skill-legend-${skill.name}-${index}`} className="flex items-center gap-2">
+              <div
+                key={`skill-legend-${skill.name}-${index}`}
+                className="flex items-center gap-2"
+              >
                 <div
                   className="w-3 h-3 border border-white dark:border-gray-800"
                   style={{ backgroundColor: skill.color }}

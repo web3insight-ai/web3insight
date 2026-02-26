@@ -1,12 +1,16 @@
-import { Card, CardBody, Skeleton } from "@nextui-org/react";
+import { Card, CardBody, Skeleton } from "@/components/ui";
 
 interface ProfileHeaderSkeletonProps {
   className?: string;
 }
 
-export function ProfileHeaderSkeleton({ className = "" }: ProfileHeaderSkeletonProps) {
+export function ProfileHeaderSkeleton({
+  className = "",
+}: ProfileHeaderSkeletonProps) {
   return (
-    <Card className={`bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark ${className}`}>
+    <Card
+      className={`bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark ${className}`}
+    >
       <CardBody className="p-4 md:p-5">
         <div className="flex items-center gap-3">
           <Skeleton className="rounded-full w-14 h-14" />

@@ -15,7 +15,9 @@ import CountryDistributionChart from "$/CountryDistributionChart";
 const { title, tagline, description } = getMetadata();
 
 export const metadata = {
-  title: `${title} - ${tagline}`,
+  title: {
+    absolute: `${title} - ${tagline}`,
+  },
   openGraph: {
     title: `${title} - ${tagline}`,
   },
@@ -167,24 +169,6 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           >
             <DeveloperRankViewWidget dataSource={developerRank} view="grid" />
           </Section>
-
-          {/* Footer */}
-          <footer className="mt-16 pt-8 border-t border-border dark:border-border-dark">
-            <div className="text-center">
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Supported by{" "}
-                <a
-                  href="https://openbuild.xyz/"
-                  className="text-foreground dark:text-foreground font-medium hover:text-primary transition-colors"
-                >
-                  OpenBuild
-                </a>{" "}
-              </p>
-              <p className="text-xs text-gray-400 dark:text-gray-600">
-                © {new Date().getFullYear()} {title}. All rights reserved.
-              </p>
-            </div>
-          </footer>
         </div>
       </DefaultLayoutWrapper>
     );

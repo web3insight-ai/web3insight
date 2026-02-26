@@ -10,70 +10,34 @@ import {
   DropdownItem,
   Button,
   Pagination,
-} from "@nextui-org/react";
+} from "@/components/ui";
 import {
   Database,
   Filter,
   SortAsc,
   SortDesc,
   Search,
-  Users,
-  Code2,
-  Zap,
   Star,
   GitFork,
 } from "lucide-react";
 import { useState, useMemo, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRepositoryList, useOverviewStatistics } from "@/hooks/api";
 import type { RepoRankRecord } from "@/lib/api/types";
-import MetricCard, { type MetricCardProps } from "$/controls/metric-card";
+import MetricCard, { resolveOverviewMetrics } from "$/controls/metric-card";
 import TableHeader from "$/controls/table-header";
+import {
+  staggerContainer,
+  staggerItemScale,
+  fadeInUp,
+} from "@/utils/animations";
 import {
   repositorySearchSchema,
   type RepositorySearchInput,
 } from "@/lib/form/schemas";
-
-function resolveMetrics(dataSource: {
-  totalCoreDevelopers: number;
-  totalDevelopers: number;
-  totalEcosystems: number;
-  totalRepositories: number;
-}): MetricCardProps[] {
-  return [
-    {
-      label: "Developers",
-      value: Number(dataSource.totalCoreDevelopers).toLocaleString(),
-      icon: <Code2 size={20} className="text-secondary" />,
-      iconBgClassName: "bg-secondary/10",
-      tooltip: "Developers with pull requests and push events in the past year",
-    },
-    {
-      label: "ECO Contributors",
-      value: Number(dataSource.totalDevelopers).toLocaleString(),
-      icon: <Users size={20} className="text-primary" />,
-      iconBgClassName: "bg-primary/10",
-      tooltip:
-        "Developers with activity (star not included) in this ecosystem (all time)",
-    },
-    {
-      label: "Ecosystems",
-      value: Number(dataSource.totalEcosystems).toLocaleString(),
-      icon: <Database size={20} className="text-warning" />,
-      iconBgClassName: "bg-warning/10",
-      tooltip: "Total number of ecosystems tracked",
-    },
-    {
-      label: "Repositories",
-      value: Number(dataSource.totalRepositories).toLocaleString(),
-      icon: <Zap size={20} className="text-success" />,
-      iconBgClassName: "bg-success/10",
-      tooltip: "Total repositories grouped by ecosystem",
-    },
-  ];
-}
 
 export default function RepositoriesPageClient() {
   // TanStack Query hooks - data is hydrated from server prefetch
@@ -185,169 +149,177 @@ export default function RepositoriesPageClient() {
   );
 
   return (
-    <div className="min-h-dvh bg-background dark:bg-background-dark pb-24">
-      <div className="w-full max-w-content mx-auto px-6 pt-8">
-        {/* Header and Overview */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-3">
+    <div className="w-full max-w-content mx-auto px-6 py-8">
+      {/* Header and Overview */}
+      <motion.div
+        variants={fadeInUp}
+        initial="hidden"
+        animate="visible"
+        className="mb-8"
+      >
+        <div className="flex items-center gap-3 mb-3">
+          <div className="p-2 rounded-xl bg-primary/10">
+            <Database size={20} className="text-primary" />
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            All Repositories
+          </h1>
+        </div>
+        <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
+          Top repositories by developer engagement and contributions across Web3
+          ecosystems
+        </p>
+      </motion.div>
+
+      {/* Summary Cards */}
+      <motion.div
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10"
+      >
+        {resolveOverviewMetrics({
+          totalCoreDevelopers,
+          totalDevelopers,
+          totalEcosystems,
+          totalRepositories,
+        }).map((metric) => (
+          <motion.div
+            key={metric.label.replaceAll(" ", "")}
+            variants={staggerItemScale}
+            whileHover={{ y: -4, scale: 1.02 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          >
+            <MetricCard {...metric} />
+          </motion.div>
+        ))}
+      </motion.div>
+
+      {/* Filters and Search */}
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+        <div className="w-full sm:w-72">
+          <Input
+            placeholder="Search repositories..."
+            value={searchValue}
+            onChange={handleSearchChange}
+            startContent={<Search size={18} className="text-gray-400" />}
+            className="w-full"
+          />
+        </div>
+        <div className="flex gap-2">
+          <Dropdown>
+            <DropdownTrigger>
+              <Button variant="flat" startContent={<Filter size={18} />}>
+                Sort By
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu aria-label="Sort options">
+              <DropdownItem key="name" onClick={() => handleSortChange("name")}>
+                <div className="flex items-center justify-between w-full">
+                  <span>Name</span>
+                  {sortBy === "name" &&
+                    (sortDirection === "asc" ? (
+                      <SortAsc size={16} />
+                    ) : (
+                      <SortDesc size={16} />
+                    ))}
+                </div>
+              </DropdownItem>
+              <DropdownItem
+                key="star_count"
+                onClick={() => handleSortChange("star_count")}
+              >
+                <div className="flex items-center justify-between w-full">
+                  <span>Stars</span>
+                  {sortBy === "star_count" &&
+                    (sortDirection === "asc" ? (
+                      <SortAsc size={16} />
+                    ) : (
+                      <SortDesc size={16} />
+                    ))}
+                </div>
+              </DropdownItem>
+              <DropdownItem
+                key="contributor_count"
+                onClick={() => handleSortChange("contributor_count")}
+              >
+                <div className="flex items-center justify-between w-full">
+                  <span>Contributors</span>
+                  {sortBy === "contributor_count" &&
+                    (sortDirection === "asc" ? (
+                      <SortAsc size={16} />
+                    ) : (
+                      <SortDesc size={16} />
+                    ))}
+                </div>
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
+        </div>
+      </div>
+
+      {/* Repositories Table */}
+      <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">
+        <CardHeader className="px-6 py-5">
+          <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary/10">
-              <Database size={20} className="text-primary" />
+              <Database size={18} className="text-primary" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              All Repositories
-            </h1>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+              Repository Analytics
+            </h3>
           </div>
-          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
-            Top repositories by developer engagement and contributions across
-            Web3 ecosystems
-          </p>
-        </div>
+        </CardHeader>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10">
-          {resolveMetrics({
-            totalCoreDevelopers,
-            totalDevelopers,
-            totalEcosystems,
-            totalRepositories,
-          }).map((metric, index) => (
-            <div
-              key={metric.label.replaceAll(" ", "")}
-              className="animate-slide-up"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <MetricCard {...metric} />
-            </div>
-          ))}
-        </div>
-
-        {/* Filters and Search */}
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-          <div className="w-full sm:w-72">
-            <Input
-              placeholder="Search repositories..."
-              value={searchValue}
-              onChange={handleSearchChange}
-              startContent={<Search size={18} className="text-gray-400" />}
-              className="w-full"
-            />
-          </div>
-          <div className="flex gap-2">
-            <Dropdown>
-              <DropdownTrigger>
-                <Button variant="flat" startContent={<Filter size={18} />}>
-                  Sort By
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu aria-label="Sort options">
-                <DropdownItem
-                  key="name"
-                  onClick={() => handleSortChange("name")}
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-t border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider w-12">
+                  #
+                </th>
+                <TableHeader>Repository</TableHeader>
+                <TableHeader
+                  align="right"
+                  tooltip="Total number of stars received by this repository"
                 >
-                  <div className="flex items-center justify-between w-full">
-                    <span>Name</span>
-                    {sortBy === "name" &&
-                      (sortDirection === "asc" ? (
-                        <SortAsc size={16} />
-                      ) : (
-                        <SortDesc size={16} />
-                      ))}
-                  </div>
-                </DropdownItem>
-                <DropdownItem
-                  key="star_count"
-                  onClick={() => handleSortChange("star_count")}
+                  Stars
+                </TableHeader>
+                <TableHeader
+                  align="right"
+                  tooltip="Total number of forks created from this repository"
                 >
-                  <div className="flex items-center justify-between w-full">
-                    <span>Stars</span>
-                    {sortBy === "star_count" &&
-                      (sortDirection === "asc" ? (
-                        <SortAsc size={16} />
-                      ) : (
-                        <SortDesc size={16} />
-                      ))}
-                  </div>
-                </DropdownItem>
-                <DropdownItem
-                  key="contributor_count"
-                  onClick={() => handleSortChange("contributor_count")}
+                  Forks
+                </TableHeader>
+                <TableHeader
+                  align="right"
+                  tooltip="Total number of developers who have contributed to this repository"
                 >
-                  <div className="flex items-center justify-between w-full">
-                    <span>Contributors</span>
-                    {sortBy === "contributor_count" &&
-                      (sortDirection === "asc" ? (
-                        <SortAsc size={16} />
-                      ) : (
-                        <SortDesc size={16} />
-                      ))}
-                  </div>
-                </DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
-          </div>
-        </div>
-
-        {/* Repositories Table */}
-        <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">
-          <CardHeader className="px-6 py-5">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Database size={18} className="text-primary" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                Repository Analytics
-              </h3>
-            </div>
-          </CardHeader>
-
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-t border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider w-12">
-                    #
-                  </th>
-                  <TableHeader>Repository</TableHeader>
-                  <TableHeader
-                    align="right"
-                    tooltip="Total number of stars received by this repository"
-                  >
-                    Stars
-                  </TableHeader>
-                  <TableHeader
-                    align="right"
-                    tooltip="Total number of forks created from this repository"
-                  >
-                    Forks
-                  </TableHeader>
-                  <TableHeader
-                    align="right"
-                    tooltip="Total number of developers who have contributed to this repository"
-                  >
-                    Contributors
-                  </TableHeader>
-                  <TableHeader
-                    align="right"
-                    tooltip="Current number of open issues in this repository"
-                  >
-                    Issues
-                  </TableHeader>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border dark:divide-border-dark">
+                  Contributors
+                </TableHeader>
+                <TableHeader
+                  align="right"
+                  tooltip="Current number of open issues in this repository"
+                >
+                  Issues
+                </TableHeader>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border dark:divide-border-dark">
+              <AnimatePresence mode="wait">
                 {paginatedItems.map((repo, index) => {
                   const absoluteIndex = (page - 1) * rowsPerPage + index + 1;
                   return (
-                    <tr
+                    <motion.tr
                       key={repo.repo_id}
-                      className="hover:bg-surface dark:hover:bg-surface-dark transition-colors duration-200 group animate-fade-in"
-                      style={{ animationDelay: `${index * 50}ms` }}
+                      className="hover:bg-surface dark:hover:bg-surface-dark transition-colors duration-200 group"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.03, duration: 0.3 }}
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <span
-                            className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-medium transition-all duration-200 group-hover:scale-110 bg-gray-50 dark:bg-gray-900/10 text-gray-500 dark:text-gray-500`}
-                          >
+                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-medium transition-all duration-200 group-hover:scale-110 bg-gray-50 dark:bg-surface-dark text-gray-500 dark:text-gray-500">
                             {absoluteIndex}
                           </span>
                         </div>
@@ -386,24 +358,20 @@ export default function RepositoriesPageClient() {
                           {Number(repo.open_issues_count).toLocaleString()}
                         </span>
                       </td>
-                    </tr>
+                    </motion.tr>
                   );
                 })}
-              </tbody>
-            </table>
-          </div>
+              </AnimatePresence>
+            </tbody>
+          </table>
+        </div>
 
-          {pages > 1 && (
-            <div className="px-6 py-4 border-t border-border dark:border-border-dark flex justify-center">
-              <Pagination
-                page={page}
-                total={pages}
-                onChange={handlePageChange}
-              />
-            </div>
-          )}
-        </Card>
-      </div>
+        {pages > 1 && (
+          <div className="px-6 py-4 border-t border-border dark:border-border-dark flex justify-center">
+            <Pagination page={page} total={pages} onChange={handlePageChange} />
+          </div>
+        )}
+      </Card>
     </div>
   );
 }

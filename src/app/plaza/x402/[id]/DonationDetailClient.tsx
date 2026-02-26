@@ -1,6 +1,7 @@
 "use client";
 
-import { Avatar, Button, Chip, Link } from "@nextui-org/react";
+import Link from "next/link";
+import { Avatar, Button, Chip } from "@/components/ui";
 import {
   Star,
   GitFork,

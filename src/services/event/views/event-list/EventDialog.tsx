@@ -1,10 +1,15 @@
-'use client';
+"use client";
 
 import { useState, useRef, MouseEvent } from "react";
 import {
-  Modal, ModalContent, ModalHeader, ModalBody, ModalFooter,
-  Textarea, Button,
-} from "@nextui-org/react";
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Textarea,
+  Button,
+} from "@/components/ui";
 import { Calendar } from "lucide-react";
 
 import FileUpload from "$/controls/file-upload";
@@ -60,7 +65,7 @@ function EventDialog({ visible, onClose }: EventDialogProps) {
 
     setLoading(true);
     insertOne({ urls: contestants, description: resolvedDescription })
-      .then(res => {
+      .then((res) => {
         if (res.success) {
           closeDialog({
             eventId: res.extra!.eventId,
@@ -89,7 +94,8 @@ function EventDialog({ visible, onClose }: EventDialogProps) {
         backdrop: "bg-background-dark/50",
         header: "border-b border-border dark:border-border-dark",
         body: "p-0",
-        closeButton: "hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",
+        closeButton:
+          "hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",
       }}
     >
       <ModalContent className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
@@ -111,7 +117,6 @@ function EventDialog({ visible, onClose }: EventDialogProps) {
 
             <ModalBody>
               <div className="px-6 py-6 space-y-6 relative">
-
                 <div className="space-y-4">
                   <Textarea
                     value={description}
@@ -122,8 +127,10 @@ function EventDialog({ visible, onClose }: EventDialogProps) {
                     onValueChange={setDescription}
                     classNames={{
                       base: "w-full",
-                      label: "text-sm font-medium text-gray-700 dark:text-gray-300 mb-2",
-                      input: "bg-white dark:bg-surface-dark border-border dark:border-border-dark",
+                      label:
+                        "text-sm font-medium text-gray-700 dark:text-gray-300 mb-2",
+                      input:
+                        "bg-white dark:bg-surface-dark border-border dark:border-border-dark",
                     }}
                   />
 
@@ -138,8 +145,10 @@ function EventDialog({ visible, onClose }: EventDialogProps) {
                     onValueChange={setUserInput}
                     classNames={{
                       base: "w-full",
-                      label: "text-sm font-medium text-gray-700 dark:text-gray-300 mb-2",
-                      input: "bg-white dark:bg-surface-dark border-border dark:border-border-dark",
+                      label:
+                        "text-sm font-medium text-gray-700 dark:text-gray-300 mb-2",
+                      input:
+                        "bg-white dark:bg-surface-dark border-border dark:border-border-dark",
                     }}
                   />
 

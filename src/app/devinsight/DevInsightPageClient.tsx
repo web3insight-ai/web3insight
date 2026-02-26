@@ -9,7 +9,7 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-} from "@nextui-org/react";
+} from "@/components/ui";
 import { Brain, AlertCircle, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { usePrivy } from "@privy-io/react-auth";
@@ -201,38 +201,34 @@ export default function DevInsightPageClient({
   // For unauthenticated users, show a simple message and let the modal handle login
   if (requiresAuth) {
     return (
-      <div className="min-h-dvh bg-background dark:bg-background-dark pb-24">
-        <div className="w-full max-w-content mx-auto px-6 pt-8">
-          {/* Header and Overview */}
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Brain size={20} className="text-primary" />
-              </div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                DevInsight
-              </h1>
+      <div className="w-full max-w-content mx-auto px-6 py-8">
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-2 rounded-xl bg-primary/10">
+              <Brain size={20} className="text-primary" />
             </div>
-            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
-              AI-powered Web3 development insights and analysis
-            </p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              DevInsight
+            </h1>
           </div>
+          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
+            AI-powered Web3 development insights and analysis
+          </p>
+        </div>
 
-          {/* Simple message - modal will handle the login */}
-          <div className="text-center py-12">
-            <div className="space-y-4">
-              <div className="p-3 rounded-full bg-primary/10 w-fit mx-auto">
-                <Brain size={32} className="text-primary" />
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                  Sign in to access DevInsight
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Connect your GitHub account to unlock AI-powered Web3
-                  development insights
-                </p>
-              </div>
+        <div className="text-center py-12">
+          <div className="space-y-4">
+            <div className="p-3 rounded-full bg-primary/10 w-fit mx-auto">
+              <Brain size={32} className="text-primary" />
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                Sign in to access DevInsight
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Connect your GitHub account to unlock AI-powered Web3
+                development insights
+              </p>
             </div>
           </div>
         </div>
@@ -241,141 +237,139 @@ export default function DevInsightPageClient({
   }
 
   return (
-    <div className="min-h-dvh bg-background dark:bg-background-dark pb-24">
-      <div className="w-full max-w-content mx-auto px-6 pt-8">
-        {/* Header and Overview */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Brain size={20} className="text-primary" />
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white whitespace-nowrap">
-              @{githubHandle} DevInsight
-            </h1>
+    <div className="w-full max-w-content mx-auto px-6 py-8">
+      {/* Header and Overview */}
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="p-2 rounded-xl bg-primary/10">
+            <Brain size={20} className="text-primary" />
           </div>
-          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
-            AI-powered Web3 development insights and analysis
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white whitespace-nowrap">
+            @{githubHandle} DevInsight
+          </h1>
         </div>
+        <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
+          AI-powered Web3 development insights and analysis
+        </p>
+      </div>
 
-        <div className="space-y-4">
-          {/* Progress section intentionally removed; show skeletons only while analyzing */}
+      <div className="space-y-4">
+        {/* Progress section intentionally removed; show skeletons only while analyzing */}
 
-          {/* Error State */}
-          {analysisError && (
-            <Card className="bg-danger/5 border border-danger/20">
-              <CardBody className="p-6">
-                <div className="flex items-center gap-3">
-                  <AlertCircle size={20} className="text-danger" />
-                  <div>
-                    <h3 className="font-semibold text-danger mb-1">
-                      Analysis Failed
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                      {analysisError}
-                    </p>
-                    <Button
-                      color="danger"
-                      variant="light"
-                      size="sm"
-                      onClick={handleAnalyze}
-                      isLoading={isAnalyzing}
-                    >
-                      Retry Analysis
-                    </Button>
-                  </div>
+        {/* Error State */}
+        {analysisError && (
+          <Card className="bg-danger/5 border border-danger/20">
+            <CardBody className="p-6">
+              <div className="flex items-center gap-3">
+                <AlertCircle size={20} className="text-danger" />
+                <div>
+                  <h3 className="font-semibold text-danger mb-1">
+                    Analysis Failed
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                    {analysisError}
+                  </p>
+                  <Button
+                    color="danger"
+                    variant="light"
+                    size="sm"
+                    onClick={handleAnalyze}
+                    isLoading={isAnalyzing}
+                  >
+                    Retry Analysis
+                  </Button>
                 </div>
-              </CardBody>
-            </Card>
-          )}
+              </div>
+            </CardBody>
+          </Card>
+        )}
 
-          {/* Profile Content */}
-          {currentUser && (
-            <div className="space-y-4">
-              {/* While analyzing, show skeletons for all sections */}
-              {isAnalyzing ? (
-                <>
-                  <ProfileHeaderSkeleton />
-                  <AIInsightsSkeleton />
-                  <MetricOverviewSkeleton />
-                  <ChartSkeleton title="Ecosystem Overview" height="280px" />
-                  <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-                    <span className="inline-flex items-center gap-2">
-                      <Loader2 size={14} className="animate-spin" />
-                      Analysis in progress... Usually takes 2–3 minutes
-                    </span>
-                  </div>
-                </>
-              ) : (
-                <>
-                  {/* Profile Header - Full Width */}
+        {/* Profile Content */}
+        {currentUser && (
+          <div className="space-y-4">
+            {/* While analyzing, show skeletons for all sections */}
+            {isAnalyzing ? (
+              <>
+                <ProfileHeaderSkeleton />
+                <AIInsightsSkeleton />
+                <MetricOverviewSkeleton />
+                <ChartSkeleton title="Ecosystem Overview" height="280px" />
+                <div className="text-center text-sm text-gray-500 dark:text-gray-400">
+                  <span className="inline-flex items-center gap-2">
+                    <Loader2 size={14} className="animate-spin" />
+                    Analysis in progress... Usually takes 2–3 minutes
+                  </span>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Profile Header - Full Width */}
+                <FadeIn>
+                  <ProfileHeader
+                    user={currentUser}
+                    githubUsername={githubHandle}
+                    analysisId={analysisId}
+                  />
+                </FadeIn>
+
+                {/* Key Metrics */}
+                {hasEcosystemData(currentUser) && (
                   <FadeIn>
-                    <ProfileHeader
+                    <KeyMetrics user={currentUser} />
+                  </FadeIn>
+                )}
+
+                {/* AI Analysis */}
+                {hasAIData(currentUser) ? (
+                  <FadeIn>
+                    <AIInsights user={currentUser} />
+                  </FadeIn>
+                ) : (
+                  isAnalyzing && <AIInsightsSkeleton />
+                )}
+
+                {/* Detailed Analysis */}
+                {hasEcosystemData(currentUser) && (
+                  <FadeIn>
+                    <AnalysisTabs
                       user={currentUser}
                       githubUsername={githubHandle}
-                      analysisId={analysisId}
                     />
                   </FadeIn>
+                )}
+              </>
+            )}
 
-                  {/* Key Metrics */}
-                  {hasEcosystemData(currentUser) && (
-                    <FadeIn>
-                      <KeyMetrics user={currentUser} />
-                    </FadeIn>
-                  )}
-
-                  {/* AI Analysis */}
-                  {hasAIData(currentUser) ? (
-                    <FadeIn>
-                      <AIInsights user={currentUser} />
-                    </FadeIn>
-                  ) : (
-                    isAnalyzing && <AIInsightsSkeleton />
-                  )}
-
-                  {/* Detailed Analysis */}
-                  {hasEcosystemData(currentUser) && (
-                    <FadeIn>
-                      <AnalysisTabs
-                        user={currentUser}
-                        githubUsername={githubHandle}
-                      />
-                    </FadeIn>
-                  )}
-                </>
-              )}
-
-              {/* Loading State */}
-              {!hasEcosystemData(currentUser) &&
-                !analysisError &&
-                !isAnalyzing && (
-                <div className="glass-card dark:glass-card-dark p-4 text-center">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-center gap-2">
-                      <Loader2
-                        size={14}
-                        className="animate-spin text-gray-400"
-                      />
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
-                          Analysis in progress...
-                      </span>
-                    </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-500">
-                        Usually takes 2-3 minutes
-                    </p>
+            {/* Loading State */}
+            {!hasEcosystemData(currentUser) &&
+              !analysisError &&
+              !isAnalyzing && (
+              <div className="glass-card dark:glass-card-dark p-4 text-center">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2
+                      size={14}
+                      className="animate-spin text-gray-400"
+                    />
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                        Analysis in progress...
+                    </span>
                   </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-500">
+                      Usually takes 2-3 minutes
+                  </p>
                 </div>
-              )}
-            </div>
-          )}
+              </div>
+            )}
+          </div>
+        )}
 
-          {/* Initial Loading State */}
-          {!currentUser && !analysisError && isAnalyzing && (
-            <div className="flex items-center justify-center min-h-[60vh]">
-              <Loader2 size={48} className="animate-spin text-primary" />
-            </div>
-          )}
-        </div>
+        {/* Initial Loading State */}
+        {!currentUser && !analysisError && isAnalyzing && (
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <Loader2 size={48} className="animate-spin text-primary" />
+          </div>
+        )}
       </div>
 
       {/* GitHub Account Required Modal */}

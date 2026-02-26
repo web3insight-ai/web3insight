@@ -2,29 +2,15 @@ import type { Metadata } from "next";
 import EventsPageClient from "./EventsPageClient";
 import { api } from "@/lib/api/client";
 import { getUser } from "~/auth/repository";
-import { headers } from "next/headers";
 import DefaultLayoutWrapper from "../DefaultLayoutWrapper";
-import { env } from "@/env";
 
 export const metadata: Metadata = {
-  title: "All Events | Web3 Insights",
-  openGraph: {
-    title: "All Events | Web3 Insights",
-  },
+  title: "All Events",
   description:
     "Comprehensive overview of Web3 development events and hackathons with insights and analytics",
 };
 
 export default async function EventsPage() {
-  // Get current user from session
-  const headersList = await headers();
-  const host = headersList.get("host") || "localhost:3000";
-  const protocol = env.NODE_ENV === "development" ? "http" : "https";
-  const url = `${protocol}://${host}/events`;
-
-  const _request = new Request(url, {
-    headers: Object.fromEntries(headersList.entries()),
-  });
   const user = await getUser();
 
   try {

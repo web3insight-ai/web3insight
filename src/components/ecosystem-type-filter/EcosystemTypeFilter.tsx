@@ -1,4 +1,10 @@
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@nextui-org/react";
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+  Button,
+} from "@/components/ui";
 import { ChevronDown } from "lucide-react";
 import { EcosystemType, EcosystemTypeLabels } from "~/ecosystem/typing";
 
@@ -8,7 +14,11 @@ interface EcosystemTypeFilterProps {
   className?: string;
 }
 
-function EcosystemTypeFilter({ selectedType, onTypeChange, className = "" }: EcosystemTypeFilterProps) {
+function EcosystemTypeFilter({
+  selectedType,
+  onTypeChange,
+  className = "",
+}: EcosystemTypeFilterProps) {
   const options = Object.entries(EcosystemTypeLabels).map(([key, label]) => ({
     key: key as EcosystemType,
     label,
@@ -23,9 +33,9 @@ function EcosystemTypeFilter({ selectedType, onTypeChange, className = "" }: Eco
             key={key}
             onClick={() => onTypeChange(key)}
             className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 whitespace-nowrap ${
-              selectedType === key 
-                ? 'bg-white dark:bg-surface-dark text-gray-900 dark:text-white shadow-sm' 
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-200/50 dark:hover:bg-surface-dark/50'
+              selectedType === key
+                ? "bg-white dark:bg-surface-dark text-gray-900 dark:text-white shadow-sm"
+                : "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-200/50 dark:hover:bg-surface-dark/50"
             }`}
           >
             {label}
@@ -51,9 +61,7 @@ function EcosystemTypeFilter({ selectedType, onTypeChange, className = "" }: Eco
             onAction={(key) => onTypeChange(key as EcosystemType)}
           >
             {options.map(({ key, label }) => (
-              <DropdownItem key={key}>
-                {label}
-              </DropdownItem>
+              <DropdownItem key={key}>{label}</DropdownItem>
             ))}
           </DropdownMenu>
         </Dropdown>

@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import { headers } from "next/headers";
 
 import { fetchCurrentUser } from "~/auth/repository";
 import { canManageEcosystems } from "~/auth/helper";
@@ -52,15 +51,6 @@ function transformEcoRepoToRepository(item: EcoRepo, eco: string): Repository {
 }
 
 async function getEcosystemDetailData(name: string) {
-  const headersList = await headers();
-  const host = headersList.get("host") || "localhost:3000";
-  const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
-  const url = `${protocol}://${host}/admin/ecosystems/${name}`;
-
-  const _request = new Request(url, {
-    headers: Object.fromEntries(headersList.entries()),
-  });
-
   const res = await fetchCurrentUser();
 
   if (!canManageEcosystems(res.data)) {
