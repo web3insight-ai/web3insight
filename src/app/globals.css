@@ -4,6 +4,15 @@
 
 html {
   @apply antialiased;
+  scroll-behavior: smooth;
+}
+
+::selection {
+  @apply bg-primary/20 text-gray-900 dark:text-white;
+}
+
+:focus-visible {
+  @apply outline-2 outline-offset-2 outline-primary;
 }
 
 @layer utilities {

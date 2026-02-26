@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Button, Card, CardBody, Chip } from "@nextui-org/react";
+import { Button, Card, CardBody, Chip } from "@/components/ui";
 import { useForm, FormProvider, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Copy, Check, FileJson, Info, Plus, Trash2 } from "lucide-react";

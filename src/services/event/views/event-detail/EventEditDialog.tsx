@@ -13,7 +13,7 @@ import {
   Textarea,
   Button,
   Chip,
-} from "@nextui-org/react";
+} from "@/components/ui";
 import { Calendar, AlertTriangle, X } from "lucide-react";
 import { useAtom } from "jotai";
 

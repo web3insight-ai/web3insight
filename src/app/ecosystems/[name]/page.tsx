@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import EcosystemDetailClient from "./EcosystemDetailClient";
-import { getTitle } from "@/utils/app";
 import { api } from "@/lib/api/client";
 import DefaultLayoutWrapper from "../../DefaultLayoutWrapper";
 import { getUser } from "~/auth/repository";
@@ -16,14 +15,9 @@ export async function generateMetadata({
 }: EcosystemPageProps): Promise<Metadata> {
   const resolvedParams = await params;
   const ecosystemName = decodeURIComponent(resolvedParams.name);
-  const baseTitle = `Ecosystem - ${getTitle()}`;
-  const title = `${ecosystemName} ${baseTitle}`;
 
   return {
-    title,
-    openGraph: {
-      title,
-    },
+    title: `${ecosystemName} Ecosystem`,
     description: `Detailed metrics and analytics for the ${ecosystemName} ecosystem. Track developer activity, contributions, and growth.`,
   };
 }

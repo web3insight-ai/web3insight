@@ -1,7 +1,7 @@
 "use client";
 
-import { Card, CardHeader, Input, Pagination } from "@nextui-org/react";
-import { Search, Warehouse, Database, Users, Code2, Zap } from "lucide-react";
+import { Card, CardHeader, Input, Pagination } from "@/components/ui";
+import { Search, Warehouse } from "lucide-react";
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -12,7 +12,7 @@ import { useEcosystemList, useOverviewStatistics } from "@/hooks/api";
 import { EcosystemType } from "~/ecosystem/typing";
 import { getFilterForType } from "~/ecosystem/helper";
 import { EcosystemTypeFilter } from "$/ecosystem-type-filter";
-import MetricCard, { type MetricCardProps } from "$/controls/metric-card";
+import MetricCard, { resolveOverviewMetrics } from "$/controls/metric-card";
 import TableHeader from "$/controls/table-header";
 import {
   staggerContainer,
@@ -20,52 +20,12 @@ import {
   fadeInUp,
 } from "@/utils/animations";
 
-// Local schema that includes the ecosystem type enum
 const ecosystemFilterSchema = z.object({
   search: z.string(),
   type: z.nativeEnum(EcosystemType),
 });
 
 type EcosystemFilterInput = z.infer<typeof ecosystemFilterSchema>;
-
-function resolveMetrics(dataSource: {
-  totalCoreDevelopers: number;
-  totalDevelopers: number;
-  totalEcosystems: number;
-  totalRepositories: number;
-}): MetricCardProps[] {
-  return [
-    {
-      label: "Developers",
-      value: Number(dataSource.totalCoreDevelopers).toLocaleString(),
-      icon: <Code2 size={20} className="text-secondary" />,
-      iconBgClassName: "bg-secondary/10",
-      tooltip: "Developers with pull requests and push events in the past year",
-    },
-    {
-      label: "ECO Contributors",
-      value: Number(dataSource.totalDevelopers).toLocaleString(),
-      icon: <Users size={20} className="text-primary" />,
-      iconBgClassName: "bg-primary/10",
-      tooltip:
-        "Developers with activity (star not included) in this ecosystem (all time)",
-    },
-    {
-      label: "Ecosystems",
-      value: Number(dataSource.totalEcosystems).toLocaleString(),
-      icon: <Database size={20} className="text-warning" />,
-      iconBgClassName: "bg-warning/10",
-      tooltip: "Total number of ecosystems tracked",
-    },
-    {
-      label: "Repositories",
-      value: Number(dataSource.totalRepositories).toLocaleString(),
-      icon: <Zap size={20} className="text-success" />,
-      iconBgClassName: "bg-success/10",
-      tooltip: "Total repositories grouped by ecosystem",
-    },
-  ];
-}
 
 export default function EcosystemsPageClient() {
   // TanStack Query hooks - data is hydrated from server prefetch
@@ -162,7 +122,7 @@ export default function EcosystemsPageClient() {
         className="mb-8"
       >
         <div className="flex items-center gap-3 mb-3">
-          <div className="p-2 rounded-lg bg-primary/10">
+          <div className="p-2 rounded-xl bg-primary/10">
             <Warehouse size={20} className="text-primary" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -181,7 +141,7 @@ export default function EcosystemsPageClient() {
         animate="visible"
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10"
       >
-        {resolveMetrics({
+        {resolveOverviewMetrics({
           totalCoreDevelopers,
           totalDevelopers,
           totalEcosystems,

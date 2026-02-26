@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Avatar, Link } from "@nextui-org/react";
+import { Avatar } from "@/components/ui";
+import Link from "next/link";
 import { Star, ExternalLink, LinkIcon } from "lucide-react";
 import { DonateButton } from "./DonateButton";
 import type { DonateRepo } from "../typing";

@@ -8,7 +8,6 @@ function PrefersColorSchemeSelector() {
   const { setTheme, theme, systemTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // Only render theme-dependent UI after mounting to avoid hydration mismatch
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -31,15 +30,10 @@ function PrefersColorSchemeSelector() {
     );
   }, [setTheme, theme, systemTheme]);
 
-  // Render placeholder with same dimensions to prevent layout shift
   if (!mounted) {
     return (
       <div
-        className="
-          flex items-center justify-center w-6 h-6 rounded-md
-          bg-gray-100 dark:bg-gray-800
-          border border-gray-200 dark:border-gray-700
-        "
+        className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800"
         aria-hidden="true"
       />
     );
@@ -49,18 +43,17 @@ function PrefersColorSchemeSelector() {
     <button
       onClick={handleThemeToggle}
       className="
-        flex items-center justify-center w-6 h-6 rounded-md
+        flex items-center justify-center w-8 h-8 rounded-lg
         bg-gray-100 dark:bg-gray-800
-        border border-gray-200 dark:border-gray-700
         hover:bg-gray-200 dark:hover:bg-gray-700
-        transition-colors duration-200
+        transition-all duration-200 hover:scale-105 active:scale-95
       "
       aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
     >
       {isDark ? (
-        <Moon className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" />
+        <Moon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
       ) : (
-        <Sun className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" />
+        <Sun className="w-4 h-4 text-gray-500 dark:text-gray-400" />
       )}
     </button>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@nextui-org/react";
+import { Button } from "@/components/ui";
 import { usePrivy } from "@privy-io/react-auth";
 import {
   Github,

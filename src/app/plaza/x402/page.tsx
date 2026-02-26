@@ -7,10 +7,7 @@ import DefaultLayoutWrapper from "../../DefaultLayoutWrapper";
 import X402PageClient from "./X402PageClient";
 
 export const metadata: Metadata = {
-  title: "x402 Donate | Web3 Insights",
-  openGraph: {
-    title: "x402 Donate | Web3 Insights",
-  },
+  title: "x402 Donate",
   description:
     "Support open source projects with x402 donations. Register your repository and accept USDC donations from the Web3 community.",
 };

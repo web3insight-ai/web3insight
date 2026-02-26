@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardBody, Avatar, Button } from "@nextui-org/react";
+import { Card, CardBody, Avatar, Button } from "@/components/ui";
 import Link from "next/link";
 import {
   User as UserIcon,

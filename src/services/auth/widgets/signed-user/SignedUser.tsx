@@ -7,7 +7,7 @@ import {
   PopoverContent,
   Button,
   Chip,
-} from "@nextui-org/react";
+} from "@/components/ui";
 import {
   LogIn,
   LogOut,

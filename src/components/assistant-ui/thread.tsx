@@ -95,8 +95,10 @@ const Thread: FC<ThreadProps> = ({ onMinimize, onClose }) => {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-border-dark bg-gray-50 dark:bg-surface-elevated">
         <div className="flex items-center gap-2">
-          <Sparkles size={18} className="text-primary" />
-          <span className="font-semibold text-sm">Web3Insights AI</span>
+          <div className="p-1 rounded-md bg-primary/10">
+            <Sparkles size={16} className="text-primary" />
+          </div>
+          <span className="font-semibold text-sm">Web3Insight AI</span>
         </div>
         <div className="flex items-center gap-1">
           {hasMessages && (

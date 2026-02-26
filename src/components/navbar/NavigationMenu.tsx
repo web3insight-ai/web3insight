@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import clsx from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
-import { Popover, PopoverTrigger, PopoverContent } from "@nextui-org/react";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui";
 import { useState } from "react";
 
 interface NavItem {

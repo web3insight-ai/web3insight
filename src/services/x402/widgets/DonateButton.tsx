@@ -12,7 +12,7 @@ import {
   Select,
   SelectItem,
   Chip,
-} from "@nextui-org/react";
+} from "@/components/ui";
 import { usePrivy } from "@privy-io/react-auth";
 import { useAtom } from "jotai";
 import {

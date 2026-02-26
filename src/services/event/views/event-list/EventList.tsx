@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
 import { useState } from "react";
 import clsx from "clsx";
-import { Card, Button, Input, Pagination } from "@nextui-org/react";
+import { Card, Button, Input, Pagination } from "@/components/ui";
 import { useRouter } from "next/navigation";
 import { Calendar, Plus, Search, Eye } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -28,11 +28,17 @@ function EventListView({ className }: EventListViewWidgetProps) {
 
   const [visible, setVisible] = useState(false);
 
-  const [addedResult, setAddedResult] = useState<EventDialogPayload>({ eventId: 0, contestants: [], failedAccounts: [] });
+  const [addedResult, setAddedResult] = useState<EventDialogPayload>({
+    eventId: 0,
+    contestants: [],
+    failedAccounts: [],
+  });
   const [addedResultVisible, setAddedResultVisible] = useState(false);
 
   // Loading state for navigation
-  const [navigatingEventId, setNavigatingEventId] = useState<number | null>(null);
+  const [navigatingEventId, setNavigatingEventId] = useState<number | null>(
+    null,
+  );
 
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -64,7 +70,7 @@ function EventListView({ className }: EventListViewWidgetProps) {
       await router.push(`/admin/events/${id}`);
       clearTimeout(timeoutId);
     } catch (error) {
-      console.error('Navigation error:', error);
+      console.error("Navigation error:", error);
       clearTimeout(timeoutId);
       setNavigatingEventId(null);
     }
@@ -90,7 +96,6 @@ function EventListView({ className }: EventListViewWidgetProps) {
   // Calculate pagination based on API total
   const pages = Math.ceil(total / rowsPerPage);
 
-
   return (
     <div className={clsx("space-y-6", className)}>
       {/* Main Events Table */}
@@ -102,8 +107,12 @@ function EventListView({ className }: EventListViewWidgetProps) {
               <Calendar size={18} className="text-primary" />
             </div>
             <div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">Event Management</h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Manage and track all events</p>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                Event Management
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Manage and track all events
+              </p>
             </div>
           </div>
 
@@ -137,11 +146,16 @@ function EventListView({ className }: EventListViewWidgetProps) {
           {loading ? (
             <div className="px-6 py-12 text-center">
               <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-sm text-gray-500 dark:text-gray-400">Loading events...</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Loading events...
+              </p>
             </div>
           ) : filteredData.length === 0 ? (
             <div className="px-6 py-12 text-center">
-              <Calendar size={48} className="mx-auto mb-4 text-gray-300 dark:text-gray-600" />
+              <Calendar
+                size={48}
+                className="mx-auto mb-4 text-gray-300 dark:text-gray-600"
+              />
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
                 {searchTerm ? "No events match your search" : "No events found"}
               </p>
@@ -163,10 +177,18 @@ function EventListView({ className }: EventListViewWidgetProps) {
               <table className="w-full table-auto">
                 <thead>
                   <tr className="border-t border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">#</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Event</th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Created</th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      #
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Event
+                    </th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Created
+                    </th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border dark:divide-border-dark">
@@ -214,20 +236,13 @@ function EventListView({ className }: EventListViewWidgetProps) {
 
         {pages > 1 && (
           <div className="px-6 py-4 border-t border-border dark:border-border-dark flex justify-center">
-            <Pagination
-              page={page}
-              total={pages}
-              onChange={setPage}
-            />
+            <Pagination page={page} total={pages} onChange={setPage} />
           </div>
         )}
       </Card>
 
       {/* Dialogs */}
-      <EventDialog
-        visible={visible}
-        onClose={closeDialog}
-      />
+      <EventDialog visible={visible} onClose={closeDialog} />
       <ContestantListDialog
         dataSource={addedResult.contestants}
         eventId={addedResult.eventId}

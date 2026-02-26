@@ -1,15 +1,18 @@
 import type { ChangeEventHandler } from "react";
-import { Select, SelectItem } from "@nextui-org/react";
+import { Select, SelectItem } from "@/components/ui";
 
 import type { SearchValue, SelectableFilterWidgetProps } from "./typing";
 
-function DirectionFilter({ value = "asc", onChange }: SelectableFilterWidgetProps<SearchValue["direction"]>) {
+function DirectionFilter({
+  value = "asc",
+  onChange,
+}: SelectableFilterWidgetProps<SearchValue["direction"]>) {
   const options = [
     { label: "ASC", value: "asc" },
     { label: "DESC", value: "desc" },
   ];
 
-  const handleChange: ChangeEventHandler<HTMLSelectElement> = e => {
+  const handleChange: ChangeEventHandler<HTMLSelectElement> = (e) => {
     onChange(e.target.value as SearchValue["direction"]);
   };
 
@@ -21,7 +24,7 @@ function DirectionFilter({ value = "asc", onChange }: SelectableFilterWidgetProp
       size="sm"
       onChange={handleChange}
     >
-      {options.map(opt => (
+      {options.map((opt) => (
         <SelectItem key={opt.value}>{opt.label}</SelectItem>
       ))}
     </Select>

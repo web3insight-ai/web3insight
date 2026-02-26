@@ -1,16 +1,26 @@
 import type { JSXElementConstructor } from "react";
 
-import { type ButtonProps, Button } from "@nextui-org/react";
+import { type ButtonProps, Button } from "@/components/ui";
 
-import type { DataValue, ViewFieldDescriptor, FieldRendererProps } from "@/types";
+import type {
+  DataValue,
+  ViewFieldDescriptor,
+  FieldRendererProps,
+} from "@/types";
 import type { TableColumn } from "$/controls/data-table";
 
-import type { TableViewAction, ActionGroup, TableViewWidgetProps } from "./typing";
+import type {
+  TableViewAction,
+  ActionGroup,
+  TableViewWidgetProps,
+} from "./typing";
 
-function resolveActionGroup(actions: TableViewWidgetProps["actions"] = []): ActionGroup {
+function resolveActionGroup(
+  actions: TableViewWidgetProps["actions"] = [],
+): ActionGroup {
   const group: ActionGroup = { inline: [], others: [] };
 
-  actions.forEach(action => {
+  actions.forEach((action) => {
     if (!action.context || action.context === "single") {
       group.inline.push(action);
     } else {
@@ -21,7 +31,10 @@ function resolveActionGroup(actions: TableViewWidgetProps["actions"] = []): Acti
   return group;
 }
 
-function renderButton(action: TableViewAction, payload: Record<string, DataValue> = {}) {
+function renderButton(
+  action: TableViewAction,
+  payload: Record<string, DataValue> = {},
+) {
   let color: ButtonProps["color"] = "default";
   let variant: ButtonProps["variant"] = "bordered";
 
@@ -47,13 +60,16 @@ function resolveColumns({
   fields = [],
   actions = [],
 }: Pick<TableViewWidgetProps, "fields" | "actions">): TableColumn[] {
-  const cols: TableColumn[] = (fields as ViewFieldDescriptor[]).map(field => {
+  const cols: TableColumn[] = (fields as ViewFieldDescriptor[]).map((field) => {
     let renderFn: TableColumn["render"];
 
     if (field.widget) {
-      const FieldWidget = field.widget as JSXElementConstructor<FieldRendererProps>;
+      const FieldWidget =
+        field.widget as JSXElementConstructor<FieldRendererProps>;
 
-      renderFn = (_, { row }) => <FieldWidget field={field} value={row[field.name]} />;
+      renderFn = (_, { row }) => (
+        <FieldWidget field={field} value={row[field.name]} />
+      );
     }
 
     return {
@@ -72,7 +88,7 @@ function resolveColumns({
       key: "_SYS_ACTION_COL_",
       render: (_, { row }) => (
         <div className="flex items-center gap-2 px-4">
-          {actions.map(action => renderButton(action, row))}
+          {actions.map((action) => renderButton(action, row))}
         </div>
       ),
     });

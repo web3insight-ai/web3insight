@@ -1,6 +1,6 @@
 "use client";
 
-import { Chip } from "@nextui-org/react";
+import { Chip } from "@/components/ui";
 import Navbar from "$/navbar";
 import { getRoleName, getRoleColor } from "@/utils/role";
 import type { ApiUser } from "~/auth/typing";

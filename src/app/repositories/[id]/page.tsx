@@ -1,13 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { headers } from "next/headers";
 import RepositoryDetailClient from "./RepositoryDetailClient";
-import { getTitle } from "@/utils/app";
 import { api } from "@/lib/api/client";
 import { getUser } from "~/auth/repository";
 import type { RepoRankRecord } from "@/lib/api/types";
 import DefaultLayoutWrapper from "../../DefaultLayoutWrapper";
-import { env } from "@/env";
 
 interface RepositoryPageProps {
   params: Promise<{
@@ -43,19 +40,13 @@ export async function generateMetadata({
       }
     }
 
-    const baseTitle = `Repository Details - ${getTitle()}`;
-    const title = `${repoName} - ${baseTitle}`;
-
     return {
-      title,
-      openGraph: {
-        title,
-      },
+      title: `${repoName} - Repository Details`,
       description: `Repository analytics and metrics for ${repoName}. Track development activity, contributors, and community engagement.`,
     };
   } catch (_error) {
     return {
-      title: `Repository Details - ${getTitle()}`,
+      title: "Repository Details",
       description: "Web3 repository analytics and metrics",
     };
   }
@@ -79,15 +70,6 @@ export default async function RepositoryDetailPage({
     notFound();
   }
 
-  // Get current user from session
-  const headersList = await headers();
-  const host = headersList.get("host") || "localhost:3000";
-  const protocol = env.NODE_ENV === "development" ? "http" : "https";
-  const url = `${protocol}://${host}/repositories/${repoId}`;
-
-  const _request = new Request(url, {
-    headers: Object.fromEntries(headersList.entries()),
-  });
   const user = await getUser();
 
   async function fetchActiveDeveloperData(repoId: number) {

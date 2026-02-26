@@ -1,4 +1,4 @@
-import { Card, CardBody, Chip } from "@nextui-org/react";
+import { Card, CardBody, Chip } from "@/components/ui";
 import { Brain, Code } from "lucide-react";
 
 import type { AIProfile } from "../../typing";
@@ -12,7 +12,10 @@ interface AIProfileDisplayProps {
   className?: string;
 }
 
-export function AIProfileDisplay({ aiProfile, className = "" }: AIProfileDisplayProps) {
+export function AIProfileDisplay({
+  aiProfile,
+  className = "",
+}: AIProfileDisplayProps) {
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Visual Analytics Dashboard */}
@@ -41,10 +44,14 @@ export function AIProfileDisplay({ aiProfile, className = "" }: AIProfileDisplay
             <CardBody className="p-4">
               <div className="flex items-center gap-2 mb-2">
                 <Brain className="text-primary" size={14} />
-                <h4 className="text-xs font-semibold text-primary">AI SUMMARY</h4>
+                <h4 className="text-xs font-semibold text-primary">
+                  AI SUMMARY
+                </h4>
               </div>
               <p className="text-xs chinese-content leading-relaxed text-gray-700 dark:text-gray-300">
-                {aiProfile.summary.length > 200 ? `${aiProfile.summary.slice(0, 200)}...` : aiProfile.summary}
+                {aiProfile.summary.length > 200
+                  ? `${aiProfile.summary.slice(0, 200)}...`
+                  : aiProfile.summary}
               </p>
             </CardBody>
           </Card>
@@ -56,7 +63,9 @@ export function AIProfileDisplay({ aiProfile, className = "" }: AIProfileDisplay
             <CardBody className="p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Code className="text-secondary" size={14} />
-                <h4 className="text-xs font-semibold text-gray-900 dark:text-white">KEY SKILLS</h4>
+                <h4 className="text-xs font-semibold text-gray-900 dark:text-white">
+                  KEY SKILLS
+                </h4>
               </div>
               <div className="flex flex-wrap gap-2">
                 {aiProfile.skills.slice(0, 6).map((skill, index) => (
@@ -66,7 +75,9 @@ export function AIProfileDisplay({ aiProfile, className = "" }: AIProfileDisplay
                 ))}
                 {aiProfile.skills.length > 6 && (
                   <Chip color="default" variant="bordered" size="sm">
-                    <span className="text-xs">+{aiProfile.skills.length - 6} MORE</span>
+                    <span className="text-xs">
+                      +{aiProfile.skills.length - 6} MORE
+                    </span>
                   </Chip>
                 )}
               </div>
@@ -83,7 +94,9 @@ export function AIProfileDisplay({ aiProfile, className = "" }: AIProfileDisplay
             <CardBody className="p-6">
               <div className="flex items-center gap-3 mb-4 pb-2 border-b-2 border-danger-200 dark:border-danger-700">
                 <div className="text-lg">🔥</div>
-                <h3 className="text-sm font-bold text-danger">AI Roast Report</h3>
+                <h3 className="text-sm font-bold text-danger">
+                  AI Roast Report
+                </h3>
                 <div className="ml-auto flex gap-2">
                   <Chip color="danger" variant="flat" size="sm">
                     🌶️ {aiProfile.roast_report.roast_score.spicyLevel}/10
@@ -140,7 +153,9 @@ export function AIProfileDisplay({ aiProfile, className = "" }: AIProfileDisplay
               <CardBody className="p-4">
                 <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
                   <div className="text-sm">🌐</div>
-                  <h5 className="font-medium text-xs">Ecosystem Choice Roast</h5>
+                  <h5 className="font-medium text-xs">
+                    Ecosystem Choice Roast
+                  </h5>
                 </div>
                 <div className="bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-lg">
                   <p className="chinese-content text-xs leading-relaxed">
@@ -171,21 +186,25 @@ export function AIProfileDisplay({ aiProfile, className = "" }: AIProfileDisplay
             <CardBody className="p-6">
               <div className="flex items-center gap-3 mb-4 pb-2 border-b-2 border-success-200 dark:border-success-700">
                 <div className="text-lg">💡</div>
-                <h4 className="text-sm font-bold text-success">Constructive Suggestions</h4>
+                <h4 className="text-sm font-bold text-success">
+                  Constructive Suggestions
+                </h4>
               </div>
               <div className="space-y-3">
-                {aiProfile.roast_report.constructive_sarcasm.map((suggestion, index) => (
-                  <div key={index} className="flex items-start gap-3">
-                    <Chip color="success" variant="flat" size="sm">
-                      {index + 1}
-                    </Chip>
-                    <div className="bg-success-100 dark:bg-success-900/30 border border-success-200 dark:border-success-700 p-3 rounded-lg flex-1">
-                      <p className="chinese-content text-xs leading-relaxed">
-                        {suggestion}
-                      </p>
+                {aiProfile.roast_report.constructive_sarcasm.map(
+                  (suggestion, index) => (
+                    <div key={index} className="flex items-start gap-3">
+                      <Chip color="success" variant="flat" size="sm">
+                        {index + 1}
+                      </Chip>
+                      <div className="bg-success-100 dark:bg-success-900/30 border border-success-200 dark:border-success-700 p-3 rounded-lg flex-1">
+                        <p className="chinese-content text-xs leading-relaxed">
+                          {suggestion}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ),
+                )}
               </div>
             </CardBody>
           </Card>
@@ -195,7 +214,9 @@ export function AIProfileDisplay({ aiProfile, className = "" }: AIProfileDisplay
             <CardBody className="p-6">
               <div className="flex items-center gap-3 mb-4 pb-2 border-b-2 border-secondary-200 dark:border-secondary-700">
                 <div className="text-lg">⚖️</div>
-                <h4 className="text-sm font-bold text-secondary">Final Verdict</h4>
+                <h4 className="text-sm font-bold text-secondary">
+                  Final Verdict
+                </h4>
               </div>
               <div className="bg-secondary-100 dark:bg-secondary-900/30 border-2 border-secondary-300 dark:border-secondary-600 p-4 rounded-lg text-center">
                 <p className="chinese-content text-sm font-bold">
@@ -213,7 +234,8 @@ export function AIProfileDisplay({ aiProfile, className = "" }: AIProfileDisplay
           <Card className="inline-block bg-gray-50 dark:bg-gray-900">
             <CardBody className="p-3">
               <div className="text-xs text-gray-600 dark:text-gray-400">
-                📅 ANALYSIS COMPLETED: {new Date(aiProfile.analysis_date).toLocaleDateString()} 📅
+                📅 ANALYSIS COMPLETED:{" "}
+                {new Date(aiProfile.analysis_date).toLocaleDateString()} 📅
               </div>
             </CardBody>
           </Card>

@@ -1,14 +1,22 @@
 import clsx from "clsx";
-import { Card, CardBody, CardHeader, Divider, Skeleton } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Divider, Skeleton } from "@/components/ui";
 
 interface ActivityListSkeletonProps {
   className?: string;
   itemCount?: number;
 }
 
-function ActivityListSkeleton({ className, itemCount = 8 }: ActivityListSkeletonProps) {
+function ActivityListSkeleton({
+  className,
+  itemCount = 8,
+}: ActivityListSkeletonProps) {
   return (
-    <Card className={clsx("bg-white dark:bg-gray-800 shadow-sm border-none", className)}>
+    <Card
+      className={clsx(
+        "bg-white dark:bg-gray-800 shadow-sm border-none",
+        className,
+      )}
+    >
       <CardHeader className="px-6 py-4">
         <Skeleton className="h-6 w-48 rounded-lg">
           <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded-lg" />
