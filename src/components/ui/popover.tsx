@@ -62,10 +62,15 @@ function PopoverContent({
 }: PopoverContentProps) {
   return (
     <BasePopover.Portal>
-      <BasePopover.Positioner side={side} align={align} sideOffset={sideOffset}>
+      <BasePopover.Positioner
+        side={side}
+        align={align}
+        sideOffset={sideOffset}
+        className="z-[100]"
+      >
         <BasePopover.Popup
           className={clsx(
-            "z-[100] rounded-xl bg-white dark:bg-surface-dark",
+            "rounded-xl bg-white dark:bg-surface-dark",
             "shadow-[0_8px_30px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]",
             "border border-gray-200 dark:border-gray-700",
             "outline-none",
