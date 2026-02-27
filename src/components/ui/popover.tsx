@@ -4,6 +4,9 @@ import { Popover as BasePopover } from "@base-ui/react/popover";
 import { type ReactNode } from "react";
 import clsx from "clsx";
 
+type PopoverSide = "top" | "bottom" | "left" | "right";
+type PopoverAlign = "start" | "center" | "end";
+
 interface PopoverProps {
   children: ReactNode;
   placement?:
@@ -18,13 +21,7 @@ interface PopoverProps {
   offset?: number;
 }
 
-function Popover({
-  children,
-  placement: _placement = "bottom",
-  isOpen,
-  onOpenChange,
-  offset: _offset = 8,
-}: PopoverProps) {
+function Popover({ children, isOpen, onOpenChange }: PopoverProps) {
   return (
     <BasePopover.Root open={isOpen} onOpenChange={onOpenChange}>
       {children}
@@ -50,17 +47,28 @@ interface PopoverContentProps {
   children: ReactNode;
   className?: string;
   style?: React.CSSProperties;
+  side?: PopoverSide;
+  align?: PopoverAlign;
+  sideOffset?: number;
 }
 
-function PopoverContent({ children, className, style }: PopoverContentProps) {
+function PopoverContent({
+  children,
+  className,
+  style,
+  side = "bottom",
+  align = "center",
+  sideOffset = 8,
+}: PopoverContentProps) {
   return (
     <BasePopover.Portal>
-      <BasePopover.Positioner sideOffset={8}>
+      <BasePopover.Positioner side={side} align={align} sideOffset={sideOffset}>
         <BasePopover.Popup
           className={clsx(
-            "z-50 rounded-lg bg-white dark:bg-surface-dark shadow-lg",
-            "border border-border dark:border-border-dark",
-            "animate-scale-in",
+            "z-[100] rounded-xl bg-white dark:bg-surface-dark",
+            "shadow-[0_8px_30px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]",
+            "border border-gray-200 dark:border-gray-700",
+            "outline-none",
             className,
           )}
           style={style}
