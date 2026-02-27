@@ -32,32 +32,43 @@ export function CopilotMessageList({
       <ConversationEmptyState className="mx-auto my-auto w-full max-w-3xl min-h-0 h-full gap-5 p-0 justify-center items-center">
         <div className="w-full pb-4 text-center">
           <div className="flex w-full flex-col justify-center px-8">
-            <p className="text-2xl font-semibold">Hello there!</p>
-            <p className="text-2xl text-muted-foreground/65">
+            <p className="text-2xl font-semibold text-foreground dark:text-foreground-dark">
+              Hello there!
+            </p>
+            <p className="mt-1 text-base text-muted-foreground">
               How can I help you today?
             </p>
           </div>
         </div>
 
         <div className="grid w-full gap-2 pb-4 md:grid-cols-2">
-          {STARTER_PROMPT_CARDS.map((prompt) => (
-            <div
-              key={prompt.action}
-              className="[&:nth-child(n+3)]:hidden md:[&:nth-child(n+3)]:block"
-            >
-              <Button
-                variant="ghost"
-                className="h-auto w-full flex-1 flex-wrap items-start justify-start gap-1 rounded-3xl border px-5 py-4 text-left text-sm md:flex-col"
-                onClick={() => {
-                  actions.sendStarterPrompt(prompt.action);
-                }}
-                aria-label={prompt.action}
+          {STARTER_PROMPT_CARDS.map((prompt) => {
+            const Icon = prompt.icon;
+
+            return (
+              <div
+                key={prompt.action}
+                className="[&:nth-child(n+3)]:hidden md:[&:nth-child(n+3)]:block"
               >
-                <span className="font-medium">{prompt.title}</span>
-                <span className="text-muted-foreground">{prompt.label}</span>
-              </Button>
-            </div>
-          ))}
+                <Button
+                  variant="ghost"
+                  className="h-auto w-full items-start justify-start gap-3 rounded-lg border border-border bg-white px-4 py-3 text-left text-sm shadow-subtle hover:bg-accent dark:border-border-dark dark:bg-surface-dark dark:text-foreground-dark dark:hover:bg-surface-elevated"
+                  onClick={() => {
+                    actions.sendStarterPrompt(prompt.action);
+                  }}
+                  aria-label={prompt.action}
+                >
+                  <Icon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                  <div className="flex min-w-0 flex-col gap-0.5">
+                    <span className="font-medium">{prompt.title}</span>
+                    <span className="text-muted-foreground">
+                      {prompt.label}
+                    </span>
+                  </div>
+                </Button>
+              </div>
+            );
+          })}
         </div>
       </ConversationEmptyState>
     );

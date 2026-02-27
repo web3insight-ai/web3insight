@@ -204,15 +204,15 @@ export function ToolPartCard({ part }: { part: ToolPart }) {
   );
 
   return (
-    <div className="mb-3 flex w-full items-start gap-3 rounded-xl border border-border/70 bg-muted/30 px-4 py-2.5">
-      <div className="flex size-8 shrink-0 items-center justify-center rounded-full border border-border/60 bg-background/80 shadow-xs">
+    <div className="mb-3 flex w-full items-start gap-3 rounded-xl border border-border/70 bg-muted/30 px-4 py-2.5 dark:border-border-dark/70 dark:bg-surface-dark/30">
+      <div className="flex size-8 shrink-0 items-center justify-center rounded-full border border-border/60 bg-background/80 shadow-xs dark:border-border-dark/60 dark:bg-background-dark/80">
         <ToolIcon className="size-4 text-muted-foreground" />
       </div>
 
       <div className="flex min-w-0 flex-1 items-center gap-3 w-full">
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <div className="flex min-w-0 items-center gap-2">
-            <span className="truncate text-sm font-semibold text-foreground">
+            <span className="truncate text-sm font-semibold text-foreground dark:text-foreground-dark">
               {toolCopy.title}
             </span>
             <span className="text-muted-foreground/70">&bull;</span>

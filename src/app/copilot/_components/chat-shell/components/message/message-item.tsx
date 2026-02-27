@@ -117,6 +117,15 @@ export function CopilotMessageItem({
     message.id,
   ]);
 
+  // Reason: Override the base MessageContent's group-[.is-user]:bg-secondary (indigo #6366F1)
+  // with a neutral dark bubble matching the dashboard's color system.
+  const userBubbleOverride =
+    "group-[.is-user]:bg-gray-900 group-[.is-user]:text-white group-[.is-user]:dark:bg-surface-dark group-[.is-user]:dark:border group-[.is-user]:dark:border-border-dark";
+
+  // Reason: MessageContent hardcodes group-[.is-assistant]:text-foreground (#000000).
+  // In dark mode this makes text invisible on dark backgrounds. Use !important to override.
+  const assistantOverride = "w-full dark:!text-foreground-dark";
+
   return (
     <div className="space-y-1">
       <Message from={message.role}>
@@ -132,7 +141,9 @@ export function CopilotMessageItem({
             status={status}
           />
         ) : (
-          <MessageContent className={!isUserMessage ? "w-full" : undefined}>
+          <MessageContent
+            className={isUserMessage ? userBubbleOverride : assistantOverride}
+          >
             {shouldShowGeneratingShimmer ? (
               <Shimmer className="w-fit" duration={1}>
                 Generating...

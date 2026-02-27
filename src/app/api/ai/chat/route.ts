@@ -8,6 +8,7 @@ import { getModel } from "~/ai/repository/client";
 import { web3InsightTools } from "~/ai/tools";
 import { getCopilotWriteDb } from "@/lib/db/copilot-db";
 import { isCopilotDbReady } from "@/lib/db/copilot-init";
+import { getCopilotUserId } from "@/lib/auth/copilot-auth";
 
 const SYSTEM_PROMPT = `You are Web3Insight AI, a specialized assistant for Web3 developer analytics.
 
@@ -72,10 +73,14 @@ export async function POST(request: Request) {
     });
   }
 
+  // Reason: Resolve userId once so persistence functions can scope session
+  // updates to the current user, preventing cross-user writes.
+  const userId = sessionId ? await getCopilotUserId() : null;
+
   // Persist the latest user message if sessionId is provided
   if (sessionId) {
     try {
-      await persistUserMessage(sessionId, messages);
+      await persistUserMessage(sessionId, messages, userId);
     } catch (error) {
       // Reason: Log but don't block the chat stream on persistence failure
       console.error("Failed to persist user message:", error);
@@ -97,7 +102,7 @@ export async function POST(request: Request) {
       }
 
       try {
-        await persistAssistantMessage(sessionId, messages, response);
+        await persistAssistantMessage(sessionId, messages, response, userId);
       } catch (error) {
         console.error("Failed to persist assistant message:", error);
       }
@@ -113,6 +118,7 @@ export async function POST(request: Request) {
 async function persistUserMessage(
   sessionId: string,
   messages: UIMessage[],
+  userId: string | null,
 ): Promise<void> {
   const dbReady = await isCopilotDbReady();
   if (!dbReady) return;
@@ -139,17 +145,24 @@ async function persistUserMessage(
     .onConflict((oc) => oc.column("message_id").doNothing())
     .execute();
 
-  // Update last_active_at
-  await db
+  // Reason: Scope session update to the current user to prevent cross-user writes
+  let sessionUpdate = db
     .updateTable("api.copilot_sessions")
     .set({ last_active_at: new Date() })
-    .where("session_id", "=", sessionId)
-    .execute();
+    .where("session_id", "=", sessionId);
+
+  if (userId) {
+    sessionUpdate = sessionUpdate.where("user_id", "=", userId);
+  } else {
+    sessionUpdate = sessionUpdate.where("user_id", "is", null);
+  }
+
+  await sessionUpdate.execute();
 
   // Derive a title from the first user message if the session has no title yet
   const isFirstMessage = messages.filter((m) => m.role === "user").length === 1;
   if (isFirstMessage) {
-    await deriveSessionTitle(sessionId, lastUserMessage);
+    await deriveSessionTitle(sessionId, lastUserMessage, userId);
   }
 }
 
@@ -162,6 +175,7 @@ async function persistAssistantMessage(
   sessionId: string,
   originalMessages: UIMessage[],
   response: { messages: Array<CoreMessage> },
+  userId: string | null,
 ): Promise<void> {
   const dbReady = await isCopilotDbReady();
   if (!dbReady) return;
@@ -192,11 +206,19 @@ async function persistAssistantMessage(
     .onConflict((oc) => oc.column("message_id").doNothing())
     .execute();
 
-  await db
+  // Reason: Scope session update to the current user to prevent cross-user writes
+  let sessionUpdate = db
     .updateTable("api.copilot_sessions")
     .set({ last_active_at: new Date() })
-    .where("session_id", "=", sessionId)
-    .execute();
+    .where("session_id", "=", sessionId);
+
+  if (userId) {
+    sessionUpdate = sessionUpdate.where("user_id", "=", userId);
+  } else {
+    sessionUpdate = sessionUpdate.where("user_id", "is", null);
+  }
+
+  await sessionUpdate.execute();
 }
 
 /**
@@ -308,6 +330,7 @@ function resolveParentId(
 async function deriveSessionTitle(
   sessionId: string,
   userMessage: UIMessage,
+  userId: string | null,
 ): Promise<void> {
   // Reason: Extract text content from the UIMessage parts to create a title.
   // We truncate to 100 chars for a reasonable session title.
@@ -325,12 +348,19 @@ async function deriveSessionTitle(
   const title = rawText.length > 100 ? rawText.slice(0, 97) + "..." : rawText;
   const db = getCopilotWriteDb();
 
-  await db
+  let query = db
     .updateTable("api.copilot_sessions")
     .set({ title })
     .where("session_id", "=", sessionId)
-    .where("title", "is", null)
-    .execute();
+    .where("title", "is", null);
+
+  if (userId) {
+    query = query.where("user_id", "=", userId);
+  } else {
+    query = query.where("user_id", "is", null);
+  }
+
+  await query.execute();
 }
 
 export async function OPTIONS() {

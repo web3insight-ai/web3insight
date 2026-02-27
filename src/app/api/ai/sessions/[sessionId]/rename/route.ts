@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCopilotWriteDb } from "@/lib/db/copilot-db";
 import { isCopilotDbReady } from "@/lib/db/copilot-init";
+import { getCopilotUserId } from "@/lib/auth/copilot-auth";
 
 type RouteParams = { params: Promise<{ sessionId: string }> };
 
@@ -11,6 +12,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     if (!dbReady) {
       return NextResponse.json({ success: true });
     }
+
+    const userId = await getCopilotUserId();
     const db = getCopilotWriteDb();
 
     const body = (await request.json()) as { title: string };
@@ -19,12 +22,19 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "title is required" }, { status: 400 });
     }
 
-    const result = await db
+    let query = db
       .updateTable("api.copilot_sessions")
       .set({ title: body.title.trim() })
       .where("session_id", "=", sessionId)
-      .where("deleted_at", "is", null)
-      .executeTakeFirst();
+      .where("deleted_at", "is", null);
+
+    if (userId) {
+      query = query.where("user_id", "=", userId);
+    } else {
+      query = query.where("user_id", "is", null);
+    }
+
+    const result = await query.executeTakeFirst();
 
     if (result.numUpdatedRows === 0n) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });

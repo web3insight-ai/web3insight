@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCopilotDb, getCopilotWriteDb } from "@/lib/db/copilot-db";
 import { isCopilotDbReady } from "@/lib/db/copilot-init";
+import { getCopilotUserId } from "@/lib/auth/copilot-auth";
 
 type RouteParams = { params: Promise<{ sessionId: string }> };
 
@@ -18,13 +19,24 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       });
     }
 
+    const userId = await getCopilotUserId();
     const db = getCopilotDb();
-    const session = await db
+
+    let query = db
       .selectFrom("api.copilot_sessions")
       .selectAll()
       .where("session_id", "=", sessionId)
-      .where("deleted_at", "is", null)
-      .executeTakeFirst();
+      .where("deleted_at", "is", null);
+
+    // Reason: If authenticated, only allow access to own sessions.
+    // Anonymous sessions (user_id IS NULL) are accessible when no user is logged in.
+    if (userId) {
+      query = query.where("user_id", "=", userId);
+    } else {
+      query = query.where("user_id", "is", null);
+    }
+
+    const session = await query.executeTakeFirst();
 
     if (!session) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
@@ -49,13 +61,22 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ success: true });
     }
 
+    const userId = await getCopilotUserId();
     const db = getCopilotWriteDb();
-    const result = await db
+
+    let query = db
       .updateTable("api.copilot_sessions")
       .set({ deleted_at: new Date() })
       .where("session_id", "=", sessionId)
-      .where("deleted_at", "is", null)
-      .executeTakeFirst();
+      .where("deleted_at", "is", null);
+
+    if (userId) {
+      query = query.where("user_id", "=", userId);
+    } else {
+      query = query.where("user_id", "is", null);
+    }
+
+    const result = await query.executeTakeFirst();
 
     if (result.numUpdatedRows === 0n) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });

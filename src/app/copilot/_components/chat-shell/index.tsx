@@ -39,9 +39,13 @@ export function CopilotChatShell({ initialRemoteId }: CopilotChatShellProps) {
   const actions = useCopilotActions();
 
   return (
-    <div className="flex h-full w-full flex-col">
-      {/* Header bar with session menu and thread actions */}
-      <div className="flex items-center justify-between border-b px-4 py-2">
+    <div
+      className="-mb-16 flex min-h-0 flex-1 flex-col overflow-hidden text-foreground dark:text-foreground-dark"
+      style={{ height: "calc(100dvh - 65px)" }}
+    >
+      {/* Reason: -mb-16 neutralizes <main>'s pb-16 so the page doesn't scroll
+          and this container fills exactly the space below the navbar. */}
+      <div className="flex shrink-0 items-center justify-between border-b border-border bg-background px-4 py-2 dark:border-border-dark dark:bg-background-dark">
         <CopilotSessionMenu
           archivedThreads={archivedThreads}
           historyQueryState={historyQueryState}
@@ -54,7 +58,7 @@ export function CopilotChatShell({ initialRemoteId }: CopilotChatShellProps) {
         />
       </div>
 
-      {/* Main chat area */}
+      {/* Chat area */}
       <div className="flex min-h-0 flex-1 flex-col">
         {error ? (
           <div className="mx-auto w-full max-w-3xl px-4 pt-4">
@@ -74,7 +78,8 @@ export function CopilotChatShell({ initialRemoteId }: CopilotChatShellProps) {
           <ConversationScrollButton />
         </Conversation>
 
-        <div className="mx-auto w-full max-w-3xl pb-4">
+        {/* Input — shrink-0 keeps it pinned at the bottom */}
+        <div className="mx-auto w-full shrink-0 max-w-3xl px-4 pb-4">
           <PromptInput
             status={status}
             onStop={actions.stopGeneration}
@@ -82,13 +87,16 @@ export function CopilotChatShell({ initialRemoteId }: CopilotChatShellProps) {
               await actions.sendMessage(text);
             }}
           >
-            <div className="rounded-2xl border border-input bg-background p-2">
+            {/* Reason: Textarea hardcodes bg/ring/outline on the inner <textarea>.
+                Use [&_textarea] + [&_textarea:focus] to strip all inner styling
+                so only the outer border is visible, even on focus. */}
+            <div className="overflow-hidden rounded-xl border border-border transition-colors focus-within:border-primary dark:border-border-dark dark:focus-within:border-primary [&_textarea]:!bg-transparent [&_textarea]:!ring-0 [&_textarea]:!shadow-none [&_textarea]:!outline-none [&_textarea]:!resize-none [&_textarea]:rounded-none [&_textarea:focus]:!ring-0 [&_textarea:focus]:!shadow-none [&_textarea:focus]:!outline-none">
               <PromptInputTextarea
                 placeholder="Ask about Web3 developer activity..."
-                className="border-0 bg-transparent"
+                className="border-0 bg-transparent shadow-none focus-visible:ring-0"
               />
-              <div className="mt-2 flex items-center justify-between px-1">
-                <p className="text-muted-foreground text-xs">
+              <div className="flex items-center justify-between px-3 py-2">
+                <p className="text-xs text-muted-foreground">
                   AI can make mistakes. Verify critical decisions.
                 </p>
                 <PromptInputSubmit status={status} />

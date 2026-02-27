@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCopilotDb, getCopilotWriteDb } from "@/lib/db/copilot-db";
 import { isCopilotDbReady } from "@/lib/db/copilot-init";
+import { getCopilotUserId } from "@/lib/auth/copilot-auth";
 
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as { localId?: string };
     const sessionId = body.localId ?? crypto.randomUUID();
+    const userId = await getCopilotUserId();
 
     const dbReady = await isCopilotDbReady();
     if (!dbReady) {
@@ -20,7 +22,7 @@ export async function POST(request: NextRequest) {
       .values({
         session_id: sessionId,
         title: null,
-        user_id: null,
+        user_id: userId,
         is_archived: false,
         deleted_at: null,
         last_active_at: new Date(),
@@ -45,6 +47,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ threads: [], nextOffset: null });
     }
 
+    const userId = await getCopilotUserId();
+
+    // Reason: Anonymous users have no sessions to list —
+    // their sessions are created with user_id = null and not queryable.
+    if (!userId) {
+      return NextResponse.json({ threads: [], nextOffset: null });
+    }
+
     const db = getCopilotDb();
     const { searchParams } = request.nextUrl;
     const archived = searchParams.get("archived") === "true";
@@ -61,6 +71,7 @@ export async function GET(request: NextRequest) {
       ])
       .where("deleted_at", "is", null)
       .where("is_archived", "=", archived)
+      .where("user_id", "=", userId)
       .orderBy("last_active_at", "desc")
       .limit(limit + 1)
       .offset(offset)

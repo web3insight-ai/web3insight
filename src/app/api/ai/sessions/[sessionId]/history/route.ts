@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCopilotDb } from "@/lib/db/copilot-db";
 import { isCopilotDbReady } from "@/lib/db/copilot-init";
+import { getCopilotUserId } from "@/lib/auth/copilot-auth";
 
 type RouteParams = { params: Promise<{ sessionId: string }> };
 
@@ -13,15 +14,23 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ messages: [] });
     }
 
+    const userId = await getCopilotUserId();
     const db = getCopilotDb();
 
-    // Verify session exists and is not deleted
-    const session = await db
+    // Verify session exists, is not deleted, and belongs to the current user
+    let sessionQuery = db
       .selectFrom("api.copilot_sessions")
       .select("session_id")
       .where("session_id", "=", sessionId)
-      .where("deleted_at", "is", null)
-      .executeTakeFirst();
+      .where("deleted_at", "is", null);
+
+    if (userId) {
+      sessionQuery = sessionQuery.where("user_id", "=", userId);
+    } else {
+      sessionQuery = sessionQuery.where("user_id", "is", null);
+    }
+
+    const session = await sessionQuery.executeTakeFirst();
 
     if (!session) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });

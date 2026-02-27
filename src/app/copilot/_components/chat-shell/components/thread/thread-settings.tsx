@@ -105,7 +105,7 @@ export function CopilotThreadSettings({
   return (
     <>
       <Button
-        variant="outline"
+        variant="ghost"
         size="icon"
         className="size-8"
         aria-label="Open Copilot settings"

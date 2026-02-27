@@ -3,6 +3,7 @@ import {
   ArchiveIcon,
   Loader2Icon,
   MoreHorizontalIcon,
+  PlusIcon,
   TrashIcon,
 } from "lucide-react";
 
@@ -42,15 +43,17 @@ export function CopilotThreadActionsMenu({
   const hasActiveSession = Boolean(sessionId);
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1">
       <Button
-        variant="outline"
+        variant="ghost"
         size="sm"
-        className="h-8"
+        className="h-8 gap-1.5"
         onClick={actions.createNewChat}
       >
+        <PlusIcon className="size-3.5" />
         New chat
       </Button>
+
       <CopilotThreadSettings
         archivedQueryState={archivedQueryState}
         archivedThreads={archivedThreads}
@@ -60,7 +63,7 @@ export function CopilotThreadActionsMenu({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon"
               className="size-8"
               aria-label="More thread actions"

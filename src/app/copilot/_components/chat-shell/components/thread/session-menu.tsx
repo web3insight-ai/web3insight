@@ -1,10 +1,5 @@
 import { useAtomValue } from "jotai";
-import {
-  CheckIcon,
-  ChevronDownIcon,
-  Loader2Icon,
-  MessageSquareIcon,
-} from "lucide-react";
+import { ChevronDownIcon, Loader2Icon, MessageSquareIcon } from "lucide-react";
 
 import { ShadcnButton as Button } from "@/components/ui/shadcn-button";
 import {
@@ -65,16 +60,13 @@ function SessionList({
       {threads.map((thread) => (
         <DropdownMenuItem
           key={thread.remoteId}
-          className="w-full justify-start"
+          className={`w-full justify-start rounded-md ${thread.remoteId === sessionId ? "bg-primary/10 font-medium text-primary" : ""}`}
           onSelect={(event) => {
             event.preventDefault();
             onSelectThread(thread);
           }}
         >
           <span className="truncate">{renderSessionItemTitle(thread)}</span>
-          {thread.remoteId === sessionId ? (
-            <CheckIcon className="ml-2 size-4 shrink-0" />
-          ) : null}
         </DropdownMenuItem>
       ))}
 
@@ -133,22 +125,22 @@ export function CopilotSessionMenu({
     <DropdownMenu open={isOpen} onOpenChange={actions.setSessionMenuOpen}>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
-          className="h-8 w-[320px] max-w-[calc(100vw-12rem)] justify-between gap-2 md:w-[360px] md:max-w-[calc(100vw-14rem)]"
+          className="h-8 max-w-[calc(100vw-12rem)] gap-2 md:max-w-[calc(100vw-14rem)]"
           aria-label="Select copilot chat"
         >
-          <span className="flex min-w-0 flex-1 items-center gap-2 text-left">
-            <MessageSquareIcon className="size-4 shrink-0" />
-            <span className="truncate">{currentTitle}</span>
+          <MessageSquareIcon className="size-4 shrink-0" />
+          <span className="max-w-[240px] truncate text-sm md:max-w-[320px]">
+            {currentTitle}
           </span>
-          <ChevronDownIcon className="size-4 shrink-0 opacity-70" />
+          <ChevronDownIcon className="size-3.5 shrink-0 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
-        align="end"
-        className="w-[340px] max-w-[calc(100vw-3rem)] p-2 md:w-[380px]"
+        align="start"
+        className="w-[340px] max-w-[calc(100vw-3rem)] bg-white p-2 dark:bg-gray-900 md:w-[380px] [&_[role=menuitem]:focus-visible]:outline-none [&_[role=menuitem]]:cursor-pointer [&_[role=menuitem]:hover]:bg-accent [&_[role=menuitem]:hover]:text-accent-foreground"
       >
         <div className="max-h-[340px] overflow-y-auto">
           <SessionList
