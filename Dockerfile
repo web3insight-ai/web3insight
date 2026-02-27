@@ -55,6 +55,8 @@ ENV NEXT_PUBLIC_PRIVY_APP_ID=${NEXT_PUBLIC_PRIVY_APP_ID}
 ENV NEXT_PUBLIC_UMAMI_WEBSITE_ID=${NEXT_PUBLIC_UMAMI_WEBSITE_ID}
 
 # Build the application
+# Reason: copilot dependencies (streamdown, motion, etc.) push webpack past the default 4GB heap
+ENV NODE_OPTIONS="--max-old-space-size=8192"
 RUN pnpm build
 
 # Stage 3: Production image
