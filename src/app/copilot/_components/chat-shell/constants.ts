@@ -2,27 +2,27 @@ import { BarChart3Icon, GlobeIcon, SearchIcon, UsersIcon } from "lucide-react";
 
 export const STARTER_PROMPT_CARDS = [
   {
-    title: "Top ecosystems",
-    label: "by developer activity",
-    action: "Show me the top Web3 ecosystems by developer activity",
+    title: "Compare ecosystems",
+    label: "Ethereum vs Solana",
+    action: "Compare Ethereum and Solana developer ecosystems",
     icon: GlobeIcon,
   },
   {
-    title: "Trending repositories",
-    label: "this week",
-    action: "What are the trending Web3 repositories this week?",
+    title: "Platform overview",
+    label: "Web3 at a glance",
+    action: "Show me the Web3 platform overview with ecosystem rankings",
     icon: BarChart3Icon,
   },
   {
-    title: "Analyze developer",
-    label: "Web3 contributions",
-    action: "Analyze pseudoyu's Web3 contributions and ecosystem activity",
+    title: "Developer profile",
+    label: "contributions & activity",
+    action: "Analyze pseudoyu's developer profile and top contributions",
     icon: SearchIcon,
   },
   {
-    title: "Developer distribution",
-    label: "by country",
-    action: "Show developer distribution by country across Web3 ecosystems",
+    title: "Hot this week",
+    label: "repos & contributors",
+    action: "What are the hottest repositories and top contributors this week?",
     icon: UsersIcon,
   },
 ] as const;

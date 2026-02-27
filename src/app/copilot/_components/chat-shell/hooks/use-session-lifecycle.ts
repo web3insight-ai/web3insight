@@ -148,6 +148,7 @@ export function useCopilotSessionLifecycle({
     (
       nextHistory: ThreadHistoryEntry[],
       preferredSelections?: Record<string, string>,
+      options?: { skipMessageUpdate?: boolean },
     ) => {
       const selectionSeed =
         preferredSelections ?? buildLatestBranchSelection(nextHistory);
@@ -156,7 +157,16 @@ export function useCopilotSessionLifecycle({
 
       setThreadHistory(nextHistory);
       setBranchSelection(selections);
-      setMessagesRef.current(nextMessages);
+
+      // Reason: After streaming completes, the chat already has messages with
+      // rich tool output from the streaming protocol. Replacing them with
+      // DB-loaded messages would lose the output data (race condition with
+      // onFinish persistence) or have different serialization. Only update
+      // messages when explicitly needed (e.g. session switch, page load).
+      if (!options?.skipMessageUpdate) {
+        setMessagesRef.current(nextMessages);
+      }
+
       clearErrorRef.current();
     },
     [clearErrorRef, setBranchSelection, setMessagesRef, setThreadHistory],
@@ -200,9 +210,17 @@ export function useCopilotSessionLifecycle({
   /**
    * Re-fetches history from the server and re-applies it to the chat.
    * Called after the AI finishes responding so the branch graph stays current.
+   *
+   * When `skipMessageUpdate` is true, only thread history and branch state
+   * are updated — chat messages are NOT replaced. This is used after streaming
+   * completes to avoid overwriting rich tool output with DB-loaded versions.
    */
   const refreshThreadHistory = useCallback(
-    async (targetSessionId: string, preferredLeafMessageId?: string) => {
+    async (
+      targetSessionId: string,
+      preferredLeafMessageId?: string,
+      options?: { skipMessageUpdate?: boolean },
+    ) => {
       try {
         const { messages: historyRows } = await fetchThreadHistory(
           targetSessionId,
@@ -224,7 +242,9 @@ export function useCopilotSessionLifecycle({
           )
           : latestSelection;
 
-        applyThreadHistoryToChat(nextHistory, selectionSeed);
+        applyThreadHistoryToChat(nextHistory, selectionSeed, {
+          skipMessageUpdate: options?.skipMessageUpdate,
+        });
       } catch (refreshError) {
         console.error(
           "[copilot-thread] Failed to refresh thread history:",
@@ -605,7 +625,16 @@ export function useCopilotSessionLifecycle({
 
     lastSyncedAssistantMessageIdRef.current = lastMessage.id;
     invalidateThreadQueries();
-    void refreshThreadHistory(activeSessionId, lastMessage.id);
+
+    // Reason: After streaming completes, the chat already has messages with
+    // correct tool output from the streaming protocol. We refresh thread
+    // history for sidebar/branch UI but skip replacing chat messages to
+    // avoid overwriting rich output with DB-loaded versions that may be
+    // incomplete (race with server-side onFinish persistence) or serialized
+    // differently.
+    void refreshThreadHistory(activeSessionId, lastMessage.id, {
+      skipMessageUpdate: true,
+    });
   }, [
     getCurrentMessages,
     invalidateThreadQueries,

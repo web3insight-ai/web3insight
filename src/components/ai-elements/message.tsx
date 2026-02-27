@@ -2,7 +2,12 @@
 
 import type { UIMessage } from "ai";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
-import type { ComponentProps, HTMLAttributes, ReactElement } from "react";
+import type {
+  ComponentProps,
+  ComponentType,
+  HTMLAttributes,
+  ReactElement,
+} from "react";
 import {
   createContext,
   memo,
@@ -18,8 +23,18 @@ import { ShadcnButton as Button } from "@/components/ui/shadcn-button";
 import { Tooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
+import { EntityLink } from "@/app/copilot/_components/chat-shell/components/message/message-parts/entity-link";
 import { streamdownStreamingAnimation } from "./streamdown-animation";
 import { streamdownPlugins } from "./streamdown-plugins";
+
+// Reason: Override the default <a> renderer in Streamdown so that entity links
+// (e.g. /developer/pseudoyu) become interactive with hover preview cards,
+// while external links get a standard external-link treatment.
+// Cast required because Streamdown's Components type uses a broad index signature
+// that doesn't narrow correctly for known element keys like "a".
+const streamdownComponents = {
+  a: EntityLink as unknown as ComponentType<Record<string, unknown>>,
+};
 
 export type MessageProps = HTMLAttributes<HTMLDivElement> & {
   from: UIMessage["role"];
@@ -333,6 +348,8 @@ export const MessageResponse = memo(
           "size-full break-words [&>*:first-child]:mt-0 [&>*:last-child]:mb-0",
           className,
         )}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        components={streamdownComponents as any}
         plugins={streamdownPlugins}
         {...props}
       />

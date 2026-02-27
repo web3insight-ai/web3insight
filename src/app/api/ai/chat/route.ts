@@ -54,7 +54,19 @@ Use the available tools to fetch accurate statistics before answering questions.
 - When asked about a developer, provide comprehensive profile info
 
 Available ecosystems: Ethereum, Solana, NEAR, OpenBuild, Starknet, and more.
-Use "ALL" for global statistics across all ecosystems.`;
+Use "ALL" for global statistics across all ecosystems.
+
+## Entity Linking:
+When mentioning developers, ecosystems, or repositories in your response text, use markdown links so the UI can make them interactive:
+- Developers: [username](/developer/username) e.g. [pseudoyu](/developer/pseudoyu)
+- Ecosystems: [Ecosystem Name](/ecosystem/Name) e.g. [Ethereum](/ecosystem/Ethereum)
+- Repositories: [owner/repo](/repository/owner/repo) e.g. [ethereum/go-ethereum](/repository/ethereum/go-ethereum)
+
+## Response Formatting:
+- The UI automatically renders rich visualizations for tool results (charts, tables, cards)
+- Keep your text commentary concise — focus on insights and analysis, not repeating raw numbers
+- Highlight key findings and notable trends
+- Use entity links when referencing specific developers, ecosystems, or repositories`;
 
 export const maxDuration = 60;
 
@@ -238,25 +250,34 @@ interface CoreContentPart {
   toolName?: string;
   args?: unknown;
   input?: unknown;
-  result?: unknown;
+  output?: unknown;
 }
 
+// Reason: UIPart uses the AI SDK v6 format so that `getToolName()` and
+// `isToolUIPart()` from the `ai` package work correctly. The key insight
+// is that tool parts must have `type: "tool-<NAME>"` (not "tool-invocation")
+// and use `state`/`output` (not `toolInvocation.state`/`result`).
 type UIPart =
   | { type: "text"; text: string }
-  | { type: "tool-invocation"; toolInvocation: ToolInvocation };
+  | {
+      type: `tool-${string}`;
+      toolCallId: string;
+      input: unknown;
+      state: "input-available" | "output-available" | "output-error";
+      output?: unknown;
+    };
 
-interface ToolInvocation {
-  toolCallId: string;
+// Reason: Track pending tool calls so tool-result messages can fill in output
+interface PendingToolCall {
   toolName: string;
-  args: unknown;
-  state: "call" | "result";
-  result?: unknown;
+  toolCallId: string;
+  input: unknown;
+  partIndex: number;
 }
 
 function coreMessagesToUIParts(messages: CoreMessage[]): UIPart[] {
   const parts: UIPart[] = [];
-  // Reason: Collect tool invocations first so tool-result messages can update them
-  const toolInvocations = new Map<string, ToolInvocation>();
+  const pendingTools = new Map<string, PendingToolCall>();
 
   for (const msg of messages) {
     if (msg.role === "assistant") {
@@ -268,24 +289,35 @@ function coreMessagesToUIParts(messages: CoreMessage[]): UIPart[] {
         if (part.type === "text" && part.text) {
           parts.push({ type: "text", text: part.text });
         } else if (part.type === "tool-call" && part.toolCallId) {
-          const invocation: ToolInvocation = {
+          const toolName = part.toolName ?? "unknown";
+          const toolPart: UIPart = {
+            type: `tool-${toolName}`,
             toolCallId: part.toolCallId,
-            toolName: part.toolName ?? "unknown",
-            args: part.args ?? part.input ?? {},
-            state: "call",
+            input: part.args ?? part.input ?? {},
+            state: "input-available",
           };
-          toolInvocations.set(part.toolCallId, invocation);
-          parts.push({ type: "tool-invocation", toolInvocation: invocation });
+          pendingTools.set(part.toolCallId, {
+            toolName,
+            toolCallId: part.toolCallId,
+            input: toolPart.input,
+            partIndex: parts.length,
+          });
+          parts.push(toolPart);
         }
       }
     } else if (msg.role === "tool") {
       const content = Array.isArray(msg.content) ? msg.content : [];
       for (const part of content) {
         if (part.type === "tool-result" && part.toolCallId) {
-          const invocation = toolInvocations.get(part.toolCallId);
-          if (invocation) {
-            invocation.state = "result";
-            invocation.result = part.result;
+          const pending = pendingTools.get(part.toolCallId);
+          if (pending) {
+            // Reason: Mutate the existing part in-place to update state + output
+            const existingPart = parts[pending.partIndex] as UIPart & {
+              state: string;
+              output?: unknown;
+            };
+            existingPart.state = "output-available";
+            existingPart.output = part.output;
           }
         }
       }

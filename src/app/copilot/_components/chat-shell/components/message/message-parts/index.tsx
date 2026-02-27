@@ -1,12 +1,15 @@
-import { useMemo } from "react";
+import { Fragment, Suspense, useMemo } from "react";
 
 import { MessageResponse } from "@/components/ai-elements/message";
 import type { CopilotUIMessage } from "~/ai/copilot-types";
 
 import { createStablePartKey } from "./create-stable-part-key";
+import { isToolLikePart, normalizeToolPart } from "./normalize-tool-part";
 import { ReasoningSection } from "./reasoning-section";
 import { SourcesSection } from "./sources-section";
-import { isToolLikePart, ToolPartCard } from "./tool-part-card";
+import { ToolPartCard } from "./tool-part-card";
+import { getToolResultRenderer } from "./tool-result-renderers";
+import { ChartLoadingSkeleton } from "./tool-result-renderers/chart-loading-skeleton";
 
 interface CopilotMessagePartsProps {
   message: CopilotUIMessage;
@@ -87,14 +90,38 @@ export function CopilotMessageParts({
         }
 
         if (isToolLikePart(part)) {
+          const normalized = normalizeToolPart(part);
+          const stableKey = createStablePartKey(
+            `${message.id}-tool-${normalized.toolName}-${normalized.toolCallId}-${normalized.state}`,
+            seenToolKeys,
+          );
+
+          const isComplete = normalized.state === "output-available";
+          const isError =
+            normalized.state === "output-error" ||
+            normalized.state === "output-denied";
+
+          const ResultRenderer = getToolResultRenderer(normalized.toolName);
+          const hasRichResult = isComplete && ResultRenderer !== null;
+
+          // Reason: UX flow:
+          // - Running/pending → show compact loading card
+          // - Error/denied → show card with error badge
+          // - Complete + has renderer → show ONLY the inline visualization
+          // - Complete + no renderer → render nothing (data is in AI text)
           return (
-            <ToolPartCard
-              key={createStablePartKey(
-                `${message.id}-tool-${part.type}-${String(part.toolCallId ?? "")}-${part.state}`,
-                seenToolKeys,
+            <Fragment key={stableKey}>
+              {(!isComplete || isError) && (
+                <ToolPartCard normalized={normalized} />
               )}
-              part={part}
-            />
+              {hasRichResult && (
+                <div className="mb-3 max-w-[600px]">
+                  <Suspense fallback={<ChartLoadingSkeleton />}>
+                    <ResultRenderer data={normalized.output} />
+                  </Suspense>
+                </div>
+              )}
+            </Fragment>
           );
         }
 
