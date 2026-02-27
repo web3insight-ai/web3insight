@@ -317,7 +317,11 @@ function CountryDistributionChart({
                 percentValue?: number;
               };
               const percentValue = point?.percentValue ?? 0;
-              return `<div style="text-align:center;font-size:11px;color:#1f2937;">${point?.name}<br /><span style="color:#6b7280;">${percentValue}%</span></div>`;
+              const isDark =
+                document.documentElement.getAttribute("data-theme") === "dark";
+              const textColor = isDark ? "#e5e7eb" : "#1f2937";
+              const subColor = isDark ? "#9ca3af" : "#6b7280";
+              return `<div style="text-align:center;font-size:11px;color:${textColor};">${point?.name}<br /><span style="color:${subColor};">${percentValue}%</span></div>`;
             },
           },
           states: {
@@ -387,7 +391,7 @@ function CountryDistributionChart({
             />
           </div>
           <div className="w-full lg:w-[360px] xl:w-[380px]">
-            <div className="border border-gray-200 dark:border-gray-800 rounded-xl p-4 bg-gray-50 dark:bg-gray-900 h-full flex flex-col">
+            <div className="border border-border dark:border-border-dark rounded-xl p-4 bg-surface dark:bg-surface-elevated h-full flex flex-col">
               {pieSeriesData.length ? (
                 <>
                   <div className="flex items-center justify-between mb-4">
