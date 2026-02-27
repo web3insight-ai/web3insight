@@ -26,6 +26,11 @@ export const env = createEnv({
       .pipe(z.number().positive())
       .default("30000"),
 
+    // Copilot database (PostgreSQL connection strings)
+    // Reason: Write connection uses admin account, read connection uses read-only account
+    COPILOT_DATABASE_URL: z.string().url().optional(),
+    COPILOT_DATABASE_WRITE_URL: z.string().url().optional(),
+
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -56,6 +61,8 @@ export const env = createEnv({
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     OPENAI_MODEL: process.env.OPENAI_MODEL,
     HTTP_TIMEOUT: process.env.HTTP_TIMEOUT,
+    COPILOT_DATABASE_URL: process.env.COPILOT_DATABASE_URL,
+    COPILOT_DATABASE_WRITE_URL: process.env.COPILOT_DATABASE_WRITE_URL,
     NODE_ENV: process.env.NODE_ENV,
 
     // Client vars

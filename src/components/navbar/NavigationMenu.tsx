@@ -7,6 +7,7 @@ import {
   Database,
   Warehouse,
   Users,
+  Bot,
   Brain,
   ChevronDown,
   Layers,
@@ -53,6 +54,7 @@ const navigationGroups: NavGroup[] = [
       { name: "EventInsight", href: "/events", icon: Calendar },
       { name: "DevInsight", href: "/devinsight", icon: Brain },
       { name: "Report", href: "/report", icon: FileBarChart },
+      { name: "Copilot", href: "/copilot", icon: Bot },
     ],
   },
   {
@@ -87,25 +89,23 @@ function NavDropdown({ group, index }: { group: NavGroup; index: number }) {
       transition={{ delay: index * 0.05, duration: 0.3 }}
     >
       <Popover isOpen={isOpen} onOpenChange={setIsOpen}>
-        <PopoverTrigger>
-          <button
+        <PopoverTrigger
+          className={clsx(
+            "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer",
+            isGroupActive
+              ? "bg-primary/10 text-primary"
+              : "text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50",
+          )}
+        >
+          <GroupIcon size={14} />
+          <span className="hidden lg:inline">{group.name}</span>
+          <ChevronDown
+            size={12}
             className={clsx(
-              "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200",
-              isGroupActive
-                ? "bg-primary/10 text-primary"
-                : "text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50",
+              "hidden lg:inline transition-transform duration-200",
+              isOpen && "rotate-180",
             )}
-          >
-            <GroupIcon size={14} />
-            <span className="hidden lg:inline">{group.name}</span>
-            <ChevronDown
-              size={12}
-              className={clsx(
-                "hidden lg:inline transition-transform duration-200",
-                isOpen && "rotate-180",
-              )}
-            />
-          </button>
+          />
         </PopoverTrigger>
         <PopoverContent
           className="p-1.5 min-w-[180px]"
