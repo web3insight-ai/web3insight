@@ -20,11 +20,15 @@ const nextConfig: NextConfig = {
       "recharts",
       "framer-motion",
       "date-fns",
+      "@json-render/react",
     ],
   },
 
   // External packages that should not be bundled by server components
   // This helps with pino, WalletConnect, and other Node.js-specific modules
+  // Reason: kysely + pg are used by copilot DB (server-only). @json-render/core
+  // is used by pipeJsonRender in the chat route. Externalizing them avoids
+  // webpack processing their dependency trees, reducing peak memory.
   serverExternalPackages: [
     "pino",
     "pino-pretty",
@@ -32,6 +36,9 @@ const nextConfig: NextConfig = {
     "sonic-boom",
     "fastbench",
     "encoding",
+    "kysely",
+    "pg",
+    "@json-render/core",
   ],
 
   // Turbopack configuration
@@ -41,7 +48,8 @@ const nextConfig: NextConfig = {
     // Use --webpack flag for production builds if needed
   },
 
-  // Keep webpack config for backward compatibility when using --webpack flag
+  // Reason: Webpack config kept for backward compatibility when using --webpack flag.
+  // Default production build uses Turbopack (next build without --webpack).
   webpack: (config, { isServer, webpack }) => {
     config.resolve.fallback = {
       ...config.resolve.fallback,

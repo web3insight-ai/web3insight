@@ -8,8 +8,8 @@
   "packageManager": "pnpm@10.29.3",
   "scripts": {
     "env": "node .knosys/scripts env",
-    "build": "next build --webpack",
-    "build:turbo": "next build",
+    "build": "next build",
+    "build:webpack": "next build --webpack",
     "predev": "npm run env",
     "dev": "next dev --turbopack",
     "lint": "eslint .",

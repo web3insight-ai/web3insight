@@ -55,8 +55,11 @@ ENV NEXT_PUBLIC_PRIVY_APP_ID=${NEXT_PUBLIC_PRIVY_APP_ID}
 ENV NEXT_PUBLIC_UMAMI_WEBSITE_ID=${NEXT_PUBLIC_UMAMI_WEBSITE_ID}
 
 # Build the application
-# Reason: copilot dependencies (streamdown, motion, etc.) push webpack past the default 4GB heap
-ENV NODE_OPTIONS="--max-old-space-size=8192"
+# Reason: Turbopack is used for production builds (Next.js 16). The webpack
+# bundler hits cssnano RangeError on the large Tailwind CSS v4 output from
+# streamdown's @source directive. Turbopack avoids this entirely and uses
+# less memory. The 4GB heap is a safety margin for the CI runner.
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN pnpm build
 
 # Stage 3: Production image
