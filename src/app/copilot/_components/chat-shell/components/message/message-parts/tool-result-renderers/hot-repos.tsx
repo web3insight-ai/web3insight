@@ -64,7 +64,7 @@ export default function HotReposResult({ data }: { data: unknown }) {
 
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-border/40 text-left text-xs text-muted-foreground dark:border-border-dark/40">
+          <tr className="border-b border-gray-100/80 text-left text-xs text-muted-foreground dark:border-white/[0.04]">
             <th className="pb-2 pr-2 font-medium">#</th>
             <th className="pb-2 pr-2 font-medium">Repository</th>
             <th className="pb-2 pr-2 text-right font-medium">Stars</th>
@@ -75,7 +75,7 @@ export default function HotReposResult({ data }: { data: unknown }) {
           {hotRepositories.map((repo) => (
             <tr
               key={repo.rank}
-              className="border-b border-border/40 last:border-0 hover:bg-muted/30 dark:border-border-dark/40"
+              className="border-b border-gray-100/80 last:border-0 dark:border-white/[0.04]"
             >
               <td className="py-2 pr-2 text-muted-foreground">{repo.rank}</td>
               <td className="py-2 pr-2">

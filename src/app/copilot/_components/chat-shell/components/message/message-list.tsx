@@ -1,4 +1,5 @@
 import type { ChatStatus } from "ai";
+import { ArrowRightIcon } from "lucide-react";
 import { useAtomValue } from "jotai";
 import { ConversationEmptyState } from "@/components/ai-elements/conversation";
 import {
@@ -6,7 +7,6 @@ import {
   MessageBranchContent,
 } from "@/components/ai-elements/message";
 import { Shimmer } from "@/components/ai-elements/shimmer";
-import { ShadcnButton as Button } from "@/components/ui/shadcn-button";
 import type { CopilotUIMessage } from "~/ai/copilot-types";
 import { STARTER_PROMPT_CARDS } from "../../constants";
 import { useCopilotActions } from "../../state/actions";
@@ -29,46 +29,27 @@ export function CopilotMessageList({
 
   if (messages.length === 0 && sessionId === null) {
     return (
-      <ConversationEmptyState className="mx-auto my-auto w-full max-w-3xl min-h-0 h-full gap-5 p-0 justify-center items-center">
-        <div className="w-full pb-4 text-center">
-          <div className="flex w-full flex-col justify-center px-8">
-            <p className="text-2xl font-semibold text-foreground dark:text-foreground-dark">
-              Hello there!
-            </p>
-            <p className="mt-1 text-base text-muted-foreground">
-              How can I help you today?
-            </p>
-          </div>
+      <ConversationEmptyState className="mx-auto my-auto w-full max-w-xl min-h-0 h-full gap-8 p-0 justify-center items-center">
+        <div className="w-full text-center">
+          <p className="text-lg font-medium text-foreground dark:text-foreground-dark">
+            What would you like to explore?
+          </p>
         </div>
 
-        <div className="grid w-full gap-2 pb-4 md:grid-cols-2">
-          {STARTER_PROMPT_CARDS.map((prompt) => {
-            const Icon = prompt.icon;
-
-            return (
-              <div
-                key={prompt.action}
-                className="[&:nth-child(n+3)]:hidden md:[&:nth-child(n+3)]:block"
-              >
-                <Button
-                  variant="ghost"
-                  className="h-auto w-full items-start justify-start gap-3 rounded-lg border border-border bg-white px-4 py-3 text-left text-sm shadow-subtle hover:bg-accent dark:border-border-dark dark:bg-surface-dark dark:text-foreground-dark dark:hover:bg-surface-elevated"
-                  onClick={() => {
-                    actions.sendStarterPrompt(prompt.action);
-                  }}
-                  aria-label={prompt.action}
-                >
-                  <Icon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                  <div className="flex min-w-0 flex-col gap-0.5">
-                    <span className="font-medium">{prompt.title}</span>
-                    <span className="text-muted-foreground">
-                      {prompt.label}
-                    </span>
-                  </div>
-                </Button>
-              </div>
-            );
-          })}
+        <div className="flex w-full flex-wrap justify-center gap-2">
+          {STARTER_PROMPT_CARDS.map((prompt) => (
+            <button
+              key={prompt.action}
+              type="button"
+              className="group inline-flex items-center gap-1.5 rounded-full bg-gray-50 px-3.5 py-2 text-[13px] text-gray-600 transition-all hover:bg-teal-50 hover:text-teal-700 dark:bg-white/[0.06] dark:text-gray-400 dark:hover:bg-teal-500/10 dark:hover:text-teal-400"
+              onClick={() => {
+                actions.sendStarterPrompt(prompt.action);
+              }}
+            >
+              {prompt.label}
+              <ArrowRightIcon className="size-3 opacity-0 -translate-x-1 transition-all group-hover:opacity-100 group-hover:translate-x-0" />
+            </button>
+          ))}
         </div>
       </ConversationEmptyState>
     );

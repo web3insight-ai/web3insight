@@ -74,7 +74,7 @@ function AvatarImage({ avatar, name }: { avatar: string; name: string }) {
 
   if (!avatar) {
     return (
-      <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400">
+      <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-teal-100 text-sm font-bold text-teal-600 dark:bg-teal-500/20 dark:text-teal-400">
         {initial}
       </div>
     );

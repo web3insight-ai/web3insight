@@ -60,11 +60,11 @@ export default function PlatformOverviewResult({ data }: { data: unknown }) {
         {METRICS.map((metric) => (
           <div
             key={metric.label}
-            className="rounded-lg border border-border/40 bg-muted/20 p-3 dark:border-border-dark/40 dark:bg-muted/10"
+            className="rounded-lg bg-white p-3 dark:bg-white/[0.04]"
           >
             <div className="flex items-center gap-2">
-              <div className="rounded-lg bg-indigo-50 p-1.5 dark:bg-indigo-500/10">
-                <metric.Icon className="size-4 text-indigo-600 dark:text-indigo-400" />
+              <div className="rounded-lg bg-teal-50 p-1.5 dark:bg-teal-500/10">
+                <metric.Icon className="size-4 text-teal-600 dark:text-teal-400" />
               </div>
               <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 {metric.label}

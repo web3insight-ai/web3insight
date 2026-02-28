@@ -1,11 +1,15 @@
 import {
   streamText,
   convertToModelMessages,
+  createUIMessageStreamResponse,
+  readUIMessageStream,
   stepCountIs,
   type UIMessage,
 } from "ai";
+import { pipeJsonRender } from "@json-render/core";
 import { getModel } from "~/ai/repository/client";
 import { web3InsightTools } from "~/ai/tools";
+import { WEB3_JSON_RENDER_PROMPT } from "@/lib/json-render/catalog-prompt";
 import { getCopilotWriteDb } from "@/lib/db/copilot-db";
 import { isCopilotDbReady } from "@/lib/db/copilot-init";
 import { getCopilotUserId } from "@/lib/auth/copilot-auth";
@@ -66,7 +70,15 @@ When mentioning developers, ecosystems, or repositories in your response text, u
 - The UI automatically renders rich visualizations for tool results (charts, tables, cards)
 - Keep your text commentary concise — focus on insights and analysis, not repeating raw numbers
 - Highlight key findings and notable trends
-- Use entity links when referencing specific developers, ecosystems, or repositories`;
+- Use entity links when referencing specific developers, ecosystems, or repositories
+
+## Advanced Data Queries
+For questions that existing tools cannot answer (custom time ranges, cross-ecosystem comparisons,
+event type breakdowns, developer activity patterns, ad-hoc aggregations), use queryWeb3Data.
+The sub-agent will generate and execute SQL against the analytics database.
+
+## Data Visualization
+${WEB3_JSON_RENDER_PROMPT}`;
 
 export const maxDuration = 60;
 
@@ -108,20 +120,35 @@ export async function POST(request: Request) {
     messages: modelMessages,
     tools: web3InsightTools,
     stopWhen: stepCountIs(5),
-    onFinish: async ({ response }) => {
-      if (!sessionId) {
-        return;
-      }
-
-      try {
-        await persistAssistantMessage(sessionId, messages, response, userId);
-      } catch (error) {
-        console.error("Failed to persist assistant message:", error);
-      }
-    },
   });
 
-  return result.toUIMessageStreamResponse();
+  // Reason: originalMessages + generateMessageId are REQUIRED for persistence.
+  // Without them, the SDK assigns message.id = "" (empty string), and the
+  // ON CONFLICT DO NOTHING clause silently skips every insert after the first.
+  const uiStream = result.toUIMessageStream({
+    sendReasoning: false,
+    sendSources: false,
+    originalMessages: sessionId ? messages : undefined,
+    generateMessageId: sessionId ? () => crypto.randomUUID() : undefined,
+  });
+
+  // Reason: pipeJsonRender transforms the raw UIMessage stream so that JSONL
+  // spec patches emitted by the LLM are converted into data-spec parts that
+  // the client can render via <CopilotJsonRenderer>.
+  const transformedStream = pipeJsonRender(uiStream);
+
+  if (sessionId) {
+    // Reason: We tee the TRANSFORMED stream so that the persisted UIMessage
+    // contains data-spec parts (not raw ```spec fences). The onFinish callback
+    // fires pre-transform and would persist raw JSONL text instead.
+    const [clientStream, persistStream] = transformedStream.tee();
+
+    void persistAssistantFromStream(persistStream, sessionId, messages, userId);
+
+    return createUIMessageStreamResponse({ stream: clientStream });
+  }
+
+  return createUIMessageStreamResponse({ stream: transformedStream });
 }
 
 /**
@@ -179,14 +206,48 @@ async function persistUserMessage(
 }
 
 /**
- * Persist the assistant response after streaming completes.
- * Reason: Converts CoreMessage[] from the model response into UIMessage parts
- * format so that history loads render correctly (markdown, tool cards, etc.).
+ * Consume the tee'd persist stream to build the post-transform UIMessage,
+ * then persist it. Runs as a background task alongside the client stream.
+ *
+ * Reason: We must persist from the post-pipeJsonRender stream so that
+ * data-spec parts (charts/tables) are included in the stored UIMessage.
+ * The onFinish callback fires pre-transform and would store raw ```spec fences.
+ */
+async function persistAssistantFromStream(
+  persistStream: ReadableStream<unknown>,
+  sessionId: string,
+  originalMessages: UIMessage[],
+  userId: string | null,
+): Promise<void> {
+  try {
+    let responseMessage: UIMessage | null = null;
+
+    for await (const msg of readUIMessageStream({
+      stream: persistStream as ReadableStream,
+    })) {
+      responseMessage = msg;
+    }
+
+    if (responseMessage) {
+      await persistAssistantMessage(
+        sessionId,
+        originalMessages,
+        responseMessage,
+        userId,
+      );
+    }
+  } catch (error) {
+    console.error("Failed to persist assistant message:", error);
+  }
+}
+
+/**
+ * Persist the assistant response to the database.
  */
 async function persistAssistantMessage(
   sessionId: string,
   originalMessages: UIMessage[],
-  response: { messages: Array<CoreMessage> },
+  responseMessage: UIMessage,
   userId: string | null,
 ): Promise<void> {
   const dbReady = await isCopilotDbReady();
@@ -196,23 +257,14 @@ async function persistAssistantMessage(
   const lastUserMessage = findLastMessageByRole(originalMessages, "user");
   const parentId = lastUserMessage?.id ?? null;
 
-  const assistantId = crypto.randomUUID();
-  const parts = coreMessagesToUIParts(response.messages);
-
-  const assistantMessage = {
-    id: assistantId,
-    role: "assistant" as const,
-    parts,
-  };
-
   await db
     .insertInto("api.copilot_messages")
     .values({
-      message_id: assistantId,
+      message_id: responseMessage.id,
       session_id: sessionId,
       parent_id: parentId,
       role: "assistant",
-      ui_message: JSON.stringify(assistantMessage),
+      ui_message: JSON.stringify(responseMessage),
       created_at: new Date(),
     })
     .onConflict((oc) => oc.column("message_id").doNothing())
@@ -231,100 +283,6 @@ async function persistAssistantMessage(
   }
 
   await sessionUpdate.execute();
-}
-
-/**
- * Convert CoreMessage[] (model response) to UIMessage parts array.
- * Reason: The AI SDK returns model-format messages (role + content array),
- * but the client expects UIMessage parts (text, tool-invocation, etc.).
- */
-interface CoreMessage {
-  role: string;
-  content: string | Array<CoreContentPart>;
-}
-
-interface CoreContentPart {
-  type: string;
-  text?: string;
-  toolCallId?: string;
-  toolName?: string;
-  args?: unknown;
-  input?: unknown;
-  output?: unknown;
-}
-
-// Reason: UIPart uses the AI SDK v6 format so that `getToolName()` and
-// `isToolUIPart()` from the `ai` package work correctly. The key insight
-// is that tool parts must have `type: "tool-<NAME>"` (not "tool-invocation")
-// and use `state`/`output` (not `toolInvocation.state`/`result`).
-type UIPart =
-  | { type: "text"; text: string }
-  | {
-      type: `tool-${string}`;
-      toolCallId: string;
-      input: unknown;
-      state: "input-available" | "output-available" | "output-error";
-      output?: unknown;
-    };
-
-// Reason: Track pending tool calls so tool-result messages can fill in output
-interface PendingToolCall {
-  toolName: string;
-  toolCallId: string;
-  input: unknown;
-  partIndex: number;
-}
-
-function coreMessagesToUIParts(messages: CoreMessage[]): UIPart[] {
-  const parts: UIPart[] = [];
-  const pendingTools = new Map<string, PendingToolCall>();
-
-  for (const msg of messages) {
-    if (msg.role === "assistant") {
-      const content = Array.isArray(msg.content)
-        ? msg.content
-        : [{ type: "text", text: String(msg.content) }];
-
-      for (const part of content) {
-        if (part.type === "text" && part.text) {
-          parts.push({ type: "text", text: part.text });
-        } else if (part.type === "tool-call" && part.toolCallId) {
-          const toolName = part.toolName ?? "unknown";
-          const toolPart: UIPart = {
-            type: `tool-${toolName}`,
-            toolCallId: part.toolCallId,
-            input: part.args ?? part.input ?? {},
-            state: "input-available",
-          };
-          pendingTools.set(part.toolCallId, {
-            toolName,
-            toolCallId: part.toolCallId,
-            input: toolPart.input,
-            partIndex: parts.length,
-          });
-          parts.push(toolPart);
-        }
-      }
-    } else if (msg.role === "tool") {
-      const content = Array.isArray(msg.content) ? msg.content : [];
-      for (const part of content) {
-        if (part.type === "tool-result" && part.toolCallId) {
-          const pending = pendingTools.get(part.toolCallId);
-          if (pending) {
-            // Reason: Mutate the existing part in-place to update state + output
-            const existingPart = parts[pending.partIndex] as UIPart & {
-              state: string;
-              output?: unknown;
-            };
-            existingPart.state = "output-available";
-            existingPart.output = part.output;
-          }
-        }
-      }
-    }
-  }
-
-  return parts;
 }
 
 /**

@@ -63,10 +63,12 @@ export function CopilotMessageItem({
       return isToolUIPart(part);
     });
   }, [message.parts]);
+  // Reason: Show shimmer as soon as the message is submitted (before streaming starts)
+  // so the user sees immediate feedback after sending a message.
   const shouldShowGeneratingShimmer =
     !isUserMessage &&
     isLastMessage &&
-    status === "streaming" &&
+    (status === "streaming" || status === "submitted") &&
     !hasDisplayableParts;
 
   const handleBeginEdit = useCallback(() => {
@@ -117,10 +119,10 @@ export function CopilotMessageItem({
     message.id,
   ]);
 
-  // Reason: Override the base MessageContent's group-[.is-user]:bg-secondary (indigo #6366F1)
-  // with a neutral dark bubble matching the dashboard's color system.
+  // Reason: Override the base MessageContent's group-[.is-user]:bg-secondary (indigo)
+  // with a neutral soft bubble matching the site's minimal design system.
   const userBubbleOverride =
-    "group-[.is-user]:bg-gray-900 group-[.is-user]:text-white group-[.is-user]:dark:bg-surface-dark group-[.is-user]:dark:border group-[.is-user]:dark:border-border-dark";
+    "group-[.is-user]:bg-gray-100 group-[.is-user]:text-gray-700 group-[.is-user]:dark:bg-white/[0.06] group-[.is-user]:dark:text-gray-200";
 
   // Reason: MessageContent hardcodes group-[.is-assistant]:text-foreground (#000000).
   // In dark mode this makes text invisible on dark backgrounds. Use !important to override.

@@ -66,21 +66,56 @@ export default function EcosystemComparisonResult({ data }: { data: unknown }) {
 
       <ResponsiveContainer width="100%" height={250}>
         <BarChart data={comparison}>
-          <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-          <XAxis dataKey="ecosystem" />
-          <YAxis />
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke="rgba(0,0,0,0.06)"
+            vertical={false}
+          />
+          <XAxis
+            dataKey="ecosystem"
+            fontSize={11}
+            tickLine={false}
+            axisLine={false}
+            tick={{ fill: "#9ca3af" }}
+          />
+          <YAxis
+            fontSize={11}
+            tickLine={false}
+            axisLine={false}
+            tick={{ fill: "#9ca3af" }}
+          />
           <Tooltip
             contentStyle={{
-              backgroundColor: "var(--color-surface-dark, #1f2937)",
-              border: "1px solid rgba(255,255,255,0.1)",
+              backgroundColor: "rgba(255, 255, 255, 0.95)",
+              border: "1px solid rgba(0, 0, 0, 0.08)",
               borderRadius: "8px",
-              color: "#f3f4f6",
+              color: "#374151",
+              fontSize: "12px",
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06)",
             }}
           />
-          <Legend />
-          <Bar dataKey="developers" fill="#6366f1" name="Developers" />
-          <Bar dataKey="coreDevelopers" fill="#8b5cf6" name="Core Devs" />
-          <Bar dataKey="repositories" fill="#06b6d4" name="Repositories" />
+          <Legend
+            iconSize={8}
+            wrapperStyle={{ fontSize: "11px", color: "#9ca3af" }}
+          />
+          <Bar
+            dataKey="developers"
+            fill="#0d9488"
+            name="Developers"
+            radius={[3, 3, 0, 0]}
+          />
+          <Bar
+            dataKey="coreDevelopers"
+            fill="#14b8a6"
+            name="Core Devs"
+            radius={[3, 3, 0, 0]}
+          />
+          <Bar
+            dataKey="repositories"
+            fill="#10b981"
+            name="Repositories"
+            radius={[3, 3, 0, 0]}
+          />
         </BarChart>
       </ResponsiveContainer>
 

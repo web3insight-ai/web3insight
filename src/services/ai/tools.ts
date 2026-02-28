@@ -634,4 +634,29 @@ export const web3InsightTools = {
       };
     },
   }),
+
+  // --------------------------------------------------------------------------
+  // Direct Database Queries (DB Sub-Agent)
+  // --------------------------------------------------------------------------
+
+  queryWeb3Data: tool({
+    description:
+      "Query the Web3Insight analytics database directly for custom data analysis. " +
+      "Use for: custom time ranges, cross-ecosystem comparisons, event type breakdowns, " +
+      "developer activity patterns, JSONB field analysis, ad-hoc aggregations. " +
+      "Not for queries the other specific tools can answer.",
+    inputSchema: z.object({
+      context: z
+        .string()
+        .describe("Brief conversation context for the sub-agent"),
+      question: z.string().describe("The specific data question to answer"),
+    }),
+    execute: async ({ context, question }) => {
+      // Reason: Dynamic import avoids loading DB/Kysely code at module level
+      // when this tool is not invoked, keeping cold starts fast.
+      const { executeSubAgentQuery } =
+        await import("~/ai/db-sub-agent/execute-sub-agent");
+      return executeSubAgentQuery({ context, question });
+    },
+  }),
 };

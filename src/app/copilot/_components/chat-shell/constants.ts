@@ -1,29 +1,32 @@
-import { BarChart3Icon, GlobeIcon, SearchIcon, UsersIcon } from "lucide-react";
-
 export const STARTER_PROMPT_CARDS = [
   {
-    title: "Compare ecosystems",
-    label: "Ethereum vs Solana",
-    action: "Compare Ethereum and Solana developer ecosystems",
-    icon: GlobeIcon,
+    label: "Ethereum developer growth trend",
+    action:
+      "Show me a line chart of monthly active developers for Ethereum over the past 12 months",
   },
   {
-    title: "Platform overview",
-    label: "Web3 at a glance",
-    action: "Show me the Web3 platform overview with ecosystem rankings",
-    icon: BarChart3Icon,
+    label: "Ethereum vs Solana comparison",
+    action:
+      "Compare monthly commit activity between Ethereum and Solana in a bar chart",
   },
   {
-    title: "Developer profile",
-    label: "contributions & activity",
-    action: "Analyze pseudoyu's developer profile and top contributions",
-    icon: SearchIcon,
+    label: "Top repos by stars",
+    action:
+      "List the top 15 repositories by star count with their ecosystems in a table",
   },
   {
-    title: "Hot this week",
-    label: "repos & contributors",
-    action: "What are the hottest repositories and top contributors this week?",
-    icon: UsersIcon,
+    label: "Developer geographic distribution",
+    action:
+      "Show a pie chart of the geographic distribution of Web3 developers by country",
+  },
+  {
+    label: "Analyze pseudoyu's profile",
+    action: "Show me pseudoyu's developer profile with contribution stats",
+  },
+  {
+    label: "Hot repos this week",
+    action:
+      "What are the hottest repositories this week by developer activity?",
   },
 ] as const;
 

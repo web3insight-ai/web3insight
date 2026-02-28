@@ -54,27 +54,44 @@ export default function ContributorTrendResult({ data }: { data: unknown }) {
 
       <ResponsiveContainer width="100%" height={250}>
         <ComposedChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-          <XAxis dataKey="date" fontSize={11} />
-          <YAxis fontSize={11} />
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke="rgba(0,0,0,0.06)"
+            vertical={false}
+          />
+          <XAxis
+            dataKey="date"
+            fontSize={11}
+            tickLine={false}
+            axisLine={false}
+            tick={{ fill: "#9ca3af" }}
+          />
+          <YAxis
+            fontSize={11}
+            tickLine={false}
+            axisLine={false}
+            tick={{ fill: "#9ca3af" }}
+          />
           <Tooltip
             contentStyle={{
-              backgroundColor: "var(--color-surface-dark, #1f2937)",
-              border: "1px solid rgba(255,255,255,0.1)",
+              backgroundColor: "rgba(255, 255, 255, 0.95)",
+              border: "1px solid rgba(0, 0, 0, 0.08)",
               borderRadius: "8px",
-              color: "#f3f4f6",
+              color: "#374151",
+              fontSize: "12px",
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06)",
             }}
           />
           <Bar
             dataKey="total"
-            fill="#6366f1"
+            fill="#0d9488"
             fillOpacity={0.3}
-            radius={[2, 2, 0, 0]}
+            radius={[3, 3, 0, 0]}
           />
           <Line
             type="monotone"
             dataKey="total"
-            stroke="#6366f1"
+            stroke="#0d9488"
             strokeWidth={2}
             dot={false}
           />

@@ -100,7 +100,7 @@ export function ToolResultCard({
   return (
     <div
       className={cn(
-        "mt-2 rounded-xl border border-border/60 bg-white p-4 dark:border-border-dark/60 dark:bg-surface-dark/50",
+        "mt-2 rounded-xl bg-gray-50/80 p-4 dark:bg-white/[0.03]",
         className,
       )}
     >

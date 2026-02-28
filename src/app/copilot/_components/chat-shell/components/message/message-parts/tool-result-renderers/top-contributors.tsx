@@ -62,7 +62,7 @@ export default function TopContributorsResult({ data }: { data: unknown }) {
         {topContributors.map((contributor) => (
           <div
             key={contributor.rank}
-            className="flex items-center gap-3 border-b border-border/40 py-2.5 last:border-0 hover:bg-muted/30 dark:border-border-dark/40"
+            className="flex items-center gap-3 border-b border-gray-100/80 py-2.5 last:border-0 dark:border-white/[0.04]"
           >
             <span className="flex size-6 items-center justify-center rounded-full bg-muted/50 text-xs font-medium">
               {contributor.rank}

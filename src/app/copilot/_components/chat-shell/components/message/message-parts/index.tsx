@@ -1,8 +1,13 @@
 import { Fragment, Suspense, useMemo } from "react";
 
+import { SPEC_DATA_PART_TYPE } from "@json-render/core";
+import { useJsonRenderMessage } from "@json-render/react";
+import type { DataPart } from "@json-render/react";
+
 import { MessageResponse } from "@/components/ai-elements/message";
 import type { CopilotUIMessage } from "~/ai/copilot-types";
 
+import { CopilotJsonRenderer } from "./copilot-json-renderer";
 import { createStablePartKey } from "./create-stable-part-key";
 import { isToolLikePart, normalizeToolPart } from "./normalize-tool-part";
 import { ReasoningSection } from "./reasoning-section";
@@ -22,6 +27,10 @@ export function CopilotMessageParts({
   isLastMessage,
   isStreaming,
 }: CopilotMessagePartsProps) {
+  // Reason: useJsonRenderMessage scans message.parts for SPEC_DATA_PART_TYPE
+  // entries and assembles them into a single Spec for the renderer.
+  const { hasSpec, spec } = useJsonRenderMessage(message.parts as DataPart[]);
+
   const reasoningText = useMemo(() => {
     return message.parts
       .filter((part) => part.type === "reasoning")
@@ -61,6 +70,8 @@ export function CopilotMessageParts({
   // correctly across iterations of the same render pass.
   const seenTextKeys = new Map<string, number>();
   const seenToolKeys = new Map<string, number>();
+  const seenSpecKeys = new Map<string, number>();
+  let hasRenderedSpec = false;
 
   return (
     <>
@@ -97,23 +108,17 @@ export function CopilotMessageParts({
           );
 
           const isComplete = normalized.state === "output-available";
-          const isError =
-            normalized.state === "output-error" ||
-            normalized.state === "output-denied";
-
           const ResultRenderer = getToolResultRenderer(normalized.toolName);
           const hasRichResult = isComplete && ResultRenderer !== null;
 
           // Reason: UX flow:
           // - Running/pending → show compact loading card
           // - Error/denied → show card with error badge
-          // - Complete + has renderer → show ONLY the inline visualization
-          // - Complete + no renderer → render nothing (data is in AI text)
+          // - Complete → always show completed card (collapsed)
+          // - Complete + has renderer → also show the inline visualization
           return (
             <Fragment key={stableKey}>
-              {(!isComplete || isError) && (
-                <ToolPartCard normalized={normalized} />
-              )}
+              <ToolPartCard normalized={normalized} />
               {hasRichResult && (
                 <div className="mb-3 max-w-[600px]">
                   <Suspense fallback={<ChartLoadingSkeleton />}>
@@ -122,6 +127,22 @@ export function CopilotMessageParts({
                 </div>
               )}
             </Fragment>
+          );
+        }
+
+        // Reason: Render the json-render spec once, on the first data-spec part.
+        // Subsequent spec patches are already folded into `spec` by the hook.
+        if (part.type === SPEC_DATA_PART_TYPE) {
+          if (!hasSpec || hasRenderedSpec) {
+            return null;
+          }
+          hasRenderedSpec = true;
+          return (
+            <CopilotJsonRenderer
+              key={createStablePartKey(`${message.id}-spec`, seenSpecKeys)}
+              spec={spec}
+              isStreaming={isLastMessage && isStreaming}
+            />
           );
         }
 
