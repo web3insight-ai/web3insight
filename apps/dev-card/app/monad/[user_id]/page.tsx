@@ -12,6 +12,7 @@ import { MintNFTButton } from '@/components/MintNFTButton'
 import MonadCardBack from '@/components/MonadCardBack'
 import MonadCardFront from '@/components/MonadCardFront'
 import LoadingScreen from '@/components/LoadingScreen'
+import { WalletAddressInput } from '@/components/WalletAddressInput'
 
 export default function CardPage({
   params,
@@ -200,6 +201,7 @@ export default function CardPage({
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.6 }}
         >
+          <WalletAddressInput ecosystem="monad" isOwnCard={isOwnCard} />
           <motion.p
             className="text-gray-500 text-xs sm:text-sm"
             animate={{ opacity: [0.5, 1, 0.5] }}
