@@ -812,38 +812,52 @@ const getUserExtra = protectedProcedure
       success: z.boolean(),
       code: z.string(),
       message: z.string(),
-      data: z.record(z.unknown()).nullable(),
+      data: z.any().nullable(),
     })
   )
   .handler(async ({ input, context }) => {
-    const response = await fetch(
-      `${context.dataApiUrl}/v1/auth/user/info/${input.tag}/extra`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${context.authToken}`,
-          accept: "*/*",
-        },
-      }
-    )
+    try {
+      const response = await fetch(
+        `${context.dataApiUrl}/v1/auth/user/info/${input.tag}/extra`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${context.authToken}`,
+            accept: "*/*",
+          },
+        }
+      )
 
-    if (!response.ok) {
-      const error = await response.text()
+      if (!response.ok) {
+        const error = await response.text()
+        return {
+          success: false,
+          code: response.status.toString(),
+          message: `Failed to fetch user extra data: ${error}`,
+          data: null,
+        }
+      }
+
+      const data = await response.json()
+
+      // Reason: Backend returns { user_id, user_info_type, user_extra, updated_at }
+      // user_extra may be a JSON string or object depending on DB driver
+      const userExtra = data?.user_extra ?? null
+      const parsed = typeof userExtra === "string" ? JSON.parse(userExtra) : userExtra
+
+      return {
+        success: true,
+        code: "200",
+        message: "User extra data retrieved successfully",
+        data: parsed,
+      }
+    } catch (error) {
       return {
         success: false,
-        code: response.status.toString(),
+        code: "500",
         message: `Failed to fetch user extra data: ${error}`,
         data: null,
       }
-    }
-
-    const data = await response.json()
-
-    return {
-      success: true,
-      code: "200",
-      message: "User extra data retrieved successfully",
-      data: data?.user_extra ?? null,
     }
   })
 
@@ -862,32 +876,40 @@ const updateUserExtra = protectedProcedure
     })
   )
   .handler(async ({ input, context }) => {
-    const response = await fetch(
-      `${context.dataApiUrl}/v1/auth/user/info/${input.tag}/extra`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${context.authToken}`,
-          "Content-Type": "application/json",
-          accept: "*/*",
-        },
-        body: JSON.stringify({ user_extra: input.user_extra }),
-      }
-    )
+    try {
+      const response = await fetch(
+        `${context.dataApiUrl}/v1/auth/user/info/${input.tag}/extra`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${context.authToken}`,
+            "Content-Type": "application/json",
+            accept: "*/*",
+          },
+          body: JSON.stringify({ user_extra: input.user_extra }),
+        }
+      )
 
-    if (!response.ok) {
-      const error = await response.text()
+      if (!response.ok) {
+        const error = await response.text()
+        return {
+          success: false,
+          code: response.status.toString(),
+          message: `Failed to update user extra data: ${error}`,
+        }
+      }
+
+      return {
+        success: true,
+        code: "200",
+        message: "User extra data updated successfully",
+      }
+    } catch (error) {
       return {
         success: false,
-        code: response.status.toString(),
+        code: "500",
         message: `Failed to update user extra data: ${error}`,
       }
-    }
-
-    return {
-      success: true,
-      code: "200",
-      message: "User extra data updated successfully",
     }
   })
 
