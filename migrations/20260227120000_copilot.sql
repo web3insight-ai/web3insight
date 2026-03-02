@@ -1,6 +1,9 @@
+-- Reason: AI SDK generates nanoid-style message IDs (not UUIDs),
+-- so message_id and parent_id must be TEXT instead of UUID.
+
 CREATE TABLE IF NOT EXISTS "api"."copilot_sessions"
 (
-    "session_id"     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    "session_id"     TEXT PRIMARY KEY,
     "user_id"        VARCHAR(255),
     "title"          TEXT,
     "last_active_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -11,9 +14,9 @@ CREATE TABLE IF NOT EXISTS "api"."copilot_sessions"
 
 CREATE TABLE IF NOT EXISTS "api"."copilot_messages"
 (
-    "message_id" UUID PRIMARY KEY,
-    "session_id" UUID NOT NULL REFERENCES "api"."copilot_sessions" ("session_id"),
-    "parent_id"  UUID,
+    "message_id" TEXT PRIMARY KEY,
+    "session_id" TEXT NOT NULL REFERENCES "api"."copilot_sessions" ("session_id"),
+    "parent_id"  TEXT,
     "role"       VARCHAR(20)              NOT NULL,
     "ui_message" JSONB                    NOT NULL,
     "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
@@ -21,9 +24,9 @@ CREATE TABLE IF NOT EXISTS "api"."copilot_messages"
 
 CREATE TABLE IF NOT EXISTS "api"."copilot_feedback"
 (
-    "id"            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    "session_id"    UUID NOT NULL REFERENCES "api"."copilot_sessions" ("session_id"),
-    "message_id"    UUID NOT NULL REFERENCES "api"."copilot_messages" ("message_id"),
+    "id"            TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+    "session_id"    TEXT NOT NULL REFERENCES "api"."copilot_sessions" ("session_id"),
+    "message_id"    TEXT NOT NULL REFERENCES "api"."copilot_messages" ("message_id"),
     "feedback_type" VARCHAR(20)              NOT NULL,
     "comment"       TEXT,
     "created_at"    TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
