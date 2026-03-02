@@ -865,7 +865,7 @@ const updateUserExtra = protectedProcedure
   .input(
     z.object({
       tag: ecosystemSchema,
-      user_extra: z.record(z.unknown()),
+      user_extra: z.any(),
     })
   )
   .output(
