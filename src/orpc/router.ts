@@ -804,6 +804,93 @@ const getAnalysisResult = baseProcedure
     }
   })
 
+// User extra data procedures
+const getUserExtra = protectedProcedure
+  .input(z.object({ tag: ecosystemSchema }))
+  .output(
+    z.object({
+      success: z.boolean(),
+      code: z.string(),
+      message: z.string(),
+      data: z.record(z.unknown()).nullable(),
+    })
+  )
+  .handler(async ({ input, context }) => {
+    const response = await fetch(
+      `${context.dataApiUrl}/v1/auth/user/info/${input.tag}/extra`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${context.authToken}`,
+          accept: "*/*",
+        },
+      }
+    )
+
+    if (!response.ok) {
+      const error = await response.text()
+      return {
+        success: false,
+        code: response.status.toString(),
+        message: `Failed to fetch user extra data: ${error}`,
+        data: null,
+      }
+    }
+
+    const data = await response.json()
+
+    return {
+      success: true,
+      code: "200",
+      message: "User extra data retrieved successfully",
+      data: data?.user_extra ?? null,
+    }
+  })
+
+const updateUserExtra = protectedProcedure
+  .input(
+    z.object({
+      tag: ecosystemSchema,
+      user_extra: z.record(z.unknown()),
+    })
+  )
+  .output(
+    z.object({
+      success: z.boolean(),
+      code: z.string(),
+      message: z.string(),
+    })
+  )
+  .handler(async ({ input, context }) => {
+    const response = await fetch(
+      `${context.dataApiUrl}/v1/auth/user/info/${input.tag}/extra`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${context.authToken}`,
+          "Content-Type": "application/json",
+          accept: "*/*",
+        },
+        body: JSON.stringify({ user_extra: input.user_extra }),
+      }
+    )
+
+    if (!response.ok) {
+      const error = await response.text()
+      return {
+        success: false,
+        code: response.status.toString(),
+        message: `Failed to update user extra data: ${error}`,
+      }
+    }
+
+    return {
+      success: true,
+      code: "200",
+      message: "User extra data updated successfully",
+    }
+  })
+
 // Create the router
 export const router = {
   auth: {
@@ -814,6 +901,8 @@ export const router = {
     getUserByIdAndEcosystem,
     bindOpenBuild,
     getOpenBuildRecord,
+    getUserExtra,
+    updateUserExtra,
   },
   github: {
     getUserByUsername: getGitHubUserByUsername,

@@ -228,3 +228,8 @@ export const aiAnalysisResultSchema = z.object({
 })
 
 export type AIAnalysisResult = z.infer<typeof aiAnalysisResultSchema>
+
+// EVM wallet address validation
+export const evmWalletAddressSchema = z
+  .string()
+  .regex(/^0x[0-9a-fA-F]{40}$/, "Invalid EVM wallet address")
