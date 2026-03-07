@@ -1,7 +1,6 @@
 import { Suspense } from "react"
 import dynamic from "next/dynamic"
 import { Header } from "@/components/header"
-import { AnnouncementBanner } from "@/components/announcement-banner"
 import { HeroSection } from "@/components/hero-section"
 import { StatsSection } from "@/components/stats-section"
 import { Footer } from "@/components/footer"
@@ -24,7 +23,6 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-background overflow-x-hidden">
       <Header />
-      <AnnouncementBanner />
       <div className="pt-10">
         <Suspense fallback={<div className="h-96" />}>
           <HeroSection />
