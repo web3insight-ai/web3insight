@@ -6,165 +6,113 @@ import { motion } from "framer-motion"
 import { fadeInUp, stagger } from "@/components/ui/motion"
 import { orpc } from "@/lib/query/utils"
 import { useAnimatedNumber, formatNumber } from "@/lib/hooks/useAnimatedNumber"
+import { Panel, Trace } from "@/components/blueprint"
 
-function CodeIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polyline points="16 18 22 12 16 6" />
-      <polyline points="8 6 2 12 8 18" />
-    </svg>
-  )
-}
-
-function UsersIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </svg>
-  )
-}
-
-function GlobeIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="10" />
-      <line x1="2" y1="12" x2="22" y2="12" />
-      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-    </svg>
-  )
-}
-
-function PackageIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m7.5 4.27 9 5.15" />
-      <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
-      <path d="m3.3 7 8.7 5 8.7-5" />
-      <path d="M12 22V12" />
-    </svg>
-  )
-}
-
-function LoadingNumber() {
-  return (
-    <div className="flex items-center">
-      <div className="flex space-x-1.5">
-        <div className="w-2 h-2 bg-accent/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-        <div className="w-2 h-2 bg-accent/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-        <div className="w-2 h-2 bg-accent/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-      </div>
-    </div>
-  )
-}
-
-function AnimatedNumber({ value, suffix, isLoading }: { value: number; suffix: string; isLoading?: boolean }) {
+function StatNumber({
+  value,
+  highlighted,
+  isLoading,
+}: {
+  value: number
+  highlighted?: boolean
+  isLoading?: boolean
+}) {
   const { displayValue, ref, isInView } = useAnimatedNumber(value, isLoading, {
     waitForInView: true,
     duration: 2000,
   })
-
-  const shouldShowLoading = isLoading || !isInView || value <= 0 || (displayValue === 0 && value > 0)
-
-  if (shouldShowLoading) {
-    return (
-      <div ref={ref}>
-        <LoadingNumber />
-      </div>
-    )
-  }
-
+  const pending = isLoading || !isInView || value <= 0 || (displayValue === 0 && value > 0)
   return (
-    <div ref={ref} className="text-3xl sm:text-4xl font-bold text-foreground tabular-nums">
-      {formatNumber(displayValue)}
-      {suffix}
+    <div
+      ref={ref}
+      className={[
+        "font-mono text-4xl sm:text-5xl font-medium tabular-nums leading-none",
+        highlighted ? "text-teal-500" : "text-foreground",
+      ].join(" ")}
+    >
+      {pending ? (
+        <span className="text-muted-foreground">——</span>
+      ) : (
+        formatNumber(displayValue)
+      )}
     </div>
   )
 }
 
 export function StatsSection() {
   const { t } = useI18n()
-
-  // Fetch statistics using TanStack Query + oRPC
   const { data: statsData, isLoading } = useQuery(orpc.statistics.get.queryOptions())
 
+  // One of four panels is teal-highlighted — "the one the eye should follow."
   const stats = [
-    { labelKey: "stats.contributors", value: statsData?.developer ?? 0, suffix: "", icon: UsersIcon },
-    { labelKey: "stats.developers", value: statsData?.coreDeveloper ?? 0, suffix: "", icon: CodeIcon },
-    { labelKey: "stats.ecosystems", value: statsData?.ecosystem ?? 0, suffix: "", icon: GlobeIcon },
-    { labelKey: "stats.repositories", value: statsData?.repository ?? 0, suffix: "", icon: PackageIcon },
+    { labelKey: "stats.contributors", code: "01", value: statsData?.developer ?? 0 },
+    { labelKey: "stats.developers", code: "02", value: statsData?.coreDeveloper ?? 0, highlighted: true },
+    { labelKey: "stats.ecosystems", code: "03", value: statsData?.ecosystem ?? 0 },
+    { labelKey: "stats.repositories", code: "04", value: statsData?.repository ?? 0 },
   ]
 
   return (
-    <section className="relative py-20 border-b border-border">
-      <motion.div
-        className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
-        variants={stagger(0.14)}
-      >
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-          {stats.map((stat, idx) => (
-            <motion.div
-              key={stat.labelKey}
-              className="relative p-6 bg-card border border-border rounded-lg group hover:border-accent/50 transition-colors"
-              variants={fadeInUp(0.05 * idx)}
-            >
-              {/* Corner decoration */}
-              <div className="absolute top-0 right-0 w-8 h-8 border-t border-r border-border opacity-0 group-hover:opacity-100 transition-opacity" />
+    <section className="relative border-b border-border py-24">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="mb-10 flex items-end justify-between">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+              signal · density
+            </p>
+            <h2 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+              At a glance
+            </h2>
+          </div>
+          <span className="hidden font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground sm:inline-block">
+            sheet 02/04
+          </span>
+        </div>
 
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-6 h-6 rounded-sm bg-secondary flex items-center justify-center text-muted-foreground">
-                  <stat.icon className="w-4 h-4" />
+        <motion.div
+          className="relative grid grid-cols-2 gap-0 lg:grid-cols-4"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
+          variants={stagger(0.12)}
+        >
+          {/* Horizontal traces connecting the four panels.
+              Desktop only — renders above borders, drawn on mount. */}
+          <Trace
+            className="inset-x-0 top-1/2 z-0 hidden h-[2px] w-full -translate-y-1/2 lg:block"
+            viewBox="0 0 1000 2"
+            preserveAspectRatio="none"
+            d="M 0 1 L 1000 1"
+            length={1000}
+            delay={0.5}
+            duration={1.4}
+            strokeWidth={0.5}
+            color="soft"
+          />
+
+          {stats.map((stat, idx) => (
+            <motion.div key={stat.labelKey} variants={fadeInUp(0.05 * idx)} className="relative">
+              <Panel
+                label={{ text: t(stat.labelKey), position: "tl" }}
+                code={stat.code}
+                ground={idx === 1 ? "dotted" : "plain"}
+                className="min-h-[180px] border-r-0 p-6 last:border-r lg:[&:nth-child(4)]:border-r"
+                hairline="solid"
+              >
+                <div className="mt-5 flex h-full items-end">
+                  <StatNumber
+                    value={stat.value}
+                    highlighted={stat.highlighted}
+                    isLoading={isLoading}
+                  />
                 </div>
-                <span className="text-xs text-muted-foreground uppercase tracking-wider">{t(stat.labelKey)}</span>
-              </div>
-              <div className="min-h-[48px] flex items-center">
-                {isLoading || stat.value === 0 ? (
-                  <LoadingNumber />
-                ) : (
-                  <AnimatedNumber value={stat.value} suffix={stat.suffix} isLoading={isLoading} />
+                {stat.highlighted && (
+                  <span className="absolute right-3 top-3 h-1.5 w-1.5 bg-teal-500" aria-hidden />
                 )}
-              </div>
+              </Panel>
             </motion.div>
           ))}
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </section>
   )
 }

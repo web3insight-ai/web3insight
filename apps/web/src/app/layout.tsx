@@ -1,18 +1,44 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { GeistSans } from "geist/font/sans"
-import { GeistMono } from "geist/font/mono"
+import { Bricolage_Grotesque, JetBrains_Mono, Manrope, Caveat } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { I18nProvider } from "@/lib/i18n-context"
 import { QueryProvider } from "@/lib/query/provider"
 import { env } from "@/env"
 import "./globals.css"
 
+const display = Bricolage_Grotesque({
+  subsets: ["latin"],
+  variable: "--font-display",
+  weight: ["400", "600", "700", "800"],
+  display: "swap",
+})
+
+const body = Manrope({
+  subsets: ["latin"],
+  variable: "--font-body",
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+})
+
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono-terminal",
+  weight: ["400", "500", "700"],
+  display: "swap",
+})
+
+const label = Caveat({
+  subsets: ["latin"],
+  variable: "--font-label-script",
+  weight: ["500", "700"],
+  display: "swap",
+})
+
 export const metadata: Metadata = {
-  title: "Web3Insight - Discover, Analyze & Connect with Web3 Developers",
+  title: "Web3Insight — Discover, Analyze & Connect with Web3 Developers",
   description:
     "AI-powered developer insights for Web3 ecosystems. Identify developers, track events, and power ecosystem growth with GitHub data and on-chain activity.",
-  generator: "v0.app",
   icons: {
     icon: [
       { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
@@ -41,7 +67,9 @@ export default function RootLayout({
           data-website-id={env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
         />
       </head>
-      <body className={`${GeistSans.variable} ${GeistMono.variable} font-sans antialiased overflow-x-hidden`}>
+      <body
+        className={`${body.variable} ${display.variable} ${mono.variable} ${label.variable} font-sans antialiased overflow-x-hidden`}
+      >
         <QueryProvider>
           <I18nProvider>{children}</I18nProvider>
         </QueryProvider>

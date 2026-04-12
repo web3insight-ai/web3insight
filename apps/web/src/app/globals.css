@@ -3,52 +3,74 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Blueprint — light mode (default).
+   Three-ink system: cream ground, near-black ink, rare teal trace. */
 :root {
-  --background: oklch(0.98 0 0);
-  --foreground: oklch(0.1 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.1 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.1 0 0);
-  --primary: oklch(0.1 0 0);
-  --primary-foreground: oklch(0.98 0 0);
-  --secondary: oklch(0.96 0 0);
-  --secondary-foreground: oklch(0.1 0 0);
-  --muted: oklch(0.94 0 0);
-  --muted-foreground: oklch(0.45 0 0);
-  --accent: oklch(0.7 0.15 145);
-  --accent-foreground: oklch(0.98 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.88 0 0);
-  --input: oklch(0.88 0 0);
-  --ring: oklch(0.5 0 0);
-  --radius: 0.5rem;
+  --background: oklch(97% 0.004 180);
+  --foreground: oklch(18% 0.008 180);
+  --card: oklch(98.5% 0.004 180);
+  --card-foreground: oklch(18% 0.008 180);
+  --popover: oklch(98.5% 0.004 180);
+  --popover-foreground: oklch(18% 0.008 180);
+  --primary: oklch(18% 0.008 180);
+  --primary-foreground: oklch(97% 0.004 180);
+  --secondary: oklch(93% 0.006 180);
+  --secondary-foreground: oklch(18% 0.008 180);
+  --muted: oklch(95% 0.005 180);
+  --muted-foreground: oklch(42% 0.01 180);
+  --destructive: oklch(52% 0.2 27);
+  --destructive-foreground: oklch(97% 0.004 180);
+  --border: oklch(18% 0.008 180);
+  --border-soft: oklch(78% 0.008 180);
+  --input: oklch(82% 0.006 180);
+  --ring: oklch(47% 0.08 180);
+  --radius: 0.125rem;
+
+  /* Teal ramp — brand trace hue (#0F766E ≈ 47% 0.08 180) */
+  --teal-50: oklch(96% 0.018 180);
+  --teal-100: oklch(90% 0.03 180);
+  --teal-200: oklch(82% 0.05 180);
+  --teal-300: oklch(72% 0.07 180);
+  --teal-400: oklch(58% 0.08 180);
+  --teal-500: oklch(47% 0.08 180);
+  --teal-600: oklch(40% 0.075 180);
+  --teal-700: oklch(33% 0.065 180);
+  --teal-800: oklch(26% 0.05 180);
+  --teal-900: oklch(20% 0.035 180);
+  --teal-950: oklch(15% 0.02 180);
+
+  --accent: var(--teal-500);
+  --accent-foreground: oklch(97% 0.004 180);
 }
 
 .dark {
-  --background: oklch(0.08 0 0);
-  --foreground: oklch(0.98 0 0);
-  --card: oklch(0.12 0 0);
-  --card-foreground: oklch(0.98 0 0);
-  --popover: oklch(0.12 0 0);
-  --popover-foreground: oklch(0.98 0 0);
-  --primary: oklch(0.98 0 0);
-  --primary-foreground: oklch(0.08 0 0);
-  --secondary: oklch(0.18 0 0);
-  --secondary-foreground: oklch(0.98 0 0);
-  --muted: oklch(0.2 0 0);
-  --muted-foreground: oklch(0.6 0 0);
-  --accent: oklch(0.7 0.15 145);
-  --accent-foreground: oklch(0.98 0 0);
-  --border: oklch(0.25 0 0);
-  --input: oklch(0.25 0 0);
-  --ring: oklch(0.5 0 0);
+  --background: oklch(14% 0.008 180);
+  --foreground: oklch(90% 0.005 180);
+  --card: oklch(17% 0.008 180);
+  --card-foreground: oklch(90% 0.005 180);
+  --popover: oklch(17% 0.008 180);
+  --popover-foreground: oklch(90% 0.005 180);
+  --primary: oklch(90% 0.005 180);
+  --primary-foreground: oklch(14% 0.008 180);
+  --secondary: oklch(22% 0.008 180);
+  --secondary-foreground: oklch(90% 0.005 180);
+  --muted: oklch(20% 0.008 180);
+  --muted-foreground: oklch(62% 0.008 180);
+  --border: oklch(78% 0.006 180);
+  --border-soft: oklch(32% 0.008 180);
+  --input: oklch(28% 0.008 180);
+  --ring: oklch(58% 0.09 180);
+
+  --accent: oklch(58% 0.09 180);
+  --accent-foreground: oklch(14% 0.008 180);
 }
 
 @theme inline {
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-terminal), ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-display: var(--font-display), var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-label: var(--font-label-script), "Caveat", cursive;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -66,12 +88,26 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
+  --color-border-soft: var(--border-soft);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-teal-50: var(--teal-50);
+  --color-teal-100: var(--teal-100);
+  --color-teal-200: var(--teal-200);
+  --color-teal-300: var(--teal-300);
+  --color-teal-400: var(--teal-400);
+  --color-teal-500: var(--teal-500);
+  --color-teal-600: var(--teal-600);
+  --color-teal-700: var(--teal-700);
+  --color-teal-800: var(--teal-800);
+  --color-teal-900: var(--teal-900);
+  --color-teal-950: var(--teal-950);
+
+  --radius-sm: 0px;
+  --radius-md: 0.125rem;
+  --radius-lg: 0.125rem;
+  --radius-xl: 0.25rem;
 }
 
 @layer base {
@@ -84,23 +120,31 @@
   body {
     @apply bg-background text-foreground overflow-x-hidden;
     max-width: 100vw;
+    font-feature-settings: "ss01", "cv01";
   }
 }
 
-/* Dotted pattern backgrounds */
+/* Blueprint ground fills — hairline texture, not decoration. */
 .dotted-pattern {
   background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
-  background-size: 12px 12px;
+  background-size: 14px 14px;
 }
 
 .diagonal-lines {
-  background: repeating-linear-gradient(45deg, transparent, transparent 4px, currentColor 4px, currentColor 5px);
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 6px,
+    currentColor 6px,
+    currentColor 7px
+  );
 }
 
-/* Grid line animation */
+/* Grid-line / trace drawing animation.
+   Consumers may override --draw-duration and --draw-delay. */
 @keyframes draw-line {
   from {
-    stroke-dashoffset: 1000;
+    stroke-dashoffset: var(--draw-length, 1000);
   }
   to {
     stroke-dashoffset: 0;
@@ -108,11 +152,12 @@
 }
 
 .animate-draw {
-  stroke-dasharray: 1000;
-  animation: draw-line 2s ease-out forwards;
+  stroke-dasharray: var(--draw-length, 1000);
+  animation: draw-line var(--draw-duration, 1.8s) cubic-bezier(0.16, 1, 0.3, 1)
+    var(--draw-delay, 0s) forwards;
 }
 
-/* Fade in animation */
+/* Entrance fade — exponential ease-out. */
 @keyframes fade-in-up {
   from {
     opacity: 0;
@@ -125,58 +170,27 @@
 }
 
 .animate-fade-in-up {
-  animation: fade-in-up 0.6s ease-out forwards;
+  animation: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Stagger children */
-.stagger-children > * {
-  opacity: 0;
-  animation: fade-in-up 0.5s ease-out forwards;
+/* Terminal cursor blink — replaces bouncing loading dots. */
+@keyframes cursor-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
 }
 
-.stagger-children > *:nth-child(1) {
-  animation-delay: 0.1s;
-}
-.stagger-children > *:nth-child(2) {
-  animation-delay: 0.2s;
-}
-.stagger-children > *:nth-child(3) {
-  animation-delay: 0.3s;
-}
-.stagger-children > *:nth-child(4) {
-  animation-delay: 0.4s;
-}
-.stagger-children > *:nth-child(5) {
-  animation-delay: 0.5s;
-}
-.stagger-children > *:nth-child(6) {
-  animation-delay: 0.6s;
+.animate-cursor {
+  animation: cursor-blink 1s step-end infinite;
 }
 
-/* Shimmer animation for skeleton loading */
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
+@media (prefers-reduced-motion: reduce) {
+  .animate-draw,
+  .animate-fade-in-up,
+  .animate-cursor {
+    animation: none !important;
+    stroke-dashoffset: 0 !important;
   }
-  100% {
-    transform: translateX(100%);
+  * {
+    transition-duration: 0.01ms !important;
   }
-}
-
-.animate-shimmer {
-  animation: shimmer 2s ease-in-out infinite;
-}
-
-/* Pulse wave animation for skeleton elements */
-@keyframes pulse-wave {
-  0%, 100% {
-    opacity: 0.4;
-  }
-  50% {
-    opacity: 0.8;
-  }
-}
-
-.animate-pulse-wave {
-  animation: pulse-wave 1.5s ease-in-out infinite;
 }

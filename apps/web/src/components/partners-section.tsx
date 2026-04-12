@@ -6,96 +6,40 @@ import Image from "next/image"
 import { useState } from "react"
 import { motion } from "framer-motion"
 import { fadeInUp, ScrollReveal, stagger } from "@/components/ui/motion"
+import { Panel } from "@/components/blueprint"
 
 const partners = [
-  {
-    name: "OpenBuild",
-    url: "https://openbuild.xyz/",
-    logo: "/ecosystem/openbuild.jpg",
-  },
-  {
-    name: "ETH Shenzhen",
-    url: "https://www.ethshenzhen.org/",
-    logo: "/ecosystem/eth-shenzhen.svg",
-  },
-  {
-    name: "Fracton",
-    url: "https://www.fracton.ventures/",
-    logo: "/ecosystem/fracton.jpg",
-  },
-  {
-    name: "Monad",
-    url: "https://www.monad.xyz/",
-    logo: "/ecosystem/monad.svg",
-  },
-  {
-    name: "Mantle",
-    url: "https://www.mantle.xyz/",
-    logo: "/ecosystem/mantle.png",
-  },
-  {
-    name: "CAMP Network",
-    url: "https://www.campnetwork.xyz/",
-    logo: "/ecosystem/camp.svg",
-  },
-  {
-    name: "Kite AI",
-    url: "https://gokite.ai/",
-    logo: "/ecosystem/kite.svg",
-  },
+  { name: "OpenBuild", url: "https://openbuild.xyz/", logo: "/ecosystem/openbuild.jpg" },
+  { name: "ETH Shenzhen", url: "https://www.ethshenzhen.org/", logo: "/ecosystem/eth-shenzhen.svg" },
+  { name: "Fracton", url: "https://www.fracton.ventures/", logo: "/ecosystem/fracton.jpg" },
+  { name: "Monad", url: "https://www.monad.xyz/", logo: "/ecosystem/monad.svg" },
+  { name: "Mantle", url: "https://www.mantle.xyz/", logo: "/ecosystem/mantle.png" },
+  { name: "CAMP Network", url: "https://www.campnetwork.xyz/", logo: "/ecosystem/camp.svg" },
+  { name: "Kite AI", url: "https://gokite.ai/", logo: "/ecosystem/kite.svg" },
 ]
 
-// Partner icon component with logo image and fallback
 function PartnerIcon({ name, logo }: { name: string; logo: string }) {
   const [imageError, setImageError] = useState(false)
   const initial = name.charAt(0)
 
-  // Get specific styling for certain partners
-  const getPartnerStyling = (partnerName: string) => {
-    switch (partnerName) {
-      case "Kite AI":
-        return {
-          containerClass: "w-12 h-8 flex items-center justify-center", // Wider container
-          imageWidth: 48,
-          imageHeight: 32,
-          imageClass: "object-contain max-w-full max-h-full" // Larger scale
-        }
-      case "ETH Shenzhen":
-        return {
-          containerClass: "w-10 h-10 flex items-center justify-center", // Larger square
-          imageWidth: 40,
-          imageHeight: 40,
-          imageClass: "object-contain max-w-full max-h-full" // Slightly larger
-        }
-      default:
-        return {
-          containerClass: "w-8 h-8 flex items-center justify-center",
-          imageWidth: 32,
-          imageHeight: 32,
-          imageClass: "object-contain max-w-full max-h-full"
-        }
-    }
-  }
-
-  const styling = getPartnerStyling(name)
-
   if (imageError || !logo) {
-    // Fallback to initial if image fails to load
     return (
-      <div className="w-8 h-8 rounded-md border border-border bg-secondary flex items-center justify-center">
-        <span className="text-sm font-semibold text-foreground">{initial}</span>
+      <div className="flex h-10 w-10 items-center justify-center border border-foreground bg-background">
+        <span className="font-mono text-sm font-semibold text-foreground">{initial}</span>
       </div>
     )
   }
 
+  const size = name === "Kite AI" ? { w: 44, h: 28 } : name === "ETH Shenzhen" ? { w: 36, h: 36 } : { w: 32, h: 32 }
+
   return (
-    <div className={styling.containerClass}>
+    <div className="flex h-10 w-full items-center justify-center">
       <Image
         src={logo}
         alt={`${name} logo`}
-        width={styling.imageWidth}
-        height={styling.imageHeight}
-        className={styling.imageClass}
+        width={size.w}
+        height={size.h}
+        className="h-auto max-h-10 max-w-full object-contain"
         onError={() => setImageError(true)}
       />
     </div>
@@ -106,37 +50,58 @@ export function PartnersSection() {
   const { t } = useI18n()
 
   return (
-    <section className="py-20 border-b border-border">
-      <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
-        <ScrollReveal className="mb-12" margin="-20% 0px -10% 0px">
-          <p className="text-center text-sm text-muted-foreground uppercase tracking-wider">
-            {t("partners.title")}
-          </p>
+    <section className="relative border-b border-border py-24">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <ScrollReveal className="mb-10 flex items-end justify-between" margin="-20% 0px -10% 0px">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+              partners · n={partners.length}
+            </p>
+            <h2 className="mt-2 font-[family-name:var(--font-display)] text-2xl font-semibold text-foreground">
+              {t("partners.title")}
+            </h2>
+          </div>
+          <span className="hidden font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground sm:inline-block">
+            sheet 04/04
+          </span>
         </ScrollReveal>
 
-        <motion.div
-          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-6 md:gap-8"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
-          variants={stagger(0.08)}
-        >
-          {partners.map((partner, idx) => (
-            <motion.div key={partner.name} variants={fadeInUp(0.02 * idx)}>
-              <Link
-                href={partner.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-accent/5 transition-colors group"
+        <Panel ground="dotted" className="p-0">
+          <motion.div
+            className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
+            variants={stagger(0.06)}
+          >
+            {partners.map((partner, idx) => (
+              <motion.div
+                key={partner.name}
+                variants={fadeInUp(0.02 * idx, 8)}
+                className={[
+                  "border-border-soft",
+                  "border-r border-b",
+                  idx % 2 === 1 ? "md:border-r" : "",
+                  idx % 4 === 3 ? "md:border-r-0" : "",
+                  idx % 7 === 6 ? "lg:border-r-0" : "lg:border-r",
+                  idx === 6 ? "lg:border-b-0" : "",
+                ].join(" ")}
               >
-                <PartnerIcon name={partner.name} logo={partner.logo} />
-                <span className="mt-3 text-sm text-muted-foreground text-center group-hover:text-foreground transition-colors font-medium">
-                  {partner.name}
-                </span>
-              </Link>
-            </motion.div>
-          ))}
-        </motion.div>
+                <Link
+                  href={partner.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex h-full flex-col items-center justify-center gap-3 bg-background/60 p-6 transition-colors hover:bg-background"
+                >
+                  <PartnerIcon name={partner.name} logo={partner.logo} />
+                  <span className="font-mono text-[11px] text-muted-foreground transition-colors group-hover:text-foreground">
+                    {partner.name}
+                  </span>
+                </Link>
+              </motion.div>
+            ))}
+          </motion.div>
+        </Panel>
       </div>
     </section>
   )
