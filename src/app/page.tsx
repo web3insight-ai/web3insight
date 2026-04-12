@@ -23,7 +23,7 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-background overflow-x-hidden">
       <Header />
-      <div className="pt-10">
+      <div className="pt-[72px]">
         <Suspense fallback={<div className="h-96" />}>
           <HeroSection />
         </Suspense>

@@ -2,10 +2,10 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { Menu, X, Github } from "lucide-react"
 import { useI18n } from "@/lib/i18n-context"
 import { LanguageSwitcher } from "@/components/language-switcher"
+import { LogoMark } from "@/components/blueprint"
 
 function XIcon({ className }: { className?: string }) {
   return (
@@ -24,33 +24,46 @@ export function Header() {
     setIsMenuOpen(false)
     const target = document.getElementById(targetId)
     if (!target) return
-    const headerOffset = 80 // account for fixed header height
+    const headerOffset = 80
     const y = target.getBoundingClientRect().top + window.scrollY - headerOffset
     window.scrollTo({ top: y, behavior: "smooth" })
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border">
-      <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
-        <div className="flex items-center h-16">
-          <div className="flex-1 flex items-center">
-            <Link href="/" className="flex items-center gap-2">
-              <Image src="/web3insight_logo.svg" alt="Web3Insight Logo" width={229} height={26} className="h-6 w-auto" />
-            </Link>
-          </div>
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background/95 backdrop-blur-[2px]">
+      {/* ruler strip */}
+      <div
+        aria-hidden
+        className="h-1.5 w-full text-border-soft"
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(to right, currentColor 0 1px, transparent 1px 24px)",
+        }}
+      />
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="flex h-16 items-center gap-6">
+          <Link href="/" className="flex items-center gap-2.5">
+            <LogoMark size={22} />
+            <span className="font-[family-name:var(--font-display)] text-[17px] font-bold tracking-tight text-foreground">
+              Web3Insight
+            </span>
+            <span className="hidden font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground sm:inline">
+              /ai
+            </span>
+          </Link>
 
-          <nav className="flex-1 hidden md:flex items-center justify-center gap-8">
+          <nav className="ml-auto hidden items-center gap-7 md:flex">
             <a
               href="#features"
               onClick={(e) => handleScrollTo(e, "features")}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+              className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
             >
               {t("nav.features")}
             </a>
             <a
               href="#use-cases"
               onClick={(e) => handleScrollTo(e, "use-cases")}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+              className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
             >
               {t("nav.useCases")}
             </a>
@@ -58,51 +71,55 @@ export function Header() {
               href="https://dash.web3insight.ai"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
             >
               {t("nav.dashboard")}
             </Link>
+            <span className="h-4 w-px bg-border-soft" aria-hidden />
             <Link
               href="https://github.com/web3insight-ai/web3insight"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-muted-foreground transition-colors hover:text-foreground"
+              aria-label="GitHub"
             >
-              <Github className="w-5 h-5" />
+              <Github className="h-[18px] w-[18px]" />
             </Link>
             <Link
               href="https://x.com/intent/follow?screen_name=Web3insightAI"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-muted-foreground transition-colors hover:text-foreground"
+              aria-label="X"
             >
-              <XIcon className="w-5 h-5" />
+              <XIcon className="h-[16px] w-[16px]" />
             </Link>
+            <LanguageSwitcher />
           </nav>
 
-          <div className="flex-1 hidden md:flex items-center justify-end gap-3">
-            <LanguageSwitcher />
-          </div>
-
-          <button className="md:hidden p-2 text-foreground" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          <button
+            className="ml-auto p-2 text-foreground md:hidden"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Menu"
+          >
+            {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
 
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border">
+          <div className="border-t border-border-soft py-4 md:hidden">
             <nav className="flex flex-col gap-4">
               <a
                 href="#features"
                 onClick={(e) => handleScrollTo(e, "features")}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
               >
                 {t("nav.features")}
               </a>
               <a
                 href="#use-cases"
                 onClick={(e) => handleScrollTo(e, "use-cases")}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
               >
                 {t("nav.useCases")}
               </a>
@@ -110,26 +127,28 @@ export function Header() {
                 href="https://dash.web3insight.ai"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
               >
                 {t("nav.dashboard")}
               </Link>
-              <div className="flex items-center gap-4 pt-4">
+              <div className="flex items-center gap-4 pt-2">
                 <Link
                   href="https://github.com/web3insight-ai/web3insight"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
+                  aria-label="GitHub"
                 >
-                  <Github className="w-5 h-5" />
+                  <Github className="h-5 w-5" />
                 </Link>
                 <Link
                   href="https://x.com/intent/follow?screen_name=Web3insightAI"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
+                  aria-label="X"
                 >
-                  <XIcon className="w-5 h-5" />
+                  <XIcon className="h-5 w-5" />
                 </Link>
                 <LanguageSwitcher />
               </div>

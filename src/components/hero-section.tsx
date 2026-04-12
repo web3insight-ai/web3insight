@@ -1,8 +1,7 @@
 "use client"
 
-import { useRef, useEffect } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { ArrowRight, Search, Globe } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useI18n } from "@/lib/i18n-context"
@@ -10,232 +9,262 @@ import { motion } from "framer-motion"
 import { fadeInUp, stagger } from "@/components/ui/motion"
 import { orpc } from "@/lib/query/utils"
 import { useAnimatedNumber, formatNumber } from "@/lib/hooks/useAnimatedNumber"
+import {
+  Panel,
+  Trace,
+  OutlinedDisplay,
+  HandLabel,
+  TerminalPanel,
+  type Line,
+} from "@/components/blueprint"
 
-// Loading animation component
-function LoadingNumber() {
+function MonoCursor() {
   return (
-    <div className="flex items-center">
-      <div className="flex space-x-1.5">
-        <div className="w-2 h-2 bg-accent/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-        <div className="w-2 h-2 bg-accent/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-        <div className="w-2 h-2 bg-accent/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-      </div>
-    </div>
+    <span
+      aria-hidden
+      className="animate-cursor ml-0.5 inline-block h-[0.85em] w-[0.55ch] translate-y-[1px] bg-teal-500 align-middle"
+    />
   )
 }
 
-// Animated number component for hero stats
-function AnimatedHeroNumber({ value, suffix = "", isLoading }: { value: number; suffix?: string; isLoading?: boolean }) {
-  const { displayValue } = useAnimatedNumber(value, isLoading, { duration: 1000 })
+function HeroNumber({
+  value,
+  isLoading,
+  format,
+}: {
+  value: number
+  isLoading?: boolean
+  format?: "raw" | "M+"
+}) {
+  const { displayValue } = useAnimatedNumber(value, isLoading, { duration: 1200 })
+  const formatter = format === "M+"
+    ? (n: number) => (n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M+` : formatNumber(n))
+    : formatNumber
 
-  // Show loading dots when loading or waiting for data
   if (isLoading || (displayValue === 0 && value > 0)) {
-    return <LoadingNumber />
+    return (
+      <span className="font-mono text-2xl text-muted-foreground">
+        —<MonoCursor />
+      </span>
+    )
   }
-
   return (
-    <span className="text-2xl font-bold text-foreground tabular-nums">
-      {formatNumber(displayValue)}
-      {suffix}
-    </span>
-  )
-}
-
-// Animated contributors with M+ format
-function AnimatedContributors({ value, isLoading }: { value: number; isLoading?: boolean }) {
-  const { displayValue } = useAnimatedNumber(value, isLoading, { duration: 1000 })
-
-  // Show loading dots when loading or waiting for data
-  if (isLoading || (displayValue === 0 && value > 0)) {
-    return <LoadingNumber />
-  }
-
-  const formattedValue = displayValue >= 1000000
-    ? `${(displayValue / 1000000).toFixed(1)}M+`
-    : formatNumber(displayValue)
-
-  return (
-    <span className="text-xl font-bold text-foreground tabular-nums">
-      {formattedValue}
+    <span className="font-mono text-2xl font-medium text-foreground tabular-nums">
+      {formatter(displayValue)}
     </span>
   )
 }
 
 export function HeroSection() {
-  const containerRef = useRef<HTMLDivElement>(null)
   const { t } = useI18n()
-
-  // Fetch statistics using TanStack Query + oRPC
   const { data: statsData, isLoading } = useQuery(orpc.statistics.get.queryOptions())
 
-  useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = container.getBoundingClientRect()
-      const x = e.clientX - rect.left
-      const y = e.clientY - rect.top
-      container.style.setProperty("--mouse-x", `${x}px`)
-      container.style.setProperty("--mouse-y", `${y}px`)
-    }
-
-    container.addEventListener("mousemove", handleMouseMove)
-    return () => container.removeEventListener("mousemove", handleMouseMove)
-  }, [])
+  const terminalLines: Line[] = [
+    [
+      { type: "comment", text: "// ask anything. AI-powered." },
+    ],
+    [
+      { type: "prompt", text: "> " },
+      { type: "keyword", text: "query" },
+      { type: "punct", text: "(" },
+      { type: "string", text: "\"top contributors of ethereum\"" },
+      { type: "punct", text: ")" },
+    ],
+    [
+      { type: "comment", text: "// filter window, then rank" },
+    ],
+    [
+      { type: "prompt", text: "> " },
+      { type: "keyword", text: "since" },
+      { type: "plain", text: " " },
+      { type: "string", text: "\"30d\"" },
+      { type: "plain", text: " | " },
+      { type: "keyword", text: "rank" },
+      { type: "plain", text: " " },
+      { type: "ident", text: "by.commits" },
+    ],
+  ]
 
   return (
     <motion.section
-      ref={containerRef}
-      className="relative pt-16 pb-20 lg:pb-32 overflow-hidden w-full max-w-full"
+      className="relative w-full overflow-hidden border-b border-border pt-16 pb-24 lg:pb-32"
       initial="hidden"
       animate="visible"
-      variants={stagger(0.18, 0.05)}
+      variants={stagger(0.16, 0.1)}
     >
-      {/* Grid background */}
-      <div className="absolute inset-0 opacity-[0.03]">
-        <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+      {/* Blueprint grid background */}
+      <div aria-hidden className="absolute inset-0 opacity-[0.04]">
+        <svg className="h-full w-full" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
-              <path d="M 60 0 L 0 0 0 60" fill="none" stroke="currentColor" strokeWidth="1" />
+            <pattern id="bp-grid" width="72" height="72" patternUnits="userSpaceOnUse">
+              <path d="M 72 0 L 0 0 0 72" fill="none" stroke="currentColor" strokeWidth="1" />
             </pattern>
           </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
+          <rect width="100%" height="100%" fill="url(#bp-grid)" className="text-foreground" />
         </svg>
       </div>
 
-      {/* Animated lines */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d="M 0 400 Q 400 350 800 400 T 1600 400"
-          stroke="currentColor"
-          strokeWidth="1"
-          fill="none"
-          className="text-border animate-draw"
-          style={{ opacity: 0.3 }}
-        />
-        <path
-          d="M 0 500 Q 300 450 600 500 T 1200 500 T 1800 500"
-          stroke="currentColor"
-          strokeWidth="1"
-          fill="none"
-          className="text-border animate-draw"
-          style={{ opacity: 0.2, animationDelay: "0.3s" }}
-        />
-      </svg>
+      <div className="relative mx-auto grid max-w-7xl grid-cols-1 gap-10 px-6 pt-14 lg:grid-cols-12 lg:gap-12 lg:px-8 lg:pt-20">
+        {/* Left column — editorial hero */}
+        <motion.div className="lg:col-span-7" variants={fadeInUp()}>
+          <div className="mb-6 inline-flex items-center gap-2 border border-border-soft px-2 py-1">
+            <span className="h-1.5 w-1.5 bg-teal-500" />
+            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+              {t("hero.badge")}
+            </span>
+          </div>
 
-      <div className="relative max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 pt-20 lg:pt-32">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Left content */}
-          <motion.div variants={fadeInUp()}>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border bg-card mb-6">
-              <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-              <span className="text-xs font-medium text-muted-foreground">{t("hero.badge")}</span>
-            </div>
-
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-[1.1] text-balance">
-              {t("hero.title1")}
-              <br />
-              <span className="relative">
+          <h1
+            className={[
+              "font-[family-name:var(--font-display)] font-extrabold leading-[0.92]",
+              "text-[44px] sm:text-[64px] lg:text-[88px]",
+              "text-foreground",
+            ].join(" ")}
+          >
+            <span className="block">{t("hero.title1")}</span>
+            <span className="mt-1 block">
+              <OutlinedDisplay stack={4} offset={4} solidFront>
                 {t("hero.title2")}
-                <svg
-                  className="absolute -bottom-2 left-0 w-full"
-                  height="8"
-                  viewBox="0 0 200 8"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M1 5.5C47.6667 2.16667 141 -2.1 199 5.5"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    className="text-accent"
-                  />
-                </svg>
-              </span>
-            </h1>
+              </OutlinedDisplay>
+            </span>
+          </h1>
 
-            <p className="mt-6 text-lg text-muted-foreground max-w-lg leading-relaxed">{t("hero.description")}</p>
+          <p className="mt-8 max-w-[58ch] text-base leading-[1.65] text-muted-foreground sm:text-lg">
+            {t("hero.description")}
+          </p>
 
-            <div className="mt-8 flex flex-row gap-3">
-              <Button size="lg" className="group flex-1 sm:flex-initial" asChild>
-                <Link href="https://dash.web3insight.ai">
-                  <span className="hidden sm:inline">{t("hero.exploreDashboard")}</span>
-                  <span className="sm:hidden">Dashboard</span>
-                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" className="flex-1 sm:flex-initial" asChild>
-                <Link href="https://github.com/web3insight-ai/web3insight" target="_blank">
-                  <span className="hidden sm:inline">{t("hero.viewGithub")}</span>
-                  <span className="sm:hidden">GitHub</span>
-                </Link>
-              </Button>
+          <div className="mt-10 flex flex-wrap items-center gap-4">
+            <Button size="lg" asChild className="group">
+              <Link href="https://dash.web3insight.ai">
+                <span>{t("hero.exploreDashboard")}</span>
+                <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </Button>
+            <Button size="lg" variant="outline" asChild>
+              <Link href="https://github.com/web3insight-ai/web3insight" target="_blank">
+                {t("hero.viewGithub")}
+              </Link>
+            </Button>
+            <div className="ml-1 hidden sm:inline-flex">
+              <HandLabel>start</HandLabel>
             </div>
-          </motion.div>
+          </div>
 
-          {/* Right side - Bento grid preview */}
-          <motion.div className="relative" variants={fadeInUp(0.15)}>
-            <div className="grid grid-cols-2 gap-3">
-              {/* Main card */}
-              <div className="col-span-2 p-6 bg-card border border-border rounded-lg">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                    <Search className="w-5 h-5 text-muted-foreground" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{t("hero.askAnything")}</p>
-                    <p className="text-xs text-muted-foreground">{t("hero.aiPowered")}</p>
-                  </div>
-                </div>
-                <div className="bg-secondary rounded-md p-3 font-mono text-xs text-muted-foreground">
-                  <span className="text-accent">{">"}</span> top contributors of ethereum
-                </div>
-              </div>
+          {/* schematic ruler */}
+          <div className="relative mt-14 flex items-center gap-3 pl-1">
+            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+              rev · 0001
+            </span>
+            <div className="h-px flex-1 bg-border-soft" />
+            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+              sheet 01/04
+            </span>
+          </div>
+        </motion.div>
 
-              {/* Stats cards */}
-              <div className="p-4 bg-card border border-border rounded-lg">
-                <p className="text-xs text-muted-foreground mb-1">{t("hero.developers")}</p>
-                <div className="min-h-[32px] flex items-center">
-                  <AnimatedHeroNumber value={statsData?.coreDeveloper ?? 0} isLoading={isLoading} />
-                </div>
-              </div>
-              <div className="p-4 bg-card border border-border rounded-lg">
-                <p className="text-xs text-muted-foreground mb-1">{t("hero.ecosystems")}</p>
-                <div className="min-h-[32px] flex items-center">
-                  <AnimatedHeroNumber value={statsData?.ecosystem ?? 0} isLoading={isLoading} />
-                </div>
-              </div>
+        {/* Right column — schematic panel grid */}
+        <motion.div
+          className="relative lg:col-span-5 lg:pt-4"
+          variants={fadeInUp(0.18)}
+        >
+          {/* Trace connecting terminal → stats */}
+          <Trace
+            className="inset-0 z-0 h-full w-full"
+            viewBox="0 0 100 100"
+            d="M 50 48 L 50 62 L 22 62 L 22 72 M 50 62 L 78 62 L 78 72"
+            length={280}
+            delay={0.8}
+            duration={1.6}
+            nodes={[
+              { x: 50, y: 48 },
+              { x: 22, y: 72 },
+              { x: 78, y: 72 },
+            ]}
+            color="teal"
+          />
 
-              {/* Dotted pattern card */}
-              <div className="col-span-2 p-4 bg-card border border-border rounded-lg overflow-hidden relative">
-                <div className="absolute inset-0 dotted-pattern text-border opacity-30" />
-                <div className="relative flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">{t("hero.contributors")}</p>
-                    <div className="min-h-[28px] flex items-center">
-                      <AnimatedContributors value={statsData?.developer ?? 0} isLoading={isLoading} />
-                    </div>
-                  </div>
-                  <div className="w-16 h-16 rounded-full border-2 border-dashed border-border flex items-center justify-center">
-                    <Globe className="w-8 h-8 text-accent" />
-                  </div>
+          <div className="relative z-10 flex flex-col gap-4">
+            <Panel
+              label={{ text: "query · nl", position: "tl" }}
+              code="01"
+              className="p-0"
+            >
+              <TerminalPanel
+                title="web3insight · nl-query"
+                lines={terminalLines}
+                className="border-0"
+              />
+            </Panel>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Panel
+                ground="dotted"
+                label={{ text: "core · devs", position: "tl" }}
+                code="02"
+                className="p-5"
+              >
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  {t("hero.developers")}
+                </p>
+                <div className="mt-2 flex min-h-[36px] items-center">
+                  <HeroNumber value={statsData?.coreDeveloper ?? 0} isLoading={isLoading} />
                 </div>
-              </div>
+                <p className="mt-2 font-mono text-[10px] text-muted-foreground/80">
+                  src: opendigger · 30d
+                </p>
+              </Panel>
+
+              <Panel
+                ground="hatched"
+                label={{ text: "ecosystems", position: "tl" }}
+                code="03"
+                className="p-5"
+              >
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  {t("hero.ecosystems")}
+                </p>
+                <div className="mt-2 flex min-h-[36px] items-center">
+                  <HeroNumber value={statsData?.ecosystem ?? 0} isLoading={isLoading} />
+                </div>
+                <p className="mt-2 font-mono text-[10px] text-muted-foreground/80">
+                  live · indexed
+                </p>
+              </Panel>
             </div>
 
-            {/* Decorative elements */}
-            <div className="absolute -top-4 -right-4 w-8 h-8 border border-border rounded-full" />
-            <div className="absolute -bottom-4 -left-4 w-12 h-12 border border-border rounded-sm rotate-45" />
-          </motion.div>
-        </div>
-      </div>
-
-      {/* Bottom border with nodes */}
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-border">
-        <div className="absolute left-1/4 -top-1.5 w-3 h-3 bg-background border border-border rounded-full" />
-        <div className="absolute left-1/2 -top-1.5 w-3 h-3 bg-accent border border-accent rounded-full" />
-        <div className="absolute left-3/4 -top-1.5 w-3 h-3 bg-background border border-border rounded-full" />
+            <Panel
+              label={{ text: "contributors · global", position: "tl" }}
+              code="04"
+              className="p-5"
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                    {t("hero.contributors")}
+                  </p>
+                  <div className="mt-2 flex min-h-[32px] items-center">
+                    <HeroNumber
+                      value={statsData?.developer ?? 0}
+                      isLoading={isLoading}
+                      format="M+"
+                    />
+                  </div>
+                </div>
+                <div className="relative h-16 w-16">
+                  <svg viewBox="0 0 64 64" className="h-full w-full text-foreground">
+                    <circle cx="32" cy="32" r="26" stroke="currentColor" strokeWidth="1" fill="none" />
+                    <circle cx="32" cy="32" r="18" stroke="currentColor" strokeWidth="1" strokeDasharray="2 3" fill="none" />
+                    <circle cx="32" cy="32" r="2" className="fill-teal-500" />
+                    <line x1="32" y1="6" x2="32" y2="12" stroke="currentColor" strokeWidth="1" />
+                    <line x1="32" y1="52" x2="32" y2="58" stroke="currentColor" strokeWidth="1" />
+                    <line x1="6" y1="32" x2="12" y2="32" stroke="currentColor" strokeWidth="1" />
+                    <line x1="52" y1="32" x2="58" y2="32" stroke="currentColor" strokeWidth="1" />
+                  </svg>
+                </div>
+              </div>
+            </Panel>
+          </div>
+        </motion.div>
       </div>
     </motion.section>
   )
