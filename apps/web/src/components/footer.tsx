@@ -1,10 +1,11 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { Github } from "lucide-react"
 import { useI18n } from "@/lib/i18n-context"
 import type { MouseEvent } from "react"
-import { HandLabel, LogoMark } from "@/components/blueprint"
+import { HandLabel } from "@/components/blueprint"
 
 function XIcon({ className }: { className?: string }) {
   return (
@@ -44,10 +45,13 @@ export function Footer() {
             {/* Brand column */}
             <div className="border-border-soft p-8 md:col-span-2 md:border-r">
               <Link href="/" className="flex items-center gap-2.5">
-                <LogoMark size={24} />
-                <span className="font-[family-name:var(--font-display)] text-lg font-bold tracking-tight text-foreground">
-                  Web3Insight
-                </span>
+                <Image
+                  src="/web3insight_logo.svg"
+                  alt="Web3Insight"
+                  width={229}
+                  height={26}
+                  className="h-6 w-auto"
+                />
               </Link>
               <p className="mt-5 max-w-[42ch] text-sm leading-[1.65] text-muted-foreground">
                 {t("footer.description")}
