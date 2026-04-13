@@ -12,6 +12,12 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { PrivyProvider } from "@/providers/PrivyProvider";
 import { PrivyAuthSync } from "@/providers/PrivyAuthSync";
 import { QueryProvider } from "@/providers/QueryProvider";
+import { useChartThemes } from "@/lib/charts";
+
+function ChartThemeBinder() {
+  useChartThemes();
+  return null;
+}
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {
   return (
@@ -21,11 +27,13 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
           <PrivyProvider>
             <PrivyAuthSync />
             <ThemeProvider
-              defaultTheme="system"
+              attribute="data-theme"
+              defaultTheme="light"
               enableSystem
               disableTransitionOnChange
             >
               <ClientOnly>
+                <ChartThemeBinder />
                 <NavigationProgress />
                 <ToastContainer />
                 {children}

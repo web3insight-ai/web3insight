@@ -68,7 +68,7 @@ function formatXLabel(value: unknown): string {
 
 function ChartTitle({ children }: { children: string }) {
   return (
-    <h4 className="mb-3 text-[13px] font-semibold tracking-tight text-gray-800 dark:text-gray-200">
+    <h4 className="mb-3 text-[13px] font-semibold tracking-tight text-fg">
       {children}
     </h4>
   );
@@ -161,20 +161,18 @@ const { registry: web3InsightRegistry } = defineRegistry(web3InsightCatalog, {
     MetricCard: ({ props }) => (
       <div
         className={cn(
-          "min-w-[140px] flex-1 rounded-xl p-4",
-          "bg-gray-50/80 dark:bg-white/[0.04]",
+          "min-w-[140px] flex-1 rounded-[2px] p-4",
+          "bg-bg-sunken dark:bg-white/[0.04]",
         )}
       >
-        <p className="text-[11px] font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">
+        <p className="text-[11px] font-medium uppercase tracking-wider text-fg-subtle">
           {props.label}
         </p>
-        <p className="mt-1.5 text-2xl font-bold tabular-nums text-gray-900 dark:text-white">
+        <p className="mt-1.5 text-2xl font-bold tabular-nums text-fg">
           {props.value}
         </p>
         {props.detail && (
-          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            {props.detail}
-          </p>
+          <p className="mt-1 text-xs text-fg-muted">{props.detail}</p>
         )}
       </div>
     ),
@@ -344,14 +342,14 @@ const { registry: web3InsightRegistry } = defineRegistry(web3InsightCatalog, {
       return (
         <div>
           {props.title && <ChartTitle>{props.title}</ChartTitle>}
-          <div className="overflow-x-auto rounded-lg bg-gray-50/50 dark:bg-white/[0.02]">
+          <div className="overflow-x-auto rounded-[2px] bg-bg-sunken dark:bg-white/[0.02]">
             <table className="w-full text-left text-[13px]">
               <thead>
-                <tr className="border-b border-gray-200/80 dark:border-white/[0.06]">
+                <tr className="border-b border-rule dark:border-white/[0.06]">
                   {columns.map((col) => (
                     <th
                       key={col.key}
-                      className="px-3 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500"
+                      className="px-3 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-fg-subtle"
                     >
                       {col.label ?? col.key}
                     </th>
@@ -362,7 +360,7 @@ const { registry: web3InsightRegistry } = defineRegistry(web3InsightCatalog, {
                 {rows.map((row, rowIdx) => (
                   <tr
                     key={rowIdx}
-                    className="border-b border-gray-100/80 last:border-0 dark:border-white/[0.03]"
+                    className="border-b border-rule last:border-0 dark:border-white/[0.03]"
                   >
                     {columns.map((col) => {
                       const cellValue = row[col.key];
@@ -373,7 +371,7 @@ const { registry: web3InsightRegistry } = defineRegistry(web3InsightCatalog, {
                       return (
                         <td
                           key={col.key}
-                          className="px-3 py-2 tabular-nums text-gray-700 dark:text-gray-300"
+                          className="px-3 py-2 tabular-nums text-fg"
                         >
                           {display}
                         </td>
@@ -385,7 +383,7 @@ const { registry: web3InsightRegistry } = defineRegistry(web3InsightCatalog, {
                   <tr>
                     <td
                       colSpan={columns.length}
-                      className="px-3 py-4 text-center text-gray-400"
+                      className="px-3 py-4 text-center text-fg-subtle"
                     >
                       No data
                     </td>
@@ -413,7 +411,7 @@ function Web3JsonRenderFallback({
   children?: ReactNode;
 }) {
   return (
-    <div className="rounded-lg bg-gray-50 p-3 text-xs text-gray-400 dark:bg-white/[0.04]">
+    <div className="rounded-[2px] bg-bg-sunken p-3 text-xs text-fg-subtle dark:bg-white/[0.04]">
       <p>Unknown component: {element.type}</p>
       {children}
     </div>

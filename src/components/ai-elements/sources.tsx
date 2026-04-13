@@ -15,7 +15,7 @@ export type SourcesProps = ComponentProps<"div">;
 export function Sources({ className, ...props }: SourcesProps) {
   return (
     <Collapsible
-      className={cn("not-prose mb-3 text-primary text-xs", className)}
+      className={cn("not-prose mb-3 text-accent text-xs", className)}
       {...props}
     />
   );

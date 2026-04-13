@@ -174,22 +174,22 @@ function SignedUser({ onSignIn }: SignedUserProps) {
         >
           <div className="flex flex-col">
             {/* User info section */}
-            <div className="px-4 py-3 border-b border-border dark:border-border-dark bg-gray-50 dark:bg-surface-elevated rounded-t-lg">
-              <p className="font-medium text-sm text-gray-900 dark:text-white truncate">
+            <div className="px-4 py-3 border-b border-rule bg-bg-sunken rounded-t-[2px]">
+              <p className="font-medium text-sm text-fg truncate">
                 {displayName}
               </p>
-              <p className="text-xs text-gray-600 dark:text-gray-400 truncate mt-1">
+              <p className="text-xs text-fg-muted truncate mt-1">
                 {userInfo.primaryAccount}
               </p>
             </div>
 
             {/* Wallet section */}
             {truncatedAddress && (
-              <div className="px-4 py-3 border-b border-border dark:border-border-dark">
+              <div className="px-4 py-3 border-b border-rule">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <Wallet size={14} className="text-gray-400" />
-                    <span className="text-xs text-gray-500">Privy Wallet</span>
+                    <Wallet size={14} className="text-fg-muted" />
+                    <span className="text-xs text-fg-muted">Privy Wallet</span>
                   </div>
                   {chainName && (
                     <Chip size="sm" variant="flat" className="text-xs h-5">
@@ -199,13 +199,13 @@ function SignedUser({ onSignIn }: SignedUserProps) {
                 </div>
                 <button
                   onClick={handleCopyAddress}
-                  className="flex items-center gap-1.5 text-sm font-mono text-gray-700 dark:text-gray-300 hover:text-primary transition-colors"
+                  className="flex items-center gap-1.5 text-sm font-mono text-fg hover:text-accent transition-colors"
                 >
                   {truncatedAddress}
                   {copied ? (
-                    <Check size={12} className="text-green-500" />
+                    <Check size={12} className="text-accent" />
                   ) : (
-                    <Copy size={12} className="text-gray-400" />
+                    <Copy size={12} className="text-fg-muted" />
                   )}
                 </button>
               </div>
@@ -249,7 +249,7 @@ function SignedUser({ onSignIn }: SignedUserProps) {
             </div>
 
             {/* Logout button */}
-            <div className="p-2 border-t border-border dark:border-border-dark">
+            <div className="p-2 border-t border-rule">
               <Button
                 fullWidth
                 size="sm"
@@ -271,7 +271,7 @@ function SignedUser({ onSignIn }: SignedUserProps) {
   return (
     <button
       onClick={() => onSignIn()}
-      className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-200"
+      className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-fg hover:text-accent transition-colors duration-200"
     >
       <LogIn size={16} />
       Sign In

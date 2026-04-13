@@ -1,8 +1,8 @@
 import clsx from "clsx";
-import { Card, CardBody, CardHeader, Divider } from "@/components/ui";
 import ReactEcharts from "echarts-for-react";
-import { Users } from "lucide-react";
 
+import { Panel } from "$/blueprint";
+import { SmallCapsLabel } from "$/primitives";
 import type { ChartCardProps } from "./typing";
 
 function ChartCard({
@@ -13,24 +13,14 @@ function ChartCard({
   chartContainerClassName,
 }: ChartCardProps) {
   return (
-    <Card
-      className={clsx(
-        "bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden",
-        className,
-      )}
+    <Panel
+      label={{ text: String(title).toLowerCase(), position: "tl" }}
+      className={clsx("overflow-hidden", className)}
     >
-      <CardHeader className="px-6 py-5">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <Users size={18} className="text-primary" />
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-            {title}
-          </h3>
-        </div>
-      </CardHeader>
-      <Divider className="bg-border dark:bg-border-dark" />
-      <CardBody className="px-6 py-4">
+      <div className="px-5 pt-5 pb-3 border-b border-rule">
+        <SmallCapsLabel>{title}</SmallCapsLabel>
+      </div>
+      <div className="px-5 py-4">
         <div
           className={clsx("w-full overflow-hidden", chartContainerClassName)}
           style={style}
@@ -40,8 +30,8 @@ function ChartCard({
             option={option}
           />
         </div>
-      </CardBody>
-    </Card>
+      </div>
+    </Panel>
   );
 }
 

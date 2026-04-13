@@ -67,7 +67,7 @@ export default function SimpleStatResult({ data }: { data: unknown }) {
   return (
     <ToolResultCard>
       <div className="flex flex-col items-center py-2 text-center">
-        <p className="text-3xl font-bold tabular-nums text-gray-900 dark:text-white">
+        <p className="text-3xl font-bold tabular-nums text-fg">
           {formatNum(stat.value)}
         </p>
         <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>

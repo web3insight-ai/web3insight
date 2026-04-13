@@ -11,7 +11,10 @@ function Skeleton({ className, children, isLoaded, ...props }: SkeletonProps) {
   }
 
   return (
-    <div className={clsx("loading-skeleton rounded-lg", className)} {...props}>
+    <div
+      className={clsx("loading-skeleton rounded-[2px]", className)}
+      {...props}
+    >
       {children && <div className="invisible">{children}</div>}
     </div>
   );

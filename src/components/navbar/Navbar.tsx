@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import clsx from "clsx";
 import Link from "next/link";
@@ -6,10 +6,8 @@ import Image from "next/image";
 import { useMediaQuery } from "react-responsive";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 
 import { getTitle } from "@/utils/app";
-import { fadeInDown } from "@/utils/animations";
 
 import SignedUserWidget from "~/auth/widgets/signed-user";
 
@@ -24,71 +22,71 @@ function Navbar({ className, children, user, extra }: NavbarProps) {
 
   const { signIn, signOut, resetPassword } = useSessionActions();
 
-  // Avoid hydration mismatch
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Determine if dark mode is active
-  const isDark = mounted && (theme === 'system' ? systemTheme === 'dark' : theme === 'dark');
+  const isDark =
+    mounted && (theme === "system" ? systemTheme === "dark" : theme === "dark");
 
   return (
-    <motion.div
-      variants={fadeInDown}
-      initial="hidden"
-      animate="visible"
-      className={clsx("flex items-center w-full px-6 py-4", className)}
-    >
-      {/* Left side - Logo */}
-      <div className="flex items-center gap-3 flex-1">
-        <Link className="flex items-center gap-3 group" title="Back to home" href="/">
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+    <div className={clsx("relative w-full", className)}>
+      {/* Blueprint ruler strip — shared with web3insight.ai header */}
+      <div
+        aria-hidden
+        className="h-1.5 w-full text-rule"
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(to right, currentColor 0 1px, transparent 1px 24px)",
+        }}
+      />
+      <div className="flex items-center w-full px-6 py-3.5 gap-6">
+        <div className="flex items-center flex-1 gap-2.5">
+          <Link
+            className="flex items-center opacity-100 transition-opacity hover:opacity-80"
+            title="Back to home"
+            href="/"
           >
             {mounted ? (
               <Image
-                src={isDark ? "/web3insight_logo_white.svg" : "/web3insight_logo.svg"}
-                width={isDesktop ? 150 : 120}
-                height={isDesktop ? 26 : 20}
+                src={
+                  isDark
+                    ? "/web3insight_logo_white.svg"
+                    : "/web3insight_logo.svg"
+                }
+                width={isDesktop ? 140 : 112}
+                height={isDesktop ? 24 : 20}
                 alt={`${getTitle()} Logo`}
                 priority
               />
             ) : (
-              <div style={{ width: isDesktop ? 150 : 120, height: isDesktop ? 26 : 20 }} />
+              <div
+                style={{
+                  width: isDesktop ? 140 : 112,
+                  height: isDesktop ? 24 : 20,
+                }}
+              />
             )}
-          </motion.div>
-        </Link>
+          </Link>
+          <span className="hidden font-mono text-[10px] uppercase tracking-[0.22em] text-fg-muted sm:inline">
+            /dashboard
+          </span>
+        </div>
+
+        <div className="flex items-center justify-center">{extra}</div>
+
+        <div className="flex items-center gap-2 flex-1 justify-end">
+          {children}
+          <SignedUserWidget
+            user={user}
+            onSignIn={signIn}
+            onSignOut={signOut}
+            onResetPassword={resetPassword}
+          />
+          <PrefersColorSchemeSelector />
+        </div>
       </div>
-
-      {/* Center - Navigation Menu */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1, duration: 0.3 }}
-        className="flex items-center justify-center flex-1"
-      >
-        {extra}
-      </motion.div>
-
-      {/* Right side - User controls */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.3 }}
-        className="flex items-center gap-3 flex-1 justify-end"
-      >
-        {children}
-        <SignedUserWidget
-          user={user}
-          onSignIn={signIn}
-          onSignOut={signOut}
-          onResetPassword={resetPassword}
-        />
-        <PrefersColorSchemeSelector />
-      </motion.div>
-    </motion.div>
+    </div>
   );
 }
 

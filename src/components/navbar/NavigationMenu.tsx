@@ -91,10 +91,10 @@ function NavDropdown({ group, index }: { group: NavGroup; index: number }) {
       <Popover isOpen={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger
           className={clsx(
-            "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer",
+            "flex items-center gap-1.5 px-2.5 py-1.5 rounded-[2px] text-xs font-medium transition-all duration-200 cursor-pointer",
             isGroupActive
-              ? "bg-primary/10 text-primary"
-              : "text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50",
+              ? "bg-accent-subtle text-accent"
+              : "text-fg-muted hover:text-fg hover:bg-bg-sunken",
           )}
         >
           <GroupIcon size={14} />
@@ -128,13 +128,13 @@ function NavDropdown({ group, index }: { group: NavGroup; index: number }) {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: itemIndex * 0.03 }}
                       className={clsx(
-                        "flex items-center gap-2 px-3 py-2 rounded-md text-xs font-medium",
-                        "text-gray-400 dark:text-gray-600 cursor-not-allowed",
+                        "flex items-center gap-2 px-3 py-2 rounded-[2px] text-xs font-medium",
+                        "text-fg-subtle cursor-not-allowed",
                       )}
                     >
                       <Icon size={14} />
                       <span>{item.name}</span>
-                      <span className="ml-auto text-[10px] text-gray-400 dark:text-gray-600">
+                      <span className="ml-auto text-[10px] text-fg-subtle">
                         Soon
                       </span>
                     </motion.div>
@@ -142,10 +142,10 @@ function NavDropdown({ group, index }: { group: NavGroup; index: number }) {
                 }
 
                 const linkClassName = clsx(
-                  "flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-150",
+                  "flex items-center gap-2.5 px-3 py-2 rounded-[2px] text-[13px] font-medium transition-all duration-150",
                   isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800",
+                    ? "bg-accent-subtle text-accent"
+                    : "text-fg-muted hover:text-fg hover:bg-bg-sunken",
                 );
 
                 return (

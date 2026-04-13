@@ -72,8 +72,8 @@ export function CopilotArchivedChatsDialog({
           <p className="text-destructive text-sm">{dialogError}</p>
         ) : null}
 
-        <div className="max-h-[420px] overflow-y-auto rounded-md border">
-          <div className="bg-muted/30 text-muted-foreground grid grid-cols-[minmax(0,1fr)_180px_120px] gap-4 border-b px-4 py-2 text-xs font-medium">
+        <div className="max-h-[420px] overflow-y-auto rounded-[2px] border border-rule">
+          <div className="bg-bg-sunken text-fg-muted grid grid-cols-[minmax(0,1fr)_180px_120px] gap-4 border-b border-rule px-4 py-2 font-mono text-[10px] uppercase tracking-[0.12em]">
             <span>Name</span>
             <span>Date created</span>
             <span>Actions</span>
@@ -106,7 +106,7 @@ export function CopilotArchivedChatsDialog({
           {archivedThreads.map((thread) => (
             <div
               key={thread.remoteId}
-              className="grid grid-cols-[minmax(0,1fr)_180px_120px] items-center gap-4 border-b px-4 py-3 last:border-b-0"
+              className="grid grid-cols-[minmax(0,1fr)_180px_120px] items-center gap-4 border-b border-rule px-4 py-3 last:border-b-0"
             >
               <span className="truncate text-sm">
                 {renderSessionItemTitle(thread)}

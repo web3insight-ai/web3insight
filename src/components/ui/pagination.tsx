@@ -59,7 +59,7 @@ function Pagination({
       <button
         onClick={() => onChange(Math.max(1, page - 1))}
         disabled={page === 1}
-        className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+        className="p-1.5 rounded-[2px] text-fg-muted hover:bg-bg-sunken disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         aria-label="Previous page"
       >
         <ChevronLeft size={16} />
@@ -70,7 +70,7 @@ function Pagination({
           return (
             <span
               key={`dots-${idx}`}
-              className="px-1 text-gray-400 select-none"
+              className="px-1 text-fg-subtle select-none"
             >
               ...
             </span>
@@ -82,10 +82,10 @@ function Pagination({
             key={item}
             onClick={() => onChange(item)}
             className={clsx(
-              "min-w-[32px] h-8 rounded-lg text-sm font-medium transition-colors",
+              "min-w-[32px] h-8 rounded-[2px] text-sm font-medium transition-colors",
               item === page
                 ? "bg-primary text-white"
-                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800",
+                : "text-fg-muted hover:bg-bg-sunken",
             )}
             aria-label={`Page ${item}`}
             aria-current={item === page ? "page" : undefined}
@@ -98,7 +98,7 @@ function Pagination({
       <button
         onClick={() => onChange(Math.min(total, page + 1))}
         disabled={page === total}
-        className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+        className="p-1.5 rounded-[2px] text-fg-muted hover:bg-bg-sunken disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         aria-label="Next page"
       >
         <ChevronRight size={16} />

@@ -94,17 +94,17 @@ export function GenerateConfigForm({ defaultValues }: GenerateConfigFormProps) {
     watchedValues.payTo && /^0x[a-fA-F0-9]{40}$/.test(watchedValues.payTo);
 
   return (
-    <Card className="bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark">
+    <Card className="bg-bg-raised border border-rule">
       <CardBody className="p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <FileJson size={20} className="text-primary" />
+          <div className="p-2 rounded-[2px] bg-accent-subtle">
+            <FileJson size={20} className="text-accent" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-fg">
               Generate donation.json
             </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-fg-muted">
               Create your donation configuration file
             </p>
           </div>
@@ -154,7 +154,7 @@ export function GenerateConfigForm({ defaultValues }: GenerateConfigFormProps) {
 
               {/* Creator Section */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="text-sm font-medium text-fg">
                   Creator (Optional)
                 </label>
                 <div className="grid grid-cols-2 gap-4">
@@ -174,7 +174,7 @@ export function GenerateConfigForm({ defaultValues }: GenerateConfigFormProps) {
               {/* Links Section */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="text-sm font-medium text-fg">
                     Links (Optional)
                   </label>
                   <Button
@@ -222,9 +222,7 @@ export function GenerateConfigForm({ defaultValues }: GenerateConfigFormProps) {
           {/* Preview Section */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Preview
-              </span>
+              <span className="text-sm font-medium text-fg">Preview</span>
               <Chip
                 size="sm"
                 variant="flat"
@@ -235,7 +233,7 @@ export function GenerateConfigForm({ defaultValues }: GenerateConfigFormProps) {
             </div>
 
             <div className="relative">
-              <pre className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-border-dark overflow-x-auto text-sm font-mono text-gray-800 dark:text-gray-200 min-h-[200px]">
+              <pre className="p-4 bg-bg-raised rounded-[2px] border border-rule overflow-x-auto text-sm font-mono text-fg min-h-[200px]">
                 {generatedConfig}
               </pre>
 
@@ -256,7 +254,7 @@ export function GenerateConfigForm({ defaultValues }: GenerateConfigFormProps) {
             </div>
 
             {/* Instructions */}
-            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-[2px] border border-blue-200 dark:border-blue-800">
               <div className="flex items-start gap-3">
                 <Info
                   size={20}

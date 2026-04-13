@@ -2,56 +2,84 @@ import type { Config } from "tailwindcss";
 
 export default {
   content: ["./src/**/*.{js,ts,jsx,tsx}"],
+  darkMode: ["selector", '[data-theme="dark"]'],
   theme: {
     extend: {
       fontFamily: {
-        sans: [
-          "var(--font-inter)",
-          "-apple-system",
-          "BlinkMacSystemFont",
-          "SF Pro Display",
-          "Segoe UI",
-          "Roboto",
-          "sans-serif",
-        ],
+        display: ["var(--font-display)"],
+        sans: ["var(--font-sans)"],
+        mono: ["var(--font-mono)"],
       },
       colors: {
-        background: {
-          DEFAULT: "#FFFFFF",
-          dark: "#0F0F0F",
+        // Semantic tokens (read live from CSS vars — flip with theme toggle)
+        bg: "var(--bg)",
+        "bg-raised": "var(--bg-raised)",
+        "bg-sunken": "var(--bg-sunken)",
+        fg: "var(--fg)",
+        "fg-muted": "var(--fg-muted)",
+        "fg-subtle": "var(--fg-subtle)",
+        rule: "var(--rule)",
+        "rule-strong": "var(--rule-strong)",
+        accent: {
+          DEFAULT: "var(--accent)",
+          fg: "var(--accent-fg)",
+          muted: "var(--accent-muted)",
+          subtle: "var(--accent-subtle)",
         },
-        foreground: {
-          DEFAULT: "#000000",
-          dark: "#FFFFFF",
-        },
-        surface: {
-          DEFAULT: "#FAFAFA",
-          dark: "#1A1A1A",
-          elevated: "#252525",
-        },
-        border: {
-          DEFAULT: "rgba(0, 0, 0, 0.06)",
-          dark: "rgba(255, 255, 255, 0.08)",
-        },
-        primary: {
-          DEFAULT: "#0F766E",
-          foreground: "#FFFFFF",
-        },
-        secondary: {
-          DEFAULT: "#6366F1",
-          foreground: "#FFFFFF",
-        },
-        success: {
-          DEFAULT: "#059669",
-          foreground: "#FFFFFF",
-        },
-        warning: {
-          DEFAULT: "#D97706",
-          foreground: "#FFFFFF",
+        warn: {
+          DEFAULT: "var(--warn)",
+          subtle: "var(--warn-subtle)",
         },
         danger: {
-          DEFAULT: "#DC2626",
-          foreground: "#FFFFFF",
+          DEFAULT: "var(--danger)",
+        },
+
+        // Teal ramp (for charts and raw palette access)
+        teal: {
+          50: "var(--teal-50)",
+          100: "var(--teal-100)",
+          200: "var(--teal-200)",
+          300: "var(--teal-300)",
+          400: "var(--teal-400)",
+          500: "var(--teal-500)",
+          600: "var(--teal-600)",
+          700: "var(--teal-700)",
+          800: "var(--teal-800)",
+          900: "var(--teal-900)",
+          950: "var(--teal-950)",
+        },
+
+        // Legacy aliases kept ONLY to prevent build breakage during the
+        // phased migration. Every use-site will be replaced across Phases 1–9
+        // and these aliases will be deleted in Phase 9.
+        background: {
+          DEFAULT: "var(--bg)",
+          dark: "var(--bg)",
+        },
+        foreground: {
+          DEFAULT: "var(--fg)",
+          dark: "var(--fg)",
+        },
+        surface: {
+          DEFAULT: "var(--bg-raised)",
+          dark: "var(--bg-raised)",
+          elevated: "var(--bg-sunken)",
+        },
+        border: {
+          DEFAULT: "var(--rule)",
+          dark: "var(--rule)",
+        },
+        primary: {
+          DEFAULT: "var(--accent)",
+          foreground: "var(--accent-fg)",
+        },
+        success: {
+          DEFAULT: "var(--accent)",
+          foreground: "var(--accent-fg)",
+        },
+        warning: {
+          DEFAULT: "var(--warn)",
+          foreground: "var(--accent-fg)",
         },
       },
       spacing: {
@@ -61,25 +89,27 @@ export default {
       },
       maxWidth: {
         "8xl": "88rem",
-        content: "1024px",
+        content: "60rem",
+        measure: "68ch",
+        "measure-wide": "78ch",
       },
       boxShadow: {
-        subtle: "0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06)",
-        card: "0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06)",
-        hover: "0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04)",
+        // Editorial rule-shadow: 1px hairline + subtle lift
+        editorial: "0 0 0 1px var(--rule), 0 1px 2px rgba(0, 0, 0, 0.04)",
+        "editorial-raised":
+          "0 0 0 1px var(--rule), 0 4px 12px rgba(0, 0, 0, 0.06)",
+      },
+      transitionTimingFunction: {
+        "out-editorial": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "out-quart": "cubic-bezier(0.25, 1, 0.5, 1)",
       },
       transitionDuration: {
         DEFAULT: "200ms",
       },
       animation: {
-        "fade-in": "fadeIn 400ms ease-in-out",
-        "slide-up": "slideUp 400ms ease-out",
-        typewriter: "typewriter 2s steps(40) 1s forwards",
-        blink: "blink 1s infinite",
-        "pulse-glow": "pulseGlow 2s ease-in-out infinite",
-        shimmer: "shimmer 2s ease-in-out infinite",
-        "gradient-x": "gradientX 3s ease infinite",
-        "scale-in": "scaleIn 300ms ease-out",
+        "fade-in": "fadeIn 400ms cubic-bezier(0.22, 1, 0.36, 1) both",
+        "editorial-pulse":
+          "editorial-pulse 2.4s cubic-bezier(0.22, 1, 0.36, 1) infinite",
       },
       gridColumn: {
         "span-2": "span 2 / span 2",
@@ -88,48 +118,15 @@ export default {
       },
       keyframes: {
         fadeIn: {
-          "0%": { opacity: "0" },
-          "100%": { opacity: "1" },
-        },
-        slideUp: {
-          "0%": { transform: "translateY(10px)", opacity: "0" },
+          "0%": { transform: "translateY(4px)", opacity: "0" },
           "100%": { transform: "translateY(0)", opacity: "1" },
         },
-        typewriter: {
-          "0%": { width: "0" },
-          "100%": { width: "100%" },
-        },
-        blink: {
-          "0%, 50%": { opacity: "1" },
-          "51%, 100%": { opacity: "0" },
-        },
-        pulseGlow: {
-          "0%, 100%": {
-            opacity: "1",
-            boxShadow:
-              "0 0 20px rgba(15, 118, 110, 0.5), 0 0 40px rgba(15, 118, 110, 0.3)",
-          },
-          "50%": {
-            opacity: "0.8",
-            boxShadow:
-              "0 0 30px rgba(15, 118, 110, 0.8), 0 0 60px rgba(15, 118, 110, 0.4)",
-          },
-        },
-        shimmer: {
-          "0%": { backgroundPosition: "-200% 0" },
-          "100%": { backgroundPosition: "200% 0" },
-        },
-        gradientX: {
-          "0%, 100%": { backgroundPosition: "0% 50%" },
-          "50%": { backgroundPosition: "100% 50%" },
-        },
-        scaleIn: {
-          "0%": { transform: "scale(0.95)", opacity: "0" },
-          "100%": { transform: "scale(1)", opacity: "1" },
+        "editorial-pulse": {
+          "0%, 100%": { opacity: "0.6" },
+          "50%": { opacity: "0.85" },
         },
       },
     },
   },
-  darkMode: ["selector", '[data-theme="dark"]'],
   plugins: [],
 } satisfies Config;

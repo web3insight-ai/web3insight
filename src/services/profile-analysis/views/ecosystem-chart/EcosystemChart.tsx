@@ -21,14 +21,12 @@ export function EcosystemChart({
 
   return (
     <Card
-      className={`bg-white dark:bg-surface-dark shadow-subtle ${className}`}
+      className={`bg-bg-raised border border-rule rounded-[2px] ${className}`}
     >
       <CardBody className="p-6">
-        <div className="flex items-center gap-3 mb-4 pb-2 border-b-2 border-border dark:border-border-dark">
+        <div className="flex items-center gap-3 mb-4 pb-2 border-b-2 border-rule">
           <Trophy className="text-warning" size={16} />
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-            ECOSYSTEM IMPACT
-          </h3>
+          <h3 className="text-sm font-semibold text-fg">ECOSYSTEM IMPACT</h3>
           <div className="ml-auto">
             <Chip color="warning" variant="flat" size="sm">
               TOP 3
@@ -54,17 +52,15 @@ export function EcosystemChart({
                         #{ecosystem.rank}
                       </span>
                     </Chip>
-                    <span className="font-medium text-gray-900 dark:text-white text-sm">
+                    <span className="font-medium text-fg text-sm">
                       {ecosystem.name}
                     </span>
                   </div>
-                  <span className="font-bold text-gray-900 dark:text-white">
-                    {ecosystem.score}
-                  </span>
+                  <span className="font-bold text-fg">{ecosystem.score}</span>
                 </div>
 
                 {/* Visual Bar Chart */}
-                <div className="relative h-8 bg-gray-50 dark:bg-surface-dark border-2 border-border dark:border-border-dark rounded-lg overflow-hidden">
+                <div className="relative h-8 bg-bg-raised border border-rule rounded-[2px] overflow-hidden">
                   <div
                     className="h-full transition-all duration-1000 ease-out flex items-center justify-center relative"
                     style={{
@@ -100,7 +96,7 @@ export function EcosystemChart({
                 </div>
 
                 {/* Activity Indicators */}
-                <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                <div className="flex items-center justify-between text-xs text-fg-muted">
                   <div className="flex items-center gap-1">
                     <Target size={10} />
                     <span>
@@ -129,9 +125,9 @@ export function EcosystemChart({
         {/* Additional Ecosystems Summary */}
         {aiProfile.web3Ecosystems?.otherEcosystems &&
           aiProfile.web3Ecosystems.otherEcosystems.length > 0 && (
-          <div className="mt-6 pt-4 border-t border-border dark:border-border-dark">
+          <div className="mt-6 pt-4 border-t border-rule">
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <span className="text-sm font-medium text-fg">
                   Other Ecosystems
               </span>
               <Chip size="sm" variant="light">

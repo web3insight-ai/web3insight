@@ -36,15 +36,13 @@ export function ProgrammingLanguagesBar({
 
   return (
     <div
-      className={`rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 p-4 ${className}`}
+      className={`rounded-[2px] border border-rule bg-bg-raised/50 p-4 ${className}`}
     >
       <div className="flex items-center gap-2 mb-4">
-        <Code2 size={14} className="text-gray-400" />
-        <h4 className="text-sm font-medium text-gray-900 dark:text-white">
-          Programming Languages
-        </h4>
+        <Code2 size={14} className="text-fg-subtle" />
+        <h4 className="text-sm font-medium text-fg">Programming Languages</h4>
         {hasLanguages && (
-          <span className="text-xs text-gray-500 dark:text-gray-400 ml-auto">
+          <span className="text-xs text-fg-muted ml-auto">
             {languages.length}
           </span>
         )}
@@ -68,29 +66,26 @@ export function ProgrammingLanguagesBar({
               >
                 <div className="flex items-center">
                   <div className="flex items-center gap-2">
-                    <Cpu
-                      size={12}
-                      className="text-gray-500 dark:text-gray-400"
-                    />
-                    <span className="font-medium text-sm text-gray-900 dark:text-white">
+                    <Cpu size={12} className="text-fg-muted" />
+                    <span className="font-medium text-sm text-fg">
                       {language.name}
                     </span>
                   </div>
                   <div className="ml-auto grid grid-cols-[100px_56px] gap-x-0.5 justify-items-start w-[156px]">
                     <div className="w-[100px]">
-                      <span className="inline-block text-xs text-gray-700 dark:text-gray-200 bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded border dark:border-gray-600">
+                      <span className="inline-block text-xs text-fg bg-rule px-2 py-1 rounded border border-rule">
                         {skillLevel}
                       </span>
                     </div>
                     <div className="w-[56px]">
-                      <span className="text-xs text-gray-500 dark:text-gray-400 tabular-nums">
+                      <span className="text-xs text-fg-muted tabular-nums">
                         {percentage.toFixed(1)}%
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="relative h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                <div className="relative h-2 bg-rule rounded-full overflow-hidden">
                   <div
                     className="h-full transition-all duration-500 ease-out bg-primary dark:bg-primary rounded-full"
                     style={{
@@ -109,16 +104,16 @@ export function ProgrammingLanguagesBar({
             <div key={index} className="space-y-2">
               <div className="flex items-center">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-gray-300 dark:bg-gray-700 rounded" />
-                  <div className="w-16 h-4 bg-gray-300 dark:bg-gray-700 rounded" />
+                  <div className="w-3 h-3 loading-skeleton rounded" />
+                  <div className="w-16 h-4 loading-skeleton rounded" />
                 </div>
                 <div className="ml-auto grid grid-cols-[100px_56px] gap-x-0.5 justify-items-start w-[156px]">
-                  <div className="w-[100px] h-4 bg-gray-300 dark:bg-gray-700 rounded" />
-                  <div className="w-[56px] h-4 bg-gray-300 dark:bg-gray-700 rounded" />
+                  <div className="w-[100px] h-4 loading-skeleton rounded" />
+                  <div className="w-[56px] h-4 loading-skeleton rounded" />
                 </div>
               </div>
-              <div className="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-full">
-                <div className="w-1/3 h-2 bg-gray-300 dark:bg-gray-700 rounded-full" />
+              <div className="w-full h-2 bg-rule rounded-full">
+                <div className="w-1/3 h-2 loading-skeleton rounded-full" />
               </div>
             </div>
           ))}

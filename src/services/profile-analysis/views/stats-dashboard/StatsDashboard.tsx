@@ -34,7 +34,7 @@ export function StatsDashboard({
       value: aiProfile.web3_involvement?.score || 0,
       max: 100,
       color: "success" as const,
-      rawColor: "#22c55e", // green-500
+      rawColor: "var(--accent)",
     },
     {
       icon: GitBranch,
@@ -42,7 +42,7 @@ export function StatsDashboard({
       value: aiProfile.profileCard?.stats?.totalScore || 0,
       max: 400,
       color: "primary" as const,
-      rawColor: "#0F766E", // teal-700
+      rawColor: "var(--accent)",
     },
     {
       icon: Users,
@@ -50,7 +50,7 @@ export function StatsDashboard({
       value: aiProfile.profileCard?.stats?.followers || 0,
       max: Math.max(aiProfile.profileCard?.stats?.followers || 0, 100),
       color: "warning" as const,
-      rawColor: "#f59e0b", // amber-500
+      rawColor: "var(--warn)",
     },
     {
       icon: Calendar,
@@ -58,7 +58,7 @@ export function StatsDashboard({
       value: aiProfile.activityTimeline?.totalDaysActive || 0,
       max: Math.max(aiProfile.activityTimeline?.totalDaysActive || 0, 1000),
       color: "secondary" as const,
-      rawColor: "#8b5cf6", // violet-500
+      rawColor: "var(--fg-muted)",
     },
     {
       icon: GitBranch,
@@ -66,7 +66,7 @@ export function StatsDashboard({
       value: aiProfile.profileCard?.stats?.publicRepos || 0,
       max: Math.max(aiProfile.profileCard?.stats?.publicRepos || 0, 50),
       color: "danger" as const,
-      rawColor: "#ef4444", // red-500
+      rawColor: "var(--danger)",
     },
     {
       icon: Zap,
@@ -74,20 +74,18 @@ export function StatsDashboard({
       value: aiProfile.web3Ecosystems?.top3?.length || 0,
       max: 10,
       color: "primary" as const,
-      rawColor: "#06b6d4", // cyan-500
+      rawColor: "var(--accent)",
     },
   ];
 
   return (
     <Card
-      className={`bg-white dark:bg-surface-dark shadow-subtle ${className}`}
+      className={`bg-bg-raised border border-rule rounded-[2px] ${className}`}
     >
       <CardBody className="p-6">
-        <div className="flex items-center gap-3 mb-4 pb-2 border-b-2 border-gray-200 dark:border-gray-700">
-          <BarChart3 className="text-primary" size={16} />
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-            KEY METRICS
-          </h3>
+        <div className="flex items-center gap-3 mb-4 pb-2 border-b-2 border-rule">
+          <BarChart3 className="text-accent" size={16} />
+          <h3 className="text-sm font-semibold text-fg">KEY METRICS</h3>
           <div className="ml-auto">
             <Chip color="primary" variant="flat" size="sm">
               DASHBOARD
@@ -102,7 +100,7 @@ export function StatsDashboard({
             return (
               <div
                 key={stat.label}
-                className="bg-gray-50 dark:bg-surface-dark border-2 border-border dark:border-border-dark p-4 rounded-lg"
+                className="bg-bg-raised border border-rule p-4 rounded-[2px]"
               >
                 {/* Header */}
                 <div className="flex items-center justify-between mb-3">
@@ -148,14 +146,14 @@ export function StatsDashboard({
                   </svg>
                   {/* Center text */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-xs font-bold text-gray-900 dark:text-gray-100">
+                    <span className="text-xs font-bold text-fg">
                       {percentage.toFixed(0)}%
                     </span>
                   </div>
                 </div>
 
                 {/* Label */}
-                <div className="text-xs text-center text-gray-600 dark:text-gray-400">
+                <div className="text-xs text-center text-fg-muted">
                   {stat.label}
                 </div>
               </div>

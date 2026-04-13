@@ -22,42 +22,37 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const colorVariants: Record<string, Record<string, string>> = {
   solid: {
-    default:
-      "bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600",
-    primary: "bg-primary text-white hover:bg-primary/90",
+    default: "bg-rule text-fg hover:bg-rule",
+    primary: "bg-accent text-accent-fg hover:brightness-105",
     secondary: "bg-secondary text-white hover:bg-secondary/90",
     success: "bg-success text-white hover:bg-success/90",
     warning: "bg-warning text-white hover:bg-warning/90",
     danger: "bg-danger text-white hover:bg-danger/90",
   },
   flat: {
-    default:
-      "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700",
-    primary: "bg-primary/10 text-primary hover:bg-primary/20",
+    default: "bg-bg-raised text-fg hover:bg-bg-sunken",
+    primary: "bg-accent-subtle text-accent hover:bg-accent-muted",
     secondary: "bg-secondary/10 text-secondary hover:bg-secondary/20",
     success: "bg-success/10 text-success hover:bg-success/20",
     warning: "bg-warning/10 text-warning hover:bg-warning/20",
     danger: "bg-danger/10 text-danger hover:bg-danger/20",
   },
   light: {
-    default:
-      "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800",
-    primary: "text-primary hover:bg-primary/10",
+    default: "text-fg hover:bg-bg-sunken",
+    primary: "text-accent hover:bg-accent-subtle",
     secondary: "text-secondary hover:bg-secondary/10",
     success: "text-success hover:bg-success/10",
     warning: "text-warning hover:bg-warning/10",
     danger: "text-danger hover:bg-danger/10",
   },
   bordered: {
-    default:
-      "border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800",
-    primary: "border border-primary text-primary hover:bg-primary/10",
+    default: "border border-rule text-fg hover:bg-bg-sunken",
+    primary: "border border-accent text-accent hover:bg-accent-subtle",
     danger: "border border-danger text-danger hover:bg-danger/10",
   },
   ghost: {
-    default:
-      "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800",
-    primary: "text-primary hover:bg-primary/10",
+    default: "text-fg hover:bg-bg-sunken",
+    primary: "text-accent hover:bg-accent-subtle",
     danger: "text-danger hover:bg-danger/10",
   },
 };
@@ -94,10 +89,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={clsx(
-          "inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200",
-          "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
-          "disabled:opacity-50 disabled:cursor-not-allowed",
-          "active:scale-[0.97]",
+          "inline-flex items-center justify-center font-medium rounded-[2px] transition-colors duration-200",
+          "focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-accent",
+          "disabled:opacity-60 disabled:saturate-50 disabled:cursor-not-allowed",
           sizeClasses[size],
           variantStyles,
           fullWidth && "w-full",

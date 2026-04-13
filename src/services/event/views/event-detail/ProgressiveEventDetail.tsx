@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Card, CardHeader, Avatar, Chip, Button } from "@/components/ui";
 import {
-  Users,
   Trophy,
   Medal,
   Award,
@@ -156,7 +155,7 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
         <Trophy size={16} className="text-yellow-600 dark:text-yellow-400" />
       );
     case 1:
-      return <Medal size={16} className="text-gray-500 dark:text-gray-400" />;
+      return <Medal size={16} className="text-fg-muted" />;
     case 2:
       return (
         <Award size={16} className="text-orange-600 dark:text-orange-400" />
@@ -173,18 +172,13 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
   return (
     <div className="space-y-8">
       {/* Event Overview with Analysis Progress */}
-      <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
+      <Card className="bg-bg-raised border border-rule rounded-[2px]">
         <CardHeader className="px-6 py-5">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-3 flex-1">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Users size={18} className="text-primary" />
-              </div>
               <div>
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                  Event Analysis
-                </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <h3 className="text-lg font-medium text-fg">Event Analysis</h3>
+                <p className="font-mono text-xs text-fg-muted">
                   {contestants.length} contestants •{" "}
                   {analysisComplete
                     ? "Analysis complete"
@@ -225,14 +219,12 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
       </Card>
 
       {/* Participants List with Progressive Loading */}
-      <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">
-        <CardHeader className="px-6 py-4 border-b border-border dark:border-border-dark">
+      <Card className="bg-bg-raised border border-rule rounded-[2px] overflow-hidden">
+        <CardHeader className="px-6 py-4 border-b border-rule">
           <div className="flex items-center justify-between w-full">
-            <h4 className="font-medium text-gray-900 dark:text-white">
-              Contestants
-            </h4>
+            <h4 className="font-medium text-fg">Contestants</h4>
             {pollingActive && (
-              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+              <div className="flex items-center gap-2 text-sm text-fg-muted">
                 <RefreshCw size={14} className="animate-spin" />
                 <span>Updating...</span>
               </div>
@@ -240,7 +232,7 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
           </div>
         </CardHeader>
 
-        <div className="divide-y divide-border dark:divide-border-dark">
+        <div className="divide-y divide-rule">
           {contestants.map((contestant, index) => {
             const isExpanded = expandedContestants.has(
               contestant.id.toString(),
@@ -251,7 +243,7 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
                 <div className="flex items-start gap-4">
                   {/* Rank Badge */}
                   <div
-                    className={`flex items-center justify-center w-8 h-8 rounded-full border ${contestant.analysisStatus === "completed" ? "bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-900/30 dark:to-yellow-800/30 text-yellow-700 dark:text-yellow-400 border-yellow-300 dark:border-yellow-700" : "bg-gray-50 dark:bg-gray-900/20 text-gray-600 dark:text-gray-500 border-gray-200 dark:border-gray-800"}`}
+                    className={`flex items-center justify-center w-8 h-8 rounded-full border ${contestant.analysisStatus === "completed" ? "bg-accent-subtle dark:from-yellow-900/30 dark:to-yellow-800/30 text-yellow-700 dark:text-yellow-400 border-yellow-300 dark:border-yellow-700" : "bg-bg-raised text-fg-muted border-rule"}`}
                   >
                     {getRankIcon(index)}
                   </div>
@@ -262,14 +254,14 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
                       <div className="flex items-center gap-3">
                         <Avatar src={contestant.avatar_url} size="md" />
                         <div>
-                          <h5 className="font-medium text-gray-900 dark:text-white">
+                          <h5 className="font-medium text-fg">
                             {contestant.name || contestant.login}
                           </h5>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                          <p className="text-sm text-fg-muted">
                             @{contestant.login}
                           </p>
                           {contestant.bio && (
-                            <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                            <p className="text-sm text-fg-muted mt-1">
                               {contestant.bio}
                             </p>
                           )}
@@ -282,7 +274,7 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
                         onClick={() =>
                           toggleContestant(contestant.id.toString())
                         }
-                        className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                        className="text-fg-muted hover:text-fg dark:text-fg-subtle dark:hover:text-fg"
                       >
                         {isExpanded ? (
                           <ChevronUp size={16} />
@@ -303,19 +295,19 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
 
                     {/* Expanded Analysis Details */}
                     {isExpanded && (
-                      <div className="mt-4 pt-4 border-t border-border dark:border-border-dark">
+                      <div className="mt-4 pt-4 border-t border-rule">
                         {contestant.analysisStatus === "completed" &&
                         contestant.analytics ? (
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                               {contestant.analytics.map((analytics) => (
                                 <div
                                   key={analytics.name}
-                                  className="p-4 border border-border dark:border-border-dark rounded-lg"
+                                  className="p-4 border border-rule rounded-[2px]"
                                 >
-                                  <h6 className="font-medium text-gray-900 dark:text-white mb-2">
+                                  <h6 className="font-medium text-fg mb-2">
                                     {analytics.name}
                                   </h6>
-                                  <div className="text-2xl font-bold text-primary mb-2">
+                                  <div className="text-2xl font-mono font-bold text-accent mb-2 tabular-nums">
                                     {analytics.score || 0}
                                   </div>
                                   {analytics.repos && (
@@ -325,10 +317,10 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
                                           key={repo.fullName}
                                           className="flex justify-between text-sm"
                                         >
-                                          <span className="text-gray-600 dark:text-gray-400 truncate">
+                                          <span className="text-fg-muted truncate">
                                             {repo.fullName}
                                           </span>
-                                          <span className="text-gray-500 dark:text-gray-500 ml-2">
+                                          <span className="text-fg-muted ml-2">
                                             {repo.score}
                                           </span>
                                         </div>

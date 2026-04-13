@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Database } from "lucide-react";
 
 import type { DataValue, ResponseResult } from "@/types";
 import type { Repository } from "~/repository/typing";
 import { getPageSize } from "~/ecosystem/helper";
 import RepositoryListView from "~/repository/views/repository-list/RepositoryList";
+import { SectionHeader } from "$/primitives";
 
 interface AdminEcosystemDetailClientProps {
   ecosystem: {
@@ -146,22 +146,13 @@ export default function AdminEcosystemDetailClient({
   };
 
   return (
-    <div className="min-h-dvh bg-background dark:bg-background-dark pb-24">
+    <div className="min-h-dvh bg-bg pb-24">
       <div className="w-full max-w-content mx-auto px-6 pt-8">
-        {/* Header and Overview */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Database size={20} className="text-primary" />
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              {ecosystem.name}
-            </h1>
-          </div>
-          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
-            Manage and mark repositories within the {ecosystem.name} ecosystem
-          </p>
-        </div>
+        <SectionHeader
+          kicker="admin · ecosystem detail"
+          title={ecosystem.name}
+          deck={`Manage and mark repositories within the ${ecosystem.name} ecosystem.`}
+        />
 
         <RepositoryListView
           dataSource={dataSource}

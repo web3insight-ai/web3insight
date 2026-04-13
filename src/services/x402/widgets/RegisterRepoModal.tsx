@@ -323,7 +323,10 @@ export function RegisterRepoModal({
       <Modal isOpen={isOpen} onClose={onClose} placement="center" size="sm">
         <ModalContent>
           <ModalBody className="py-16">
-            <Loader2 size={24} className="animate-spin text-gray-400 mx-auto" />
+            <Loader2
+              size={24}
+              className="animate-spin text-fg-subtle mx-auto"
+            />
           </ModalBody>
         </ModalContent>
       </Modal>
@@ -335,13 +338,13 @@ export function RegisterRepoModal({
       <Modal isOpen={isOpen} onClose={onClose} placement="center" size="sm">
         <ModalContent>
           <ModalBody className="py-10 text-center">
-            <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
-              <Github size={24} className="text-gray-500" />
+            <div className="w-12 h-12 rounded-full bg-bg-raised flex items-center justify-center mx-auto mb-4">
+              <Github size={24} className="text-fg-muted" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+            <h3 className="text-lg font-semibold text-fg mb-1">
               Sign in to continue
             </h3>
-            <p className="text-sm text-gray-500 mb-6">
+            <p className="text-sm text-fg-muted mb-6">
               Connect your account to register repositories.
             </p>
             <Button color="primary" onPress={() => login()}>
@@ -358,13 +361,13 @@ export function RegisterRepoModal({
       <Modal isOpen={isOpen} onClose={onClose} placement="center" size="sm">
         <ModalContent>
           <ModalBody className="py-10 text-center">
-            <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
-              <Github size={24} className="text-gray-500" />
+            <div className="w-12 h-12 rounded-full bg-bg-raised flex items-center justify-center mx-auto mb-4">
+              <Github size={24} className="text-fg-muted" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+            <h3 className="text-lg font-semibold text-fg mb-1">
               Connect GitHub
             </h3>
-            <p className="text-sm text-gray-500 mb-6">
+            <p className="text-sm text-fg-muted mb-6">
               Link your GitHub account to register repositories.
             </p>
             <Button
@@ -412,14 +415,14 @@ export function RegisterRepoModal({
                   placeholder="owner/repo"
                   variant="bordered"
                   labelPlacement="outside"
-                  startContent={<Github size={16} className="text-gray-400" />}
+                  startContent={<Github size={16} className="text-fg-subtle" />}
                   isInvalid={!!errors.repo_full_name}
                   errorMessage={errors.repo_full_name?.message}
                   description="We'll check for .x402/donation.json"
                 />
 
                 {submitError && (
-                  <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg text-sm text-red-600 dark:text-red-400">
+                  <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 rounded-[2px] text-sm text-red-600 dark:text-red-400">
                     <AlertCircle size={16} className="flex-shrink-0" />
                     <span>{submitError}</span>
                   </div>
@@ -463,21 +466,21 @@ export function RegisterRepoModal({
                       href={repoInfo.html_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-semibold text-gray-900 dark:text-white hover:text-primary transition-colors"
+                      className="font-semibold text-fg hover:text-accent transition-colors"
                     >
                       {repoInfo.full_name}
                     </a>
                     <ExternalLink
                       size={14}
-                      className="text-gray-300 flex-shrink-0"
+                      className="text-fg-subtle flex-shrink-0"
                     />
                   </div>
                   {repoInfo.description && (
-                    <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+                    <p className="text-sm text-fg-muted mt-1 line-clamp-2">
                       {repoInfo.description}
                     </p>
                   )}
-                  <div className="flex items-center gap-1 text-xs text-gray-400 mt-2">
+                  <div className="flex items-center gap-1 text-xs text-fg-subtle mt-2">
                     <Star size={12} />
                     <span>{repoInfo.stargazers_count.toLocaleString()}</span>
                   </div>
@@ -485,37 +488,35 @@ export function RegisterRepoModal({
               </div>
 
               {/* Divider */}
-              <div className="border-t border-gray-100 dark:border-gray-800" />
+              <div className="border-t border-rule" />
 
               {/* Config Status */}
               {hasConfig ? (
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <CheckCircle size={16} className="text-green-500" />
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                    <span className="text-sm font-medium text-fg">
                       donation.json detected
                     </span>
                   </div>
-                  <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg space-y-2">
+                  <div className="p-3 bg-bg-raised rounded-[2px] space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Recipient</span>
-                      <span className="font-mono text-gray-700 dark:text-gray-300">
+                      <span className="text-fg-muted">Recipient</span>
+                      <span className="font-mono text-fg">
                         {donateData?.payTo?.slice(0, 6)}...
                         {donateData?.payTo?.slice(-4)}
                       </span>
                     </div>
                     {donateData?.title && (
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">Title</span>
-                        <span className="text-gray-700 dark:text-gray-300">
-                          {donateData.title}
-                        </span>
+                        <span className="text-fg-muted">Title</span>
+                        <span className="text-fg">{donateData.title}</span>
                       </div>
                     )}
                     {donateData?.defaultAmount && (
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">Default</span>
-                        <span className="text-gray-700 dark:text-gray-300">
+                        <span className="text-fg-muted">Default</span>
+                        <span className="text-fg">
                           ${donateData.defaultAmount} USDC
                         </span>
                       </div>
@@ -626,7 +627,7 @@ export function RegisterRepoModal({
                     {/* Row 5: Links */}
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <span className="text-sm font-medium text-fg">
                           Links
                         </span>
                         <Button
@@ -706,7 +707,7 @@ export function RegisterRepoModal({
                   {/* Generated JSON */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-medium text-gray-500">
+                      <span className="text-xs font-medium text-fg-muted">
                         .x402/donation.json
                       </span>
                       <div className="flex gap-1">
@@ -736,10 +737,10 @@ export function RegisterRepoModal({
                         </Button>
                       </div>
                     </div>
-                    <pre className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg text-xs font-mono text-gray-600 dark:text-gray-400 overflow-x-auto">
+                    <pre className="p-3 bg-bg-raised rounded-[2px] text-xs font-mono text-fg-muted overflow-x-auto">
                       {generatedConfig}
                     </pre>
-                    <p className="text-xs text-gray-400 mt-2">
+                    <p className="text-xs text-fg-subtle mt-2">
                       Add this file to your repo, then click Verify.
                     </p>
                   </div>
@@ -747,7 +748,7 @@ export function RegisterRepoModal({
               )}
 
               {submitError && (
-                <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg text-sm text-red-600 dark:text-red-400">
+                <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 rounded-[2px] text-sm text-red-600 dark:text-red-400">
                   <AlertCircle size={16} className="flex-shrink-0" />
                   <span>{submitError}</span>
                 </div>
@@ -792,10 +793,10 @@ export function RegisterRepoModal({
               <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto mb-4">
                 <CheckCircle size={24} className="text-green-500" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+              <h3 className="text-lg font-semibold text-fg mb-1">
                 Repository Registered
               </h3>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-fg-muted">
                 {repoInfo?.full_name} is now accepting donations.
               </p>
             </ModalBody>

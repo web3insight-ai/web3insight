@@ -72,10 +72,10 @@ function RepoScoreListCard({ dataSource }: RepoScoreListCardProps) {
   };
 
   return (
-    <div className="border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle">
+    <div className="border border-rule rounded-[2px] p-4 bg-bg-raised">
       <div className="flex items-center gap-2 mb-3">
-        <Github size={14} className="text-gray-600 dark:text-gray-400" />
-        <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+        <Github size={14} className="text-fg-muted" />
+        <h3 className="text-sm font-medium text-fg">
           Repository Scores by Ecosystem
         </h3>
       </div>
@@ -94,7 +94,7 @@ function RepoScoreListCard({ dataSource }: RepoScoreListCardProps) {
             >
               {/* Ecosystem Header - Clickable */}
               <div
-                className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark rounded-lg hover:shadow-card transition-all duration-200 hover:scale-[1.02] cursor-pointer group"
+                className="bg-bg-raised border border-rule rounded-[2px] transition-colors duration-200 hover:bg-bg-sunken cursor-pointer group"
                 onClick={() => toggleEcosystem(idx)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -108,17 +108,17 @@ function RepoScoreListCard({ dataSource }: RepoScoreListCardProps) {
                 aria-label={`${isExpanded ? "Hide" : "Show"} details for ${eco.name} ecosystem`}
               >
                 <div className="flex items-center gap-3 py-4 px-4 w-full">
-                  <div className="w-3 h-3 rounded-full bg-primary" />
+                  <div className="w-3 h-3 bg-accent" />
                   <div className="flex-1 text-left">
-                    <h4 className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary transition-colors">
+                    <h4 className="text-sm font-medium text-fg group-hover:text-accent transition-colors">
                       {eco.name}
                     </h4>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {validRepos.length} repositories • Total Score:{" "}
+                    <p className="font-mono text-xs text-fg-muted mt-1 tabular-nums">
+                      {validRepos.length} repositories · Total Score:{" "}
                       {eco.score}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 group-hover:text-primary transition-colors">
+                  <div className="flex items-center gap-2 text-fg-muted group-hover:text-accent transition-colors">
                     <span className="text-xs font-medium">
                       {isExpanded ? "Hide" : "Show"} Details
                     </span>
@@ -155,7 +155,7 @@ function RepoScoreListCard({ dataSource }: RepoScoreListCardProps) {
                       return (
                         <Card
                           key={`${fullName}-${i}`}
-                          className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark hover:shadow-card transition-all duration-200 hover:scale-[1.02] group"
+                          className="bg-bg-raised border border-rule rounded-[2px] transition-colors duration-200 hover:bg-bg-sunken group"
                         >
                           <CardBody className="p-4">
                             <div className="flex flex-col gap-2">
@@ -164,10 +164,10 @@ function RepoScoreListCard({ dataSource }: RepoScoreListCardProps) {
                                 <Link
                                   href={`https://github.com/${fullName || "unknown/repository"}`}
                                   isExternal
-                                  className="text-xs font-mono leading-relaxed text-gray-900 dark:text-white hover:text-primary group-hover:text-primary transition-colors line-clamp-3 break-all"
+                                  className="text-xs font-mono leading-relaxed text-fg hover:text-accent group-hover:text-accent transition-colors line-clamp-3 break-all"
                                   title={fullName || "Unknown Repository"}
                                 >
-                                  <span className="text-gray-500 dark:text-gray-400 font-normal">
+                                  <span className="text-fg-muted font-normal">
                                     {owner}/
                                   </span>
                                   <span className="font-medium">
@@ -182,13 +182,13 @@ function RepoScoreListCard({ dataSource }: RepoScoreListCardProps) {
                                   size="sm"
                                   variant="flat"
                                   startContent={<Trophy size={12} />}
-                                  className="bg-primary/10 text-primary"
+                                  className="bg-accent-subtle text-accent"
                                 >
                                   {score}
                                 </Chip>
                                 <Github
                                   size={14}
-                                  className="text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors"
+                                  className="text-fg-subtle group-hover:text-fg-muted transition-colors"
                                 />
                               </div>
                             </div>

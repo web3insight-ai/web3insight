@@ -38,20 +38,16 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   const stats = payload[0].payload;
 
   return (
-    <div className="bg-white dark:bg-surface-dark border border-border dark:border-border-dark rounded-xl shadow-lg p-4 min-w-[220px]">
-      <p className="text-lg font-bold text-gray-900 dark:text-white mb-3">
-        {label}
-      </p>
+    <div className="bg-bg-raised border border-rule rounded-[2px] shadow-sm p-4 min-w-[220px]">
+      <p className="text-lg font-bold text-fg mb-3">{label}</p>
       <div className="space-y-2.5">
         <div>
           <div className="flex items-center gap-2 mb-0.5">
             <div className="w-2 h-2 rounded-full bg-[#0F766E]" />
-            <span className="text-xs text-gray-500 dark:text-gray-400">
-              Active Developers
-            </span>
+            <span className="text-xs text-fg-muted">Active Developers</span>
           </div>
           <div className="flex items-center gap-2 pl-4">
-            <span className="text-sm font-semibold text-gray-900 dark:text-white tabular-nums">
+            <span className="text-sm font-semibold text-fg tabular-nums">
               {Number(stats.active_developers).toLocaleString()}
             </span>
             {stats.active_developers_yearly_growth_rate !== null && (
@@ -65,13 +61,11 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
         </div>
         <div>
           <div className="flex items-center gap-2 mb-0.5">
-            <div className="w-2 h-2 rounded-full bg-[#6366F1]" />
-            <span className="text-xs text-gray-500 dark:text-gray-400">
-              New Developers
-            </span>
+            <div className="w-2 h-2 rounded-full bg-[var(--accent)]" />
+            <span className="text-xs text-fg-muted">New Developers</span>
           </div>
           <div className="flex items-center gap-2 pl-4">
-            <span className="text-sm font-semibold text-gray-900 dark:text-white tabular-nums">
+            <span className="text-sm font-semibold text-fg tabular-nums">
               {Number(stats.new_developers).toLocaleString()}
             </span>
             {stats.new_developers_yearly_growth_rate !== null && (
@@ -106,20 +100,18 @@ export default function DeveloperGrowthChart({
 
   return (
     <motion.div variants={fadeInUp} {...createViewportAnimation()}>
-      <div className="rounded-2xl border border-border dark:border-border-dark bg-white dark:bg-surface-dark overflow-hidden">
+      <div className="rounded-[2px] border border-rule bg-bg-raised overflow-hidden">
         {/* Header with key stats */}
         <div className="px-6 pt-6 pb-2">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-primary/10">
-                <TrendingUp size={18} className="text-primary" />
-              </div>
+              <TrendingUp size={18} className="text-accent" />
               <div>
-                <p className="text-base font-semibold text-gray-900 dark:text-white">
+                <p className="text-base font-semibold text-fg">
                   Developer Growth Trends
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Active and new developers over the past years
+                <p className="font-mono text-xs text-fg-muted">
+                  active and new developers over the past years
                 </p>
               </div>
             </div>
@@ -128,11 +120,11 @@ export default function DeveloperGrowthChart({
             {latestStat && (
               <div className="flex gap-6">
                 <div className="text-right">
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">
+                  <p className="text-2xl font-bold text-fg tabular-nums">
                     {latestStat.active_developers.toLocaleString()}
                   </p>
                   <div className="flex items-center justify-end gap-1">
-                    <p className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                    <p className="text-[10px] text-fg-subtle uppercase tracking-wider">
                       Active
                     </p>
                     {latestStat.active_developers_yearly_growth_rate !==
@@ -158,11 +150,11 @@ export default function DeveloperGrowthChart({
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400 tabular-nums">
+                  <p className="text-2xl font-bold text-accent dark:text-accent tabular-nums">
                     {latestStat.new_developers.toLocaleString()}
                   </p>
                   <div className="flex items-center justify-end gap-1">
-                    <p className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                    <p className="text-[10px] text-fg-subtle uppercase tracking-wider">
                       New
                     </p>
                     {latestStat.new_developers_yearly_growth_rate !== null && (
@@ -234,11 +226,11 @@ export default function DeveloperGrowthChart({
                 dataKey="new_developers"
                 name="New Developers"
                 type="monotone"
-                stroke="#6366F1"
+                stroke="var(--accent)"
                 strokeWidth={2.5}
                 dot={{
                   r: 5,
-                  fill: "#6366F1",
+                  fill: "var(--accent)",
                   strokeWidth: 3,
                   stroke: "#fff",
                 }}

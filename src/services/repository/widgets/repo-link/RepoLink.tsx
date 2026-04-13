@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import clsx from "clsx";
 import Link from "next/link";
@@ -8,14 +8,14 @@ import type { RepoLinkWidgetProps } from "./typing";
 function RepoLink({ className, repo, repoId }: RepoLinkWidgetProps) {
   // Handle case where repo is undefined
   const repoName = repo || "unknown-repo";
-  
+
   // If repoId is provided, use internal link, otherwise fallback to GitHub
   if (repoId) {
     // Encode the repo name in the URL for the detail page to use
     const searchParams = new URLSearchParams({ name: repoName }).toString();
     return (
       <Link
-        className={clsx("hover:text-primary hover:underline", className)}
+        className={clsx("hover:text-accent hover:underline", className)}
         href={`/repositories/${repoId}?${searchParams}`}
         target="_blank"
         rel="noreferrer"
@@ -27,7 +27,7 @@ function RepoLink({ className, repo, repoId }: RepoLinkWidgetProps) {
 
   return (
     <a
-      className={clsx("hover:text-primary hover:underline", className)}
+      className={clsx("hover:text-accent hover:underline", className)}
       href={`https://github.com/${repoName}`}
       target="_blank"
       rel="noreferrer"

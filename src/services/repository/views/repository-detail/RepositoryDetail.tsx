@@ -115,23 +115,23 @@ function RepositoryDetail({
         <RepositoryHeaderWidget className="mb-4" repository={repository} />
       </div>
       <div className="animate-slide-up mb-4" style={{ animationDelay: "40ms" }}>
-        <div className="rounded-xl border border-border dark:border-border-dark bg-white dark:bg-surface-dark p-4 shadow-subtle">
+        <div className="rounded-[2px] border border-rule bg-bg-raised p-4">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-2">
-              <UserCheck size={14} className="text-gray-400" />
+              <UserCheck size={14} className="text-fg-subtle" />
               <div>
-                <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                <h3 className="text-sm font-medium text-fg">
                   Active Developers
                 </h3>
                 {latestActiveDeveloper && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-fg-muted">
                     {formatMonthLabel(latestActiveDeveloper.month)}
                     {hasActiveDeveloperData && (
-                      <span className="ml-2 text-gray-600 dark:text-gray-400">
+                      <span className="ml-2 text-fg-muted">
                         {averageActiveDevelopers !== null && (
                           <span>
                             Avg:{" "}
-                            <span className="font-medium text-gray-900 dark:text-white">
+                            <span className="font-medium text-fg">
                               {averageActiveDevelopers}
                             </span>
                           </span>
@@ -139,14 +139,14 @@ function RepositoryDetail({
                         {peakActiveDeveloper && (
                           <span className="ml-3">
                             Peak {formatMonthLabel(peakActiveDeveloper.month)}:{" "}
-                            <span className="font-medium text-gray-900 dark:text-white">
+                            <span className="font-medium text-fg">
                               {peakActiveDeveloper.developers}
                             </span>
                           </span>
                         )}
                         <span className="ml-3">
                           Months:{" "}
-                          <span className="font-medium text-gray-900 dark:text-white">
+                          <span className="font-medium text-fg">
                             {monthKeys.length}
                           </span>
                         </span>
@@ -163,7 +163,7 @@ function RepositoryDetail({
             </div>
             {latestActiveDeveloper && (
               <div className="text-right">
-                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+                <p className="text-2xl font-semibold text-fg">
                   {latestActiveDeveloper.developers}
                 </p>
                 {previousActiveDeveloper && activeDeveloperChange !== null && (
@@ -182,7 +182,7 @@ function RepositoryDetail({
               </div>
             )}
           </div>
-          <div className="mt-3 flex flex-wrap gap-3 text-xs text-gray-600 dark:text-gray-400" />
+          <div className="mt-3 flex flex-wrap gap-3 text-xs text-fg-muted" />
           <ClientOnly>
             <div className="mt-4 h-[280px]">
               <ReactECharts

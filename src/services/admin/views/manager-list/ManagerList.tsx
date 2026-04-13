@@ -1,8 +1,9 @@
 import { useState } from "react";
 import clsx from "clsx";
-import { Card } from "@/components/ui";
 
 import TableViewWidget from "$/widgets/view/table";
+import { Panel } from "$/blueprint";
+import { SmallCapsLabel } from "$/primitives";
 
 import type { Manager } from "../../typing";
 
@@ -20,12 +21,14 @@ function ManagerListView({
   const [manager, setManager] = useState({} as Manager);
 
   return (
-    <Card
-      className={clsx(
-        "h-full bg-white dark:bg-gray-800 shadow-sm border-none hover:shadow-md transition-all duration-300",
-        className,
-      )}
+    <Panel
+      label={{ text: "admin · managers", position: "tl" }}
+      code="01"
+      className={clsx("h-full", className)}
     >
+      <div className="px-5 pt-5 pb-3 border-b border-rule">
+        <SmallCapsLabel>managers</SmallCapsLabel>
+      </div>
       <TableViewWidget
         dataSource={dataSource}
         fields={[
@@ -65,7 +68,7 @@ function ManagerListView({
         onClose={() => setVisible(false)}
         onChange={(assigned) => onAssign(assigned, manager)}
       />
-    </Card>
+    </Panel>
   );
 }
 

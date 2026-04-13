@@ -73,16 +73,16 @@ export default function ProfilePageClient({
             summary="Manage your account information and settings"
           >
             <div className="max-w-2xl mx-auto">
-              <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
+              <Card className="bg-bg-raised border border-rule rounded-[2px]">
                 <CardBody className="text-center py-12">
                   <AlertTriangle
                     size={48}
                     className="text-warning mx-auto mb-4"
                   />
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  <h3 className="text-lg font-semibold text-fg mb-2">
                     Session Expired
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-6">
+                  <p className="text-fg-muted mb-6">
                     {error ||
                       "Your session has expired. Please sign in again to access your profile."}
                   </p>
@@ -111,7 +111,7 @@ export default function ProfilePageClient({
         >
           <div className="max-w-4xl mx-auto space-y-6">
             {/* Profile Header Card */}
-            <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">
+            <Card className="bg-bg-raised border border-rule rounded-[2px] overflow-hidden">
               <CardBody className="p-6">
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
                   <div className="flex-shrink-0">
@@ -130,7 +130,7 @@ export default function ProfilePageClient({
 
                   <div className="flex-1 text-center md:text-left">
                     <div className="flex flex-col md:flex-row md:items-center gap-3 mb-4">
-                      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                      <h1 className="text-2xl font-bold text-fg">
                         {userInfo.displayName}
                       </h1>
                       {githubHandle && (
@@ -139,7 +139,7 @@ export default function ProfilePageClient({
                             variant="light"
                             size="sm"
                             startContent={<Brain size={14} />}
-                            className="font-medium hover:bg-gray-100 dark:hover:bg-surface-elevated px-3 py-1.5 h-auto min-h-0 rounded-full bg-gray-50 dark:bg-surface-dark border border-gray-200 dark:border-border-dark text-gray-700 dark:text-gray-300"
+                            className="font-medium hover:bg-bg-sunken px-3 py-1.5 h-auto min-h-0 rounded-[2px] bg-bg-raised border border-rule text-fg"
                           >
                             DevInsight
                           </Button>
@@ -147,7 +147,7 @@ export default function ProfilePageClient({
                       )}
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-3 text-sm text-gray-600 dark:text-gray-400">
+                    <div className="flex flex-col sm:flex-row gap-3 text-sm text-fg-muted">
                       <div className="flex items-center justify-center md:justify-start gap-2">
                         <Calendar size={16} />
                         <span>
@@ -167,60 +167,52 @@ export default function ProfilePageClient({
             {/* First Row: Account Information | Roles & Permissions */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Account Information */}
-              <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
+              <Card className="bg-bg-raised border border-rule rounded-[2px]">
                 <CardBody className="p-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-gray-100 dark:bg-surface-elevated rounded-lg">
-                      <UserIcon
-                        size={20}
-                        className="text-gray-600 dark:text-gray-400"
-                      />
+                    <div className="p-2 bg-bg-sunken border border-rule rounded-[2px]">
+                      <UserIcon size={20} className="text-fg-muted" />
                     </div>
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    <h2 className="text-lg font-semibold text-fg">
                       Account Information
                     </h2>
                   </div>
 
                   <div className="space-y-4">
                     <div>
-                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">
+                      <p className="text-sm font-medium text-fg block mb-1">
                         User ID
                       </p>
-                      <p className="text-sm text-gray-900 dark:text-white font-mono bg-gray-50 dark:bg-surface-elevated px-3 py-2 rounded-lg">
+                      <p className="text-sm text-fg font-mono bg-bg-sunken border border-rule px-3 py-2 rounded-[2px]">
                         {user.profile?.user_id || user.id}
                       </p>
                     </div>
 
                     <div>
-                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">
+                      <p className="text-sm font-medium text-fg block mb-1">
                         Username
                       </p>
-                      <p className="text-sm text-gray-900 dark:text-white">
-                        {userInfo.displayName}
-                      </p>
+                      <p className="text-sm text-fg">{userInfo.displayName}</p>
                     </div>
 
                     <div>
-                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">
+                      <p className="text-sm font-medium text-fg block mb-1">
                         Primary Account
                       </p>
-                      <p className="text-sm text-gray-900 dark:text-white">
+                      <p className="text-sm text-fg">
                         {userInfo.primaryAccount}
                       </p>
                     </div>
 
                     <div>
-                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">
+                      <p className="text-sm font-medium text-fg block mb-1">
                         Account Status
                       </p>
                       <div className="flex items-center gap-2">
-                        <div className="flex items-center justify-center w-5 h-5 bg-gray-100 dark:bg-surface-elevated rounded-full">
-                          <CheckCircle
-                            size={12}
-                            className="text-gray-600 dark:text-gray-400"
-                          />
+                        <div className="flex items-center justify-center w-5 h-5 bg-bg-sunken rounded-full">
+                          <CheckCircle size={12} className="text-fg-muted" />
                         </div>
-                        <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
+                        <span className="text-sm text-fg font-medium">
                           Active
                         </span>
                       </div>
@@ -230,34 +222,31 @@ export default function ProfilePageClient({
               </Card>
 
               {/* Roles & Permissions */}
-              <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
+              <Card className="bg-bg-raised border border-rule rounded-[2px]">
                 <CardBody className="p-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-gray-100 dark:bg-surface-elevated rounded-lg">
-                      <Shield
-                        size={20}
-                        className="text-gray-600 dark:text-gray-400"
-                      />
+                    <div className="p-2 bg-bg-sunken border border-rule rounded-[2px]">
+                      <Shield size={20} className="text-fg-muted" />
                     </div>
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    <h2 className="text-lg font-semibold text-fg">
                       Roles & Permissions
                     </h2>
                   </div>
 
                   <div>
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-3">
+                    <p className="text-sm font-medium text-fg block mb-3">
                       Available Roles
                     </p>
                     <div className="flex flex-wrap gap-3">
                       {user.role?.allowed_roles?.map((role: string) => (
                         <div
                           key={role}
-                          className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full border bg-gray-50 dark:bg-surface-elevated text-gray-600 dark:text-gray-400 border-gray-200 dark:border-border-dark"
+                          className="inline-flex items-center px-3 py-1.5 text-xs font-mono font-medium rounded-[2px] border bg-bg-sunken text-fg-muted border-rule"
                         >
                           {getRoleName(role)}
                         </div>
                       )) || (
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-fg-muted">
                           No roles available
                         </p>
                       )}
@@ -268,16 +257,13 @@ export default function ProfilePageClient({
             </div>
 
             {/* Connected Accounts */}
-            <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
+            <Card className="bg-bg-raised border border-rule rounded-[2px]">
               <CardBody className="p-6">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-gray-100 dark:bg-surface-elevated rounded-lg">
-                    <ExternalLink
-                      size={20}
-                      className="text-gray-600 dark:text-gray-400"
-                    />
+                  <div className="p-2 bg-bg-sunken border border-rule rounded-[2px]">
+                    <ExternalLink size={20} className="text-fg-muted" />
                   </div>
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <h2 className="text-lg font-semibold text-fg">
                     Connected Accounts
                   </h2>
                 </div>

@@ -24,9 +24,7 @@ function AdminEventListPageContent({ manager }: { manager: ApiUser | null }) {
   if (!manager) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-500 dark:text-gray-400">
-          Unable to load manager information.
-        </p>
+        <p className="text-fg-muted">Unable to load manager information.</p>
       </div>
     );
   }

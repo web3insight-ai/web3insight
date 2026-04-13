@@ -78,7 +78,7 @@ export function DonateRepoCard({ repo }: DonateRepoCardProps) {
 
   return (
     <div
-      className="group p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-md transition-all cursor-pointer"
+      className="group p-4 rounded-[2px] border border-rule bg-bg-raised hover:border-rule-strong transition-colors cursor-pointer"
       onClick={handleCardClick}
       role="button"
       tabIndex={0}
@@ -102,13 +102,13 @@ export function DonateRepoCard({ repo }: DonateRepoCardProps) {
             target="_blank"
             rel="noopener noreferrer"
             onClick={stopPropagation}
-            className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white hover:text-primary transition-colors max-w-full"
+            className="flex items-center gap-2 text-sm font-medium text-fg hover:text-accent transition-colors max-w-full"
           >
             <span className="truncate">{repoDisplayName}</span>
-            <ExternalLink size={12} className="flex-shrink-0 text-gray-300" />
+            <ExternalLink size={12} className="flex-shrink-0 text-fg-muted" />
           </a>
         </div>
-        <div className="flex items-center gap-1 text-xs text-gray-400 flex-shrink-0">
+        <div className="flex items-center gap-1 text-xs text-fg-muted flex-shrink-0">
           <Star size={12} />
           <span>{repo_info.stargazers_count.toLocaleString()}</span>
         </div>
@@ -117,13 +117,13 @@ export function DonateRepoCard({ repo }: DonateRepoCardProps) {
       {/* Creator handle with GitHub link */}
       {creator?.handle && (
         <div className="flex items-center gap-1 mb-1 ml-11">
-          <span className="text-xs text-gray-400">by</span>
+          <span className="text-xs text-fg-muted">by</span>
           <a
             href={`https://github.com/${creator.handle}`}
             target="_blank"
             rel="noopener noreferrer"
             onClick={stopPropagation}
-            className="text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-primary transition-colors"
+            className="text-xs font-medium text-fg hover:text-accent transition-colors"
           >
             @{creator.handle}
           </a>
@@ -132,14 +132,14 @@ export function DonateRepoCard({ repo }: DonateRepoCardProps) {
 
       {/* Title */}
       {repo_donate_data?.title && (
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-1 ml-11">
+        <p className="text-sm text-fg-muted mb-1 ml-11">
           {repo_donate_data.title}
         </p>
       )}
 
       {/* Description - use donation description if available, otherwise repo description */}
       {(repo_donate_data?.description || repo_info.description) && (
-        <p className="text-xs text-gray-500 line-clamp-2 mb-2 ml-11">
+        <p className="text-xs text-fg-muted line-clamp-2 mb-2 ml-11">
           {repo_donate_data?.description || repo_info.description}
         </p>
       )}
@@ -157,7 +157,7 @@ export function DonateRepoCard({ repo }: DonateRepoCardProps) {
               isExternal
               showAnchorIcon
               anchorIcon={<LinkIcon size={10} />}
-              className="text-xs text-primary hover:underline"
+              className="text-xs text-accent hover:underline"
             >
               {getLinkDisplayText(link)}
             </Link>
@@ -172,7 +172,7 @@ export function DonateRepoCard({ repo }: DonateRepoCardProps) {
       >
         {hasDonationConfig ? (
           <>
-            <div className="flex items-center gap-3 text-xs text-gray-400">
+            <div className="flex items-center gap-3 text-xs text-fg-muted">
               <span className="font-mono">
                 {repo_donate_data.payTo.slice(0, 6)}...
                 {repo_donate_data.payTo.slice(-4)}
@@ -194,7 +194,7 @@ export function DonateRepoCard({ repo }: DonateRepoCardProps) {
             />
           </>
         ) : (
-          <span className="text-xs text-gray-400">No donation config</span>
+          <span className="text-xs text-fg-muted">No donation config</span>
         )}
       </div>
     </div>

@@ -3,7 +3,6 @@ import type { ChatStatus } from "ai";
 import { useCallback, useMemo, useState } from "react";
 
 import { Message, MessageContent } from "@/components/ai-elements/message";
-import { Shimmer } from "@/components/ai-elements/shimmer";
 import type { CopilotUIMessage } from "~/ai/copilot-types";
 
 import { extractTextFromMessage } from "../../lib/message-utils";
@@ -120,13 +119,13 @@ export function CopilotMessageItem({
   ]);
 
   // Reason: Override the base MessageContent's group-[.is-user]:bg-secondary (indigo)
-  // with a neutral soft bubble matching the site's minimal design system.
+  // with a neutral soft bubble matching the Blueprint tinted-neutral system.
   const userBubbleOverride =
-    "group-[.is-user]:bg-gray-100 group-[.is-user]:text-gray-700 group-[.is-user]:dark:bg-white/[0.06] group-[.is-user]:dark:text-gray-200";
+    "group-[.is-user]:bg-bg-sunken group-[.is-user]:text-fg group-[.is-user]:rounded-[2px] group-[.is-user]:border group-[.is-user]:border-rule";
 
   // Reason: MessageContent hardcodes group-[.is-assistant]:text-foreground (#000000).
-  // In dark mode this makes text invisible on dark backgrounds. Use !important to override.
-  const assistantOverride = "w-full dark:!text-foreground-dark";
+  // Use !important to override so our --fg semantic token wins.
+  const assistantOverride = "w-full !text-fg";
 
   return (
     <div className="space-y-1">
@@ -147,9 +146,13 @@ export function CopilotMessageItem({
             className={isUserMessage ? userBubbleOverride : assistantOverride}
           >
             {shouldShowGeneratingShimmer ? (
-              <Shimmer className="w-fit" duration={1}>
-                Generating...
-              </Shimmer>
+              <span className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.12em] text-fg-muted">
+                generating
+                <span
+                  aria-hidden
+                  className="animate-cursor inline-block h-[0.9em] w-[0.55ch] translate-y-[2px] bg-accent align-middle"
+                />
+              </span>
             ) : (
               <CopilotMessageParts
                 message={message}

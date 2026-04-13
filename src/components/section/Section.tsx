@@ -18,25 +18,26 @@ function Section({
     : {};
 
   return (
-    <div className={clsx(classNameMap.container, className)}>
-      <div className={clsx(classNameMap.header, "relative pb-8")}>
-        <div className="flex items-center gap-4 max-w-3xl mx-auto">
-          <div className="h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-800 to-transparent flex-1" />
-          <div className="text-center shrink-0">
-            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white whitespace-nowrap">
-              {title}
-            </h2>
-            {summary && (
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                {summary}
-              </p>
-            )}
-          </div>
-          <div className="h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-800 to-transparent flex-1" />
+    <section className={clsx(classNameMap.container, className)}>
+      <header
+        className={clsx(
+          classNameMap.header,
+          "flex items-start justify-between gap-6 border-b border-rule pb-4 mb-6",
+        )}
+      >
+        <div className="flex flex-col gap-1.5 max-w-[var(--measure)]">
+          <h2 className="font-display text-[1.5rem] leading-[1.15] font-semibold tracking-[-0.01em] text-fg">
+            {title}
+          </h2>
+          {summary && (
+            <p className="text-[0.9375rem] leading-[1.5] text-fg-muted">
+              {summary}
+            </p>
+          )}
         </div>
-      </div>
+      </header>
       <div className={classNameMap.content}>{children}</div>
-    </div>
+    </section>
   );
 }
 

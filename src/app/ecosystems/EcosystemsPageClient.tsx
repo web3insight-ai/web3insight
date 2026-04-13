@@ -1,7 +1,7 @@
 "use client";
 
-import { Card, CardHeader, Input, Pagination } from "@/components/ui";
-import { Search, Warehouse } from "lucide-react";
+import { Input, Pagination } from "@/components/ui";
+import { Search } from "lucide-react";
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -12,8 +12,9 @@ import { useEcosystemList, useOverviewStatistics } from "@/hooks/api";
 import { EcosystemType } from "~/ecosystem/typing";
 import { getFilterForType } from "~/ecosystem/helper";
 import { EcosystemTypeFilter } from "$/ecosystem-type-filter";
-import MetricCard, { resolveOverviewMetrics } from "$/controls/metric-card";
 import TableHeader from "$/controls/table-header";
+import { Panel } from "$/blueprint";
+import { SectionHeader, SmallCapsLabel, BigNumber } from "$/primitives";
 import {
   staggerContainer,
   staggerItemScale,
@@ -112,48 +113,73 @@ export default function EcosystemsPageClient() {
 
   const pages = Math.ceil(sortedItems.length / rowsPerPage);
 
+  const metricCards = [
+    {
+      code: "01",
+      label: "core devs",
+      value: totalCoreDevelopers,
+      footnote: "src: opendigger · 12m PR / push",
+      ground: "dotted" as const,
+    },
+    {
+      code: "02",
+      label: "eco contributors",
+      value: totalDevelopers,
+      footnote: "all-time, tracked ecosystems",
+      ground: "plain" as const,
+    },
+    {
+      code: "03",
+      label: "ecosystems",
+      value: totalEcosystems,
+      footnote: "live · indexed",
+      ground: "hatched" as const,
+    },
+    {
+      code: "04",
+      label: "repositories",
+      value: totalRepositories,
+      footnote: "grouped by ecosystem",
+      ground: "plain" as const,
+    },
+  ];
+
   return (
-    <div className="w-full max-w-content mx-auto px-6 py-8">
-      {/* Header and Overview */}
+    <div className="w-full max-w-content mx-auto px-6 py-10">
       <motion.div
         variants={fadeInUp}
         initial="hidden"
         animate="visible"
-        className="mb-8"
+        className="mb-10"
       >
-        <div className="flex items-center gap-3 mb-3">
-          <div className="p-2 rounded-xl bg-primary/10">
-            <Warehouse size={20} className="text-primary" />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            All Ecosystems
-          </h1>
-        </div>
-        <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
-          Compare metrics across all blockchain and Web3 ecosystems
-        </p>
+        <SectionHeader
+          kicker="index · ecosystems"
+          title="All ecosystems"
+          deck="Compare developer and repository metrics across every tracked blockchain and Web3 ecosystem."
+        />
       </motion.div>
 
-      {/* Summary Cards */}
       <motion.div
         variants={staggerContainer}
         initial="hidden"
         animate="visible"
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12"
       >
-        {resolveOverviewMetrics({
-          totalCoreDevelopers,
-          totalDevelopers,
-          totalEcosystems,
-          totalRepositories,
-        }).map((metric) => (
-          <motion.div
-            key={metric.label.replaceAll(" ", "")}
-            variants={staggerItemScale}
-            whileHover={{ y: -4, scale: 1.02 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          >
-            <MetricCard {...metric} />
+        {metricCards.map((m) => (
+          <motion.div key={m.code} variants={staggerItemScale}>
+            <Panel
+              ground={m.ground}
+              label={{ text: m.label, position: "tl" }}
+              code={m.code}
+              className="p-5 h-full"
+            >
+              <BigNumber
+                label=""
+                value={m.value}
+                format="compact"
+                footnote={m.footnote}
+              />
+            </Panel>
           </motion.div>
         ))}
       </motion.div>
@@ -169,30 +195,27 @@ export default function EcosystemsPageClient() {
             placeholder="Search ecosystems..."
             value={searchValue}
             onChange={(e) => form.setValue("search", e.target.value)}
-            startContent={<Search size={18} className="text-gray-400" />}
+            startContent={<Search size={18} className="text-fg-subtle" />}
             className="w-full"
           />
         </div>
       </div>
 
       {/* Ecosystems Table */}
-      <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">
-        <CardHeader className="px-6 py-5">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Warehouse size={18} className="text-primary" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-              Ecosystem Analytics
-            </h3>
-          </div>
-        </CardHeader>
+      <Panel
+        label={{ text: "ranking · ecosystems", position: "tl" }}
+        code="05"
+        className="overflow-hidden"
+      >
+        <div className="px-5 pt-5 pb-3 border-b border-rule">
+          <SmallCapsLabel>ecosystem analytics</SmallCapsLabel>
+        </div>
 
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-t border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider w-12">
+              <tr className="border-t border-rule bg-bg-sunken">
+                <th className="px-6 py-3 text-left font-mono text-[10px] font-medium text-fg-muted uppercase tracking-[0.18em] w-12">
                   #
                 </th>
                 <TableHeader>Ecosystem</TableHeader>
@@ -222,7 +245,7 @@ export default function EcosystemsPageClient() {
                 </TableHeader>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border dark:divide-border-dark">
+            <tbody className="divide-y divide-rule">
               <AnimatePresence mode="wait">
                 {paginatedItems.map((ecosystem, index) => {
                   const globalRank =
@@ -230,45 +253,41 @@ export default function EcosystemsPageClient() {
                   return (
                     <motion.tr
                       key={ecosystem.eco_name}
-                      className="hover:bg-surface dark:hover:bg-surface-dark transition-colors duration-200 group"
+                      className="hover:bg-bg-sunken transition-colors duration-200 group"
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.03, duration: 0.3 }}
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <span
-                            className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-medium transition-all duration-200 group-hover:scale-110 bg-gray-50 dark:bg-surface-dark text-gray-500 dark:text-gray-500`}
-                          >
-                            {globalRank}
-                          </span>
-                        </div>
+                        <span className="font-mono text-[11px] text-fg-muted tabular-nums">
+                          {String(globalRank).padStart(3, "0")}
+                        </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Link
                           href={`/ecosystems/${encodeURIComponent(ecosystem.eco_name)}`}
-                          className="font-medium text-gray-900 dark:text-white hover:text-primary transition-colors duration-200"
+                          className="font-medium text-fg hover:text-accent transition-colors duration-200"
                         >
                           {ecosystem.eco_name}
                         </Link>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
+                        <span className="text-fg font-mono text-sm tabular-nums">
                           {Number(ecosystem.actors_core_total).toLocaleString()}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
+                        <span className="text-fg font-mono text-sm tabular-nums">
                           {Number(ecosystem.actors_total).toLocaleString()}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
+                        <span className="text-fg font-mono text-sm tabular-nums">
                           {Number(ecosystem.actors_new_total).toLocaleString()}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
+                        <span className="text-fg font-mono text-sm tabular-nums">
                           {Number(ecosystem.repos_total).toLocaleString()}
                         </span>
                       </td>
@@ -281,11 +300,11 @@ export default function EcosystemsPageClient() {
         </div>
 
         {pages > 1 && (
-          <div className="px-6 py-4 border-t border-border dark:border-border-dark flex justify-center">
+          <div className="px-6 py-4 border-t border-rule flex justify-center">
             <Pagination page={page} total={pages} onChange={setPage} />
           </div>
         )}
-      </Card>
+      </Panel>
     </div>
   );
 }

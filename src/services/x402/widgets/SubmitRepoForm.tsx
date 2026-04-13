@@ -99,10 +99,10 @@ export function SubmitRepoForm({ onSuccess, onError }: SubmitRepoFormProps) {
   // Not ready yet
   if (!ready) {
     return (
-      <Card className="bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark">
+      <Card className="bg-bg-raised border border-rule">
         <CardBody className="p-6">
           <div className="flex items-center justify-center py-8">
-            <Loader2 size={24} className="animate-spin text-gray-400" />
+            <Loader2 size={24} className="animate-spin text-fg-muted" />
           </div>
         </CardBody>
       </Card>
@@ -112,16 +112,16 @@ export function SubmitRepoForm({ onSuccess, onError }: SubmitRepoFormProps) {
   // Not authenticated - show login prompt
   if (!authenticated) {
     return (
-      <Card className="bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark">
+      <Card className="bg-bg-raised border border-rule">
         <CardBody className="p-6">
           <div className="text-center py-4">
-            <div className="p-3 rounded-full bg-primary/10 w-fit mx-auto mb-4">
-              <Github size={24} className="text-primary" />
+            <div className="p-3 rounded-[2px] border border-rule bg-accent-subtle w-fit mx-auto mb-4">
+              <Github size={24} className="text-accent" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            <h3 className="text-lg font-semibold text-fg mb-2">
               Sign in to Submit
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-sm text-fg-muted mb-4">
               Connect your GitHub account to register your repository for
               donations.
             </p>
@@ -136,9 +136,9 @@ export function SubmitRepoForm({ onSuccess, onError }: SubmitRepoFormProps) {
 
   return (
     <>
-      <Card className="bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark">
+      <Card className="bg-bg-raised border border-rule">
         <CardBody className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          <h3 className="text-lg font-semibold text-fg mb-4">
             Register Your Repository
           </h3>
 
@@ -151,25 +151,25 @@ export function SubmitRepoForm({ onSuccess, onError }: SubmitRepoFormProps) {
                 name="repo_full_name"
                 label="Repository"
                 placeholder="owner/repo (e.g., ethereum/go-ethereum)"
-                startContent={<Github size={16} className="text-gray-400" />}
+                startContent={<Github size={16} className="text-fg-muted" />}
               />
 
               {submitMutation.isSuccess && submitMutation.data?.success && (
-                <div className="flex items-start gap-3 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                <div className="flex items-start gap-3 p-4 bg-accent-subtle rounded-[2px] border border-accent/30">
                   <CheckCircle
                     size={20}
-                    className="text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5"
+                    className="text-accent flex-shrink-0 mt-0.5"
                   />
                   <div>
-                    <p className="text-sm font-medium text-green-800 dark:text-green-200">
+                    <p className="text-sm font-medium text-accent">
                       Repository registered successfully!
                     </p>
                     {submitMutation.data.data?.repo_donate_data?.payTo ? (
-                      <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                      <p className="text-xs text-accent mt-1">
                         donation.json detected with payTo address.
                       </p>
                     ) : (
-                      <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                      <p className="text-xs text-accent mt-1">
                         No donation.json found. Use the generator below to
                         create one.
                       </p>
@@ -179,16 +179,16 @@ export function SubmitRepoForm({ onSuccess, onError }: SubmitRepoFormProps) {
               )}
 
               {submitMutation.isError && (
-                <div className="flex items-start gap-3 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <div className="flex items-start gap-3 p-4 bg-danger/10 rounded-[2px] border border-danger/30">
                   <AlertCircle
                     size={20}
-                    className="text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5"
+                    className="text-danger flex-shrink-0 mt-0.5"
                   />
                   <div>
-                    <p className="text-sm font-medium text-red-800 dark:text-red-200">
+                    <p className="text-sm font-medium text-danger">
                       Failed to register repository
                     </p>
-                    <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+                    <p className="text-xs text-danger mt-1">
                       {submitMutation.error instanceof Error
                         ? submitMutation.error.message
                         : "Please check the repository name and try again."}
@@ -211,9 +211,9 @@ export function SubmitRepoForm({ onSuccess, onError }: SubmitRepoFormProps) {
                   : "Register Repository"}
               </Button>
 
-              <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+              <p className="text-xs text-fg-muted text-center">
                 We&apos;ll automatically check for a{" "}
-                <code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-primary">
+                <code className="bg-bg-raised px-1 py-0.5 rounded-[2px] text-accent font-mono">
                   .x402/donation.json
                 </code>{" "}
                 file in your repository.
@@ -233,11 +233,8 @@ export function SubmitRepoForm({ onSuccess, onError }: SubmitRepoFormProps) {
         <ModalContent>
           <ModalHeader className="flex flex-col gap-1">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-orange-100 dark:bg-orange-900/20 rounded-full">
-                <AlertCircle
-                  size={24}
-                  className="text-orange-600 dark:text-orange-400"
-                />
+              <div className="p-2 bg-warn/10 rounded-[2px] border border-warn/30">
+                <AlertCircle size={24} className="text-warn" />
               </div>
               <span className="text-xl font-semibold">
                 GitHub Account Required
@@ -245,7 +242,7 @@ export function SubmitRepoForm({ onSuccess, onError }: SubmitRepoFormProps) {
             </div>
           </ModalHeader>
           <ModalBody>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-fg-muted">
               To register your repository for donations, you need to connect
               your GitHub account. This helps verify ownership of the
               repositories you submit.

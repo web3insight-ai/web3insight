@@ -18,8 +18,11 @@ const ToolFallback: FC<ToolCallMessagePartProps> = ({ toolName, result }) => {
 
   // Show loading indicator while tool is executing
   return (
-    <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 my-2">
-      <span className="inline-block w-2 h-2 bg-primary rounded-full animate-pulse" />
+    <div className="flex items-center gap-2 text-xs text-fg-muted my-2 font-mono">
+      <span
+        aria-hidden
+        className="animate-cursor inline-block h-[0.9em] w-[0.55ch] translate-y-[2px] bg-accent align-middle"
+      />
       <span>
         Fetching{" "}
         {toolName

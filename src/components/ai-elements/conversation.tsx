@@ -97,7 +97,7 @@ export function ConversationScrollButton({
   return (
     <Button
       className={cn(
-        "absolute bottom-4 left-[50%] z-10 translate-x-[-50%] rounded-full dark:bg-background-dark dark:hover:bg-surface-dark dark:border-border-dark dark:text-foreground-dark",
+        "absolute bottom-4 left-[50%] z-10 translate-x-[-50%] rounded-[2px] border border-rule bg-bg-raised text-fg hover:bg-bg-sunken",
         className,
       )}
       onClick={handleScrollToBottom}

@@ -22,8 +22,8 @@ export function resolveOverviewMetrics(
     {
       label: "ECO Contributors",
       value: Number(stats.totalDevelopers).toLocaleString(),
-      icon: <Users size={20} className="text-primary" />,
-      iconBgClassName: "bg-primary/10",
+      icon: <Users size={20} className="text-accent" />,
+      iconBgClassName: "bg-accent-subtle",
       tooltip:
         "Developers with activity (star not included) in this ecosystem (all time)",
     },

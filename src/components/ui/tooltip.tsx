@@ -34,9 +34,9 @@ function Tooltip({
           <BaseTooltip.Positioner side={placement} sideOffset={6}>
             <BaseTooltip.Popup
               className={clsx(
-                "z-50 max-w-xs rounded-lg px-3 py-2 text-xs leading-relaxed shadow-lg",
-                "bg-white dark:bg-surface-elevated text-gray-900 dark:text-gray-100",
-                "border border-gray-200 dark:border-border-dark",
+                "z-50 max-w-xs rounded-[2px] px-3 py-2 text-xs leading-relaxed shadow-lg",
+                "bg-bg-raised text-fg",
+                "border border-rule-strong",
                 "animate-fade-in",
                 classNames?.content,
               )}

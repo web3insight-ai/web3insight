@@ -14,7 +14,7 @@ import {
   Button,
   Chip,
 } from "@/components/ui";
-import { Calendar, AlertTriangle, X } from "lucide-react";
+import { AlertTriangle, X } from "lucide-react";
 import { useAtom } from "jotai";
 
 import { addToastAtom } from "#/atoms";
@@ -188,21 +188,17 @@ function EventEditDialog({
         base: "max-w-2xl mx-4 max-h-[80vh] my-8",
         wrapper: "overflow-visible",
         backdrop: "bg-background-dark/50",
-        header: "border-b border-border dark:border-border-dark",
+        header: "border-b border-rule",
         body: "p-0 overflow-hidden",
-        closeButton:
-          "hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",
+        closeButton: "hover:bg-bg-sunken transition-colors",
       }}
     >
-      <ModalContent className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark flex flex-col max-h-full">
+      <ModalContent className="bg-bg-raised border border-rule rounded-[2px] flex flex-col max-h-full">
         {() => (
           <form onSubmit={handleSubmit(onSubmit)}>
             <ModalHeader className="flex items-center gap-3 px-6 py-5">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Calendar size={20} className="text-primary" />
-              </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <h2 className="text-lg font-semibold text-fg">
                   Edit Event
                   {event && (
                     <Chip
@@ -215,7 +211,7 @@ function EventEditDialog({
                     </Chip>
                   )}
                 </h2>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-xs text-fg-muted mt-1">
                   Update event details and manage participants
                 </p>
               </div>
@@ -238,34 +234,32 @@ function EventEditDialog({
                         errorMessage={errors.description?.message}
                         classNames={{
                           base: "w-full",
-                          label:
-                            "text-sm font-medium text-gray-700 dark:text-gray-300 mb-2",
-                          input:
-                            "bg-white dark:bg-surface-dark border-border dark:border-border-dark",
+                          label: "text-sm font-medium text-fg mb-2",
+                          input: "bg-bg-raised border-rule",
                         }}
                       />
                     )}
                   />
 
                   <div>
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                    <label className="text-sm font-medium text-fg mb-2 block">
                       Current Participants ({currentParticipants.length})
                     </label>
                     {currentParticipants.length > 0 ? (
-                      <div className="max-h-64 overflow-y-auto bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-border dark:border-border-dark">
+                      <div className="max-h-64 overflow-y-auto bg-bg-raised rounded-[2px] border border-rule">
                         <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-2 p-4">
                           {currentParticipants.map((participant, index) => (
                             <div
                               key={index}
-                              className="relative bg-white dark:bg-surface-dark border border-border dark:border-border-dark rounded-md px-3 py-2 group hover:border-gray-300 dark:hover:border-gray-600 transition-colors text-center"
+                              className="relative bg-bg-raised border border-rule rounded-[2px] px-3 py-2 group hover:border-rule-strong transition-colors text-center"
                             >
-                              <span className="text-sm text-gray-700 dark:text-gray-300 truncate block">
+                              <span className="text-sm text-fg truncate block">
                                 {participant}
                               </span>
                               <button
                                 type="button"
                                 onClick={() => removeParticipant(index)}
-                                className="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all duration-200 w-5 h-5 bg-white dark:bg-surface-dark hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full border border-border dark:border-border-dark flex items-center justify-center"
+                                className="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 text-fg-subtle hover:text-red-500 transition-all duration-200 w-5 h-5 bg-bg-raised hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full border border-rule flex items-center justify-center"
                                 title="Remove participant"
                               >
                                 <X size={10} />
@@ -275,7 +269,7 @@ function EventEditDialog({
                         </div>
                       </div>
                     ) : (
-                      <div className="p-4 text-center text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-border dark:border-border-dark">
+                      <div className="p-4 text-center text-fg-muted bg-bg-raised rounded-[2px] border border-rule">
                         No current participants
                       </div>
                     )}
@@ -294,17 +288,15 @@ function EventEditDialog({
                         maxRows={10}
                         classNames={{
                           base: "w-full",
-                          label:
-                            "text-sm font-medium text-gray-700 dark:text-gray-300 mb-2",
-                          input:
-                            "bg-white dark:bg-surface-dark border-border dark:border-border-dark",
+                          label: "text-sm font-medium text-fg mb-2",
+                          input: "bg-bg-raised border-rule",
                         }}
                       />
                     )}
                   />
 
                   <div className="flex items-center gap-3 pt-2">
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                    <span className="text-sm text-fg-muted">
                       Input manually above or
                     </span>
                     <FileUpload
@@ -316,7 +308,7 @@ function EventEditDialog({
                         onClick={handleCsvUpload}
                         size="sm"
                         variant="bordered"
-                        className="border-border dark:border-border-dark hover:bg-gray-50 dark:hover:bg-white/10"
+                        className="border-rule hover:bg-bg-sunken dark:hover:bg-white/10"
                       >
                         import from CSV file
                       </Button>
@@ -324,7 +316,7 @@ function EventEditDialog({
                   </div>
 
                   {/* Warning Notice */}
-                  <div className="bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800 rounded-lg p-4">
+                  <div className="bg-warn-subtle border border-warn/40 rounded-[2px] p-4">
                     <div className="flex items-start gap-2">
                       <AlertTriangle
                         size={16}
@@ -346,13 +338,13 @@ function EventEditDialog({
               </div>
             </ModalBody>
 
-            <ModalFooter className="border-t border-border dark:border-border-dark px-6 py-4">
+            <ModalFooter className="border-t border-rule px-6 py-4">
               <div className="flex gap-3 w-full sm:w-auto sm:ml-auto">
                 <Button
                   type="button"
                   variant="bordered"
                   onClick={closeDialog}
-                  className="flex-1 sm:flex-none border-border dark:border-border-dark hover:bg-gray-50 dark:hover:bg-white/10"
+                  className="flex-1 sm:flex-none border-rule hover:bg-bg-sunken dark:hover:bg-white/10"
                 >
                   {updateMutation.isPending ? "Close" : "Cancel"}
                 </Button>

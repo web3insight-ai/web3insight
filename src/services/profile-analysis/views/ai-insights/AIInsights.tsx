@@ -1,301 +1,264 @@
 import { useState } from "react";
 import { Button, Chip } from "@/components/ui";
-import { Brain, Sparkles, Target } from "lucide-react";
+import { Target } from "lucide-react";
 import { useAtom } from "jotai";
 
 import type { GitHubUser } from "../../typing";
 import { hasAIData, getInvolvementLevelColor } from "../../helper";
 import { languageAtom } from "#/atoms";
 import { LanguageToggle } from "$/controls/language-toggle";
+import { SectionHeader, SmallCapsLabel } from "$/primitives";
 
 interface AIInsightsProps {
   user: GitHubUser;
   className?: string;
 }
 
+function ScoreTriplet({
+  spicy,
+  truth,
+  helpful,
+}: {
+  spicy: number;
+  truth: number;
+  helpful: number;
+}) {
+  const items: { label: string; value: number }[] = [
+    { label: "Spiciness", value: spicy },
+    { label: "Truthfulness", value: truth },
+    { label: "Helpfulness", value: helpful },
+  ];
+  return (
+    <div className="grid grid-cols-3 gap-x-10 border-t border-rule pt-6">
+      {items.map((item) => (
+        <div key={item.label} className="flex flex-col gap-1.5">
+          <SmallCapsLabel tone="subtle">{item.label}</SmallCapsLabel>
+          <div className="flex items-baseline gap-1.5">
+            <span className="font-display text-[1.875rem] leading-[1] font-semibold tabular-nums text-fg">
+              {item.value}
+            </span>
+            <span className="font-mono text-[0.75rem] text-fg-subtle">
+              / 10
+            </span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function AIInsights({ user, className = "" }: AIInsightsProps) {
   const [showFullSummary, setShowFullSummary] = useState(false);
   const [language] = useAtom(languageAtom);
 
-  if (!hasAIData(user) || !user.ai) {
-    return null;
-  }
+  if (!hasAIData(user) || !user.ai) return null;
 
   const aiProfile = user.ai;
-
-  // Check for new roastReport structure first, then fall back to old structure
   const hasNewRoastReport = aiProfile.roastReport;
   const hasOldRoastReport = aiProfile.roast_report;
   const hasRoastReport = hasNewRoastReport || hasOldRoastReport;
 
-  return (
-    <div className={`space-y-4 ${className}`}>
-      {/* AI Roast Report - Hero Section */}
-      {hasRoastReport ? (
-        // DevInsight - Simple & Clean
-        <div className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark compact-card">
-          <div className="space-y-3">
-            {/* Header with Language Toggle */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Brain size={16} className="text-primary" />
-                <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
-                  AI Analysis Report
-                </h2>
-              </div>
-              <div className="flex items-center gap-3">
-                {/* Language Toggle - only show for new structure */}
-                {hasNewRoastReport && <LanguageToggle />}
-                {/* Scores - With Labels - only show for old structure */}
-                {hasOldRoastReport && (
-                  <div className="flex items-center gap-4 text-xs">
-                    <div className="text-center">
-                      <div className="text-gray-900 dark:text-white font-semibold">
-                        {aiProfile.roast_report?.roast_score.spicyLevel}/10
-                      </div>
-                      <div className="text-gray-500 dark:text-gray-400 text-[10px]">
-                        Spiciness
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-gray-900 dark:text-white font-semibold">
-                        {aiProfile.roast_report?.roast_score.truthLevel}/10
-                      </div>
-                      <div className="text-gray-500 dark:text-gray-400 text-[10px]">
-                        Truthfulness
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-gray-900 dark:text-white font-semibold">
-                        {aiProfile.roast_report?.roast_score.helpfulLevel}/10
-                      </div>
-                      <div className="text-gray-500 dark:text-gray-400 text-[10px]">
-                        Helpfulness
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
+  if (hasRoastReport) {
+    const scores = aiProfile.roast_report?.roast_score;
+    return (
+      <section className={`border-t border-rule pt-10 ${className}`}>
+        <SectionHeader
+          kicker="AI brief · analysis"
+          title="The candid read"
+          deck={
+            <>
+              An unblinking summary of this developer's signal — generated from
+              repo activity, commit cadence, and ecosystem footprint. Treat it
+              as a starting point for conversation, not a verdict.
+            </>
+          }
+          action={hasNewRoastReport ? <LanguageToggle /> : null}
+        />
+
+        {hasOldRoastReport && scores && (
+          <div className="mb-8">
+            <ScoreTriplet
+              spicy={scores.spicyLevel}
+              truth={scores.truthLevel}
+              helpful={scores.helpfulLevel}
+            />
+          </div>
+        )}
+
+        {hasNewRoastReport && (
+          <p className="chinese-content font-sans text-[1.0625rem] leading-[1.65] text-fg max-w-[var(--measure-wide)]">
+            {aiProfile.roastReport?.[language] ??
+              aiProfile.roastReport?.english ??
+              aiProfile.roastReport?.chinese}
+          </p>
+        )}
+
+        {hasOldRoastReport && !hasNewRoastReport && (
+          <div className="flex flex-col gap-8 max-w-[var(--measure-wide)]">
+            <p className="chinese-content font-display text-[1.25rem] leading-[1.3] font-semibold text-fg">
+              {aiProfile.roast_report?.title}
+            </p>
+
+            <AnalysisBlock
+              label="Overall performance"
+              body={aiProfile.roast_report?.overall_roast}
+            />
+            <AnalysisBlock
+              label="Activity level"
+              body={aiProfile.roast_report?.activity_roast}
+            />
+            <AnalysisBlock
+              label="Ecosystem choice"
+              body={aiProfile.roast_report?.ecosystem_roast}
+            />
+            <AnalysisBlock
+              label="Technical skills"
+              body={aiProfile.roast_report?.technical_roast}
+            />
+
+            <div className="border-t border-rule-strong pt-6">
+              <SmallCapsLabel tone="subtle">Summary</SmallCapsLabel>
+              <p className="chinese-content font-display mt-2 text-[1.125rem] leading-[1.5] text-fg">
+                {aiProfile.roast_report?.final_verdict}
+              </p>
             </div>
 
-            {/* Content - New Structure */}
-            {hasNewRoastReport && (
-              <div className="border-l-3 border-l-primary pl-3">
-                <p className="chinese-content text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-                  {aiProfile.roastReport?.[language] ??
-                    aiProfile.roastReport?.english ??
-                    aiProfile.roastReport?.chinese}
-                </p>
+            {aiProfile.roast_report?.constructive_sarcasm &&
+              aiProfile.roast_report.constructive_sarcasm.length > 0 && (
+              <div className="border-t border-rule pt-6">
+                <SmallCapsLabel tone="subtle">
+                    Improvement suggestions
+                </SmallCapsLabel>
+                <ol className="mt-4 flex flex-col gap-3">
+                  {aiProfile.roast_report.constructive_sarcasm
+                    .slice(0, 3)
+                    .map((suggestion, index) => (
+                      <li key={index} className="flex items-baseline gap-3">
+                        <span className="font-mono text-[0.75rem] text-fg-subtle tabular-nums shrink-0">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
+                        <p className="chinese-content text-[0.9375rem] leading-[1.55] text-fg-muted">
+                          {suggestion}
+                        </p>
+                      </li>
+                    ))}
+                </ol>
               </div>
-            )}
-
-            {/* Content - Old Structure */}
-            {hasOldRoastReport && !hasNewRoastReport && (
-              <>
-                {/* Title */}
-                <div className="border-l-3 border-l-primary pl-3">
-                  <p className="chinese-content text-sm font-medium text-gray-900 dark:text-white">
-                    {aiProfile.roast_report?.title}
-                  </p>
-                </div>
-
-                {/* Analysis Content - Compact */}
-                <div className="space-y-3 text-sm">
-                  <div className="border-l-2 border-l-gray-200 dark:border-l-gray-700 pl-3">
-                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                      Overall Performance
-                    </h4>
-                    <p className="chinese-content leading-relaxed text-gray-700 dark:text-gray-300">
-                      {aiProfile.roast_report?.overall_roast}
-                    </p>
-                  </div>
-
-                  <div className="border-l-2 border-l-gray-200 dark:border-l-gray-700 pl-3">
-                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                      Activity Level
-                    </h4>
-                    <p className="chinese-content leading-relaxed text-gray-700 dark:text-gray-300">
-                      {aiProfile.roast_report?.activity_roast}
-                    </p>
-                  </div>
-
-                  <div className="border-l-2 border-l-gray-200 dark:border-l-gray-700 pl-3">
-                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                      Ecosystem Choice
-                    </h4>
-                    <p className="chinese-content leading-relaxed text-gray-700 dark:text-gray-300">
-                      {aiProfile.roast_report?.ecosystem_roast}
-                    </p>
-                  </div>
-
-                  <div className="border-l-2 border-l-gray-200 dark:border-l-gray-700 pl-3">
-                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                      Technical Skills
-                    </h4>
-                    <p className="chinese-content leading-relaxed text-gray-700 dark:text-gray-300">
-                      {aiProfile.roast_report?.technical_roast}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Summary */}
-                <div className="bg-gray-100 dark:bg-gray-700/50 rounded-lg p-3 mt-4 border dark:border-gray-600">
-                  <h4 className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-2">
-                    Summary
-                  </h4>
-                  <p className="chinese-content text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                    {aiProfile.roast_report?.final_verdict}
-                  </p>
-                </div>
-
-                {/* Suggestions */}
-                {aiProfile.roast_report?.constructive_sarcasm &&
-                  aiProfile.roast_report.constructive_sarcasm.length > 0 && (
-                  <div className="mt-4">
-                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
-                        Improvement Suggestions
-                    </h4>
-                    <div className="space-y-2">
-                      {aiProfile.roast_report?.constructive_sarcasm
-                        .slice(0, 2)
-                        .map((suggestion, index) => (
-                          <div key={index} className="flex items-start gap-2">
-                            <span className="text-xs text-gray-400 mt-0.5">
-                              {index + 1}.
-                            </span>
-                            <p className="chinese-content text-xs leading-relaxed text-gray-600 dark:text-gray-400">
-                              {suggestion}
-                            </p>
-                          </div>
-                        ))}
-                    </div>
-                  </div>
-                )}
-              </>
             )}
           </div>
-        </div>
-      ) : (
-        // Fallback for other AI insights when no roast report
-        <div className="space-y-4">
-          {/* Web3 Involvement Score - Primary KPI */}
-          {aiProfile.web3_involvement && (
-            <div className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark compact-card">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    Web3 Involvement Level
-                  </h3>
-                  <div className="flex items-center gap-3">
-                    <Chip
-                      color={getInvolvementLevelColor(
-                        aiProfile.web3_involvement.level,
-                      )}
-                      variant="flat"
-                      size="lg"
-                      className="font-semibold"
-                    >
-                      {aiProfile.web3_involvement.level}
-                    </Chip>
-                    <span className="metric-number text-gray-900 dark:text-white">
-                      {aiProfile.web3_involvement.score}/100
-                    </span>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <Target size={32} className="text-primary/60" />
-                </div>
-              </div>
-            </div>
-          )}
+        )}
+      </section>
+    );
+  }
 
-          {/* AI Summary - Progressive Disclosure */}
-          {aiProfile.summary && (
-            <div className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark compact-card">
-              <div className="flex items-center gap-3 mb-4">
-                <Sparkles size={18} className="text-secondary" />
-                <h3 className="font-semibold text-gray-900 dark:text-white">
-                  DevInsight Analysis Summary
-                </h3>
-              </div>
+  return (
+    <section className={`border-t border-rule pt-10 ${className}`}>
+      <SectionHeader
+        kicker="AI brief"
+        title="Signal summary"
+        deck="Machine-read commentary on this developer's Web3 footprint, capability signal, and suggested next steps."
+      />
 
-              <div className="space-y-3">
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-sm">
-                  {showFullSummary
-                    ? aiProfile.summary
-                    : `${aiProfile.summary.slice(0, 200)}${aiProfile.summary.length > 200 ? "..." : ""}`}
-                </p>
-
-                {aiProfile.summary.length > 200 && (
-                  <Button
-                    variant="light"
-                    size="sm"
-                    onPress={() => setShowFullSummary(!showFullSummary)}
-                    className="text-primary"
-                  >
-                    {showFullSummary ? "Show Less" : "Read More"}
-                  </Button>
+      <div className="flex flex-col gap-10 max-w-[var(--measure-wide)]">
+        {aiProfile.web3_involvement && (
+          <div className="flex flex-col gap-3">
+            <SmallCapsLabel tone="subtle">
+              Web3 involvement level
+            </SmallCapsLabel>
+            <div className="flex items-baseline gap-4">
+              <span className="font-display text-[2.5rem] leading-[1] font-semibold tabular-nums text-fg">
+                {aiProfile.web3_involvement.score}
+                <span className="text-[1rem] font-mono text-fg-subtle">
+                  {" "}
+                  / 100
+                </span>
+              </span>
+              <Chip
+                color={getInvolvementLevelColor(
+                  aiProfile.web3_involvement.level,
                 )}
-              </div>
+                variant="flat"
+                size="md"
+                className="font-medium"
+              >
+                {aiProfile.web3_involvement.level}
+              </Chip>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Skills - Simplified Display */}
-          {aiProfile.skills && aiProfile.skills.length > 0 && (
-            <div className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark compact-card">
-              <div className="flex items-center gap-3 mb-4">
-                <Brain size={18} className="text-primary" />
-                <h3 className="font-semibold text-gray-900 dark:text-white">
-                  Key Skills
-                </h3>
-              </div>
+        {aiProfile.summary && (
+          <div className="flex flex-col gap-3 border-t border-rule pt-6">
+            <SmallCapsLabel tone="subtle">Analysis summary</SmallCapsLabel>
+            <p className="text-[1rem] leading-[1.65] text-fg">
+              {showFullSummary
+                ? aiProfile.summary
+                : `${aiProfile.summary.slice(0, 240)}${aiProfile.summary.length > 240 ? "…" : ""}`}
+            </p>
+            {aiProfile.summary.length > 240 && (
+              <Button
+                variant="light"
+                size="sm"
+                onPress={() => setShowFullSummary(!showFullSummary)}
+                className="self-start text-accent px-0 h-6 min-w-0"
+              >
+                {showFullSummary ? "Show less ↑" : "Read more ↓"}
+              </Button>
+            )}
+          </div>
+        )}
 
-              <div className="flex flex-wrap gap-2">
-                {aiProfile.skills.slice(0, 8).map((skill, index) => (
-                  <Chip
-                    key={index}
-                    color="primary"
-                    variant="flat"
-                    size="sm"
-                    className="text-xs"
-                  >
-                    {skill}
-                  </Chip>
-                ))}
-                {aiProfile.skills.length > 8 && (
-                  <Chip
-                    color="default"
-                    variant="bordered"
-                    size="sm"
-                    className="text-xs"
-                  >
-                    +{aiProfile.skills.length - 8} more
-                  </Chip>
-                )}
-              </div>
+        {aiProfile.skills && aiProfile.skills.length > 0 && (
+          <div className="flex flex-col gap-3 border-t border-rule pt-6">
+            <SmallCapsLabel tone="subtle">Key skills</SmallCapsLabel>
+            <div className="flex flex-wrap gap-2">
+              {aiProfile.skills.slice(0, 10).map((skill, index) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center font-mono text-[0.75rem] uppercase tracking-[0.08em] text-fg-muted border border-rule rounded-sm px-2 py-1"
+                >
+                  {skill}
+                </span>
+              ))}
+              {aiProfile.skills.length > 10 && (
+                <span className="inline-flex items-center text-[0.75rem] text-fg-subtle px-1 py-1">
+                  + {aiProfile.skills.length - 10} more
+                </span>
+              )}
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Recommendation */}
-          {aiProfile.recommendation && (
-            <div className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark compact-card border-l-4 border-l-success">
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-success/10 rounded-lg flex-shrink-0 mt-1">
-                  <Target size={18} className="text-success" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-success mb-2">
-                    Recommendations
-                  </h3>
-                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-sm">
-                    {aiProfile.recommendation}
-                  </p>
-                </div>
-              </div>
+        {aiProfile.recommendation && (
+          <div className="flex flex-col gap-3 border-t border-rule pt-6">
+            <div className="flex items-center gap-2">
+              <Target size={12} className="text-accent" />
+              <SmallCapsLabel tone="accent">Recommendations</SmallCapsLabel>
             </div>
-          )}
-        </div>
-      )}
+            <p className="text-[1rem] leading-[1.65] text-fg">
+              {aiProfile.recommendation}
+            </p>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function AnalysisBlock({
+  label,
+  body,
+}: {
+  label: string;
+  body: string | undefined;
+}) {
+  if (!body) return null;
+  return (
+    <div className="flex flex-col gap-2">
+      <SmallCapsLabel tone="subtle">{label}</SmallCapsLabel>
+      <p className="chinese-content text-[1rem] leading-[1.65] text-fg">
+        {body}
+      </p>
     </div>
   );
 }

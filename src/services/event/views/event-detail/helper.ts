@@ -24,11 +24,11 @@ function resolveChartOptions(dataSource: EcosystemAnalytics[]): EChartsOption {
       axisLabel: {
         rotate: 45,
         fontSize: 9,
-        color: '#6B7280',
+        color: "var(--fg-muted)",
       },
       axisLine: {
         lineStyle: {
-          color: '#E5E7EB',
+          color: "var(--rule)",
         },
       },
       axisTick: {
@@ -39,7 +39,7 @@ function resolveChartOptions(dataSource: EcosystemAnalytics[]): EChartsOption {
       type: "value",
       axisLabel: {
         fontSize: 9,
-        color: '#6B7280',
+        color: "var(--fg-muted)",
       },
       axisLine: {
         show: false,
@@ -49,8 +49,8 @@ function resolveChartOptions(dataSource: EcosystemAnalytics[]): EChartsOption {
       },
       splitLine: {
         lineStyle: {
-          color: '#F3F4F6',
-          type: 'dashed',
+          color: "var(--rule)",
+          type: "dashed",
           opacity: 0.5,
         },
       },
@@ -60,24 +60,24 @@ function resolveChartOptions(dataSource: EcosystemAnalytics[]): EChartsOption {
         data: seriesData,
         type: "bar",
         itemStyle: {
-          color: '#0D9488',
+          color: "var(--accent)",
         },
         label: {
           show: false,
         },
-        barWidth: '60%',
+        barWidth: "60%",
       },
     ],
     tooltip: {
-      trigger: 'axis',
-      backgroundColor: 'rgba(255, 255, 255, 0.95)',
-      borderColor: '#E5E7EB',
+      trigger: "axis",
+      backgroundColor: "var(--bg-raised)",
+      borderColor: "var(--rule-strong)",
       borderWidth: 1,
       textStyle: {
-        color: '#374151',
+        color: "var(--fg)",
         fontSize: 10,
       },
-      formatter: function(params: unknown) {
+      formatter: function (params: unknown) {
         const paramsArray = Array.isArray(params) ? params : [params];
         const data = paramsArray[0] as { name: string; value: number };
         return `${data.name}: ${data.value}`;

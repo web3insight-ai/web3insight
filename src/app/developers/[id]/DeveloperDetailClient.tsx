@@ -52,7 +52,7 @@ export default function DeveloperDetailClient({
     return (
       <div className="w-full max-w-content mx-auto px-6 py-8">
         <div className="mb-8">
-          <Skeleton className="h-32 w-full rounded-xl" />
+          <Skeleton className="h-32 w-full rounded-[2px]" />
         </div>
         <CardSkeleton count={4} />
         <div className="mt-8">
@@ -61,13 +61,13 @@ export default function DeveloperDetailClient({
         <div className="mt-8">
           <TableSkeleton
             title="Top Repositories"
-            icon={<Github size={18} className="text-primary" />}
+            icon={<Github size={18} className="text-accent" />}
             rows={10}
             columns={6}
           />
         </div>
         <div className="mt-8">
-          <Skeleton className="h-96 w-full rounded-xl" />
+          <Skeleton className="h-96 w-full rounded-[2px]" />
         </div>
       </div>
     );
@@ -89,7 +89,7 @@ export default function DeveloperDetailClient({
       {shouldShowGitHubLanguages && (
         <div className="animate-slide-up" style={{ animationDelay: "50ms" }}>
           <div className="mb-4">
-            <h5 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+            <h5 className="text-xs font-medium text-fg-muted uppercase tracking-wider mb-2">
               Programming Languages
             </h5>
             <div className="grid gap-4 lg:grid-cols-2">
@@ -109,10 +109,10 @@ export default function DeveloperDetailClient({
         className="animate-slide-up mb-4"
         style={{ animationDelay: "200ms" }}
       >
-        <div className="rounded-xl border border-border dark:border-border-dark bg-white dark:bg-surface-dark p-4 shadow-subtle">
+        <div className="rounded-[2px] border border-rule bg-bg-raised p-4">
           <div className="flex items-center gap-2 mb-3">
-            <Github size={14} className="text-gray-400" />
-            <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+            <Github size={14} className="text-fg-subtle" />
+            <h3 className="text-sm font-medium text-fg">
               Contribution Activity
             </h3>
           </div>

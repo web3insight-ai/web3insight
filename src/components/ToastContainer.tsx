@@ -63,7 +63,7 @@ const ToastItem = memo(function ToastItem({ toast }: { toast: Toast }) {
   return (
     <div
       className={`
-        mb-2 p-3 rounded-lg border shadow-sm
+        mb-2 p-3 rounded-[2px] border
         ${style.bg} ${style.border}
         animate-in slide-in-from-right-5 fade-in duration-200
       `}
@@ -80,7 +80,7 @@ const ToastItem = memo(function ToastItem({ toast }: { toast: Toast }) {
               href={toast.link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-xs mt-1 text-primary hover:underline"
+              className="inline-flex items-center gap-1 text-xs mt-1 text-accent hover:underline"
             >
               {toast.link.text}
               <ExternalLink size={10} />
@@ -92,7 +92,7 @@ const ToastItem = memo(function ToastItem({ toast }: { toast: Toast }) {
           onClick={handleRemove}
           className="flex-shrink-0 p-0.5 rounded hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
         >
-          <X size={14} className="text-gray-400" />
+          <X size={14} className="text-fg-subtle" />
         </button>
       </div>
     </div>

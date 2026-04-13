@@ -21,18 +21,9 @@ interface EcosystemBarChartProps {
   limit?: number;
 }
 
-const BAR_COLORS = [
-  "#0D9488",
-  "#14B8A6",
-  "#10B981",
-  "#059669",
-  "#0F766E",
-  "#6366F1",
-  "#818CF8",
-  "#A78BFA",
-  "#8B5CF6",
-  "#7C3AED",
-];
+import { sequentialTeal } from "@/lib/charts";
+
+const BAR_COLORS = [...sequentialTeal, ...sequentialTeal].slice(0, 10);
 
 export default function EcosystemBarChart({
   data,
@@ -67,25 +58,21 @@ export default function EcosystemBarChart({
 
   return (
     <motion.div variants={fadeInUp} {...createViewportAnimation()}>
-      <div className="rounded-2xl border border-border dark:border-border-dark bg-white dark:bg-surface-dark overflow-hidden">
+      <div className="rounded-[2px] border border-rule bg-bg-raised overflow-hidden">
         {/* Header */}
         <div className="px-6 pt-6 pb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-primary/10">{icon}</div>
+            {icon}
             <div>
-              <p className="text-base font-semibold text-gray-900 dark:text-white">
-                {title}
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {subtitle}
-              </p>
+              <p className="text-base font-semibold text-fg">{title}</p>
+              <p className="font-mono text-xs text-fg-muted">{subtitle}</p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">
+            <p className="text-2xl font-bold text-fg tabular-nums">
               {totalCount.toLocaleString()}
             </p>
-            <p className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+            <p className="text-[10px] text-fg-subtle uppercase tracking-wider">
               total devs
             </p>
           </div>
@@ -110,13 +97,13 @@ export default function EcosystemBarChart({
                   onMouseLeave={() => setHoveredIndex(null)}
                 >
                   {/* Rank number */}
-                  <span className="w-5 text-[10px] text-gray-400 dark:text-gray-500 tabular-nums text-right shrink-0">
+                  <span className="w-5 text-[10px] text-fg-subtle tabular-nums text-right shrink-0">
                     {index + 1}
                   </span>
 
                   {/* Name */}
                   <span
-                    className="w-28 text-xs text-gray-600 dark:text-gray-300 truncate shrink-0 transition-colors"
+                    className="w-28 text-xs text-fg-muted truncate shrink-0 transition-colors"
                     style={{ color: isHovered ? color : undefined }}
                     title={item.name}
                   >
@@ -124,7 +111,7 @@ export default function EcosystemBarChart({
                   </span>
 
                   {/* Bar */}
-                  <div className="flex-1 h-5 bg-gray-50 dark:bg-gray-800/50 rounded overflow-hidden relative">
+                  <div className="flex-1 h-5 bg-bg-raised rounded overflow-hidden relative">
                     <motion.div
                       className="h-full rounded transition-all duration-300"
                       initial={{ width: 0 }}
@@ -140,7 +127,7 @@ export default function EcosystemBarChart({
                       }}
                     />
                     {isHovered && item.kind && (
-                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] text-gray-500 dark:text-gray-400">
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] text-fg-muted">
                         {item.kind}
                       </span>
                     )}

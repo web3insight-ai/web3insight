@@ -164,14 +164,12 @@ function MarkDialog({ record, visible, onClose, onChange }: MarkDialogProps) {
         {() => (
           <form onSubmit={handleSubmit(onSubmit)}>
             <ModalHeader className="flex flex-col gap-1">
-              <div className="text-lg font-semibold text-gray-900 dark:text-white">
+              <div className="text-lg font-semibold text-fg">
                 Mark Repository
               </div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">
+              <div className="text-sm text-fg-muted">
                 Repository:{" "}
-                <span className="font-mono text-primary">
-                  {record.fullName}
-                </span>
+                <span className="font-mono text-accent">{record.fullName}</span>
               </div>
             </ModalHeader>
             <ModalBody className="pb-6">
@@ -179,7 +177,7 @@ function MarkDialog({ record, visible, onClose, onChange }: MarkDialogProps) {
                 <div>
                   <label
                     htmlFor="mark-select"
-                    className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block"
+                    className="text-sm font-medium text-fg mb-2 block"
                   >
                     Custom Mark Level
                   </label>
@@ -194,8 +192,7 @@ function MarkDialog({ record, visible, onClose, onChange }: MarkDialogProps) {
                         isInvalid={!!errors.mark}
                         errorMessage={errors.mark?.message}
                         classNames={{
-                          trigger:
-                            "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700",
+                          trigger: "bg-bg-raised border border-rule",
                         }}
                         onChange={(e) => field.onChange(e.target.value)}
                       >
@@ -207,23 +204,23 @@ function MarkDialog({ record, visible, onClose, onChange }: MarkDialogProps) {
                             <div className="py-2">
                               <div className="flex items-center gap-2">
                                 <span
-                                  className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium ${
+                                  className={`inline-flex items-center justify-center w-6 h-6 rounded-[2px] border font-mono text-xs tabular-nums ${
                                     opt.value === 0
-                                      ? "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
+                                      ? "border-rule bg-bg-sunken text-fg-muted"
                                       : opt.value <= 3
-                                        ? "bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200"
+                                        ? "border-rule bg-bg-sunken text-fg-muted"
                                         : opt.value <= 6
-                                          ? "bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200"
-                                          : "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200"
+                                          ? "border-rule bg-bg-sunken text-fg"
+                                          : "border-accent bg-accent-subtle text-accent"
                                   }`}
                                 >
                                   {opt.value}
                                 </span>
-                                <p className="font-semibold text-gray-900 dark:text-white">
+                                <p className="font-semibold text-fg">
                                   {opt.label}
                                 </p>
                               </div>
-                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 ml-8">
+                              <p className="text-xs text-fg-muted mt-1 ml-8">
                                 {opt.description}
                               </p>
                             </div>
@@ -234,29 +231,29 @@ function MarkDialog({ record, visible, onClose, onChange }: MarkDialogProps) {
                   />
                 </div>
                 {markValue && (
-                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <div className="p-4 bg-bg-sunken rounded-[2px] border border-rule">
                     <div className="flex items-center gap-2">
                       <span
-                        className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium ${
+                        className={`inline-flex items-center justify-center w-6 h-6 rounded-[2px] border font-mono text-xs tabular-nums ${
                           Number(markValue) === 0
-                            ? "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
+                            ? "border-rule bg-bg-raised text-fg-muted"
                             : Number(markValue) <= 3
-                              ? "bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200"
+                              ? "border-rule bg-bg-raised text-fg-muted"
                               : Number(markValue) <= 6
-                                ? "bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200"
-                                : "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200"
+                                ? "border-rule bg-bg-raised text-fg"
+                                : "border-accent bg-accent-subtle text-accent"
                         }`}
                       >
                         {markValue}
                       </span>
-                      <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                      <span className="text-sm font-medium text-fg">
                         {
                           options.find((opt) => opt.value === Number(markValue))
                             ?.label
                         }
                       </span>
                     </div>
-                    <p className="text-xs text-blue-700 dark:text-blue-300 mt-2">
+                    <p className="text-xs text-fg-muted mt-2">
                       {
                         options.find((opt) => opt.value === Number(markValue))
                           ?.description

@@ -2,15 +2,13 @@
 
 import {
   Button,
-  Card,
-  CardBody,
   Modal,
   ModalContent,
   ModalHeader,
   ModalBody,
   ModalFooter,
 } from "@/components/ui";
-import { Brain, AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 
@@ -22,7 +20,6 @@ import type {
   GitHubUser,
 } from "~/profile-analysis/typing";
 import { hasAIData, hasEcosystemData } from "~/profile-analysis/helper";
-// Progress card removed per design; keep skeleton-only loading experience
 import {
   ProfileHeader,
   ProfileHeaderSkeleton,
@@ -36,12 +33,38 @@ import {
 import MetricOverviewSkeleton from "$/loading/MetricOverviewSkeleton";
 import ChartSkeleton from "$/loading/ChartSkeleton";
 import FadeIn from "$/FadeIn";
+import { SmallCapsLabel } from "$/primitives";
 
 interface DevInsightPageProps {
   requiresAuth: boolean;
   error?: string;
   user?: unknown;
   githubHandle?: string;
+}
+
+function PageHero({ handle }: { handle?: string | null }) {
+  return (
+    <div className="flex flex-col gap-4 pb-10 border-b border-rule">
+      <SmallCapsLabel tone="accent">DevInsight · AI brief</SmallCapsLabel>
+      <h1 className="font-display text-[clamp(2rem,4.5vw,3rem)] leading-[1.05] font-semibold tracking-[-0.02em] text-fg max-w-[20ch]">
+        {handle ? (
+          <>
+            <span className="font-mono text-fg-muted">@{handle}</span>
+            <span className="text-fg-subtle font-sans font-normal"> / </span>
+            <br />
+            an unblinking developer brief.
+          </>
+        ) : (
+          <>A candid developer brief, generated from commits.</>
+        )}
+      </h1>
+      <p className="text-[1rem] leading-[1.55] text-fg-muted max-w-[var(--measure)]">
+        Commit velocity, ecosystem reach, and language footprint — distilled
+        into a readable profile you can paste into a grant memo. Methodology
+        stays visible; sources are linked. Read it top-to-bottom.
+      </p>
+    </div>
+  );
 }
 
 export default function DevInsightPageClient({
@@ -58,20 +81,15 @@ export default function DevInsightPageClient({
     linkGithub,
   } = usePrivy();
 
-  // Get GitHub handle from Privy linkedAccounts if not provided by server
   const githubAccount = privyUser?.linkedAccounts?.find(
     (acc) => acc.type === "github_oauth",
   );
   const privyGithubHandle = githubAccount?.username || null;
-
-  // Use Privy GitHub handle if server didn't provide one
   const githubHandle = serverGithubHandle || privyGithubHandle;
 
-  // State for GitHub linking
   const [isLinkingGithub, setIsLinkingGithub] = useState(false);
   const [showGitHubModal, setShowGitHubModal] = useState(false);
 
-  // Show modal when user needs to link GitHub
   useEffect(() => {
     if (error && ready && authenticated && !githubHandle) {
       setShowGitHubModal(true);
@@ -80,21 +98,17 @@ export default function DevInsightPageClient({
     }
   }, [error, ready, authenticated, githubHandle]);
 
-  // Handle GitHub account linking
   const handleLinkGithub = async () => {
     setIsLinkingGithub(true);
     try {
       await linkGithub();
-      // Privy will handle the OAuth flow and update linkedAccounts automatically
-      // The page will detect the new GitHub account via useEffect
     } catch (_error) {
-      // Error handled by Privy UI
+      // Privy UI handles errors
     } finally {
       setIsLinkingGithub(false);
     }
   };
 
-  // Analysis state
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisStatus, setAnalysisStatus] =
     useState<AnalysisStatus>("pending");
@@ -105,18 +119,12 @@ export default function DevInsightPageClient({
   const [analysisError, setAnalysisError] = useState("");
   const [analysisId, setAnalysisId] = useState<number | null>(null);
 
-  // Auto-trigger Privy login for unauthenticated users
   useEffect(() => {
-    if (requiresAuth && ready && !authenticated) {
-      login();
-    }
+    if (requiresAuth && ready && !authenticated) login();
   }, [requiresAuth, ready, authenticated, login]);
 
-  // Auto-start analysis when GitHub handle becomes available
-  // This handles both initial load and when user links GitHub account
   useEffect(() => {
     if (ready && githubHandle && !isAnalyzing) {
-      // If we have a GitHub handle and not currently analyzing, start analysis
       if (analysisStatus === "pending" || (!results && !basicInfo)) {
         handleAnalyze();
       }
@@ -125,21 +133,15 @@ export default function DevInsightPageClient({
   }, [ready, githubHandle]);
 
   useEffect(() => {
-    if (basicInfo?.id) {
-      setAnalysisId(basicInfo.id);
-    }
+    if (basicInfo?.id) setAnalysisId(basicInfo.id);
   }, [basicInfo]);
 
   useEffect(() => {
-    if (results?.analysisId) {
-      setAnalysisId(results.analysisId);
-    }
+    if (results?.analysisId) setAnalysisId(results.analysisId);
   }, [results]);
 
-  // Force re-render when results change to ensure AI insights appear
   useEffect(() => {
     if (results?.data?.users?.[0]?.ai) {
-      // Force a small state update to trigger re-render
       setProgress((prev) => (prev === 100 ? 100 : 100));
     }
   }, [results]);
@@ -164,7 +166,6 @@ export default function DevInsightPageClient({
         (status, progressValue, data) => {
           setStatusMessage(status);
           if (progressValue) setProgress(progressValue);
-          // Live update results when partial data (including AI) arrives via polling
           if (data?.data?.users && data.data.users.length > 0) {
             setResults({
               data: { users: data.data.users as GitHubUser[] },
@@ -195,184 +196,121 @@ export default function DevInsightPageClient({
     }
   };
 
-  // Get the current user data for display
   const currentUser = results?.data.users[0] || basicInfo?.users[0];
 
-  // For unauthenticated users, show a simple message and let the modal handle login
   if (requiresAuth) {
     return (
-      <div className="w-full max-w-content mx-auto px-6 py-8">
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 rounded-xl bg-primary/10">
-              <Brain size={20} className="text-primary" />
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              DevInsight
-            </h1>
-          </div>
-          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
-            AI-powered Web3 development insights and analysis
+      <div className="w-full max-w-content mx-auto px-6 pt-12 pb-24">
+        <PageHero />
+        <div className="mt-20 flex flex-col items-start gap-4 max-w-[var(--measure)]">
+          <SmallCapsLabel tone="subtle">Sign in required</SmallCapsLabel>
+          <h2 className="font-display text-[1.5rem] leading-[1.2] font-semibold text-fg">
+            Link your GitHub to unlock the brief.
+          </h2>
+          <p className="text-[0.9375rem] leading-[1.55] text-fg-muted">
+            DevInsight reads public commit and ecosystem data — no private repos
+            — and returns an AI-written summary you can share.
           </p>
-        </div>
-
-        <div className="text-center py-12">
-          <div className="space-y-4">
-            <div className="p-3 rounded-full bg-primary/10 w-fit mx-auto">
-              <Brain size={32} className="text-primary" />
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                Sign in to access DevInsight
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Connect your GitHub account to unlock AI-powered Web3
-                development insights
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-content mx-auto px-6 py-8">
-      {/* Header and Overview */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="p-2 rounded-xl bg-primary/10">
-            <Brain size={20} className="text-primary" />
+    <div className="w-full max-w-content mx-auto px-6 pt-12 pb-24">
+      <PageHero handle={githubHandle} />
+
+      {analysisError && (
+        <div className="mt-10 border-t border-rule pt-6 flex flex-col gap-3 max-w-[var(--measure)]">
+          <div className="flex items-center gap-2">
+            <AlertCircle size={14} className="text-danger" />
+            <SmallCapsLabel tone="subtle">Analysis failed</SmallCapsLabel>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white whitespace-nowrap">
-            @{githubHandle} DevInsight
-          </h1>
+          <p className="text-[0.9375rem] leading-[1.5] text-fg">
+            {analysisError}
+          </p>
+          <Button
+            color="danger"
+            variant="light"
+            size="sm"
+            onClick={handleAnalyze}
+            isLoading={isAnalyzing}
+            className="self-start px-0 h-7"
+          >
+            Retry analysis →
+          </Button>
         </div>
-        <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
-          AI-powered Web3 development insights and analysis
-        </p>
-      </div>
+      )}
 
-      <div className="space-y-4">
-        {/* Progress section intentionally removed; show skeletons only while analyzing */}
-
-        {/* Error State */}
-        {analysisError && (
-          <Card className="bg-danger/5 border border-danger/20">
-            <CardBody className="p-6">
-              <div className="flex items-center gap-3">
-                <AlertCircle size={20} className="text-danger" />
-                <div>
-                  <h3 className="font-semibold text-danger mb-1">
-                    Analysis Failed
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                    {analysisError}
-                  </p>
-                  <Button
-                    color="danger"
-                    variant="light"
-                    size="sm"
-                    onClick={handleAnalyze}
-                    isLoading={isAnalyzing}
-                  >
-                    Retry Analysis
-                  </Button>
-                </div>
+      {currentUser && (
+        <div className="flex flex-col gap-16 mt-10">
+          {isAnalyzing ? (
+            <>
+              <ProfileHeaderSkeleton />
+              <AIInsightsSkeleton />
+              <MetricOverviewSkeleton />
+              <ChartSkeleton title="Ecosystem brief" height="280px" />
+              <div className="border-t border-rule pt-5 flex items-center gap-2 text-[0.8125rem] text-fg-muted">
+                <Loader2 size={12} className="animate-spin" />
+                Analysis in progress — usually 2–3 minutes. You can leave this
+                tab open.
               </div>
-            </CardBody>
-          </Card>
-        )}
+            </>
+          ) : (
+            <>
+              <FadeIn>
+                <ProfileHeader
+                  user={currentUser}
+                  githubUsername={githubHandle || undefined}
+                  analysisId={analysisId}
+                />
+              </FadeIn>
 
-        {/* Profile Content */}
-        {currentUser && (
-          <div className="space-y-4">
-            {/* While analyzing, show skeletons for all sections */}
-            {isAnalyzing ? (
-              <>
-                <ProfileHeaderSkeleton />
-                <AIInsightsSkeleton />
-                <MetricOverviewSkeleton />
-                <ChartSkeleton title="Ecosystem Overview" height="280px" />
-                <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-                  <span className="inline-flex items-center gap-2">
-                    <Loader2 size={14} className="animate-spin" />
-                    Analysis in progress... Usually takes 2–3 minutes
-                  </span>
-                </div>
-              </>
-            ) : (
-              <>
-                {/* Profile Header - Full Width */}
+              {hasEcosystemData(currentUser) && (
                 <FadeIn>
-                  <ProfileHeader
+                  <KeyMetrics user={currentUser} />
+                </FadeIn>
+              )}
+
+              {hasAIData(currentUser) ? (
+                <FadeIn>
+                  <AIInsights user={currentUser} />
+                </FadeIn>
+              ) : (
+                isAnalyzing && <AIInsightsSkeleton />
+              )}
+
+              {hasEcosystemData(currentUser) && (
+                <FadeIn>
+                  <AnalysisTabs
                     user={currentUser}
-                    githubUsername={githubHandle}
-                    analysisId={analysisId}
+                    githubUsername={githubHandle || undefined}
                   />
                 </FadeIn>
+              )}
+            </>
+          )}
 
-                {/* Key Metrics */}
-                {hasEcosystemData(currentUser) && (
-                  <FadeIn>
-                    <KeyMetrics user={currentUser} />
-                  </FadeIn>
-                )}
+          {!hasEcosystemData(currentUser) && !analysisError && !isAnalyzing && (
+            <div className="border-t border-rule pt-5 flex items-center gap-2 text-[0.8125rem] text-fg-muted">
+              <Loader2 size={12} className="animate-spin" />
+              Analysis in progress — usually 2–3 minutes.
+            </div>
+          )}
+        </div>
+      )}
 
-                {/* AI Analysis */}
-                {hasAIData(currentUser) ? (
-                  <FadeIn>
-                    <AIInsights user={currentUser} />
-                  </FadeIn>
-                ) : (
-                  isAnalyzing && <AIInsightsSkeleton />
-                )}
-
-                {/* Detailed Analysis */}
-                {hasEcosystemData(currentUser) && (
-                  <FadeIn>
-                    <AnalysisTabs
-                      user={currentUser}
-                      githubUsername={githubHandle}
-                    />
-                  </FadeIn>
-                )}
-              </>
-            )}
-
-            {/* Loading State */}
-            {!hasEcosystemData(currentUser) &&
-              !analysisError &&
-              !isAnalyzing && (
-              <div className="glass-card dark:glass-card-dark p-4 text-center">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-center gap-2">
-                    <Loader2
-                      size={14}
-                      className="animate-spin text-gray-400"
-                    />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                        Analysis in progress...
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-500">
-                      Usually takes 2-3 minutes
-                  </p>
-                </div>
-              </div>
-            )}
+      {!currentUser && !analysisError && isAnalyzing && (
+        <div className="mt-20 flex items-center justify-center min-h-[40vh] text-fg-muted">
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 size={28} className="animate-spin text-accent" />
+            <SmallCapsLabel tone="subtle">
+              Reading commits and ecosystems…
+            </SmallCapsLabel>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Initial Loading State */}
-        {!currentUser && !analysisError && isAnalyzing && (
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <Loader2 size={48} className="animate-spin text-primary" />
-          </div>
-        )}
-      </div>
-
-      {/* GitHub Account Required Modal */}
       <Modal
         isOpen={showGitHubModal}
         onClose={() => setShowGitHubModal(false)}
@@ -381,22 +319,15 @@ export default function DevInsightPageClient({
       >
         <ModalContent>
           <ModalHeader className="flex flex-col gap-1">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-red-100 dark:bg-red-900/20 rounded-full">
-                <AlertCircle
-                  size={24}
-                  className="text-red-600 dark:text-red-400"
-                />
-              </div>
-              <span className="text-xl font-semibold">
-                GitHub Account Required
-              </span>
-            </div>
+            <SmallCapsLabel tone="subtle">Action required</SmallCapsLabel>
+            <span className="font-display text-[1.25rem] font-semibold text-fg">
+              Link your GitHub to continue
+            </span>
           </ModalHeader>
           <ModalBody>
-            <p className="text-gray-600 dark:text-gray-400">
-              Connect your GitHub account to unlock AI-powered Web3 development
-              insights
+            <p className="text-[0.9375rem] leading-[1.55] text-fg-muted">
+              Connect GitHub to unlock the brief. We only read public data:
+              commits, repos, languages, and ecosystem associations.
             </p>
           </ModalBody>
           <ModalFooter>
@@ -408,7 +339,7 @@ export default function DevInsightPageClient({
               onPress={handleLinkGithub}
               isLoading={isLinkingGithub}
             >
-              Connect GitHub Account
+              Connect GitHub
             </Button>
           </ModalFooter>
         </ModalContent>

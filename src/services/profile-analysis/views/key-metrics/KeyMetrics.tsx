@@ -1,9 +1,18 @@
-
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
-import { Globe } from "lucide-react";
 
 import type { GitHubUser } from "../../typing";
-import { formatNumber, calculateEcosystemRankings, hasEcosystemData } from "../../helper";
+import {
+  formatNumber,
+  calculateEcosystemRankings,
+  hasEcosystemData,
+} from "../../helper";
+import {
+  SectionHeader,
+  NumericCell,
+  SmallCapsLabel,
+  MetaList,
+} from "$/primitives";
+import { sequentialTeal, getRechartsDefaults } from "@/lib/charts";
 
 interface KeyMetricsProps {
   user: GitHubUser;
@@ -13,11 +22,11 @@ interface KeyMetricsProps {
 export function KeyMetrics({ user, className = "" }: KeyMetricsProps) {
   if (!hasEcosystemData(user)) {
     return (
-      <div className={`bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark compact-card text-center ${className}`}>
-        <div className="space-y-2">
-          <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto" />
-          <p className="text-xs text-gray-500 dark:text-gray-400">Loading metrics...</p>
-        </div>
+      <div className={`border-t border-rule pt-8 ${className}`}>
+        <SmallCapsLabel tone="subtle">Ecosystem brief</SmallCapsLabel>
+        <p className="mt-2 text-sm text-fg-muted">
+          Loading ecosystem signal — this step usually lands first.
+        </p>
       </div>
     );
   }
@@ -25,43 +34,61 @@ export function KeyMetrics({ user, className = "" }: KeyMetricsProps) {
   const rankings = calculateEcosystemRankings(user.ecosystem_scores!);
   if (!rankings) return null;
 
-  // Prepare pie chart data from top ecosystems
-  const pieData = rankings.slice(0, 5).map((eco, index) => ({
-    name: eco.ecosystem, // Show full name
+  const top = rankings.slice(0, 5);
+  const palette = [...sequentialTeal].reverse();
+
+  const pieData = top.map((eco, index) => ({
+    name: eco.ecosystem,
     value: eco.score,
     percentage: eco.percentage,
-    color: [
-      "#134E4A", // teal-800 - darkest, coldest
-      "#0F766E", // teal-700 - dark cool
-      "#115E59", // teal-800 variant - cold mid-tone
-      "#0D9488", // teal-600 - deeper cool
-      "#047857", // emerald-700 - cold dark green-teal
-    ][index] || "#0F766E",
+    color: palette[index] ?? palette[palette.length - 1],
   }));
 
   const totalScore = rankings.reduce((sum, eco) => sum + eco.score, 0);
+  const defaults = getRechartsDefaults();
 
   return (
-    <div className={`bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark compact-card ${className}`}>
-      {/* Header */}
-      <div className="flex items-center gap-2 mb-4">
-        <Globe size={16} className="text-gray-500 dark:text-gray-400" />
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Web3 Ecosystem Analysis</h3>
-      </div>
+    <section className={`border-t border-rule pt-8 ${className}`}>
+      <SectionHeader
+        kicker="Ecosystem brief"
+        title="Where this developer shows up"
+        deck={
+          <>
+            A score-weighted breakdown of every tracked Web3 ecosystem this
+            account contributed to. Ranked by cumulative activity, not repo
+            count.
+          </>
+        }
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        {/* Pie Chart - Left */}
-        <div className="lg:col-span-3">
-          <div className="h-64">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <div className="lg:col-span-7">
+          <div className="flex items-baseline gap-4 mb-2">
+            <span className="font-display text-[clamp(2.5rem,5vw,3.25rem)] leading-[0.95] font-semibold tabular-nums text-fg">
+              {formatNumber(totalScore)}
+            </span>
+            <SmallCapsLabel tone="subtle">total activity score</SmallCapsLabel>
+          </div>
+          <MetaList
+            className="mb-6"
+            items={[
+              { label: "Ecosystems", value: rankings.length },
+              { label: "Primary", value: top[0]?.ecosystem ?? "—" },
+              { label: "Method", value: "opendigger" },
+            ]}
+          />
+
+          <div className="h-72 border-t border-rule pt-4">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={pieData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={40}
-                  outerRadius={85}
-                  paddingAngle={2}
+                  innerRadius={60}
+                  outerRadius={104}
+                  paddingAngle={1}
+                  stroke="none"
                   dataKey="value"
                 >
                   {pieData.map((entry, index) => (
@@ -70,58 +97,56 @@ export function KeyMetrics({ user, className = "" }: KeyMetricsProps) {
                 </Pie>
                 <Tooltip
                   formatter={(value: number) => [formatNumber(value), "Score"]}
-                  contentStyle={{
-                    backgroundColor: "rgba(255, 255, 255, 0.95)",
-                    border: "1px solid rgba(0, 0, 0, 0.1)",
-                    borderRadius: "6px",
-                    fontSize: "11px",
-                  }}
-                  wrapperClassName="dark:[&_.recharts-tooltip-wrapper]:!bg-gray-800 dark:[&_.recharts-tooltip-wrapper]:!border-gray-600 dark:[&_.recharts-tooltip-wrapper]:!text-gray-200"
+                  contentStyle={defaults.tooltipStyle}
+                  labelStyle={defaults.tooltipLabelStyle}
+                  itemStyle={defaults.tooltipItemStyle}
                 />
               </PieChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Stats & Legend - Right */}
-        <div className="lg:col-span-2 space-y-3">
-          {/* Key Numbers */}
-          <div className="text-center space-y-2">
-            <div>
-              <div className="text-xl font-bold text-primary">
-                {formatNumber(totalScore)}
-              </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Total Web3 Ecosystem Activity Score</div>
-            </div>
-            <div className="text-xs text-gray-600 dark:text-gray-400">
-              Covering <strong className="text-gray-900 dark:text-white">{rankings.length}</strong> ecosystems
-            </div>
-          </div>
-
-          {/* Top Ecosystems */}
-          <div className="space-y-1">
-            <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Primary Ecosystems:
-            </div>
-            {pieData.slice(0, 5).map((item, index) => (
-              <div key={index} className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-1">
-                  <div
-                    className="w-2 h-2 rounded-full"
-                    style={{ backgroundColor: item.color }}
+        <div className="lg:col-span-5 flex flex-col">
+          <SmallCapsLabel tone="subtle" className="mb-3">
+            Primary ecosystems
+          </SmallCapsLabel>
+          <ol className="flex flex-col">
+            {pieData.map((item, index) => (
+              <li
+                key={item.name}
+                className="flex items-baseline gap-3 border-t border-rule py-3 first:border-t-0 first:pt-0"
+              >
+                <span className="w-5 text-[0.75rem] font-mono text-fg-subtle tabular-nums">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <span
+                  aria-hidden
+                  className="size-2 rounded-sm shrink-0"
+                  style={{ backgroundColor: item.color }}
+                />
+                <span className="flex-1 text-[0.9375rem] text-fg truncate">
+                  {item.name}
+                </span>
+                <div className="flex items-baseline gap-2 shrink-0">
+                  <NumericCell
+                    value={item.value}
+                    format="compact"
+                    className="text-[0.9375rem]"
                   />
-                  <span className="text-gray-600 dark:text-gray-400">
-                    {item.name}
+                  <span className="font-mono text-[0.75rem] text-fg-subtle tabular-nums w-10 text-right">
+                    {item.percentage.toFixed(0)}%
                   </span>
                 </div>
-                <span className="font-medium text-gray-900 dark:text-white">
-                  {formatNumber(item.value)}
-                </span>
-              </div>
+              </li>
             ))}
-          </div>
+          </ol>
+          {rankings.length > 5 && (
+            <p className="mt-4 text-[0.75rem] text-fg-subtle">
+              + {rankings.length - 5} more ecosystems with material activity.
+            </p>
+          )}
         </div>
       </div>
-    </div>
+    </section>
   );
 }

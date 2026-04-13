@@ -33,7 +33,7 @@ function PrefersColorSchemeSelector() {
   if (!mounted) {
     return (
       <div
-        className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800"
+        className="flex items-center justify-center w-8 h-8 rounded-[2px] bg-bg-raised"
         aria-hidden="true"
       />
     );
@@ -43,17 +43,17 @@ function PrefersColorSchemeSelector() {
     <button
       onClick={handleThemeToggle}
       className="
-        flex items-center justify-center w-8 h-8 rounded-lg
-        bg-gray-100 dark:bg-gray-800
-        hover:bg-gray-200 dark:hover:bg-gray-700
+        flex items-center justify-center w-8 h-8 rounded-[2px]
+        bg-bg-raised
+        hover:bg-bg-sunken
         transition-all duration-200 hover:scale-105 active:scale-95
       "
       aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
     >
       {isDark ? (
-        <Moon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+        <Moon className="w-4 h-4 text-fg-muted" />
       ) : (
-        <Sun className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+        <Sun className="w-4 h-4 text-fg-muted" />
       )}
     </button>
   );

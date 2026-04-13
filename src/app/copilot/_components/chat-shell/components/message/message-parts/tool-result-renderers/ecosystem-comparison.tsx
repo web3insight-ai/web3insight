@@ -60,9 +60,7 @@ export default function EcosystemComparisonResult({ data }: { data: unknown }) {
 
   return (
     <ToolResultCard>
-      <h4 className="mb-3 text-sm font-bold text-gray-900 dark:text-white">
-        Ecosystem Comparison
-      </h4>
+      <h4 className="mb-3 text-sm font-bold text-fg">Ecosystem Comparison</h4>
 
       <ResponsiveContainer width="100%" height={250}>
         <BarChart data={comparison}>

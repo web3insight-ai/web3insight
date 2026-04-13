@@ -180,18 +180,14 @@ export function ToolPartCard({
   return (
     <div
       className={cn(
-        "mb-2 flex w-full items-center gap-2.5 rounded-lg px-3 py-2 transition-colors",
-        isComplete
-          ? "bg-gray-50/60 dark:bg-white/[0.03]"
-          : "bg-gray-50 dark:bg-white/[0.05]",
+        "mb-2 flex w-full items-center gap-2.5 rounded-[2px] border border-rule px-3 py-2 transition-colors",
+        isComplete ? "bg-bg-sunken/60" : "bg-bg-sunken",
       )}
     >
       <ToolIcon
         className={cn(
           "size-3.5 shrink-0",
-          isComplete
-            ? "text-gray-400 dark:text-gray-500"
-            : "text-gray-500 dark:text-gray-400",
+          isComplete ? "text-fg-subtle" : "text-fg-muted",
         )}
       />
 
@@ -199,15 +195,13 @@ export function ToolPartCard({
         <span
           className={cn(
             "truncate text-[13px] font-medium",
-            isComplete
-              ? "text-gray-500 dark:text-gray-400"
-              : "text-gray-700 dark:text-gray-200",
+            isComplete ? "text-fg-muted" : "text-fg",
           )}
         >
           {toolCopy.title}
         </span>
-        <span className="text-gray-300 dark:text-gray-600">·</span>
-        <span className="truncate text-[13px] text-gray-400 dark:text-gray-500">
+        <span className="text-rule">·</span>
+        <span className="truncate text-[13px] text-fg-subtle">
           {toolCopy.subtitle}
         </span>
       </div>
@@ -220,7 +214,7 @@ export function ToolPartCard({
             "text-teal-600 dark:text-teal-400",
           statusConfig.tone === "error" && "text-red-500 dark:text-red-400",
           statusConfig.tone === "attention" && "text-sky-600 dark:text-sky-400",
-          statusConfig.tone === "muted" && "text-gray-400 dark:text-gray-500",
+          statusConfig.tone === "muted" && "text-fg-subtle",
         )}
       >
         <statusConfig.Icon

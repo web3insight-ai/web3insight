@@ -32,7 +32,7 @@ export function CopilotSettingsDialog({
         <div className="p-4 sm:p-6">
           <button
             type="button"
-            className="flex w-full items-center justify-between rounded-lg border px-4 py-3 text-left transition-colors hover:bg-muted/40"
+            className="flex w-full items-center justify-between rounded-[2px] border border-rule px-4 py-3 text-left transition-colors hover:bg-muted/40"
             onClick={() => {
               onOpenChange(false);
               onManageArchivedChats();

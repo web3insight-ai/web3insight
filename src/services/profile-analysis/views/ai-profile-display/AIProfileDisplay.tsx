@@ -43,12 +43,12 @@ export function AIProfileDisplay({
           <Card className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800">
             <CardBody className="p-4">
               <div className="flex items-center gap-2 mb-2">
-                <Brain className="text-primary" size={14} />
-                <h4 className="text-xs font-semibold text-primary">
+                <Brain className="text-accent" size={14} />
+                <h4 className="text-xs font-mono font-semibold text-accent uppercase tracking-[0.14em]">
                   AI SUMMARY
                 </h4>
               </div>
-              <p className="text-xs chinese-content leading-relaxed text-gray-700 dark:text-gray-300">
+              <p className="text-xs chinese-content leading-relaxed text-fg">
                 {aiProfile.summary.length > 200
                   ? `${aiProfile.summary.slice(0, 200)}...`
                   : aiProfile.summary}
@@ -59,13 +59,11 @@ export function AIProfileDisplay({
 
         {/* Quick Skills */}
         {aiProfile.skills && aiProfile.skills.length > 0 && (
-          <Card className="bg-white dark:bg-surface-dark shadow-subtle">
+          <Card className="bg-bg-raised border border-rule rounded-[2px]">
             <CardBody className="p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Code className="text-secondary" size={14} />
-                <h4 className="text-xs font-semibold text-gray-900 dark:text-white">
-                  KEY SKILLS
-                </h4>
+                <h4 className="text-xs font-semibold text-fg">KEY SKILLS</h4>
               </div>
               <div className="flex flex-wrap gap-2">
                 {aiProfile.skills.slice(0, 6).map((skill, index) => (
@@ -119,13 +117,13 @@ export function AIProfileDisplay({
           {/* Main Roast Content */}
           <div className="grid gap-4 md:grid-cols-2">
             {/* Overall Roast */}
-            <Card className="bg-white dark:bg-surface-dark shadow-subtle">
+            <Card className="bg-bg-raised border border-rule rounded-[2px]">
               <CardBody className="p-4">
-                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-rule">
                   <div className="text-sm">😈</div>
                   <h5 className="font-medium text-xs">Overall Roast</h5>
                 </div>
-                <div className="bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-lg">
+                <div className="bg-bg-raised border border-rule p-3 rounded-[2px]">
                   <p className="chinese-content text-xs leading-relaxed">
                     {aiProfile.roast_report.overall_roast}
                   </p>
@@ -134,13 +132,13 @@ export function AIProfileDisplay({
             </Card>
 
             {/* Activity Roast */}
-            <Card className="bg-white dark:bg-surface-dark shadow-subtle">
+            <Card className="bg-bg-raised border border-rule rounded-[2px]">
               <CardBody className="p-4">
-                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-rule">
                   <div className="text-sm">📊</div>
                   <h5 className="font-medium text-xs">Activity Roast</h5>
                 </div>
-                <div className="bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-lg">
+                <div className="bg-bg-raised border border-rule p-3 rounded-[2px]">
                   <p className="chinese-content text-xs leading-relaxed">
                     {aiProfile.roast_report.activity_roast}
                   </p>
@@ -149,15 +147,15 @@ export function AIProfileDisplay({
             </Card>
 
             {/* Ecosystem Roast */}
-            <Card className="bg-white dark:bg-surface-dark shadow-subtle">
+            <Card className="bg-bg-raised border border-rule rounded-[2px]">
               <CardBody className="p-4">
-                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-rule">
                   <div className="text-sm">🌐</div>
                   <h5 className="font-medium text-xs">
                     Ecosystem Choice Roast
                   </h5>
                 </div>
-                <div className="bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-lg">
+                <div className="bg-bg-raised border border-rule p-3 rounded-[2px]">
                   <p className="chinese-content text-xs leading-relaxed">
                     {aiProfile.roast_report.ecosystem_roast}
                   </p>
@@ -166,13 +164,13 @@ export function AIProfileDisplay({
             </Card>
 
             {/* Technical Roast */}
-            <Card className="bg-white dark:bg-surface-dark shadow-subtle">
+            <Card className="bg-bg-raised border border-rule rounded-[2px]">
               <CardBody className="p-4">
-                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-rule">
                   <div className="text-sm">💻</div>
                   <h5 className="font-medium text-xs">Tech Stack Roast</h5>
                 </div>
-                <div className="bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-lg">
+                <div className="bg-bg-raised border border-rule p-3 rounded-[2px]">
                   <p className="chinese-content text-xs leading-relaxed">
                     {aiProfile.roast_report.technical_roast}
                   </p>
@@ -197,7 +195,7 @@ export function AIProfileDisplay({
                       <Chip color="success" variant="flat" size="sm">
                         {index + 1}
                       </Chip>
-                      <div className="bg-success-100 dark:bg-success-900/30 border border-success-200 dark:border-success-700 p-3 rounded-lg flex-1">
+                      <div className="bg-success/10 border border-success/30 p-3 rounded-[2px] flex-1">
                         <p className="chinese-content text-xs leading-relaxed">
                           {suggestion}
                         </p>
@@ -218,7 +216,7 @@ export function AIProfileDisplay({
                   Final Verdict
                 </h4>
               </div>
-              <div className="bg-secondary-100 dark:bg-secondary-900/30 border-2 border-secondary-300 dark:border-secondary-600 p-4 rounded-lg text-center">
+              <div className="bg-bg-sunken border border-rule p-4 rounded-[2px] text-center">
                 <p className="chinese-content text-sm font-bold">
                   {aiProfile.roast_report.final_verdict}
                 </p>
@@ -231,9 +229,9 @@ export function AIProfileDisplay({
       {/* Analysis Date Footer */}
       {aiProfile.analysis_date && (
         <div className="text-center mt-6">
-          <Card className="inline-block bg-gray-50 dark:bg-gray-900">
+          <Card className="inline-block bg-bg-raised">
             <CardBody className="p-3">
-              <div className="text-xs text-gray-600 dark:text-gray-400">
+              <div className="text-xs text-fg-muted">
                 📅 ANALYSIS COMPLETED:{" "}
                 {new Date(aiProfile.analysis_date).toLocaleDateString()} 📅
               </div>

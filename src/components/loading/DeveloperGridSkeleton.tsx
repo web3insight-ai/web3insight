@@ -1,30 +1,30 @@
-import { Card, Skeleton } from "@/components/ui";
+import { Skeleton } from "@/components/ui";
 
 function DeveloperGridSkeleton() {
   return (
-    <Card className="bg-white dark:bg-gray-800 shadow-sm border-none">
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-0.5">
+    <div className="border border-rule rounded-[2px] bg-bg-raised">
+      <div className="grid grid-cols-1 md:grid-cols-5 divide-x divide-rule border-b border-rule">
         {Array.from({ length: 10 }).map((_, index) => (
           <div key={index} className="relative p-5">
-            <div className="animate-pulse">
-              <Skeleton className="h-5 w-24 mb-3 rounded" />
-              <Skeleton className="h-7 w-16 mb-1 rounded" />
-              <Skeleton className="h-3 w-8 mb-3 rounded" />
-              <Skeleton className="h-3 w-20 mb-1 rounded" />
-              <div className="space-y-1">
-                <Skeleton className="h-3 w-28 rounded" />
-                <Skeleton className="h-3 w-24 rounded" />
-              </div>
+            <Skeleton className="h-5 w-24 mb-3 rounded-[2px]" />
+            <Skeleton className="h-7 w-16 mb-1 rounded-[2px]" />
+            <Skeleton className="h-3 w-8 mb-3 rounded-[2px]" />
+            <Skeleton className="h-3 w-20 mb-1 rounded-[2px]" />
+            <div className="space-y-1">
+              <Skeleton className="h-3 w-28 rounded-[2px]" />
+              <Skeleton className="h-3 w-24 rounded-[2px]" />
             </div>
           </div>
         ))}
       </div>
-      <div className="px-6 py-4 border-t border-border dark:border-border-dark">
-        <div className="flex items-center justify-center">
-          <Skeleton className="h-4 w-32 rounded" />
-        </div>
+      <div className="px-6 py-4 flex items-center justify-center gap-2">
+        <span className="font-mono text-[11px] text-fg-muted">fetching</span>
+        <span
+          aria-hidden
+          className="animate-cursor inline-block h-[0.85em] w-[0.55ch] translate-y-[1px] bg-accent align-middle"
+        />
       </div>
-    </Card>
+    </div>
   );
 }
 

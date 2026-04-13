@@ -1,29 +1,24 @@
-'use client';
+"use client";
 
 import clsx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Warehouse, Calendar, Settings, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 import { canManageEcosystems, canManageEvents } from "~/auth/helper";
 import type { ApiUser } from "~/auth/typing";
+import { SmallCapsLabel } from "$/primitives";
 
 type MenuItem = {
   text: string;
   path: string;
   childrenPrefix?: string;
+  code: string;
 };
 
 interface AdminNavMenuProps {
   user: ApiUser | null;
 }
-
-// Icon mapping for menu items
-const iconMap = {
-  "Ecosystems": Warehouse,
-  "Events": Calendar,
-  "Managers": Settings,
-};
 
 function buildMenu(user: ApiUser | null): MenuItem[] {
   const menuItems: MenuItem[] = [];
@@ -33,6 +28,7 @@ function buildMenu(user: ApiUser | null): MenuItem[] {
       text: "Ecosystems",
       path: "/admin/ecosystems",
       childrenPrefix: "/admin/ecosystems",
+      code: "01",
     });
   }
 
@@ -41,6 +37,7 @@ function buildMenu(user: ApiUser | null): MenuItem[] {
       text: "Events",
       path: "/admin/events",
       childrenPrefix: "/admin/events",
+      code: "02",
     });
   }
 
@@ -48,7 +45,10 @@ function buildMenu(user: ApiUser | null): MenuItem[] {
 }
 
 function isMenuItemActive(pathname: string, item: MenuItem): boolean {
-  return item.path === pathname || (!!item.childrenPrefix && pathname.startsWith(item.childrenPrefix));
+  return (
+    item.path === pathname ||
+    (!!item.childrenPrefix && pathname.startsWith(item.childrenPrefix))
+  );
 }
 
 function AdminNavMenu({ user }: AdminNavMenuProps) {
@@ -59,41 +59,38 @@ function AdminNavMenu({ user }: AdminNavMenuProps) {
     <div className="space-y-6">
       {/* Navigation Header */}
       <div className="px-2">
-        <h2 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-          Administration
-        </h2>
+        <SmallCapsLabel tone="subtle">administration</SmallCapsLabel>
       </div>
 
       {/* Navigation Items */}
-      <nav className="space-y-2">
-        {menuItems.map(item => {
+      <nav className="space-y-1">
+        {menuItems.map((item) => {
           const isActive = isMenuItemActive(pathname, item);
-          const IconComponent = iconMap[item.text as keyof typeof iconMap];
 
           return (
             <Link
               key={item.text}
               className={clsx(
-                "group flex items-center justify-between px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200",
-                "hover:bg-white/80 dark:hover:bg-white/10 hover:shadow-subtle hover:scale-[1.02]",
-                "border border-transparent hover:border-border dark:hover:border-border-dark",
+                "group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-[2px] transition-colors",
+                "border",
                 {
-                  "bg-white dark:bg-white/10 text-primary shadow-card border-border dark:border-border-dark": isActive,
-                  "text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary": !isActive,
+                  "bg-bg-raised text-accent border-rule-strong": isActive,
+                  "text-fg border-transparent hover:border-rule hover:bg-bg-raised":
+                    !isActive,
                 },
               )}
               href={item.path}
             >
               <div className="flex items-center gap-3">
-                <div className={clsx(
-                  "flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200",
-                  {
-                    "bg-primary/10 text-primary": isActive,
-                    "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 group-hover:bg-primary/10 group-hover:text-primary": !isActive,
-                  },
-                )}>
-                  {IconComponent && <IconComponent size={16} />}
-                </div>
+                <span
+                  aria-hidden
+                  className={clsx(
+                    "font-mono text-[10px] tracking-[0.12em]",
+                    isActive ? "text-accent" : "text-fg-muted",
+                  )}
+                >
+                  {item.code}
+                </span>
                 <span className="font-medium">{item.text}</span>
               </div>
 
@@ -102,8 +99,8 @@ function AdminNavMenu({ user }: AdminNavMenuProps) {
                 className={clsx(
                   "transition-all duration-200 opacity-0 group-hover:opacity-100 group-hover:translate-x-1",
                   {
-                    "opacity-100 text-primary": isActive,
-                    "text-gray-400": !isActive,
+                    "opacity-100 text-accent": isActive,
+                    "text-fg-muted": !isActive,
                   },
                 )}
               />
@@ -113,13 +110,11 @@ function AdminNavMenu({ user }: AdminNavMenuProps) {
       </nav>
 
       {/* Navigation Footer */}
-      <div className="px-2 pt-4 border-t border-border dark:border-border-dark">
-        <p className="text-xs text-gray-500 dark:text-gray-400">
-          Admin Panel
+      <div className="px-2 pt-4 border-t border-rule">
+        <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-fg-muted">
+          admin panel
         </p>
-        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-          Manage your Web3Insight
-        </p>
+        <p className="text-xs text-fg-subtle mt-1">Manage your Web3Insight</p>
       </div>
     </div>
   );

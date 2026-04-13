@@ -74,7 +74,7 @@ function AvatarImage({ avatar, name }: { avatar: string; name: string }) {
 
   if (!avatar) {
     return (
-      <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-teal-100 text-sm font-bold text-teal-600 dark:bg-teal-500/20 dark:text-teal-400">
+      <div className="flex size-10 shrink-0 items-center justify-center rounded-[2px] border border-rule bg-accent-subtle font-mono text-sm font-medium text-accent">
         {initial}
       </div>
     );
@@ -84,7 +84,7 @@ function AvatarImage({ avatar, name }: { avatar: string; name: string }) {
     <img
       src={avatar}
       alt={name}
-      className="size-10 shrink-0 rounded-full object-cover"
+      className="size-10 shrink-0 rounded-[2px] border border-rule object-cover"
       onError={(e) => {
         // Reason: Fallback to initial when the avatar URL fails to load
         const target = e.currentTarget;
@@ -128,9 +128,7 @@ export default function DeveloperProfileResult({ data }: { data: unknown }) {
       <div className="flex items-center gap-3">
         <AvatarImage avatar={data.avatar} name={data.name} />
         <div className="min-w-0">
-          <p className="truncate text-sm font-bold text-gray-900 dark:text-white">
-            {data.name}
-          </p>
+          <p className="truncate text-sm font-bold text-fg">{data.name}</p>
           <p className="truncate text-xs text-muted-foreground">
             @{data.username}
           </p>
@@ -139,9 +137,7 @@ export default function DeveloperProfileResult({ data }: { data: unknown }) {
 
       {/* Bio */}
       {data.bio && (
-        <p className="mt-2 line-clamp-2 text-sm text-gray-700 dark:text-gray-300">
-          {data.bio}
-        </p>
+        <p className="mt-2 line-clamp-2 text-sm text-fg">{data.bio}</p>
       )}
 
       {/* Location */}
@@ -157,9 +153,9 @@ export default function DeveloperProfileResult({ data }: { data: unknown }) {
         {STAT_ITEMS.map((item) => (
           <span
             key={item.key}
-            className="inline-flex items-center gap-1 rounded-md bg-muted/40 px-2 py-1 text-xs dark:bg-muted/20"
+            className="inline-flex items-center gap-1 rounded-[2px] border border-rule bg-bg-sunken px-2 py-1 text-xs"
           >
-            <span className="font-semibold tabular-nums text-gray-900 dark:text-white">
+            <span className="font-semibold tabular-nums text-fg">
               {formatNumber(coercedStats[item.key])}
             </span>
             <span className="text-muted-foreground">{item.label}</span>
@@ -176,7 +172,7 @@ export default function DeveloperProfileResult({ data }: { data: unknown }) {
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-gray-900 dark:hover:text-white"
+              className="inline-flex items-center gap-1 text-xs text-fg-muted transition-colors hover:text-fg"
               aria-label={link.label}
             >
               <link.Icon className="size-3.5" />

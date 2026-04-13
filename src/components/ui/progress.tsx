@@ -17,7 +17,7 @@ interface ProgressProps {
 }
 
 const colorMap: Record<string, string> = {
-  default: "bg-gray-500",
+  default: "bg-fg-muted",
   primary: "bg-primary",
   secondary: "bg-secondary",
   success: "bg-success",
@@ -46,13 +46,9 @@ function Progress({
     <div className={clsx("w-full", className)}>
       {(label || showValueLabel) && (
         <div className="flex justify-between mb-1">
-          {label && (
-            <span className="text-xs text-gray-600 dark:text-gray-400">
-              {label}
-            </span>
-          )}
+          {label && <span className="text-xs text-fg-muted">{label}</span>}
           {showValueLabel && (
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-fg-muted">
               {Math.round(percentage)}%
             </span>
           )}
@@ -60,7 +56,7 @@ function Progress({
       )}
       <div
         className={clsx(
-          "w-full rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden",
+          "w-full rounded-full bg-rule overflow-hidden",
           sizeMap[size],
         )}
       >

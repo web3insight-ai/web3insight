@@ -261,17 +261,17 @@ export default function DonationDetailClient({
             size="sm"
             startContent={<ArrowLeft size={16} />}
             onPress={() => router.push("/plaza/x402")}
-            className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 -ml-2 mb-4"
+            className="text-fg-muted hover:text-fg dark:hover:text-fg-muted -ml-2 mb-4"
           >
             Back to x402 Donate
           </Button>
 
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900 dark:text-white tracking-tight">
+              <h1 className="text-2xl font-semibold text-fg tracking-tight">
                 {repo_donate_data?.title || repo_info.full_name}
               </h1>
-              <p className="text-base text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-base text-fg-muted mt-1">
                 Support this open source project with crypto donations
               </p>
             </div>
@@ -279,7 +279,7 @@ export default function DonationDetailClient({
         </header>
 
         {/* Repository Card */}
-        <div className="p-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 mb-4">
+        <div className="p-6 rounded-[2px] border border-rule bg-bg-raised/50 mb-4">
           {/* Repo Header */}
           <div className="flex items-start gap-4 mb-4">
             <Avatar
@@ -293,26 +293,26 @@ export default function DonationDetailClient({
                   href={repo_info.html_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-lg font-medium text-gray-900 dark:text-white hover:text-primary transition-colors"
+                  className="flex items-center gap-2 text-lg font-medium text-fg hover:text-accent transition-colors"
                 >
                   <span className="truncate">{repo_info.full_name}</span>
                   <ExternalLink
                     size={14}
-                    className="flex-shrink-0 text-gray-300"
+                    className="flex-shrink-0 text-fg-subtle"
                   />
                 </a>
                 {language && (
                   <Chip
                     size="sm"
                     variant="flat"
-                    className="bg-primary/10 text-primary"
+                    className="bg-accent-subtle text-accent"
                   >
                     {language}
                   </Chip>
                 )}
               </div>
             </div>
-            <div className="flex items-center gap-4 text-xs text-gray-400 flex-shrink-0">
+            <div className="flex items-center gap-4 text-xs text-fg-subtle flex-shrink-0">
               <div className="flex items-center gap-1">
                 <Star size={14} />
                 <span>{repo_info.stargazers_count.toLocaleString()}</span>
@@ -330,7 +330,7 @@ export default function DonationDetailClient({
 
           {/* Description */}
           {(repo_donate_data?.description || repo_info.description) && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-sm text-fg-muted mb-4">
               {repo_donate_data?.description || repo_info.description}
             </p>
           )}
@@ -341,7 +341,7 @@ export default function DonationDetailClient({
               href={repo_info.html_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-primary transition-colors"
+              className="flex items-center gap-1.5 text-sm text-fg-muted hover:text-accent transition-colors"
             >
               <Github size={14} />
               <span>View on GitHub</span>
@@ -351,7 +351,7 @@ export default function DonationDetailClient({
                 href={homepage}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-primary transition-colors"
+                className="flex items-center gap-1.5 text-sm text-fg-muted hover:text-accent transition-colors"
               >
                 <Globe size={14} />
                 <span>Website</span>
@@ -364,7 +364,7 @@ export default function DonationDetailClient({
                 isExternal
                 showAnchorIcon
                 anchorIcon={<LinkIcon size={10} />}
-                className="text-sm text-primary hover:underline"
+                className="text-sm text-accent hover:underline"
               >
                 {getLinkDisplayText(link)}
               </Link>
@@ -377,7 +377,7 @@ export default function DonationDetailClient({
               {topics.slice(0, 10).map((topic) => (
                 <span
                   key={topic}
-                  className="px-2.5 py-0.5 bg-gray-100 dark:bg-gray-800 text-xs text-gray-600 dark:text-gray-400 rounded-full"
+                  className="px-2.5 py-0.5 bg-bg-raised text-xs text-fg-muted rounded-full"
                 >
                   {topic}
                 </span>
@@ -386,12 +386,12 @@ export default function DonationDetailClient({
           )}
 
           {/* Divider */}
-          <div className="border-t border-gray-200 dark:border-gray-700 my-4" />
+          <div className="border-t border-rule my-4" />
 
           {/* Donation Section */}
           {hasDonationConfig ? (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-6 text-sm text-gray-500">
+            <div className="flex items-center justify-between gap-6 flex-wrap">
+              <div className="flex items-center gap-6 text-sm text-fg-muted flex-wrap">
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-xs">
                     {repo_donate_data.payTo.slice(0, 6)}...
@@ -407,7 +407,7 @@ export default function DonationDetailClient({
                     {copied ? (
                       <Check size={12} className="text-green-500" />
                     ) : (
-                      <Copy size={12} className="text-gray-400" />
+                      <Copy size={12} className="text-fg-subtle" />
                     )}
                   </Button>
                 </div>
@@ -418,7 +418,7 @@ export default function DonationDetailClient({
                 </Chip>
                 <span>USDC</span>
                 {repo_donate_data.defaultAmount && (
-                  <span className="font-medium">
+                  <span className="font-mono font-medium text-fg tabular-nums">
                     ${repo_donate_data.defaultAmount}
                   </span>
                 )}
@@ -437,29 +437,29 @@ export default function DonationDetailClient({
             </div>
           ) : (
             <div className="text-center py-2">
-              <span className="text-sm text-gray-400">No donation config</span>
+              <span className="text-sm text-fg-subtle">No donation config</span>
             </div>
           )}
         </div>
 
         {/* Active Developers Chart - only show when there's data */}
         {hasActiveDeveloperData && (
-          <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 mb-4">
+          <div className="p-4 rounded-[2px] border border-rule bg-bg-raised/50 mb-4">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-2">
-                <UserCheck size={14} className="text-gray-400" />
+                <UserCheck size={14} className="text-fg-subtle" />
                 <div>
-                  <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                  <h3 className="text-sm font-medium text-fg">
                     Active Developers
                   </h3>
                   {latestActiveDeveloper && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-fg-muted">
                       {formatMonthLabel(latestActiveDeveloper.month)}
-                      <span className="ml-2 text-gray-600 dark:text-gray-400">
+                      <span className="ml-2 text-fg-muted">
                         {averageActiveDevelopers !== null && (
                           <span>
                             Avg:{" "}
-                            <span className="font-medium text-gray-900 dark:text-white">
+                            <span className="font-medium text-fg">
                               {averageActiveDevelopers}
                             </span>
                           </span>
@@ -467,14 +467,14 @@ export default function DonationDetailClient({
                         {peakActiveDeveloper && (
                           <span className="ml-3">
                             Peak {formatMonthLabel(peakActiveDeveloper.month)}:{" "}
-                            <span className="font-medium text-gray-900 dark:text-white">
+                            <span className="font-medium text-fg">
                               {peakActiveDeveloper.developers}
                             </span>
                           </span>
                         )}
                         <span className="ml-3">
                           Months:{" "}
-                          <span className="font-medium text-gray-900 dark:text-white">
+                          <span className="font-medium text-fg">
                             {monthKeys.length}
                           </span>
                         </span>
@@ -485,7 +485,7 @@ export default function DonationDetailClient({
               </div>
               {latestActiveDeveloper && (
                 <div className="text-right">
-                  <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  <p className="text-2xl font-semibold text-fg">
                     {latestActiveDeveloper.developers}
                   </p>
                   {previousActiveDeveloper &&
@@ -574,14 +574,14 @@ export default function DonationDetailClient({
         {developer && (
           <>
             <div className="flex items-center gap-2 mt-6 mb-4">
-              <Github size={16} className="text-gray-400" />
-              <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400">
+              <Github size={16} className="text-fg-subtle" />
+              <h2 className="text-sm font-medium text-fg-muted">
                 Creator Profile
               </h2>
             </div>
 
             {/* Developer Card */}
-            <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 mb-4">
+            <div className="p-4 rounded-[2px] border border-rule bg-bg-raised/50 mb-4">
               <div className="flex items-center gap-3">
                 <Avatar
                   src={developer.avatar}
@@ -592,13 +592,13 @@ export default function DonationDetailClient({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
-                      <h4 className="text-base font-medium text-gray-900 dark:text-white truncate">
+                      <h4 className="text-base font-medium text-fg truncate">
                         {developer.nickname || developer.username}
                       </h4>
                       {githubLoading ? (
-                        <div className="w-8 h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                        <div className="w-8 h-5 bg-rule rounded animate-pulse" />
                       ) : githubData?.stats?.rank ? (
-                        <span className="text-xs font-medium px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+                        <span className="text-xs font-medium px-2 py-0.5 rounded bg-bg-raised text-fg-muted border border-rule">
                           {githubData.stats.rank}
                         </span>
                       ) : null}
@@ -607,7 +607,7 @@ export default function DonationDetailClient({
                       href={developer.social.github}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                      className="flex items-center gap-1 text-xs text-fg-subtle hover:text-fg transition-colors"
                     >
                       <Github size={12} />
                       <span>@{developer.username}</span>
@@ -615,28 +615,28 @@ export default function DonationDetailClient({
                   </div>
 
                   {/* Stats Row */}
-                  <div className="flex items-center gap-4 text-xs text-gray-400">
+                  <div className="flex items-center gap-4 text-xs text-fg-subtle">
                     <span>
-                      <strong className="text-gray-900 dark:text-white">
+                      <strong className="text-fg">
                         {developer.statistics.repository}
                       </strong>{" "}
                       Repositories
                     </span>
                     {githubLoading ? (
                       <div className="flex items-center gap-4">
-                        <div className="w-14 h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-                        <div className="w-16 h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                        <div className="w-14 h-3 bg-rule rounded animate-pulse" />
+                        <div className="w-16 h-3 bg-rule rounded animate-pulse" />
                       </div>
                     ) : githubData?.stats ? (
                       <>
                         <span>
-                          <strong className="text-gray-900 dark:text-white">
+                          <strong className="text-fg">
                             {githubData.stats.totalStars}
                           </strong>{" "}
                           Stars
                         </span>
                         <span>
-                          <strong className="text-gray-900 dark:text-white">
+                          <strong className="text-fg">
                             {githubData.stats.totalCommits}
                           </strong>{" "}
                           Commits (2025)
@@ -644,7 +644,7 @@ export default function DonationDetailClient({
                       </>
                     ) : null}
                     <span>
-                      <strong className="text-gray-900 dark:text-white">
+                      <strong className="text-fg">
                         {developer.statistics.codeReview}
                       </strong>{" "}
                       Reviews
@@ -656,13 +656,13 @@ export default function DonationDetailClient({
 
             {/* Ecosystems */}
             {ecosystems && ecosystems.ecosystems.length > 0 && (
-              <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 mb-4">
+              <div className="p-4 rounded-[2px] border border-rule bg-bg-raised/50 mb-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <Layers size={14} className="text-gray-400" />
-                  <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                  <Layers size={14} className="text-fg-subtle" />
+                  <h3 className="text-sm font-medium text-fg">
                     Ecosystems Contributed
                   </h3>
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-fg-subtle">
                     ({ecosystems.ecosystems.length})
                   </span>
                 </div>
@@ -671,11 +671,11 @@ export default function DonationDetailClient({
                     <NextLink
                       key={eco.ecosystem}
                       href={`/ecosystems/${encodeURIComponent(eco.ecosystem)}`}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-700"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs bg-bg-raised text-fg-muted hover:bg-bg-sunken transition-colors border border-rule"
                     >
                       {eco.ecosystem}
                       {eco.repoCount !== undefined && eco.repoCount > 0 && (
-                        <span className="text-gray-400 dark:text-gray-500">
+                        <span className="text-fg-subtle">
                           ({eco.repoCount} repos)
                         </span>
                       )}
@@ -687,10 +687,10 @@ export default function DonationDetailClient({
 
             {/* Contribution Activity */}
             {contributions.length > 0 && (
-              <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50">
+              <div className="p-4 rounded-[2px] border border-rule bg-bg-raised/50">
                 <div className="flex items-center gap-2 mb-3">
-                  <Github size={14} className="text-gray-400" />
-                  <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                  <Github size={14} className="text-fg-subtle" />
+                  <h3 className="text-sm font-medium text-fg">
                     Contribution Activity
                   </h3>
                 </div>

@@ -1,385 +1,196 @@
 /**
- * Framer Motion Animation Utilities
- * Provides reusable animation variants, transitions, and helpers
+ * Editorial motion presets.
+ *
+ * Exponential ease-out only. No springs, no bounce, no rotate. Translate ≤ 8px,
+ * scale ≤ 1.005. All presets compose with `useReducedMotion` via `withReduced`.
  */
 
 import { Variants, Transition } from "framer-motion";
 
-// ============================================================================
-// TRANSITION PRESETS
-// ============================================================================
+const EASE_OUT_EDITORIAL: [number, number, number, number] = [0.22, 1, 0.36, 1];
+const EASE_OUT_QUART: [number, number, number, number] = [0.25, 1, 0.5, 1];
 
 export const transitions = {
-  // Smooth and elegant
-  smooth: {
-    type: "spring",
-    stiffness: 100,
-    damping: 15,
-    mass: 0.8,
-  } as Transition,
-
-  // Quick and snappy
-  snappy: {
-    type: "spring",
-    stiffness: 400,
-    damping: 30,
-  } as Transition,
-
-  // Bouncy effect
-  bouncy: {
-    type: "spring",
-    stiffness: 300,
-    damping: 10,
-  } as Transition,
-
-  // Ease out
-  easeOut: {
+  quick: {
     type: "tween",
-    ease: "easeOut",
-    duration: 0.3,
+    ease: EASE_OUT_EDITORIAL,
+    duration: 0.18,
   } as Transition,
 
-  // Ease in out
-  easeInOut: {
+  editorial: {
     type: "tween",
-    ease: "easeInOut",
+    ease: EASE_OUT_EDITORIAL,
+    duration: 0.24,
+  } as Transition,
+
+  long: {
+    type: "tween",
+    ease: EASE_OUT_QUART,
     duration: 0.4,
   } as Transition,
+
+  // Deprecated — kept as aliases so existing imports don't break mid-migration.
+  // These map to the editorial ease-out; no spring, no bounce.
+  smooth: {
+    type: "tween",
+    ease: EASE_OUT_EDITORIAL,
+    duration: 0.3,
+  } as Transition,
+  snappy: {
+    type: "tween",
+    ease: EASE_OUT_EDITORIAL,
+    duration: 0.18,
+  } as Transition,
+  bouncy: {
+    type: "tween",
+    ease: EASE_OUT_EDITORIAL,
+    duration: 0.24,
+  } as Transition,
+  easeOut: {
+    type: "tween",
+    ease: EASE_OUT_EDITORIAL,
+    duration: 0.24,
+  } as Transition,
+  easeInOut: {
+    type: "tween",
+    ease: EASE_OUT_EDITORIAL,
+    duration: 0.3,
+  } as Transition,
 };
 
-// ============================================================================
-// ANIMATION VARIANTS
-// ============================================================================
-
-/**
- * Fade in from opacity 0 to 1
- */
 export const fadeIn: Variants = {
   hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: transitions.easeOut,
-  },
+  visible: { opacity: 1, transition: transitions.editorial },
 };
 
-/**
- * Fade in with upward motion
- */
 export const fadeInUp: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: transitions.smooth,
-  },
+  hidden: { opacity: 0, y: 6 },
+  visible: { opacity: 1, y: 0, transition: transitions.editorial },
 };
 
-/**
- * Fade in with downward motion
- */
 export const fadeInDown: Variants = {
-  hidden: { opacity: 0, y: -20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: transitions.smooth,
-  },
+  hidden: { opacity: 0, y: -6 },
+  visible: { opacity: 1, y: 0, transition: transitions.editorial },
 };
 
-/**
- * Fade in from left
- */
 export const fadeInLeft: Variants = {
-  hidden: { opacity: 0, x: -30 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: transitions.smooth,
-  },
+  hidden: { opacity: 0, x: -8 },
+  visible: { opacity: 1, x: 0, transition: transitions.editorial },
 };
 
-/**
- * Fade in from right
- */
 export const fadeInRight: Variants = {
-  hidden: { opacity: 0, x: 30 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: transitions.smooth,
-  },
+  hidden: { opacity: 0, x: 8 },
+  visible: { opacity: 1, x: 0, transition: transitions.editorial },
 };
 
-/**
- * Scale in animation
- */
+// Editorial surfaces should NOT scale on entrance — opacity + translate only.
+// `scaleIn` is kept for modal entries where a tiny scale feels right.
 export const scaleIn: Variants = {
-  hidden: { opacity: 0, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: transitions.smooth,
-  },
+  hidden: { opacity: 0, scale: 0.995 },
+  visible: { opacity: 1, scale: 1, transition: transitions.editorial },
 };
 
-/**
- * Scale in with bounce
- */
-export const scaleInBounce: Variants = {
-  hidden: { opacity: 0, scale: 0.8 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: transitions.bouncy,
-  },
-};
+// Deprecated — alias to scaleIn. Removed in Phase 9.
+export const scaleInBounce: Variants = scaleIn;
 
-/**
- * Slide in from bottom
- */
 export const slideInBottom: Variants = {
-  hidden: { opacity: 0, y: 50 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: transitions.smooth,
-  },
+  hidden: { opacity: 0, y: 12 },
+  visible: { opacity: 1, y: 0, transition: transitions.editorial },
 };
 
-/**
- * Slide in from top
- */
 export const slideInTop: Variants = {
-  hidden: { opacity: 0, y: -50 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: transitions.smooth,
-  },
+  hidden: { opacity: 0, y: -12 },
+  visible: { opacity: 1, y: 0, transition: transitions.editorial },
 };
 
-/**
- * Container for stagger children animations
- */
 export const staggerContainer: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.05,
-    },
+    transition: { staggerChildren: 0.08, delayChildren: 0.04 },
   },
 };
 
-/**
- * Fast stagger container
- */
 export const staggerContainerFast: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.05,
-      delayChildren: 0.02,
-    },
+    transition: { staggerChildren: 0.05, delayChildren: 0.02 },
   },
 };
 
-/**
- * Stagger item for use with stagger containers
- */
 export const staggerItem: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: transitions.smooth,
-  },
+  hidden: { opacity: 0, y: 6 },
+  visible: { opacity: 1, y: 0, transition: transitions.editorial },
 };
 
-/**
- * Stagger item with scale
- */
 export const staggerItemScale: Variants = {
-  hidden: { opacity: 0, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: transitions.smooth,
-  },
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: transitions.editorial },
 };
 
-/**
- * Card hover effect
- */
+// Hover effects — subtle translate only. No scale.
 export const cardHover = {
-  rest: { scale: 1 },
-  hover: {
-    scale: 1.02,
-    transition: transitions.snappy,
-  },
-  tap: {
-    scale: 0.98,
-  },
+  rest: { y: 0 },
+  hover: { y: -1, transition: transitions.quick },
+  tap: { y: 0 },
 };
 
-/**
- * Button hover effect
- */
 export const buttonHover = {
-  rest: { scale: 1 },
-  hover: {
-    scale: 1.05,
-    transition: transitions.snappy,
-  },
-  tap: {
-    scale: 0.95,
-  },
+  rest: { opacity: 1 },
+  hover: { opacity: 0.9, transition: transitions.quick },
+  tap: { opacity: 0.8 },
 };
 
-/**
- * Icon hover effect
- */
+// Deprecated — used to rotate 360° on hover. Neutralized for editorial feel.
 export const iconHover = {
-  rest: { rotate: 0 },
-  hover: {
-    rotate: 360,
-    transition: { duration: 0.5, ease: "easeInOut" },
-  },
+  rest: { opacity: 1 },
+  hover: { opacity: 0.7, transition: transitions.quick },
 };
 
-/**
- * Subtle lift on hover
- */
 export const liftOnHover = {
   rest: { y: 0 },
-  hover: {
-    y: -4,
-    transition: transitions.snappy,
-  },
+  hover: { y: -1, transition: transitions.quick },
 };
 
-/**
- * Page transition variants
- */
 export const pageTransition: Variants = {
-  initial: { opacity: 0, y: 20 },
-  animate: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.4,
-      ease: "easeOut",
-    },
-  },
-  exit: {
-    opacity: 0,
-    y: -20,
-    transition: {
-      duration: 0.3,
-      ease: "easeIn",
-    },
-  },
+  initial: { opacity: 0, y: 6 },
+  animate: { opacity: 1, y: 0, transition: transitions.editorial },
+  exit: { opacity: 0, transition: transitions.quick },
 };
 
-/**
- * Modal transition variants
- */
 export const modalTransition: Variants = {
-  hidden: { opacity: 0, scale: 0.95, y: 20 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    y: 0,
-    transition: {
-      type: "spring",
-      stiffness: 300,
-      damping: 30,
-    },
-  },
-  exit: {
-    opacity: 0,
-    scale: 0.95,
-    y: 20,
-    transition: {
-      duration: 0.2,
-      ease: "easeIn",
-    },
-  },
+  hidden: { opacity: 0, y: 8 },
+  visible: { opacity: 1, y: 0, transition: transitions.editorial },
+  exit: { opacity: 0, y: 4, transition: transitions.quick },
 };
 
-/**
- * Drawer slide in from right
- */
 export const drawerSlideRight: Variants = {
   hidden: { x: "100%" },
-  visible: {
-    x: 0,
-    transition: {
-      type: "spring",
-      stiffness: 300,
-      damping: 30,
-    },
-  },
-  exit: {
-    x: "100%",
-    transition: {
-      duration: 0.3,
-      ease: "easeIn",
-    },
-  },
+  visible: { x: 0, transition: transitions.long },
+  exit: { x: "100%", transition: transitions.editorial },
 };
 
-/**
- * Drawer slide in from left
- */
 export const drawerSlideLeft: Variants = {
   hidden: { x: "-100%" },
-  visible: {
-    x: 0,
-    transition: {
-      type: "spring",
-      stiffness: 300,
-      damping: 30,
-    },
-  },
-  exit: {
-    x: "-100%",
-    transition: {
-      duration: 0.3,
-      ease: "easeIn",
-    },
-  },
+  visible: { x: 0, transition: transitions.long },
+  exit: { x: "-100%", transition: transitions.editorial },
 };
 
-// ============================================================================
-// HELPER FUNCTIONS
-// ============================================================================
-
-/**
- * Create a custom stagger delay
- */
 export const createStagger = (
-  staggerDelay: number = 0.1,
+  staggerDelay: number = 0.08,
   delayChildren: number = 0,
 ) => ({
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: {
-      staggerChildren: staggerDelay,
-      delayChildren,
-    },
+    transition: { staggerChildren: staggerDelay, delayChildren },
   },
 });
 
-/**
- * Create a custom fade in with direction
- */
 export const createFadeIn = (
   direction: "up" | "down" | "left" | "right" = "up",
-  distance: number = 20,
+  distance: number = 6,
 ) => {
   const axis = direction === "left" || direction === "right" ? "x" : "y";
   const value =
@@ -390,18 +201,31 @@ export const createFadeIn = (
     visible: {
       opacity: 1,
       [axis]: 0,
-      transition: transitions.smooth,
+      transition: transitions.editorial,
     },
   };
 };
 
-/**
- * Create a viewport animation config
- * Useful for scroll-triggered animations
- */
 export const createViewportAnimation = (once: boolean = true) => ({
   viewport: { once, amount: 0.3 },
   initial: "hidden",
   whileInView: "visible",
 });
 
+/**
+ * Wrap variants so they degrade to an instant opacity flip under
+ * `prefers-reduced-motion`. Pair with `useReducedMotion()` from framer-motion.
+ */
+export function withReduced(variants: Variants, reduced: boolean): Variants {
+  if (!reduced) return variants;
+  const out: Variants = {};
+  for (const key of Object.keys(variants)) {
+    const v = variants[key];
+    if (typeof v === "object" && v !== null && !Array.isArray(v)) {
+      out[key] = { opacity: (v as { opacity?: number }).opacity ?? 1 };
+    } else {
+      out[key] = v;
+    }
+  }
+  return out;
+}

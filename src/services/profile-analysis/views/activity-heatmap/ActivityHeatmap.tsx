@@ -51,19 +51,17 @@ export function ActivityHeatmap({
     if (normalizedIntensity > 0.7) return "bg-success-500 dark:bg-success-400";
     if (normalizedIntensity > 0.4) return "bg-warning-500 dark:bg-warning-400";
     if (normalizedIntensity > 0.1) return "bg-primary-500 dark:bg-primary-400";
-    return "bg-gray-300 dark:bg-gray-500";
+    return "bg-rule";
   };
 
   return (
     <Card
-      className={`bg-white dark:bg-surface-dark shadow-subtle ${className}`}
+      className={`bg-bg-raised border border-rule rounded-[2px] ${className}`}
     >
       <CardBody className="p-6">
-        <div className="flex items-center gap-3 mb-4 pb-2 border-b-2 border-border dark:border-border-dark">
+        <div className="flex items-center gap-3 mb-4 pb-2 border-b-2 border-rule">
           <Activity className="text-success" size={16} />
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-            ACTIVITY HEATMAP
-          </h3>
+          <h3 className="text-sm font-semibold text-fg">ACTIVITY HEATMAP</h3>
           <div className="ml-auto">
             <Chip color="success" variant="flat" size="sm">
               {years.length}Y SPAN
@@ -89,19 +87,19 @@ export function ActivityHeatmap({
                     style={{ height: "50px" }}
                   >
                     <div
-                      className={`w-full border border-border dark:border-border-dark transition-all duration-500 ease-out ${getIntensityColor(data.intensity)}`}
+                      className={`w-full border border-rule transition-all duration-500 ease-out ${getIntensityColor(data.intensity)}`}
                       style={{ height: `${height}px` }}
                     />
                   </div>
 
                   {/* Year Label */}
-                  <span className="text-xs text-gray-600 dark:text-gray-400 transform -rotate-45 origin-center whitespace-nowrap">
+                  <span className="text-xs text-fg-muted transform -rotate-45 origin-center whitespace-nowrap">
                     {data.year}
                   </span>
 
                   {/* Score */}
                   {data.score > 0 && (
-                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300">
+                    <span className="text-xs font-bold text-fg">
                       {data.score}
                     </span>
                   )}
@@ -111,63 +109,49 @@ export function ActivityHeatmap({
           </div>
 
           {/* Activity Summary */}
-          <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border dark:border-border-dark">
-            <div className="text-center p-3 bg-primary/10 rounded-lg">
-              <Calendar className="mx-auto mb-1 text-primary" size={16} />
-              <div className="font-bold text-lg text-primary">
+          <div className="grid grid-cols-3 gap-4 pt-4 border-t border-rule">
+            <div className="text-center p-3 bg-accent-subtle rounded-[2px]">
+              <Calendar className="mx-auto mb-1 text-accent" size={16} />
+              <div className="font-mono font-bold text-lg text-accent tabular-nums">
                 {years.length}
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">
-                YEARS
-              </div>
+              <div className="text-xs text-fg-muted">YEARS</div>
             </div>
 
-            <div className="text-center p-3 bg-success/10 rounded-lg">
+            <div className="text-center p-3 bg-success/10 rounded-[2px]">
               <TrendingUp className="mx-auto mb-1 text-success" size={16} />
               <div className="font-bold text-lg text-success">
                 {Math.round(activityTimeline.totalDaysActive / years.length)}
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">
-                DAYS/YEAR
-              </div>
+              <div className="text-xs text-fg-muted">DAYS/YEAR</div>
             </div>
 
-            <div className="text-center p-3 bg-warning/10 rounded-lg">
+            <div className="text-center p-3 bg-warn-subtle rounded-[2px]">
               <Activity className="mx-auto mb-1 text-warning" size={16} />
               <div className="font-bold text-lg text-warning">
                 {activityTimeline.activityLevel.toUpperCase()}
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">
-                INTENSITY
-              </div>
+              <div className="text-xs text-fg-muted">INTENSITY</div>
             </div>
           </div>
 
           {/* Legend */}
           <div className="flex items-center justify-center gap-4 pt-2">
             <div className="flex items-center gap-1">
-              <div className="w-3 h-3 bg-gray-300 dark:bg-gray-500 border border-gray-300 dark:border-gray-600" />
-              <span className="text-xs text-gray-600 dark:text-gray-400">
-                LOW
-              </span>
+              <div className="w-3 h-3 bg-rule border border-rule" />
+              <span className="text-xs text-fg-muted">LOW</span>
             </div>
             <div className="flex items-center gap-1">
               <div className="w-3 h-3 bg-primary-500 border border-primary-400" />
-              <span className="text-xs text-gray-600 dark:text-gray-400">
-                MED
-              </span>
+              <span className="text-xs text-fg-muted">MED</span>
             </div>
             <div className="flex items-center gap-1">
               <div className="w-3 h-3 bg-warning-500 border border-warning-400" />
-              <span className="text-xs text-gray-600 dark:text-gray-400">
-                HIGH
-              </span>
+              <span className="text-xs text-fg-muted">HIGH</span>
             </div>
             <div className="flex items-center gap-1">
               <div className="w-3 h-3 bg-success-500 border border-success-400" />
-              <span className="text-xs text-gray-600 dark:text-gray-400">
-                PEAK
-              </span>
+              <span className="text-xs text-fg-muted">PEAK</span>
             </div>
           </div>
         </div>

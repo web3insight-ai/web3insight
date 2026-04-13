@@ -40,7 +40,7 @@ export function CopilotMessageEditor({
   };
 
   return (
-    <div className="ml-auto w-full max-w-xl overflow-hidden rounded-xl border border-border p-3 transition-colors focus-within:border-primary dark:border-border-dark dark:focus-within:border-primary [&_textarea]:!bg-transparent [&_textarea]:!ring-0 [&_textarea]:!shadow-none [&_textarea]:!outline-none [&_textarea]:!resize-none [&_textarea:focus]:!ring-0 [&_textarea:focus]:!shadow-none [&_textarea:focus]:!outline-none">
+    <div className="ml-auto w-full max-w-xl overflow-hidden rounded-[2px] border border-rule bg-bg-raised p-3 transition-colors focus-within:border-accent [&_textarea]:!bg-transparent [&_textarea]:!ring-0 [&_textarea]:!shadow-none [&_textarea]:!outline-none [&_textarea]:!resize-none [&_textarea:focus]:!ring-0 [&_textarea:focus]:!shadow-none [&_textarea:focus]:!outline-none">
       <Textarea
         value={draft}
         onChange={(event) => onDraftChange(event.target.value)}

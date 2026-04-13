@@ -10,7 +10,6 @@ import {
   Textarea,
   Button,
 } from "@/components/ui";
-import { Calendar } from "lucide-react";
 
 import FileUpload from "$/controls/file-upload";
 
@@ -92,25 +91,19 @@ function EventDialog({ visible, onClose }: EventDialogProps) {
         base: "max-w-2xl mx-4",
         wrapper: "overflow-visible",
         backdrop: "bg-background-dark/50",
-        header: "border-b border-border dark:border-border-dark",
+        header: "border-b border-rule",
         body: "p-0",
-        closeButton:
-          "hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",
+        closeButton: "hover:bg-bg-sunken transition-colors",
       }}
     >
-      <ModalContent className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
+      <ModalContent className="bg-bg-raised border border-rule rounded-[2px]">
         {() => (
           <>
             <ModalHeader className="flex items-center gap-3 px-6 py-5">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Calendar size={20} className="text-primary" />
-              </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Add Event
-                </h2>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Create a new event to track contestants and their activities
+                <h2 className="text-lg font-semibold text-fg">Add Event</h2>
+                <p className="font-mono text-xs text-fg-muted mt-1">
+                  create a new event to track contestants and their activities
                 </p>
               </div>
             </ModalHeader>
@@ -127,10 +120,8 @@ function EventDialog({ visible, onClose }: EventDialogProps) {
                     onValueChange={setDescription}
                     classNames={{
                       base: "w-full",
-                      label:
-                        "text-sm font-medium text-gray-700 dark:text-gray-300 mb-2",
-                      input:
-                        "bg-white dark:bg-surface-dark border-border dark:border-border-dark",
+                      label: "text-sm font-medium text-fg mb-2",
+                      input: "bg-bg-raised border-rule",
                     }}
                   />
 
@@ -145,15 +136,13 @@ function EventDialog({ visible, onClose }: EventDialogProps) {
                     onValueChange={setUserInput}
                     classNames={{
                       base: "w-full",
-                      label:
-                        "text-sm font-medium text-gray-700 dark:text-gray-300 mb-2",
-                      input:
-                        "bg-white dark:bg-surface-dark border-border dark:border-border-dark",
+                      label: "text-sm font-medium text-fg mb-2",
+                      input: "bg-bg-raised border-rule",
                     }}
                   />
 
                   <div className="flex items-center gap-3 pt-2">
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                    <span className="text-sm text-fg-muted">
                       Input manually above or
                     </span>
                     <FileUpload
@@ -165,7 +154,7 @@ function EventDialog({ visible, onClose }: EventDialogProps) {
                         onClick={handleCsvUpload}
                         size="sm"
                         variant="bordered"
-                        className="border-border dark:border-border-dark hover:bg-gray-50 dark:hover:bg-white/10"
+                        className="border-rule hover:bg-bg-sunken dark:hover:bg-white/10"
                       >
                         import from CSV file
                       </Button>
@@ -175,13 +164,13 @@ function EventDialog({ visible, onClose }: EventDialogProps) {
               </div>
             </ModalBody>
 
-            <ModalFooter className="border-t border-border dark:border-border-dark px-6 py-4">
+            <ModalFooter className="border-t border-rule px-6 py-4">
               <div className="flex gap-3 w-full sm:w-auto sm:ml-auto">
                 <Button
                   variant="bordered"
                   onClick={() => closeDialog()}
                   isDisabled={loading}
-                  className="flex-1 sm:flex-none border-border dark:border-border-dark hover:bg-gray-50 dark:hover:bg-white/10"
+                  className="flex-1 sm:flex-none border-rule hover:bg-bg-sunken dark:hover:bg-white/10"
                 >
                   Cancel
                 </Button>

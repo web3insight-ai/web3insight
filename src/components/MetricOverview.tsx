@@ -1,74 +1,60 @@
 "use client";
 
-import { Code2, Users, Zap, Database } from "lucide-react";
-import { motion } from "framer-motion";
-
-import MetricCard, { type MetricCardProps } from "$/controls/metric-card";
 import MetricOverviewSkeleton from "./loading/MetricOverviewSkeleton";
 import type { DataValue } from "@/types";
-import { staggerContainer, staggerItemScale } from "@/utils/animations";
+import { BigNumber } from "$/primitives";
 
 type MetricOverviewProps = {
   dataSource: Record<string, DataValue>;
   isLoading?: boolean;
 };
 
-function resolveMetrics(dataSource: MetricOverviewProps["dataSource"]): MetricCardProps[] {
-  return [
-    {
-      label: "Developers",
-      value: Number(dataSource.coreDeveloper).toLocaleString(),
-      icon: <Code2 size={20} className="text-secondary" />,
-      iconBgClassName: "bg-secondary/10",
-      tooltip: "Developers with pull requests and push events in the past year",
-    },
-    {
-      label: "ECO Contributors",
-      value: Number(dataSource.developer).toLocaleString(),
-      icon: <Users size={20} className="text-primary" />,
-      iconBgClassName: "bg-primary/10",
-      tooltip: "Developers with activity (star not included) in this ecosystem (all time)",
-    },
-    {
-      label: "Ecosystems",
-      value: Number(dataSource.ecosystem).toLocaleString(),
-      icon: <Database size={20} className="text-warning" />,
-      iconBgClassName: "bg-warning/10",
-      tooltip: "Total number of ecosystems tracked",
-    },
-    {
-      label: "Repositories",
-      value: Number(dataSource.repository).toLocaleString(),
-      icon: <Zap size={20} className="text-success" />,
-      iconBgClassName: "bg-success/10",
-      tooltip: "Total repositories grouped by ecosystem",
-    },
-  ];
-}
-
-function MetricOverview({ dataSource, isLoading = false }: MetricOverviewProps) {
+function MetricOverview({
+  dataSource,
+  isLoading = false,
+}: MetricOverviewProps) {
   if (isLoading) {
     return <MetricOverviewSkeleton />;
   }
 
+  const core = Number(dataSource.coreDeveloper);
+  const eco = Number(dataSource.developer);
+  const ecos = Number(dataSource.ecosystem);
+  const repos = Number(dataSource.repository);
+
   return (
-    <motion.div
-      variants={staggerContainer}
-      initial="hidden"
-      animate="visible"
-      className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6"
-    >
-      {resolveMetrics(dataSource).map((metric) => (
-        <motion.div
-          key={metric.label.replaceAll(" ", "")}
-          variants={staggerItemScale}
-          whileHover={{ y: -4, scale: 1.02 }}
-          transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        >
-          <MetricCard {...metric} />
-        </motion.div>
-      ))}
-    </motion.div>
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 py-2">
+      <div className="lg:col-span-6">
+        <BigNumber
+          label="Core developers"
+          value={Number.isFinite(core) ? core : null}
+          format="compact"
+          size="hero"
+          footnote="Authors of pull requests or push events in the past 12 months. The headline figure this platform is built around."
+        />
+      </div>
+      <div className="lg:col-span-3 flex flex-col gap-10">
+        <BigNumber
+          label="Eco contributors"
+          value={Number.isFinite(eco) ? eco : null}
+          format="compact"
+          footnote="All-time activity (stars excluded) in tracked ecosystems."
+        />
+        <BigNumber
+          label="Ecosystems tracked"
+          value={Number.isFinite(ecos) ? ecos : null}
+          format="full"
+        />
+      </div>
+      <div className="lg:col-span-3 flex flex-col gap-10">
+        <BigNumber
+          label="Repositories"
+          value={Number.isFinite(repos) ? repos : null}
+          format="compact"
+          footnote="Grouped by ecosystem. Includes archived repos with recent activity."
+        />
+      </div>
+    </div>
   );
 }
 

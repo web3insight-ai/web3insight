@@ -6,7 +6,6 @@ import {
   MessageBranch,
   MessageBranchContent,
 } from "@/components/ai-elements/message";
-import { Shimmer } from "@/components/ai-elements/shimmer";
 import type { CopilotUIMessage } from "~/ai/copilot-types";
 import { STARTER_PROMPT_CARDS } from "../../constants";
 import { useCopilotActions } from "../../state/actions";
@@ -31,8 +30,11 @@ export function CopilotMessageList({
     return (
       <ConversationEmptyState className="mx-auto my-auto w-full max-w-xl min-h-0 h-full gap-8 p-0 justify-center items-center">
         <div className="w-full text-center">
-          <p className="text-lg font-medium text-foreground dark:text-foreground-dark">
+          <p className="font-display text-2xl font-semibold tracking-[-0.01em] text-fg">
             What would you like to explore?
+          </p>
+          <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.12em] text-fg-muted">
+            pick a starter · or ask anything
           </p>
         </div>
 
@@ -41,7 +43,7 @@ export function CopilotMessageList({
             <button
               key={prompt.action}
               type="button"
-              className="group inline-flex items-center gap-1.5 rounded-full bg-gray-50 px-3.5 py-2 text-[13px] text-gray-600 transition-all hover:bg-teal-50 hover:text-teal-700 dark:bg-white/[0.06] dark:text-gray-400 dark:hover:bg-teal-500/10 dark:hover:text-teal-400"
+              className="group inline-flex items-center gap-1.5 rounded-[2px] border border-rule bg-bg-raised px-3 py-2 text-[13px] text-fg-muted transition-colors hover:border-rule-strong hover:text-accent"
               onClick={() => {
                 actions.sendStarterPrompt(prompt.action);
               }}
@@ -101,9 +103,13 @@ export function CopilotMessageList({
       })}
 
       {status === "submitted" ? (
-        <Shimmer className="w-fit" duration={3}>
-          Thinking...
-        </Shimmer>
+        <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.12em] text-fg-muted">
+          <span>thinking</span>
+          <span
+            aria-hidden
+            className="animate-cursor inline-block h-[0.9em] w-[0.55ch] translate-y-[2px] bg-accent align-middle"
+          />
+        </div>
       ) : null}
     </>
   );

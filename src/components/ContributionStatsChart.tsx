@@ -23,26 +23,25 @@ const ContributionStatsChart: React.FC<ContributionStatsProps> = ({
     {
       name: "With Contributions",
       value: usersWithContributions,
-      color: "#0D9488", // teal-600
+      color: "var(--accent)",
       percentage: contributionPercentage,
     },
     {
       name: "Without Contributions",
       value: usersWithoutContributions,
-      color: "#e5e7eb", // gray-200
+      color: "var(--rule)",
       percentage: 100 - contributionPercentage,
     },
   ];
 
   return (
     <div
-      className={`border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle ${className}`}
+      className={`border border-rule rounded-[2px] p-4 bg-bg-raised ${className}`}
     >
-      {/* Header */}
       <div className="flex items-center gap-2 mb-3">
-        <Users size={14} className="text-gray-600 dark:text-gray-400" />
-        <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-          Web3 Contribution Analysis
+        <Users size={14} className="text-fg-muted" />
+        <h3 className="font-mono text-[10px] uppercase tracking-[0.18em] font-medium text-fg-muted">
+          web3 contribution analysis
         </h3>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
@@ -67,52 +66,46 @@ const ContributionStatsChart: React.FC<ContributionStatsProps> = ({
                 <Tooltip
                   formatter={(value: number) => [`${value} developers`, ""]}
                   contentStyle={{
-                    backgroundColor: "rgba(255, 255, 255, 0.95)",
-                    border: "1px solid rgba(0, 0, 0, 0.1)",
-                    borderRadius: "6px",
-                    fontSize: "10px",
+                    backgroundColor: "var(--bg-raised)",
+                    border: "1px solid var(--rule-strong)",
+                    borderRadius: "2px",
+                    color: "var(--fg)",
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "11px",
                   }}
-                  wrapperClassName="dark:[&_.recharts-tooltip-wrapper]:!bg-gray-800 dark:[&_.recharts-tooltip-wrapper]:!border-gray-600 dark:[&_.recharts-tooltip-wrapper]:!text-gray-200"
                 />
               </PieChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Stats & Legend - Right */}
         <div className="lg:col-span-2 space-y-2">
-          {/* Key Numbers */}
-          <div className="text-center p-3 border border-gray-200 dark:border-gray-600 rounded-lg">
-            <div className="text-lg font-semibold text-gray-900 dark:text-white">
+          <div className="text-center p-3 border border-rule rounded-[2px] bg-bg">
+            <div className="font-mono text-lg font-semibold text-fg tabular-nums">
               {totalUsers}
             </div>
-            <div className="text-xs text-gray-600 dark:text-gray-400">
-              Total Participants
+            <div className="font-mono text-[10px] uppercase tracking-[0.14em] text-fg-muted">
+              total participants
             </div>
           </div>
 
-          {/* Contribution Breakdown */}
           <div className="space-y-1">
-            <div className="flex items-center justify-between p-2 border border-gray-200 dark:border-gray-600 rounded-lg text-xs">
-              <div className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-full bg-teal-600" />
-                <span className="text-gray-600 dark:text-gray-400">
-                  With Contributions
-                </span>
+            <div className="flex items-center justify-between p-2 border border-rule rounded-[2px] text-xs">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2 h-2 bg-accent" />
+                <span className="text-fg-muted">With Contributions</span>
               </div>
-              <span className="font-medium text-gray-900 dark:text-white">
+              <span className="font-mono text-fg tabular-nums">
                 {usersWithContributions} ({contributionPercentage.toFixed(1)}%)
               </span>
             </div>
             {usersWithoutContributions > 0 && (
-              <div className="flex items-center justify-between p-2 border border-gray-200 dark:border-gray-600 rounded-lg text-xs">
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-gray-300" />
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Without Contributions
-                  </span>
+              <div className="flex items-center justify-between p-2 border border-rule rounded-[2px] text-xs">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 bg-rule" />
+                  <span className="text-fg-muted">Without Contributions</span>
                 </div>
-                <span className="font-medium text-gray-900 dark:text-white">
+                <span className="font-mono text-fg tabular-nums">
                   {usersWithoutContributions} (
                   {(100 - contributionPercentage).toFixed(1)}%)
                 </span>

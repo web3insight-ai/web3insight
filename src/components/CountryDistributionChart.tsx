@@ -151,11 +151,31 @@ function CountryDistributionChart({
     [formattedData],
   );
 
-  // Use medium green color scheme (matching DevInsight page)
-  const pieColors = useMemo(
-    () => ["#0D9488", "#14B8A6", "#10B981", "#059669", "#0F766E"],
-    [],
-  );
+  // Teal-dominant ramp — resolved at paint time from CSS variables so theme
+  // toggles recolor. Matches the Blueprint "one rare teal, many tinted
+  // neutrals" rule; Highcharts expects concrete colour strings so we resolve
+  // them here instead of referring to `var(--…)`.
+  const pieColors = useMemo(() => {
+    if (typeof window === "undefined") {
+      return [
+        "oklch(47% 0.08 180)",
+        "oklch(58% 0.08 180)",
+        "oklch(40% 0.075 180)",
+        "oklch(72% 0.07 180)",
+        "oklch(33% 0.065 180)",
+      ];
+    }
+    const styles = getComputedStyle(document.documentElement);
+    const read = (name: string, fallback: string) =>
+      styles.getPropertyValue(name).trim() || fallback;
+    return [
+      read("--teal-500", "oklch(47% 0.08 180)"),
+      read("--teal-400", "oklch(58% 0.08 180)"),
+      read("--teal-600", "oklch(40% 0.075 180)"),
+      read("--teal-300", "oklch(72% 0.07 180)"),
+      read("--teal-700", "oklch(33% 0.065 180)"),
+    ];
+  }, []);
 
   const pieSeriesData = useMemo<PieDatum[]>(
     () =>
@@ -211,10 +231,10 @@ function CountryDistributionChart({
           const code = point?.code ? ` (${point.code})` : "";
           const displayName = point?.label ?? point?.name ?? "Unknown region";
           return `
-          <div style="padding:8px 12px;background:#fff;border:1px solid rgba(15,23,42,0.12);border-radius:8px;box-shadow:0 8px 20px rgba(15,23,42,0.1);min-width:180px;">
-            <div style="font-size:12px;font-weight:600;color:#111827;">${displayName}${code}</div>
-            <div style="font-size:12px;color:#111827;margin-top:4px;">${value.toLocaleString()} contributors</div>
-            <div style="font-size:11px;color:#6B7280;">${percent.toFixed(1)}% of tracked</div>
+          <div style="padding:8px 12px;background:var(--bg-raised);border:1px solid rgba(15,23,42,0.12);border-radius:8px;box-shadow:0 8px 20px rgba(15,23,42,0.1);min-width:180px;">
+            <div style="font-size:12px;font-weight:600;color:var(--fg);">${displayName}${code}</div>
+            <div style="font-size:12px;color:var(--fg);margin-top:4px;">${value.toLocaleString()} contributors</div>
+            <div style="font-size:11px;color:var(--fg-muted);">${percent.toFixed(1)}% of tracked</div>
           </div>
         `;
         },
@@ -223,9 +243,9 @@ function CountryDistributionChart({
         min: 0,
         max: maxValue || 1,
         stops: [
-          [0, "#D1FAE5"], // emerald-100 - light green
-          [0.5, "#10B981"], // emerald-500 - medium green
-          [1, "#059669"], // emerald-600 - deeper green (not too dark)
+          [0, "oklch(90% 0.030 180)"], // emerald-100 - light green
+          [0.5, "oklch(47% 0.080 180)"], // emerald-500 - medium green
+          [1, "oklch(33% 0.065 180)"], // emerald-600 - deeper green (not too dark)
         ],
       },
       series: [
@@ -235,12 +255,12 @@ function CountryDistributionChart({
           data: mapSeriesData as SeriesMapDataOptions[],
           mapData: mapDataWorld as unknown as SeriesMapDataOptions[],
           joinBy: ["iso-a2", "code"],
-          borderColor: "#94A3B8", // slate-400 - subtle borders
+          borderColor: "oklch(68% 0.009 180)", // slate-400 - subtle borders
           borderWidth: 0.5,
-          nullColor: "#F8FAFC", // slate-50 - no data
+          nullColor: "oklch(97% 0.004 180)", // slate-50 - no data
           states: {
             hover: {
-              color: "#10B981", // emerald-500 - hover highlight
+              color: "oklch(47% 0.080 180)", // emerald-500 - hover highlight
             },
           },
           dataLabels: {
@@ -274,8 +294,8 @@ function CountryDistributionChart({
       },
       tooltip: {
         useHTML: true,
-        backgroundColor: "#fff",
-        borderColor: "#E5E7EB",
+        backgroundColor: "var(--bg-raised)",
+        borderColor: "oklch(78% 0.008 180)",
         borderRadius: 8,
         shadow: true,
         formatter: function formatter() {
@@ -290,10 +310,10 @@ function CountryDistributionChart({
           const percentValue = point?.percentValue ?? 0;
           const code = point?.code ? ` (${point.code})` : "";
           return `
-          <div style="padding:8px 12px;background:#fff;border:1px solid rgba(15,23,42,0.12);border-radius:8px;box-shadow:0 8px 20px rgba(15,23,42,0.1);min-width:180px;">
-            <div style="font-size:12px;font-weight:600;color:#111827;">${point?.name ?? "Unknown"}${code}</div>
-            <div style="font-size:12px;color:#111827;margin-top:4px;">${value.toLocaleString()} contributors</div>
-            <div style="font-size:11px;color:#6B7280;">${percentValue.toFixed(1)}% of tracked</div>
+          <div style="padding:8px 12px;background:var(--bg-raised);border:1px solid rgba(15,23,42,0.12);border-radius:8px;box-shadow:0 8px 20px rgba(15,23,42,0.1);min-width:180px;">
+            <div style="font-size:12px;font-weight:600;color:var(--fg);">${point?.name ?? "Unknown"}${code}</div>
+            <div style="font-size:12px;color:var(--fg);margin-top:4px;">${value.toLocaleString()} contributors</div>
+            <div style="font-size:11px;color:var(--fg-muted);">${percentValue.toFixed(1)}% of tracked</div>
           </div>
         `;
         },
@@ -319,8 +339,8 @@ function CountryDistributionChart({
               const percentValue = point?.percentValue ?? 0;
               const isDark =
                 document.documentElement.getAttribute("data-theme") === "dark";
-              const textColor = isDark ? "#e5e7eb" : "#1f2937";
-              const subColor = isDark ? "#9ca3af" : "#6b7280";
+              const textColor = isDark ? "var(--fg)" : "var(--fg)";
+              const subColor = isDark ? "var(--fg-muted)" : "var(--fg-muted)";
               return `<div style="text-align:center;font-size:11px;color:${textColor};">${point?.name}<br /><span style="color:${subColor};">${percentValue}%</span></div>`;
             },
           },
@@ -346,15 +366,15 @@ function CountryDistributionChart({
   if (formattedData.length === 0) {
     return (
       <div
-        className={`border border-border dark:border-border-dark rounded-xl p-6 bg-white dark:bg-surface-dark text-center ${className}`}
+        className={`border border-rule rounded-[2px] p-6 bg-bg-raised text-center ${className}`}
       >
-        <div className="flex items-center justify-center gap-2 mb-2 text-gray-500 dark:text-gray-400">
+        <div className="flex items-center justify-center gap-2 mb-2 text-fg-muted">
           <Globe2 size={16} />
           <span className="text-sm font-medium">
             Global Contributor Distribution
           </span>
         </div>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-fg-muted">
           No country or region data is available right now.
         </p>
       </div>
@@ -363,17 +383,15 @@ function CountryDistributionChart({
 
   return (
     <div
-      className={`border border-border dark:border-border-dark rounded-xl p-6 bg-white dark:bg-surface-dark ${className}`}
+      className={`border border-rule rounded-[2px] p-6 bg-bg-raised ${className}`}
     >
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 rounded-full bg-primary/10 text-primary">
-          <Globe2 size={18} />
-        </div>
+        <Globe2 size={18} className="text-accent" />
         <div>
-          <p className="text-sm font-semibold text-gray-900 dark:text-white">
+          <p className="font-display text-base font-semibold text-fg tracking-[-0.01em]">
             Global Contributor Distribution
           </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p className="font-mono text-[11px] text-fg-muted tabular-nums">
             Tracking {computedTotal.toLocaleString()} contributors
           </p>
         </div>
@@ -391,21 +409,19 @@ function CountryDistributionChart({
             />
           </div>
           <div className="w-full lg:w-[360px] xl:w-[380px]">
-            <div className="border border-border dark:border-border-dark rounded-xl p-4 bg-surface dark:bg-surface-elevated h-full flex flex-col">
+            <div className="border border-rule rounded-[2px] p-4 bg-bg-sunken h-full flex flex-col">
               {pieSeriesData.length ? (
                 <>
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                      <p className="text-sm font-semibold text-fg">
                         Top Contributors
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-xs text-fg-muted">
                         Share of total tracked
                       </p>
                     </div>
-                    <div className="text-xs text-gray-400 dark:text-gray-500">
-                      Top 10
-                    </div>
+                    <div className="text-xs text-fg-subtle">Top 10</div>
                   </div>
                   <div className="w-full" style={{ minHeight: 260 }}>
                     <HighchartsReact
@@ -417,7 +433,7 @@ function CountryDistributionChart({
                   </div>
                 </>
               ) : (
-                <div className="h-full flex flex-col items-center justify-center text-center text-sm text-gray-500 dark:text-gray-400">
+                <div className="h-full flex flex-col items-center justify-center text-center text-sm text-fg-muted">
                   <p>No top contributor data available.</p>
                 </div>
               )}

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Card, Skeleton } from "@/components/ui";
-import { Calendar, ArrowRight, Lock, Loader2 } from "lucide-react";
+import { Skeleton } from "@/components/ui";
+import { ArrowRight, Lock, Loader2 } from "lucide-react";
 import { useAtom } from "jotai";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -10,6 +10,8 @@ import Link from "next/link";
 import { addToastAtom } from "#/atoms";
 import { canManageEvents } from "~/auth/helper";
 import type { ApiUser } from "~/auth/typing";
+import { Panel } from "$/blueprint";
+import { SmallCapsLabel } from "$/primitives";
 import type { EventInsight } from "../../typing";
 
 type EventInsightsProps = {
@@ -67,77 +69,75 @@ function EventInsightsWidget({
 
   if (loading) {
     return (
-      <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">
-        <div className="px-6 pt-5 pb-4 flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <Calendar size={18} className="text-primary" />
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-            Recent Events
-          </h3>
+      <Panel
+        label={{ text: "events · recent", position: "tl" }}
+        code="E1"
+        className="overflow-hidden"
+      >
+        <div className="px-5 pt-5 pb-3 border-b border-rule">
+          <SmallCapsLabel>recent events</SmallCapsLabel>
         </div>
         <div className="p-6 space-y-4">
           {Array.from({ length: 3 }).map((_, index) => (
             <div key={index} className="space-y-2">
-              <Skeleton className="h-4 w-3/4 rounded-lg" />
-              <Skeleton className="h-3 w-1/2 rounded-lg" />
+              <Skeleton className="h-4 w-3/4 rounded-[2px]" />
+              <Skeleton className="h-3 w-1/2 rounded-[2px]" />
             </div>
           ))}
         </div>
-      </Card>
+      </Panel>
     );
   }
 
   if (!dataSource.length) {
     return (
-      <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">
-        <div className="px-6 pt-5 pb-4 flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <Calendar size={18} className="text-primary" />
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-            Recent Events
-          </h3>
+      <Panel
+        label={{ text: "events · recent", position: "tl" }}
+        code="E1"
+        className="overflow-hidden"
+      >
+        <div className="px-5 pt-5 pb-3 border-b border-rule">
+          <SmallCapsLabel>recent events</SmallCapsLabel>
         </div>
         <div className="p-6">
-          <p className="text-gray-500 dark:text-gray-400 text-center py-8">
+          <p className="text-fg-muted text-center py-8 font-mono text-sm">
             No recent events available
           </p>
         </div>
-      </Card>
+      </Panel>
     );
   }
 
   return (
-    <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">
-      <div className="px-6 pt-5 pb-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <Calendar size={18} className="text-primary" />
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-            Recent Events
-          </h3>
-        </div>
+    <Panel
+      label={{ text: "events · recent", position: "tl" }}
+      code="E1"
+      className="overflow-hidden"
+    >
+      <div className="px-5 pt-5 pb-3 border-b border-rule">
+        <SmallCapsLabel>recent events</SmallCapsLabel>
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-t border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">
+            <tr className="border-t border-rule bg-bg-sunken">
+              <th className="px-6 py-3 text-left font-mono text-[10px] font-medium text-fg-muted uppercase tracking-[0.18em] w-12">
+                #
+              </th>
+              <th className="px-6 py-3 text-left font-mono text-[10px] font-medium text-fg-muted uppercase tracking-[0.18em]">
                 Event
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left font-mono text-[10px] font-medium text-fg-muted uppercase tracking-[0.18em]">
                 Created
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-right font-mono text-[10px] font-medium text-fg-muted uppercase tracking-[0.18em]">
                 Action
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white dark:bg-surface-dark divide-y divide-border dark:divide-border-dark">
-            {dataSource.map((event) => {
+          <tbody className="divide-y divide-rule">
+            {dataSource.map((event, i) => {
               const createdDate = new Date(event.created_at);
               const formattedDate = createdDate.toLocaleDateString("en-US", {
                 year: "numeric",
@@ -148,17 +148,20 @@ function EventInsightsWidget({
               return (
                 <tr
                   key={event.id}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                  className="hover:bg-bg-sunken transition-colors group"
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex flex-col">
-                      <div className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-xs">
-                        {event.description}
-                      </div>
+                    <span className="font-mono text-[11px] text-fg-muted tabular-nums">
+                      {String(i + 1).padStart(3, "0")}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-fg truncate max-w-xs">
+                      {event.description}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                    <div className="font-mono text-sm text-fg-muted tabular-nums">
                       {formattedDate}
                     </div>
                   </td>
@@ -166,7 +169,7 @@ function EventInsightsWidget({
                     <button
                       onClick={() => handleViewDetailsClick(event.id)}
                       disabled={navigatingEventId !== null}
-                      className={`inline-flex items-center gap-1 text-sm font-medium transition-colors ${isLockedForUser ? "text-gray-400 dark:text-gray-500 cursor-not-allowed disabled:opacity-30" : "text-gray-900 dark:text-white hover:text-primary dark:hover:text-primary disabled:opacity-50 disabled:cursor-not-allowed"}`}
+                      className={`inline-flex items-center gap-1 text-sm font-medium transition-colors ${isLockedForUser ? "text-fg-subtle cursor-not-allowed disabled:opacity-30" : "text-fg hover:text-accent disabled:opacity-50 disabled:cursor-not-allowed"}`}
                     >
                       {isLockedForUser && <Lock size={12} />}
                       View Details
@@ -183,16 +186,16 @@ function EventInsightsWidget({
           </tbody>
         </table>
       </div>
-      <div className="px-6 py-4 border-t border-border dark:border-border-dark">
+      <div className="px-6 py-4 border-t border-rule">
         <Link
           href={isAdminVariant ? "/admin/events" : "/events"}
-          className="flex items-center justify-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200"
+          className="flex items-center justify-center gap-2 text-sm font-medium text-fg-muted hover:text-accent transition-colors duration-200"
         >
           View All Events
           <ArrowRight size={16} />
         </Link>
       </div>
-    </Card>
+    </Panel>
   );
 }
 

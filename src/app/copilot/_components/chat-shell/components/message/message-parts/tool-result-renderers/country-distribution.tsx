@@ -49,7 +49,7 @@ export default function CountryDistributionResult({ data }: { data: unknown }) {
   // Reason: The full CountryDistributionChart includes a 440px world map which
   // is too tall for inline chat context. We constrain it with overflow/scale.
   return (
-    <div className="overflow-hidden rounded-xl [&_.highcharts-container]:!h-[200px] [&>div]:!p-3">
+    <div className="overflow-hidden rounded-[2px] border border-rule [&_.highcharts-container]:!h-[200px] [&>div]:!p-3">
       <CountryDistributionChart
         data={chartData}
         totalDevelopers={toNumber(totalContributors) ?? 0}

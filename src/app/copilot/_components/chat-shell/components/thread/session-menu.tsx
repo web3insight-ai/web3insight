@@ -60,7 +60,7 @@ function SessionList({
       {threads.map((thread) => (
         <DropdownMenuItem
           key={thread.remoteId}
-          className={`w-full justify-start rounded-md ${thread.remoteId === sessionId ? "bg-primary/10 font-medium text-primary" : ""}`}
+          className={`w-full justify-start rounded-[2px] ${thread.remoteId === sessionId ? "bg-accent-subtle font-medium text-accent" : ""}`}
           onSelect={(event) => {
             event.preventDefault();
             onSelectThread(thread);
@@ -140,7 +140,7 @@ export function CopilotSessionMenu({
 
       <DropdownMenuContent
         align="start"
-        className="w-[340px] max-w-[calc(100vw-3rem)] bg-white p-2 dark:bg-gray-900 md:w-[380px] [&_[role=menuitem]:focus-visible]:outline-none [&_[role=menuitem]]:cursor-pointer [&_[role=menuitem]:hover]:bg-accent [&_[role=menuitem]:hover]:text-accent-foreground"
+        className="w-[340px] max-w-[calc(100vw-3rem)] bg-bg-raised border border-rule rounded-[2px] p-2 md:w-[380px] [&_[role=menuitem]:focus-visible]:outline-none [&_[role=menuitem]]:cursor-pointer [&_[role=menuitem]:hover]:bg-bg-sunken"
       >
         <div className="max-h-[340px] overflow-y-auto">
           <SessionList

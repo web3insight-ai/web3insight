@@ -52,7 +52,7 @@ export default function DeveloperReposResult({ data }: { data: unknown }) {
 
   return (
     <ToolResultCard>
-      <h4 className="mb-3 text-sm font-bold text-gray-900 dark:text-white">
+      <h4 className="mb-3 text-sm font-bold text-fg">
         {username}&apos;s Top Repositories
       </h4>
 
@@ -60,13 +60,11 @@ export default function DeveloperReposResult({ data }: { data: unknown }) {
         {topRepositories.map((repo) => (
           <div
             key={repo.rank}
-            className="border-b border-gray-100/80 py-2.5 last:border-0 dark:border-white/[0.04]"
+            className="border-b border-rule py-2.5 last:border-0 dark:border-white/[0.04]"
           >
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
-                <span className="text-sm font-bold text-gray-900 dark:text-white">
-                  {repo.name}
-                </span>
+                <span className="text-sm font-bold text-fg">{repo.name}</span>
                 {repo.description && (
                   <p className="mt-0.5 truncate text-xs text-muted-foreground">
                     {repo.description}

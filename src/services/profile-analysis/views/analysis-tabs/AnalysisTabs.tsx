@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { BarChart3, Globe, Code, Activity } from "lucide-react";
+import { BarChart3 } from "lucide-react";
 
 import type { GitHubUser } from "../../typing";
 import { hasEcosystemData } from "../../helper";
 import { EcosystemInsights } from "../ecosystem-insights";
 import { TechnicalBreakdown } from "../technical-breakdown";
 import { ActivityAnalytics } from "../activity-analytics";
+import { SectionHeader, SmallCapsLabel } from "$/primitives";
 
 interface AnalysisTabsProps {
   user: GitHubUser;
@@ -13,113 +14,101 @@ interface AnalysisTabsProps {
   className?: string;
 }
 
-export function AnalysisTabs({ user, githubUsername, className = "" }: AnalysisTabsProps) {
+export function AnalysisTabs({
+  user,
+  githubUsername,
+  className = "",
+}: AnalysisTabsProps) {
   const [selectedTab, setSelectedTab] = useState("overview");
 
   if (!hasEcosystemData(user)) {
     return (
-      <div className={`bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark compact-card text-center ${className}`}>
-        <div className="space-y-3">
-          <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto flex items-center justify-center">
-            <BarChart3 size={16} className="text-gray-400" />
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
-              Processing Analytics
-            </h3>
-            <p className="text-xs text-gray-600 dark:text-gray-400">
-              Analyzing Web3 ecosystem activity
-            </p>
-          </div>
+      <section className={`border-t border-rule pt-10 ${className}`}>
+        <div className="flex items-center gap-2">
+          <BarChart3 size={14} className="text-fg-subtle" />
+          <SmallCapsLabel tone="subtle">
+            Processing deep analytics…
+          </SmallCapsLabel>
         </div>
-      </div>
+      </section>
     );
   }
 
   const tabItems = [
     {
       key: "overview",
-      title: "Ecosystem Overview",
-      icon: Globe,
-      subtitle: "Detailed ecosystem analysis",
+      title: "Ecosystems",
+      hint: "Where activity lands and how it's distributed.",
       content: <EcosystemInsights ecosystemScores={user.ecosystem_scores!} />,
     },
     {
       key: "technical",
-      title: "Technical Details",
-      icon: Code,
-      subtitle: "Tech stack analysis",
-      content: <TechnicalBreakdown ecosystemScores={user.ecosystem_scores!} githubUsername={githubUsername} />,
+      title: "Technical",
+      hint: "Languages, stacks, and repositories by weight.",
+      content: (
+        <TechnicalBreakdown
+          ecosystemScores={user.ecosystem_scores!}
+          githubUsername={githubUsername}
+        />
+      ),
     },
     {
       key: "activity",
       title: "Activity",
-      icon: Activity,
-      subtitle: "Timeline analysis",
+      hint: "Commit rhythm and long-term engagement signal.",
       content: <ActivityAnalytics ecosystemScores={user.ecosystem_scores!} />,
     },
   ];
 
+  const active = tabItems.find((tab) => tab.key === selectedTab);
+
   return (
-    <div className={`space-y-4 ${className}`}>
-      {/* Horizontal Card Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        {tabItems.map((tab) => (
-          <div
-            key={tab.key}
-            className={`analysis-tab cursor-pointer rounded-xl border p-4 ${
-              selectedTab === tab.key
-                ? "analysis-tab-selected border-primary/30 dark:border-primary/40"
-                : "border-border dark:border-border-dark bg-white dark:bg-surface-dark"
-            }`}
-            onClick={() => setSelectedTab(tab.key)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                setSelectedTab(tab.key);
-              }
-            }}
-            role="button"
-            tabIndex={0}
-          >
-            <div className="text-center space-y-2">
-              <div className="flex justify-center">
-                <tab.icon 
-                  size={18} 
-                  className={`transition-colors duration-200 ${
-                    selectedTab === tab.key 
-                      ? "text-primary" 
-                      : "text-gray-400 dark:text-gray-500"
-                  }`} 
+    <section className={`border-t border-rule pt-10 ${className}`}>
+      <SectionHeader
+        kicker="Deep analytics"
+        title="Break it apart"
+        deck="Three lenses on the same developer footprint. Switch freely — each view is computed from the same activity set."
+      />
+
+      {/* Editorial underline tab bar */}
+      <div
+        role="tablist"
+        aria-label="Analysis views"
+        className="flex items-end gap-8 border-b border-rule -mt-2 mb-8"
+      >
+        {tabItems.map((tab) => {
+          const isActive = tab.key === selectedTab;
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              onClick={() => setSelectedTab(tab.key)}
+              className="relative flex flex-col items-start gap-1 pb-3 pt-1 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-accent"
+            >
+              <span
+                className={`font-display text-[1rem] leading-[1.2] tracking-[-0.005em] transition-colors ${
+                  isActive ? "text-fg font-semibold" : "text-fg-muted"
+                }`}
+              >
+                {tab.title}
+              </span>
+              <span className="font-sans text-[0.75rem] text-fg-subtle max-w-[18ch] text-left">
+                {tab.hint}
+              </span>
+              {isActive && (
+                <span
+                  aria-hidden
+                  className="absolute -bottom-px left-0 right-0 h-[2px] bg-accent"
                 />
-              </div>
-              <div>
-                <h3 className={`text-sm font-medium ${
-                  selectedTab === tab.key 
-                    ? "text-gray-900 dark:text-white" 
-                    : "text-gray-700 dark:text-gray-200"
-                }`}>
-                  {tab.title}
-                </h3>
-                <p className={`text-xs ${
-                  selectedTab === tab.key 
-                    ? "text-gray-600 dark:text-gray-300" 
-                    : "text-gray-500 dark:text-gray-400"
-                }`}>
-                  {tab.subtitle}
-                </p>
-              </div>
-            </div>
-          </div>
-        ))}
+              )}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Selected Content */}
-      <div className="border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle">
-        <div className="animate-fade-in">
-          {tabItems.find(tab => tab.key === selectedTab)?.content}
-        </div>
-      </div>
-    </div>
+      <div className="animate-fade-in">{active?.content}</div>
+    </section>
   );
 }

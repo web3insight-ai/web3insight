@@ -33,14 +33,12 @@ const CodeHeader: FC<CodeHeaderProps> = ({ language, code }) => {
   };
 
   return (
-    <div className="mt-2.5 flex items-center justify-between rounded-t-lg border border-gray-200 dark:border-gray-700 border-b-0 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 text-xs">
-      <span className="font-medium text-gray-500 dark:text-gray-400 lowercase">
-        {language}
-      </span>
+    <div className="mt-2.5 flex items-center justify-between rounded-t-[2px] border border-rule border-b-0 bg-bg-raised px-3 py-1.5 text-xs">
+      <span className="font-mono text-fg-muted lowercase">{language}</span>
       <button
         type="button"
         onClick={onCopy}
-        className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-colors"
+        className="p-1 rounded-[2px] hover:bg-bg-sunken text-fg-muted transition-colors"
         aria-label="Copy code"
       >
         {isCopied ? <CheckIcon size={14} /> : <CopyIcon size={14} />}
@@ -68,7 +66,7 @@ const defaultComponents = memoizeMarkdownComponents({
   h1: ({ className, ...props }) => (
     <h1
       className={clsx(
-        "mb-2 scroll-m-20 font-semibold text-base text-gray-900 dark:text-gray-100 first:mt-0 last:mb-0",
+        "mb-2 scroll-m-20 font-semibold text-base text-fg first:mt-0 last:mb-0",
         className,
       )}
       {...props}
@@ -77,7 +75,7 @@ const defaultComponents = memoizeMarkdownComponents({
   h2: ({ className, ...props }) => (
     <h2
       className={clsx(
-        "mt-3 mb-1.5 scroll-m-20 font-semibold text-sm text-gray-900 dark:text-gray-100 first:mt-0 last:mb-0",
+        "mt-3 mb-1.5 scroll-m-20 font-semibold text-sm text-fg first:mt-0 last:mb-0",
         className,
       )}
       {...props}
@@ -86,7 +84,7 @@ const defaultComponents = memoizeMarkdownComponents({
   h3: ({ className, ...props }) => (
     <h3
       className={clsx(
-        "mt-2.5 mb-1 scroll-m-20 font-semibold text-sm text-gray-900 dark:text-gray-100 first:mt-0 last:mb-0",
+        "mt-2.5 mb-1 scroll-m-20 font-semibold text-sm text-fg first:mt-0 last:mb-0",
         className,
       )}
       {...props}
@@ -95,7 +93,7 @@ const defaultComponents = memoizeMarkdownComponents({
   h4: ({ className, ...props }) => (
     <h4
       className={clsx(
-        "mt-2 mb-1 scroll-m-20 font-medium text-sm text-gray-900 dark:text-gray-100 first:mt-0 last:mb-0",
+        "mt-2 mb-1 scroll-m-20 font-medium text-sm text-fg first:mt-0 last:mb-0",
         className,
       )}
       {...props}
@@ -104,7 +102,7 @@ const defaultComponents = memoizeMarkdownComponents({
   p: ({ className, ...props }) => (
     <p
       className={clsx(
-        "my-2.5 text-sm text-gray-700 dark:text-gray-300 leading-relaxed first:mt-0 last:mb-0",
+        "my-2.5 text-sm text-fg leading-relaxed first:mt-0 last:mb-0",
         className,
       )}
       {...props}
@@ -113,25 +111,19 @@ const defaultComponents = memoizeMarkdownComponents({
   a: ({ className, ...props }) => (
     <a
       className={clsx(
-        "text-primary underline underline-offset-2 hover:opacity-80",
+        "text-accent underline underline-offset-2 hover:opacity-80",
         className,
       )}
       {...props}
     />
   ),
   strong: ({ className, ...props }) => (
-    <strong
-      className={clsx(
-        "font-semibold text-gray-900 dark:text-gray-100",
-        className,
-      )}
-      {...props}
-    />
+    <strong className={clsx("font-semibold text-fg", className)} {...props} />
   ),
   blockquote: ({ className, ...props }) => (
     <blockquote
       className={clsx(
-        "my-2.5 border-gray-300 dark:border-gray-600 border-l-2 pl-3 text-gray-500 dark:text-gray-400 italic",
+        "my-2.5 border-rule border-l-2 pl-3 text-fg-muted italic",
         className,
       )}
       {...props}
@@ -140,7 +132,7 @@ const defaultComponents = memoizeMarkdownComponents({
   ul: ({ className, ...props }) => (
     <ul
       className={clsx(
-        "my-2 ml-4 list-disc text-sm text-gray-700 dark:text-gray-300 marker:text-gray-400 [&>li]:mt-1",
+        "my-2 ml-4 list-disc text-sm text-fg marker:text-fg-muted [&>li]:mt-1",
         className,
       )}
       {...props}
@@ -149,7 +141,7 @@ const defaultComponents = memoizeMarkdownComponents({
   ol: ({ className, ...props }) => (
     <ol
       className={clsx(
-        "my-2 ml-4 list-decimal text-sm text-gray-700 dark:text-gray-300 marker:text-gray-400 [&>li]:mt-1",
+        "my-2 ml-4 list-decimal text-sm text-fg marker:text-fg-muted [&>li]:mt-1",
         className,
       )}
       {...props}
@@ -159,10 +151,7 @@ const defaultComponents = memoizeMarkdownComponents({
     <li className={clsx("leading-relaxed", className)} {...props} />
   ),
   hr: ({ className, ...props }) => (
-    <hr
-      className={clsx("my-2 border-gray-200 dark:border-gray-700", className)}
-      {...props}
-    />
+    <hr className={clsx("my-2 border-rule", className)} {...props} />
   ),
   table: ({ className, ...props }) => (
     <div className="my-2 overflow-x-auto">
@@ -183,17 +172,14 @@ const defaultComponents = memoizeMarkdownComponents({
   ),
   tr: ({ className, ...props }) => (
     <tr
-      className={clsx(
-        "m-0 border-b border-gray-200 dark:border-gray-700 p-0 first:border-t [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg",
-        className,
-      )}
+      className={clsx("m-0 border-b border-rule p-0 first:border-t", className)}
       {...props}
     />
   ),
   th: ({ className, ...props }) => (
     <th
       className={clsx(
-        "bg-gray-100 dark:bg-gray-800 px-2.5 py-1.5 text-left text-xs font-medium text-gray-600 dark:text-gray-300 first:rounded-tl-lg last:rounded-tr-lg",
+        "bg-bg-sunken px-2.5 py-1.5 text-left font-mono text-[10px] uppercase tracking-[0.12em] text-fg-muted",
         className,
       )}
       {...props}
@@ -202,7 +188,7 @@ const defaultComponents = memoizeMarkdownComponents({
   td: ({ className, ...props }) => (
     <td
       className={clsx(
-        "border-b border-l border-gray-200 dark:border-gray-700 px-2.5 py-1.5 text-left text-sm text-gray-700 dark:text-gray-300 last:border-r",
+        "border-b border-l border-rule px-2.5 py-1.5 text-left text-sm text-fg last:border-r",
         className,
       )}
       {...props}
@@ -211,7 +197,7 @@ const defaultComponents = memoizeMarkdownComponents({
   pre: ({ className, ...props }) => (
     <pre
       className={clsx(
-        "overflow-x-auto rounded-t-none rounded-b-lg border border-gray-200 dark:border-gray-700 border-t-0 bg-gray-50 dark:bg-gray-900 p-3 text-xs leading-relaxed",
+        "overflow-x-auto rounded-t-none rounded-b-[2px] border border-rule border-t-0 bg-bg-raised p-3 text-xs leading-relaxed",
         className,
       )}
       {...props}
@@ -223,7 +209,7 @@ const defaultComponents = memoizeMarkdownComponents({
       <code
         className={clsx(
           !isCodeBlock &&
-            "rounded-md border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 font-mono text-[0.85em] text-primary",
+            "rounded-[2px] border border-rule bg-bg-raised px-1.5 py-0.5 font-mono text-[0.85em] text-accent",
           className,
         )}
         {...props}

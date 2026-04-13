@@ -1,8 +1,6 @@
 "use client";
 
 import {
-  Card,
-  CardHeader,
   Input,
   Dropdown,
   DropdownTrigger,
@@ -15,7 +13,7 @@ import {
   ModalHeader,
   ModalBody,
 } from "@/components/ui";
-import { Filter, SortAsc, SortDesc, Search, Users } from "lucide-react";
+import { Filter, SortAsc, SortDesc, Search } from "lucide-react";
 import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -24,13 +22,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeveloperList, useOverviewStatistics } from "@/hooks/api";
 import type { ActorRankRecord } from "@/lib/api/types";
 import RepoLinkWidget from "~/repository/widgets/repo-link";
-import MetricCard, { resolveOverviewMetrics } from "$/controls/metric-card";
 import TableHeader from "$/controls/table-header";
+import { Panel } from "$/blueprint";
+import { SectionHeader, SmallCapsLabel, BigNumber } from "$/primitives";
 import {
   staggerContainer,
   staggerItemScale,
   fadeInUp,
-  modalTransition,
 } from "@/utils/animations";
 import {
   developerSearchSchema,
@@ -150,59 +148,82 @@ export default function DevelopersPageClient() {
   }, []);
 
   return (
-    <div className="w-full max-w-content mx-auto px-6 py-8">
-      {/* Header and Overview */}
+    <div className="w-full max-w-content mx-auto px-6 py-10">
       <motion.div
         variants={fadeInUp}
         initial="hidden"
         animate="visible"
-        className="mb-8"
+        className="mb-10"
       >
-        <div className="flex items-center gap-3 mb-3">
-          <div className="p-2 rounded-xl bg-primary/10">
-            <Users size={20} className="text-primary" />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white whitespace-nowrap">
-            All Developers
-          </h1>
-        </div>
-        <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
-          Top contributors and developers across Web3 ecosystems
-        </p>
+        <SectionHeader
+          kicker="index · developers"
+          title="All developers"
+          deck="Top contributors across Web3 ecosystems, ranked by weighted commit score."
+          level={1}
+        />
       </motion.div>
 
-      {/* Summary Cards */}
       <motion.div
         variants={staggerContainer}
         initial="hidden"
         animate="visible"
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12"
       >
-        {resolveOverviewMetrics({
-          totalCoreDevelopers: coreDevelopers,
-          totalDevelopers: activeDevelopers,
-          totalEcosystems,
-          totalRepositories,
-        }).map((metric) => (
-          <motion.div
-            key={metric.label.replaceAll(" ", "")}
-            variants={staggerItemScale}
-            whileHover={{ y: -4, scale: 1.02 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          >
-            <MetricCard {...metric} />
+        {[
+          {
+            code: "01",
+            label: "core devs",
+            value: coreDevelopers,
+            footnote: "src: opendigger · 12m PR / push",
+            ground: "dotted" as const,
+          },
+          {
+            code: "02",
+            label: "eco contributors",
+            value: activeDevelopers,
+            footnote: "all-time, tracked ecosystems",
+            ground: "plain" as const,
+          },
+          {
+            code: "03",
+            label: "ecosystems",
+            value: totalEcosystems,
+            footnote: "live · indexed",
+            ground: "hatched" as const,
+          },
+          {
+            code: "04",
+            label: "repositories",
+            value: totalRepositories,
+            footnote: "grouped by ecosystem",
+            ground: "plain" as const,
+          },
+        ].map((m) => (
+          <motion.div key={m.code} variants={staggerItemScale}>
+            <Panel
+              ground={m.ground}
+              label={{ text: m.label, position: "tl" }}
+              code={m.code}
+              className="p-5 h-full"
+            >
+              <BigNumber
+                label=""
+                value={m.value}
+                format="compact"
+                footnote={m.footnote}
+              />
+            </Panel>
           </motion.div>
         ))}
       </motion.div>
 
-      {/* Filters and Search */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
         <div className="w-full sm:w-72">
           <Input
             placeholder="Search developers..."
             value={searchValue}
             onChange={handleSearchChange}
-            startContent={<Search size={18} className="text-gray-400" />}
+            startContent={<Search size={18} className="text-fg-subtle" />}
             className="w-full"
           />
         </div>
@@ -247,24 +268,19 @@ export default function DevelopersPageClient() {
         </div>
       </div>
 
-      {/* Developers Table */}
-      <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">
-        <CardHeader className="px-6 py-5">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Users size={18} className="text-primary" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-              Developer Analytics
-            </h3>
-          </div>
-        </CardHeader>
-
+      <Panel
+        label={{ text: "ranking · commits", position: "tl" }}
+        code="05"
+        className="overflow-hidden"
+      >
+        <div className="px-5 pt-5 pb-3 border-b border-rule">
+          <SmallCapsLabel>developer analytics</SmallCapsLabel>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-t border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider w-12">
+              <tr className="border-t border-rule bg-bg-sunken">
+                <th className="px-6 py-3 text-left font-mono text-[10px] font-medium text-fg-muted uppercase tracking-[0.18em] w-12">
                   #
                 </th>
                 <TableHeader>Developer</TableHeader>
@@ -276,35 +292,33 @@ export default function DevelopersPageClient() {
                 </TableHeader>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border dark:divide-border-dark">
+            <tbody className="divide-y divide-rule">
               <AnimatePresence mode="wait">
                 {paginatedItems.map((developer, index) => {
                   const absoluteIndex = (page - 1) * rowsPerPage + index + 1;
                   return (
                     <motion.tr
                       key={developer.actor_id}
-                      className="hover:bg-surface dark:hover:bg-surface-dark transition-colors duration-200 group"
+                      className="hover:bg-bg-sunken transition-colors duration-200 group"
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.03, duration: 0.3 }}
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-medium transition-all duration-200 group-hover:scale-110 bg-gray-50 dark:bg-surface-dark text-gray-500 dark:text-gray-500">
-                            {absoluteIndex}
-                          </span>
-                        </div>
+                        <span className="font-mono text-[11px] text-fg-muted tabular-nums">
+                          {String(absoluteIndex).padStart(3, "0")}
+                        </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Link
                           href={`/developers/${developer.actor_id}`}
-                          className="font-medium text-gray-900 dark:text-white hover:text-primary transition-colors duration-200"
+                          className="font-medium text-fg hover:text-accent transition-colors duration-200"
                         >
                           @{developer.actor_login}
                         </Link>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
+                        <span className="text-fg font-mono text-sm tabular-nums">
                           {Number(
                             developer.total_commit_count,
                           ).toLocaleString()}
@@ -315,14 +329,14 @@ export default function DevelopersPageClient() {
                           {developer.top_repos.slice(0, 3).map((repo) => (
                             <div
                               key={repo.repo_id}
-                              className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-800"
+                              className="inline-flex items-center px-2 py-1 rounded-[2px] border border-rule text-xs font-medium bg-bg-raised"
                             >
                               <RepoLinkWidget
                                 repo={repo.repo_name}
                                 repoId={repo.repo_id}
-                                className="text-gray-700 dark:text-gray-300 hover:text-primary"
+                                className="text-fg hover:text-accent"
                               />
-                              <span className="ml-1 text-gray-500 dark:text-gray-500">
+                              <span className="ml-1 font-mono text-fg-muted tabular-nums">
                                 {repo.commit_count}
                               </span>
                             </div>
@@ -330,7 +344,7 @@ export default function DevelopersPageClient() {
                           {developer.top_repos.length > 3 && (
                             <button
                               onClick={() => handleShowAllRepos(developer)}
-                              className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium text-primary hover:bg-primary/10 transition-colors cursor-pointer"
+                              className="inline-flex items-center px-2 py-1 rounded-[2px] text-xs font-medium text-accent hover:bg-accent-subtle transition-colors cursor-pointer"
                             >
                               +{developer.top_repos.length - 3} more
                             </button>
@@ -346,27 +360,21 @@ export default function DevelopersPageClient() {
         </div>
 
         {pages > 1 && (
-          <div className="px-6 py-4 border-t border-border dark:border-border-dark flex justify-center">
+          <div className="px-6 py-4 border-t border-rule flex justify-center">
             <Pagination page={page} total={pages} onChange={handlePageChange} />
           </div>
         )}
-      </Card>
+      </Panel>
 
       {/* Modal for showing all repositories */}
       <AnimatePresence>
         {isModalOpen && (
           <Modal isOpen={isModalOpen} onClose={handleModalClose} size="md">
-            <ModalContent
-              as={motion.div}
-              variants={modalTransition}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-            >
+            <ModalContent>
               <ModalHeader className="flex flex-col gap-1">
-                <h3 className="text-lg font-semibold">All Repositories</h3>
+                <SmallCapsLabel tone="subtle">all repositories</SmallCapsLabel>
                 {selectedDeveloper && (
-                  <p className="text-sm text-gray-500">
+                  <p className="font-mono text-sm text-fg-muted">
                     @{selectedDeveloper.actor_login}
                   </p>
                 )}
@@ -376,12 +384,12 @@ export default function DevelopersPageClient() {
                   {selectedDeveloper?.top_repos.map((repo) => (
                     <div
                       key={repo.repo_id}
-                      className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      className="p-3 rounded-[2px] border border-rule bg-bg-raised hover:bg-bg-sunken transition-colors"
                     >
                       <RepoLinkWidget
                         repo={repo.repo_name}
                         repoId={repo.repo_id}
-                        className="text-sm font-medium text-gray-900 dark:text-white hover:text-primary"
+                        className="text-sm font-medium text-fg hover:text-accent"
                       />
                     </div>
                   ))}

@@ -13,8 +13,8 @@ const sizeMap: Record<string, string> = {
 };
 
 const colorMap: Record<string, string> = {
-  default: "text-gray-400",
-  primary: "text-primary",
+  default: "text-fg-subtle",
+  primary: "text-accent",
   white: "text-white",
 };
 

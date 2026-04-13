@@ -18,10 +18,10 @@ export default function X402PageClient() {
       <header className="mb-8">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white tracking-tight">
+            <h1 className="text-2xl font-semibold text-fg tracking-tight">
               x402 Donate
             </h1>
-            <p className="text-base text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-base text-fg-muted mt-1">
               Support open source projects with crypto donations
             </p>
           </div>

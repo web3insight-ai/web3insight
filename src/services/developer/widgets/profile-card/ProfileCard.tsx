@@ -14,7 +14,7 @@ function ProfileCard({ className, developer }: ProfileCardWidgetProps) {
   return (
     <div
       className={clsx(
-        "rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 p-4",
+        "rounded-[2px] border border-rule bg-bg-raised p-4",
         className,
       )}
     >
@@ -28,13 +28,13 @@ function ProfileCard({ className, developer }: ProfileCardWidgetProps) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
-              <h4 className="text-base font-medium text-gray-900 dark:text-white truncate">
+              <h4 className="text-base font-medium text-fg truncate">
                 {nickname}
               </h4>
               {githubLoading ? (
-                <div className="w-8 h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="w-8 h-5 loading-skeleton rounded-[2px]" />
               ) : githubData?.stats?.rank ? (
-                <span className="text-xs font-medium px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+                <span className="text-xs font-medium px-2 py-0.5 rounded bg-bg-raised text-fg-muted border border-rule">
                   {githubData.stats.rank}
                 </span>
               ) : null}
@@ -43,7 +43,7 @@ function ProfileCard({ className, developer }: ProfileCardWidgetProps) {
               href={developer.social.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              className="flex items-center gap-1 text-xs text-fg-subtle hover:text-fg transition-colors"
             >
               <Github size={12} />
               <span>@{developer.username}</span>
@@ -51,28 +51,28 @@ function ProfileCard({ className, developer }: ProfileCardWidgetProps) {
           </div>
 
           {/* Stats Row */}
-          <div className="flex items-center gap-4 text-xs text-gray-400">
+          <div className="flex items-center gap-4 text-xs text-fg-subtle">
             <span>
-              <strong className="text-gray-900 dark:text-white">
+              <strong className="text-fg">
                 {developer.statistics.repository}
               </strong>{" "}
               Repositories
             </span>
             {githubLoading ? (
               <div className="flex items-center gap-4">
-                <div className="w-14 h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-                <div className="w-16 h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="w-14 h-3 loading-skeleton rounded-[2px]" />
+                <div className="w-16 h-3 loading-skeleton rounded-[2px]" />
               </div>
             ) : githubData?.stats ? (
               <>
                 <span>
-                  <strong className="text-gray-900 dark:text-white">
+                  <strong className="text-fg">
                     {githubData.stats.totalStars}
                   </strong>{" "}
                   Stars
                 </span>
                 <span>
-                  <strong className="text-gray-900 dark:text-white">
+                  <strong className="text-fg">
                     {githubData.stats.totalCommits}
                   </strong>{" "}
                   Commits (2025)
@@ -80,7 +80,7 @@ function ProfileCard({ className, developer }: ProfileCardWidgetProps) {
               </>
             ) : null}
             <span>
-              <strong className="text-gray-900 dark:text-white">
+              <strong className="text-fg">
                 {developer.statistics.codeReview}
               </strong>{" "}
               Reviews

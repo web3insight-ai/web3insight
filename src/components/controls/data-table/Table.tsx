@@ -18,18 +18,16 @@ function Table({
 
   return (
     <div className={clsx("relative flex flex-col", className)}>
-      <div className="flex-shrink-0 px-8 py-3 bg-gray-50 dark:bg-gray-750 border-b border-gray-100 dark:border-gray-800 grid grid-cols-12 gap-2">
+      <div className="flex-shrink-0 px-8 py-3 bg-bg-raised border-b border-rule grid grid-cols-12 gap-2">
         {showSerialNumber && (
-          <div className="col-span-1 text-xs font-medium text-gray-500 dark:text-gray-400">
-            #
-          </div>
+          <div className="col-span-1 text-xs font-medium text-fg-muted">#</div>
         )}
         {columns.map((col) => (
           <div
             key={String(col.key ?? col.name)}
             className={resolveColumnClassName(
               col,
-              "text-xs font-medium text-gray-500 dark:text-gray-400",
+              "text-xs font-medium text-fg-muted",
             )}
           >
             {col.title}
@@ -42,12 +40,12 @@ function Table({
             {dataSource.map((item, index) => (
               <div
                 key={index}
-                className="px-8 py-4 grid grid-cols-12 gap-2 items-center border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors duration-200"
+                className="px-8 py-4 grid grid-cols-12 gap-2 items-center border-b border-rule last:border-0 hover:bg-bg-sunken transition-colors duration-200"
               >
                 {showSerialNumber && (
                   <div className="col-span-1">
                     <span
-                      className={`inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs font-medium`}
+                      className={`inline-flex items-center justify-center w-6 h-6 rounded-full bg-bg-raised text-fg-muted text-xs font-medium`}
                     >
                       {index + 1}
                     </span>
@@ -68,7 +66,7 @@ function Table({
                       key={`${colKey}-${index}`}
                       className={resolveColumnClassName(
                         col,
-                        "font-medium text-gray-700 dark:text-gray-300",
+                        "font-medium text-fg",
                       )}
                     >
                       {col.render
@@ -87,7 +85,7 @@ function Table({
             ))}
           </>
         ) : (
-          <div className="flex items-center justify-center h-96 text-gray-500">
+          <div className="flex items-center justify-center h-96 text-fg-muted">
             No data
           </div>
         )}

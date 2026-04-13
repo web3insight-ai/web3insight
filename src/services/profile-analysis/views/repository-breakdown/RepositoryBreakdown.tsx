@@ -60,11 +60,11 @@ export function RepositoryBreakdown({
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Top Repositories */}
-      <Card className="bg-white dark:bg-surface-dark shadow-subtle">
+      <Card className="bg-bg-raised border border-rule rounded-[2px]">
         <CardBody className="p-6">
-          <div className="flex items-center gap-3 mb-6 pb-2 border-b-2 border-border dark:border-border-dark">
+          <div className="flex items-center gap-3 mb-6 pb-2 border-b-2 border-rule">
             <GitBranch className="text-success" size={16} />
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-sm font-semibold text-fg">
               TOP REPOSITORY CONTRIBUTIONS
             </h3>
             <div className="ml-auto">
@@ -86,7 +86,7 @@ export function RepositoryBreakdown({
               return (
                 <div
                   key={`${repo.ecosystem}-${repo.repo_name}`}
-                  className="bg-gray-50 dark:bg-surface-dark border border-border dark:border-border-dark rounded-lg p-4"
+                  className="bg-bg-raised border border-rule rounded-[2px] p-4"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1 min-w-0">
@@ -120,26 +120,26 @@ export function RepositoryBreakdown({
                         )}
                       </div>
 
-                      <h4 className="font-semibold text-sm text-gray-900 dark:text-white mb-1 truncate">
+                      <h4 className="font-semibold text-sm text-fg mb-1 truncate">
                         {repoDisplayName}
                       </h4>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                      <p className="text-xs text-fg-muted truncate">
                         {repo.repo_name}
                       </p>
                     </div>
 
                     <div className="ml-4 text-right">
-                      <div className="text-lg font-bold text-primary mb-1">
+                      <div className="text-lg font-mono font-bold text-accent mb-1 tabular-nums">
                         {formatNumber(repo.score)}
                       </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                      <div className="text-xs text-fg-muted">
                         {scorePercentage.toFixed(1)}%
                       </div>
                     </div>
                   </div>
 
                   {/* Score Progress Bar */}
-                  <div className="relative h-3 bg-gray-100 dark:bg-surface-dark rounded-full mb-3 overflow-hidden">
+                  <div className="relative h-3 bg-bg-sunken rounded-[2px] mb-3 overflow-hidden">
                     <div
                       className="h-full transition-all duration-1000 ease-out relative"
                       style={{
@@ -155,12 +155,12 @@ export function RepositoryBreakdown({
                       }}
                     >
                       {/* Shine effect */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+                      <div className="absolute inset-0 animate-editorial-pulse" />
                     </div>
                   </div>
 
                   {/* Activity Period */}
-                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center justify-between text-xs text-fg-muted">
                     <div className="flex items-center gap-1">
                       <Calendar size={10} />
                       <span>
@@ -184,11 +184,11 @@ export function RepositoryBreakdown({
       </Card>
 
       {/* Repository Distribution by Ecosystem */}
-      <Card className="bg-white dark:bg-surface-dark shadow-subtle">
+      <Card className="bg-bg-raised border border-rule rounded-[2px]">
         <CardBody className="p-6">
-          <div className="flex items-center gap-3 mb-6 pb-2 border-b-2 border-border dark:border-border-dark">
-            <Package className="text-primary" size={16} />
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+          <div className="flex items-center gap-3 mb-6 pb-2 border-b-2 border-rule">
+            <Package className="text-accent" size={16} />
+            <h3 className="text-sm font-semibold text-fg">
               ECOSYSTEM REPOSITORY DISTRIBUTION
             </h3>
           </div>
@@ -203,7 +203,7 @@ export function RepositoryBreakdown({
                 return (
                   <div
                     key={`repo-breakdown-${ecosystem}-${index}`}
-                    className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-surface-dark dark:to-surface-dark border border-border dark:border-border-dark rounded-lg p-4"
+                    className="bg-bg-raised border border-rule rounded-[2px] p-4"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <Chip
@@ -214,47 +214,43 @@ export function RepositoryBreakdown({
                         <span className="text-xs font-bold">{data.count}</span>
                       </Chip>
                       <div className="text-right">
-                        <div className="text-sm font-bold text-primary">
+                        <div className="text-sm font-mono font-bold text-accent tabular-nums">
                           {formatNumber(data.totalScore)}
                         </div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">
-                          Total Score
-                        </div>
+                        <div className="text-xs text-fg-muted">Total Score</div>
                       </div>
                     </div>
 
-                    <h4 className="font-medium text-sm text-gray-900 dark:text-white mb-3 line-clamp-2 min-h-[2.5rem]">
+                    <h4 className="font-medium text-sm text-fg mb-3 line-clamp-2 min-h-[2.5rem]">
                       {ecosystem}
                     </h4>
 
                     <div className="space-y-2">
                       <div className="flex justify-between items-center text-xs">
-                        <span className="text-gray-600 dark:text-gray-400">
-                          Avg Score:
-                        </span>
-                        <span className="font-semibold text-gray-900 dark:text-white">
+                        <span className="text-fg-muted">Avg Score:</span>
+                        <span className="font-semibold text-fg">
                           {Math.round(data.avgScore)}
                         </span>
                       </div>
 
                       <div className="space-y-1">
-                        <div className="text-xs text-gray-600 dark:text-gray-400">
+                        <div className="text-xs text-fg-muted">
                           Top Repository:
                         </div>
-                        <div className="bg-white dark:bg-surface-dark border border-border dark:border-border-dark rounded p-2">
+                        <div className="bg-bg-raised border border-rule rounded p-2">
                           <div className="flex items-center gap-1 mb-1">
                             <Star size={8} className="text-warning" />
-                            <span className="text-xs font-medium text-gray-900 dark:text-white truncate">
+                            <span className="text-xs font-medium text-fg truncate">
                               {data.topRepo.repo_name.split("/").pop()}
                             </span>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                            <span className="text-xs text-fg-muted">
                               Score: {formatNumber(data.topRepo.score)}
                             </span>
                             <div className="flex items-center gap-1">
                               <TrendingUp size={8} className="text-success" />
-                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                              <span className="text-xs text-fg-muted">
                                 {new Date(data.topRepo.last_activity_at) >
                                 new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)
                                   ? "Active"
@@ -273,11 +269,11 @@ export function RepositoryBreakdown({
       </Card>
 
       {/* Repository Activity Insights */}
-      <Card className="bg-gradient-to-r from-success/10 to-primary/10 border border-success/20">
+      <Card className="bg-accent-subtle border border-success/20">
         <CardBody className="p-6">
           <div className="flex items-center gap-3 mb-4">
             <Code2 size={20} className="text-success" />
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-sm font-semibold text-fg">
               REPOSITORY INSIGHTS
             </h3>
           </div>
@@ -287,18 +283,14 @@ export function RepositoryBreakdown({
               <div className="text-2xl font-bold text-success mb-1">
                 {topRepos.length}
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">
-                Total Repositories
-              </div>
+              <div className="text-xs text-fg-muted">Total Repositories</div>
             </div>
 
             <div className="text-center">
-              <div className="text-2xl font-bold text-primary mb-1">
+              <div className="text-2xl font-mono font-bold text-accent mb-1 tabular-nums">
                 {Object.keys(reposByEcosystem).length}
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">
-                Ecosystems
-              </div>
+              <div className="text-xs text-fg-muted">Ecosystems</div>
             </div>
 
             <div className="text-center">
@@ -311,9 +303,7 @@ export function RepositoryBreakdown({
                   ).length
                 }
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">
-                Active Repos
-              </div>
+              <div className="text-xs text-fg-muted">Active Repos</div>
             </div>
 
             <div className="text-center">
@@ -322,9 +312,7 @@ export function RepositoryBreakdown({
                   topRepos.reduce((sum, repo) => sum + repo.score, 0),
                 )}
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">
-                Combined Score
-              </div>
+              <div className="text-xs text-fg-muted">Combined Score</div>
             </div>
           </div>
         </CardBody>

@@ -127,9 +127,9 @@ export function DonateButton({
     switch (status) {
     case "preparing":
       return (
-        <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-          <Loader2 size={16} className="animate-spin text-gray-500" />
-          <span className="text-sm text-gray-600 dark:text-gray-400">
+        <div className="flex items-center gap-3 p-3 bg-bg-raised border border-rule rounded-[2px]">
+          <Loader2 size={16} className="animate-spin text-fg-muted" />
+          <span className="text-sm text-fg-muted">
               Preparing authorization...
           </span>
         </div>
@@ -137,13 +137,13 @@ export function DonateButton({
     case "signing":
       return (
         <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-3 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+          <div className="flex items-center gap-3 p-3 bg-warn/10 border border-warn/30 rounded-[2px]">
             <Loader2 size={16} className="animate-spin text-amber-500" />
             <span className="text-sm text-amber-700 dark:text-amber-300">
                 Sign the authorization in your wallet...
             </span>
           </div>
-          <div className="flex items-center gap-2 px-3 text-xs text-gray-500 dark:text-gray-400">
+          <div className="flex items-center gap-2 px-3 text-xs text-fg-muted">
             <Zap size={12} className="text-green-500" />
             <span>No gas fee required - you only need USDC</span>
           </div>
@@ -151,7 +151,7 @@ export function DonateButton({
       );
     case "submitting":
       return (
-        <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+        <div className="flex items-center gap-3 p-3 bg-accent-subtle border border-accent/30 rounded-[2px]">
           <Loader2 size={16} className="animate-spin text-blue-500" />
           <span className="text-sm text-blue-700 dark:text-blue-300">
               Processing payment via x402 facilitator...
@@ -160,7 +160,7 @@ export function DonateButton({
       );
     case "success":
       return (
-        <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+        <div className="flex items-center gap-3 p-3 bg-accent-subtle border border-accent/30 rounded-[2px]">
           <CheckCircle size={16} className="text-green-500" />
           <span className="text-sm text-green-700 dark:text-green-300">
               Donation successful!
@@ -169,7 +169,7 @@ export function DonateButton({
       );
     case "error":
       return (
-        <div className="flex items-start gap-3 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+        <div className="flex items-start gap-3 p-3 bg-danger/10 border border-danger/30 rounded-[2px]">
           <AlertCircle
             size={16}
             className="text-red-500 flex-shrink-0 mt-0.5"
@@ -199,7 +199,7 @@ export function DonateButton({
         onPress={handleOpen}
         isDisabled={disabled || !ready}
         startContent={<Heart size={14} />}
-        className="font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+        className="font-medium bg-transparent text-accent hover:bg-accent-subtle border border-accent/60 hover:border-accent rounded-[2px]"
       >
         Donate
       </Button>
@@ -231,7 +231,7 @@ export function DonateButton({
                 Gasless
               </Chip>
             </div>
-            <span className="text-xs font-normal text-gray-500 dark:text-gray-400">
+            <span className="text-xs font-normal text-fg-muted">
               Send USDC on{" "}
               {SUPPORTED_NETWORKS.find((n) => n.value === selectedNetwork)
                 ?.label || "Base"}{" "}
@@ -245,9 +245,9 @@ export function DonateButton({
                 {/* Wallet & Network */}
                 <div className="flex items-center gap-2">
                   {isConnected && activeWallet && (
-                    <div className="flex-1 flex items-center gap-2 p-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <Wallet size={14} className="text-gray-400" />
-                      <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
+                    <div className="flex-1 flex items-center gap-2 p-2.5 bg-bg-raised border border-rule rounded-[2px]">
+                      <Wallet size={14} className="text-fg-muted" />
+                      <span className="text-xs text-fg-muted font-mono">
                         {activeWallet.address?.slice(0, 6)}...
                         {activeWallet.address?.slice(-4)}
                       </span>
@@ -262,7 +262,7 @@ export function DonateButton({
                     }}
                     className="w-36"
                     classNames={{
-                      trigger: "bg-gray-50 dark:bg-gray-800 border-0 h-10",
+                      trigger: "bg-bg-raised border-0 h-10",
                       value: "text-xs",
                     }}
                     aria-label="Select network"
@@ -277,7 +277,7 @@ export function DonateButton({
 
                 {/* Preset Amounts */}
                 <div className="space-y-2">
-                  <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                  <span className="text-xs font-medium text-fg-muted">
                     Amount (USDC)
                   </span>
                   <div className="flex gap-2">
@@ -286,10 +286,10 @@ export function DonateButton({
                         key={amount}
                         type="button"
                         onClick={() => handleAmountSelect(amount)}
-                        className={`flex-1 py-2 px-3 text-sm font-medium rounded-lg border transition-colors ${
+                        className={`flex-1 py-2 px-3 text-sm font-medium rounded-[2px] border transition-colors ${
                           selectedAmount === amount
-                            ? "border-primary bg-primary/10 text-primary"
-                            : "border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600"
+                            ? "border-accent bg-accent-subtle text-accent"
+                            : "border-rule text-fg hover:border-rule-strong"
                         }`}
                       >
                         ${amount}
@@ -306,26 +306,26 @@ export function DonateButton({
                   value={customAmount}
                   onChange={(e) => handleCustomAmountChange(e.target.value)}
                   startContent={
-                    <span className="text-gray-400 text-xs">$</span>
+                    <span className="text-fg-muted text-xs">$</span>
                   }
                   endContent={
-                    <span className="text-gray-400 text-xs">USDC</span>
+                    <span className="text-fg-muted text-xs">USDC</span>
                   }
                   classNames={{
-                    inputWrapper: "bg-gray-50 dark:bg-gray-800 border-0",
+                    inputWrapper: "bg-bg-raised border-0",
                   }}
                 />
 
                 {/* Recipient */}
-                <div className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <span className="text-xs text-gray-400">To</span>
-                  <p className="text-xs font-mono text-gray-600 dark:text-gray-400 break-all mt-0.5">
+                <div className="p-2.5 bg-bg-raised border border-rule rounded-[2px]">
+                  <span className="text-xs text-fg-muted">To</span>
+                  <p className="text-xs font-mono text-fg-muted break-all mt-0.5">
                     {payTo}
                   </p>
                 </div>
 
                 {/* Gasless info */}
-                <div className="flex flex-col gap-1.5 p-2.5 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div className="flex flex-col gap-1.5 p-2.5 bg-accent-subtle border border-accent/30 rounded-[2px]">
                   <div className="flex items-center gap-2">
                     <Zap size={14} className="text-green-500" />
                     <span className="text-xs text-green-700 dark:text-green-300">

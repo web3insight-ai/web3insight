@@ -70,9 +70,9 @@ function PopoverContent({
       >
         <BasePopover.Popup
           className={clsx(
-            "rounded-xl bg-white dark:bg-surface-dark",
+            "rounded-[2px] bg-bg-raised",
             "shadow-[0_8px_30px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]",
-            "border border-gray-200 dark:border-gray-700",
+            "border border-rule",
             "outline-none",
             className,
           )}

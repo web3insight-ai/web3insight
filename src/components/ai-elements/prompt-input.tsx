@@ -183,7 +183,7 @@ export function PromptInputSubmit({
     <InputGroup className="w-auto border-0 bg-transparent p-0 shadow-none">
       <InputGroupButton
         aria-label={isStreaming ? "Stop generating" : "Send message"}
-        className={cn("size-8 rounded-full", className)}
+        className={cn("size-8 rounded-[2px]", className)}
         disabled={computedDisabled}
         onClick={() => {
           if (isStreaming) {

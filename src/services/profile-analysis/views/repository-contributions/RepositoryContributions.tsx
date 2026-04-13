@@ -35,11 +35,11 @@ export function RepositoryContributions({
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Top Repository Contributions */}
-      <Card className="bg-white dark:bg-surface-dark shadow-subtle">
+      <Card className="bg-bg-raised border border-rule rounded-[2px]">
         <CardBody className="p-6">
-          <div className="flex items-center gap-3 mb-6 pb-2 border-b-2 border-border dark:border-border-dark">
+          <div className="flex items-center gap-3 mb-6 pb-2 border-b-2 border-rule">
             <GitBranch className="text-success" size={16} />
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-sm font-semibold text-fg">
               TOP REPOSITORY CONTRIBUTIONS
             </h3>
             <div className="ml-auto">
@@ -59,7 +59,7 @@ export function RepositoryContributions({
               return (
                 <div
                   key={`${repo.ecosystem}-${repo.repo_name}`}
-                  className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-surface-dark dark:to-surface-dark border border-border dark:border-border-dark rounded-lg p-4"
+                  className="bg-bg-raised border border-rule rounded-[2px] p-4"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1 min-w-0">
@@ -96,10 +96,10 @@ export function RepositoryContributions({
                         )}
                       </div>
 
-                      <h4 className="font-semibold text-sm text-gray-900 dark:text-white mb-1 truncate">
+                      <h4 className="font-semibold text-sm text-fg mb-1 truncate">
                         {repo.repo_name.split("/").pop()?.toUpperCase()}
                       </h4>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate mb-1">
+                      <p className="text-xs text-fg-muted truncate mb-1">
                         {repo.repo_name}
                       </p>
                       <Chip color="primary" variant="bordered" size="sm">
@@ -108,17 +108,17 @@ export function RepositoryContributions({
                     </div>
 
                     <div className="ml-4 text-right">
-                      <div className="text-xl font-bold text-primary mb-1">
+                      <div className="text-xl font-mono font-bold text-accent mb-1 tabular-nums">
                         {formatNumber(repo.score)}
                       </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                      <div className="text-xs text-fg-muted">
                         {scorePercentage.toFixed(1)}% of max
                       </div>
                     </div>
                   </div>
 
                   {/* Score Progress Bar */}
-                  <div className="relative h-4 bg-gray-200 dark:bg-gray-600 rounded-full mb-3 overflow-hidden">
+                  <div className="relative h-4 bg-rule rounded-full mb-3 overflow-hidden">
                     <div
                       className="h-full transition-all duration-1000 ease-out flex items-center justify-center relative"
                       style={{
@@ -156,7 +156,7 @@ export function RepositoryContributions({
                   </div>
 
                   {/* Activity Period */}
-                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center justify-between text-xs text-fg-muted">
                     <div className="flex items-center gap-1">
                       <Calendar size={10} />
                       <span>
@@ -180,11 +180,11 @@ export function RepositoryContributions({
       </Card>
 
       {/* Ecosystem Distribution */}
-      <Card className="bg-white dark:bg-surface-dark shadow-subtle">
+      <Card className="bg-bg-raised border border-rule rounded-[2px]">
         <CardBody className="p-6">
-          <div className="flex items-center gap-3 mb-6 pb-2 border-b-2 border-border dark:border-border-dark">
-            <TrendingUp className="text-primary" size={16} />
-            <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
+          <div className="flex items-center gap-3 mb-6 pb-2 border-b-2 border-rule">
+            <TrendingUp className="text-accent" size={16} />
+            <h4 className="text-sm font-semibold text-fg">
               ECOSYSTEM CONTRIBUTION BREAKDOWN
             </h4>
           </div>
@@ -193,12 +193,12 @@ export function RepositoryContributions({
             {detailed.map((ecosystem, index) => (
               <div
                 key={`repo-contributions-${ecosystem.ecosystem}-${index}`}
-                className="bg-gray-50 dark:bg-surface-dark border-2 border-border-dark rounded-lg p-4"
+                className="bg-bg-raised border border-rule rounded-[2px] p-4"
               >
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     {index < 3 && <Award size={12} className="text-warning" />}
-                    <span className="font-medium text-xs text-gray-900 dark:text-white line-clamp-1">
+                    <span className="font-medium text-xs text-fg line-clamp-1">
                       {ecosystem.ecosystem}
                     </span>
                   </div>
@@ -223,26 +223,22 @@ export function RepositoryContributions({
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-600 dark:text-gray-400">
-                      Repositories:
-                    </span>
-                    <span className="text-xs font-semibold text-gray-900 dark:text-white">
+                    <span className="text-xs text-fg-muted">Repositories:</span>
+                    <span className="text-xs font-semibold text-fg">
                       {ecosystem.repos.length}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-600 dark:text-gray-400">
+                    <span className="text-xs text-fg-muted">
                       Top Repository:
                     </span>
-                    <span className="text-xs font-semibold text-gray-900 dark:text-white">
+                    <span className="text-xs font-semibold text-fg">
                       {Math.max(...ecosystem.repos.map((r) => r.score))}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-600 dark:text-gray-400">
-                      Avg Score:
-                    </span>
-                    <span className="text-xs font-semibold text-gray-900 dark:text-white">
+                    <span className="text-xs text-fg-muted">Avg Score:</span>
+                    <span className="text-xs font-semibold text-fg">
                       {Math.round(ecosystem.score / ecosystem.repos.length)}
                     </span>
                   </div>
@@ -250,12 +246,12 @@ export function RepositoryContributions({
 
                 {/* Show top repository for this ecosystem */}
                 {ecosystem.repos.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-border dark:border-border-dark">
-                    <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">
+                  <div className="mt-3 pt-3 border-t border-rule">
+                    <div className="text-xs text-fg-muted mb-1">
                       Top Contribution:
                     </div>
-                    <div className="bg-white dark:bg-surface-dark border border-border dark:border-border-dark rounded p-2">
-                      <div className="text-xs font-medium text-gray-900 dark:text-white truncate">
+                    <div className="bg-bg-raised border border-rule rounded p-2">
+                      <div className="text-xs font-medium text-fg truncate">
                         {ecosystem.repos
                           .sort((a, b) => b.score - a.score)[0]
                           .name.split("/")
@@ -268,7 +264,7 @@ export function RepositoryContributions({
                               .score,
                           )}
                         </span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                        <span className="text-xs text-fg-muted">
                           {new Date(
                             ecosystem.repos.sort((a, b) => b.score - a.score)[0]
                               .lastActivityAt,
@@ -287,11 +283,11 @@ export function RepositoryContributions({
       </Card>
 
       {/* Contribution Insights */}
-      <Card className="bg-gradient-to-r from-success/10 to-primary/10 border border-success/20">
+      <Card className="bg-accent-subtle border border-success/20">
         <CardBody className="p-6">
           <div className="flex items-center gap-3 mb-4">
             <Award size={20} className="text-success" />
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-sm font-semibold text-fg">
               CONTRIBUTION INSIGHTS
             </h3>
           </div>
@@ -307,18 +303,14 @@ export function RepositoryContributions({
                   ).length
                 }
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">
-                Active Repositories
-              </div>
+              <div className="text-xs text-fg-muted">Active Repositories</div>
             </div>
 
             <div className="text-center">
-              <div className="text-2xl font-bold text-primary mb-1">
+              <div className="text-2xl font-mono font-bold text-accent mb-1 tabular-nums">
                 {new Set(topRepos.map((repo) => repo.ecosystem)).size}
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">
-                Ecosystem Diversity
-              </div>
+              <div className="text-xs text-fg-muted">Ecosystem Diversity</div>
             </div>
 
             <div className="text-center">
@@ -328,18 +320,14 @@ export function RepositoryContributions({
                     topRepos.length,
                 )}
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">
-                Average Impact
-              </div>
+              <div className="text-xs text-fg-muted">Average Impact</div>
             </div>
 
             <div className="text-center">
               <div className="text-2xl font-bold text-secondary mb-1">
                 {formatNumber(Math.max(...topRepos.map((repo) => repo.score)))}
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">
-                Peak Contribution
-              </div>
+              <div className="text-xs text-fg-muted">Peak Contribution</div>
             </div>
           </div>
         </CardBody>

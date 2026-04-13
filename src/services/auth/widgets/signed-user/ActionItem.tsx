@@ -16,30 +16,29 @@ function ActionItem({
     "flex items-center px-4 py-2 text-sm transition-colors duration-200",
     {
       "w-full text-left": renderType === "button",
-      "text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20": danger && !disabled,
-      "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50": !danger && !disabled,
-      "text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-60": disabled,
+      "text-danger hover:bg-danger/10": danger && !disabled,
+      "text-fg hover:bg-bg-sunken": !danger && !disabled,
+      "text-fg-subtle cursor-not-allowed opacity-60": disabled,
     },
   );
 
   const IconComponent = disabled ? Lock : ActionIcon;
   const actionContent = (
     <>
-      <IconComponent size={15} className={clsx("mr-2", { "text-gray-500 dark:text-gray-400": !danger && !disabled })} />
+      <IconComponent
+        size={15}
+        className={clsx("mr-2", { "text-fg-muted": !danger && !disabled })}
+      />
       {text}
     </>
   );
 
   if (disabled) {
-    return (
-      <div className={actionClassName}>
-        {actionContent}
-      </div>
-    );
+    return <div className={actionClassName}>{actionContent}</div>;
   }
 
   return renderType === "button" ? (
-    <button className={actionClassName} onClick={action as (() => void)}>
+    <button className={actionClassName} onClick={action as () => void}>
       {actionContent}
     </button>
   ) : (

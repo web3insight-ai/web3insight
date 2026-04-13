@@ -13,9 +13,8 @@ const widgetTransition = {
     scale: 1,
     y: 0,
     transition: {
-      type: "spring",
-      stiffness: 300,
-      damping: 25,
+      duration: 0.24,
+      ease: [0.22, 1, 0.36, 1],
     },
   },
   exit: {
@@ -32,9 +31,8 @@ const buttonTransition = {
     opacity: 1,
     scale: 1,
     transition: {
-      type: "spring",
-      stiffness: 400,
-      damping: 20,
+      duration: 0.24,
+      ease: [0.22, 1, 0.36, 1],
     },
   },
   exit: {
@@ -74,7 +72,7 @@ const AssistantModal: FC<AssistantModalProps> = ({ open, onOpenChange }) => {
             animate="visible"
             exit="exit"
             onClick={() => onOpenChange(true)}
-            className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-primary hover:bg-primary/90 text-white shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center group"
+            className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-[2px] bg-accent hover:brightness-105 text-accent-fg border border-rule-strong transition-colors flex items-center justify-center group"
             aria-label="Open AI Assistant"
           >
             <Sparkles
@@ -93,7 +91,7 @@ const AssistantModal: FC<AssistantModalProps> = ({ open, onOpenChange }) => {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="fixed bottom-6 right-6 z-50 w-[480px] max-h-[80vh] flex flex-col bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark rounded-xl shadow-2xl overflow-hidden"
+            className="fixed bottom-6 right-6 z-50 w-[480px] max-h-[80vh] flex flex-col bg-bg-raised border border-rule-strong rounded-[2px] overflow-hidden"
           >
             <Thread onMinimize={handleMinimize} onClose={handleClose} />
           </motion.div>

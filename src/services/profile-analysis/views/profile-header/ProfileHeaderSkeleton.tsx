@@ -9,7 +9,7 @@ export function ProfileHeaderSkeleton({
 }: ProfileHeaderSkeletonProps) {
   return (
     <Card
-      className={`bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark ${className}`}
+      className={`bg-bg-raised border border-rule rounded-[2px] ${className}`}
     >
       <CardBody className="p-4 md:p-5">
         <div className="flex items-center gap-3">

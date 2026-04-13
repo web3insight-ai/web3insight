@@ -55,9 +55,7 @@ export function RepositoryHoverCard({ name }: { name: string }) {
 
   return (
     <div className="w-[280px] p-4">
-      <p className="text-sm font-semibold text-gray-900 dark:text-white">
-        {data.repo_name}
-      </p>
+      <p className="text-sm font-semibold text-fg">{data.repo_name}</p>
 
       {data.description && (
         <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
@@ -88,7 +86,7 @@ export function RepositoryHoverCard({ name }: { name: string }) {
 
       <Link
         href={`/repository/${data.repo_name}`}
-        className="mt-3 block text-xs font-medium text-primary hover:text-primary/80"
+        className="mt-3 block text-xs font-medium text-accent hover:brightness-110"
       >
         View repository →
       </Link>

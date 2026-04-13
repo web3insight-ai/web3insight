@@ -1,29 +1,26 @@
-import { Card, CardBody, Skeleton } from "@/components/ui";
+import { Skeleton } from "@/components/ui";
 
 function MetricOverviewSkeleton() {
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-      {Array.from({ length: 4 }).map((_, index) => (
-        <div
-          key={index}
-          className="animate-slide-up"
-          style={{ animationDelay: `${index * 100}ms` }}
-        >
-          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-            <CardBody className="p-5">
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-between">
-                  <Skeleton className="flex-shrink-0 w-10 h-10 rounded-lg" />
-                </div>
-                <div className="space-y-1">
-                  <Skeleton className="h-3 w-20 rounded" />
-                  <Skeleton className="h-6 w-16 rounded" />
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-        </div>
-      ))}
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 py-2">
+      <div className="lg:col-span-6 flex flex-col gap-3">
+        <Skeleton className="h-3 w-32 rounded" />
+        <Skeleton className="h-16 w-48 rounded" />
+        <Skeleton className="h-3 w-full max-w-xs rounded mt-2" />
+      </div>
+      <div className="lg:col-span-3 flex flex-col gap-10">
+        {[0, 1].map((i) => (
+          <div key={i} className="flex flex-col gap-3">
+            <Skeleton className="h-3 w-24 rounded" />
+            <Skeleton className="h-9 w-32 rounded" />
+          </div>
+        ))}
+      </div>
+      <div className="lg:col-span-3 flex flex-col gap-3">
+        <Skeleton className="h-3 w-24 rounded" />
+        <Skeleton className="h-9 w-32 rounded" />
+        <Skeleton className="h-3 w-full max-w-xs rounded mt-2" />
+      </div>
     </div>
   );
 }

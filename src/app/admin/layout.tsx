@@ -29,18 +29,18 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
     : null;
 
   return (
-    <div className="flex flex-col h-screen bg-background dark:bg-background-dark">
+    <div className="flex flex-col h-screen bg-bg">
       <AdminHeader user={user} effectiveRole={effectiveRole} />
       <main className="flex-grow flex min-h-0">
         {/* Sidebar */}
-        <aside className="flex-shrink-0 w-64 bg-white dark:bg-surface-dark border-r border-border dark:border-border-dark hidden md:block">
+        <aside className="flex-shrink-0 w-64 bg-bg-raised border-r border-rule hidden md:block">
           <div className="h-full p-4 overflow-y-auto">
             <AdminNavMenu user={user} />
           </div>
         </aside>
 
         {/* Main Content */}
-        <div className="flex-grow flex flex-col min-h-0 overflow-auto bg-background dark:bg-background-dark">
+        <div className="flex-grow flex flex-col min-h-0 overflow-auto bg-bg">
           <div className="p-4 md:p-8">{children}</div>
         </div>
       </main>

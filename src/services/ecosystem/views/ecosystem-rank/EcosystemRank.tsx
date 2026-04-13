@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { Card } from "@/components/ui";
-import { Warehouse, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useState, useMemo } from "react";
+
 import { EcosystemType } from "~/ecosystem/typing";
 import { EcosystemTypeFilter } from "$/ecosystem-type-filter";
 import TableHeader from "$/controls/table-header";
+import { Panel } from "$/blueprint";
+import { SmallCapsLabel } from "$/primitives";
 
 import type { EcosystemRankViewWidgetProps } from "./typing";
 
@@ -56,16 +58,13 @@ function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
   }, [filteredData]);
 
   return (
-    <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">
-      <div className="px-6 pt-5 pb-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <Warehouse size={18} className="text-primary" />
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-            Top Ecosystems
-          </h3>
-        </div>
+    <Panel
+      label={{ text: "ranking · ecosystems", position: "tl" }}
+      code="06"
+      className="overflow-hidden"
+    >
+      <div className="px-5 pt-5 pb-3 border-b border-rule flex items-center justify-between gap-4">
+        <SmallCapsLabel>top ecosystems</SmallCapsLabel>
         <EcosystemTypeFilter
           selectedType={selectedType}
           onTypeChange={setSelectedType}
@@ -75,8 +74,8 @@ function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-t border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider w-12">
+            <tr className="border-t border-rule bg-bg-sunken">
+              <th className="px-6 py-3 text-left font-mono text-[10px] font-medium text-fg-muted uppercase tracking-[0.18em] w-12">
                 #
               </th>
               <TableHeader>Ecosystem</TableHeader>
@@ -106,50 +105,46 @@ function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
               </TableHeader>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border dark:divide-border-dark">
+          <tbody className="divide-y divide-rule">
             {topEcosystems.map((ecosystem, index) => {
               const globalRank =
                 ecosystemRanks.get(ecosystem.eco_name || "") || 0;
               return (
                 <tr
                   key={index}
-                  className="hover:bg-surface dark:hover:bg-surface-dark transition-colors duration-200 group animate-fade-in"
+                  className="hover:bg-bg-sunken transition-colors duration-200 group animate-fade-in"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <span
-                        className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-medium transition-all duration-200 group-hover:scale-110 bg-gray-50 dark:bg-surface-dark text-gray-500 dark:text-gray-500`}
-                      >
-                        {globalRank}
-                      </span>
-                    </div>
+                    <span className="font-mono text-[11px] text-fg-muted tabular-nums">
+                      {String(globalRank).padStart(3, "0")}
+                    </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <Link
                       href={`/ecosystems/${encodeURIComponent(ecosystem.eco_name || "unknown-ecosystem")}`}
-                      className="font-medium text-gray-900 dark:text-white hover:text-primary transition-colors duration-200"
+                      className="font-medium text-fg hover:text-accent transition-colors duration-200"
                     >
                       {ecosystem.eco_name || "Unknown Ecosystem"}
                     </Link>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
-                    <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
+                    <span className="text-fg font-mono text-sm tabular-nums">
                       {Number(ecosystem.actors_core_total).toLocaleString()}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
-                    <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
+                    <span className="text-fg font-mono text-sm tabular-nums">
                       {Number(ecosystem.actors_total).toLocaleString()}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
-                    <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
+                    <span className="text-fg font-mono text-sm tabular-nums">
                       {Number(ecosystem.actors_new_total).toLocaleString()}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
-                    <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
+                    <span className="text-fg font-mono text-sm tabular-nums">
                       {Number(ecosystem.repos_total).toLocaleString()}
                     </span>
                   </td>
@@ -159,16 +154,16 @@ function EcosystemRankView({ dataSource }: EcosystemRankViewWidgetProps) {
           </tbody>
         </table>
       </div>
-      <div className="px-6 py-4 border-t border-border dark:border-border-dark">
+      <div className="px-6 py-4 border-t border-rule">
         <Link
           href="/ecosystems"
-          className="flex items-center justify-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200"
+          className="flex items-center justify-center gap-2 text-sm font-medium text-fg-muted hover:text-accent transition-colors duration-200"
         >
           View All Ecosystems
           <ArrowRight size={16} />
         </Link>
       </div>
-    </Card>
+    </Panel>
   );
 }
 

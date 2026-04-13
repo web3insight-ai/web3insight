@@ -1,71 +1,46 @@
-import clsx from "clsx";
-import { Card, CardBody, Tooltip } from "@/components/ui";
+import { Tooltip } from "@/components/ui";
 import { Info } from "lucide-react";
 
 import type { MetricCardProps } from "./typing";
 import GrowthIndicator from "./GrowthIndicator";
+import { SmallCapsLabel } from "$/primitives";
 
-function MetricCard({
-  label,
-  value,
-  growth,
-  icon,
-  iconBgClassName,
-  tooltip,
-}: MetricCardProps) {
+function MetricCard({ label, value, growth, tooltip }: MetricCardProps) {
   return (
-    <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark hover:shadow-card transition-all duration-300 group">
-      <CardBody className="p-5">
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <div
-              className={clsx(
-                "flex-shrink-0 p-2.5 rounded-xl transition-transform duration-300 group-hover:scale-110",
-                iconBgClassName,
-              )}
-            >
-              {icon}
-            </div>
-            {growth !== undefined && (
-              <GrowthIndicator
-                value={`${growth > 0 ? "+" + growth : growth}%`}
-                positive={growth > 0}
-              />
-            )}
-          </div>
-          <div className="space-y-1">
-            <div className="flex items-center gap-1.5">
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                {label}
-              </p>
-              {tooltip && (
-                <Tooltip
-                  content={tooltip}
-                  placement="top"
-                  classNames={{
-                    base: "max-w-xs",
-                    content:
-                      "bg-white dark:bg-surface-elevated text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-border-dark shadow-lg text-xs leading-relaxed p-3 rounded-lg",
-                    arrow:
-                      "bg-white dark:bg-surface-elevated border border-gray-200 dark:border-border-dark",
-                  }}
-                  delay={300}
-                  closeDelay={0}
-                >
-                  <Info
-                    size={12}
-                    className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors cursor-help"
-                  />
-                </Tooltip>
-              )}
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums tracking-tight">
-              {value}
-            </h2>
-          </div>
-        </div>
-      </CardBody>
-    </Card>
+    <div className="flex flex-col gap-2 border-t border-rule pt-4">
+      <div className="flex items-center gap-1.5">
+        <SmallCapsLabel>{label}</SmallCapsLabel>
+        {tooltip && (
+          <Tooltip
+            content={tooltip}
+            placement="top"
+            classNames={{
+              base: "max-w-xs",
+              content:
+                "bg-bg-raised text-fg border border-rule-strong text-xs leading-relaxed p-3 rounded",
+            }}
+            delay={300}
+            closeDelay={0}
+          >
+            <Info
+              size={11}
+              className="text-fg-subtle hover:text-fg-muted transition-colors cursor-help"
+            />
+          </Tooltip>
+        )}
+      </div>
+      <div className="flex items-baseline gap-3">
+        <span className="font-display text-[1.875rem] leading-[1] font-semibold tabular-nums tracking-[-0.02em] text-fg">
+          {value}
+        </span>
+        {growth !== undefined && (
+          <GrowthIndicator
+            value={`${growth > 0 ? "+" + growth : growth}%`}
+            positive={growth > 0}
+          />
+        )}
+      </div>
+    </div>
   );
 }
 

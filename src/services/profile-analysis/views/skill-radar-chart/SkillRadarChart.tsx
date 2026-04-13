@@ -74,14 +74,12 @@ export function SkillRadarChart({
 
   return (
     <Card
-      className={`bg-white dark:bg-surface-dark shadow-subtle ${className}`}
+      className={`bg-bg-raised border border-rule rounded-[2px] ${className}`}
     >
       <CardBody className="p-6">
-        <div className="flex items-center gap-3 mb-4 pb-2 border-b-2 border-border dark:border-border-dark">
-          <Code className="text-primary" size={16} />
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-            SKILL RADAR
-          </h3>
+        <div className="flex items-center gap-3 mb-4 pb-2 border-b-2 border-rule">
+          <Code className="text-accent" size={16} />
+          <h3 className="text-sm font-semibold text-fg">SKILL RADAR</h3>
           <div className="ml-auto">
             <Chip color="primary" variant="flat" size="sm">
               ANALYSIS
@@ -99,7 +97,7 @@ export function SkillRadarChart({
                 {[1, 2, 3, 4, 5].map((ring) => (
                   <div
                     key={ring}
-                    className="absolute border border-gray-300 dark:border-gray-500"
+                    className="absolute border border-rule"
                     style={{
                       width: `${ring * 20}px`,
                       height: `${ring * 20}px`,
@@ -133,7 +131,7 @@ export function SkillRadarChart({
                   }}
                 >
                   <div
-                    className="w-6 h-6 border-2 border-white dark:border-gray-800 flex items-center justify-center rounded-sm"
+                    className="w-6 h-6 border-2 border-rule flex items-center justify-center rounded-sm"
                     style={{ backgroundColor: skill.color }}
                   >
                     <skill.icon size={12} className="text-white" />
@@ -144,15 +142,13 @@ export function SkillRadarChart({
                   >
                     {skill.name}
                   </div>
-                  <div className="text-xs font-bold text-gray-700 dark:text-gray-300">
-                    {skill.score}
-                  </div>
+                  <div className="text-xs font-bold text-fg">{skill.score}</div>
                 </div>
               );
             })}
 
             {/* Center point */}
-            <div className="absolute w-4 h-4 bg-white dark:bg-surface-dark border-2 border-gray-800 dark:border-white left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full" />
+            <div className="absolute w-4 h-4 bg-bg-raised border-2 border-fg left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full" />
           </div>
 
           {/* Legend */}
@@ -163,12 +159,10 @@ export function SkillRadarChart({
                 className="flex items-center gap-2"
               >
                 <div
-                  className="w-3 h-3 border border-white dark:border-gray-800"
+                  className="w-3 h-3 border border-rule"
                   style={{ backgroundColor: skill.color }}
                 />
-                <span className="text-xs text-gray-600 dark:text-gray-400">
-                  {skill.name}
-                </span>
+                <span className="text-xs text-fg-muted">{skill.name}</span>
               </div>
             ))}
           </div>

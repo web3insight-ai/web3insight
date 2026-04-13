@@ -3,9 +3,6 @@
 import { useState, useMemo } from "react";
 import clsx from "clsx";
 import {
-  Card,
-  CardBody,
-  CardHeader,
   Input,
   Dropdown,
   DropdownTrigger,
@@ -14,15 +11,9 @@ import {
   Button,
   Pagination,
 } from "@/components/ui";
-import {
-  Search,
-  Database,
-  Star,
-  GitFork,
-  Filter,
-  SortAsc,
-  SortDesc,
-} from "lucide-react";
+import { Search, Filter, SortAsc, SortDesc } from "lucide-react";
+import { Panel } from "$/blueprint";
+import { SmallCapsLabel, BigNumber } from "$/primitives";
 
 import type { Repository } from "../../typing";
 import { resolveCustomMarkText } from "../../helper";
@@ -148,93 +139,75 @@ function RepositoryListView({
     });
   };
 
+  // Build panels for the metrics row based on available data
+  const panels: Array<{
+    code: string;
+    label: string;
+    value: number;
+    footnote: string;
+    ground: "plain" | "dotted" | "hatched";
+  }> = [
+    {
+      code: "01",
+      label: "total repositories",
+      value: pagination.total,
+      footnote: "tracked in admin",
+      ground: "dotted",
+    },
+    {
+      code: "02",
+      label: "marked repositories",
+      value: stats.markedRepos,
+      footnote: "custom relevance > 0",
+      ground: "plain",
+    },
+  ];
+  if (stats.hasStarData) {
+    panels.push({
+      code: String(panels.length + 1).padStart(2, "0"),
+      label: "total stars",
+      value: stats.totalStars,
+      footnote: "sum across set",
+      ground: "hatched",
+    });
+  }
+  if (stats.hasForkData) {
+    panels.push({
+      code: String(panels.length + 1).padStart(2, "0"),
+      label: "total forks",
+      value: stats.totalForks,
+      footnote: "sum across set",
+      ground: "plain",
+    });
+  }
+
+  const gridCols =
+    panels.length === 4
+      ? "md:grid-cols-4"
+      : panels.length === 3
+        ? "md:grid-cols-3"
+        : "md:grid-cols-2";
+
   return (
     <div className={clsx("min-h-full space-y-6", className)}>
-      {/* Summary Cards */}
-      <div
-        className={`grid grid-cols-1 gap-4 md:gap-6 ${
-          stats.hasStarData && stats.hasForkData
-            ? "md:grid-cols-4"
-            : stats.hasStarData || stats.hasForkData
-              ? "md:grid-cols-3"
-              : "md:grid-cols-2"
-        }`}
-      >
-        <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-          <CardBody className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-primary/10 rounded-xl flex-shrink-0">
-                <Database size={20} className="text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-500">
-                  Total Repositories
-                </p>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {pagination.total.toLocaleString()}
-                </h2>
-              </div>
-            </div>
-          </CardBody>
-        </Card>
-
-        <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-          <CardBody className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-success/10 rounded-xl flex-shrink-0">
-                <Database size={20} className="text-success" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-500">
-                  Marked Repositories
-                </p>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {stats.markedRepos.toLocaleString()}
-                </h2>
-              </div>
-            </div>
-          </CardBody>
-        </Card>
-
-        {stats.hasStarData && (
-          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-            <CardBody className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-secondary/10 rounded-xl flex-shrink-0">
-                  <Star size={20} className="text-secondary" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">
-                    Total Stars
-                  </p>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {stats.totalStars.toLocaleString()}
-                  </h2>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-        )}
-
-        {stats.hasForkData && (
-          <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-            <CardBody className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-warning/10 rounded-xl flex-shrink-0">
-                  <GitFork size={20} className="text-warning" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">
-                    Total Forks
-                  </p>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {stats.totalForks.toLocaleString()}
-                  </h2>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-        )}
+      {/* Summary Panels */}
+      <div className={clsx("grid grid-cols-1 gap-4", gridCols)}>
+        {panels.map((m) => (
+          <Panel
+            key={m.code}
+            ground={m.ground}
+            label={{ text: m.label, position: "tl" }}
+            code={m.code}
+            className="p-5 h-full"
+          >
+            <BigNumber
+              label=""
+              value={m.value}
+              format="compact"
+              footnote={m.footnote}
+            />
+          </Panel>
+        ))}
       </div>
 
       {/* Filters and Search */}
@@ -245,7 +218,7 @@ function RepositoryListView({
             value={filterValue}
             onChange={(e) => setFilterValue(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            startContent={<Search size={18} className="text-gray-400" />}
+            startContent={<Search size={18} className="text-fg-subtle" />}
             className="w-full"
           />
         </div>
@@ -326,47 +299,44 @@ function RepositoryListView({
       </div>
 
       {/* Repositories Table */}
-      <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">
-        <CardHeader className="px-6 py-5">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Database size={18} className="text-primary" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-              Repository Management
-            </h3>
-          </div>
-        </CardHeader>
+      <Panel
+        label={{ text: "admin · repositories", position: "tl" }}
+        code="TB"
+        className="overflow-hidden"
+      >
+        <div className="px-5 pt-5 pb-3 border-b border-rule">
+          <SmallCapsLabel>repository management</SmallCapsLabel>
+        </div>
 
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-t border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider w-12">
+              <tr className="border-t border-rule bg-bg-sunken">
+                <th className="px-6 py-3 text-left font-mono text-[10px] font-medium text-fg-muted uppercase tracking-[0.18em] w-12">
                   #
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left font-mono text-[10px] font-medium text-fg-muted uppercase tracking-[0.18em]">
                   Repository
                 </th>
                 {stats.hasStarData && (
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-right font-mono text-[10px] font-medium text-fg-muted uppercase tracking-[0.18em]">
                     Stars
                   </th>
                 )}
                 {stats.hasForkData && (
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-right font-mono text-[10px] font-medium text-fg-muted uppercase tracking-[0.18em]">
                     Forks
                   </th>
                 )}
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-center font-mono text-[10px] font-medium text-fg-muted uppercase tracking-[0.18em]">
                   Custom Mark
                 </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-center font-mono text-[10px] font-medium text-fg-muted uppercase tracking-[0.18em]">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border dark:divide-border-dark">
+            <tbody className="divide-y divide-rule">
               {loading ? (
                 <tr>
                   <td
@@ -378,8 +348,8 @@ function RepositoryListView({
                     className="px-6 py-16 text-center"
                   >
                     <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-                      <span className="ml-3 text-gray-500 dark:text-gray-400">
+                      <div className="animate-spin rounded-[2px] h-8 w-8 border-b-2 border-accent" />
+                      <span className="ml-3 text-fg-muted">
                         Loading repositories...
                       </span>
                     </div>
@@ -392,23 +362,21 @@ function RepositoryListView({
                   return (
                     <tr
                       key={repo.id}
-                      className="hover:bg-surface dark:hover:bg-surface-dark transition-colors duration-200 group animate-fade-in"
+                      className="hover:bg-bg-sunken transition-colors duration-200 group animate-fade-in"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-medium transition-all duration-200 group-hover:scale-110 bg-gray-50 dark:bg-gray-900/10 text-gray-500 dark:text-gray-500">
-                            {absoluteIndex}
-                          </span>
-                        </div>
+                        <span className="font-mono text-[11px] text-fg-muted tabular-nums">
+                          {String(absoluteIndex).padStart(3, "0")}
+                        </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
-                          <div className="font-medium text-gray-900 dark:text-white">
+                          <div className="font-medium text-fg">
                             {repo.fullName}
                           </div>
                           {repo.description && (
-                            <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs">
+                            <div className="text-sm text-fg-muted truncate max-w-xs">
                               {repo.description}
                             </div>
                           )}
@@ -416,7 +384,7 @@ function RepositoryListView({
                       </td>
                       {stats.hasStarData && (
                         <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
+                          <span className="text-fg font-mono text-sm tabular-nums">
                             {Number(
                               repo.statistics?.star || 0,
                             ).toLocaleString()}
@@ -425,7 +393,7 @@ function RepositoryListView({
                       )}
                       {stats.hasForkData && (
                         <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
+                          <span className="text-fg font-mono text-sm tabular-nums">
                             {Number(
                               repo.statistics?.fork || 0,
                             ).toLocaleString()}
@@ -434,14 +402,14 @@ function RepositoryListView({
                       )}
                       <td className="px-6 py-4 whitespace-nowrap text-center">
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          className={`inline-flex items-center px-2 py-0.5 rounded-[2px] border text-[11px] font-mono uppercase tracking-[0.08em] ${
                             !repo.customMark || Number(repo.customMark) === 0
-                              ? "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
+                              ? "border-rule bg-bg-sunken text-fg-muted"
                               : Number(repo.customMark) <= 3
-                                ? "bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200"
+                                ? "border-rule bg-bg-sunken text-fg-muted"
                                 : Number(repo.customMark) <= 6
-                                  ? "bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200"
-                                  : "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200"
+                                  ? "border-rule bg-bg-sunken text-fg"
+                                  : "border-accent bg-accent-subtle text-accent"
                           }`}
                         >
                           {resolveCustomMarkText(repo.customMark || 0)}
@@ -473,9 +441,7 @@ function RepositoryListView({
                     }
                     className="px-6 py-16 text-center"
                   >
-                    <p className="text-gray-500 dark:text-gray-400">
-                      No repositories found.
-                    </p>
+                    <p className="text-fg-muted">No repositories found.</p>
                   </td>
                 </tr>
               )}
@@ -483,8 +449,8 @@ function RepositoryListView({
           </table>
         </div>
 
-        <div className="px-6 py-4 border-t border-border dark:border-border-dark flex justify-between items-center">
-          <div className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="px-6 py-4 border-t border-rule flex justify-between items-center">
+          <div className="text-sm text-fg-muted font-mono tabular-nums">
             Showing{" "}
             {Math.min(
               (pagination.pageNum - 1) * pagination.pageSize + 1,
@@ -505,7 +471,7 @@ function RepositoryListView({
             />
           )}
         </div>
-      </Card>
+      </Panel>
 
       <MarkDialog
         record={record}

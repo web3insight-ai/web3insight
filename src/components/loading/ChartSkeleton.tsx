@@ -1,4 +1,7 @@
-import { Card, CardHeader, CardBody, Skeleton } from "@/components/ui";
+import { Skeleton } from "@/components/ui";
+
+import { Panel } from "$/blueprint";
+import { SmallCapsLabel } from "$/primitives";
 
 interface ChartSkeletonProps {
   title?: string;
@@ -6,22 +9,20 @@ interface ChartSkeletonProps {
 }
 
 function ChartSkeleton({
-  title = "Loading Chart...",
+  title = "loading chart",
   height = "320px",
 }: ChartSkeletonProps) {
   return (
-    <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
-      <CardHeader className="px-6 py-4 border-b border-border dark:border-border-dark">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-          {title}
-        </h3>
-      </CardHeader>
-      <CardBody className="p-6" style={{ height }}>
+    <Panel className="overflow-hidden">
+      <div className="px-5 pt-5 pb-3 border-b border-rule">
+        <SmallCapsLabel>{title}</SmallCapsLabel>
+      </div>
+      <div className="p-5" style={{ height }}>
         <div className="w-full h-full flex items-end justify-between gap-2">
           {Array.from({ length: 12 }).map((_, index) => (
             <div key={index} className="flex-1 h-full flex items-end">
               <Skeleton
-                className="w-full rounded-t"
+                className="w-full rounded-[2px]"
                 style={{
                   height: `${Math.random() * 60 + 40}%`,
                   animationDelay: `${index * 100}ms`,
@@ -30,8 +31,8 @@ function ChartSkeleton({
             </div>
           ))}
         </div>
-      </CardBody>
-    </Card>
+      </div>
+    </Panel>
   );
 }
 

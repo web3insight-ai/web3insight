@@ -3,14 +3,19 @@ import dayjs from "dayjs";
 
 import type { DeveloperContribution } from "~/developer/typing";
 
-function resolveChartOptions(dataSource: DeveloperContribution[]): EChartsOption {
+function resolveChartOptions(
+  dataSource: DeveloperContribution[],
+): EChartsOption {
   const xaxisData: string[] = [];
   const seriesData: number[] = [];
 
-  dataSource.slice().reverse().forEach(({ date, total }) => {
-    xaxisData.push(dayjs(date).format("MMM, YYYY"));
-    seriesData.push(total);
-  });
+  dataSource
+    .slice()
+    .reverse()
+    .forEach(({ date, total }) => {
+      xaxisData.push(dayjs(date).format("MMM, YYYY"));
+      seriesData.push(total);
+    });
 
   return {
     grid: {
@@ -24,7 +29,7 @@ function resolveChartOptions(dataSource: DeveloperContribution[]): EChartsOption
       data: xaxisData,
       axisLabel: {
         fontSize: 9,
-        color: '#6B7280',
+        color: "var(--fg-muted)",
         rotate: 45,
       },
       axisTick: { show: false },
@@ -33,19 +38,20 @@ function resolveChartOptions(dataSource: DeveloperContribution[]): EChartsOption
       type: "value",
       axisLabel: {
         fontSize: 9,
-        color: '#6B7280',
+        color: "var(--fg-muted)",
       },
       axisTick: { show: false },
       splitLine: {
         lineStyle: {
-          color: '#E5E7EB',
+          color: "var(--rule)",
           opacity: 0.5,
         },
       },
     },
     tooltip: {
       fontSize: 10,
-      formatter: (params: { name: string; value: number }) => `${params.name}<br/>Contributions: ${params.value}`,
+      formatter: (params: { name: string; value: number }) =>
+        `${params.name}<br/>Contributions: ${params.value}`,
     },
     series: [
       {
@@ -54,10 +60,10 @@ function resolveChartOptions(dataSource: DeveloperContribution[]): EChartsOption
         smooth: true,
         lineStyle: {
           width: 2,
-          color: '#0D9488',
+          color: "var(--accent)",
         },
         itemStyle: {
-          color: '#0D9488',
+          color: "var(--accent)",
         },
         label: { show: false },
       },

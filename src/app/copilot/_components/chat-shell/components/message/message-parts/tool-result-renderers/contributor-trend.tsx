@@ -48,7 +48,7 @@ export default function ContributorTrendResult({ data }: { data: unknown }) {
 
   return (
     <ToolResultCard>
-      <h4 className="mb-3 text-sm font-bold text-gray-900 dark:text-white">
+      <h4 className="mb-3 text-sm font-bold text-fg">
         Contributor Growth &mdash; {ecosystem}
       </h4>
 

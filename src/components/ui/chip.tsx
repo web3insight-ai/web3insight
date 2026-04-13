@@ -18,7 +18,7 @@ interface ChipProps extends HTMLAttributes<HTMLSpanElement> {
 
 const colorMap: Record<string, Record<string, string>> = {
   solid: {
-    default: "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200",
+    default: "bg-rule text-fg",
     primary: "bg-primary text-white",
     secondary: "bg-secondary text-white",
     success: "bg-success text-white",
@@ -26,17 +26,16 @@ const colorMap: Record<string, Record<string, string>> = {
     danger: "bg-danger text-white",
   },
   flat: {
-    default: "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300",
-    primary: "bg-primary/10 text-primary",
+    default: "bg-bg-raised text-fg",
+    primary: "bg-accent-subtle text-accent",
     secondary: "bg-secondary/10 text-secondary",
     success: "bg-success/10 text-success",
     warning: "bg-warning/10 text-warning",
     danger: "bg-danger/10 text-danger",
   },
   bordered: {
-    default:
-      "border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300",
-    primary: "border border-primary text-primary",
+    default: "border border-rule text-fg",
+    primary: "border border-accent text-accent",
   },
 };
 

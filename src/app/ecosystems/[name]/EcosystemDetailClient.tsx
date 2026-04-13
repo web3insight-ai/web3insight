@@ -1,10 +1,11 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Warehouse, Github, Users, TrendingUp } from "lucide-react";
+import { Github, Users, TrendingUp } from "lucide-react";
 
 import { CardSkeleton, ChartSkeleton, TableSkeleton } from "$/loading";
-import ChartTitle from "$/controls/chart-title";
+import { Panel } from "$/blueprint";
+import { SectionHeader, SmallCapsLabel } from "$/primitives";
 
 import RepositoryRankViewWidget from "~/repository/views/repository-rank";
 import DeveloperRankViewWidget from "~/developer/views/developer-rank";
@@ -65,33 +66,21 @@ export default function EcosystemDetailClient({
   const isLoading = !statistics;
 
   return (
-    <div className="w-full max-w-content mx-auto px-6 py-8">
-      {/* Header and Overview */}
-      <div className="mb-4 animate-fade-in">
-        <div className="flex items-center gap-4 mb-4">
-          <div className="p-3 rounded-xl bg-primary/10">
-            <Warehouse size={28} className="text-primary" />
-          </div>
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
-              {ecosystem}
-            </h1>
-            <p className="text-lg text-gray-500 dark:text-gray-400">
-              Ecosystem Analytics
-            </p>
-          </div>
-        </div>
-        <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl leading-relaxed">
-          Comprehensive developer analytics and insights for the {ecosystem}{" "}
-          ecosystem.
-        </p>
+    <div className="w-full max-w-content mx-auto px-6 py-10">
+      {/* Header */}
+      <div className="mb-8 animate-fade-in">
+        <SectionHeader
+          kicker={`ecosystem · ${ecosystem.toLowerCase()}`}
+          title={ecosystem}
+          deck={`Developer and repository analytics for the ${ecosystem} ecosystem. Metrics pulled from GitHub and OpenDigger, refreshed on schedule.`}
+        />
       </div>
 
       <div className="animate-slide-up" style={{ animationDelay: "100ms" }}>
         {isLoading ? (
           <CardSkeleton count={4} />
         ) : (
-          <MetricOverview className="mb-4" dataSource={statistics!} />
+          <MetricOverview className="mb-6" dataSource={statistics!} />
         )}
       </div>
       <div className="animate-slide-up" style={{ animationDelay: "200ms" }}>
@@ -102,7 +91,7 @@ export default function EcosystemDetailClient({
           />
         ) : (
           <CountryDistributionChart
-            className="mb-4"
+            className="mb-6"
             data={statistics!.countryDistribution}
             totalDevelopers={statistics!.countryDistributionTotal}
           />
@@ -113,20 +102,29 @@ export default function EcosystemDetailClient({
           {isLoading ? (
             <ChartSkeleton title="Developer Activity Trend" height="320px" />
           ) : (
-            <div className="mb-4 border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle">
-              <ChartTitle
-                icon={<TrendingUp size={14} />}
-                title="Developer Activity Trend"
-                tooltip="Developers with activity (star not included) over time"
-                className="mb-3"
-              />
+            <Panel
+              label={{ text: "activity · trend", position: "tl" }}
+              code="05"
+              className="mb-6 p-5"
+            >
+              <div className="mb-3 flex items-center justify-between border-b border-rule pb-3">
+                <SmallCapsLabel>developer activity trend</SmallCapsLabel>
+                <TrendingUp
+                  size={14}
+                  className="text-fg-muted"
+                  aria-label="Developers with activity (stars excluded) over time"
+                />
+              </div>
               <div className="h-56">
                 <ReactECharts
                   option={resolveChartOptions(statistics!.trend)}
                   style={{ height: "100%", width: "100%" }}
                 />
               </div>
-            </div>
+              <p className="mt-3 font-mono text-[10px] text-fg-muted/80">
+                src: opendigger · monthly rollup
+              </p>
+            </Panel>
           )}
         </ClientOnly>
       </div>
@@ -135,7 +133,7 @@ export default function EcosystemDetailClient({
           <CardSkeleton count={1} />
         ) : (
           <RepositoryTrendingViewWidget
-            className="mb-4"
+            className="mb-6"
             dataSource={statistics!.trendingRepositories}
           />
         )}
@@ -144,13 +142,13 @@ export default function EcosystemDetailClient({
         {isLoading ? (
           <TableSkeleton
             title="Top Repositories"
-            icon={<Github size={18} className="text-primary" />}
+            icon={<Github size={18} className="text-fg-muted" />}
             rows={10}
             columns={6}
           />
         ) : (
           <RepositoryRankViewWidget
-            className="mb-4"
+            className="mb-6"
             dataSource={statistics!.repositories}
           />
         )}
@@ -159,7 +157,7 @@ export default function EcosystemDetailClient({
         {isLoading ? (
           <TableSkeleton
             title="Top Contributors"
-            icon={<Users size={18} className="text-secondary" />}
+            icon={<Users size={18} className="text-fg-muted" />}
             rows={10}
             columns={4}
           />

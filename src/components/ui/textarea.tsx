@@ -17,7 +17,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         {label && (
           <label
             htmlFor={textareaId}
-            className="text-xs font-medium text-gray-600 dark:text-gray-400"
+            className="text-xs font-medium text-fg-muted"
           >
             {label}
           </label>
@@ -26,10 +26,10 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           ref={ref}
           id={textareaId}
           className={clsx(
-            "w-full rounded-lg px-3 py-2 text-sm outline-none transition-colors duration-200",
-            "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700",
-            "text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500",
-            "focus:ring-2 focus:ring-primary/40",
+            "w-full rounded-[2px] px-3 py-2 text-sm outline-none transition-colors duration-200",
+            "bg-bg-raised hover:bg-bg-sunken",
+            "text-fg placeholder:text-fg-subtle dark:placeholder:text-fg-muted",
+            "focus:ring-1 focus:ring-accent focus:border-accent",
             "resize-y min-h-[80px]",
             isInvalid && "ring-2 ring-danger/40",
           )}

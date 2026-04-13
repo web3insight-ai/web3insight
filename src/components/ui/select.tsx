@@ -57,9 +57,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
     return (
       <div className={clsx("flex flex-col gap-1.5", className)}>
         {label && (
-          <label className="text-xs font-medium text-gray-600 dark:text-gray-400">
-            {label}
-          </label>
+          <label className="text-xs font-medium text-fg-muted">{label}</label>
         )}
         <div className="relative">
           <select
@@ -69,13 +67,12 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
               onSelectionChange?.(new Set([e.target.value]));
             }}
             className={clsx(
-              "w-full appearance-none rounded-lg pr-8 pl-3 outline-none transition-colors duration-200",
-              "text-gray-900 dark:text-white",
-              "focus:ring-2 focus:ring-primary/40",
+              "w-full appearance-none rounded-[2px] pr-8 pl-3 outline-none transition-colors duration-200",
+              "text-fg",
               variant === "flat" &&
-                "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700",
+                "bg-bg-raised hover:bg-bg-sunken focus:ring-1 focus:ring-accent",
               variant === "bordered" &&
-                "border border-gray-300 dark:border-gray-600 bg-transparent",
+                "border border-rule bg-transparent hover:border-rule-strong focus:border-accent",
               sizeClasses[size],
             )}
             {...props}
@@ -84,7 +81,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
           </select>
           <ChevronDown
             size={14}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-fg-subtle pointer-events-none"
           />
         </div>
       </div>

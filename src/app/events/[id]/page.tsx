@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { Calendar } from "lucide-react";
 
 import DefaultLayoutWrapper from "../../DefaultLayoutWrapper";
 import { getUser } from "~/auth/repository";
@@ -9,6 +8,7 @@ import { resolveEventDetail } from "~/event/helper";
 import type { DataValue } from "@/types";
 import type { EventReport } from "~/event/typing";
 import EventDetailViewWidget from "~/event/views/event-detail";
+import { SectionHeader } from "$/primitives";
 
 interface EventDetailPageProps {
   params: Promise<{
@@ -91,25 +91,13 @@ export default async function EventDetailPage({
 
   return (
     <DefaultLayoutWrapper user={user}>
-      <div className="w-full max-w-content mx-auto px-6 py-8">
-        <div className="mb-8 animate-fade-in">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="p-3 rounded-xl bg-primary/10">
-              <Calendar size={28} className="text-primary" />
-            </div>
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
-                {eventName}
-              </h1>
-              <p className="text-lg text-gray-500 dark:text-gray-400">
-                Event Insights &amp; Analytics
-              </p>
-            </div>
-          </div>
-          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl leading-relaxed">
-            Explore top contributors, ecosystem performance, and key statistics
-            captured from this Web3 event.
-          </p>
+      <div className="w-full max-w-content mx-auto px-6 py-10">
+        <div className="mb-10 animate-fade-in">
+          <SectionHeader
+            kicker={`event · #${eventId}`}
+            title={eventName}
+            deck="Explore top contributors, ecosystem performance, and key statistics captured from this Web3 event."
+          />
         </div>
 
         <div className="animate-slide-up" style={{ animationDelay: "100ms" }}>

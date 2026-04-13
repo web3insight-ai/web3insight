@@ -2,10 +2,10 @@
 
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { Code2, Users, Database, Zap, Network, Sprout } from "lucide-react";
-import MetricCard from "$/controls/metric-card";
-import type { MetricCardProps } from "$/controls/metric-card";
+import { Network, Sprout } from "lucide-react";
 import Section from "$/section";
+import { Panel } from "$/blueprint";
+import { BigNumber } from "$/primitives";
 import DeveloperGrowthChart from "../../widgets/DeveloperGrowthChart";
 import EcosystemBarChart from "../../widgets/EcosystemBarChart";
 import TopReposTable from "../../widgets/TopReposTable";
@@ -39,40 +39,35 @@ export default function YearlyReport({ data }: YearlyReportProps) {
     [data],
   );
 
-  const metrics: MetricCardProps[] = useMemo(
+  const metrics = useMemo(
     () => [
       {
-        label: "Active Devs",
-        value: latestStats
-          ? latestStats.active_developers.toLocaleString()
-          : "—",
-        growth: latestStats?.active_developers_yearly_growth_rate ?? undefined,
-        icon: <Code2 size={20} className="text-primary" />,
-        iconBgClassName: "bg-primary/10",
-        tooltip: "Active Chinese Web3 developers in the target year",
+        code: "01",
+        label: "active devs",
+        value: latestStats?.active_developers ?? 0,
+        footnote: "Active Chinese Web3 devs",
+        ground: "dotted" as const,
       },
       {
-        label: "New Devs",
-        value: latestStats ? latestStats.new_developers.toLocaleString() : "—",
-        growth: latestStats?.new_developers_yearly_growth_rate ?? undefined,
-        icon: <Users size={20} className="text-secondary" />,
-        iconBgClassName: "bg-secondary/10",
-        tooltip: "First-time Chinese Web3 developers in the target year",
+        code: "02",
+        label: "new devs",
+        value: latestStats?.new_developers ?? 0,
+        footnote: "First-time contributors",
+        ground: "plain" as const,
       },
       {
-        label: "Ecosystems",
-        value: publicChainParticipation.length.toLocaleString(),
-        icon: <Database size={20} className="text-warning" />,
-        iconBgClassName: "bg-warning/10",
-        tooltip:
-          "Number of public chain ecosystems with Chinese developer participation",
+        code: "03",
+        label: "ecosystems",
+        value: publicChainParticipation.length,
+        footnote: "Public chains tracked",
+        ground: "hatched" as const,
       },
       {
-        label: "Top Repos",
-        value: data ? data.top_repos.length.toLocaleString() : "—",
-        icon: <Zap size={20} className="text-success" />,
-        iconBgClassName: "bg-success/10",
-        tooltip: "Repositories with the most Chinese developer contributions",
+        code: "04",
+        label: "top repos",
+        value: data ? data.top_repos.length : 0,
+        footnote: "Highest-impact repositories",
+        ground: "plain" as const,
       },
     ],
     [latestStats, data, publicChainParticipation],
@@ -81,7 +76,7 @@ export default function YearlyReport({ data }: YearlyReportProps) {
   if (!data) {
     return (
       <div className="text-center py-32">
-        <p className="text-gray-500 dark:text-gray-400 text-lg">
+        <p className="text-fg-muted text-lg">
           Report data is not available at the moment.
         </p>
       </div>
@@ -92,10 +87,10 @@ export default function YearlyReport({ data }: YearlyReportProps) {
     <div>
       {/* Page Title */}
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <h1 className="text-3xl font-bold text-fg">
           Chinese Web3 Developer Report {data.target_year}
         </h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+        <p className="text-sm text-fg-muted mt-2">
           A data-driven overview of developer activity across Web3 ecosystems
         </p>
       </div>
@@ -108,13 +103,20 @@ export default function YearlyReport({ data }: YearlyReportProps) {
         className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6"
       >
         {metrics.map((metric) => (
-          <motion.div
-            key={metric.label}
-            variants={staggerItemScale}
-            whileHover={{ y: -4, scale: 1.02 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          >
-            <MetricCard {...metric} />
+          <motion.div key={metric.label} variants={staggerItemScale}>
+            <Panel
+              ground={metric.ground}
+              label={{ text: metric.label, position: "tl" }}
+              code={metric.code}
+              className="p-5 h-full"
+            >
+              <BigNumber
+                label=""
+                value={metric.value}
+                format="compact"
+                footnote={metric.footnote}
+              />
+            </Panel>
           </motion.div>
         ))}
       </motion.div>
@@ -141,7 +143,7 @@ export default function YearlyReport({ data }: YearlyReportProps) {
             data={publicChainParticipation}
             title="Developer Distribution"
             subtitle="Active developers per public chain"
-            icon={<Network size={18} className="text-primary" />}
+            icon={<Network size={18} className="text-accent" />}
             valueKey="developer_count"
           />
         </Section>
@@ -176,9 +178,9 @@ export default function YearlyReport({ data }: YearlyReportProps) {
       )}
 
       {/* Footer */}
-      <footer className="mt-16 pt-8 border-t border-border dark:border-border-dark">
+      <footer className="mt-16 pt-8 border-t border-rule">
         <div className="text-center">
-          <p className="text-xs text-gray-400 dark:text-gray-600">
+          <p className="text-xs text-fg-subtle">
             Data sourced from GitHub public events &middot; Analysis by
             Web3Insight
           </p>

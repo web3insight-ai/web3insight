@@ -60,7 +60,7 @@ const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
         onClick={onClick}
         className={clsx(
           "inline-flex items-center justify-center rounded-full overflow-hidden flex-shrink-0",
-          "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-medium",
+          "bg-rule text-fg-muted font-medium",
           sizeClasses[size],
           isBordered && `ring-2 ${colorClasses[color]}`,
           isButton && "cursor-pointer hover:opacity-80 transition-opacity",

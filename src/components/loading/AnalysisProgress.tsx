@@ -22,7 +22,7 @@ function AnalysisProgress({
     switch (status) {
     case "pending":
       return {
-        icon: <Clock size={16} className="text-gray-400" />,
+        icon: <Clock size={16} className="text-fg-subtle" />,
         text: "Queued for analysis",
         color: "default" as const,
         showProgress: false,
@@ -30,7 +30,7 @@ function AnalysisProgress({
     case "analyzing":
       return {
         icon: (
-          <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent" />
+          <div className="animate-spin rounded-full h-4 w-4 border-2 border-accent border-t-transparent" />
         ),
         text: message || "Analyzing repository contributions...",
         color: "primary" as const,
@@ -52,7 +52,7 @@ function AnalysisProgress({
       };
     default:
       return {
-        icon: <Clock size={16} className="text-gray-400" />,
+        icon: <Clock size={16} className="text-fg-subtle" />,
         text: "Unknown status",
         color: "default" as const,
         showProgress: false,
@@ -66,13 +66,9 @@ function AnalysisProgress({
     <div className={`space-y-2 ${className}`}>
       <div className="flex items-center space-x-2">
         {config.icon}
-        <span className="text-sm text-gray-600 dark:text-gray-300">
-          {config.text}
-        </span>
+        <span className="text-sm text-fg-muted">{config.text}</span>
         {estimatedTime && status === "analyzing" && (
-          <span className="text-xs text-gray-500 dark:text-gray-400">
-            (~{estimatedTime})
-          </span>
+          <span className="text-xs text-fg-muted">(~{estimatedTime})</span>
         )}
       </div>
 

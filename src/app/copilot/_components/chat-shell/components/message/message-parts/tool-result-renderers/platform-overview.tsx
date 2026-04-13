@@ -53,24 +53,20 @@ export default function PlatformOverviewResult({ data }: { data: unknown }) {
 
   return (
     <ToolResultCard>
-      <h4 className="mb-3 text-sm font-bold text-gray-900 dark:text-white">
-        Platform Overview
-      </h4>
+      <h4 className="mb-3 text-sm font-bold text-fg">Platform Overview</h4>
       <div className="grid grid-cols-2 gap-3">
         {METRICS.map((metric) => (
           <div
             key={metric.label}
-            className="rounded-lg bg-white p-3 dark:bg-white/[0.04]"
+            className="rounded-[2px] border border-rule bg-bg-raised p-3"
           >
             <div className="flex items-center gap-2">
-              <div className="rounded-lg bg-teal-50 p-1.5 dark:bg-teal-500/10">
-                <metric.Icon className="size-4 text-teal-600 dark:text-teal-400" />
-              </div>
-              <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              <metric.Icon className="size-4 text-accent" />
+              <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-fg-muted">
                 {metric.label}
               </span>
             </div>
-            <p className="mt-2 text-xl font-bold tabular-nums text-gray-900 dark:text-white">
+            <p className="mt-2 font-mono text-xl font-medium tabular-nums text-fg">
               {formatNumber(coerced[metric.key])}
             </p>
           </div>

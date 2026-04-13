@@ -63,15 +63,15 @@ export function DeveloperHoverCard({ username }: { username: string }) {
           <img
             src={avatarUrl}
             alt={displayName}
-            className="size-10 rounded-full object-cover"
+            className="size-10 rounded-[2px] border border-rule object-cover"
           />
         ) : (
-          <div className="flex size-10 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300">
+          <div className="flex size-10 items-center justify-center rounded-[2px] border border-rule bg-accent-subtle text-sm font-semibold text-accent">
             {initials}
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">
+          <p className="truncate text-sm font-semibold text-fg">
             {displayName}
           </p>
           <p className="truncate text-xs text-muted-foreground">
@@ -94,15 +94,15 @@ export function DeveloperHoverCard({ username }: { username: string }) {
       )}
 
       <div className="mt-3 flex items-center gap-3">
-        <div className="flex items-center gap-1 rounded-md bg-muted/40 px-2 py-1 text-xs dark:bg-muted/20">
+        <div className="flex items-center gap-1 rounded-[2px] border border-rule bg-bg-sunken px-2 py-1 text-xs font-mono tabular-nums">
           <BookOpen className="size-3" />
           <span>{data.statistics.repository} repos</span>
         </div>
-        <div className="flex items-center gap-1 rounded-md bg-muted/40 px-2 py-1 text-xs dark:bg-muted/20">
+        <div className="flex items-center gap-1 rounded-[2px] border border-rule bg-bg-sunken px-2 py-1 text-xs font-mono tabular-nums">
           <GitPullRequest className="size-3" />
           <span>{data.statistics.pullRequest} PRs</span>
         </div>
-        <div className="flex items-center gap-1 rounded-md bg-muted/40 px-2 py-1 text-xs dark:bg-muted/20">
+        <div className="flex items-center gap-1 rounded-[2px] border border-rule bg-bg-sunken px-2 py-1 text-xs font-mono tabular-nums">
           <Code className="size-3" />
           <span>{data.statistics.codeReview}</span>
         </div>
@@ -110,7 +110,7 @@ export function DeveloperHoverCard({ username }: { username: string }) {
 
       <Link
         href={`/developer/${data.username}`}
-        className="mt-3 block text-xs font-medium text-primary hover:text-primary/80"
+        className="mt-3 block text-xs font-medium text-accent hover:brightness-110"
       >
         View full profile →
       </Link>

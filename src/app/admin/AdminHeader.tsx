@@ -12,14 +12,12 @@ interface AdminHeaderProps {
 
 export default function AdminHeader({ user, effectiveRole }: AdminHeaderProps) {
   return (
-    <header className="flex-shrink-0 glass-morphism border-b border-border dark:border-border-dark">
+    <header className="flex-shrink-0 bg-bg-raised border-b border-rule">
       <Navbar
         user={user as ApiUser | null}
         extra={
-          <div className="flex items-center gap-3 border-l border-border dark:border-border-dark pl-4">
-            <span className="text-sm font-medium text-foreground dark:text-foreground-dark">
-              Admin Panel
-            </span>
+          <div className="flex items-center gap-3 border-l border-rule pl-4">
+            <span className="text-sm font-medium text-fg">Admin Panel</span>
             {effectiveRole && (
               <Chip
                 size="sm"

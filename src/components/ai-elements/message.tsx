@@ -64,8 +64,8 @@ export function MessageContent({
     <div
       className={cn(
         "is-user:dark flex w-fit min-w-0 max-w-full flex-col gap-2 overflow-hidden text-sm",
-        "group-[.is-user]:ml-auto group-[.is-user]:rounded-2xl group-[.is-user]:bg-secondary group-[.is-user]:px-4 group-[.is-user]:py-3 group-[.is-user]:text-foreground",
-        "group-[.is-assistant]:text-foreground",
+        "group-[.is-user]:ml-auto group-[.is-user]:rounded-[2px] group-[.is-user]:bg-bg-sunken group-[.is-user]:border group-[.is-user]:border-rule group-[.is-user]:px-4 group-[.is-user]:py-3 group-[.is-user]:text-fg",
+        "group-[.is-assistant]:text-fg",
         className,
       )}
       {...props}
@@ -251,7 +251,7 @@ export function MessageBranchSelector({
   return (
     <div
       className={cn(
-        "inline-flex items-center rounded-md border bg-background p-0.5",
+        "inline-flex items-center rounded-[2px] border border-rule bg-bg p-0.5",
         className,
       )}
       {...props}
@@ -315,7 +315,10 @@ export function MessageBranchPage({
 
   return (
     <span
-      className={cn("px-2 text-xs text-muted-foreground", className)}
+      className={cn(
+        "px-2 font-mono text-[11px] text-fg-muted tabular-nums",
+        className,
+      )}
       {...props}
     >
       {currentBranch + 1} of {totalBranches}

@@ -121,26 +121,21 @@ export function PrivyAccountsWidget({
         {githubAccounts.map((account) => (
           <div
             key={account.address || account.email}
-            className="flex items-center justify-between p-4 bg-gray-50 dark:bg-surface-elevated rounded-lg"
+            className="flex items-center justify-between p-4 bg-bg-sunken border border-rule rounded-[2px]"
           >
             <div className="flex items-center gap-3">
-              <Github size={20} className="text-gray-700 dark:text-gray-300" />
+              <Github size={20} className="text-fg" />
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  GitHub
-                </p>
+                <p className="text-sm font-medium text-fg">GitHub</p>
                 <div className="flex items-center gap-2">
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                  <p className="text-xs text-fg-muted">
                     {account.username || account.email || "Connected"}
                   </p>
-                  <CheckCircle
-                    size={14}
-                    className="text-gray-600 dark:text-gray-400"
-                  />
+                  <CheckCircle size={14} className="text-fg-muted" />
                 </div>
               </div>
             </div>
-            <div className="px-3 py-1.5 bg-gray-100 dark:bg-surface-elevated text-gray-700 dark:text-gray-300 text-xs font-medium rounded-full border border-gray-200 dark:border-border-dark">
+            <div className="px-3 py-1.5 bg-bg-raised text-fg text-[10px] font-mono uppercase tracking-[0.12em] rounded-[2px] border border-rule">
               Verified
             </div>
           </div>
@@ -150,7 +145,7 @@ export function PrivyAccountsWidget({
         {googleAccounts.map((account) => (
           <div
             key={account.email}
-            className="flex items-center justify-between p-4 bg-gray-50 dark:bg-surface-elevated rounded-lg"
+            className="flex items-center justify-between p-4 bg-bg-sunken border border-rule rounded-[2px]"
           >
             <div className="flex items-center gap-3">
               <div className="w-5 h-5 flex items-center justify-center">
@@ -174,21 +169,14 @@ export function PrivyAccountsWidget({
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  Google
-                </p>
+                <p className="text-sm font-medium text-fg">Google</p>
                 <div className="flex items-center gap-2">
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    {account.email}
-                  </p>
-                  <CheckCircle
-                    size={14}
-                    className="text-gray-600 dark:text-gray-400"
-                  />
+                  <p className="text-xs text-fg-muted">{account.email}</p>
+                  <CheckCircle size={14} className="text-fg-muted" />
                 </div>
               </div>
             </div>
-            <div className="px-3 py-1.5 bg-gray-100 dark:bg-surface-elevated text-gray-700 dark:text-gray-300 text-xs font-medium rounded-full border border-gray-200 dark:border-border-dark">
+            <div className="px-3 py-1.5 bg-bg-raised text-fg text-[10px] font-mono uppercase tracking-[0.12em] rounded-[2px] border border-rule">
               Verified
             </div>
           </div>
@@ -198,27 +186,20 @@ export function PrivyAccountsWidget({
         {emailAccounts.map((account) => (
           <div
             key={account.address}
-            className="flex items-center justify-between p-4 bg-gray-50 dark:bg-surface-elevated rounded-lg"
+            className="flex items-center justify-between p-4 bg-bg-sunken border border-rule rounded-[2px]"
           >
             <div className="flex items-center gap-3">
-              <Mail size={20} className="text-gray-700 dark:text-gray-300" />
+              <Mail size={20} className="text-fg" />
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  Email
-                </p>
+                <p className="text-sm font-medium text-fg">Email</p>
                 <div className="flex items-center gap-2">
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    {account.address}
-                  </p>
-                  <CheckCircle
-                    size={14}
-                    className="text-gray-600 dark:text-gray-400"
-                  />
+                  <p className="text-xs text-fg-muted">{account.address}</p>
+                  <CheckCircle size={14} className="text-fg-muted" />
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <div className="px-3 py-1.5 bg-gray-100 dark:bg-surface-elevated text-gray-700 dark:text-gray-300 text-xs font-medium rounded-full border border-gray-200 dark:border-border-dark">
+              <div className="px-3 py-1.5 bg-bg-raised text-fg text-[10px] font-mono uppercase tracking-[0.12em] rounded-[2px] border border-rule">
                 Verified
               </div>
               {emailAccounts.length > 1 && (
@@ -245,27 +226,24 @@ export function PrivyAccountsWidget({
         {walletAccounts.map((account) => (
           <div
             key={account.address}
-            className="flex items-center justify-between p-4 bg-gray-50 dark:bg-surface-elevated rounded-lg"
+            className="flex items-center justify-between p-4 bg-bg-sunken border border-rule rounded-[2px]"
           >
             <div className="flex items-center gap-3">
-              <Wallet size={20} className="text-gray-700 dark:text-gray-300" />
+              <Wallet size={20} className="text-fg" />
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                <p className="text-sm font-medium text-fg">
                   Wallet {account.walletClient === "privy" && "(Embedded)"}
                 </p>
                 <div className="flex items-center gap-2">
-                  <p className="text-xs font-mono text-gray-600 dark:text-gray-400">
+                  <p className="text-xs font-mono text-fg-muted">
                     {account.address.slice(0, 6)}...{account.address.slice(-4)}
                   </p>
-                  <CheckCircle
-                    size={14}
-                    className="text-gray-600 dark:text-gray-400"
-                  />
+                  <CheckCircle size={14} className="text-fg-muted" />
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <div className="px-3 py-1.5 bg-gray-100 dark:bg-surface-elevated text-gray-700 dark:text-gray-300 text-xs font-medium rounded-full border border-gray-200 dark:border-border-dark">
+              <div className="px-3 py-1.5 bg-bg-raised text-fg text-[10px] font-mono uppercase tracking-[0.12em] rounded-[2px] border border-rule">
                 Connected
               </div>
               {walletAccounts.length > 1 &&
@@ -292,7 +270,7 @@ export function PrivyAccountsWidget({
         {/* No connected accounts message */}
         {linkedAccounts.length === 0 && (
           <div className="col-span-full">
-            <p className="text-sm text-gray-600 dark:text-gray-400 text-center py-4">
+            <p className="text-sm text-fg-muted text-center py-4">
               No connected accounts
             </p>
           </div>
@@ -304,8 +282,8 @@ export function PrivyAccountsWidget({
         walletAccounts.length === 0 ||
         githubAccounts.length === 0 ||
         googleAccounts.length === 0) && (
-        <div className="pt-4 border-t border-gray-200 dark:border-border-dark">
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+        <div className="pt-4 border-t border-rule">
+          <p className="text-sm font-medium text-fg mb-3">
             Link Additional Accounts
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

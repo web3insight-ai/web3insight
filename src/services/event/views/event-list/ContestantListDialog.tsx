@@ -143,14 +143,14 @@ function ContestantListDialog({
             <ModalHeader className="flex flex-col gap-1">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Users size={20} className="text-primary" />
+                  <Users size={20} className="text-accent" />
                   <span>Contestants</span>
                 </div>
                 <Chip color="primary" variant="flat">
                   {dataSource.length} user{dataSource.length !== 1 ? "s" : ""}
                 </Chip>
               </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-fg-muted">
                 {analysisComplete
                   ? "Basic profiles loaded • Analysis complete"
                   : pollingError
@@ -162,7 +162,7 @@ function ContestantListDialog({
               <div className="flex flex-col gap-4 max-h-96 overflow-auto">
                 {dataSource.map((user) => (
                   <div
-                    className="flex gap-4 p-4 border border-border dark:border-border-dark rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                    className="flex gap-4 p-4 border border-rule rounded-[2px] hover:bg-bg-sunken transition-colors"
                     key={user.id}
                   >
                     <Link
@@ -173,7 +173,7 @@ function ContestantListDialog({
                       <Avatar
                         src={user.avatar_url}
                         size="lg"
-                        className="ring-2 ring-border dark:border-border-dark"
+                        className="ring-2 ring-rule"
                       />
                     </Link>
                     <div className="flex-1 min-w-0">
@@ -183,26 +183,26 @@ function ContestantListDialog({
                             user.html_url || `https://github.com/${user.login}`
                           }
                           isExternal
-                          className="text-lg font-semibold text-gray-900 dark:text-gray-100 hover:text-primary transition-colors"
+                          className="text-lg font-semibold text-fg hover:text-accent transition-colors"
                         >
                           {user.login}
                         </Link>
-                        <ExternalLink size={14} className="text-gray-400" />
+                        <ExternalLink size={14} className="text-fg-subtle" />
                       </div>
 
                       {user.name && (
-                        <div className="text-sm text-gray-600 dark:text-gray-300 mb-1">
+                        <div className="text-sm text-fg-muted mb-1">
                           {user.name}
                         </div>
                       )}
 
                       {user.bio && (
-                        <div className="text-sm text-gray-500 dark:text-gray-400 mb-2 line-clamp-2">
+                        <div className="text-sm text-fg-muted mb-2 line-clamp-2">
                           {user.bio}
                         </div>
                       )}
 
-                      <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 mb-3">
+                      <div className="flex items-center gap-4 text-xs text-fg-muted mb-3">
                         {user.location && (
                           <div className="flex items-center gap-1">
                             <MapPin size={12} />
@@ -299,8 +299,8 @@ function ContestantListDialog({
                           These accounts could not be processed. Please verify
                           the usernames:
                         </div>
-                        <div className="bg-white dark:bg-gray-900 rounded-md p-3 border border-red-200 dark:border-red-700">
-                          <div className="font-mono text-sm text-gray-800 dark:text-gray-200 space-y-1">
+                        <div className="bg-bg-raised rounded-[2px] p-3 border border-danger/30">
+                          <div className="font-mono text-sm text-fg space-y-1">
                             {failedAccounts.map((account, index) => (
                               <div
                                 key={index}
@@ -330,7 +330,7 @@ function ContestantListDialog({
             </ModalBody>
             <ModalFooter>
               <div className="flex justify-between items-center w-full">
-                <div className="text-sm text-gray-500 dark:text-gray-400">
+                <div className="text-sm text-fg-muted">
                   {analysisComplete
                     ? "Analysis completed successfully"
                     : pollingError

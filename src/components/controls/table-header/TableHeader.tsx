@@ -23,7 +23,7 @@ function TableHeader({
 
   return (
     <th
-      className={`px-6 py-3 ${alignClass} text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider ${className}`}
+      className={`px-6 py-3 ${alignClass} font-mono text-[10px] font-medium text-fg-muted uppercase tracking-[0.18em] ${className}`}
     >
       <div
         className={`flex items-center gap-1.5 ${align === "right" ? "justify-end" : align === "center" ? "justify-center" : "justify-start"}`}
@@ -36,16 +36,14 @@ function TableHeader({
             classNames={{
               base: "max-w-xs",
               content:
-                "bg-white dark:bg-surface-elevated text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-border-dark shadow-lg text-xs leading-relaxed p-3 rounded-lg",
-              arrow:
-                "bg-white dark:bg-surface-elevated border border-gray-200 dark:border-border-dark",
+                "bg-bg-raised text-fg border border-rule-strong text-xs leading-relaxed p-3 rounded-[2px]",
             }}
             delay={300}
             closeDelay={0}
           >
             <Info
               size={12}
-              className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors cursor-help"
+              className="text-fg-subtle hover:text-fg-muted transition-colors cursor-help"
             />
           </Tooltip>
         )}

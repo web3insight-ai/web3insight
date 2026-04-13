@@ -32,7 +32,7 @@ function Switch({
       className={clsx(
         "group relative inline-flex items-center rounded-full transition-colors duration-200 cursor-pointer",
         sizes.track,
-        "data-[checked]:bg-primary bg-gray-300 dark:bg-gray-600",
+        "data-[checked]:bg-accent bg-rule",
         className,
       )}
       {...props}

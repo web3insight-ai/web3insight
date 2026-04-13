@@ -30,7 +30,7 @@ function OpenRankChart({ data, repoName }: OpenRankChartProps) {
 
   if (chartData.length === 0) {
     return (
-      <div className="flex items-center justify-center h-[300px] md:h-[400px] text-gray-500">
+      <div className="flex items-center justify-center h-[300px] md:h-[400px] text-fg-muted">
         No OpenRank data available
       </div>
     );
@@ -39,7 +39,7 @@ function OpenRankChart({ data, repoName }: OpenRankChartProps) {
   return (
     <div className="w-full">
       <h3
-        className="text-center font-medium mb-4"
+        className="text-center font-display font-semibold tracking-[-0.01em] mb-4 text-fg"
         style={{ fontSize: isMobile ? 14 : 18 }}
       >
         OpenRank for {repoName}
@@ -54,28 +54,34 @@ function OpenRankChart({ data, repoName }: OpenRankChartProps) {
             bottom: isMobile ? 60 : 40,
           }}
         >
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--rule)" />
           <XAxis
             dataKey="month"
-            tick={{ fontSize: isMobile ? 10 : 12 }}
+            tick={{ fontSize: isMobile ? 10 : 12, fill: "var(--fg-muted)" }}
+            stroke="var(--rule)"
             angle={isMobile ? -45 : 0}
             textAnchor={isMobile ? "end" : "middle"}
             height={isMobile ? 60 : 30}
           />
-          <YAxis tick={{ fontSize: isMobile ? 10 : 12 }} />
+          <YAxis
+            tick={{ fontSize: isMobile ? 10 : 12, fill: "var(--fg-muted)" }}
+            stroke="var(--rule)"
+          />
           <Tooltip
             contentStyle={{
-              backgroundColor: "#fff",
-              border: "1px solid #e5e7eb",
-              borderRadius: 8,
-              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+              backgroundColor: "var(--bg-raised)",
+              border: "1px solid var(--rule-strong)",
+              borderRadius: 2,
+              color: "var(--fg)",
+              fontFamily: "var(--font-mono)",
+              fontSize: 12,
             }}
             formatter={(value: number) => [value.toFixed(2), "OpenRank"]}
           />
           <Bar
             dataKey="value"
-            fill="#10B981"
-            radius={[4, 4, 0, 0]}
+            fill="var(--accent)"
+            radius={[0, 0, 0, 0]}
             name="OpenRank"
           />
         </BarChart>

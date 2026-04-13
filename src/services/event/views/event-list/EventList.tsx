@@ -99,19 +99,14 @@ function EventListView({ className }: EventListViewWidgetProps) {
   return (
     <div className={clsx("space-y-6", className)}>
       {/* Main Events Table */}
-      <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">
+      <Card className="bg-bg-raised border border-rule rounded-[2px] overflow-hidden">
         {/* Header with Search and Actions */}
         <div className="px-6 pt-5 pb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Calendar size={18} className="text-primary" />
-            </div>
             <div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                Event Management
-              </h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Manage and track all events
+              <h3 className="text-lg font-medium text-fg">Event Management</h3>
+              <p className="font-mono text-xs text-fg-muted">
+                manage and track all events
               </p>
             </div>
           </div>
@@ -119,7 +114,7 @@ function EventListView({ className }: EventListViewWidgetProps) {
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <Input
               placeholder="Search events..."
-              startContent={<Search size={16} className="text-gray-400" />}
+              startContent={<Search size={16} className="text-fg-subtle" />}
               value={searchTerm}
               onValueChange={setSearchTerm}
               className="w-full sm:w-64"
@@ -145,18 +140,15 @@ function EventListView({ className }: EventListViewWidgetProps) {
         <div className="overflow-x-auto">
           {loading ? (
             <div className="px-6 py-12 text-center">
-              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+              <p className="font-mono text-sm text-fg-muted">
                 Loading events...
               </p>
             </div>
           ) : filteredData.length === 0 ? (
             <div className="px-6 py-12 text-center">
-              <Calendar
-                size={48}
-                className="mx-auto mb-4 text-gray-300 dark:text-gray-600"
-              />
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+              <Calendar size={48} className="mx-auto mb-4 text-fg-subtle" />
+              <p className="text-sm text-fg-muted mb-2">
                 {searchTerm ? "No events match your search" : "No events found"}
               </p>
               {!searchTerm && (
@@ -176,36 +168,34 @@ function EventListView({ className }: EventListViewWidgetProps) {
             <>
               <table className="w-full table-auto">
                 <thead>
-                  <tr className="border-t border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <tr className="border-t border-rule bg-bg-sunken">
+                    <th className="px-6 py-3 text-center font-mono text-[10px] font-medium text-fg-muted uppercase tracking-[0.18em]">
                       #
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left font-mono text-[10px] font-medium text-fg-muted uppercase tracking-[0.18em]">
                       Event
                     </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center font-mono text-[10px] font-medium text-fg-muted uppercase tracking-[0.18em]">
                       Created
                     </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center font-mono text-[10px] font-medium text-fg-muted uppercase tracking-[0.18em]">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border dark:divide-border-dark">
-                  {filteredData.map((event: EventData) => (
+                <tbody className="divide-y divide-rule">
+                  {filteredData.map((event: EventData, i: number) => (
                     <tr
                       key={event.id}
-                      className="hover:bg-surface dark:hover:bg-surface-dark transition-colors duration-200 group"
+                      className="hover:bg-bg-sunken transition-colors duration-200 group"
                     >
                       <td className="px-6 py-4 whitespace-nowrap text-center">
-                        <div className="flex items-center justify-center">
-                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-medium transition-all duration-200 group-hover:scale-110 bg-gray-50 dark:bg-surface-dark text-gray-500 dark:text-gray-500">
-                            {event.id}
-                          </span>
-                        </div>
+                        <span className="font-mono text-[11px] text-fg-muted tabular-nums">
+                          {String(i + 1).padStart(3, "0")}
+                        </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">
+                        <div className="text-sm font-medium text-fg">
                           {event.description}
                         </div>
                       </td>
@@ -220,7 +210,7 @@ function EventListView({ className }: EventListViewWidgetProps) {
                           onClick={() => gotoDetail(event.id)}
                           isLoading={navigatingEventId === event.id}
                           isDisabled={navigatingEventId !== null}
-                          className="border-border dark:border-border-dark hover:bg-surface dark:hover:bg-surface-dark"
+                          className="border-rule hover:bg-bg-sunken rounded-[2px]"
                           title="View Event Details"
                         >
                           <Eye size={14} />
@@ -235,7 +225,7 @@ function EventListView({ className }: EventListViewWidgetProps) {
         </div>
 
         {pages > 1 && (
-          <div className="px-6 py-4 border-t border-border dark:border-border-dark flex justify-center">
+          <div className="px-6 py-4 border-t border-rule flex justify-center">
             <Pagination page={page} total={pages} onChange={setPage} />
           </div>
         )}

@@ -42,8 +42,8 @@ function Modal({
         />
         <BaseDialog.Popup
           className={clsx(
-            "fixed z-50 w-[calc(100%-2rem)] rounded-xl bg-white dark:bg-surface-dark",
-            "border border-border dark:border-border-dark shadow-2xl",
+            "fixed z-50 w-[calc(100%-2rem)] rounded-[2px] bg-bg-raised",
+            "border border-rule shadow-2xl",
             "animate-scale-in",
             sizeClasses[size],
             placement === "center" &&
@@ -74,14 +74,11 @@ function ModalHeader({
 }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={clsx(
-        "px-6 py-4 border-b border-border dark:border-border-dark",
-        className,
-      )}
+      className={clsx("px-6 py-4 border-b border-rule", className)}
       {...props}
     >
       {typeof children === "string" ? (
-        <BaseDialog.Title className="text-lg font-semibold text-gray-900 dark:text-white">
+        <BaseDialog.Title className="text-lg font-semibold text-fg">
           {children}
         </BaseDialog.Title>
       ) : (
@@ -111,7 +108,7 @@ function ModalFooter({
   return (
     <div
       className={clsx(
-        "px-6 py-4 border-t border-border dark:border-border-dark flex justify-end gap-2",
+        "px-6 py-4 border-t border-rule flex justify-end gap-2",
         className,
       )}
       {...props}

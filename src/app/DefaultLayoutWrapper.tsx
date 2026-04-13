@@ -4,6 +4,7 @@ import { getTitle } from "@/utils/app";
 import AuthFormDialogViewWidget from "~/auth/views/auth-form-dialog";
 import Navbar from "$/navbar";
 import NavigationMenu from "$/navbar/NavigationMenu";
+import { SmallCapsLabel } from "$/primitives";
 import type { ApiUser } from "~/auth/typing";
 
 interface DefaultLayoutWrapperProps {
@@ -20,8 +21,8 @@ export default function DefaultLayoutWrapper({
   const title = getTitle();
 
   return (
-    <div className="min-h-screen bg-background dark:bg-background-dark flex flex-col">
-      <header className="sticky top-0 z-20 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-border dark:border-border-dark">
+    <div className="min-h-screen bg-bg text-fg flex flex-col">
+      <header className="sticky top-0 z-20 bg-bg/85 backdrop-blur-sm border-b border-rule">
         <Navbar
           className="max-w-content mx-auto"
           user={user}
@@ -29,24 +30,34 @@ export default function DefaultLayoutWrapper({
         />
       </header>
 
-      <main className="flex-1 pb-16">{children}</main>
+      <main className="flex-1 pb-20">{children}</main>
 
       {!hideFooter && (
-        <footer className="border-t border-border dark:border-border-dark bg-surface/50 dark:bg-surface-dark/50">
-          <div className="max-w-content mx-auto px-6 py-8">
-            <div className="text-center">
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                Supported by{" "}
+        <footer className="border-t border-rule bg-bg">
+          <div className="max-w-content mx-auto px-6 py-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+              <div className="flex flex-col gap-2">
+                <SmallCapsLabel tone="subtle">Supported by</SmallCapsLabel>
                 <a
                   href="https://openbuild.xyz/"
-                  className="font-medium text-gray-900 dark:text-white hover:text-primary transition-colors"
+                  className="font-display text-[1.125rem] text-fg hover:text-accent transition-colors w-fit"
                 >
                   OpenBuild
                 </a>
-              </p>
-              <p className="text-xs text-gray-400 dark:text-gray-600">
-                © {new Date().getFullYear()} {title}. All rights reserved.
-              </p>
+                <p className="text-[0.8125rem] text-fg-muted max-w-[var(--measure)]">
+                  Web3 developer analytics — ecosystems, repositories, and
+                  contributors in one instrument.
+                </p>
+              </div>
+              <div className="flex flex-col gap-1 md:items-end md:text-right">
+                <SmallCapsLabel tone="subtle">
+                  © {new Date().getFullYear()}
+                </SmallCapsLabel>
+                <p className="text-[0.8125rem] font-mono text-fg-muted">
+                  {title.toLowerCase()} · v.{new Date().getFullYear() % 100}.
+                  {String(new Date().getMonth() + 1).padStart(2, "0")}
+                </p>
+              </div>
             </div>
           </div>
         </footer>

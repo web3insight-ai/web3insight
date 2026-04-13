@@ -46,40 +46,39 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="text-xs font-medium text-gray-600 dark:text-gray-400"
+            className="text-xs font-medium text-fg-muted"
           >
             {label}
           </label>
         )}
         <div
           className={clsx(
-            "flex items-center gap-2 rounded-lg transition-colors duration-200",
+            "flex items-center gap-2 rounded-[2px] transition-colors duration-200",
             variant === "flat" &&
-              "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700",
+              "bg-bg-raised hover:bg-bg-sunken focus-within:bg-bg-raised focus-within:ring-1 focus-within:ring-accent",
             variant === "bordered" &&
-              "border border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500",
+              "border border-rule hover:border-rule-strong focus-within:border-accent",
             variant === "underlined" &&
-              "border-b border-gray-300 dark:border-gray-600 rounded-none",
-            "focus-within:ring-2 focus-within:ring-primary/40",
-            isInvalid && "ring-2 ring-danger/40",
+              "border-b border-rule rounded-none focus-within:border-accent",
+            isInvalid && "ring-1 ring-danger",
             sizeClasses[size],
           )}
         >
           {startContent && (
-            <span className="flex-shrink-0 text-gray-400">{startContent}</span>
+            <span className="flex-shrink-0 text-fg-subtle">{startContent}</span>
           )}
           <input
             ref={ref}
             id={inputId}
-            className="flex-1 bg-transparent outline-none text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 min-w-0"
+            className="flex-1 bg-transparent outline-none text-fg placeholder:text-fg-subtle dark:placeholder:text-fg-muted min-w-0"
             {...props}
           />
           {endContent && (
-            <span className="flex-shrink-0 text-gray-400">{endContent}</span>
+            <span className="flex-shrink-0 text-fg-subtle">{endContent}</span>
           )}
         </div>
         {description && !isInvalid && (
-          <p className="text-xs text-gray-500">{description}</p>
+          <p className="text-xs text-fg-muted">{description}</p>
         )}
         {isInvalid && errorMessage && (
           <p className="text-xs text-danger">{errorMessage}</p>

@@ -67,8 +67,7 @@ export function FormInput<T extends FieldValues>({
           variant={variant}
           classNames={{
             input: "text-sm font-normal",
-            inputWrapper:
-              "bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark",
+            inputWrapper: "bg-bg-raised border border-rule",
           }}
         />
       )}
@@ -124,8 +123,7 @@ export function FormTextarea<T extends FieldValues>({
           maxRows={maxRows}
           classNames={{
             input: "text-sm font-normal",
-            inputWrapper:
-              "bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark",
+            inputWrapper: "bg-bg-raised border border-rule",
           }}
         />
       )}
@@ -189,8 +187,7 @@ export function FormSelect<T extends FieldValues>({
           isDisabled={disabled}
           size={size}
           classNames={{
-            trigger:
-              "bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark",
+            trigger: "bg-bg-raised border border-rule",
           }}
         >
           {options.map((option) => (
@@ -254,7 +251,7 @@ export function FormSubmit({
       type="submit"
       disabled={disabled || isLoading || !formState.isValid}
       className={`
-        px-4 py-2 rounded-lg font-medium transition-all
+        px-4 py-2 rounded-[2px] font-medium transition-all
         bg-primary text-white hover:bg-primary-600
         disabled:opacity-50 disabled:cursor-not-allowed
         ${className}

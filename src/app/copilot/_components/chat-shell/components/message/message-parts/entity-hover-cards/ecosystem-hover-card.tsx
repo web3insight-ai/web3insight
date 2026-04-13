@@ -56,12 +56,10 @@ export function EcosystemHoverCard({ name }: { name: string }) {
   return (
     <div className="w-[260px] p-4">
       <div className="flex items-center gap-2">
-        <div className="rounded-lg bg-indigo-50 p-1.5 dark:bg-indigo-500/10">
-          <Globe2 className="size-4 text-indigo-600 dark:text-indigo-400" />
+        <div className="rounded-[2px] border border-rule bg-accent-subtle p-1.5">
+          <Globe2 className="size-4 text-accent" />
         </div>
-        <p className="text-sm font-semibold text-gray-900 dark:text-white">
-          {data.eco_name}
-        </p>
+        <p className="text-sm font-semibold text-fg">{data.eco_name}</p>
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2">
@@ -89,7 +87,7 @@ export function EcosystemHoverCard({ name }: { name: string }) {
 
       <Link
         href={`/ecosystem/${data.eco_name}`}
-        className="mt-3 block text-xs font-medium text-primary hover:text-primary/80"
+        className="mt-3 block text-xs font-medium text-accent hover:brightness-110"
       >
         View ecosystem →
       </Link>
@@ -107,12 +105,12 @@ function StatItem({
   value: string;
 }) {
   return (
-    <div className="rounded-md bg-muted/30 p-2 dark:bg-muted/10">
+    <div className="rounded-[2px] border border-rule bg-bg-sunken p-2">
       <div className="flex items-center gap-1 text-xs text-muted-foreground">
         {icon}
         <span>{label}</span>
       </div>
-      <p className="mt-0.5 text-sm font-semibold tabular-nums text-gray-900 dark:text-white">
+      <p className="mt-0.5 text-sm font-semibold tabular-nums text-fg">
         {value}
       </p>
     </div>

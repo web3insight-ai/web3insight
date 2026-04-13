@@ -2,8 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Card, CardHeader, CardBody } from "@/components/ui";
-import { Users, ArrowRight, Eye, EyeOff } from "lucide-react";
+import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -13,6 +12,8 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
+import { Panel } from "$/blueprint";
+import { SmallCapsLabel } from "$/primitives";
 
 import type { RepositoryDeveloperActivityViewWidgetProps } from "./typing";
 
@@ -116,39 +117,35 @@ function RepositoryDeveloperActivityView({
       const data = payload[0].payload;
 
       return (
-        <div className="bg-white dark:bg-surface-dark border border-border dark:border-border-dark rounded-lg p-3 shadow-subtle max-w-xs">
-          <div className="text-xs font-semibold text-gray-900 dark:text-white mb-1">
+        <div className="bg-bg-raised border border-rule rounded-[2px] p-3 max-w-xs">
+          <div className="text-xs font-semibold text-fg mb-1">
             {data.repoName}
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 line-clamp-3">
+          <p className="text-xs text-fg-muted mb-2 line-clamp-3">
             {data.description || "No description provided."}
           </p>
           <div className="space-y-1 text-xs">
             <div className="flex items-center justify-between">
-              <span className="text-gray-500 dark:text-gray-400">
-                Active Developers (7d)
-              </span>
-              <span className="font-semibold text-primary">
+              <span className="text-fg-muted">Active Developers (7d)</span>
+              <span className="font-semibold text-accent font-mono tabular-nums">
                 {formatNumber(data.developerCount)}
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-gray-500 dark:text-gray-400">Stars</span>
-              <span className="font-semibold text-gray-900 dark:text-white">
+              <span className="text-fg-muted">Stars</span>
+              <span className="font-semibold text-fg font-mono tabular-nums">
                 {formatNumber(data.starCount)}
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-gray-500 dark:text-gray-400">Forks</span>
-              <span className="font-semibold text-gray-900 dark:text-white">
+              <span className="text-fg-muted">Forks</span>
+              <span className="font-semibold text-fg font-mono tabular-nums">
                 {formatNumber(data.forkCount)}
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-gray-500 dark:text-gray-400">
-                Open Issues
-              </span>
-              <span className="font-semibold text-gray-900 dark:text-white">
+              <span className="text-fg-muted">Open Issues</span>
+              <span className="font-semibold text-fg font-mono tabular-nums">
                 {formatNumber(data.issueCount)}
               </span>
             </div>
@@ -160,36 +157,24 @@ function RepositoryDeveloperActivityView({
     return null;
   };
 
-  const cardClassName = [
-    "bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden",
-    className || "",
-  ]
-    .join(" ")
-    .trim();
-
   return (
-    <Card className={cardClassName}>
-      <CardHeader className="px-6 py-5">
+    <Panel
+      label={{ text: "weekly · participation", position: "tl" }}
+      className={`overflow-hidden ${className || ""}`}
+    >
+      <div className="px-5 pt-5 pb-3 border-b border-rule">
         <div className="flex items-start justify-between gap-4 w-full">
-          <div className="flex items-start gap-3 min-w-0">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Users size={18} className="text-primary" />
-            </div>
-            <div className="min-w-0">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                Weekly Developer Participation
-              </h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Repositories with the most active contributors in the past 7
-                days
-              </p>
-            </div>
+          <div className="min-w-0">
+            <SmallCapsLabel>Weekly Developer Participation</SmallCapsLabel>
+            <p className="text-xs text-fg-muted mt-1">
+              Repositories with the most active contributors in the past 7 days
+            </p>
           </div>
           <div className="flex items-center gap-3 whitespace-nowrap">
             <button
               type="button"
               onClick={() => setIncludeSensitive((prev) => !prev)}
-              className="inline-flex items-center justify-center w-4 h-4 rounded-full border border-primary text-primary hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 text-[10px]"
+              className="inline-flex items-center justify-center w-4 h-4 rounded-[2px] border border-accent text-accent hover:bg-accent-subtle transition-colors duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 text-[10px]"
               aria-pressed={includeSensitive}
               aria-label={
                 includeSensitive
@@ -208,13 +193,13 @@ function RepositoryDeveloperActivityView({
                 <EyeOff size={9} strokeWidth={1.8} />
               )}
             </button>
-            <div className="text-xs font-medium text-gray-500 dark:text-gray-400">
+            <div className="text-xs font-mono uppercase tracking-[0.12em] text-fg-muted">
               Showing top {chartData.length}
             </div>
           </div>
         </div>
-      </CardHeader>
-      <CardBody className="px-6 pb-6 pt-0 space-y-6">
+      </div>
+      <div className="px-6 pb-6 pt-5 space-y-6">
         {hasData ? (
           <>
             <div className="h-72 w-full">
@@ -255,8 +240,8 @@ function RepositoryDeveloperActivityView({
                   />
                   <Bar
                     dataKey="developerCount"
-                    fill="#0D9488"
-                    radius={[6, 6, 6, 6]}
+                    fill="var(--teal-500)"
+                    radius={[0, 0, 0, 0]}
                     barSize={16}
                   />
                 </BarChart>
@@ -267,13 +252,13 @@ function RepositoryDeveloperActivityView({
               {listData.map((repo, index) => (
                 <div
                   key={repo.id}
-                  className="group border border-border dark:border-border-dark rounded-lg p-3 bg-white dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-surface-elevated transition-colors duration-200 animate-fade-in"
+                  className="group border border-rule rounded-[2px] p-3 bg-bg-raised hover:bg-bg-sunken transition-colors duration-200 animate-fade-in"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div className="flex items-start gap-3">
                     <div className="flex items-center pt-0.5">
-                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-medium transition-all duration-200 group-hover:scale-110 bg-gray-50 dark:bg-gray-900/10 text-gray-500 dark:text-gray-500">
-                        {index + 1}
+                      <span className="font-mono text-[11px] text-fg-muted tabular-nums">
+                        {String(index + 1).padStart(3, "0")}
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
@@ -283,19 +268,19 @@ function RepositoryDeveloperActivityView({
                             href={`/repositories/${encodeURIComponent(String(repo.repoId || "unknown"))}?name=${encodeURIComponent(repo.repoName)}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-sm font-medium text-gray-900 dark:text-white hover:text-primary transition-colors duration-200 truncate"
+                            className="text-sm font-medium text-fg hover:text-accent transition-colors duration-200 truncate"
                           >
                             {repo.repoName}
                           </Link>
-                          <p className="text-xs text-gray-600 dark:text-gray-400 truncate mt-1 pr-2">
+                          <p className="text-xs text-fg-muted truncate mt-1 pr-2">
                             {repo.description || "No description provided."}
                           </p>
                         </div>
                         <div className="text-right space-y-1 whitespace-nowrap pl-2">
-                          <div className="text-sm font-semibold text-primary">
+                          <div className="text-sm font-semibold text-accent font-mono tabular-nums">
                             {formatNumber(repo.developerCount)} devs
                           </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                          <div className="text-xs text-fg-muted font-mono tabular-nums">
                             {formatNumber(repo.starCount)} stars ·{" "}
                             {formatNumber(repo.forkCount)} forks ·{" "}
                             {formatNumber(repo.issueCount)} open issues
@@ -309,24 +294,24 @@ function RepositoryDeveloperActivityView({
             </div>
           </>
         ) : (
-          <div className="h-72 w-full flex items-center justify-center text-sm text-gray-500 dark:text-gray-400 text-center px-6">
+          <div className="h-72 w-full flex items-center justify-center text-sm text-fg-muted text-center px-6">
             Flagged repositories are hidden. Toggle the button above to view
             them.
           </div>
         )}
-        <div className="px-6 py-4 border-t border-border dark:border-border-dark">
+        <div className="px-6 py-4 border-t border-rule">
           <button
             type="button"
             onClick={() => setIsExpanded((prev) => !prev)}
-            className="w-full flex items-center justify-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200"
+            className="w-full flex items-center justify-center gap-2 text-sm font-medium text-fg-muted hover:text-accent transition-colors duration-200"
             disabled={!hasData && !includeSensitive}
           >
             {isExpanded ? "Show less" : "View All Repositories"}
             <ArrowRight size={16} />
           </button>
         </div>
-      </CardBody>
-    </Card>
+      </div>
+    </Panel>
   );
 }
 

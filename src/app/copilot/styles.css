@@ -53,7 +53,7 @@
 
 /* Reason: Remove hard borders from any rendered elements (hr, tables, blockquotes) */
 .is-assistant hr {
-  border-color: rgba(0, 0, 0, 0.06);
+  border-color: var(--rule);
   margin-top: 0.75rem;
   margin-bottom: 0.75rem;
 }
@@ -66,37 +66,21 @@
 .is-assistant th,
 .is-assistant td {
   padding: 0.375rem 0.5rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid var(--rule);
 }
 
 .is-assistant th {
-  font-weight: 600;
-  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 0.6875rem;
   text-transform: uppercase;
-  letter-spacing: 0.025em;
-  color: #9ca3af;
+  letter-spacing: 0.12em;
+  color: var(--fg-muted);
 }
 
 .is-assistant blockquote {
-  border-left: 2px solid rgba(0, 0, 0, 0.08);
+  border-left: 2px solid var(--rule);
   padding-left: 0.75rem;
   margin-left: 0;
-  color: #6b7280;
-}
-
-/* Dark mode overrides */
-@media (prefers-color-scheme: dark) {
-  .is-assistant hr {
-    border-color: rgba(255, 255, 255, 0.06);
-  }
-
-  .is-assistant th,
-  .is-assistant td {
-    border-bottom-color: rgba(255, 255, 255, 0.06);
-  }
-
-  .is-assistant blockquote {
-    border-left-color: rgba(255, 255, 255, 0.1);
-    color: #9ca3af;
-  }
+  color: var(--fg-muted);
 }

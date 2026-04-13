@@ -1,8 +1,6 @@
 "use client";
 
 import {
-  Card,
-  CardHeader,
   Input,
   Dropdown,
   DropdownTrigger,
@@ -11,15 +9,7 @@ import {
   Button,
   Pagination,
 } from "@/components/ui";
-import {
-  Database,
-  Filter,
-  SortAsc,
-  SortDesc,
-  Search,
-  Star,
-  GitFork,
-} from "lucide-react";
+import { Filter, SortAsc, SortDesc, Search, Star, GitFork } from "lucide-react";
 import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -27,8 +17,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRepositoryList, useOverviewStatistics } from "@/hooks/api";
 import type { RepoRankRecord } from "@/lib/api/types";
-import MetricCard, { resolveOverviewMetrics } from "$/controls/metric-card";
 import TableHeader from "$/controls/table-header";
+import { Panel } from "$/blueprint";
+import { SectionHeader, SmallCapsLabel, BigNumber } from "$/primitives";
 import {
   staggerContainer,
   staggerItemScale,
@@ -149,48 +140,72 @@ export default function RepositoriesPageClient() {
   );
 
   return (
-    <div className="w-full max-w-content mx-auto px-6 py-8">
-      {/* Header and Overview */}
+    <div className="w-full max-w-content mx-auto px-6 py-10">
+      {/* Header */}
       <motion.div
         variants={fadeInUp}
         initial="hidden"
         animate="visible"
-        className="mb-8"
+        className="mb-10"
       >
-        <div className="flex items-center gap-3 mb-3">
-          <div className="p-2 rounded-xl bg-primary/10">
-            <Database size={20} className="text-primary" />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            All Repositories
-          </h1>
-        </div>
-        <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
-          Top repositories by developer engagement and contributions across Web3
-          ecosystems
-        </p>
+        <SectionHeader
+          kicker="index · repositories"
+          title="All repositories"
+          deck="Top repositories by developer engagement and contributions across Web3 ecosystems."
+        />
       </motion.div>
 
-      {/* Summary Cards */}
+      {/* Summary Panels */}
       <motion.div
         variants={staggerContainer}
         initial="hidden"
         animate="visible"
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12"
       >
-        {resolveOverviewMetrics({
-          totalCoreDevelopers,
-          totalDevelopers,
-          totalEcosystems,
-          totalRepositories,
-        }).map((metric) => (
-          <motion.div
-            key={metric.label.replaceAll(" ", "")}
-            variants={staggerItemScale}
-            whileHover={{ y: -4, scale: 1.02 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          >
-            <MetricCard {...metric} />
+        {[
+          {
+            code: "01",
+            label: "repositories",
+            value: totalRepositories,
+            footnote: "grouped by ecosystem",
+            ground: "dotted" as const,
+          },
+          {
+            code: "02",
+            label: "core devs",
+            value: totalCoreDevelopers,
+            footnote: "src: opendigger · 12m PR / push",
+            ground: "plain" as const,
+          },
+          {
+            code: "03",
+            label: "eco contributors",
+            value: totalDevelopers,
+            footnote: "all-time, tracked ecosystems",
+            ground: "hatched" as const,
+          },
+          {
+            code: "04",
+            label: "ecosystems",
+            value: totalEcosystems,
+            footnote: "live · indexed",
+            ground: "plain" as const,
+          },
+        ].map((m) => (
+          <motion.div key={m.code} variants={staggerItemScale}>
+            <Panel
+              ground={m.ground}
+              label={{ text: m.label, position: "tl" }}
+              code={m.code}
+              className="p-5 h-full"
+            >
+              <BigNumber
+                label=""
+                value={m.value}
+                format="compact"
+                footnote={m.footnote}
+              />
+            </Panel>
           </motion.div>
         ))}
       </motion.div>
@@ -202,7 +217,7 @@ export default function RepositoriesPageClient() {
             placeholder="Search repositories..."
             value={searchValue}
             onChange={handleSearchChange}
-            startContent={<Search size={18} className="text-gray-400" />}
+            startContent={<Search size={18} className="text-fg-subtle" />}
             className="w-full"
           />
         </div>
@@ -259,23 +274,20 @@ export default function RepositoriesPageClient() {
       </div>
 
       {/* Repositories Table */}
-      <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">
-        <CardHeader className="px-6 py-5">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Database size={18} className="text-primary" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-              Repository Analytics
-            </h3>
-          </div>
-        </CardHeader>
+      <Panel
+        label={{ text: "ranking · repos", position: "tl" }}
+        code="05"
+        className="overflow-hidden"
+      >
+        <div className="px-5 pt-5 pb-3 border-b border-rule">
+          <SmallCapsLabel>repository analytics</SmallCapsLabel>
+        </div>
 
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-t border-border dark:border-border-dark bg-surface dark:bg-surface-dark">
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider w-12">
+              <tr className="border-t border-rule bg-bg-sunken">
+                <th className="px-6 py-3 text-left font-mono text-[10px] font-medium text-fg-muted uppercase tracking-[0.18em] w-12">
                   #
                 </th>
                 <TableHeader>Repository</TableHeader>
@@ -305,56 +317,54 @@ export default function RepositoriesPageClient() {
                 </TableHeader>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border dark:divide-border-dark">
+            <tbody className="divide-y divide-rule">
               <AnimatePresence mode="wait">
                 {paginatedItems.map((repo, index) => {
                   const absoluteIndex = (page - 1) * rowsPerPage + index + 1;
                   return (
                     <motion.tr
                       key={repo.repo_id}
-                      className="hover:bg-surface dark:hover:bg-surface-dark transition-colors duration-200 group"
+                      className="hover:bg-bg-sunken transition-colors duration-200 group"
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.03, duration: 0.3 }}
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-medium transition-all duration-200 group-hover:scale-110 bg-gray-50 dark:bg-surface-dark text-gray-500 dark:text-gray-500">
-                            {absoluteIndex}
-                          </span>
-                        </div>
+                        <span className="font-mono text-[11px] text-fg-muted tabular-nums">
+                          {String(absoluteIndex).padStart(3, "0")}
+                        </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Link
                           href={`/repositories/${repo.repo_id}`}
-                          className="font-medium text-gray-900 dark:text-white hover:text-primary transition-colors duration-200"
+                          className="font-medium text-fg hover:text-accent transition-colors duration-200"
                         >
                           {repo.repo_name}
                         </Link>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <Star size={14} className="text-yellow-500" />
-                          <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
+                          <Star size={14} className="text-fg-subtle" />
+                          <span className="text-fg font-mono text-sm tabular-nums">
                             {Number(repo.star_count).toLocaleString()}
                           </span>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <GitFork size={14} className="text-gray-500" />
-                          <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
+                          <GitFork size={14} className="text-fg-subtle" />
+                          <span className="text-fg font-mono text-sm tabular-nums">
                             {Number(repo.forks_count).toLocaleString()}
                           </span>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
+                        <span className="text-fg font-mono text-sm tabular-nums">
                           {Number(repo.contributor_count).toLocaleString()}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <span className="text-gray-700 dark:text-gray-300 font-mono text-sm">
+                        <span className="text-fg font-mono text-sm tabular-nums">
                           {Number(repo.open_issues_count).toLocaleString()}
                         </span>
                       </td>
@@ -367,11 +377,11 @@ export default function RepositoriesPageClient() {
         </div>
 
         {pages > 1 && (
-          <div className="px-6 py-4 border-t border-border dark:border-border-dark flex justify-center">
+          <div className="px-6 py-4 border-t border-rule flex justify-center">
             <Pagination page={page} total={pages} onChange={handlePageChange} />
           </div>
         )}
-      </Card>
+      </Panel>
     </div>
   );
 }

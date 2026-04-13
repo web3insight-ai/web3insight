@@ -36,18 +36,16 @@ export default function TopReposTable({ data }: TopReposTableProps) {
 
   return (
     <motion.div variants={fadeInUp} {...createViewportAnimation()}>
-      <div className="rounded-2xl border border-border dark:border-border-dark bg-white dark:bg-surface-dark overflow-hidden">
+      <div className="rounded-[2px] border border-rule bg-bg-raised overflow-hidden">
         {/* Header */}
         <div className="px-6 pt-6 pb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-secondary/10">
-              <GitFork size={18} className="text-secondary" />
-            </div>
+            <GitFork size={18} className="text-accent" />
             <div>
-              <p className="text-base font-semibold text-gray-900 dark:text-white">
+              <p className="text-base font-semibold text-fg">
                 Top Repositories
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="font-mono text-xs text-fg-muted tabular-nums">
                 {data.length} repos ranked by developer participation
               </p>
             </div>
@@ -60,11 +58,10 @@ export default function TopReposTable({ data }: TopReposTableProps) {
               setSearch(val);
               setPage(1);
             }}
-            startContent={<Search size={14} className="text-gray-400" />}
+            startContent={<Search size={14} className="text-fg-subtle" />}
             classNames={{
               base: "w-full sm:w-56",
-              inputWrapper:
-                "bg-gray-50 dark:bg-gray-900 border border-border dark:border-border-dark",
+              inputWrapper: "bg-bg-raised border border-rule",
             }}
           />
         </div>
@@ -74,17 +71,17 @@ export default function TopReposTable({ data }: TopReposTableProps) {
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="border-b border-border dark:border-border-dark">
-                  <th className="pb-3 pr-3 text-[10px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider w-10">
+                <tr className="border-b border-rule">
+                  <th className="pb-3 pr-3 text-[10px] font-medium text-fg-subtle uppercase tracking-wider w-10">
                     #
                   </th>
-                  <th className="pb-3 pr-3 text-[10px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                  <th className="pb-3 pr-3 text-[10px] font-medium text-fg-subtle uppercase tracking-wider">
                     Repository
                   </th>
-                  <th className="pb-3 pr-3 text-[10px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider text-right w-20">
+                  <th className="pb-3 pr-3 text-[10px] font-medium text-fg-subtle uppercase tracking-wider text-right w-20">
                     Devs
                   </th>
-                  <th className="pb-3 text-[10px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider w-32 hidden sm:table-cell">
+                  <th className="pb-3 text-[10px] font-medium text-fg-subtle uppercase tracking-wider w-32 hidden sm:table-cell">
                     Share
                   </th>
                 </tr>
@@ -104,13 +101,13 @@ export default function TopReposTable({ data }: TopReposTableProps) {
                         initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: idx * 0.015 }}
-                        className="border-b border-border/30 dark:border-border-dark/30 hover:bg-gray-50/80 dark:hover:bg-gray-900/30 transition-colors group"
+                        className="border-b border-rule/40 hover:bg-bg-sunken transition-colors group"
                       >
                         <td className="py-2.5 pr-3">
                           <span
-                            className={`text-xs tabular-nums ${globalIdx <= 3 ? "font-bold text-primary" : "text-gray-400 dark:text-gray-500"}`}
+                            className={`font-mono text-[11px] tabular-nums ${globalIdx <= 3 ? "font-bold text-accent" : "text-fg-muted"}`}
                           >
-                            {globalIdx}
+                            {String(globalIdx).padStart(3, "0")}
                           </span>
                         </td>
                         <td className="py-2.5 pr-3">
@@ -118,7 +115,7 @@ export default function TopReposTable({ data }: TopReposTableProps) {
                             href={`https://github.com/${repo.repo_name}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 text-sm text-gray-900 dark:text-white hover:text-primary dark:hover:text-primary transition-colors font-medium"
+                            className="inline-flex items-center gap-1.5 text-sm text-fg hover:text-accent transition-colors font-medium"
                           >
                             {repo.repo_name}
                             <ExternalLink
@@ -128,18 +125,15 @@ export default function TopReposTable({ data }: TopReposTableProps) {
                           </a>
                         </td>
                         <td className="py-2.5 pr-3 text-right">
-                          <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-700 dark:text-gray-300 tabular-nums">
-                            <Users
-                              size={10}
-                              className="text-gray-400 dark:text-gray-500"
-                            />
+                          <span className="inline-flex items-center gap-1 text-xs font-medium text-fg tabular-nums">
+                            <Users size={10} className="text-fg-subtle" />
                             {Number(repo.developer_count).toLocaleString()}
                           </span>
                         </td>
                         <td className="py-2.5 hidden sm:table-cell">
-                          <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1">
+                          <div className="w-full bg-bg-sunken rounded-[2px] h-1">
                             <motion.div
-                              className="bg-primary/60 h-1 rounded-full"
+                              className="bg-accent/70 h-1 rounded-[2px]"
                               initial={{ width: 0 }}
                               animate={{ width: `${barWidth}%` }}
                               transition={{
@@ -166,7 +160,7 @@ export default function TopReposTable({ data }: TopReposTableProps) {
                 size="sm"
                 showControls
                 classNames={{
-                  cursor: "bg-primary text-white",
+                  cursor: "bg-accent text-accent-fg",
                 }}
               />
             </div>

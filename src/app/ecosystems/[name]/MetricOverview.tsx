@@ -1,48 +1,71 @@
 import clsx from "clsx";
-import { Users, Code2, Zap, Database } from "lucide-react";
 
-import MetricCard, { type MetricCardProps } from "$/controls/metric-card";
+import { Panel } from "$/blueprint";
+import { BigNumber } from "$/primitives";
 
 import type { MetricOverviewProps } from "./typing";
 
-function resolveMetrics(dataSource: MetricOverviewProps["dataSource"]): MetricCardProps[] {
+type Metric = {
+  code: string;
+  label: string;
+  value: number;
+  footnote: string;
+  ground: "plain" | "dotted" | "hatched";
+};
+
+function resolveMetrics(
+  dataSource: MetricOverviewProps["dataSource"],
+): Metric[] {
   return [
     {
-      label: "Developers",
-      value: Number(dataSource.developerCoreCount).toLocaleString(),
-      icon: <Code2 size={20} className="text-secondary" />,
-      iconBgClassName: "bg-secondary/10",
-      tooltip: "Developers with pull requests and push events in the past year",
+      code: "01",
+      label: "core devs",
+      value: Number(dataSource.developerCoreCount),
+      footnote: "src: opendigger · 12m PR / push",
+      ground: "dotted",
     },
     {
-      label: "ECO Contributors",
-      value: Number(dataSource.developerTotalCount).toLocaleString(),
-      icon: <Users size={20} className="text-primary" />,
-      iconBgClassName: "bg-primary/10",
-      tooltip: "Developers with activity (star not included) in this ecosystem (all time)",
+      code: "02",
+      label: "eco contributors",
+      value: Number(dataSource.developerTotalCount),
+      footnote: "all-time, stars excluded",
+      ground: "plain",
     },
     {
-      label: "New Developers",
-      value: Number(dataSource.developerGrowthCount).toLocaleString(),
-      icon: <Database size={20} className="text-warning" />,
-      iconBgClassName: "bg-warning/10",
-      tooltip: "Developers with first activity in past 90 days",
+      code: "03",
+      label: "new · 90d",
+      value: Number(dataSource.developerGrowthCount),
+      footnote: "first activity, last 90 days",
+      ground: "hatched",
     },
     {
-      label: "Repositories",
-      value: Number(dataSource.repositoryTotalCount).toLocaleString(),
-      icon: <Zap size={20} className="text-success" />,
-      iconBgClassName: "bg-success/10",
-      tooltip: "Total repositories in this ecosystem",
+      code: "04",
+      label: "repositories",
+      value: Number(dataSource.repositoryTotalCount),
+      footnote: "tracked under ecosystem",
+      ground: "plain",
     },
   ];
 }
 
 function MetricOverview({ className, dataSource }: MetricOverviewProps) {
   return (
-    <div className={clsx("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6", className)}>
-      {resolveMetrics(dataSource).map(metric => (
-        <MetricCard key={metric.label.replaceAll(" ", "")} {...metric} />
+    <div className={clsx("grid grid-cols-2 lg:grid-cols-4 gap-4", className)}>
+      {resolveMetrics(dataSource).map((metric) => (
+        <Panel
+          key={metric.code}
+          ground={metric.ground}
+          label={{ text: metric.label, position: "tl" }}
+          code={metric.code}
+          className="p-5 h-full"
+        >
+          <BigNumber
+            label=""
+            value={metric.value}
+            format="compact"
+            footnote={metric.footnote}
+          />
+        </Panel>
       ))}
     </div>
   );

@@ -58,10 +58,11 @@ function resolveChartOptions(dataSource: ActorTrendRecord[]): EChartsOption {
         smooth: true,
         lineStyle: {
           width: 2,
-          color: "#0D9488",
+          // Reason: teal-500 brand trace token mirrored as hex so ECharts' canvas renderer resolves it.
+          color: "#0F766E",
         },
         itemStyle: {
-          color: "#0D9488",
+          color: "#0F766E",
         },
         label: { show: false },
       },

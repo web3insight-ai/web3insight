@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { Card, CardHeader, Avatar, Button } from "@/components/ui";
 import {
   Calendar,
-  Users,
   Trophy,
   Medal,
   Award,
@@ -50,7 +49,7 @@ function ContestantProgrammingLanguages({ username }: { username: string }) {
 
   return (
     <div>
-      <h5 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+      <h5 className="text-xs font-medium text-fg-muted uppercase tracking-wider mb-2">
         Programming Languages
       </h5>
       <div className="grid gap-4 lg:grid-cols-2">
@@ -90,7 +89,7 @@ function EventDetailView({
     return (
       <>
         {contestant.nickname}{" "}
-        <span className="text-xs text-gray-400 dark:text-gray-500 font-normal">
+        <span className="text-xs text-fg-subtle font-normal">
           ({contestant.username})
         </span>
       </>
@@ -208,9 +207,7 @@ function EventDetailView({
       <div className="flex items-center justify-center min-h-96">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-500 dark:text-gray-400">
-            Loading event details...
-          </p>
+          <p className="text-fg-muted">Loading event details...</p>
         </div>
       </div>
     );
@@ -220,14 +217,11 @@ function EventDetailView({
     return (
       <div className="flex items-center justify-center min-h-96">
         <div className="text-center">
-          <Calendar
-            size={48}
-            className="mx-auto mb-4 text-gray-300 dark:text-gray-600"
-          />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+          <Calendar size={48} className="mx-auto mb-4 text-fg-subtle" />
+          <h3 className="text-lg font-medium text-fg mb-2">
             No contestants found
           </h3>
-          <p className="text-gray-500 dark:text-gray-400">
+          <p className="text-fg-muted">
             This event doesn&apos;t have any contestants yet.
           </p>
         </div>
@@ -252,7 +246,7 @@ function EventDetailView({
         <Trophy size={16} className="text-yellow-600 dark:text-yellow-400" />
       );
     case 1:
-      return <Medal size={16} className="text-gray-500 dark:text-gray-400" />;
+      return <Medal size={16} className="text-fg-muted" />;
     case 2:
       return (
         <Award size={16} className="text-orange-600 dark:text-orange-400" />
@@ -265,31 +259,26 @@ function EventDetailView({
   const getRankBadgeStyles = (index: number) => {
     switch (index) {
     case 0:
-      return "bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-900/30 dark:to-yellow-800/30 text-yellow-700 dark:text-yellow-400 border-yellow-300 dark:border-yellow-700";
+      return "bg-accent-subtle dark:from-yellow-900/30 dark:to-yellow-800/30 text-yellow-700 dark:text-yellow-400 border-yellow-300 dark:border-yellow-700";
     case 1:
-      return "bg-gradient-to-br from-gray-100 to-gray-200 dark:from-surface-elevated dark:to-surface-dark text-gray-700 dark:text-gray-400 border-gray-300 dark:border-border-dark";
+      return "bg-bg-raised text-fg-muted border-rule";
     case 2:
-      return "bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-500/20 dark:to-orange-500/30 text-orange-700 dark:text-orange-300 border-orange-300 dark:border-orange-500/30";
+      return "bg-warn-subtle dark:from-orange-500/20 dark:to-orange-500/30 text-orange-700 dark:text-orange-300 border-orange-300 dark:border-orange-500/30";
     default:
-      return "bg-gray-50 dark:bg-surface-dark text-gray-600 dark:text-gray-500 border-gray-200 dark:border-border-dark";
+      return "bg-bg-raised text-fg-muted border-rule";
     }
   };
 
   return (
     <div className="space-y-4">
       {/* Event Overview */}
-      <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark">
+      <Card className="bg-bg-raised border border-rule rounded-[2px]">
         <CardHeader className="px-6 py-5">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-3 flex-1">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Users size={18} className="text-primary" />
-              </div>
               <div>
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                  Event Overview
-                </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <h3 className="text-lg font-medium text-fg">Event Overview</h3>
+                <p className="font-mono text-xs text-fg-muted">
                   {contestants.length} contestants participating
                 </p>
               </div>
@@ -302,7 +291,7 @@ function EventDetailView({
                   startContent={<Edit3 size={14} />}
                   onClick={handleEditClick}
                   isLoading={loadingEventData}
-                  className="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 h-8 min-w-0"
+                  className="text-xs text-fg-muted hover:text-fg dark:hover:text-fg px-3 h-8 min-w-0"
                 >
                   Edit
                 </Button>
@@ -346,19 +335,16 @@ function EventDetailView({
       ) : null}
 
       {shouldShowParticipants && (
-        <Card className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark overflow-hidden">
+        <Card className="bg-bg-raised border border-rule rounded-[2px] overflow-hidden">
           <CardHeader className="px-6 py-5">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-secondary/10">
-                <Users size={18} className="text-secondary" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+              <h3 className="text-lg font-medium text-fg">
                 Event Participants
               </h3>
             </div>
           </CardHeader>
 
-          <div className="divide-y divide-border dark:divide-border-dark">
+          <div className="divide-y divide-rule">
             {contestants.map((contestant, index) => {
               const isExpanded = expandedContestants.has(String(contestant.id));
 
@@ -370,7 +356,7 @@ function EventDetailView({
                 >
                   {/* Participant Row */}
                   <button
-                    className="w-full px-6 py-4 text-left hover:bg-surface dark:hover:bg-surface-dark transition-colors duration-200 focus:outline-none focus:bg-surface dark:focus:bg-surface-dark"
+                    className="w-full px-6 py-4 text-left hover:bg-bg-sunken transition-colors duration-200 focus:outline-none focus:bg-bg-sunken"
                     onClick={() => toggleContestant(String(contestant.id))}
                     aria-expanded={isExpanded}
                     aria-controls={`contestant-details-${String(contestant.id)}`}
@@ -388,17 +374,17 @@ function EventDetailView({
                         src={contestant.avatar}
                         fallback={contestant.username || "?"}
                         size="md"
-                        className="border-2 border-white dark:border-gray-700 shadow-sm flex-shrink-0"
+                        className="border-2 border-rule shadow-sm flex-shrink-0"
                       />
 
                       {/* Participant Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
                           <div>
-                            <h4 className="text-base font-semibold text-gray-900 dark:text-white">
+                            <h4 className="text-base font-semibold text-fg">
                               {formatDisplayName(contestant)}
                             </h4>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                            <p className="text-xs text-fg-muted">
                               Rank #{index + 1} • {contestant.analytics.length}{" "}
                               ecosystems
                             </p>
@@ -412,20 +398,20 @@ function EventDetailView({
                                 .map((eco, ecoIndex) => (
                                   <div
                                     key={`${eco.name}-${ecoIndex}`}
-                                    className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 dark:bg-gray-800 rounded-md flex-shrink-0"
+                                    className="flex items-center gap-1.5 px-2.5 py-1 bg-bg-sunken rounded-[2px] flex-shrink-0"
                                     title={`${eco.name}: ${eco.score}`}
                                   >
-                                    <div className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
-                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                                    <div className="w-1.5 h-1.5 bg-accent flex-shrink-0" />
+                                    <span className="text-xs font-medium text-fg whitespace-nowrap">
                                       {eco.name}
                                     </span>
-                                    <span className="text-xs font-semibold text-primary flex-shrink-0">
+                                    <span className="text-xs font-mono font-semibold text-accent flex-shrink-0 tabular-nums">
                                       {eco.score}
                                     </span>
                                   </div>
                                 ))}
                               {contestant.analytics.length > 3 && (
-                                <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                <span className="text-xs text-fg-subtle flex-shrink-0">
                                   +{contestant.analytics.length - 3}
                                 </span>
                               )}
@@ -448,21 +434,21 @@ function EventDetailView({
                                   return (
                                     <div
                                       key={`${eco.name}-${ecoIndex}`}
-                                      className="flex items-center gap-1 px-2 py-1 bg-gray-50 dark:bg-gray-800 rounded-md flex-shrink-0"
+                                      className="flex items-center gap-1 px-2 py-1 bg-bg-sunken rounded-[2px] flex-shrink-0"
                                       title={`${eco.name}: ${eco.score}`}
                                     >
-                                      <div className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
-                                      <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                                      <div className="w-1.5 h-1.5 bg-accent flex-shrink-0" />
+                                      <span className="text-xs font-medium text-fg">
                                         {abbrevName}
                                       </span>
-                                      <span className="text-xs font-semibold text-primary flex-shrink-0">
+                                      <span className="text-xs font-mono font-semibold text-accent flex-shrink-0 tabular-nums">
                                         {eco.score}
                                       </span>
                                     </div>
                                   );
                                 })}
                               {contestant.analytics.length > 3 && (
-                                <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                <span className="text-xs text-fg-subtle flex-shrink-0">
                                   +{contestant.analytics.length - 3}
                                 </span>
                               )}
@@ -470,13 +456,13 @@ function EventDetailView({
 
                             {/* Mobile: Show only count */}
                             <div className="sm:hidden">
-                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                              <span className="text-xs text-fg-muted">
                                 {contestant.analytics.length} ecosystems
                               </span>
                             </div>
 
                             {/* Expand/Collapse Icon */}
-                            <div className="flex items-center text-gray-400 dark:text-gray-500">
+                            <div className="flex items-center text-fg-subtle">
                               {isExpanded ? (
                                 <ChevronUp
                                   size={18}
@@ -498,12 +484,12 @@ function EventDetailView({
                   {isExpanded && (
                     <div
                       id={`contestant-details-${String(contestant.id)}`}
-                      className="px-6 pb-4 bg-gray-50 dark:bg-surface-elevated"
+                      className="px-6 pb-4 bg-bg-sunken"
                     >
                       <div className="space-y-4 pt-3">
                         {/* Profile Section - Full Width */}
                         <div>
-                          <h5 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                          <h5 className="text-xs font-medium text-fg-muted uppercase tracking-wider mb-2">
                             Developer Profile
                           </h5>
                           <ProfileCardWidget developer={contestant} />
@@ -516,13 +502,10 @@ function EventDetailView({
 
                         {/* Ecosystem Scores Chart - Full Width */}
                         <div>
-                          <div className="border border-border dark:border-border-dark rounded-xl p-4 bg-white dark:bg-surface-dark shadow-subtle">
+                          <div className="border border-rule rounded-[2px] p-4 bg-bg-raised">
                             <div className="flex items-center gap-2 mb-3">
-                              <Trophy
-                                size={14}
-                                className="text-gray-600 dark:text-gray-400"
-                              />
-                              <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                              <Trophy size={14} className="text-fg-muted" />
+                              <h3 className="text-sm font-medium text-fg">
                                 Ecosystem Scores
                               </h3>
                             </div>

@@ -89,7 +89,7 @@ export function EntityLink(props: AnchorHTMLAttributes<HTMLAnchorElement>) {
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-0.5 text-primary underline underline-offset-2 hover:text-primary/80"
+        className="inline-flex items-center gap-0.5 text-accent underline underline-offset-2 hover:brightness-110"
         {...rest}
       >
         {children}
@@ -109,7 +109,7 @@ export function EntityLink(props: AnchorHTMLAttributes<HTMLAnchorElement>) {
         <PopoverTrigger>
           <Link
             href={href}
-            className="text-primary underline underline-offset-2 hover:text-primary/80 font-medium"
+            className="text-accent underline underline-offset-2 hover:brightness-110 font-medium"
             {...rest}
           >
             {children}

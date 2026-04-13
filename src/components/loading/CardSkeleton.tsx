@@ -1,5 +1,3 @@
-import { Card, CardBody, Skeleton } from "@/components/ui";
-
 interface CardSkeletonProps {
   count?: number;
 }
@@ -8,20 +6,24 @@ function CardSkeleton({ count = 4 }: CardSkeletonProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
       {Array.from({ length: count }).map((_, index) => (
-        <Card
+        <div
           key={index}
-          className="bg-white dark:bg-surface-dark shadow-subtle border border-border dark:border-border-dark"
+          className="relative border border-rule bg-bg-raised rounded-[2px] p-5"
         >
-          <CardBody className="p-6">
-            <div className="flex items-center gap-4">
-              <Skeleton className="p-3 w-12 h-12 rounded-xl flex-shrink-0" />
-              <div className="flex-1">
-                <Skeleton className="h-3 w-20 mb-2 rounded" />
-                <Skeleton className="h-6 w-16 rounded" />
-              </div>
+          <span className="absolute top-0 left-0 -translate-y-1/2 translate-x-3 bg-bg px-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-fg-muted">
+            loading
+          </span>
+          <div className="flex flex-col gap-3">
+            <span className="loading-skeleton h-[11px] w-20 rounded-[2px]" />
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-2xl text-fg-muted">—</span>
+              <span
+                aria-hidden
+                className="animate-cursor inline-block h-[0.85em] w-[0.55ch] translate-y-[1px] bg-accent align-middle"
+              />
             </div>
-          </CardBody>
-        </Card>
+          </div>
+        </div>
       ))}
     </div>
   );
