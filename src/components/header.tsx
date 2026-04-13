@@ -2,10 +2,10 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { Menu, X, Github } from "lucide-react"
 import { useI18n } from "@/lib/i18n-context"
 import { LanguageSwitcher } from "@/components/language-switcher"
-import { LogoMark } from "@/components/blueprint"
 
 function XIcon({ className }: { className?: string }) {
   return (
@@ -43,10 +43,14 @@ export function Header() {
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="flex h-16 items-center gap-6">
           <Link href="/" className="flex items-center gap-2.5">
-            <LogoMark size={22} />
-            <span className="font-[family-name:var(--font-display)] text-[17px] font-bold tracking-tight text-foreground">
-              Web3Insight
-            </span>
+            <Image
+              src="/web3insight_logo.svg"
+              alt="Web3Insight"
+              width={229}
+              height={26}
+              className="h-6 w-auto"
+              priority
+            />
             <span className="hidden font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground sm:inline">
               /ai
             </span>
