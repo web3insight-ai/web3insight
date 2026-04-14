@@ -115,41 +115,39 @@ function FeatureVisual({ type }: { type: VisualType }) {
       )}
 
       {type === "growth" && (
-        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 120 60" preserveAspectRatio="none">
-          <line x1="10" y1="50" x2="110" y2="50" stroke="currentColor" strokeWidth="0.5" className="text-border-soft" />
-          <line x1="10" y1="32" x2="110" y2="32" stroke="currentColor" strokeWidth="0.5" strokeDasharray="2 2" className="text-border-soft" />
-          <line x1="10" y1="14" x2="110" y2="14" stroke="currentColor" strokeWidth="0.5" strokeDasharray="2 2" className="text-border-soft" />
-          <path
-            d="M 12 46 L 32 40 L 52 30 L 72 20 L 92 12 L 108 8"
-            stroke="currentColor"
-            strokeWidth="1.25"
-            fill="none"
-            className="text-teal-500 animate-draw"
-            style={
-              {
-                "--draw-length": 180,
-                "--draw-duration": "1.4s",
-                animationPlayState: isVisible ? "running" : "paused",
-              } as React.CSSProperties
-            }
-          />
-          {[
-            { x: 12, y: 46 },
-            { x: 52, y: 30 },
-            { x: 92, y: 12 },
-          ].map((p, i) => (
-            <circle key={i} cx={p.x} cy={p.y} r="1.5" className="fill-teal-500" />
-          ))}
-          <text x="12" y="58" className="fill-muted-foreground font-mono" style={{ fontSize: "5.5px" }}>
-            hack
-          </text>
-          <text x="52" y="58" className="fill-muted-foreground font-mono" style={{ fontSize: "5.5px" }}>
-            contrib
-          </text>
-          <text x="92" y="58" className="fill-muted-foreground font-mono" style={{ fontSize: "5.5px" }}>
-            core
-          </text>
-        </svg>
+        <div className="absolute inset-0 flex flex-col">
+          <svg className="w-full flex-1" viewBox="0 0 120 48" preserveAspectRatio="none">
+            <line x1="10" y1="40" x2="110" y2="40" stroke="currentColor" strokeWidth="0.5" className="text-border-soft" />
+            <line x1="10" y1="26" x2="110" y2="26" stroke="currentColor" strokeWidth="0.5" strokeDasharray="2 2" className="text-border-soft" />
+            <line x1="10" y1="12" x2="110" y2="12" stroke="currentColor" strokeWidth="0.5" strokeDasharray="2 2" className="text-border-soft" />
+            <path
+              d="M 12 38 L 32 33 L 52 25 L 72 17 L 92 10 L 108 6"
+              stroke="currentColor"
+              strokeWidth="1.25"
+              fill="none"
+              className="text-teal-500 animate-draw"
+              style={
+                {
+                  "--draw-length": 180,
+                  "--draw-duration": "1.4s",
+                  animationPlayState: isVisible ? "running" : "paused",
+                } as React.CSSProperties
+              }
+            />
+            {[
+              { x: 12, y: 38 },
+              { x: 52, y: 25 },
+              { x: 92, y: 10 },
+            ].map((p, i) => (
+              <circle key={i} cx={p.x} cy={p.y} r="1.5" className="fill-teal-500" />
+            ))}
+          </svg>
+          <div className="flex justify-between px-3 pb-2 font-mono text-[10px] text-muted-foreground">
+            <span>hack</span>
+            <span>contrib</span>
+            <span>core</span>
+          </div>
+        </div>
       )}
     </div>
   )
