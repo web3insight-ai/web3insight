@@ -1,16 +1,17 @@
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui";
 import {
-  Button,
-  Input,
-  Switch,
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui";
-import { Github, ExternalLink, Share2, Copy, Loader2 } from "lucide-react";
+  Github,
+  ExternalLink,
+  Share2,
+  Copy,
+  Loader2,
+  Lock,
+} from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAtom } from "jotai";
+import clsx from "clsx";
 
 import type { GitHubUser } from "../../typing";
 import { useGitHubStats } from "../../../../hooks/useGitHubStats";
@@ -255,83 +256,148 @@ export function ProfileHeader({
         </div>
 
         {analysisId && (
-          <Popover
-            placement="bottom-end"
-            showArrow
-            backdrop="transparent"
-            classNames={{
-              content: "p-4 bg-bg-raised border border-rule rounded-[2px]",
-            }}
-          >
-            <PopoverTrigger>
-              <Button
-                variant={isPublic ? "flat" : "light"}
-                color="primary"
-                size="sm"
-                startContent={
-                  shareUpdating || shareStatusLoading ? (
-                    <Loader2 size={14} className="animate-spin" />
-                  ) : (
-                    <Share2 size={14} />
-                  )
-                }
-                className="h-8 px-3 text-xs uppercase tracking-[0.12em]"
-                isDisabled={shareUpdating || shareStatusLoading}
-              >
-                {isPublic ? "public" : "share"}
-              </Button>
+          <Popover>
+            <PopoverTrigger
+              className={clsx(
+                "shrink-0 items-center gap-2 h-8 px-2.5 rounded-[2px]",
+                "font-sans text-[0.6875rem] font-medium uppercase tracking-[0.14em]",
+                "transition-colors duration-150 cursor-pointer select-none",
+                "hover:bg-bg-sunken focus-visible:bg-bg-sunken",
+                isPublic ? "text-fg" : "text-fg-muted hover:text-fg",
+                (shareUpdating || shareStatusLoading) &&
+                  "opacity-60 pointer-events-none",
+              )}
+            >
+              {shareUpdating || shareStatusLoading ? (
+                <Loader2 size={12} className="animate-spin" />
+              ) : (
+                <Share2 size={12} strokeWidth={1.75} />
+              )}
+              <span>{isPublic ? "Public" : "Share"}</span>
+              {isPublic && (
+                <span
+                  aria-hidden
+                  className="ml-0.5 size-[6px] rounded-full bg-accent"
+                />
+              )}
             </PopoverTrigger>
-            <PopoverContent>
-              <div className="w-80 flex flex-col gap-3">
-                <div className="flex flex-col gap-1">
+            <PopoverContent
+              side="bottom"
+              align="end"
+              sideOffset={10}
+              className="w-[22rem] overflow-hidden"
+            >
+              <div className="flex flex-col">
+                {/* Heading */}
+                <div className="px-5 pt-4 pb-4 flex flex-col gap-1.5">
                   <SmallCapsLabel>Share your DevInsight</SmallCapsLabel>
-                  <p className="text-xs text-fg-muted">
-                    Flip public and anyone with the link can read the full
-                    brief.
+                  <p className="text-[0.8125rem] leading-[1.5] text-fg-muted">
+                    Public access lets anyone with the link read the full brief.
                   </p>
                 </div>
-                <div className="flex items-center gap-3 border-t border-rule pt-3">
-                  <Switch
-                    color="primary"
-                    size="sm"
-                    isSelected={isPublic}
-                    onValueChange={handleShareToggle}
-                    isDisabled={shareUpdating || shareStatusLoading}
-                    aria-label="Toggle public sharing"
-                  />
-                  <span className="text-sm text-fg">Make public</span>
-                </div>
-                {isPublic && (
-                  <div className="flex flex-col gap-1.5 border-t border-rule pt-3">
-                    <SmallCapsLabel tone="subtle">Public URL</SmallCapsLabel>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        value={shareUrl}
-                        readOnly
-                        size="sm"
-                        variant="bordered"
-                        className="flex-1"
-                        classNames={{
-                          inputWrapper: "bg-bg border-rule h-8",
-                          input: "text-xs font-mono",
-                        }}
-                        aria-label="Public URL for sharing"
+
+                {/* Visibility — typographic segmented toggle */}
+                <div className="px-5 pt-3 pb-4 border-t border-rule flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <SmallCapsLabel tone="subtle">Visibility</SmallCapsLabel>
+                    {(shareUpdating || shareStatusLoading) && (
+                      <Loader2
+                        size={11}
+                        className="animate-spin text-fg-subtle"
                       />
-                      <Button
-                        variant="flat"
-                        color="primary"
-                        size="sm"
-                        onPress={handleCopyLink}
-                        startContent={<Copy size={12} />}
-                        className="h-8 px-3 text-xs"
+                    )}
+                  </div>
+                  <div
+                    role="group"
+                    aria-label="Visibility"
+                    className="grid grid-cols-2 border border-rule rounded-[2px] divide-x divide-rule overflow-hidden"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (isPublic) handleShareToggle(false);
+                      }}
+                      aria-pressed={!isPublic}
+                      disabled={shareUpdating || shareStatusLoading}
+                      className={clsx(
+                        "h-9 inline-flex items-center justify-center gap-1.5",
+                        "text-[0.6875rem] font-medium uppercase tracking-[0.14em]",
+                        "transition-colors duration-150 disabled:cursor-not-allowed",
+                        !isPublic
+                          ? "bg-fg text-bg"
+                          : "text-fg-muted hover:text-fg hover:bg-bg-sunken",
+                      )}
+                    >
+                      <Lock size={10} strokeWidth={2.25} />
+                      <span>Private</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!isPublic) handleShareToggle(true);
+                      }}
+                      aria-pressed={isPublic}
+                      disabled={shareUpdating || shareStatusLoading}
+                      className={clsx(
+                        "h-9 inline-flex items-center justify-center gap-2",
+                        "text-[0.6875rem] font-medium uppercase tracking-[0.14em]",
+                        "transition-colors duration-150 disabled:cursor-not-allowed",
+                        isPublic
+                          ? "bg-accent text-accent-fg"
+                          : "text-fg-muted hover:text-fg hover:bg-bg-sunken",
+                      )}
+                    >
+                      <span
+                        aria-hidden
+                        className={clsx(
+                          "size-[6px] rounded-full transition-opacity",
+                          isPublic ? "bg-accent-fg opacity-100" : "opacity-0",
+                        )}
+                      />
+                      <span>Public</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Public URL rail */}
+                {isPublic && (
+                  <div className="px-5 pt-3 pb-4 border-t border-rule flex flex-col gap-2 animate-fade-in">
+                    <SmallCapsLabel tone="subtle">Public URL</SmallCapsLabel>
+                    <div className="flex items-stretch border border-rule rounded-[2px] bg-bg focus-within:border-accent transition-colors">
+                      <span
+                        aria-hidden
+                        className="pl-2.5 pr-1 flex items-center font-mono text-[0.75rem] text-accent select-none"
                       >
-                        Copy
-                      </Button>
+                        ›
+                      </span>
+                      <input
+                        readOnly
+                        value={shareUrl}
+                        aria-label="Public URL"
+                        onFocus={(e) => e.currentTarget.select()}
+                        className="flex-1 min-w-0 bg-transparent py-2 pr-2 font-mono text-[0.75rem] text-fg outline-none truncate"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleCopyLink}
+                        className={clsx(
+                          "shrink-0 inline-flex items-center gap-1.5 px-3 border-l border-rule",
+                          "text-[0.6875rem] font-medium uppercase tracking-[0.14em]",
+                          "text-fg-muted hover:text-accent hover:bg-accent-subtle",
+                          "transition-colors duration-150",
+                        )}
+                      >
+                        <Copy size={11} strokeWidth={1.75} />
+                        <span>Copy</span>
+                      </button>
                     </div>
                   </div>
                 )}
+
                 {shareError && (
-                  <p className="text-xs text-danger">{shareError}</p>
+                  <div className="px-5 pb-4 -mt-1">
+                    <p className="text-[0.75rem] text-danger">{shareError}</p>
+                  </div>
                 )}
               </div>
             </PopoverContent>
