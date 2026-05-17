@@ -1,14 +1,19 @@
+import { createWeb3InsightClient } from "@web3insight/orpc-client";
 import { getSession } from "~/auth/helper/server";
 import { fetchCurrentUser } from "~/auth/repository";
 import { env } from "@/env";
 
+const RPC_URL = `${env.DATA_API_URL}/rpc`;
+
+// Reason: legacy event-analysis route shared the /custom/analysis/users/:id
+// REST surface; orpc procedure `custom.getAnalysis` is the same backend
+// lookup, so we reuse it here rather than introducing a separate procedure.
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const resolvedParams = await params;
   try {
-    // Get event ID from URL params
     const eventId = resolvedParams.id;
 
     if (!eventId) {
@@ -23,17 +28,14 @@ export async function GET(
       );
     }
 
-    // For event analysis, try user authentication first, fallback to server token
     const userResult = await fetchCurrentUser();
     let authToken: string | undefined;
 
     if (userResult.success) {
-      // Use user token if authenticated
       const session = await getSession();
       authToken = session.get("userToken") as string | undefined;
     }
 
-    // Fallback to server token for public event analysis
     if (!authToken) {
       authToken = env.DATA_API_TOKEN;
     }
@@ -50,41 +52,29 @@ export async function GET(
       );
     }
 
-    const baseUrl = env.DATA_API_URL;
-    const apiUrl = `${baseUrl}/v1/custom/analysis/users/${eventId}`;
-
-    const response = await fetch(apiUrl, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${authToken}`,
-      },
+    const { client } = createWeb3InsightClient({
+      url: RPC_URL,
+      token: authToken,
+      credentials: "omit",
     });
 
-    if (!response.ok) {
-      return Response.json(
-        {
-          success: false,
-          code: `HTTP_${response.status}`,
-          message: `HTTP ${response.status}: ${response.statusText}`,
-          data: null,
-        },
-        { status: response.status },
-      );
-    }
+    const detail = await client.custom.getAnalysis({ id: Number(eventId) });
 
-    const rawResponse = await response.json();
-
-    return Response.json(rawResponse, { status: 200 });
+    return Response.json(
+      { success: true, code: "200", message: "", data: detail },
+      { status: 200 },
+    );
   } catch (error) {
+    const status = (error as { status?: number })?.status ?? 500;
+    const message = error instanceof Error ? error.message : "Unknown error";
     return Response.json(
       {
         success: false,
-        code: "API_ERROR",
-        message: error instanceof Error ? error.message : "Unknown error",
+        code: `HTTP_${status}`,
+        message,
         data: null,
       },
-      { status: 500 },
+      { status },
     );
   }
 }

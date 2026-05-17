@@ -12,9 +12,11 @@ export const DonateRepoSchema = z.record(z.string(), z.unknown());
 
 export const DonateRepoListSchema = z.array(DonateRepoSchema);
 
+// Reason: dashboard's "submit repo for donation" form posts a single
+// `repo_full_name` (owner/repo). The backend donate service resolves
+// repo_id by name and uses the authenticated user as submitter. Earlier
+// schema authoring invented amount/tx_hash fields that the service never
+// reads — keep the contract aligned with what the route actually consumes.
 export const CreateDonateRepoInputSchema = z.object({
-  repo_id: z.number().int(),
-  repo_name: z.string().min(1),
-  amount: z.coerce.number().positive(),
-  tx_hash: z.string().optional(),
+  repo_full_name: z.string().min(1),
 });

@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
+import { createWeb3InsightClient } from "@web3insight/orpc-client";
 import { env } from "@/env";
 
+const RPC_URL = `${env.DATA_API_URL}/rpc`;
+
 /**
- * GET /api/donate/repos/[id]
- * Get a single donate repo by ID
+ * GET /api/donate/repos/[id] — fetch a single donate repo by id.
  */
 export async function GET(
   _request: Request,
@@ -24,28 +26,32 @@ export async function GET(
       );
     }
 
-    const apiUrl = `${env.DATA_API_URL}/v1/donate/repos/${id}`;
-
-    const response = await fetch(apiUrl, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${env.DATA_API_TOKEN}`,
-      },
+    const { client } = createWeb3InsightClient({
+      url: RPC_URL,
+      token: env.DATA_API_TOKEN,
+      credentials: "omit",
     });
 
-    const data = await response.json();
+    const detail = await client.donate.getDonationById({ id: Number(id) });
 
-    return NextResponse.json(data, { status: response.status });
+    return NextResponse.json({
+      success: true,
+      code: "200",
+      message: "",
+      data: detail,
+    });
   } catch (error) {
+    const status = (error as { status?: number })?.status ?? 500;
+    const message = error instanceof Error ? error.message : "Unknown error";
     console.error("[API] Get donate repo by ID error:", error);
     return NextResponse.json(
       {
         success: false,
-        code: "API_ERROR",
-        message: error instanceof Error ? error.message : "Unknown error",
+        code: `HTTP_${status}`,
+        message,
         data: null,
       },
-      { status: 500 },
+      { status },
     );
   }
 }

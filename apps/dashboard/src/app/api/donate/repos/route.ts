@@ -1,16 +1,17 @@
 import { NextResponse } from "next/server";
+import { createWeb3InsightClient } from "@web3insight/orpc-client";
 import { getSession } from "~/auth/helper/server";
 import { fetchCurrentUser } from "~/auth/repository";
 import { env } from "@/env";
 
+const RPC_URL = `${env.DATA_API_URL}/rpc`;
+
 /**
- * POST /api/donate/repos
- * Submit a repository for donation
- * Requires authentication with GitHub linked
+ * POST /api/donate/repos — submit a repo for donation listing.
+ * Requires an authenticated user; forwards to orpc.donate.createDonation.
  */
 export async function POST(request: Request) {
   try {
-    // Verify user is authenticated
     const userResult = await fetchCurrentUser();
 
     if (!userResult.success || !userResult.data) {
@@ -25,7 +26,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Get user token from session
     const session = await getSession();
     const userToken = session.get("userToken") as string | undefined;
 
@@ -41,7 +41,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Parse request body
     const body = await request.json();
     const { repo_full_name } = body;
 
@@ -57,7 +56,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Validate repo name format (owner/repo)
     const repoNameRegex = /^[\w.-]+\/[\w.-]+$/;
     if (!repoNameRegex.test(repo_full_name)) {
       return NextResponse.json(
@@ -71,71 +69,70 @@ export async function POST(request: Request) {
       );
     }
 
-    // Forward request to backend API
-    const apiUrl = `${env.DATA_API_URL}/v1/donate/repos`;
-
-    const response = await fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userToken}`,
-      },
-      body: JSON.stringify({ repo_full_name }),
+    const { client } = createWeb3InsightClient({
+      url: RPC_URL,
+      token: userToken,
+      credentials: "omit",
     });
 
-    const data = await response.json();
+    const created = await client.donate.createDonation({ repo_full_name });
 
-    return NextResponse.json(data, { status: response.status });
+    return NextResponse.json({
+      success: true,
+      code: "200",
+      message: "",
+      data: created,
+    });
   } catch (error) {
+    const status = (error as { status?: number })?.status ?? 500;
+    const message = error instanceof Error ? error.message : "Unknown error";
     console.error("[API] Donate repo error:", error);
     return NextResponse.json(
       {
         success: false,
-        code: "API_ERROR",
-        message: error instanceof Error ? error.message : "Unknown error",
+        code: `HTTP_${status}`,
+        message,
         data: null,
       },
-      { status: 500 },
+      { status },
     );
   }
 }
 
 /**
- * GET /api/donate/repos
- * List all donate repos (public)
+ * GET /api/donate/repos — list all donate repos (public).
  */
 export async function GET() {
   try {
-    const apiUrl = `${env.DATA_API_URL}/v1/donate/repos`;
-
-    const response = await fetch(apiUrl, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${env.DATA_API_TOKEN}`,
-      },
-      // Reason: Disable Next.js caching to ensure fresh data on every request
-      cache: "no-store",
+    const { client } = createWeb3InsightClient({
+      url: RPC_URL,
+      token: env.DATA_API_TOKEN,
+      credentials: "omit",
     });
 
-    const data = await response.json();
+    const list = await client.donate.listDonations();
 
-    // Reason: Add cache-control headers to prevent browser/CDN caching of stale data
-    return NextResponse.json(data, {
-      status: response.status,
-      headers: {
-        "Cache-Control": "no-store, max-age=0",
+    return NextResponse.json(
+      { success: true, code: "200", message: "", data: list },
+      {
+        // Reason: keep parity with previous handler — prevent CDN/browser
+        // caching since donations change frequently and stale lists confuse
+        // contributors checking their submission.
+        headers: { "Cache-Control": "no-store, max-age=0" },
       },
-    });
+    );
   } catch (error) {
+    const status = (error as { status?: number })?.status ?? 500;
+    const message = error instanceof Error ? error.message : "Unknown error";
     console.error("[API] List donate repos error:", error);
     return NextResponse.json(
       {
         success: false,
-        code: "API_ERROR",
-        message: error instanceof Error ? error.message : "Unknown error",
+        code: `HTTP_${status}`,
+        message,
         data: null,
       },
-      { status: 500 },
+      { status },
     );
   }
 }

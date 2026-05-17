@@ -1,3 +1,4 @@
+import { createWeb3InsightClient } from "@web3insight/orpc-client";
 import { getSession } from "~/auth/helper/server";
 import { fetchCurrentUser } from "~/auth/repository";
 import { env } from "@/env";
@@ -5,6 +6,8 @@ import { env } from "@/env";
 interface ShareRequestBody {
   share?: boolean;
 }
+
+const RPC_URL = `${env.DATA_API_URL}/rpc`;
 
 export async function POST(
   request: Request,
@@ -54,54 +57,37 @@ export async function POST(
       );
     }
 
-    const apiUrl = `${env.DATA_API_URL}/v1/custom/analysis/users/${analysisId}/share`;
-
-    const response = await fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${authToken}`,
-      },
-      body: JSON.stringify({ share }),
+    const { client } = createWeb3InsightClient({
+      url: RPC_URL,
+      token: authToken,
+      credentials: "omit",
     });
 
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => "");
-      return Response.json(
-        {
-          success: false,
-          code: `HTTP_${response.status}`,
-          message:
-            errorText || `HTTP ${response.status}: ${response.statusText}`,
-          data: null,
-        },
-        { status: response.status },
-      );
-    }
-
-    let data: unknown = null;
-    if (response.status !== 204) {
-      data = await response.json().catch(() => null);
-    }
+    await client.custom.shareAnalysis({
+      id: Number(analysisId),
+      data: { share },
+    });
 
     return Response.json(
       {
         success: true,
         code: "SUCCESS",
         message: share ? "Analysis shared publicly" : "Analysis made private",
-        data,
+        data: null,
       },
       { status: 200 },
     );
   } catch (error) {
+    const status = (error as { status?: number })?.status ?? 500;
+    const message = error instanceof Error ? error.message : "Unknown error";
     return Response.json(
       {
         success: false,
-        code: "API_ERROR",
-        message: error instanceof Error ? error.message : "Unknown error",
+        code: `HTTP_${status}`,
+        message,
         data: null,
       },
-      { status: 500 },
+      { status },
     );
   }
 }
