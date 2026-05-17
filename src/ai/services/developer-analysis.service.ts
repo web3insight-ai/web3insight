@@ -189,8 +189,7 @@ export class DeveloperAnalysisService {
     // 计算账号年龄
     const yearsFromCreate = (
       Math.round(
-        ((now.getTime() - createdAt.getTime()) /
-          (1000 * 60 * 60 * 24 * 365)) *
+        ((now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24 * 365)) *
           10,
       ) / 10
     ).toString();
@@ -284,7 +283,7 @@ export class DeveloperAnalysisService {
         chinese: parsed.chinese || '',
         english: parsed.english || '',
       };
-    } catch (parseError) {
+    } catch {
       this.logger.warn('Failed to parse AI response as JSON, using raw text');
       return {
         chinese: text,

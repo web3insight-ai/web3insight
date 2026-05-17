@@ -251,7 +251,7 @@ export class InitDataService {
               .execute();
           } else {
             console.error(`Error updating ${repo.upstream_repo_name}:`, error);
-            throw new Error('Unexpected error');
+            throw new Error('Unexpected error', { cause: error });
           }
           console.error(`Error updating ${repo.upstream_repo_name}:`, error);
         }
@@ -281,7 +281,8 @@ export class InitDataService {
     );
 
     const reposToUpsert = upstreamRepos
-      .filter((repo) => {
+      .filter((repo): repo is typeof repo & { repo_id: string } => {
+        if (!repo.repo_id) return false;
         const existing = existingRepoMap.get(repo.repo_id);
         return (
           !existing ||
@@ -303,9 +304,9 @@ export class InitDataService {
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-expect-error
           repo_name: repo.api.owner.login + '/' + repo.api.name,
-          upstream_marks: repo.upstream_marks,
-          api: repo.api,
-          api_updated_at: repo.api_updated_at,
+          upstream_marks: repo.upstream_marks ?? {},
+          api: repo.api ?? {},
+          api_updated_at: repo.api_updated_at ?? new Date(),
         };
       });
 

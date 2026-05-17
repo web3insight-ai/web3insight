@@ -58,6 +58,5 @@ export class CacheDataService {
     const result = await this.getCacheData(CacheKey.RepoTotal, 'Test');
 
     console.log('result', result);
-    return null;
   }
 }

@@ -264,14 +264,17 @@ ORDER BY ecosystem;`;
 
       const res = await this.reposService.getRepoInfo(ids);
 
-      const data: QueryTopStarRepo[] = row.top_repositories.map((row) => {
+      const data: QueryTopStarRepo[] = row.top_repositories.flatMap((row) => {
         const api = res.find((r) => r.id === row.repo_id);
-        return {
-          ...row,
-          star_count: api.stargazers_count,
-          forks_count: api.forks_count,
-          open_issues_count: api.open_issues_count,
-        };
+        if (!api) return [];
+        return [
+          {
+            ...row,
+            star_count: api.stargazers_count,
+            forks_count: api.forks_count,
+            open_issues_count: api.open_issues_count,
+          },
+        ];
       });
       data.sort((a, b) => b.star_count - a.star_count);
       const cacheData = new RepoRankListDto();
@@ -324,15 +327,18 @@ FROM top200_repo tr
 
       const res = await this.reposService.getRepoInfo(ids);
 
-      const data: QueryTopStarRepo[] = row.top_repositories.map((row) => {
+      const data: QueryTopStarRepo[] = row.top_repositories.flatMap((row) => {
         const api = res.find((r) => r.id === row.repo_id);
-        return {
-          ...row,
-          star_count: api.stargazers_count,
-          forks_count: api.forks_count,
-          open_issues_count: api.open_issues_count,
-          description: api.description,
-        };
+        if (!api) return [];
+        return [
+          {
+            ...row,
+            star_count: api.stargazers_count,
+            forks_count: api.forks_count,
+            open_issues_count: api.open_issues_count,
+            description: api.description,
+          },
+        ];
       });
       const cacheData = new RepoRankListDto();
       cacheData.list = data;
@@ -404,15 +410,18 @@ ORDER BY ecosystem;`;
 
       const res = await this.reposService.getRepoInfo(ids);
 
-      const data: QueryTopStarRepo[] = row.top_repositories.map((row) => {
+      const data: QueryTopStarRepo[] = row.top_repositories.flatMap((row) => {
         const api = res.find((r) => r.id === row.repo_id);
-        return {
-          ...row,
-          star_count: api.stargazers_count,
-          forks_count: api.forks_count,
-          open_issues_count: api.open_issues_count,
-          description: api.description,
-        };
+        if (!api) return [];
+        return [
+          {
+            ...row,
+            star_count: api.stargazers_count,
+            forks_count: api.forks_count,
+            open_issues_count: api.open_issues_count,
+            description: api.description,
+          },
+        ];
       });
       const cacheData = new RepoRankListDto();
       cacheData.list = data;

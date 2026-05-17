@@ -401,6 +401,5 @@ WHERE r.repo_id = rj.repo_id;
     await this.actorsTotalNew(ecoTypes);
     await this.ecoTotal();
     await this.actorCountryStats(ecoTypes);
-    return null;
   }
 }

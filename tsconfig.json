@@ -8,6 +8,7 @@
     "allowSyntheticDefaultImports": true,
     "target": "ES2023",
     "strict": false,
+    "strictNullChecks": true,
     "noImplicitAny": false,
     "noUncheckedIndexedAccess": false,
     "sourceMap": true,

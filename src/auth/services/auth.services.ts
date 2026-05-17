@@ -15,8 +15,7 @@ import { Command, Console } from 'nestjs-console';
 import { ExtraClaims, JwtPayload } from '../auth.jwt.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ethers } from 'ethers';
-import { PrivyClient } from '@privy-io/node';
-import { LinkedAccount } from '@privy-io/node/resources/users';
+import { PrivyClient, type LinkedAccount } from '@privy-io/node';
 import { UsersService } from '@/data/services/users.services';
 import { GithubService } from '@/api/services/github.services';
 import { join } from 'path';
@@ -65,10 +64,12 @@ export class AuthService {
   ) {}
 
   private createPrivyClient() {
-    return new PrivyClient({
-      appId: this.configService.get<string>('PRIVY_APP_ID'),
-      appSecret: this.configService.get<string>('PRIVY_APP_SECRET'),
-    });
+    const appId = this.configService.get<string>('PRIVY_APP_ID');
+    const appSecret = this.configService.get<string>('PRIVY_APP_SECRET');
+    if (!appId || !appSecret) {
+      throw new Error('Privy credentials not configured');
+    }
+    return new PrivyClient({ appId, appSecret });
   }
 
   async login(body: LoginReqDto) {
@@ -288,7 +289,7 @@ export class AuthService {
     if (Array.isArray(updatePayload.user_custom_labels)) {
       updatePayload.user_custom_labels = JSON.stringify(
         updatePayload.user_custom_labels,
-      ) as Json;
+      );
     }
 
     if (Object.keys(updatePayload).length === 0) {
@@ -350,7 +351,7 @@ export class AuthService {
     if (Array.isArray(updatePayload.user_custom_labels)) {
       updatePayload.user_custom_labels = JSON.stringify(
         updatePayload.user_custom_labels,
-      ) as Json;
+      );
     }
 
     updatePayload.user_info_type = tag;
@@ -546,7 +547,8 @@ export class AuthService {
 
     if (!userResponse.data.email) {
       const email = await client.users.listEmailsForAuthenticatedUser();
-      userResponse.data.email = email.data.find((e: any) => e.primary)?.email;
+      userResponse.data.email =
+        email.data.find((e: any) => e.primary)?.email ?? null;
     }
 
     const token = tokenData;
@@ -555,7 +557,7 @@ export class AuthService {
       id: String(userResponse.data.id),
       username: userResponse.data.login,
       avatar: userResponse.data.avatar_url,
-      email: userResponse.data.email,
+      email: userResponse.data.email ?? undefined,
     };
 
     return { token, data };
@@ -816,7 +818,7 @@ export class AuthService {
   async getPrivyUserBindings(userDid: string): Promise<{
     user_id: string;
     linked_accounts: LinkedAccount[];
-  }> {
+  } | null> {
     if (!userDid) {
       return null;
     }
@@ -1126,7 +1128,7 @@ export class AuthService {
       const userId = user.user_id == null ? '' : String(user.user_id);
       const privyDid = userId ? privyBindByUid.get(userId) : undefined;
 
-      let github = '';
+      let github: string;
       if (privyDid) {
         const bindings = await getCachedBindings(privyDid);
         const githubAccount = bindings?.linked_accounts.find(
@@ -1240,7 +1242,7 @@ export class AuthService {
       const userId = user.user_id == null ? '' : String(user.user_id);
       const privyDid = userId ? privyBindByUid.get(userId) : undefined;
 
-      let github = '';
+      let github: string;
       if (privyDid) {
         const bindings = await getCachedBindings(privyDid);
         const githubAccount = bindings?.linked_accounts.find(
@@ -1939,7 +1941,7 @@ export class AuthService {
             .insertInto('api.auth_users_binds')
             .values({
               bind_key: newHandle,
-              bind_openid: String(githubAccount.id ?? ''),
+              bind_openid: githubAccount.subject ?? '',
               bind_secret: '',
               bind_type: 'github',
               bind_uid: Number(uid),

@@ -112,14 +112,13 @@ export class UsersService {
         batch.map(async (username) => {
           try {
             if (!username) {
-              fail.push(username);
               return null;
             }
             const clinet = await this.tokenPoolService.getClient();
             const response = await clinet.users.getByUsername({ username });
             return { username, data: response.data };
           } catch (error) {
-            fail.push(username);
+            if (username) fail.push(username);
             console.error(`Failed to process user ${username}:`, error);
             return null;
           }
@@ -629,9 +628,7 @@ export class UsersService {
         language,
         count,
         percentage:
-          totalUsers > 0
-            ? Number(((count / totalUsers) * 100).toFixed(2))
-            : 0,
+          totalUsers > 0 ? Number(((count / totalUsers) * 100).toFixed(2)) : 0,
       }))
       .sort(
         (a, b) => b.count - a.count || a.language.localeCompare(b.language),

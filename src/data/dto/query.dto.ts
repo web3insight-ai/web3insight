@@ -12,7 +12,7 @@ export class QueryTopStarRepo {
   forks_count: number = 0;
   open_issues_count: number = 0;
   contributor_count: number;
-  description: string;
+  description: string | null;
   star_growth_7d: number;
   developer_count_last_7_days: number;
 }
