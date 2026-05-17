@@ -35,13 +35,15 @@ export function normalizeRestfulResponse<T>(response: unknown): ResponseResult<T
 
   // Normalize from different API response formats
   if (response && typeof response === 'object' && ('status' in response || 'ok' in response)) {
-    const responseObj = response as any;
+    const responseObj = response as Record<string, unknown>;
     if (responseObj.status === 'success' || responseObj.ok) {
       return generateSuccessResponse(responseObj.data || response);
     }
 
     if (responseObj.status === 'error' || responseObj.error) {
-      return generateFailedResponse(responseObj.message || 'Request failed', responseObj.code || '400');
+      const message = typeof responseObj.message === 'string' ? responseObj.message : 'Request failed';
+      const code = typeof responseObj.code === 'string' ? responseObj.code : '400';
+      return generateFailedResponse(message, code);
     }
   }
 

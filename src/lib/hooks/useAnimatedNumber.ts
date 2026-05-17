@@ -55,6 +55,7 @@ export function useAnimatedNumber(
   const isInView = waitForInView ? isInViewResult : true
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- animation effect intentionally drives React state from a non-React side channel (interval timer) */
     // Reset when loading
     if (isLoading) {
       setDisplayValue(0)
@@ -94,6 +95,7 @@ export function useAnimatedNumber(
     }, duration / steps)
 
     return () => clearInterval(timer)
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [targetValue, isLoading, isInView, duration])
 
   return { displayValue, isAnimating, ref, isInView }
