@@ -16,25 +16,23 @@ function requireUser(user: { id: number } | undefined): { id: number } {
 export const createDonationHandler = os.donate.createDonation.handler(
   async ({ input, context }) => {
     const user = requireUser(context.user);
-    return (await context.container.services.donate.create(
+    return await context.container.services.donate.create(
       input.repo_full_name,
       String(user.id),
-    )) as never;
+    );
   },
 );
 
 export const listDonationsHandler = os.donate.listDonations.handler(
   async ({ context }) => {
-    return (await context.container.services.donate.list()) as never;
+    return await context.container.services.donate.list();
   },
 );
 
 export const getDonationByIdHandler = os.donate.getDonationById.handler(
   async ({ input, context }) => {
     try {
-      return (await context.container.services.donate.detail(
-        input.id,
-      )) as never;
+      return await context.container.services.donate.detail(input.id);
     } catch (err) {
       throw new ORPCError('NOT_FOUND', {
         message: err instanceof Error ? err.message : 'Repository not found',
@@ -46,9 +44,7 @@ export const getDonationByIdHandler = os.donate.getDonationById.handler(
 export const getDonationByNameHandler = os.donate.getDonationByName.handler(
   async ({ input, context }) => {
     try {
-      return (await context.container.services.donate.detailByName(
-        input.name,
-      )) as never;
+      return await context.container.services.donate.detailByName(input.name);
     } catch (err) {
       throw new ORPCError('NOT_FOUND', {
         message: err instanceof Error ? err.message : 'Repository not found',

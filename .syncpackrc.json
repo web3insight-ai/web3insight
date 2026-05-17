@@ -1,5 +1,4 @@
 {
-  "dependencyTypes": ["prod", "dev", "peer"],
   "indent": "  ",
   "sortFirst": ["name", "version", "type", "private", "packageManager", "engines", "scripts", "dependencies", "devDependencies", "peerDependencies"],
   "versionGroups": [

@@ -28,7 +28,7 @@ async function getCache(
 // strict for new writes while staying compatible with historical rows.
 function coerceTotal(data: unknown): { total: number } {
   if (data && typeof data === 'object' && 'total' in data) {
-    const t = (data as { total: unknown }).total;
+    const t = data.total;
     return { total: typeof t === 'number' ? t : Number(t ?? 0) };
   }
   return ZERO_TOTAL;
@@ -38,11 +38,14 @@ function coerceDateList(data: unknown): {
   list: Array<{ date: string; total: number }>;
 } {
   if (data && typeof data === 'object' && 'list' in data) {
-    const list = (data as { list: unknown }).list;
+    const list = data.list;
     if (Array.isArray(list)) {
       return {
         list: list.map((row) => ({
-          date: String((row as { date: unknown }).date ?? ''),
+          date:
+            typeof (row as { date?: unknown }).date === 'string'
+              ? (row as { date: string }).date
+              : '',
           total: Number((row as { total: unknown }).total ?? 0),
         })),
       };
@@ -63,7 +66,10 @@ function coerceCountryList(data: unknown): {
       return {
         total: typeof t === 'number' ? t : Number(t ?? 0),
         list: list.map((row) => ({
-          country: String((row as { country: unknown }).country ?? ''),
+          country:
+            typeof (row as { country?: unknown }).country === 'string'
+              ? (row as { country: string }).country
+              : '',
           total: Number((row as { total: unknown }).total ?? 0),
         })),
       };

@@ -18,7 +18,7 @@
     "@radix-ui/react-slot": "1.2.4",
     "@t3-oss/env-nextjs": "^0.13.11",
     "@tanstack/react-query": "catalog:",
-    "@vercel/analytics": "2.0.1",
+    "@vercel/analytics": "^2.0.1",
     "@web3insight/api-contract": "workspace:*",
     "@web3insight/env-base": "workspace:*",
     "@web3insight/orpc-client": "workspace:*",

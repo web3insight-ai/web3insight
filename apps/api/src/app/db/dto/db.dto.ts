@@ -6,7 +6,7 @@ import {
   TotalDto,
 } from '@/api/dto/api.dto';
 import type { ColumnType } from 'kysely';
-import { RepoInfo } from '../pool.services';
+import type { RepoInfo } from '@/services/token-pool.service';
 
 export type Generated<T> =
   T extends ColumnType<infer S, infer I, infer U>

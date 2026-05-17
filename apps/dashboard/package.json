@@ -14,7 +14,7 @@
     "typecheck": "tsc --noEmit || true"
   },
   "dependencies": {
-    "@ai-sdk/azure": "^3.0.65",
+    "@ai-sdk/azure": "catalog:",
     "@ai-sdk/openai": "catalog:",
     "@ai-sdk/react": "catalog:",
     "@assistant-ui/react": "^0.14.5",
@@ -34,7 +34,7 @@
     "@streamdown/code": "^1.1.1",
     "@streamdown/math": "^1.0.2",
     "@streamdown/mermaid": "^1.0.2",
-    "@t3-oss/env-nextjs": "0.13.11",
+    "@t3-oss/env-nextjs": "^0.13.11",
     "@tanstack/react-query": "catalog:",
     "@web3insight/api-contract": "workspace:*",
     "@web3insight/auth-privy": "workspace:*",
@@ -67,7 +67,7 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-hook-form": "catalog:",
-    "react-markdown": "^10.1.0",
+    "react-markdown": "catalog:",
     "react-responsive": "^10.0.1",
     "recharts": "catalog:",
     "remark-gfm": "^4.0.1",

@@ -23,15 +23,15 @@
     "clean": "turbo run clean && rm -rf node_modules .turbo apps/*/node_modules apps/*/.turbo apps/*/.next apps/*/dist packages/*/node_modules packages/*/.turbo packages/*/dist config/*/node_modules config/*/.turbo",
     "console:dev": "pnpm --filter @web3insight/api console:dev",
     "console:prod": "pnpm --filter @web3insight/api console:prod",
-    "syncpack:lint": "syncpack lint",
-    "syncpack:fix": "syncpack fix-mismatches",
+    "syncpack:lint": "syncpack lint --dependency-types prod,dev,peer",
+    "syncpack:fix": "syncpack fix",
     "prepare": "husky || exit 0"
   },
   "devDependencies": {
-    "husky": "9.1.7",
-    "lint-staged": "17.0.5",
-    "syncpack": "15.1.2",
-    "turbo": "2.9.14"
+    "husky": "catalog:",
+    "lint-staged": "catalog:",
+    "syncpack": "catalog:",
+    "turbo": "catalog:"
   },
   "lint-staged": {
     "apps/api/**/*.{js,ts}": "pnpm -C apps/api exec eslint --cache --fix",
