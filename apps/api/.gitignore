@@ -3,6 +3,10 @@
 /node_modules
 /build
 
+# esbuild bundled function outputs (built by scripts/bundle-functions.ts)
+api/hono.js
+api/cron/*.js
+
 # Logs
 logs
 *.log

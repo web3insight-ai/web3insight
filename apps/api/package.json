@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build",
+    "build": "tsx scripts/bundle-functions.ts",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -76,6 +76,8 @@
     "@types/pg-cursor": "^2.7.2",
     "@types/supertest": "^7.2.0",
     "dotenv": "^17.4.2",
+    "esbuild": "^0.24.2",
+    "tsx": "^4.22.1",
     "eslint": "9.39.4",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",

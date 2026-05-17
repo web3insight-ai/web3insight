@@ -1,13 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "cd ../.. && pnpm turbo build --filter=@web3insight/api",
-  "outputDirectory": "dist",
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
   "framework": null,
   "functions": {
-    "api/index.ts": { "maxDuration": 60, "memory": 1024 },
-    "api/hono.ts": { "maxDuration": 60, "memory": 1024 },
-    "api/cron/**/*.ts": { "maxDuration": 300, "memory": 512 }
+    "api/hono.js": { "maxDuration": 60, "memory": 1024 },
+    "api/cron/**/*.js": { "maxDuration": 300, "memory": 512 }
   },
   "crons": [
     { "path": "/api/cron/cache-clear", "schedule": "0 4 * * *" }
@@ -18,72 +16,8 @@
       "destination": "/api/cron/:path*"
     },
     {
-      "source": "/doc/:path*",
-      "destination": "/api/hono?path=/doc/:path*"
-    },
-    {
-      "source": "/openapi.json",
-      "destination": "/api/hono?path=/openapi.json"
-    },
-    {
-      "source": "/v1/auth/:path*",
-      "destination": "/api?path=/v1/auth/:path*"
-    },
-    {
-      "source": "/v1/user/:path*",
-      "destination": "/api?path=/v1/user/:path*"
-    },
-    {
-      "source": "/v2/user/:path*",
-      "destination": "/api?path=/v2/user/:path*"
-    },
-    {
-      "source": "/v1/magic",
-      "destination": "/api?path=/v1/magic"
-    },
-    {
-      "source": "/v1/bind/:path*",
-      "destination": "/api?path=/v1/bind/:path*"
-    },
-    {
-      "source": "/v1/privy/:path*",
-      "destination": "/api?path=/v1/privy/:path*"
-    },
-    {
-      "source": "/v1/openbuild/:path*",
-      "destination": "/api?path=/v1/openbuild/:path*"
-    },
-    {
-      "source": "/v1/login/:path*",
-      "destination": "/api?path=/v1/login/:path*"
-    },
-    {
-      "source": "/v1/ai/:path*",
-      "destination": "/api?path=/v1/ai/:path*"
-    },
-    {
-      "source": "/rpc/auth/:path*",
-      "destination": "/api?path=/rpc/auth/:path*"
-    },
-    {
-      "source": "/rpc/:path*",
-      "destination": "/api/hono?path=/rpc/:path*"
-    },
-    {
-      "source": "/v1/:path*",
-      "destination": "/api/hono?path=/v1/:path*"
-    },
-    {
-      "source": "/v2/:path*",
-      "destination": "/api/hono?path=/v2/:path*"
-    },
-    {
-      "source": "/health",
-      "destination": "/api/hono?path=/health"
-    },
-    {
       "source": "/(.*)",
-      "destination": "/api?path=/$1"
+      "destination": "/api/hono?path=/$1"
     }
   ]
 }
