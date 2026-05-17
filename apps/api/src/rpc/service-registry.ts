@@ -47,7 +47,9 @@ export function setRegistry(registry: ServiceRegistry): void {
 }
 export function getRegistry(): ServiceRegistry {
   if (!_registry) {
-    throw new Error('ServiceRegistry not initialized — rpc.module bootstrap missing');
+    throw new Error(
+      'ServiceRegistry not initialized — rpc.module bootstrap missing',
+    );
   }
   return _registry;
 }

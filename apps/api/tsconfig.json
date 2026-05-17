@@ -14,7 +14,6 @@
     "noUncheckedIndexedAccess": false,
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "./src",
     "baseUrl": "./",
     "incremental": true,
     "forceConsistentCasingInFileNames": true,
@@ -23,5 +22,7 @@
     "paths": {
       "@/*": ["./src/*"]
     }
-  }
+  },
+  "include": ["src/**/*", "api/**/*"],
+  "exclude": ["dist", "node_modules", "test", "**/*.spec.ts"]
 }

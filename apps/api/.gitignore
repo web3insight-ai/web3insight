@@ -3,6 +3,10 @@
 /node_modules
 /build
 
+# esbuild bundled function outputs (built by scripts/bundle-functions.ts)
+api/hono.js
+api/cron/*.js
+
 # Logs
 logs
 *.log
@@ -60,3 +64,4 @@ service-account-key.json
 
 eco.jsonl
 .vscode/*
+.vercel

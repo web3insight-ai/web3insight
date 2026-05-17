@@ -1,16 +1,21 @@
 import { oc } from '@orpc/contract';
 import { z } from 'zod';
 import {
-  OAuthLoginInputSchema,
   PrivyTokenAuthInputSchema,
   AuthTokenResponseSchema,
   UserPublicSchema,
   UpdateUserInputSchema,
   UpdateUserExtraInputSchema,
-  BindWalletInputSchema,
   OpenBuildBindInputSchema,
 } from '../schemas/auth.js';
 import { SuccessResponseSchema, PositiveIdSchema } from '../schemas/shared.js';
+
+/**
+ * Auth contract — Privy-only login + user profile + dev-card OpenBuild
+ * binding. Legacy /v1/auth/login/oauth (GitHub direct), /v1/auth/magic, and
+ * /v1/auth/bind/wallet have been dropped: Privy handles GitHub/wallet on the
+ * client and exchanges identity tokens for backend JWTs via privyTokenAuth.
+ */
 
 const TagOrIdParamSchema = z.object({
   tag: z.string(),
@@ -22,16 +27,8 @@ const TagAndIdParamSchema = z.object({
 });
 
 export const authContract = oc.tag('Auth').router({
-  /** POST /v1/login/oauth */
-  oauthLogin: oc
-    .route({ method: 'POST', path: '/login/oauth' })
-    .input(OAuthLoginInputSchema)
-    .output(AuthTokenResponseSchema),
-
-  /** GET /v1/user — current authenticated user */
-  me: oc
-    .route({ method: 'GET', path: '/user' })
-    .output(UserPublicSchema),
+  /** POST /v1/user — current authenticated user */
+  me: oc.route({ method: 'GET', path: '/user' }).output(UserPublicSchema),
 
   /** GET /v1/user/info/:tag/extra */
   getUserExtra: oc
@@ -69,24 +66,13 @@ export const authContract = oc.tag('Auth').router({
     .input(UpdateUserInputSchema)
     .output(SuccessResponseSchema),
 
-  /** GET /v1/magic */
-  getMagic: oc
-    .route({ method: 'GET', path: '/magic' })
-    .output(z.object({ magic: z.string() })),
-
-  /** POST /v1/bind/wallet */
-  bindWallet: oc
-    .route({ method: 'POST', path: '/bind/wallet' })
-    .input(BindWalletInputSchema)
-    .output(SuccessResponseSchema),
-
-  /** POST /v1/privy/token/auth */
+  /** POST /v1/privy/token/auth — exchange Privy identity token for backend JWT */
   privyTokenAuth: oc
     .route({ method: 'POST', path: '/privy/token/auth' })
     .input(PrivyTokenAuthInputSchema)
     .output(AuthTokenResponseSchema),
 
-  /** POST /v1/bind/openbuild */
+  /** POST /v1/bind/openbuild — dev-card OpenBuild OAuth bind */
   bindOpenBuild: oc
     .route({ method: 'POST', path: '/bind/openbuild' })
     .input(OpenBuildBindInputSchema)

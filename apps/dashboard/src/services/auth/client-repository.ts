@@ -1,14 +1,8 @@
 "use client";
 
 import type { ResponseResult } from "@/types";
-import type {
-  ApiUser,
-  ApiAuthResponse,
-  MagicResponse,
-  WalletBindResponse,
-} from "./typing";
+import type { ApiUser, ApiAuthResponse } from "./typing";
 
-// Helper for API calls
 async function apiCall<T>(
   url: string,
   options?: RequestInit,
@@ -21,17 +15,6 @@ async function apiCall<T>(
     },
   });
   return res.json();
-}
-
-// Client-only versions of auth functions that make API calls
-
-async function signInWithGitHub(
-  code: string,
-): Promise<ResponseResult<ApiAuthResponse>> {
-  return apiCall("/api/auth/login", {
-    method: "POST",
-    body: JSON.stringify({ code, clientSide: true }),
-  });
 }
 
 async function signInWithPrivy(
@@ -54,26 +37,4 @@ async function fetchCurrentUser(): Promise<ResponseResult<ApiUser>> {
   return apiCall("/api/auth/me");
 }
 
-async function fetchMagic(): Promise<ResponseResult<MagicResponse>> {
-  return apiCall("/api/auth/magic");
-}
-
-async function bindWallet(params: {
-  signature: string;
-  message: string;
-  address: string;
-}): Promise<ResponseResult<WalletBindResponse>> {
-  return apiCall("/api/auth/bind/wallet", {
-    method: "POST",
-    body: JSON.stringify(params),
-  });
-}
-
-export {
-  signInWithGitHub,
-  signInWithPrivy,
-  signOut,
-  fetchCurrentUser,
-  fetchMagic,
-  bindWallet,
-};
+export { signInWithPrivy, signOut, fetchCurrentUser };

@@ -1,11 +1,5 @@
 import { z } from 'zod';
 
-/** OAuth login request (GitHub/etc). */
-export const OAuthLoginInputSchema = z.object({
-  type: z.string().default('github'),
-  code: z.string().min(1),
-});
-
 export const PrivyTokenAuthInputSchema = z.object({
   id_token: z.string().min(1),
 });
@@ -36,12 +30,6 @@ export const UpdateUserInputSchema = z.object({
 
 export const UpdateUserExtraInputSchema = z.object({
   user_extra: z.record(z.string(), z.unknown()),
-});
-
-export const BindWalletInputSchema = z.object({
-  address: z.string().min(1),
-  magic: z.string().min(1),
-  signature: z.string().min(1),
 });
 
 export const OpenBuildBindInputSchema = z.object({

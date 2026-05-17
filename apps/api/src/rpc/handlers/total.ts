@@ -25,32 +25,46 @@ export const reposHandler = os.total.repos.handler(async ({ input }) => {
 
 export const actorsHandler = os.total.actors.handler(async ({ input }) => {
   // Contract uses lowercase 'core'; legacy DTO uses ActorsScopeType.Core ('Core')
-  const key = input.scope === 'core' ? CacheKey.ActorCoreTotal : CacheKey.ActorTotal;
+  const key =
+    input.scope === 'core' ? CacheKey.ActorCoreTotal : CacheKey.ActorTotal;
   const data = await getCache(key, input.eco_name);
   return (data ?? ZERO_TOTAL) as { total: number };
 });
 
-export const actorsLastQuarterNewHandler = os.total.actorsLastQuarterNew.handler(async ({ input }) => {
-  const data = await getCache(CacheKey.ActorTotalNew, input.eco_name);
-  return (data ?? ZERO_TOTAL) as { total: number };
-});
+export const actorsLastQuarterNewHandler =
+  os.total.actorsLastQuarterNew.handler(async ({ input }) => {
+    const data = await getCache(CacheKey.ActorTotalNew, input.eco_name);
+    return (data ?? ZERO_TOTAL) as { total: number };
+  });
 
 export const ecosystemsHandler = os.total.ecosystems.handler(async () => {
   const data = await getCache(CacheKey.EcoTotal, ECO_ALL);
   return (data ?? ZERO_TOTAL) as { total: number };
 });
 
-export const actorsByDateHandler = os.total.actorsByDate.handler(async ({ input }) => {
-  // Contract enum value 'month' matches StatsPeriod.MONTH ('month')
-  const key = input.period === 'month' ? CacheKey.ActorMonthTotal : CacheKey.ActorWeekTotal;
-  const data = await getCache(key, input.eco_name);
-  return (data ?? { list: [] }) as { list: Array<{ date: string; total: number }> };
-});
+export const actorsByDateHandler = os.total.actorsByDate.handler(
+  async ({ input }) => {
+    // Contract enum value 'month' matches StatsPeriod.MONTH ('month')
+    const key =
+      input.period === 'month'
+        ? CacheKey.ActorMonthTotal
+        : CacheKey.ActorWeekTotal;
+    const data = await getCache(key, input.eco_name);
+    return (data ?? { list: [] }) as {
+      list: Array<{ date: string; total: number }>;
+    };
+  },
+);
 
-export const actorsByCountryHandler = os.total.actorsByCountry.handler(async ({ input }) => {
-  const data = await getCache(CacheKey.ActorCountryStats, input.eco_name);
-  return (data ?? { total: 0, list: [] }) as { total: number; list: Array<{ country: string; total: number }> };
-});
+export const actorsByCountryHandler = os.total.actorsByCountry.handler(
+  async ({ input }) => {
+    const data = await getCache(CacheKey.ActorCountryStats, input.eco_name);
+    return (data ?? { total: 0, list: [] }) as {
+      total: number;
+      list: Array<{ country: string; total: number }>;
+    };
+  },
+);
 
 export const totalRouter = os.total.router({
   repos: reposHandler,

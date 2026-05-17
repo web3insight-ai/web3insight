@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter } from '@nestjs/platform-express';
@@ -13,9 +12,13 @@ async function bootstrap() {
   if (cachedHandler) return cachedHandler;
 
   const expressApp = express();
-  const app = await NestFactory.create(AppModule, new ExpressAdapter(expressApp), {
-    logger: ['error', 'warn', 'log'],
-  });
+  const app = await NestFactory.create(
+    AppModule,
+    new ExpressAdapter(expressApp),
+    {
+      logger: ['error', 'warn', 'log'],
+    },
+  );
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -35,5 +38,5 @@ async function bootstrap() {
 
 export default async function handler(req: any, res: any) {
   const fn = await bootstrap();
-  return fn(req, res);
+  return (fn as any)(req, res);
 }

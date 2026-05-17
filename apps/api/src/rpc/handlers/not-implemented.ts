@@ -7,9 +7,10 @@ import { ORPCError } from '@orpc/server';
  * during the migration window.
  */
 export function notImplementedHandler() {
-  return async () => {
+  return () => {
     throw new ORPCError('NOT_IMPLEMENTED', {
-      message: 'This RPC procedure is not yet migrated. Use the legacy REST endpoint.',
+      message:
+        'This RPC procedure is not yet migrated. Use the legacy REST endpoint.',
     });
   };
 }
