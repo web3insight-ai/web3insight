@@ -139,6 +139,12 @@
       "skillPath": "skills/troubleshooting-guide/SKILL.md",
       "computedHash": "b1685a2eb8561176de9df1ef845671946733227c7bfd91612d777ed02b74987c"
     },
+    "turborepo": {
+      "source": "vercel/turborepo",
+      "sourceType": "github",
+      "skillPath": "skills/turborepo/SKILL.md",
+      "computedHash": "6a23ee82918e35f8848b6fc2ccbea699d740a30fee65f288201adb4e98bf3827"
+    },
     "unit-testing-framework": {
       "source": "aj-geddes/useful-ai-prompts",
       "sourceType": "github",

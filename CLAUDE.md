@@ -196,13 +196,14 @@ Install a new skill (always pass both targets, copy mode so the file lives in th
 npx skills add <owner/repo> -a claude-code -a universal -s <skill-name> -y --copy
 ```
 
-Currently installed (30 skills):
+Currently installed (31 skills):
 
 | Category | Skills |
 |---|---|
 | **Hono / Next.js / Vercel** | `hono`, `next-best-practices`, `next-cache-components`, `next-upgrade`, `vercel-composition-patterns`, `vercel-cli-with-tokens`, `vercel-react-best-practices`, `vercel-react-view-transitions`, `deploy-to-vercel`, `web-design-guidelines` |
+| **Monorepo tooling** | `turborepo` (official `vercel/turborepo` skill — pipeline/cache/filtering/CI), `monorepo-management`, `pnpm` |
 | **Auth / DB** | `privy`, `drizzle-orm-patterns` (reference only — we use Kysely) |
-| **General engineering** | `api-error-handling`, `api-rate-limiting`, `api-versioning-strategy`, `secrets-management`, `frontend-state-management`, `query-caching-strategies`, `integration-testing`, `unit-testing-framework`, `e2e-testing-automation`, `monorepo-management`, `pnpm`, `semantic-versioning`, `markdown-documentation`, `logging-best-practices`, `troubleshooting-guide`, `pull-request-automation` |
+| **General engineering** | `api-error-handling`, `api-rate-limiting`, `api-versioning-strategy`, `secrets-management`, `frontend-state-management`, `query-caching-strategies`, `integration-testing`, `unit-testing-framework`, `e2e-testing-automation`, `semantic-versioning`, `markdown-documentation`, `logging-best-practices`, `troubleshooting-guide`, `pull-request-automation` |
 | **Claude Code workflow** | `skill-creator`, `mcp-builder`, `webapp-testing` |
 
 When invoking, just type `/<skill-name>` — Claude Code will read the matching `SKILL.md`.
