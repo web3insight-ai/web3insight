@@ -15,10 +15,19 @@ type Entry = {
   maxDuration: number;
 };
 
+// Reason: source files live under src/serverless/ (not apps/api/api/) so the
+// Vercel pipeline cannot autodetect them as serverless functions and trigger
+// its own per-file install (which fails on workspace:* refs). The output paths
+// under .vercel/output/functions/api/... are still what determines the URL.
 const entries: Entry[] = [
-  { in: 'api/hono.ts', funcPath: 'api/hono', memory: 1024, maxDuration: 60 },
   {
-    in: 'api/cron/cache-clear.ts',
+    in: 'src/serverless/api-hono.ts',
+    funcPath: 'api/hono',
+    memory: 1024,
+    maxDuration: 60,
+  },
+  {
+    in: 'src/serverless/cron-cache-clear.ts',
     funcPath: 'api/cron/cache-clear',
     memory: 512,
     maxDuration: 300,
@@ -92,7 +101,12 @@ async function main() {
     JSON.stringify(config, null, 2),
   );
 
-  console.log('[bundle-functions] wrote', entries.length, 'functions to', OUTPUT_ROOT);
+  console.log(
+    '[bundle-functions] wrote',
+    entries.length,
+    'functions to',
+    OUTPUT_ROOT,
+  );
 }
 
 main().catch((err) => {
