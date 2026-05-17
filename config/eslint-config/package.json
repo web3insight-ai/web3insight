@@ -1,0 +1,23 @@
+{
+  "name": "@web3insight/eslint-config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "files": ["base.mjs", "nextjs.mjs", "node.mjs"],
+  "exports": {
+    "./base": "./base.mjs",
+    "./nextjs": "./nextjs.mjs",
+    "./node": "./node.mjs"
+  },
+  "dependencies": {
+    "@eslint/js": "^10.0.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "globals": "^16.4.0",
+    "typescript-eslint": "^8.45.0"
+  },
+  "peerDependencies": {
+    "eslint": "catalog:"
+  }
+}

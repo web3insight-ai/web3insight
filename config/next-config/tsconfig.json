@@ -1,0 +1,9 @@
+{
+  "extends": "@web3insight/typescript-config/library.json",
+  "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "types": ["node"]
+  },
+  "include": ["src/**/*.ts"]
+}

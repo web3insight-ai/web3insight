@@ -1,0 +1,5 @@
+dist/
+test/
+nest-cli.json
+tsconfig.build.json
+Dockerfile

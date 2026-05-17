@@ -1,0 +1,161 @@
+"use client"
+
+import { useState, useCallback, memo, useMemo } from "react"
+import { Sparkles, ChevronRight } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
+
+interface CreateCardButtonProps {
+  ecosystem?: "mantle" | "monad" | "openbuild"
+  inviteCode?: string
+}
+
+export const CreateCardButton = memo(function CreateCardButton({ ecosystem = "mantle", inviteCode }: CreateCardButtonProps) {
+  const [isHovered, setIsHovered] = useState(false)
+
+  // Memoize computed styles to avoid recalculation on re-renders
+  const { accentColor, glowColor, bgGradient, createUrl } = useMemo(() => {
+    if (ecosystem === "openbuild") {
+      return {
+        accentColor: "#01DB83",
+        glowColor: "rgba(1, 219, 131, 0.6)",
+        bgGradient: "linear-gradient(135deg, rgba(1, 219, 131, 0.2) 0%, rgba(1, 219, 131, 0.1) 100%)",
+        createUrl: `/${ecosystem}`,
+      }
+    }
+    if (ecosystem === "mantle") {
+      return {
+        accentColor: "#5EEAD4",
+        glowColor: "rgba(94, 234, 212, 0.6)",
+        bgGradient: "linear-gradient(135deg, rgba(94, 234, 212, 0.2) 0%, rgba(94, 234, 212, 0.1) 100%)",
+        createUrl: `/${ecosystem}`,
+      }
+    }
+    return {
+      accentColor: "#9F8EFF",
+      glowColor: "rgba(159, 142, 255, 0.6)",
+      bgGradient: "linear-gradient(135deg, rgba(159, 142, 255, 0.2) 0%, rgba(159, 142, 255, 0.1) 100%)",
+      createUrl: `/${ecosystem}`,
+    }
+  }, [ecosystem])
+
+  const handleClick = useCallback(() => {
+    if (inviteCode) {
+      localStorage.setItem(`devcard-invite-code-${ecosystem}`, inviteCode)
+    }
+  }, [inviteCode, ecosystem])
+
+  return (
+    <div className="relative">
+      {/* Pulsing glow ring */}
+      <motion.div
+        className="absolute inset-0 rounded-xl"
+        style={{
+          background: bgGradient,
+          boxShadow: `0 0 20px ${glowColor}, 0 0 40px ${glowColor}`,
+        }}
+        animate={{
+          scale: [1, 1.15, 1],
+          opacity: [0.5, 0.8, 0.5],
+        }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+
+      {/* Main button */}
+      <motion.a
+        href={createUrl}
+        onClick={handleClick}
+        className="relative w-12 py-1.5 rounded-xl flex flex-col items-center gap-0.5 border"
+        style={{
+          color: accentColor,
+          borderColor: accentColor,
+          background: "rgba(0, 0, 0, 0.6)",
+          backdropFilter: "blur(8px)",
+        }}
+        onHoverStart={() => setIsHovered(true)}
+        onHoverEnd={() => setIsHovered(false)}
+        whileHover={{
+          scale: 1.08,
+          boxShadow: `0 0 25px ${glowColor}`,
+        }}
+        whileTap={{ scale: 0.95 }}
+        aria-label="Create your own card"
+      >
+        {/* Sparkles icon with animation */}
+        <motion.div
+          animate={{
+            rotate: [0, 10, -10, 0],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        >
+          <Sparkles className="w-4 h-4" />
+        </motion.div>
+        <span className="text-[9px] font-medium">Create</span>
+      </motion.a>
+
+      {/* Tooltip - "Create Your Own Dev Card" */}
+      <AnimatePresence>
+        {isHovered && (
+          <motion.div
+            className="absolute right-full top-1/2 mr-2 whitespace-nowrap"
+            initial={{ opacity: 0, x: 10, y: "-50%" }}
+            animate={{ opacity: 1, x: 0, y: "-50%" }}
+            exit={{ opacity: 0, x: 10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div
+              className="px-3 py-2 rounded-lg text-xs font-medium"
+              style={{
+                background: "rgba(0, 0, 0, 0.9)",
+                border: `1px solid ${accentColor}`,
+                color: accentColor,
+                boxShadow: `0 0 15px ${glowColor}`,
+              }}
+            >
+              Create Your Own Dev Card
+            </div>
+            {/* Tooltip arrow */}
+            <div
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-full"
+              style={{
+                width: 0,
+                height: 0,
+                borderTop: "6px solid transparent",
+                borderBottom: "6px solid transparent",
+                borderLeft: `6px solid ${accentColor}`,
+              }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Floating hint arrow that pulses - hidden when hovered */}
+      {!isHovered && (
+        <motion.div
+          className="absolute -left-6 top-1/2 -translate-y-1/2"
+          animate={{
+            x: [0, -4, 0],
+            opacity: [0.6, 1, 0.6],
+          }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        >
+          <ChevronRight
+            className="w-4 h-4"
+            style={{ color: accentColor }}
+          />
+        </motion.div>
+      )}
+    </div>
+  )
+})

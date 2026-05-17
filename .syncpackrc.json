@@ -1,0 +1,19 @@
+{
+  "dependencyTypes": ["prod", "dev", "peer"],
+  "indent": "  ",
+  "sortFirst": ["name", "version", "type", "private", "packageManager", "engines", "scripts", "dependencies", "devDependencies", "peerDependencies"],
+  "versionGroups": [
+    {
+      "label": "Internal workspace packages always use workspace:*",
+      "packages": ["**"],
+      "dependencies": ["@web3insight/**"],
+      "pinVersion": "workspace:*"
+    },
+    {
+      "label": "Use catalog for shared deps",
+      "packages": ["**"],
+      "dependencies": ["next", "react", "react-dom", "typescript", "zod", "@tanstack/react-query", "@orpc/**", "tailwindcss", "@tailwindcss/postcss", "kysely", "pg", "@nestjs/**", "ai", "@ai-sdk/**", "@privy-io/react-auth", "eslint", "vitest", "tsx", "@types/node", "@types/react", "@types/react-dom", "react-hook-form", "@hookform/resolvers", "lucide-react", "framer-motion", "recharts", "lint-staged", "husky", "syncpack", "turbo", "date-fns", "embla-carousel-react", "react-markdown", "sonner"],
+      "pinVersion": "catalog:"
+    }
+  ]
+}

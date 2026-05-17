@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "cd ../.. && pnpm turbo build --filter=@web3insight/api",
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
+  "framework": null,
+  "crons": [
+    { "path": "/api/cron/cache-clear", "schedule": "0 4 * * *" }
+  ]
+}
