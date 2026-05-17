@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { getMetadata } from "@/utils/app";
 import { api } from "@/lib/api/client";
 import { getUser } from "~/auth/repository";
@@ -25,21 +24,7 @@ export const metadata = {
   description,
 };
 
-interface HomePageProps {
-  searchParams: Promise<{
-    error?: string;
-    code?: string;
-  }>;
-}
-
-export default async function HomePage({ searchParams }: HomePageProps) {
-  const resolvedSearchParams = await searchParams;
-  const { code } = resolvedSearchParams;
-
-  if (code) {
-    redirect(`/connect/github/redirect?code=${code}`);
-  }
-
+export default async function HomePage() {
   const user = await getUser();
 
   const results = await Promise.allSettled([
