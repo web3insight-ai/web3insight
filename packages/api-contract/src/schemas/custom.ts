@@ -39,11 +39,16 @@ export const CustomQueryUsersListSchema = z.object({
   total: z.coerce.number().int().nonnegative(),
 });
 
-export const CustomUploadResponseSchema = z.object({
-  id: z.number().int(),
-  users: z.array(z.record(z.string(), z.unknown())),
-  fail: z.array(z.string()),
-});
+// Reason: legacy uploadAndGetUsers returns a nested shape — the dashboard's
+// analyzeUser reads `data.users.users[]` and other downstream fields the
+// initial contract authoring did not enumerate. Coerce `id` (bigint string
+// in postgres) and let the rest flow through with `.loose()` until the
+// service has a stable projection worth pinning down.
+export const CustomUploadResponseSchema = z
+  .object({
+    id: z.coerce.number().int(),
+  })
+  .loose();
 
 export const CustomShareInputSchema = z.object({
   share: z.boolean().default(false),
