@@ -57,14 +57,14 @@ export async function GET(
       credentials: "omit",
     });
 
+    // Reason: dashboard's fetchAnalysisResult + ProfileHeader read fields
+    // (id, public, intent, github, …) directly off the response body. The
+    // legacy NestJS endpoint returned the raw row, so do the same here.
     const detail = await client.custom.getAnalysis({
       id: Number(analysisId),
     });
 
-    return Response.json(
-      { success: true, code: "200", message: "", data: detail },
-      { status: 200 },
-    );
+    return Response.json(detail, { status: 200 });
   } catch (error) {
     const status = (error as { status?: number })?.status ?? 500;
     const message = error instanceof Error ? error.message : "Unknown error";

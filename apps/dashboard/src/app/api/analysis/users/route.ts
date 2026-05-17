@@ -55,12 +55,12 @@ export async function POST(request: Request) {
       credentials: "omit",
     });
 
+    // Reason: dashboard's analyzeUser reads `rawResult.id` directly off the
+    // response body — the legacy NestJS endpoint returned the raw shape, so
+    // pass the orpc result through without an envelope to keep that contract.
     const result = await client.custom.createAnalysis(requestData as never);
 
-    return Response.json(
-      { success: true, code: "200", message: "", data: result },
-      { status: 200 },
-    );
+    return Response.json(result, { status: 200 });
   } catch (error) {
     const status = (error as { status?: number })?.status ?? 500;
     const message = error instanceof Error ? error.message : "Unknown error";
