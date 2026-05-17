@@ -22,7 +22,7 @@ jobs:
     env:
       NODE_OPTIONS: --max-old-space-size=4096
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
       - run: pnpm turbo run lint --cache-dir=.turbo
 
@@ -32,7 +32,7 @@ jobs:
     env:
       NODE_OPTIONS: --max-old-space-size=4096
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
       - run: pnpm turbo run typecheck --cache-dir=.turbo
 
@@ -45,7 +45,7 @@ jobs:
       OPENAI_API_KEY: sk-dummy-ci
       NEXT_PUBLIC_UMAMI_WEBSITE_ID: dummy
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
       - run: pnpm turbo run build --cache-dir=.turbo
 
@@ -53,6 +53,6 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
       - run: pnpm turbo run test --cache-dir=.turbo
