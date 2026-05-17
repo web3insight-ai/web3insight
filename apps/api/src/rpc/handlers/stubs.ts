@@ -31,7 +31,6 @@ export const repoStubRouter = os.repo.router({
 });
 
 export const authStubRouter = os.auth.router({
-  oauthLogin: os.auth.oauthLogin.handler(() => notImplemented()),
   me: os.auth.me.handler(() => notImplemented()),
   getUserExtra: os.auth.getUserExtra.handler(() => notImplemented()),
   updateUserExtra: os.auth.updateUserExtra.handler(() => notImplemented()),
@@ -39,8 +38,6 @@ export const authStubRouter = os.auth.router({
   updateUserByTag: os.auth.updateUserByTag.handler(() => notImplemented()),
   getUserByTagAndId: os.auth.getUserByTagAndId.handler(() => notImplemented()),
   updateMe: os.auth.updateMe.handler(() => notImplemented()),
-  getMagic: os.auth.getMagic.handler(() => notImplemented()),
-  bindWallet: os.auth.bindWallet.handler(() => notImplemented()),
   privyTokenAuth: os.auth.privyTokenAuth.handler(() => notImplemented()),
   bindOpenBuild: os.auth.bindOpenBuild.handler(() => notImplemented()),
   getOpenBuildRecord: os.auth.getOpenBuildRecord.handler(() =>

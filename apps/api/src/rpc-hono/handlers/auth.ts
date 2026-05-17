@@ -1,34 +1,162 @@
 import { ORPCError } from '@orpc/server';
 import { os } from '../orpc';
+import type { HonoRpcContext } from '../context';
+import type { JwtPayload } from '@/services/auth.service';
 
 /**
- * Auth handlers — STUB until Phase D ports auth/services/auth.services.ts (1967 LOC).
+ * Auth handlers — Phase D port. Scope is intentionally Privy-only + OpenBuild
+ * binding; legacy GitHub direct OAuth + wallet bind + magic number were
+ * dropped from the contract.
  *
- * Every procedure throws NOT_IMPLEMENTED. Clients should continue using the
- * NestJS path at /v1/auth/* + /v1/user/* for login + user management until
- * cutover. The Hono auth middleware still verifies JWTs issued by the NestJS
- * AuthService, so authenticated requests to other Hono procedures work today.
+ * The Hono middleware in src/app/middleware/auth.ts validates JWTs and
+ * populates context.user from payload.sub (numeric string id).
  */
 
-function notImpl<T>(): T {
-  throw new ORPCError('NOT_IMPLEMENTED', {
-    message:
-      'Auth procedures pending Phase D — use legacy /v1/auth/* and /v1/user/* endpoints',
-  });
+function requireUser(
+  user: HonoRpcContext['user'],
+): { id: number; tag?: string } {
+  if (!user) {
+    throw new ORPCError('UNAUTHORIZED', { message: 'Authentication required' });
+  }
+  return user;
+}
+
+/**
+ * Synthesize a JwtPayload for AuthService methods that still take the legacy
+ * payload shape. Only `.uid` is read by the slimmed service.
+ */
+function toJwtPayload(user: { id: number; tag?: string }): JwtPayload {
+  const uid = String(user.id);
+  return {
+    uid,
+    iss: 'web3insights.app',
+    exp: 0,
+    type: user.tag ?? 'privy',
+    extra: {
+      claims: {
+        allowed_roles: ['user'],
+        default_role: 'user',
+        user_id: uid,
+      },
+    },
+  };
+}
+
+function safeParseStringArray(raw: string): string[] | undefined {
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as string[]) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function profileToPublic(profile: Record<string, unknown>) {
+  return {
+    id: Number(profile.user_id),
+    user_nick_name: (profile.user_nick_name as string | null) ?? null,
+    user_avatar: (profile.user_avatar as string | null) ?? null,
+    user_bio: (profile.user_bio as string | null) ?? null,
+    user_title: (profile.user_title as string | null) ?? null,
+    user_custom_labels: Array.isArray(profile.user_custom_labels)
+      ? (profile.user_custom_labels as string[])
+      : typeof profile.user_custom_labels === 'string'
+        ? safeParseStringArray(profile.user_custom_labels)
+        : undefined,
+  };
 }
 
 export const authRouter = os.auth.router({
-  oauthLogin: os.auth.oauthLogin.handler(() => notImpl()),
-  me: os.auth.me.handler(() => notImpl()),
-  getUserExtra: os.auth.getUserExtra.handler(() => notImpl()),
-  updateUserExtra: os.auth.updateUserExtra.handler(() => notImpl()),
-  publicById: os.auth.publicById.handler(() => notImpl()),
-  updateUserByTag: os.auth.updateUserByTag.handler(() => notImpl()),
-  getUserByTagAndId: os.auth.getUserByTagAndId.handler(() => notImpl()),
-  updateMe: os.auth.updateMe.handler(() => notImpl()),
-  getMagic: os.auth.getMagic.handler(() => notImpl()),
-  bindWallet: os.auth.bindWallet.handler(() => notImpl()),
-  privyTokenAuth: os.auth.privyTokenAuth.handler(() => notImpl()),
-  bindOpenBuild: os.auth.bindOpenBuild.handler(() => notImpl()),
-  getOpenBuildRecord: os.auth.getOpenBuildRecord.handler(() => notImpl()),
+  me: os.auth.me.handler(async ({ context }) => {
+    const user = requireUser(context.user);
+    const result = await context.container.services.auth.getUserInfo(
+      toJwtPayload(user),
+    );
+    return profileToPublic(result.profile as unknown as Record<string, unknown>);
+  }),
+
+  getUserExtra: os.auth.getUserExtra.handler(async ({ input, context }) => {
+    const user = requireUser(context.user);
+    const result = await context.container.services.auth.getUserExtra(
+      toJwtPayload(user),
+      input.tag,
+    );
+    return result.user_extra as Record<string, unknown>;
+  }),
+
+  updateUserExtra: os.auth.updateUserExtra.handler(
+    async ({ input, context }) => {
+      const user = requireUser(context.user);
+      await context.container.services.auth.updateUserExtra(
+        toJwtPayload(user),
+        input.tag,
+        { user_extra: input.data.user_extra },
+      );
+      return { success: true };
+    },
+  ),
+
+  publicById: os.auth.publicById.handler(async ({ input, context }) => {
+    const result = await context.container.services.auth.getUserInfoFormId(
+      String(input.id),
+    );
+    return profileToPublic(result.profile as unknown as Record<string, unknown>);
+  }),
+
+  updateUserByTag: os.auth.updateUserByTag.handler(
+    async ({ input, context }) => {
+      const user = requireUser(context.user);
+      await context.container.services.auth.updateUserInfoV2(
+        toJwtPayload(user),
+        input.data,
+        input.tag,
+      );
+      return { success: true };
+    },
+  ),
+
+  getUserByTagAndId: os.auth.getUserByTagAndId.handler(
+    async ({ input, context }) => {
+      const result = await context.container.services.auth.getUserInfoFormIdV2(
+        input.id,
+        input.tag,
+      );
+      return profileToPublic(
+        result.profile as unknown as Record<string, unknown>,
+      );
+    },
+  ),
+
+  updateMe: os.auth.updateMe.handler(async ({ input, context }) => {
+    const user = requireUser(context.user);
+    await context.container.services.auth.updateUserInfo(
+      toJwtPayload(user),
+      input,
+    );
+    return { success: true };
+  }),
+
+  privyTokenAuth: os.auth.privyTokenAuth.handler(async ({ input, context }) => {
+    const result = await context.container.services.auth.privyTokenAuth(
+      input.id_token,
+    );
+    return { token: result.token };
+  }),
+
+  bindOpenBuild: os.auth.bindOpenBuild.handler(async ({ input, context }) => {
+    const user = requireUser(context.user);
+    await context.container.services.auth.bindOpenBuildOAuth(
+      String(user.id),
+      input.code,
+    );
+    return { success: true };
+  }),
+
+  getOpenBuildRecord: os.auth.getOpenBuildRecord.handler(async ({ context }) => {
+    const user = requireUser(context.user);
+    const result = await context.container.services.auth.getOpenBuildUserRecord(
+      String(user.id),
+    );
+    return (result ?? null) as Record<string, unknown> | null;
+  }),
 });

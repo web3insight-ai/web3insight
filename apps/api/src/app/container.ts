@@ -10,6 +10,7 @@ import { ReposService } from '@/services/repos.service';
 import { RankService } from '@/services/rank.service';
 import { UsersService } from '@/services/users.service';
 import { AuthService } from '@/services/auth.service';
+import { DeveloperAnalysisService } from '@/services/developer-analysis.service';
 
 /**
  * Minimal subset of `env` the container needs to bootstrap. Passed in so this
@@ -22,6 +23,11 @@ export interface ContainerEnv {
   GITHUB_TOKENS?: string;
   PRIVY_APP_ID?: string;
   PRIVY_APP_SECRET?: string;
+  OPENBUILD_OAUTH_CLIENT?: string;
+  OPENBUILD_OAUTH_SECRET?: string;
+  OPENROUTER_API_KEY?: string;
+  OPENROUTER_BASE_URL?: string;
+  OPENROUTER_MODEL?: string;
 }
 
 export interface Container {
@@ -38,6 +44,7 @@ export interface Container {
     rank: RankService;
     users: UsersService;
     auth: AuthService;
+    developerAnalysis: DeveloperAnalysisService;
   };
 }
 
@@ -83,11 +90,19 @@ export function getContainer(env: ContainerEnv): Container {
     jwtSecret: env.JWT_SECRET,
     privyAppId: env.PRIVY_APP_ID,
     privyAppSecret: env.PRIVY_APP_SECRET,
+    openBuildOAuthClient: env.OPENBUILD_OAUTH_CLIENT,
+    openBuildOAuthSecret: env.OPENBUILD_OAUTH_SECRET,
+  });
+
+  const developerAnalysis = new DeveloperAnalysisService({
+    apiKey: env.OPENROUTER_API_KEY,
+    baseURL: env.OPENROUTER_BASE_URL,
+    model: env.OPENROUTER_MODEL,
   });
 
   const users = new UsersService(db, tokenPool, github, {
     getAuthService: () => auth,
-    developerAnalysisService: null,
+    developerAnalysisService: developerAnalysis,
   });
 
   // Resolve the auth ↔ users cycle now that both exist.
@@ -107,6 +122,7 @@ export function getContainer(env: ContainerEnv): Container {
       rank,
       users,
       auth,
+      developerAnalysis,
     },
   };
   return cached;

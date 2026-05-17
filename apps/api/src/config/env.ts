@@ -21,6 +21,8 @@ export const env = createEnv({
     OPENROUTER_MODEL: z.string().default('openai/gpt-4o-mini'),
     PRIVY_APP_ID: z.string().optional(),
     PRIVY_APP_SECRET: z.string().optional(),
+    OPENBUILD_OAUTH_CLIENT: z.string().optional(),
+    OPENBUILD_OAUTH_SECRET: z.string().optional(),
     INNGEST_SIGNING_KEY: z.string().optional(),
     INNGEST_EVENT_KEY: z.string().optional(),
     CRON_SECRET: z.string().min(32).optional(),

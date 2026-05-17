@@ -60,13 +60,15 @@ export interface UsersServiceDeps {
   getAuthService: () => {
     getPrivyUserBindings(userDid: string): Promise<{
       user_id: string;
-      linked_accounts: Array<{ type: string; username?: string }>;
+      // Reason: Privy SDK's LinkedAccount is a discriminated union; consumer code
+      // narrows by `.type`. Using unknown[] avoids importing the full Privy type
+      // surface into this interface.
+      linked_accounts: ReadonlyArray<unknown>;
     } | null>;
   };
   /**
-   * Optional AI analyzer. Phase E ports the streaming version; until then the
-   * handler skips AI augmentation if null.
-   * TODO(phase-e): wire DeveloperAnalysisService once OpenAI streaming is ported.
+   * AI analyzer (Phase E port — pure class wired in src/app/container.ts).
+   * Optional + duck-typed so test stubs can provide a minimal shim.
    */
   developerAnalysisService?: {
     analyze: (analysisData: unknown) => Promise<unknown>;
@@ -901,17 +903,18 @@ export class UsersService {
       .getAuthService()
       .getPrivyUserBindings(privyBind?.bind_openid || '');
 
-    console.log(account);
-
     if (account == null) {
       return null;
     }
 
     const githubAccount = account.linked_accounts.find(
-      (acc) => acc.type === 'github_oauth',
+      (acc): acc is { type: string; username?: string | null } =>
+        typeof acc === 'object' &&
+        acc !== null &&
+        (acc as { type?: unknown }).type === 'github_oauth',
     );
 
-    return githubAccount?.username || null;
+    return githubAccount?.username ?? null;
   }
 
   /**

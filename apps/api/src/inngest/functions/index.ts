@@ -10,22 +10,32 @@ export {
 } from './sync-db-eco';
 
 /**
- * Inngest function registry — full Phase F coverage of the 11 long-running
- * legacy console commands. Functions marked TODO carry the trigger wiring +
- * step boundary; the underlying ReposService / UsersService batch methods
- * land in a follow-up commit once the legacy commands are deleted.
+ * ⚠️ DEFERRED — Inngest is being dropped from the stack (decision 2026-05-17).
  *
- * ✅ Live functions (cron + event triggers):
- *   sync-eco-total-full     · sync/eco.total.full   · cron 0 5 * * *
- *   sync-db-rank            · sync/db.rank          · cron 0 6 * * *
- *   sync-years              · sync/years            · cron 0 7 1 * *
- *   sync-db-eco-total       · sync/db.eco.total
+ * These 9 functions are KEPT IN TREE as the canonical scaffold of the 11
+ * long-running console-command ports, but they will NOT be registered with
+ * Inngest cloud or relied upon in production. The replacement story is
+ * "Vercel Cron + Postgres checkpoint table" — to be implemented in a
+ * follow-up commit.
  *
- * 🚧 Scaffolded (event triggers + step skeleton; service method TODO):
- *   sync-repos-full         · sync/repos.full
- *   sync-repos-single       · sync/repos.single
- *   sync-db-actors-api      · sync/db.actors.api
- *   sync-db-actors-archive  · sync/db.actors.archive
- *   sync-db-eco-upstream-repos · sync/db.eco.upstream-repos
- *   sync-db-eco-single      · sync/db.eco.single
+ * Until then:
+ *   • api/inngest/[...slug].ts still mounts the webhook (no-op without
+ *     INNGEST_SIGNING_KEY / INNGEST_EVENT_KEY in Vercel env).
+ *   • vercel.json keeps the route definition; safe to leave because
+ *     the handler short-circuits when env vars are absent.
+ *   • Do NOT add new Inngest functions here. Add cron handlers under
+ *     apps/api/api/cron/ with a checkpoint row in sync_checkpoints.
+ *
+ * Trigger/step skeletons preserved below so the replacement crons can
+ * reuse the chunking boundaries already designed:
+ *   sync-eco-total-full       · per-country chunks
+ *   sync-db-rank              · per-ecosystem chunks
+ *   sync-years                · per-year chunks
+ *   sync-db-eco-total         · single-shot
+ *   sync-repos-full           · per-ecosystem chunks
+ *   sync-repos-single         · single repo by id
+ *   sync-db-actors-api        · cursor-paginated batches (batchSize=500)
+ *   sync-db-actors-archive    · per-year chunks
+ *   sync-db-eco-upstream-repos · per-ecosystem chunks
+ *   sync-db-eco-single        · single ecosystem by name
  */
