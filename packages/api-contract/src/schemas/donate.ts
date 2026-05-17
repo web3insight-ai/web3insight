@@ -1,18 +1,16 @@
 import { z } from 'zod';
 
-export const DonateRepoSchema = z.object({
-  id: z.number().int(),
-  repo_id: z.number().int(),
-  repo_name: z.string(),
-  description: z.string().nullable(),
-  total_amount: z.number().nonnegative(),
-  donor_count: z.number().int().nonnegative(),
-  created_at: z.string(),
-});
+// Reason: the legacy NestJS donate endpoint returned raw DB rows
+// ({ repo_id: bigint-string, repo_info: jsonb, repo_donate_data: jsonb,
+// submitter_id, created_at, updated_at }) and the dashboard pages render
+// off those exact shapes. The original contract authored a cleaner shape
+// (id/repo_name/total_amount/donor_count) that the implementation never
+// emitted. Until a follow-up rewrites the service to project that view,
+// keep the schemas permissive so output validation does not reject
+// historical rows.
+export const DonateRepoSchema = z.record(z.string(), z.unknown());
 
-export const DonateRepoListSchema = z.object({
-  list: z.array(DonateRepoSchema),
-});
+export const DonateRepoListSchema = z.array(DonateRepoSchema);
 
 export const CreateDonateRepoInputSchema = z.object({
   repo_id: z.number().int(),
