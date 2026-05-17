@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  web3insight-ai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: web3insight-ai
+    restart: unless-stopped
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - web3insight-network
+    # Uncomment if you need to persist data
+    # volumes:
+    #   - ./data:/app/data
+
+networks:
+  web3insight-network:
+    driver: bridge
+
