@@ -1,4 +1,5 @@
 import { env } from "@env";
+import { createWeb3InsightClient } from "@web3insight/orpc-client";
 import type {
   ResponseResult,
   TotalResponse,
@@ -41,132 +42,56 @@ import type {
 import { isNumeric } from "@/utils";
 
 // ============================================================================
-// Core Fetch Function
+// oRPC clients (one for the service token, factory for per-user tokens)
 // ============================================================================
 
-interface FetchOptions {
-  method?: "GET" | "POST" | "PUT" | "DELETE";
-  params?: Record<string, string | number | boolean | undefined>;
-  body?: unknown;
-  headers?: Record<string, string>;
-  signal?: AbortSignal;
+// Reason: Universal client (works in both server and client components) that
+// auths with the build-time DATA_API_TOKEN. Replaces the legacy fetchApi REST
+// shim — every method below now speaks oRPC over /rpc/* via the typed
+// @web3insight/api-contract.
+const { client: serviceClient } = createWeb3InsightClient({
+  url: `${env.DATA_API_URL}/rpc`,
+  token: env.DATA_API_TOKEN,
+  // Reason: server-to-server call — don't forward browser cookies, we attach
+  // the bearer token ourselves.
+  credentials: "omit",
+  timeoutMs: Number(env.HTTP_TIMEOUT),
+});
+
+function clientForUser(token: string) {
+  return createWeb3InsightClient({
+    url: `${env.DATA_API_URL}/rpc`,
+    token,
+    credentials: "omit",
+    timeoutMs: Number(env.HTTP_TIMEOUT),
+  }).client;
 }
 
 /**
- * Type-safe fetch wrapper for the backend API
- * Returns ResponseResult<T> to match existing patterns
+ * Wrap an oRPC call in the legacy ResponseResult<T> envelope the dashboard UI
+ * consumes everywhere. ORPCError.status → string code; plain errors get 500.
  */
-async function fetchApi<T>(
-  path: string,
-  options: FetchOptions = {},
+async function rpc<T>(
+  fn: () => Promise<unknown>,
+  fallback: T,
 ): Promise<ResponseResult<T>> {
-  const { method = "GET", params, body, headers = {}, signal } = options;
-
-  const url = new URL(path, env.DATA_API_URL);
-
-  // Add query params
-  if (params) {
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        url.searchParams.set(key, String(value));
-      }
-    });
-  }
-
-  const response = await fetch(url.toString(), {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${env.DATA_API_TOKEN}`,
-      ...headers,
-    },
-    body: body ? JSON.stringify(body) : undefined,
-    signal: signal ?? AbortSignal.timeout(Number(env.HTTP_TIMEOUT)),
-  });
-
-  if (!response.ok) {
-    return {
-      success: false,
-      data: undefined as T,
-      message: `HTTP Error: ${response.status} ${response.statusText}`,
-      code: String(response.status),
-    };
-  }
-
-  // Handle empty responses (204 No Content or empty body)
-  const text = await response.text();
-  if (!text || text.trim() === "") {
-    return {
-      success: true,
-      data: undefined as T,
-      message: "No content",
-      code: "204",
-    };
-  }
-
-  let json: unknown;
   try {
-    json = JSON.parse(text);
-  } catch {
-    return {
-      success: false,
-      data: undefined as T,
-      message: "Invalid JSON response from server",
-      code: "500",
-    };
+    const data = (await fn()) as T;
+    return { success: true, data, message: "Success", code: "200" };
+  } catch (error) {
+    // Reason: orpc-client throws an ORPCError with `.status` (HTTP int) +
+    // `.message`; detect by shape rather than importing the class so we don't
+    // need to pull @orpc/client as a direct dep.
+    const errObj = error as { status?: number; message?: string } | null;
+    const status = errObj?.status ? String(errObj.status) : "500";
+    const message =
+      error instanceof Error ? error.message : "Request failed";
+    return { success: false, data: fallback, message, code: status };
   }
-
-  // Normalize response to ResponseResult format
-  // Backend may return { data, ... } or { success, data, ... }
-  if (json && typeof json === "object" && "success" in json) {
-    return json as ResponseResult<T>;
-  }
-
-  // Handle primitive responses (boolean, number, string)
-  if (json === null || typeof json !== "object") {
-    return {
-      success: true,
-      data: json as T,
-      message: "Success",
-      code: "200",
-    };
-  }
-
-  const jsonObj = json as Record<string, unknown>;
-
-  // Check if response looks like a complete event/analysis response
-  // These have id, github, data at the top level and should NOT be unwrapped
-  const isEventResponse =
-    "id" in jsonObj && "github" in jsonObj && "data" in jsonObj;
-
-  return {
-    success: true,
-    // For event responses, use the full object; otherwise extract data field
-    data: (isEventResponse ? json : (jsonObj?.data ?? json)) as T,
-    message: (jsonObj?.message as string) ?? "Success",
-    code: (jsonObj?.code as string) ?? "200",
-  };
-}
-
-/**
- * Create authenticated API client for user-specific requests
- */
-function createAuthenticatedFetch(userToken: string) {
-  return async function <T>(
-    path: string,
-    options: Omit<FetchOptions, "headers"> = {},
-  ): Promise<ResponseResult<T>> {
-    return fetchApi<T>(path, {
-      ...options,
-      headers: {
-        Authorization: `Bearer ${userToken}`,
-      },
-    });
-  };
 }
 
 // ============================================================================
-// Type-Safe API Namespace
+// Type-Safe API Namespace (unchanged surface, oRPC internals)
 // ============================================================================
 
 export const api = {
@@ -175,22 +100,35 @@ export const api = {
   // --------------------------------------------------------------------------
   ecosystems: {
     getTotal: (): Promise<ResponseResult<TotalResponse>> =>
-      fetchApi("/v1/ecosystems/total"),
+      rpc(
+        () => serviceClient.total.ecosystems({}),
+        { total: 0 } as unknown as TotalResponse,
+      ),
 
     getRankList: (): Promise<ResponseResult<ListResponse<EcoRankRecord>>> =>
-      fetchApi("/v1/ecosystems/top"),
+      rpc(
+        () => serviceClient.rank.ecosystemsTop({}),
+        { list: [] } as ListResponse<EcoRankRecord>,
+      ),
 
-    // Admin endpoints
     getAdminList: (): Promise<ResponseResult<AdminEcosystemListResponse>> =>
-      fetchApi("/v1/admin/ecosystems"),
+      rpc(
+        () => serviceClient.admin.listEcosystems({}),
+        {} as AdminEcosystemListResponse,
+      ),
 
     getAdminRepoList: (
       params: PaginationParams & EcoParams = {},
     ): Promise<ResponseResult<ListResponse<EcoRepo> & TotalResponse>> => {
       const { eco, ...others } = params;
-      return fetchApi("/v1/admin/ecosystems/repos", {
-        params: { ...others, eco_name: eco },
-      });
+      return rpc(
+        () =>
+          serviceClient.admin.listEcosystemRepos({
+            ...(others as Record<string, unknown>),
+            eco_name: eco,
+          } as never),
+        { list: [], total: 0 } as unknown as ListResponse<EcoRepo> & TotalResponse,
+      );
     },
 
     updateRepoCustomMark: (data: {
@@ -198,11 +136,16 @@ export const api = {
       eco: string;
       mark: number;
     }): Promise<ResponseResult<void>> => {
-      const { id, eco, ...others } = data;
-      return fetchApi(`/v1/admin/ecosystems/repos/${id}/mark`, {
-        method: "POST",
-        body: { ...others, eco_name: eco },
-      });
+      const { id, eco, mark } = data;
+      return rpc(
+        () =>
+          serviceClient.admin.markEcosystemRepo({
+            id,
+            eco_name: eco,
+            mark,
+          } as never),
+        undefined as unknown as void,
+      );
     },
   },
 
@@ -213,37 +156,50 @@ export const api = {
     getTotal: (
       params: EcoParams = {},
     ): Promise<ResponseResult<TotalResponse>> =>
-      fetchApi("/v1/repos/total", {
-        params: { eco_name: params.eco ?? "ALL" },
-      }),
+      rpc(
+        () => serviceClient.total.repos({ eco_name: params.eco ?? "ALL" }),
+        { total: 0 } as unknown as TotalResponse,
+      ),
 
     getRankList: (
       params: EcoParams = {},
     ): Promise<ResponseResult<ListResponse<RepoRankRecord>>> =>
-      fetchApi("/v1/repos/top", {
-        params: { eco_name: params.eco ?? "ALL" },
-      }),
+      rpc(
+        () =>
+          serviceClient.rank.reposTop({ eco_name: params.eco ?? "ALL" } as never),
+        { list: [] } as ListResponse<RepoRankRecord>,
+      ),
 
     getTrendingList: (
       params: EcoParams = {},
     ): Promise<ResponseResult<ListResponse<RepoTrendingRecord>>> =>
-      fetchApi("/v1/repos/top/7d", {
-        params: { eco_name: params.eco ?? "ALL" },
-      }),
+      rpc(
+        () =>
+          serviceClient.rank.reposTop7d({
+            eco_name: params.eco ?? "ALL",
+          } as never),
+        { list: [] } as ListResponse<RepoTrendingRecord>,
+      ),
 
     getDeveloperActivityList: (
       params: EcoParams = {},
     ): Promise<ResponseResult<ListResponse<RepoDeveloperActivityRecord>>> =>
-      fetchApi("/v1/repos/top/dev/7d", {
-        params: { eco_name: params.eco ?? "ALL" },
-      }),
+      rpc(
+        () =>
+          serviceClient.rank.reposTopByDev7d({
+            eco_name: params.eco ?? "ALL",
+          } as never),
+        { list: [] } as ListResponse<RepoDeveloperActivityRecord>,
+      ),
 
     getActiveDeveloperList: (
       repoId: number,
     ): Promise<ResponseResult<ListResponse<RepoActiveDeveloperRecord>>> =>
-      fetchApi("/v1/repos/active/developer", {
-        params: { repo_id: repoId },
-      }),
+      rpc(
+        () =>
+          serviceClient.repo.activeDeveloper({ repo_id: repoId } as never),
+        { list: [] } as ListResponse<RepoActiveDeveloperRecord>,
+      ),
   },
 
   // --------------------------------------------------------------------------
@@ -253,43 +209,59 @@ export const api = {
     getTotal: (
       params: ActorTotalParams = {},
     ): Promise<ResponseResult<TotalResponse>> =>
-      fetchApi("/v1/actors/total", {
-        params: {
-          eco_name: params.eco ?? "ALL",
-          scope: params.scope ?? "ALL",
-        },
-      }),
+      rpc(
+        () =>
+          serviceClient.total.actors({
+            eco_name: params.eco ?? "ALL",
+            scope: params.scope ?? "ALL",
+          } as never),
+        { total: 0 } as unknown as TotalResponse,
+      ),
 
     getGrowthCount: (
       params: EcoParams = {},
     ): Promise<ResponseResult<TotalResponse>> =>
-      fetchApi("/v1/actors/total/new/quarter/last", {
-        params: { eco_name: params.eco ?? "ALL" },
-      }),
+      rpc(
+        () =>
+          serviceClient.total.actorsLastQuarterNew({
+            eco_name: params.eco ?? "ALL",
+          } as never),
+        { total: 0 } as unknown as TotalResponse,
+      ),
 
     getRankList: (
       params: EcoParams = {},
     ): Promise<ResponseResult<ListResponse<ActorRankRecord>>> =>
-      fetchApi("/v1/actors/top", {
-        params: { eco_name: params.eco ?? "ALL" },
-      }),
+      rpc(
+        () =>
+          serviceClient.rank.actorsTop({
+            eco_name: params.eco ?? "ALL",
+          } as never),
+        { list: [] } as ListResponse<ActorRankRecord>,
+      ),
 
     getTrendList: (
       params: ActorTrendParams = {},
     ): Promise<ResponseResult<ListResponse<ActorTrendRecord>>> =>
-      fetchApi("/v1/actors/total/date", {
-        params: {
-          eco_name: params.eco ?? "ALL",
-          period: params.period ?? "month",
-        },
-      }),
+      rpc(
+        () =>
+          serviceClient.total.actorsByDate({
+            eco_name: params.eco ?? "ALL",
+            period: params.period ?? "month",
+          } as never),
+        { list: [] } as ListResponse<ActorTrendRecord>,
+      ),
 
     getCountryRank: (
       params: EcoParams = {},
     ): Promise<ResponseResult<ActorCountryRankResponse>> =>
-      fetchApi("/v1/actors/country/rank", {
-        params: { eco_name: params.eco ?? "ALL" },
-      }),
+      rpc(
+        () =>
+          serviceClient.total.actorsByCountry({
+            eco_name: params.eco ?? "ALL",
+          } as never),
+        { list: [], total: 0 } as ActorCountryRankResponse,
+      ),
   },
 
   // --------------------------------------------------------------------------
@@ -297,7 +269,10 @@ export const api = {
   // --------------------------------------------------------------------------
   rankings: {
     getYearlyReport: (): Promise<ResponseResult<YearlyReportData>> =>
-      fetchApi("/v1/years/rank/report"),
+      rpc(
+        () => serviceClient.rank.yearsRankReport({}),
+        {} as YearlyReportData,
+      ),
   },
 
   // --------------------------------------------------------------------------
@@ -314,16 +289,10 @@ export const api = {
     > => {
       const [ecosystemRes, repoRes, actorRes, coreActorRes] = await Promise.all(
         [
-          fetchApi<TotalResponse>("/v1/ecosystems/total"),
-          fetchApi<TotalResponse>("/v1/repos/total", {
-            params: { eco_name: "ALL" },
-          }),
-          fetchApi<TotalResponse>("/v1/actors/total", {
-            params: { eco_name: "ALL", scope: "ALL" },
-          }),
-          fetchApi<TotalResponse>("/v1/actors/total", {
-            params: { eco_name: "ALL", scope: "Core" },
-          }),
+          api.ecosystems.getTotal(),
+          api.repos.getTotal({ eco: "ALL" }),
+          api.actors.getTotal({ eco: "ALL", scope: "ALL" }),
+          api.actors.getTotal({ eco: "ALL", scope: "Core" }),
         ],
       );
 
@@ -363,7 +332,6 @@ export const api = {
       idOrUsername: number | string,
     ): Promise<ResponseResult<Developer | null>> => {
       try {
-        // Fetch user from OSS Insight
         const userRes = isNumeric(idOrUsername)
           ? await api.ossinsight.getUserById(idOrUsername)
           : await api.ossinsight.getUser(String(idOrUsername));
@@ -380,7 +348,6 @@ export const api = {
           };
         }
 
-        // Fetch personal overview stats
         const statsRes = await api.ossinsight.getPersonalOverview(
           userRes.data.id,
         );
@@ -490,11 +457,9 @@ export const api = {
           };
         }
 
-        // Transform events to activities with description
         const activities: DeveloperActivity[] = eventsRes.data.map((event) => {
           let description = `Performed ${event.type} in ${event.repo.name}`;
 
-          // Create descriptions based on event type
           if (event.type === "PushEvent") {
             const ref =
               (event.payload as { ref?: string }).ref?.replace(
@@ -604,60 +569,48 @@ export const api = {
     getEcosystems: async (
       id: number,
     ): Promise<ResponseResult<DeveloperEcosystems | null>> => {
-      try {
-        const result = await fetchApi<EcoScoreApiResponse>(
-          `/v2/external/github/users/id/${id}`,
-        );
+      const result = await rpc<EcoScoreApiResponse | null>(
+        () => serviceClient.custom.externalGithubById({ id: String(id) }),
+        null,
+      );
 
-        if (!result.success || !result.data) {
-          return {
-            success: false,
-            message: result.message || "Failed to fetch ecosystems",
-            data: null,
-            code: result.code || "500",
-          };
-        }
+      if (!result.success || !result.data) {
+        return {
+          success: false,
+          message: result.message || "Failed to fetch ecosystems",
+          data: null,
+          code: result.code || "500",
+        };
+      }
 
-        const ecoScore = result.data.eco_score;
-        if (
-          !ecoScore ||
-          !ecoScore.ecosystems ||
-          ecoScore.ecosystems.length === 0
-        ) {
-          return {
-            success: true,
-            data: { ecosystems: [], totalScore: 0 },
-            message: "Success",
-            code: "200",
-          };
-        }
-
-        const ecosystems: EcosystemInfo[] = ecoScore.ecosystems.map((eco) => ({
-          ecosystem: eco.ecosystem,
-          totalScore: eco.total_score,
-          repoCount: eco.repos?.length || 0,
-          firstActivityAt: eco.first_activity_at,
-          lastActivityAt: eco.last_activity_at,
-        }));
-
+      const ecoScore = result.data.eco_score;
+      if (
+        !ecoScore ||
+        !ecoScore.ecosystems ||
+        ecoScore.ecosystems.length === 0
+      ) {
         return {
           success: true,
-          data: {
-            ecosystems,
-            totalScore: ecoScore.total_score,
-          },
+          data: { ecosystems: [], totalScore: 0 },
           message: "Success",
           code: "200",
         };
-      } catch (error) {
-        console.error("[API] Failed to fetch developer ecosystems:", error);
-        return {
-          success: false,
-          message: "Failed to fetch ecosystems",
-          data: null,
-          code: "500",
-        };
       }
+
+      const ecosystems: EcosystemInfo[] = ecoScore.ecosystems.map((eco) => ({
+        ecosystem: eco.ecosystem,
+        totalScore: eco.total_score,
+        repoCount: eco.repos?.length || 0,
+        firstActivityAt: eco.first_activity_at,
+        lastActivityAt: eco.last_activity_at,
+      }));
+
+      return {
+        success: true,
+        data: { ecosystems, totalScore: ecoScore.total_score },
+        message: "Success",
+        code: "200",
+      };
     },
   },
 
@@ -665,28 +618,39 @@ export const api = {
   // Events (Public)
   // --------------------------------------------------------------------------
   events: {
-    getPublicList: (
+    getPublicList: async (
       params: EventInsightsParams = {},
-    ): Promise<ResponseResult<EventInsight[]>> =>
-      fetchApi<EventInsightsResponse>("/v1/custom/analysis/users/public", {
-        params: {
-          skip: params.skip ?? 0,
-          take: params.take ?? 10,
-          intent: params.intent ?? "hackathon",
-          direction: params.direction ?? "asc",
-        },
-      }).then((res) => ({
+    ): Promise<ResponseResult<EventInsight[]>> => {
+      const res = await rpc<EventInsightsResponse>(
+        () =>
+          serviceClient.custom.listPublicAnalyses({
+            skip: params.skip ?? 0,
+            take: params.take ?? 10,
+            intent: (params.intent ?? "hackathon") as never,
+            direction: (params.direction ?? "asc") as never,
+          } as never),
+        { list: [], total: 0 } as EventInsightsResponse,
+      );
+      return {
         ...res,
         data: res.success ? res.data.list : [],
-        extra: res.success ? { total: res.data.total } : undefined,
-      })),
+        // Reason: legacy callsites read `extra.total` for pagination — keep it
+        // available even though it's not declared on ResponseResult<T>.
+        ...(res.success ? { extra: { total: res.data.total } } : {}),
+      };
+    },
 
     getPublicDetail: (id: number | string): Promise<ResponseResult<unknown>> =>
-      fetchApi(`/v1/custom/analysis/users/${id}`),
+      rpc(
+        () => serviceClient.custom.getAnalysis({ id: Number(id) }),
+        null,
+      ),
 
-    // Get event-specific developer profile by username or GitHub ID
     getEventDeveloper: (identifier: string): Promise<ResponseResult<unknown>> =>
-      fetchApi(`/v1/event/users/${identifier}`),
+      rpc(
+        () => serviceClient.custom.eventUsers({ x: identifier } as never),
+        null,
+      ),
   },
 
   // --------------------------------------------------------------------------
@@ -697,34 +661,30 @@ export const api = {
       userToken: string,
       params: AnalysisUserListParams = {},
     ): Promise<ResponseResult<ListResponse<unknown> & TotalResponse>> => {
-      const authFetch = createAuthenticatedFetch(userToken);
-      const queryParams: Record<string, string | number | undefined> = {
-        offset: params.offset,
-        limit: params.limit,
-        search: params.search,
-        order: params.order,
-        direction: params.direction,
-      };
-      return authFetch("/v1/custom/analysis/users", { params: queryParams });
+      const c = clientForUser(userToken);
+      return rpc(
+        () => c.custom.listMyAnalyses(params as never),
+        { list: [], total: 0 } as unknown as ListResponse<unknown> & TotalResponse,
+      );
     },
 
     analyzeUserList: (
       userToken: string,
       data: AnalyzeUserRequest,
     ): Promise<ResponseResult<AnalyzeUserResponse>> => {
-      const authFetch = createAuthenticatedFetch(userToken);
-      return authFetch("/v1/custom/analysis/users", {
-        method: "POST",
-        body: data,
-      });
+      const c = clientForUser(userToken);
+      return rpc(
+        () => c.custom.createAnalysis(data as never),
+        {} as AnalyzeUserResponse,
+      );
     },
 
     getAnalysisUser: (
       userToken: string,
       id: number,
     ): Promise<ResponseResult<unknown>> => {
-      const authFetch = createAuthenticatedFetch(userToken);
-      return authFetch(`/v1/custom/analysis/users/${id}`);
+      const c = clientForUser(userToken);
+      return rpc(() => c.custom.getAnalysis({ id }), null);
     },
 
     updateAnalysisUser: (
@@ -732,11 +692,11 @@ export const api = {
       id: number,
       data: AnalyzeUserRequest,
     ): Promise<ResponseResult<AnalyzeUserResponse>> => {
-      const authFetch = createAuthenticatedFetch(userToken);
-      return authFetch(`/v1/custom/analysis/users/${id}`, {
-        method: "POST",
-        body: data,
-      });
+      const c = clientForUser(userToken);
+      return rpc(
+        () => c.custom.updateAnalysis({ id, ...(data as object) } as never),
+        {} as AnalyzeUserResponse,
+      );
     },
   },
 
@@ -745,15 +705,29 @@ export const api = {
   // --------------------------------------------------------------------------
   github: {
     getRepoByName: (repoName: string): Promise<ResponseResult<GitHubRepo>> =>
-      fetchApi(`/v1/github/proxy/repos/${repoName}`),
+      rpc(
+        () => serviceClient.github.proxy({ path: `repos/${repoName}` }),
+        {} as GitHubRepo,
+      ),
 
     getUserRepos: (login: string): Promise<ResponseResult<GitHubRepo[]>> =>
-      fetchApi(`/v1/github/proxy/users/${login}/repos`),
+      rpc(
+        async () =>
+          (await serviceClient.github.proxy({
+            path: `users/${login}/repos`,
+          })) as unknown as GitHubRepo[],
+        [] as GitHubRepo[],
+      ),
 
     getUserEvents: (login: string): Promise<ResponseResult<GitHubEvent[]>> =>
-      fetchApi(`/v1/github/proxy/users/${login}/events/public`, {
-        params: { per_page: 20 },
-      }),
+      rpc(
+        async () =>
+          (await serviceClient.github.proxy({
+            path: `users/${login}/events/public`,
+            query: { per_page: 20 },
+          })) as unknown as GitHubEvent[],
+        [] as GitHubEvent[],
+      ),
   },
 
   // --------------------------------------------------------------------------
@@ -761,23 +735,36 @@ export const api = {
   // --------------------------------------------------------------------------
   donate: {
     list: (): Promise<ResponseResult<DonateRepo[]>> =>
-      fetchApi("/v1/donate/repos"),
+      rpc(
+        async () =>
+          (await serviceClient.donate.listDonations({})) as unknown as DonateRepo[],
+        [] as DonateRepo[],
+      ),
 
     getById: (id: number): Promise<ResponseResult<DonateRepo>> =>
-      fetchApi(`/v1/donate/repos/${id}`),
+      rpc(
+        () => serviceClient.donate.getDonationById({ id }),
+        {} as DonateRepo,
+      ),
 
     getByName: (name: string): Promise<ResponseResult<DonateRepo>> =>
-      fetchApi(`/v1/donate/repos/name/${encodeURIComponent(name)}`),
+      rpc(
+        () => serviceClient.donate.getDonationByName({ name }),
+        {} as DonateRepo,
+      ),
 
     submit: (
       userToken: string,
       repoFullName: string,
     ): Promise<ResponseResult<DonateRepo>> => {
-      const authFetch = createAuthenticatedFetch(userToken);
-      return authFetch("/v1/donate/repos", {
-        method: "POST",
-        body: { repo_full_name: repoFullName },
-      });
+      const c = clientForUser(userToken);
+      return rpc(
+        () =>
+          c.donate.createDonation({
+            repo_full_name: repoFullName,
+          } as never),
+        {} as DonateRepo,
+      );
     },
 
     update: (
@@ -785,25 +772,27 @@ export const api = {
       id: number,
       repoDonateData: Record<string, unknown>,
     ): Promise<ResponseResult<DonateRepo>> => {
-      const authFetch = createAuthenticatedFetch(userToken);
-      return authFetch(`/v1/donate/repos/${id}`, {
-        method: "POST",
-        body: { repo_donate_data: repoDonateData },
-      });
+      const c = clientForUser(userToken);
+      return rpc(
+        () =>
+          c.donate.updateDonation({
+            id,
+            repo_donate_data: repoDonateData,
+          } as never),
+        {} as DonateRepo,
+      );
     },
   },
 
   // --------------------------------------------------------------------------
-  // OSS Insight (external API)
+  // OSS Insight (external API — stays raw fetch, not in our contract)
   // --------------------------------------------------------------------------
   ossinsight: {
     getUser: async (login: string): Promise<ResponseResult<OssInsightUser>> => {
       try {
         const response = await fetch(
           `${env.OSSINSIGHT_URL}/gh/users/${login}`,
-          {
-            signal: AbortSignal.timeout(env.HTTP_TIMEOUT),
-          },
+          { signal: AbortSignal.timeout(env.HTTP_TIMEOUT) },
         );
         if (!response.ok) {
           return {
@@ -951,6 +940,3 @@ export const api = {
     },
   },
 };
-
-// Export utility for direct fetch access
-export { fetchApi, createAuthenticatedFetch };
