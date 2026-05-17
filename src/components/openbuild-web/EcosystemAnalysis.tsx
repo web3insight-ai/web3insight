@@ -83,7 +83,17 @@ export function EcosystemAnalysis({ ecosystemScores }: EcosystemAnalysisProps) {
   const donutCy = 100
   const donutStroke = 30
   const circumference = 2 * Math.PI * donutRadius
-  let cumulativePercentage = 0
+
+  // Precompute dash offsets so the render path stays pure (react-hooks/static-components)
+  const donutSegments = chartData.items.reduce<
+    { item: (typeof chartData.items)[number]; dashLength: number; dashOffset: number }[]
+  >((acc, item) => {
+    const cumulative = acc.reduce((sum, s) => sum + s.item.percentage, 0)
+    const dashLength = (item.percentage / 100) * circumference
+    const dashOffset = -((cumulative / 100) * circumference)
+    acc.push({ item, dashLength, dashOffset })
+    return acc
+  }, [])
 
   // Primary ecosystems = top 5
   const primaryEcosystems = chartData.items.slice(0, 5)
@@ -101,24 +111,19 @@ export function EcosystemAnalysis({ ecosystemScores }: EcosystemAnalysisProps) {
         {/* Donut chart */}
         <div className="relative w-[200px] h-[200px] flex-shrink-0">
           <svg viewBox="0 0 200 200" className="w-full h-full -rotate-90">
-            {chartData.items.map((item) => {
-              const dashLength = (item.percentage / 100) * circumference
-              const dashOffset = -((cumulativePercentage / 100) * circumference)
-              cumulativePercentage += item.percentage
-              return (
-                <circle
-                  key={item.ecosystem}
-                  cx={donutCx}
-                  cy={donutCy}
-                  r={donutRadius}
-                  fill="none"
-                  stroke={item.color}
-                  strokeWidth={donutStroke}
-                  strokeDasharray={`${dashLength} ${circumference - dashLength}`}
-                  strokeDashoffset={dashOffset}
-                />
-              )
-            })}
+            {donutSegments.map(({ item, dashLength, dashOffset }) => (
+              <circle
+                key={item.ecosystem}
+                cx={donutCx}
+                cy={donutCy}
+                r={donutRadius}
+                fill="none"
+                stroke={item.color}
+                strokeWidth={donutStroke}
+                strokeDasharray={`${dashLength} ${circumference - dashLength}`}
+                strokeDashoffset={dashOffset}
+              />
+            ))}
           </svg>
         </div>
 

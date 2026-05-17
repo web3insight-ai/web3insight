@@ -47,53 +47,11 @@ export function useAuth(options?: UseAuthOptions) {
 
     // 2. Fallback: use Privy avatar info
     if (privyUser) {
-      // GitHub avatar priority (try multiple fields)
       const githubAccount = privyUser.linkedAccounts.find(
-        (acc) => acc.type === "github_oauth" || acc.type === "github"
+        (acc) => acc.type === "github_oauth"
       )
-
-      if (githubAccount) {
-        // Try profile.profilePictureUrl
-        if ("profile" in githubAccount && githubAccount.profile?.profilePictureUrl) {
-          return githubAccount.profile.profilePictureUrl
-        }
-        // Try profile.avatar_url
-        if ("profile" in githubAccount && githubAccount.profile?.avatar_url) {
-          return githubAccount.profile.avatar_url
-        }
-        // Try profile.picture
-        if ("profile" in githubAccount && githubAccount.profile?.picture) {
-          return githubAccount.profile.picture
-        }
-        // Try to construct avatar URL from GitHub username
-        if (
-          githubAccount.username ||
-          ("profile" in githubAccount && githubAccount.profile?.username)
-        ) {
-          const username = githubAccount.username || githubAccount.profile?.username
-          return `https://github.com/${username}.png`
-        }
-      }
-
-      // Google avatar as secondary
-      const googleAccount = privyUser.linkedAccounts.find(
-        (acc) => acc.type === "google_oauth" || acc.type === "google"
-      )
-
-      if (googleAccount) {
-        if ("profile" in googleAccount && googleAccount.profile?.profilePictureUrl) {
-          return googleAccount.profile.profilePictureUrl
-        }
-        if ("profile" in googleAccount && googleAccount.profile?.picture) {
-          return googleAccount.profile.picture
-        }
-      }
-
-      // Email account avatar (if available)
-      const emailAccount = privyUser.linkedAccounts.find((acc) => acc.type === "email")
-
-      if (emailAccount && "profile" in emailAccount && emailAccount.profile?.profilePictureUrl) {
-        return emailAccount.profile.profilePictureUrl
+      if (githubAccount?.username) {
+        return `https://github.com/${githubAccount.username}.png`
       }
     }
 
@@ -110,41 +68,27 @@ export function useAuth(options?: UseAuthOptions) {
     // 2. Fallback: use Privy name info by priority
     if (privyUser) {
       const githubAccount = privyUser.linkedAccounts.find(
-        (acc) => acc.type === "github_oauth" || acc.type === "github"
+        (acc) => acc.type === "github_oauth"
       )
       const googleAccount = privyUser.linkedAccounts.find(
-        (acc) => acc.type === "google_oauth" || acc.type === "google"
+        (acc) => acc.type === "google_oauth"
       )
       const emailAccount = privyUser.linkedAccounts.find((acc) => acc.type === "email")
 
       // 2.1 GitHub display name (real name) or username
       if (githubAccount) {
-        // Try profile.name first (real name)
-        if ("profile" in githubAccount && githubAccount.profile?.name) {
-          return githubAccount.profile.name
-        }
-        // Fallback to username (same logic as getDisplayAvatar)
-        const username =
-          (githubAccount as any).username ||
-          ("profile" in githubAccount && githubAccount.profile?.username)
-        if (username) {
-          return username
-        }
+        if (githubAccount.name) return githubAccount.name
+        if (githubAccount.username) return githubAccount.username
       }
 
       // 2.2 Google display name
-      if (googleAccount) {
-        if ("name" in googleAccount && (googleAccount as any).name) {
-          return (googleAccount as any).name
-        }
-        if ("profile" in googleAccount && googleAccount.profile?.name) {
-          return googleAccount.profile.name
-        }
+      if (googleAccount?.name) {
+        return googleAccount.name
       }
 
       // 2.3 Email username as fallback (remove domain part)
-      if (emailAccount && "address" in emailAccount && (emailAccount as any).address) {
-        return (emailAccount as any).address.split("@")[0]
+      if (emailAccount?.address) {
+        return emailAccount.address.split("@")[0]
       }
     }
 
@@ -160,16 +104,10 @@ export function useAuth(options?: UseAuthOptions) {
     // 2. Fallback: use Privy GitHub account info
     if (privyUser) {
       const githubAccount = privyUser.linkedAccounts.find(
-        (acc) => acc.type === "github_oauth" || acc.type === "github"
+        (acc) => acc.type === "github_oauth"
       )
-      if (githubAccount) {
-        // Try multiple ways to get username (same logic as getDisplayAvatar)
-        const username =
-          (githubAccount as any).username ||
-          ("profile" in githubAccount && githubAccount.profile?.username)
-        if (username) {
-          return username
-        }
+      if (githubAccount?.username) {
+        return githubAccount.username
       }
     }
 
@@ -179,12 +117,10 @@ export function useAuth(options?: UseAuthOptions) {
   const getGithubUserId = () => {
     if (privyUser) {
       const githubAccount = privyUser.linkedAccounts.find(
-        (acc) => acc.type === "github_oauth" || acc.type === "github"
+        (acc) => acc.type === "github_oauth"
       )
-      if (githubAccount) {
-        if ("subject" in githubAccount && githubAccount.subject) {
-          return githubAccount.subject
-        }
+      if (githubAccount?.subject) {
+        return githubAccount.subject
       }
     }
     return ""
@@ -200,15 +136,15 @@ export function useAuth(options?: UseAuthOptions) {
     if (privyUser) {
       // Google email priority
       const googleAccount = privyUser.linkedAccounts.find(
-        (acc) => acc.type === "google_oauth" || acc.type === "google"
+        (acc) => acc.type === "google_oauth"
       )
-      if (googleAccount && "email" in googleAccount && googleAccount.email) {
+      if (googleAccount?.email) {
         return googleAccount.email
       }
 
       // Direct email account
       const emailAccount = privyUser.linkedAccounts.find((acc) => acc.type === "email")
-      if (emailAccount && "address" in emailAccount && emailAccount.address) {
+      if (emailAccount?.address) {
         return emailAccount.address
       }
     }
@@ -219,7 +155,7 @@ export function useAuth(options?: UseAuthOptions) {
   const getWalletAddress = () => {
     if (privyUser) {
       const walletAccount = privyUser.linkedAccounts.find((acc) => acc.type === "wallet")
-      if (walletAccount && "address" in walletAccount && walletAccount.address) {
+      if (walletAccount?.address) {
         return walletAccount.address
       }
     }

@@ -63,12 +63,11 @@ export function useCardCapture(options: UseCardCaptureOptions = {}) {
     // Element should already be at the target size (1701x2709)
     const snapshot = await snapdom(element, {
       scale: 1,
-      pixelRatio: 1,
       width: outputSize.width,
       height: outputSize.height,
       backgroundColor,
       quality,
-      skipFonts: false,
+      embedFonts: true,
       filter: (node) => {
         if (!(node instanceof HTMLElement)) return true
         return shouldIncludeNode(node)

@@ -300,7 +300,7 @@ export function useDevCardForm({ ecosystem }: UseDevCardFormOptions) {
 
   // Connect Twitter - fetch user data and update form
   const connectTwitter = async () => {
-    const twitterHandle = form.getValues("twitter").replace("@", "").trim()
+    const twitterHandle = (form.getValues("twitter") ?? "").replace("@", "").trim()
 
     if (!twitterHandle) {
       form.setError("twitter", { message: "Please enter a Twitter username first" })

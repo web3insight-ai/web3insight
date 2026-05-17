@@ -42,7 +42,8 @@ function PrivyConfiguredProvider({ children }: { children: React.ReactNode }) {
   }
 
   // Determine login methods based on user type
-  const loginMethods = userType === "dev" ? ["github"] : ["email"]
+  const loginMethods: ("github" | "email")[] =
+    userType === "dev" ? ["github"] : ["email"]
 
   return (
     <PrivyAuthProvider
