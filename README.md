@@ -80,7 +80,7 @@ Add a skill:
 npx skills add <owner/repo> -a claude-code -a universal -s <skill-name> -y --copy
 ```
 
-See the [Skills section in CLAUDE.md](./CLAUDE.md#skills-system) for the current 30-skill catalog grouped by category.
+See the [Skills section in CLAUDE.md](./CLAUDE.md#skills-system) for the current 43-skill catalog grouped by category.
 
 ## History
 

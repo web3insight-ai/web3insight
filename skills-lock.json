@@ -13,11 +13,23 @@
       "skillPath": "skills/api-rate-limiting/SKILL.md",
       "computedHash": "eea9d86f19e720a41f0187a5b3057daea56bf67ba07697e84fb341ebc7468bd0"
     },
+    "api-security-hardening": {
+      "source": "aj-geddes/useful-ai-prompts",
+      "sourceType": "github",
+      "skillPath": "skills/api-security-hardening/SKILL.md",
+      "computedHash": "cb3fac8f65a33ecaa4d8a4ef7f55097c3d0ff0d583c4b70ec28a8957a5d38d41"
+    },
     "api-versioning-strategy": {
       "source": "aj-geddes/useful-ai-prompts",
       "sourceType": "github",
       "skillPath": "skills/api-versioning-strategy/SKILL.md",
       "computedHash": "30823b57b301d25f5385e5035905a645a3ca1531577a0efcd1817d6c0fbf2d62"
+    },
+    "csrf-protection": {
+      "source": "aj-geddes/useful-ai-prompts",
+      "sourceType": "github",
+      "skillPath": "skills/csrf-protection/SKILL.md",
+      "computedHash": "8a1ec5ce3d09635bd310f98336759fa76dccaa4653ec0d2a4755066f63025083"
     },
     "deploy-to-vercel": {
       "source": "vercel-labs/agent-skills",
@@ -36,6 +48,12 @@
       "sourceType": "github",
       "skillPath": "skills/e2e-testing-automation/SKILL.md",
       "computedHash": "75bffcbbc0614b69e0fd97d2a518a2e7484a967577444e76b07aaedf2d0609a3"
+    },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-design/SKILL.md",
+      "computedHash": "063a0e6448123cd359ad0044cc46b0e490cc7964d45ef4bb9fd842bd2ffbca67"
     },
     "frontend-state-management": {
       "source": "aj-geddes/useful-ai-prompts",
@@ -97,6 +115,18 @@
       "skillPath": "skills/next-upgrade/SKILL.md",
       "computedHash": "e3aeb1f9e8a68d24df0c1c2e3c8ab97ede09a7251a2c76988318d02254346979"
     },
+    "playwright-best-practices": {
+      "source": "currents-dev/playwright-best-practices-skill",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "320eaf861e3a0a923bfaad0726cb311a3fe30093378f8d26c89b9c5ae5c42b35"
+    },
+    "playwright-cli": {
+      "source": "microsoft/playwright-cli",
+      "sourceType": "github",
+      "skillPath": "skills/playwright-cli/SKILL.md",
+      "computedHash": "84495cfda62b6c012afc4cc34a0c35bfc7923ba35983b8c04ce4cace0f35a5d8"
+    },
     "privy": {
       "source": "privy-io/privy-agentic-wallets-skill",
       "sourceType": "github",
@@ -115,6 +145,12 @@
       "skillPath": "skills/query-caching-strategies/SKILL.md",
       "computedHash": "78f38cd61706b9017be7ecfa0b61de11b3d146f7b155e571a6887db46f2fcac7"
     },
+    "react-hook-form": {
+      "source": "pproenca/dot-skills",
+      "sourceType": "github",
+      "skillPath": "skills/.curated/react-hook-form/SKILL.md",
+      "computedHash": "708cdc15b14a2826d05f1ac92a7d63f496a068cee5b4b5139c09cbcd68ba2409"
+    },
     "secrets-management": {
       "source": "aj-geddes/useful-ai-prompts",
       "sourceType": "github",
@@ -132,6 +168,24 @@
       "sourceType": "github",
       "skillPath": "skills/skill-creator/SKILL.md",
       "computedHash": "5ea13a6d9f0d4bb694405d79acd00cadec0d21bb138c4dd10fcf3c500cb835c2"
+    },
+    "sql-injection-prevention": {
+      "source": "aj-geddes/useful-ai-prompts",
+      "sourceType": "github",
+      "skillPath": "skills/sql-injection-prevention/SKILL.md",
+      "computedHash": "ee18a30c53d66696383ef1804f213d5f899059956d57c216ba9bcd8492618cc3"
+    },
+    "tailwind-design-system": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "skillPath": "plugins/frontend-mobile-development/skills/tailwind-design-system/SKILL.md",
+      "computedHash": "988d80e52c67c3692d43cc963b6a048a239895e88b272b061de55370d0f8efc3"
+    },
+    "tanstack-query-best-practices": {
+      "source": "deckardger/tanstack-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/tanstack-query/SKILL.md",
+      "computedHash": "21d2e8b7468a81d772b6527ad8ca178cc2f3f08af777bb9061333013ee88a0c9"
     },
     "troubleshooting-guide": {
       "source": "aj-geddes/useful-ai-prompts",
@@ -175,6 +229,12 @@
       "skillPath": "skills/react-view-transitions/SKILL.md",
       "computedHash": "c8952fc9127fa0564d0cb71dccb4215a5608ac933b5831104f09173a97a46f85"
     },
+    "vitest": {
+      "source": "antfu/skills",
+      "sourceType": "github",
+      "skillPath": "skills/vitest/SKILL.md",
+      "computedHash": "669c7275f7e1379b06b2bcfa593603aead4c983b951c7e8edbc09640aa38d0a1"
+    },
     "web-design-guidelines": {
       "source": "vercel-labs/agent-skills",
       "sourceType": "github",
@@ -186,6 +246,18 @@
       "sourceType": "github",
       "skillPath": "skills/webapp-testing/SKILL.md",
       "computedHash": "ad5b1fc52807e9afa4635e59218a026b164dc58b6c3f41b0f7c644dcd6ccf572"
+    },
+    "xss-prevention": {
+      "source": "aj-geddes/useful-ai-prompts",
+      "sourceType": "github",
+      "skillPath": "skills/xss-prevention/SKILL.md",
+      "computedHash": "6df76804f75e2b61dd98afb092bc093cb58a55103ddb38db572047042ea969a5"
+    },
+    "zod": {
+      "source": "pproenca/dot-skills",
+      "sourceType": "github",
+      "skillPath": "skills/.curated/zod/SKILL.md",
+      "computedHash": "c69b5133b65643317236707f2cd3e521b4fc6e5ee5fd6c6c00cf62a37dfd0144"
     }
   }
 }
