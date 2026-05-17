@@ -74,9 +74,7 @@ export const authRouter = os.auth.router({
       const result = await context.container.services.auth.getUserInfo(
         toJwtPayload(user),
       );
-      return profileToPublic(
-        result.profile as unknown as Record<string, unknown>,
-      );
+      return profileToPublic(result.profile);
     } catch (err) {
       // Reason: service tokens (uid=1 DATA_API_TOKEN) and deleted users have
       // no row in api.auth_users — the service throws plain Error('User not
@@ -115,9 +113,7 @@ export const authRouter = os.auth.router({
     const result = await context.container.services.auth.getUserInfoFormId(
       String(input.id),
     );
-    return profileToPublic(
-      result.profile as unknown as Record<string, unknown>,
-    );
+    return profileToPublic(result.profile);
   }),
 
   updateUserByTag: os.auth.updateUserByTag.handler(
@@ -138,9 +134,7 @@ export const authRouter = os.auth.router({
         input.id,
         input.tag,
       );
-      return profileToPublic(
-        result.profile as unknown as Record<string, unknown>,
-      );
+      return profileToPublic(result.profile);
     },
   ),
 

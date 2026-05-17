@@ -3,7 +3,6 @@ import { cors } from 'hono/cors';
 import { logger as honoLogger } from 'hono/logger';
 import { RPCHandler } from '@orpc/server/fetch';
 import { OpenAPIHandler } from '@orpc/openapi/fetch';
-import { ZodToJsonSchemaConverter } from '@orpc/zod/zod4';
 import { Scalar } from '@scalar/hono-api-reference';
 import { router } from '@/rpc-hono/router';
 import { createAuthMiddleware } from '@/app/middleware/auth';
@@ -56,11 +55,11 @@ export function createApp({ container, jwtSecret }: CreateAppOptions) {
     // Reason: surface RPC handler stack traces in Vercel runtime logs while
     // we still chase L7 bugs; otherwise the only visible signal is `<-- POST 500`.
     clientInterceptors: [
-      async ({ next, path }) => {
+      async (options) => {
         try {
-          return await next();
+          return await options.next();
         } catch (err) {
-          console.error(`[rpc] ${path.join('.')} threw`, err);
+          console.error(`[rpc] ${options.path.join('.')} threw`, err);
           throw err;
         }
       },
@@ -81,12 +80,10 @@ export function createApp({ container, jwtSecret }: CreateAppOptions) {
   // Legacy REST surface — serves /v1/* and /v2/* URLs straight from contract
   // route metadata via OpenAPIHandler. Keeps dashboard/web/dev-card fetchApi
   // calls working without per-app rewrites; same business logic as /rpc/*.
-  const restHandler = new OpenAPIHandler(router, {
-    schemaConverters: [new ZodToJsonSchemaConverter()],
-  });
+  const restHandler = new OpenAPIHandler(router);
   const mountRest = async (
     c: import('hono').Context<AppBindings>,
-    prefix: string,
+    prefix: `/${string}`,
   ) => {
     const { response, matched } = await restHandler.handle(c.req.raw, {
       prefix,

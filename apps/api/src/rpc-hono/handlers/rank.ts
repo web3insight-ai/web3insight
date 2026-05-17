@@ -48,7 +48,7 @@ export const reposTopHandler = os.rank.reposTop.handler(
       CacheKey.RepoStarRank,
       input.eco_name,
     );
-    return (data ?? { list: [] }) as never;
+    return data ?? { list: [] };
   },
 );
 
@@ -60,7 +60,7 @@ export const reposTop7dHandler = os.rank.reposTop7d.handler(
       CacheKey.RepoStarRank7d,
       input.eco_name,
     );
-    return (data ?? { list: [] }) as never;
+    return data ?? { list: [] };
   },
 );
 
@@ -72,7 +72,7 @@ export const reposTopByDev7dHandler = os.rank.reposTopByDev7d.handler(
       CacheKey.RepoDevRank7d,
       input.eco_name,
     );
-    return (data ?? { list: [] }) as never;
+    return data ?? { list: [] };
   },
 );
 
@@ -99,7 +99,7 @@ export const yearsRankReportHandler = os.rank.yearsRankReport.handler(
     if (!data) {
       throw new ORPCError('NOT_FOUND', { message: 'Cache not found' });
     }
-    return data as never;
+    return data;
   },
 );
 

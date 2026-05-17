@@ -41,11 +41,11 @@ export function useOverviewStatisticsRpc(ecoName = "all") {
   const data: OverviewStatistics | undefined =
     eco.data || actors.data || coreActors.data || repos.data
       ? {
-          totalEcosystems: Number(eco.data?.total ?? 0),
-          totalDevelopers: Number(actors.data?.total ?? 0),
-          totalCoreDevelopers: Number(coreActors.data?.total ?? 0),
-          totalRepositories: Number(repos.data?.total ?? 0),
-        }
+        totalEcosystems: Number(eco.data?.total ?? 0),
+        totalDevelopers: Number(actors.data?.total ?? 0),
+        totalCoreDevelopers: Number(coreActors.data?.total ?? 0),
+        totalRepositories: Number(repos.data?.total ?? 0),
+      }
       : undefined;
 
   return {
