@@ -1,37 +1,50 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Dependencies
+node_modules/
+.pnpm-store/
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
-.yarn/install-state.gz
+# Build output
+dist/
+.next/
+.turbo/
+out/
+*.tsbuildinfo
+.eslintcache
 
-# testing
-/coverage
+# Environment
+.env
+.env.local
+.env.*.local
+!.env.example
 
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
+# Logs
+*.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
+pnpm-debug.log*
 
-# local env files
-.env*.local
+# Editor
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 
-# vercel
-.vercel
+# Test
+coverage/
+.nyc_output/
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-.eslintcache
+# Vercel
+.vercel/
+
+# Claude / agents (per-machine)
+.claude/scheduled_tasks.lock
+.claude/settings.local.json
+
+# Playwright MCP cache
+.playwright-mcp/
+
+# Misc
+*.pid
+.tmp/

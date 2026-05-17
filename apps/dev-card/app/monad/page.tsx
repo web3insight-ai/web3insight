@@ -1,0 +1,219 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { usePrivy } from "@privy-io/react-auth"
+import Image from "next/image"
+import { motion } from "framer-motion"
+import { setUserType } from "@/lib/userTypeEvents"
+
+export default function ConnectPage() {
+  const router = useRouter()
+  const [isDev, setIsDev] = useState(true)
+  const { login, ready, authenticated } = usePrivy()
+
+  // Initialize and save user type on mount
+  useEffect(() => {
+    setUserType('dev')
+  }, [])
+
+  // Redirect to create page if already logged in (returning user)
+  // New logins will be handled by PrivyAuthSync after backend auth completes
+  useEffect(() => {
+    if (ready && authenticated) {
+      // Only redirect returning users, not new logins
+      // New logins have redirectToCreate flag set and will be handled by PrivyAuthSync
+      const isNewLogin = typeof window !== 'undefined' && localStorage.getItem('redirectToCreate') === 'true'
+      if (!isNewLogin) {
+        router.push('/monad/create')
+      }
+    }
+  }, [ready, authenticated, router])
+
+  // Update userType whenever isDev changes
+  const handleTypeChange = (isDevOption: boolean) => {
+    setIsDev(isDevOption)
+    setUserType(isDevOption ? "dev" : "not-dev")
+  }
+
+  const handleConnect = async () => {
+    if (ready) {
+      // Set flag to redirect to create page after login
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('redirectToCreate', 'true')
+        localStorage.setItem('redirectEcosystem', 'monad')
+      }
+      // Trigger Privy login (userType already saved in localStorage)
+      login()
+    }
+  }
+
+  return (
+    <motion.div
+      className="min-h-dvh bg-black text-white relative overflow-hidden"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      {/* Background */}
+      <motion.div
+        className="absolute inset-0 z-0"
+        initial={{ scale: 1.1 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 1, ease: "easeOut" }}
+      >
+        <Image src="/images/bg-synthwave.jpeg" alt="Synthwave background" fill className="object-cover" priority />
+      </motion.div>
+
+      {/* Top gradient overlay */}
+      <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/80 to-transparent z-10" />
+
+      {/* Content */}
+      <div className="relative z-20 flex flex-col items-center min-h-dvh px-4 py-6 md:py-8">
+        {/* Header logos */}
+        <motion.header
+          className="flex items-center justify-center gap-1.5 md:gap-2 mb-4 md:mb-2 mt-2 md:mt-4"
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+        >
+          <Image src="/images/monad.svg" alt="MONAD" width={80} height={20} className="h-4 md:h-5 w-auto" />
+          <Image src="/images/seperator.svg" alt="" width={10} height={10} className="h-2.5 w-auto opacity-50" />
+          <Image
+            src="/images/openbuild-logo.svg"
+            alt="OpenBuild"
+            width={80}
+            height={20}
+            className="h-4 md:h-5 w-auto"
+          />
+          <Image src="/images/seperator.svg" alt="" width={10} height={10} className="h-2.5 w-auto opacity-50" />
+          <Image
+            src="/images/web3insight_logo.svg"
+            alt="web3insight"
+            width={80}
+            height={20}
+            className="h-4 md:h-5 w-auto"
+          />
+        </motion.header>
+
+        {/* Main content - title, toggle, card, button, footer - all together */}
+        <div className="flex-1 flex flex-col items-center justify-center min-h-0">
+          {/* Title section */}
+          <motion.div
+            className="text-center mb-4 md:mb-4"
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.7 }}
+          >
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.1]">
+              <span className="block md:inline">Monad</span>
+              <span className="block md:inline md:ml-4">Dev Card</span>
+            </h1>
+            <p className="mt-3 md:mt-3 text-white text-lg md:text-xl font-medium">
+              {"Not just a profile—it's your proof of build"}
+            </p>
+          </motion.div>
+
+          {/* Toggle buttons */}
+          <motion.div
+            className="p-1 bg-zinc-700/20 rounded-lg shadow-[0px_0px_32px_0px_rgba(159,142,255,0.30)] outline outline-1 outline-offset-[-1px] outline-white/20 inline-flex justify-center items-center gap-1 mb-10 md:mb-8"
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.5, duration: 0.5 }}
+          >
+            <button
+              onClick={() => handleTypeChange(true)}
+              className={`h-7 px-3 py-px rounded-md inline-flex justify-center items-center gap-1 transition-all whitespace-nowrap ${
+                isDev
+                  ? "bg-violet-500/20 shadow-[0px_2px_5px_0px_rgba(131,110,249,0.40)] outline outline-1 outline-offset-[-1px] outline-violet-500"
+                  : "opacity-80"
+              }`}
+            >
+              <Image
+                src="/images/star.svg"
+                alt=""
+                width={14}
+                height={14}
+                className={`w-3.5 h-3.5 ${isDev ? "[&_path]:fill-violet-500" : "[&_path]:fill-white"}`}
+              />
+              <span className="text-center text-white text-xs font-semibold leading-4 whitespace-nowrap">
+                {"I'm a dev"}
+              </span>
+            </button>
+            <button
+              onClick={() => handleTypeChange(false)}
+              className={`h-7 px-3 py-px rounded-md inline-flex justify-center items-center gap-1 transition-all whitespace-nowrap ${
+                !isDev
+                  ? "bg-violet-500/20 shadow-[0px_2px_5px_0px_rgba(131,110,249,0.40)] outline outline-1 outline-offset-[-1px] outline-violet-500"
+                  : "opacity-80"
+              }`}
+            >
+              <Image
+                src="/images/star.svg"
+                alt=""
+                width={14}
+                height={14}
+                className={`w-3.5 h-3.5 ${!isDev ? "[&_path]:fill-violet-500" : "[&_path]:fill-white"}`}
+              />
+              <span className="text-center text-white text-xs font-semibold leading-4 whitespace-nowrap">
+                {"I'm not a dev"}
+              </span>
+            </button>
+          </motion.div>
+
+          {/* Card, button, and footer text grouped together */}
+          <motion.div
+            className="flex flex-col items-center gap-4 md:gap-5"
+            initial={{ y: 40, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.7, duration: 0.7 }}
+          >
+            <motion.div
+              className="w-[190px] h-[300px] md:w-[174px] md:h-[276px] lg:w-[200px] lg:h-[316px] rounded-[22px] shadow-[0px_18px_24px_12px_rgba(131,110,249,0.80)] overflow-hidden bg-black"
+              style={{
+                border: "2.76px solid transparent",
+                backgroundImage: "linear-gradient(black, black), linear-gradient(to bottom, #FFFFFF, #927EFF)",
+                backgroundOrigin: "border-box",
+                backgroundClip: "padding-box, border-box",
+              }}
+              whileHover={{ scale: 1.05, y: -10 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
+              <Image
+                src="/images/monad-mascot.png"
+                alt="Monad mascot"
+                width={232}
+                height={368}
+                className="w-full h-full object-cover"
+              />
+            </motion.div>
+
+            <motion.button
+              onClick={handleConnect}
+              className="w-[190px] md:w-[174px] lg:w-[200px] h-9 px-6 py-1.5 bg-gradient-to-r from-violet-500 to-slate-400 rounded-[50px] shadow-[0px_0px_10px_0px_rgba(159,142,255,0.50)] outline outline-2 outline-offset-[-2px] outline-indigo-300 inline-flex justify-center items-center gap-2"
+              whileHover={{ scale: 1.05, y: -2, boxShadow: "0px 0px 20px 0px rgba(159,142,255,0.70)" }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            >
+              <span className="text-center text-white text-sm font-semibold whitespace-nowrap">
+                {!ready ? "Loading..." : "Connect"}
+              </span>
+            </motion.button>
+
+            <motion.p
+              className="text-center text-white text-xs font-medium leading-5 mt-1"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.9, duration: 0.5 }}
+            >
+              {"We'll analyze your repos, lines of code, and vibes."}
+              <br />
+              {"Nothing sensitive. Only public data."}
+            </motion.p>
+          </motion.div>
+        </div>
+      </div>
+    </motion.div>
+  )
+}
