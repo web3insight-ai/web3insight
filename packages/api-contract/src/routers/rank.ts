@@ -39,9 +39,13 @@ export const rankContract = oc.tag('Rank').router({
     .output(TopActorListSchema),
 
   /** GET /v1/years/rank/report */
+  // Reason: legacy cache key `YearsChineseSummary` stores an arbitrary
+  // blob populated by the AI summary job — not the typed
+  // YearlyDeveloperStatListSchema this contract was authored against.
+  // Until the summary shape is normalised, expose it raw.
   yearsRankReport: oc
     .route({ method: 'GET', path: '/years/rank/report' })
-    .output(YearlyDeveloperStatListSchema),
+    .output(z.unknown()),
 });
 
 export type RankContract = typeof rankContract;
