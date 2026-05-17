@@ -78,7 +78,7 @@ catalog:
   # Husky / git
   husky: 9.1.7
   'lint-staged': 17.0.5
-  syncpack: 15.1.2
+  syncpack: 15.2.0
   turbo: 2.9.14
 
   # Misc utilities used in multiple apps
