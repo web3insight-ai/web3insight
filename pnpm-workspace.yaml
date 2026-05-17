@@ -38,7 +38,7 @@ catalog:
   'tailwind-merge': 3.6.0
   clsx: 2.1.1
   'class-variance-authority': 0.7.1
-  'lucide-react': 0.577.0
+  'lucide-react': 1.16.0
   'framer-motion': 12.38.0
   recharts: 3.8.1
 
