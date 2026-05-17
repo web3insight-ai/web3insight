@@ -19,7 +19,11 @@
     },
     {
       "source": "/doc/:path*",
-      "destination": "/api?path=/doc/:path*"
+      "destination": "/api/hono?path=/doc/:path*"
+    },
+    {
+      "source": "/openapi.json",
+      "destination": "/api/hono?path=/openapi.json"
     },
     {
       "source": "/v1/auth/:path*",

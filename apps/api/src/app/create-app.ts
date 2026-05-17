@@ -2,8 +2,10 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger as honoLogger } from 'hono/logger';
 import { RPCHandler } from '@orpc/server/fetch';
+import { Scalar } from '@scalar/hono-api-reference';
 import { router } from '@/rpc-hono/router';
 import { createAuthMiddleware } from '@/app/middleware/auth';
+import { getOpenApiSpec } from '@/app/docs';
 import type { Container } from '@/app/container';
 
 export interface AppBindings {
@@ -37,6 +39,15 @@ export function createApp({ container, jwtSecret }: CreateAppOptions) {
 
   app.get('/health', (c) =>
     c.json({ ok: true, runtime: 'hono', timestamp: new Date().toISOString() }),
+  );
+
+  app.get('/openapi.json', async (c) => c.json(await getOpenApiSpec()));
+  app.get(
+    '/doc/api',
+    Scalar({
+      url: '/openapi.json',
+      pageTitle: 'Web3Insight API — Scalar Reference',
+    }),
   );
 
   const rpcHandler = new RPCHandler(router);

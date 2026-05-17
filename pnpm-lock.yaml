@@ -308,7 +308,7 @@ importers:
         specifier: ^30.0.0
         version: 30.0.0
       '@types/node':
-        specifier: 'catalog:'
+        specifier: 25.8.0
         version: 25.8.0
       '@types/pg':
         specifier: ^8.20.0
