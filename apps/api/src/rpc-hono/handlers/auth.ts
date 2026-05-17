@@ -12,9 +12,10 @@ import type { JwtPayload } from '@/services/auth.service';
  * populates context.user from payload.sub (numeric string id).
  */
 
-function requireUser(
-  user: HonoRpcContext['user'],
-): { id: number; tag?: string } {
+function requireUser(user: HonoRpcContext['user']): {
+  id: number;
+  tag?: string;
+} {
   if (!user) {
     throw new ORPCError('UNAUTHORIZED', { message: 'Authentication required' });
   }
@@ -72,7 +73,9 @@ export const authRouter = os.auth.router({
     const result = await context.container.services.auth.getUserInfo(
       toJwtPayload(user),
     );
-    return profileToPublic(result.profile as unknown as Record<string, unknown>);
+    return profileToPublic(
+      result.profile as unknown as Record<string, unknown>,
+    );
   }),
 
   getUserExtra: os.auth.getUserExtra.handler(async ({ input, context }) => {
@@ -100,7 +103,9 @@ export const authRouter = os.auth.router({
     const result = await context.container.services.auth.getUserInfoFormId(
       String(input.id),
     );
-    return profileToPublic(result.profile as unknown as Record<string, unknown>);
+    return profileToPublic(
+      result.profile as unknown as Record<string, unknown>,
+    );
   }),
 
   updateUserByTag: os.auth.updateUserByTag.handler(
@@ -152,11 +157,14 @@ export const authRouter = os.auth.router({
     return { success: true };
   }),
 
-  getOpenBuildRecord: os.auth.getOpenBuildRecord.handler(async ({ context }) => {
-    const user = requireUser(context.user);
-    const result = await context.container.services.auth.getOpenBuildUserRecord(
-      String(user.id),
-    );
-    return (result ?? null) as Record<string, unknown> | null;
-  }),
+  getOpenBuildRecord: os.auth.getOpenBuildRecord.handler(
+    async ({ context }) => {
+      const user = requireUser(context.user);
+      const result =
+        await context.container.services.auth.getOpenBuildUserRecord(
+          String(user.id),
+        );
+      return (result ?? null) as Record<string, unknown> | null;
+    },
+  ),
 });

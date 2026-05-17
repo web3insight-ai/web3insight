@@ -155,8 +155,7 @@ export class DeveloperAnalysisService {
 
     const yearsFromCreate = (
       Math.round(
-        ((now.getTime() - createdAt.getTime()) /
-          (1000 * 60 * 60 * 24 * 365)) *
+        ((now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24 * 365)) *
           10,
       ) / 10
     ).toString();

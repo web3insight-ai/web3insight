@@ -60,3 +60,4 @@ service-account-key.json
 
 eco.jsonl
 .vscode/*
+.vercel
