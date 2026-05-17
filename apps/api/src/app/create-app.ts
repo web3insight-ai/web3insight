@@ -52,7 +52,20 @@ export function createApp({ container, jwtSecret }: CreateAppOptions) {
     }),
   );
 
-  const rpcHandler = new RPCHandler(router);
+  const rpcHandler = new RPCHandler(router, {
+    // Reason: surface RPC handler stack traces in Vercel runtime logs while
+    // we still chase L7 bugs; otherwise the only visible signal is `<-- POST 500`.
+    clientInterceptors: [
+      async ({ next, path }) => {
+        try {
+          return await next();
+        } catch (err) {
+          console.error(`[rpc] ${path.join('.')} threw`, err);
+          throw err;
+        }
+      },
+    ],
+  });
   app.all('/rpc/*', async (c) => {
     const { response, matched } = await rpcHandler.handle(c.req.raw, {
       prefix: '/rpc',

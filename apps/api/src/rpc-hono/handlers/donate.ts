@@ -16,9 +16,8 @@ function requireUser(user: { id: number } | undefined): { id: number } {
 export const createDonationHandler = os.donate.createDonation.handler(
   async ({ input, context }) => {
     const user = requireUser(context.user);
-    // Contract input uses `repo_name` (owner/repo) — the service expects that exact shape.
     return (await context.container.services.donate.create(
-      input.repo_name,
+      input.repo_full_name,
       String(user.id),
     )) as never;
   },

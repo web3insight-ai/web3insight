@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { createWeb3InsightClient } from "@web3insight/orpc-client";
 import { env } from "@env";
 
-const DATA_API_URL = env.DATA_API_URL;
+const RPC_URL = `${env.DATA_API_URL}/rpc`;
 
-// Privy authentication endpoint
+// Privy authentication endpoint — exchanges a Privy identity token for a
+// backend JWT via the api's orpc.auth.privyTokenAuth procedure, then fetches
+// the user profile via orpc.auth.me. Both calls go through the typed
+// @web3insight/orpc-client; no legacy REST left in this route.
 export async function POST(request: Request) {
   try {
     const { idToken } = await request.json();
@@ -16,68 +20,62 @@ export async function POST(request: Request) {
       );
     }
 
-    // Call backend API to exchange Privy token for backend token
-    const response = await fetch(`${DATA_API_URL}/v1/auth/privy/token/auth`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        accept: "*/*",
-      },
-      body: JSON.stringify({ id_token: idToken }),
-    });
+    const anonClient = createWeb3InsightClient({
+      url: RPC_URL,
+      credentials: "omit",
+    }).client;
 
-    if (!response.ok) {
-      const error = await response.text();
+    let token: string;
+    try {
+      const auth = (await anonClient.auth.privyTokenAuth({
+        id_token: idToken,
+      } as never)) as { token?: string };
+      if (!auth?.token) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Invalid authentication response from server",
+          },
+          { status: 500 },
+        );
+      }
+      token = auth.token;
+    } catch (err) {
+      const status = (err as { status?: number })?.status ?? 500;
+      const message = err instanceof Error ? err.message : "auth failed";
       return NextResponse.json(
         {
           success: false,
-          message: `Failed to authenticate with Privy: ${error}`,
-          error: error,
+          message: `Failed to authenticate with Privy: ${message}`,
+          error: message,
         },
-        { status: response.status },
+        { status },
       );
     }
 
-    const authData = await response.json();
+    const userClient = createWeb3InsightClient({
+      url: RPC_URL,
+      token,
+      credentials: "omit",
+    }).client;
 
-    if (!authData.token) {
+    let userData: unknown;
+    try {
+      userData = await userClient.auth.me({});
+    } catch (err) {
+      const status = (err as { status?: number })?.status ?? 500;
       return NextResponse.json(
-        {
-          success: false,
-          message: "Invalid authentication response from server",
-        },
-        { status: 500 },
+        { success: false, message: "Failed to fetch user profile" },
+        { status },
       );
     }
 
-    // Fetch user profile using the backend token
-    const userResponse = await fetch(`${DATA_API_URL}/v1/auth/user`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${authData.token}`,
-        accept: "*/*",
-      },
-    });
-
-    if (!userResponse.ok) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Failed to fetch user profile",
-        },
-        { status: userResponse.status },
-      );
-    }
-
-    const userData = await userResponse.json();
-
-    // Set the backend token as an HTTP-only cookie
     const cookieStore = await cookies();
-    cookieStore.set("auth-token", authData.token, {
+    cookieStore.set("auth-token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: 60 * 60 * 24 * 7,
       path: "/",
     });
 
@@ -85,10 +83,7 @@ export async function POST(request: Request) {
       success: true,
       code: "200",
       message: "Privy authentication successful",
-      data: {
-        token: authData.token,
-        user: userData,
-      },
+      data: { token, user: userData },
     });
   } catch (error) {
     console.error("Privy authentication error:", error);
@@ -101,4 +96,3 @@ export async function POST(request: Request) {
     );
   }
 }
-

@@ -70,12 +70,24 @@ function profileToPublic(profile: Record<string, unknown>) {
 export const authRouter = os.auth.router({
   me: os.auth.me.handler(async ({ context }) => {
     const user = requireUser(context.user);
-    const result = await context.container.services.auth.getUserInfo(
-      toJwtPayload(user),
-    );
-    return profileToPublic(
-      result.profile as unknown as Record<string, unknown>,
-    );
+    try {
+      const result = await context.container.services.auth.getUserInfo(
+        toJwtPayload(user),
+      );
+      return profileToPublic(
+        result.profile as unknown as Record<string, unknown>,
+      );
+    } catch (err) {
+      // Reason: service tokens (uid=1 DATA_API_TOKEN) and deleted users have
+      // no row in api.auth_users — the service throws plain Error('User not
+      // found'). Surface as NOT_FOUND so dashboard's fetchCurrentUser can
+      // gracefully render a logged-out state instead of crashing with 500.
+      const message = err instanceof Error ? err.message : 'auth lookup failed';
+      if (message === 'User not found') {
+        throw new ORPCError('NOT_FOUND', { message });
+      }
+      throw err;
+    }
   }),
 
   getUserExtra: os.auth.getUserExtra.handler(async ({ input, context }) => {

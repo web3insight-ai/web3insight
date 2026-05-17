@@ -2,6 +2,7 @@ import { os, ORPCError } from "@orpc/server"
 import { z } from "zod"
 import { cookies } from "next/headers"
 import type { ORPCContext } from "./context"
+import { createBackendClient } from "./backend"
 import {
   ecosystemSchema,
   apiUserSchema,
@@ -102,7 +103,27 @@ function processUserData(userData: any): z.infer<typeof apiUserSchema> | null {
   return userData
 }
 
-// Auth procedures
+/**
+ * Map an oRPC ORPCError into the legacy `{success, code, message}` envelope
+ * the dev-card UI expects. Non-oRPC errors still surface as success:false.
+ */
+function rpcErrorEnvelope(error: unknown, defaultMessage: string) {
+  if (error instanceof ORPCError) {
+    return {
+      success: false as const,
+      code: error.status?.toString() ?? error.code ?? "500",
+      message: error.message || defaultMessage,
+    }
+  }
+  return {
+    success: false as const,
+    code: "500",
+    message: error instanceof Error ? error.message : defaultMessage,
+  }
+}
+
+// --- Auth procedures -------------------------------------------------------
+
 const signInWithPrivy = baseProcedure
   .input(privyAuthInputSchema)
   .output(
@@ -113,61 +134,40 @@ const signInWithPrivy = baseProcedure
       data: authResponseSchema.optional(),
     })
   )
-  .handler(async ({ input, context }) => {
-    const response = await fetch(
-      `${context.dataApiUrl}/v1/auth/privy/token/auth`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          accept: "*/*",
-        },
-        body: JSON.stringify({ id_token: input.idToken }),
+  .handler(async ({ input }) => {
+    // Step 1: exchange Privy id_token for backend JWT
+    let token: string
+    try {
+      const { client } = createBackendClient()
+      const authResult = await client.auth.privyTokenAuth({
+        id_token: input.idToken,
+      })
+      if (!authResult?.token) {
+        return {
+          success: false,
+          code: "500",
+          message: "Invalid authentication response from server",
+        }
       }
-    )
-
-    if (!response.ok) {
-      const error = await response.text()
-      return {
-        success: false,
-        code: response.status.toString(),
-        message: `Failed to authenticate with Privy: ${error}`,
-      }
+      token = authResult.token
+    } catch (error) {
+      return rpcErrorEnvelope(error, "Failed to authenticate with Privy")
     }
 
-    const authData = await response.json()
-
-    if (!authData.token) {
-      return {
-        success: false,
-        code: "500",
-        message: "Invalid authentication response from server",
-      }
+    // Step 2: fetch user profile using the new token
+    let userData: any
+    try {
+      const { client: authedClient } = createBackendClient(token)
+      userData = await authedClient.auth.me()
+    } catch (error) {
+      return rpcErrorEnvelope(error, "Failed to fetch user profile")
     }
 
-    // Fetch user profile using the backend token
-    const userResponse = await fetch(`${context.dataApiUrl}/v1/auth/user`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${authData.token}`,
-        accept: "*/*",
-      },
-    })
-
-    if (!userResponse.ok) {
-      return {
-        success: false,
-        code: userResponse.status.toString(),
-        message: "Failed to fetch user profile",
-      }
-    }
-
-    const userData = await userResponse.json()
     const processedUserData = processUserData(userData)
 
-    // Set the backend token as an HTTP-only cookie
+    // Step 3: set the backend token as an HTTP-only cookie
     const cookieStore = await cookies()
-    cookieStore.set("auth-token", authData.token, {
+    cookieStore.set("auth-token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
@@ -180,7 +180,7 @@ const signInWithPrivy = baseProcedure
       code: "200",
       message: "Privy authentication successful",
       data: {
-        token: authData.token,
+        token,
         user: processedUserData!,
       },
     }
@@ -201,68 +201,63 @@ const getCurrentUser = baseProcedure
       return { success: true, code: "200", message: "", data: null }
     }
 
-    // First, get user ID from v1 auth endpoint
-    const userResponse = await fetch(`${context.dataApiUrl}/v1/auth/user`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${context.authToken}`,
-        accept: "*/*",
-      },
-    })
-
-    if (!userResponse.ok) {
-      if (userResponse.status === 401) {
+    // Step 1: identify user via /auth/me. 401 = stale cookie; clear and bail.
+    let userData: any
+    try {
+      const { client } = createBackendClient(context.authToken)
+      userData = await client.auth.me()
+    } catch (error) {
+      if (error instanceof ORPCError && error.status === 401) {
         const cookieStore = await cookies()
         cookieStore.delete("auth-token")
       }
       return { success: true, code: "200", message: "", data: null }
     }
 
-    const userData = await userResponse.json()
-    const userId = userData?.profile?.user_id || userData?.user_id
-
+    const userId: number | string | undefined =
+      userData?.profile?.user_id ?? userData?.user_id
     if (!userId) {
       return { success: true, code: "200", message: "", data: null }
     }
 
-    // Check if OpenBuild is bound from v1 binds data
-    let openbuildBound = false
-    if (userData.binds && Array.isArray(userData.binds)) {
-      openbuildBound = userData.binds.some(
-        (bind: any) => bind.bind_type === "openbuild"
-      )
-    }
+    const openbuildBound =
+      Array.isArray(userData?.binds) &&
+      userData.binds.some((bind: any) => bind.bind_type === "openbuild")
 
-    // Use v2 API for ecosystem-specific data
-    const v2Response = await fetch(
-      `${context.dataApiUrl}/v2/auth/user/info/${input.ecosystem}/${userId}`,
-      {
-        method: "GET",
-        headers: { accept: "*/*" },
+    // Step 2: ecosystem-specific profile. Missing = let user create one.
+    try {
+      const { client } = createBackendClient(context.authToken)
+      const v2Data = await client.auth.getUserByTagAndId({
+        tag: input.ecosystem,
+        id: String(userId),
+      })
+      const processed = processUserData(v2Data)
+      return {
+        success: true,
+        code: "200",
+        message: "",
+        data: processed
+          ? { ...processed, openbuild_bound: openbuildBound }
+          : null,
       }
-    )
-
-    if (!v2Response.ok) {
-      // v2 API failed, return basic info for user to create profile
+    } catch {
+      // Fallback shape: enough to bootstrap profile creation in the UI.
       let githubLogin = ""
       if (userData.profile?.github_login) {
         githubLogin = userData.profile.github_login
-      } else if (userData.binds && Array.isArray(userData.binds)) {
+      } else if (Array.isArray(userData.binds)) {
         const githubBind = userData.binds.find(
           (bind: any) =>
             bind.bind_type === "github" || bind.bind_type === "github_oauth"
         )
-        if (githubBind) {
-          githubLogin = githubBind.bind_key || ""
-        }
+        if (githubBind) githubLogin = githubBind.bind_key || ""
       }
-
       return {
         success: true,
         code: "200",
         message: "",
         data: {
-          id: userId,
+          id: String(userId),
           nick_name: "",
           user_avatar: "",
           user_bio: "",
@@ -273,16 +268,6 @@ const getCurrentUser = baseProcedure
           openbuild_bound: openbuildBound,
         },
       }
-    }
-
-    const v2Data = await v2Response.json()
-    const processedV2Data = processUserData(v2Data)
-
-    return {
-      success: true,
-      code: "200",
-      message: "",
-      data: processedV2Data ? { ...processedV2Data, openbuild_bound: openbuildBound } : null,
     }
   })
 
@@ -297,7 +282,6 @@ const logout = baseProcedure
   .handler(async () => {
     const cookieStore = await cookies()
     cookieStore.delete("auth-token")
-
     return {
       success: true,
       code: "200",
@@ -321,36 +305,30 @@ const updateProfile = protectedProcedure
     })
   )
   .handler(async ({ input, context }) => {
-    const response = await fetch(
-      `${context.dataApiUrl}/v2/auth/user/info/${input.ecosystem}`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${context.authToken}`,
-          "Content-Type": "application/json",
-          accept: "*/*",
-        },
-        body: JSON.stringify(input.data),
-      }
-    )
+    try {
+      const { client } = createBackendClient(context.authToken)
+      await client.auth.updateUserByTag({
+        tag: input.ecosystem,
+        data: input.data,
+      })
 
-    if (!response.ok) {
-      const error = await response.text()
+      // Re-fetch the profile post-write so the UI gets the canonical shape.
+      const userId = (await client.auth.me())?.id
+      const refreshed = userId
+        ? await client.auth.getUserByTagAndId({
+            tag: input.ecosystem,
+            id: String(userId),
+          })
+        : null
+      const processed = processUserData(refreshed)
       return {
-        success: false,
-        code: response.status.toString(),
-        message: `Failed to update profile: ${error}`,
+        success: true,
+        code: "200",
+        message: "Profile updated successfully",
+        data: processed ?? undefined,
       }
-    }
-
-    const userData = await response.json()
-    const processedUserData = processUserData(userData)
-
-    return {
-      success: true,
-      code: "200",
-      message: "Profile updated successfully",
-      data: processedUserData!,
+    } catch (error) {
+      return rpcErrorEnvelope(error, "Failed to update profile")
     }
   })
 
@@ -369,37 +347,36 @@ const getUserByIdAndEcosystem = baseProcedure
       data: apiUserSchema.nullable(),
     })
   )
-  .handler(async ({ input, context }) => {
-    const response = await fetch(
-      `${context.dataApiUrl}/v2/auth/user/info/${input.ecosystem}/${input.id}`,
-      {
-        method: "GET",
-        headers: { accept: "*/*" },
-      }
-    )
-
-    if (!response.ok) {
-      const error = await response.text()
+  .handler(async ({ input }) => {
+    try {
+      const { client } = createBackendClient()
+      const userData = await client.auth.getUserByTagAndId({
+        tag: input.ecosystem,
+        id: input.id,
+      })
       return {
-        success: false,
-        code: response.status.toString(),
-        message: `Failed to fetch user profile: ${error}`,
-        data: null,
+        success: true,
+        code: "200",
+        message: "",
+        data: processUserData(userData),
       }
-    }
-
-    const userData = await response.json()
-    const processedUserData = processUserData(userData)
-
-    return {
-      success: true,
-      code: "200",
-      message: "",
-      data: processedUserData,
+    } catch (error) {
+      return { ...rpcErrorEnvelope(error, "Failed to fetch user profile"), data: null }
     }
   })
 
-// GitHub procedures
+// --- GitHub procedures -----------------------------------------------------
+
+function extractEcosystemNames(githubData: any): string[] {
+  if (!githubData?.eco_score?.ecosystems) return []
+  return githubData.eco_score.ecosystems
+    .filter(
+      (eco: any) =>
+        eco.ecosystem && eco.ecosystem !== "ALL" && eco.ecosystem !== "General"
+    )
+    .map((eco: any) => eco.ecosystem)
+}
+
 const getGitHubUserByUsername = baseProcedure
   .input(z.object({ username: z.string() }))
   .output(
@@ -410,44 +387,20 @@ const getGitHubUserByUsername = baseProcedure
       data: githubUserDataSchema.extend({ ecosystems: z.array(z.string()) }).optional(),
     })
   )
-  .handler(async ({ input, context }) => {
-    const response = await fetch(
-      `${context.dataApiUrl}/v2/external/github/users/username/${input.username}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          accept: "*/*",
-        },
-      }
-    )
-
-    if (!response.ok) {
-      const error = await response.text()
+  .handler(async ({ input }) => {
+    try {
+      const { client } = createBackendClient()
+      const githubData = await client.custom.externalGithubByUsername({
+        username: input.username,
+      })
       return {
-        success: false,
-        code: response.status.toString(),
-        message: `Failed to fetch GitHub user data: ${error}`,
+        success: true,
+        code: "200",
+        message: "GitHub user data retrieved successfully",
+        data: { ...(githubData as any), ecosystems: extractEcosystemNames(githubData) },
       }
-    }
-
-    const githubData = await response.json()
-
-    let ecosystemNames: string[] = []
-    if (githubData.eco_score?.ecosystems) {
-      ecosystemNames = githubData.eco_score.ecosystems
-        .filter(
-          (eco: any) =>
-            eco.ecosystem && eco.ecosystem !== "ALL" && eco.ecosystem !== "General"
-        )
-        .map((eco: any) => eco.ecosystem)
-    }
-
-    return {
-      success: true,
-      code: "200",
-      message: "GitHub user data retrieved successfully",
-      data: { ...githubData, ecosystems: ecosystemNames },
+    } catch (error) {
+      return rpcErrorEnvelope(error, "Failed to fetch GitHub user data")
     }
   })
 
@@ -461,48 +414,70 @@ const getGitHubUserById = baseProcedure
       data: githubUserDataSchema.extend({ ecosystems: z.array(z.string()) }).optional(),
     })
   )
-  .handler(async ({ input, context }) => {
-    const response = await fetch(
-      `${context.dataApiUrl}/v2/external/github/users/id/${input.id}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          accept: "*/*",
-        },
-      }
-    )
-
-    if (!response.ok) {
-      const error = await response.text()
+  .handler(async ({ input }) => {
+    try {
+      const { client } = createBackendClient()
+      const githubData = await client.custom.externalGithubById({ id: input.id })
       return {
-        success: false,
-        code: response.status.toString(),
-        message: `Failed to fetch GitHub user data: ${error}`,
+        success: true,
+        code: "200",
+        message: "GitHub user data retrieved successfully",
+        data: { ...(githubData as any), ecosystems: extractEcosystemNames(githubData) },
       }
-    }
-
-    const githubData = await response.json()
-
-    let ecosystemNames: string[] = []
-    if (githubData.eco_score?.ecosystems) {
-      ecosystemNames = githubData.eco_score.ecosystems
-        .filter(
-          (eco: any) =>
-            eco.ecosystem && eco.ecosystem !== "ALL" && eco.ecosystem !== "General"
-        )
-        .map((eco: any) => eco.ecosystem)
-    }
-
-    return {
-      success: true,
-      code: "200",
-      message: "GitHub user data retrieved successfully",
-      data: { ...githubData, ecosystems: ecosystemNames },
+    } catch (error) {
+      return rpcErrorEnvelope(error, "Failed to fetch GitHub user data")
     }
   })
 
-// Twitter procedures
+const getFullGitHubUser = baseProcedure
+  .input(z.object({ username: z.string() }))
+  .output(
+    z.object({
+      success: z.boolean(),
+      code: z.string(),
+      message: z.string(),
+      data: z.any().optional(),
+    })
+  )
+  .handler(async ({ input }) => {
+    try {
+      const { client } = createBackendClient()
+      const githubData: any = await client.custom.externalGithubByUsername({
+        username: input.username,
+      })
+      let ecosystemNames: string[] = []
+      let ecosystemScores: z.infer<typeof ecosystemScoreItemSchema>[] = []
+      if (githubData?.eco_score?.ecosystems) {
+        const filtered = githubData.eco_score.ecosystems.filter(
+          (eco: any) =>
+            eco.ecosystem && eco.ecosystem !== "ALL" && eco.ecosystem !== "General"
+        )
+        ecosystemNames = filtered.map((eco: any) => eco.ecosystem)
+        ecosystemScores = filtered.map((eco: any) => ({
+          ecosystem: eco.ecosystem,
+          total_score: eco.total_score || 0,
+          repos: eco.repos || [],
+          last_activity_at: eco.last_activity_at,
+          first_activity_at: eco.first_activity_at,
+        }))
+      }
+      return {
+        success: true,
+        code: "200",
+        message: "Full GitHub user data retrieved successfully",
+        data: {
+          ...githubData,
+          ecosystems: ecosystemNames,
+          ecosystem_scores: ecosystemScores,
+        },
+      }
+    } catch (error) {
+      return rpcErrorEnvelope(error, "Failed to fetch GitHub user data")
+    }
+  })
+
+// --- Twitter procedure (external API — stays raw fetch) -------------------
+
 const getTwitterUser = baseProcedure
   .input(z.object({ username: z.string() }))
   .output(
@@ -541,10 +516,7 @@ const getTwitterUser = baseProcedure
     const user = result?.legacy
     const bio = user?.description || ""
 
-    // Get avatar from the correct path
     let avatarUrl = result?.avatar?.image_url || user?.profile_image_url_https || ""
-
-    // Replace _normal with _400x400 for higher quality image
     if (avatarUrl && avatarUrl.includes("_normal.")) {
       avatarUrl = avatarUrl.replace("_normal.", "_400x400.")
     }
@@ -562,7 +534,8 @@ const getTwitterUser = baseProcedure
     }
   })
 
-// OpenBuild procedures
+// --- OpenBuild procedures --------------------------------------------------
+
 const bindOpenBuild = protectedProcedure
   .input(openbuildBindInputSchema)
   .output(
@@ -573,32 +546,16 @@ const bindOpenBuild = protectedProcedure
     })
   )
   .handler(async ({ input, context }) => {
-    const response = await fetch(
-      `${context.dataApiUrl}/v1/auth/bind/openbuild`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${context.authToken}`,
-          "Content-Type": "application/json",
-          accept: "*/*",
-        },
-        body: JSON.stringify({ code: input.code }),
-      }
-    )
-
-    if (!response.ok) {
-      const error = await response.text()
+    try {
+      const { client } = createBackendClient(context.authToken)
+      await client.auth.bindOpenBuild({ code: input.code })
       return {
-        success: false,
-        code: response.status.toString(),
-        message: `Failed to bind OpenBuild: ${error}`,
+        success: true,
+        code: "200",
+        message: "OpenBuild account bound successfully",
       }
-    }
-
-    return {
-      success: true,
-      code: "200",
-      message: "OpenBuild account bound successfully",
+    } catch (error) {
+      return rpcErrorEnvelope(error, "Failed to bind OpenBuild")
     }
   })
 
@@ -612,160 +569,53 @@ const getOpenBuildRecord = protectedProcedure
     })
   )
   .handler(async ({ context }) => {
-    const response = await fetch(
-      `${context.dataApiUrl}/v1/auth/openbuild/record`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${context.authToken}`,
-          accept: "*/*",
-        },
-      }
-    )
-
-    if (!response.ok) {
-      const error = await response.text()
+    try {
+      const { client } = createBackendClient(context.authToken)
+      const data = await client.auth.getOpenBuildRecord()
       return {
-        success: false,
-        code: response.status.toString(),
-        message: `Failed to fetch OpenBuild record: ${error}`,
+        success: true,
+        code: "200",
+        message: "OpenBuild record retrieved successfully",
+        data,
       }
-    }
-
-    const data = await response.json()
-
-    return {
-      success: true,
-      code: "200",
-      message: "OpenBuild record retrieved successfully",
-      data,
+    } catch (error) {
+      return rpcErrorEnvelope(error, "Failed to fetch OpenBuild record")
     }
   })
 
-// Full GitHub user data with ecosystem scores
-const getFullGitHubUser = baseProcedure
-  .input(z.object({ username: z.string() }))
-  .output(
-    z.object({
-      success: z.boolean(),
-      code: z.string(),
-      message: z.string(),
-      data: z.any().optional(),
-    })
-  )
-  .handler(async ({ input, context }) => {
-    const response = await fetch(
-      `${context.dataApiUrl}/v2/external/github/users/username/${input.username}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          accept: "*/*",
-        },
-      }
-    )
+// --- Analysis procedures ---------------------------------------------------
 
-    if (!response.ok) {
-      const error = await response.text()
-      return {
-        success: false,
-        code: response.status.toString(),
-        message: `Failed to fetch GitHub user data: ${error}`,
-      }
-    }
-
-    const githubData = await response.json()
-
-    // Process ecosystem scores
-    let ecosystemNames: string[] = []
-    let ecosystemScores: z.infer<typeof ecosystemScoreItemSchema>[] = []
-    if (githubData.eco_score?.ecosystems) {
-      const filtered = githubData.eco_score.ecosystems.filter(
-        (eco: any) =>
-          eco.ecosystem && eco.ecosystem !== "ALL" && eco.ecosystem !== "General"
-      )
-      ecosystemNames = filtered.map((eco: any) => eco.ecosystem)
-      ecosystemScores = filtered.map((eco: any) => ({
-        ecosystem: eco.ecosystem,
-        total_score: eco.total_score || 0,
-        repos: eco.repos || [],
-        last_activity_at: eco.last_activity_at,
-        first_activity_at: eco.first_activity_at,
-      }))
-    }
-
-    return {
-      success: true,
-      code: "200",
-      message: "Full GitHub user data retrieved successfully",
-      data: {
-        ...githubData,
-        ecosystems: ecosystemNames,
-        ecosystem_scores: ecosystemScores,
-      },
-    }
-  })
-
-// Analysis procedures
 const startAnalysis = protectedProcedure
-  .input(
-    z.object({
-      githubUrl: z.string(),
-    })
-  )
+  .input(z.object({ githubUrl: z.string() }))
   .output(
     z.object({
       success: z.boolean(),
       code: z.string(),
       message: z.string(),
-      data: z.object({
-        id: z.union([z.string(), z.number()]),
-      }).optional(),
+      data: z.object({ id: z.union([z.string(), z.number()]) }).optional(),
     })
   )
   .handler(async ({ input, context }) => {
-    const response = await fetch(
-      `${context.dataApiUrl}/v1/custom/analysis/users`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${context.authToken}`,
-          "Content-Type": "application/json",
-          accept: "*/*",
-        },
-        body: JSON.stringify({
-          intent: "profile",
-          request_data: [input.githubUrl],
-          description: "DevCard analysis",
-        }),
-      }
-    )
-
-    if (!response.ok) {
-      const error = await response.text()
+    try {
+      const { client } = createBackendClient(context.authToken)
+      const data = await client.custom.createAnalysis({
+        intent: "profile",
+        request_data: [input.githubUrl],
+        description: "DevCard analysis",
+      })
       return {
-        success: false,
-        code: response.status.toString(),
-        message: `Failed to start analysis: ${error}`,
+        success: true,
+        code: "200",
+        message: "Analysis started",
+        data: { id: data.id },
       }
-    }
-
-    const data = await response.json()
-
-    return {
-      success: true,
-      code: "200",
-      message: "Analysis started",
-      data: { id: data.id },
+    } catch (error) {
+      return rpcErrorEnvelope(error, "Failed to start analysis")
     }
   })
 
 const getAnalysisResult = baseProcedure
-  .input(
-    z.object({
-      id: z.union([z.string(), z.number()]),
-    })
-  )
+  .input(z.object({ id: z.union([z.string(), z.number()]) }))
   .output(
     z.object({
       success: z.boolean(),
@@ -774,37 +624,23 @@ const getAnalysisResult = baseProcedure
       data: z.any().optional(),
     })
   )
-  .handler(async ({ input, context }) => {
-    const response = await fetch(
-      `${context.dataApiUrl}/v1/custom/analysis/users/${input.id}`,
-      {
-        method: "GET",
-        headers: {
-          accept: "*/*",
-        },
-      }
-    )
-
-    if (!response.ok) {
-      const error = await response.text()
+  .handler(async ({ input }) => {
+    try {
+      const { client } = createBackendClient()
+      const data = await client.custom.getAnalysis({ id: Number(input.id) })
       return {
-        success: false,
-        code: response.status.toString(),
-        message: `Failed to fetch analysis result: ${error}`,
+        success: true,
+        code: "200",
+        message: "Analysis result retrieved",
+        data,
       }
-    }
-
-    const data = await response.json()
-
-    return {
-      success: true,
-      code: "200",
-      message: "Analysis result retrieved",
-      data,
+    } catch (error) {
+      return rpcErrorEnvelope(error, "Failed to fetch analysis result")
     }
   })
 
-// User extra data procedures
+// --- User extra data -------------------------------------------------------
+
 const getUserExtra = protectedProcedure
   .input(z.object({ tag: ecosystemSchema }))
   .output(
@@ -817,34 +653,13 @@ const getUserExtra = protectedProcedure
   )
   .handler(async ({ input, context }) => {
     try {
-      const response = await fetch(
-        `${context.dataApiUrl}/v1/auth/user/info/${input.tag}/extra`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${context.authToken}`,
-            accept: "*/*",
-          },
-        }
-      )
-
-      if (!response.ok) {
-        const error = await response.text()
-        return {
-          success: false,
-          code: response.status.toString(),
-          message: `Failed to fetch user extra data: ${error}`,
-          data: null,
-        }
-      }
-
-      const data = await response.json()
-
-      // Reason: Backend returns { user_id, user_info_type, user_extra, updated_at }
-      // user_extra may be a JSON string or object depending on DB driver
-      const userExtra = data?.user_extra ?? null
-      const parsed = typeof userExtra === "string" ? JSON.parse(userExtra) : userExtra
-
+      const { client } = createBackendClient(context.authToken)
+      const data = await client.auth.getUserExtra({ tag: input.tag })
+      // Reason: backend returns { user_id, user_info_type, user_extra, updated_at }
+      // where user_extra may be a JSON string or object depending on driver.
+      const userExtra = (data as any)?.user_extra ?? null
+      const parsed =
+        typeof userExtra === "string" ? JSON.parse(userExtra) : userExtra
       return {
         success: true,
         code: "200",
@@ -852,12 +667,7 @@ const getUserExtra = protectedProcedure
         data: parsed,
       }
     } catch (error) {
-      return {
-        success: false,
-        code: "500",
-        message: `Failed to fetch user extra data: ${error}`,
-        data: null,
-      }
+      return { ...rpcErrorEnvelope(error, "Failed to fetch user extra data"), data: null }
     }
   })
 
@@ -877,43 +687,23 @@ const updateUserExtra = protectedProcedure
   )
   .handler(async ({ input, context }) => {
     try {
-      const response = await fetch(
-        `${context.dataApiUrl}/v1/auth/user/info/${input.tag}/extra`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${context.authToken}`,
-            "Content-Type": "application/json",
-            accept: "*/*",
-          },
-          body: JSON.stringify({ user_extra: input.user_extra }),
-        }
-      )
-
-      if (!response.ok) {
-        const error = await response.text()
-        return {
-          success: false,
-          code: response.status.toString(),
-          message: `Failed to update user extra data: ${error}`,
-        }
-      }
-
+      const { client } = createBackendClient(context.authToken)
+      await client.auth.updateUserExtra({
+        tag: input.tag,
+        data: { user_extra: input.user_extra },
+      })
       return {
         success: true,
         code: "200",
         message: "User extra data updated successfully",
       }
     } catch (error) {
-      return {
-        success: false,
-        code: "500",
-        message: `Failed to update user extra data: ${error}`,
-      }
+      return rpcErrorEnvelope(error, "Failed to update user extra data")
     }
   })
 
-// Create the router
+// --- Router ----------------------------------------------------------------
+
 export const router = {
   auth: {
     signInWithPrivy,

@@ -1,14 +1,15 @@
+import { createWeb3InsightClient } from "@web3insight/orpc-client";
 import { getSession } from "~/auth/helper/server";
 import { fetchCurrentUser } from "~/auth/repository";
 import type { AnalysisRequest } from "~/profile-analysis/typing";
 import { env } from "@/env";
 
+const RPC_URL = `${env.DATA_API_URL}/rpc`;
+
 export async function POST(request: Request) {
   try {
-    // Parse request data
     const requestData = (await request.json()) as AnalysisRequest;
 
-    // Validate request data
     if (!requestData.intent) {
       return Response.json(
         {
@@ -21,17 +22,17 @@ export async function POST(request: Request) {
       );
     }
 
-    // For profile analysis, try user authentication first, fallback to server token
+    // Reason: profile analysis is usable both logged-in and anonymously —
+    // prefer the user's JWT so saved analyses bind to their account, fall
+    // back to the server token so public submissions still hit the backend.
     const userResult = await fetchCurrentUser();
     let authToken: string | undefined;
 
     if (userResult.success) {
-      // Use user token if authenticated
       const session = await getSession();
       authToken = session.get("userToken") as string | undefined;
     }
 
-    // Fallback to server token for public profile analysis
     if (!authToken) {
       authToken = env.DATA_API_TOKEN;
     }
@@ -48,42 +49,29 @@ export async function POST(request: Request) {
       );
     }
 
-    const baseUrl = env.DATA_API_URL;
-    const apiUrl = `${baseUrl}/v1/custom/analysis/users`;
-
-    const response = await fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${authToken}`,
-      },
-      body: JSON.stringify(requestData),
+    const { client } = createWeb3InsightClient({
+      url: RPC_URL,
+      token: authToken,
+      credentials: "omit",
     });
 
-    if (!response.ok) {
-      return Response.json(
-        {
-          success: false,
-          code: `HTTP_${response.status}`,
-          message: `HTTP ${response.status}: ${response.statusText}`,
-          data: null,
-        },
-        { status: response.status },
-      );
-    }
+    // Reason: dashboard's analyzeUser reads `rawResult.id` directly off the
+    // response body — the legacy NestJS endpoint returned the raw shape, so
+    // pass the orpc result through without an envelope to keep that contract.
+    const result = await client.custom.createAnalysis(requestData as never);
 
-    const rawResponse = await response.json();
-
-    return Response.json(rawResponse, { status: 200 });
+    return Response.json(result, { status: 200 });
   } catch (error) {
+    const status = (error as { status?: number })?.status ?? 500;
+    const message = error instanceof Error ? error.message : "Unknown error";
     return Response.json(
       {
         success: false,
-        code: "API_ERROR",
-        message: error instanceof Error ? error.message : "Unknown error",
+        code: `HTTP_${status}`,
+        message,
         data: null,
       },
-      { status: 500 },
+      { status },
     );
   }
 }

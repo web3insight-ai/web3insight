@@ -1,15 +1,11 @@
 import "server-only";
 
+import { createWeb3InsightClient } from "@web3insight/orpc-client";
 import { getSession } from "~/auth/helper/server";
 import { env } from "@/env";
 
 /**
  * Resolve the current user's ID from the auth cookie for copilot session scoping.
- *
- * Reason: We call the backend /v1/auth/user endpoint directly (instead of
- * reusing fetchCurrentUser) to keep this lightweight — we only need the
- * user_id string, not the full ApiUser transform. Next.js fetch cache
- * with 60s revalidation avoids repeated network calls per request.
  *
  * Returns null for anonymous (unauthenticated) users.
  */
@@ -22,24 +18,19 @@ export async function getCopilotUserId(): Promise<string | null> {
       return null;
     }
 
-    const response = await fetch(`${env.DATA_API_URL}/v1/auth/user`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${userToken}`,
-        accept: "*/*",
-      },
-      next: { revalidate: 60 },
+    const { client } = createWeb3InsightClient({
+      url: `${env.DATA_API_URL}/rpc`,
+      token: userToken,
+      credentials: "omit",
     });
 
-    if (!response.ok) {
-      return null;
-    }
-
-    const userData = (await response.json()) as {
-      profile?: { user_id?: string };
+    const me = (await client.auth.me({})) as {
+      user_id?: string | number;
+      id?: string | number;
     };
 
-    return userData.profile?.user_id ?? null;
+    const id = me.user_id ?? me.id;
+    return id != null ? String(id) : null;
   } catch {
     return null;
   }

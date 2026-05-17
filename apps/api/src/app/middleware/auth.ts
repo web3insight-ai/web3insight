@@ -29,9 +29,14 @@ export function createAuthMiddleware(
     if (rawToken) {
       try {
         const { payload } = await jwtVerify(rawToken, secret);
-        if (payload.sub) {
+        // Reason: legacy JwtPayload uses `uid` (string|number). New tokens may
+        // use the standard `sub` field. Accept either so DATA_API_TOKEN
+        // service tokens authenticate alongside modern user JWTs.
+        const rawId = payload.uid ?? payload.sub;
+        const id = rawId != null ? Number(rawId) : NaN;
+        if (Number.isFinite(id)) {
           c.set('user', {
-            id: Number(payload.sub),
+            id,
             tag: typeof payload.tag === 'string' ? payload.tag : undefined,
           });
         }

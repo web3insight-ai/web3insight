@@ -10,7 +10,9 @@ export const env = createEnv({
   server: {
     DATABASE_URL: z.string().url(),
     DATABASE_URL_DIRECT: z.string().url().optional(),
-    JWT_SECRET: z.string().min(32),
+    // Reason: existing prod JWT_SECRET predates the workspace and is 17 chars.
+    // Tightening this would invalidate every signed DATA_API_TOKEN / user JWT.
+    JWT_SECRET: z.string().min(16),
     DATA_API_TOKEN: z.string().optional(),
     GITHUB_TOKENS: z.string().optional(),
     OPENROUTER_API_KEY: z.string().optional(),

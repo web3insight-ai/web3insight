@@ -19,26 +19,36 @@ export const CustomQueryUsersOrderInputSchema = z.object({
 // Reason: dev-card analysis polling reads many derived fields (status, result,
 // users[], etc.) populated by the analysis pipeline. `.loose()` lets the orpc
 // client surface those without declaring each one here.
+// `id` is a postgres bigint serialised as a string by the pg driver; `created_at`
+// can arrive as a Date instance on internal calls — coerce both so historical
+// rows pass output validation alongside fully-projected ones. `intent` and
+// `share` are not selected by `getPublicList` (it returns only id/desc/created_at)
+// so they are optional here.
 export const ApiAnalysisUserSchema = z
   .object({
-    id: z.number().int(),
-    intent: IntentSchema,
+    id: z.coerce.number().int(),
+    intent: IntentSchema.optional(),
     description: z.string().nullable(),
-    share: z.boolean(),
-    created_at: z.string(),
+    share: z.boolean().optional(),
+    created_at: z.coerce.string(),
   })
   .loose();
 
 export const CustomQueryUsersListSchema = z.object({
   list: z.array(ApiAnalysisUserSchema),
-  total: z.number().int().nonnegative(),
+  total: z.coerce.number().int().nonnegative(),
 });
 
-export const CustomUploadResponseSchema = z.object({
-  id: z.number().int(),
-  users: z.array(z.record(z.string(), z.unknown())),
-  fail: z.array(z.string()),
-});
+// Reason: legacy uploadAndGetUsers returns a nested shape — the dashboard's
+// analyzeUser reads `data.users.users[]` and other downstream fields the
+// initial contract authoring did not enumerate. Coerce `id` (bigint string
+// in postgres) and let the rest flow through with `.loose()` until the
+// service has a stable projection worth pinning down.
+export const CustomUploadResponseSchema = z
+  .object({
+    id: z.coerce.number().int(),
+  })
+  .loose();
 
 export const CustomShareInputSchema = z.object({
   share: z.boolean().default(false),

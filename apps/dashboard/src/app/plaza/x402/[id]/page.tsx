@@ -4,6 +4,7 @@ import DonationDetailClient from "./DonationDetailClient";
 import { getTitle } from "@/utils/app";
 import { getUser } from "~/auth/repository";
 import DefaultLayoutWrapper from "../../../DefaultLayoutWrapper";
+import { createWeb3InsightClient } from "@web3insight/orpc-client";
 import { env } from "@/env";
 import { api } from "@/lib/api/client";
 import type { DonateRepo, RepoActiveDeveloperRecord } from "@/lib/api/types";
@@ -21,33 +22,17 @@ interface DonationPageProps {
 
 async function fetchDonateRepo(id: string): Promise<DonateRepo | null> {
   try {
-    const apiUrl = `${env.DATA_API_URL}/v1/donate/repos/${id}`;
-
-    const response = await fetch(apiUrl, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${env.DATA_API_TOKEN}`,
-      },
-      next: { revalidate: 60 },
+    const { client } = createWeb3InsightClient({
+      url: `${env.DATA_API_URL}/rpc`,
+      token: env.DATA_API_TOKEN,
+      credentials: "omit",
     });
 
-    if (!response.ok) {
-      return null;
-    }
+    const detail = (await client.donate.getDonationById({
+      id: Number(id),
+    })) as DonateRepo | null;
 
-    const json = await response.json();
-
-    // Handle both wrapped and direct response formats
-    if (json.success !== undefined) {
-      return json.success ? json.data : null;
-    }
-
-    // Direct response format - check if it has repo_id
-    if (json.repo_id) {
-      return json as DonateRepo;
-    }
-
-    return null;
+    return detail && detail.repo_id ? detail : null;
   } catch (error) {
     console.error("[API] Fetch donate repo error:", error);
     return null;

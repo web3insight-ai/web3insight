@@ -1,4 +1,5 @@
 import type { ResponseResult } from "@/types";
+import { createWeb3InsightClient } from "@web3insight/orpc-client";
 import { getSession, clearSession } from "./helper/server";
 
 import type { ApiUser, UserBind } from "./typing";
@@ -17,7 +18,7 @@ function generateFailedResponse<T = unknown>(
   };
 }
 
-const DATA_API_URL = env.DATA_API_URL;
+const RPC_URL = `${env.DATA_API_URL}/rpc`;
 
 function transformApiUserToCompatibleFormat(apiResponse: {
   profile: {
@@ -81,33 +82,27 @@ async function fetchCurrentUser(): Promise<ResponseResult<ApiUser | null>> {
   }
 
   try {
-    const response = await fetch(`${DATA_API_URL}/rpc/auth/me`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${userToken}`,
-        "Content-Type": "application/json",
-        accept: "*/*",
-      },
-      body: JSON.stringify({}),
-      next: { revalidate: 60 },
+    const { client } = createWeb3InsightClient({
+      url: RPC_URL,
+      token: userToken,
+      credentials: "omit",
     });
 
-    if (!response.ok) {
-      if (response.status === 401) {
-        return {
-          success: false,
-          code: "401",
-          message: "Your session has expired. Please sign in again.",
-          data: null,
-        };
-      }
-      return defaultResult;
-    }
+    const profile = (await client.auth.me({})) as {
+      id?: string | number;
+      user_id?: string | number;
+      user_nick_name?: string;
+      user_avatar?: string;
+      created_at?: string;
+      updated_at?: string;
+    };
 
-    const profile = await response.json();
+    const userIdRaw = profile.id ?? profile.user_id ?? "";
+    const userId = String(userIdRaw);
+
     const user = transformApiUserToCompatibleFormat({
       profile: {
-        user_id: String(profile.id),
+        user_id: userId,
         user_nick_name: profile.user_nick_name ?? "",
         user_avatar: profile.user_avatar ?? "",
         created_at: profile.created_at ?? "",
@@ -117,12 +112,24 @@ async function fetchCurrentUser(): Promise<ResponseResult<ApiUser | null>> {
       role: {
         allowed_roles: ["user"],
         default_role: "user",
-        user_id: String(profile.id),
+        user_id: userId,
       },
     });
 
     return { ...defaultResult, data: user };
-  } catch {
+  } catch (err) {
+    // Reason: orpc-client throws an ORPCError with `.status`. 401 means the
+    // backend rejected the JWT — surface the expired-session message so the
+    // dashboard can prompt re-login instead of silently rendering anon UI.
+    const status = (err as { status?: number })?.status;
+    if (status === 401) {
+      return {
+        success: false,
+        code: "401",
+        message: "Your session has expired. Please sign in again.",
+        data: null,
+      };
+    }
     return defaultResult;
   }
 }
