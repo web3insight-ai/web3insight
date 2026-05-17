@@ -71,7 +71,10 @@ export function createApp({ container, jwtSecret }: CreateAppOptions) {
   const restHandler = new OpenAPIHandler(router, {
     schemaConverters: [new ZodToJsonSchemaConverter()],
   });
-  const mountRest = async (c: import('hono').Context<AppBindings>, prefix: string) => {
+  const mountRest = async (
+    c: import('hono').Context<AppBindings>,
+    prefix: string,
+  ) => {
     const { response, matched } = await restHandler.handle(c.req.raw, {
       prefix,
       context: {
