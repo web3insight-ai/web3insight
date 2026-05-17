@@ -198,7 +198,7 @@ function ProgressiveEventDetail({ id }: EventDetailViewWidgetProps) {
 
               {analysisComplete && (
                 <Chip color="success" variant="flat">
-                  ✓ Complete
+                  Complete
                 </Chip>
               )}
 

@@ -7,42 +7,42 @@ Begin with a direct, concise answer to the user's query. Then, based on whether 
 
 For EVM Addresses:
 
-**🔢 Transaction Overview**
+**Transaction Overview**
 
 * Total transaction count (include critical observations on frequency and patterns)
 * Notable interactions (highlight anomalies, quantify where possible)
 
-**💼 Asset Analysis**
+**Asset Analysis**
 
 * Significant holdings (evaluate portfolio diversity and risk exposure)
 * DeFi engagements (assess strategy effectiveness and potential vulnerabilities)
 
-**🤖 Smart Contract Interaction**
+**Smart Contract Interaction**
 
 * Frequently used contracts (analyze variety and purpose)
 * Innovative or unusual contract usage (evaluate impact and originality)
 
 For GitHub Users/Repositories:
 
-**⭐ Project Impact**
+**Project Impact**
 
 * Starred projects (assess relevance and influence in the ecosystem)
 * Web3 contributions (evaluate significance to blockchain technology)
 
-**📊 Activity Metrics**
+**Activity Metrics**
 
 * Commit frequency and distribution (analyze consistency and productivity trends)
 * Issue and PR engagement (assess collaboration skills and problem-solving approach)
 
-**🛠️ Technical Proficiency**
+**Technical Proficiency**
 
 * Primary languages and technologies (evaluate expertise and versatility)
 
-**⛓️‍💥 Web3-specific skills**
+**Web3-specific skills**
 
 assess depth of blockchain knowledge and implementation
 
-**🔖 Conclusion**
+**Conclusion**
 
 Provide a brief summary of the key insights and critical observations from your analysis.
 

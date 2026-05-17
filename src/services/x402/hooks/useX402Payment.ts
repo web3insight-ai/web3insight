@@ -118,9 +118,11 @@ export function useX402Payment(options?: UseX402PaymentOptions) {
           try {
             await wallet.switchChain(targetChainId);
             await new Promise((resolve) => setTimeout(resolve, 500));
-          } catch (_switchError) {
+          } catch (switchError) {
             const networkName = networkKey === "base" ? "Base" : "Base Sepolia";
-            throw new Error(`Please switch to ${networkName} network`);
+            throw new Error(`Please switch to ${networkName} network`, {
+              cause: switchError,
+            });
           }
         }
 

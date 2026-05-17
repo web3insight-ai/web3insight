@@ -115,7 +115,7 @@ export function RepositoryBreakdown({
 
                         {isRecent && (
                           <Chip color="danger" variant="flat" size="sm">
-                            <span className="text-xs">🔥 ACTIVE</span>
+                            <span className="text-xs">ACTIVE</span>
                           </Chip>
                         )}
                       </div>

@@ -86,7 +86,7 @@ export default async function RepositoryDetailPage({
   }
 
   let repoName: string;
-  let repoRankData: RepoRankRecord | null = null;
+  let repoRankData: RepoRankRecord | null;
 
   try {
     // If repo name is provided in query params, use it directly

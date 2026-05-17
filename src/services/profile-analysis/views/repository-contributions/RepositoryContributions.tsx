@@ -84,7 +84,7 @@ export function RepositoryContributions({
 
                         {isRecent && (
                           <Chip color="danger" variant="flat" size="sm">
-                            <span className="text-xs">🔥 ACTIVE</span>
+                            <span className="text-xs">ACTIVE</span>
                           </Chip>
                         )}
 
@@ -264,13 +264,13 @@ export function RepositoryContributions({
                               .score,
                           )}
                         </span>
-                        <span className="text-xs text-fg-muted">
+                        <span className="text-[0.6875rem] font-mono uppercase tracking-[0.14em] text-fg-subtle">
                           {new Date(
                             ecosystem.repos.sort((a, b) => b.score - a.score)[0]
                               .lastActivityAt,
                           ) > new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)
-                            ? "🔥"
-                            : "📚"}
+                            ? "active"
+                            : "archived"}
                         </span>
                       </div>
                     </div>

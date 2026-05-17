@@ -23,6 +23,7 @@
     ],
     "target": "ES2022",
     "forceConsistentCasingInFileNames": true,
+    "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
       "@env": [

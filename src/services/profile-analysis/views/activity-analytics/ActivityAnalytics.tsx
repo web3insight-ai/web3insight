@@ -1,18 +1,79 @@
-import {
-  Calendar,
-  TrendingUp,
-  Activity,
-  Clock,
-  Zap,
-  BarChart,
-} from "lucide-react";
-
 import type { EcosystemScore } from "../../typing";
 import { calculateActivityTimeline, formatNumber } from "../../helper";
+import { SmallCapsLabel } from "$/primitives";
 
 interface ActivityAnalyticsProps {
   ecosystemScores: EcosystemScore[];
   className?: string;
+}
+
+type ActivityLevel = "Very High" | "High" | "Medium" | "Low" | "Minimal";
+
+function getActivityLevel(score: number, maxScore: number): ActivityLevel {
+  const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
+  if (percentage >= 80) return "Very High";
+  if (percentage >= 60) return "High";
+  if (percentage >= 40) return "Medium";
+  if (percentage >= 20) return "Low";
+  return "Minimal";
+}
+
+interface OverviewStat {
+  label: string;
+  value: string;
+}
+
+function OverviewColumn({ label, value }: OverviewStat) {
+  return (
+    <div className="flex flex-col gap-1">
+      <SmallCapsLabel tone="subtle">{label}</SmallCapsLabel>
+      <span className="font-display text-[1.25rem] leading-[1] font-semibold tabular-nums text-fg">
+        {value}
+      </span>
+    </div>
+  );
+}
+
+interface JourneyRowProps {
+  label: string;
+  value: React.ReactNode;
+}
+
+function JourneyRow({ label, value }: JourneyRowProps) {
+  return (
+    <>
+      <dt className="py-3">
+        <SmallCapsLabel tone="subtle">{label}</SmallCapsLabel>
+      </dt>
+      <dd className="py-3 font-sans text-sm text-fg text-right tabular-nums">
+        {value}
+      </dd>
+    </>
+  );
+}
+
+interface PatternRowProps {
+  label: string;
+  hint: string;
+  value: string;
+}
+
+function PatternRow({ label, hint, value }: PatternRowProps) {
+  return (
+    <>
+      <div className="py-3.5 flex flex-col gap-1">
+        <span className="font-sans text-sm text-fg">{label}</span>
+        <span className="font-sans text-[0.8125rem] leading-[1.4] text-fg-muted">
+          {hint}
+        </span>
+      </div>
+      <div className="py-3.5 self-center text-right">
+        <span className="font-mono text-[0.75rem] uppercase tracking-[0.14em] text-accent">
+          {value}
+        </span>
+      </div>
+    </>
+  );
 }
 
 export function ActivityAnalytics({
@@ -20,7 +81,6 @@ export function ActivityAnalytics({
   className = "",
 }: ActivityAnalyticsProps) {
   const timelineData = calculateActivityTimeline(ecosystemScores);
-
   if (!timelineData) return null;
 
   const {
@@ -31,7 +91,6 @@ export function ActivityAnalytics({
     totalEcosystems,
   } = timelineData;
 
-  // Calculate some interesting metrics
   const yearsActive = yearlyData.length;
   const mostActiveYear = yearlyData.reduce(
     (max, year) => (year.totalScore > max.totalScore ? year : max),
@@ -40,279 +99,194 @@ export function ActivityAnalytics({
   const recentActivity =
     new Date(lastActivity) > new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
   const maxYearScore = Math.max(...yearlyData.map((y) => y.totalScore));
+  const currentYear = new Date().getFullYear();
 
-  // Calculate activity intensity levels
-  const getActivityLevel = (score: number, maxScore: number) => {
-    const percentage = (score / maxScore) * 100;
-    if (percentage >= 80)
-      return { level: "Very High", color: "success" as const };
-    if (percentage >= 60) return { level: "High", color: "primary" as const };
-    if (percentage >= 40) return { level: "Medium", color: "warning" as const };
-    if (percentage >= 20) return { level: "Low", color: "secondary" as const };
-    return { level: "Minimal", color: "default" as const };
-  };
+  const consistencyLabel =
+    yearsActive > 3 ? "High" : yearsActive > 1 ? "Medium" : "Building";
+  const growthLabel =
+    totalEcosystems > 10
+      ? "Diverse"
+      : totalEcosystems > 5
+        ? "Expanding"
+        : "Focused";
+  const impactLabel =
+    mostActiveYear.totalScore > 2000
+      ? "High Impact"
+      : mostActiveYear.totalScore > 1000
+        ? "Solid Contributor"
+        : "Steady Builder";
+
+  const overviewStats: OverviewStat[] = [
+    {
+      label: "Years Active",
+      value: Math.max(1, Math.round(totalDaysActive / 365)).toString(),
+    },
+    { label: "Contributing Years", value: yearsActive.toString() },
+    { label: "Ecosystems", value: totalEcosystems.toString() },
+    { label: "Peak Year", value: mostActiveYear.year.toString() },
+    {
+      label: "Current Status",
+      value: recentActivity ? "Active" : "Dormant",
+    },
+  ];
+
+  const dateFmt = new Intl.DateTimeFormat(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 
   return (
-    <div className={`space-y-4 ${className}`}>
-      {/* Activity Overview */}
-      <div className="border border-rule rounded-[2px] p-4 bg-bg-raised">
-        <div className="flex items-center gap-2 mb-3">
-          <Activity size={16} className="text-fg-muted" />
-          <h3 className="text-sm font-medium text-fg">
-            Activity Timeline Analysis
-          </h3>
+    <section
+      className={`flex flex-col gap-12 border-t border-rule pt-8 ${className}`}
+    >
+      {/* Overview — editorial stat columns */}
+      <div>
+        <div className="flex items-baseline justify-between gap-4 mb-5">
+          <SmallCapsLabel>Activity Timeline Analysis</SmallCapsLabel>
+          <span className="font-mono text-[0.75rem] text-fg-subtle tabular-nums">
+            {yearsActive} / {Math.max(1, Math.round(totalDaysActive / 365))} yrs
+          </span>
         </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-          <div className="text-center">
-            <div className="text-lg font-semibold text-fg mb-1">
-              {Math.round(totalDaysActive / 365)}
-            </div>
-            <div className="text-xs text-fg-muted">Years Active</div>
-          </div>
-
-          <div className="text-center">
-            <div className="text-lg font-semibold text-fg mb-1">
-              {yearsActive}
-            </div>
-            <div className="text-xs text-fg-muted">Contributing Years</div>
-          </div>
-
-          <div className="text-center">
-            <div className="text-lg font-semibold text-fg mb-1">
-              {totalEcosystems}
-            </div>
-            <div className="text-xs text-fg-muted">Ecosystems</div>
-          </div>
-
-          <div className="text-center">
-            <div className="text-lg font-semibold text-fg mb-1">
-              {mostActiveYear.year}
-            </div>
-            <div className="text-xs text-fg-muted">Peak Year</div>
-          </div>
-
-          <div className="text-center">
-            <div className="text-lg font-semibold text-fg mb-1">
-              {recentActivity ? "Active" : "Dormant"}
-            </div>
-            <div className="text-xs text-fg-muted">Current Status</div>
-          </div>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-x-8 gap-y-6 border-t border-rule pt-5">
+          {overviewStats.map((s) => (
+            <OverviewColumn key={s.label} label={s.label} value={s.value} />
+          ))}
         </div>
       </div>
 
-      {/* Activity Timeline Chart */}
-      <div className="border border-rule rounded-[2px] p-4 bg-bg-raised">
-        <div className="flex items-center gap-2 mb-4">
-          <BarChart size={14} className="text-fg-muted" />
-          <h3 className="text-sm font-medium text-fg">
-            Yearly Activity Breakdown
-          </h3>
-          <span className="text-xs text-fg-muted ml-auto">
-            {yearlyData.length} years
+      {/* Yearly breakdown — hairline-delimited rows, 2px accent bar */}
+      <div>
+        <div className="flex items-baseline justify-between gap-4 mb-5">
+          <SmallCapsLabel>Yearly Activity Breakdown</SmallCapsLabel>
+          <span className="font-mono text-[0.75rem] text-fg-subtle tabular-nums">
+            {yearlyData.length} {yearlyData.length === 1 ? "year" : "years"}
           </span>
         </div>
-
-        <div className="space-y-3">
+        <ul className="flex flex-col border-t border-b border-rule divide-y divide-rule">
           {yearlyData.map((year) => {
-            const scorePercentage = (year.totalScore / maxYearScore) * 100;
-            const activityInfo = getActivityLevel(
-              year.totalScore,
-              maxYearScore,
-            );
-            const isCurrentYear = year.year === new Date().getFullYear();
+            const scorePercentage =
+              maxYearScore > 0 ? (year.totalScore / maxYearScore) * 100 : 0;
+            const level = getActivityLevel(year.totalScore, maxYearScore);
+            const isCurrentYear = year.year === currentYear;
+            const isPeak = year.year === mostActiveYear.year;
+            const avgScore =
+              year.repos > 0 ? Math.round(year.totalScore / year.repos) : 0;
 
             return (
-              <div key={year.year} className="space-y-2">
-                {/* Year Header */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-fg">{year.year}</span>
-                    {isCurrentYear && (
-                      <span className="text-xs text-fg bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded border dark:border-blue-600/50">
-                        Current
+              <li key={year.year} className="py-6 flex flex-col gap-4">
+                <div className="flex items-start justify-between gap-6">
+                  <div className="flex flex-col gap-1.5 min-w-0">
+                    <div className="flex items-baseline gap-3 flex-wrap">
+                      <span className="font-display text-[1.5rem] leading-[1] font-semibold tabular-nums text-fg">
+                        {year.year}
                       </span>
-                    )}
-                    {year.year === mostActiveYear.year && (
-                      <span className="text-xs text-fg bg-yellow-100 dark:bg-yellow-900/30 px-2 py-1 rounded border dark:border-yellow-600/50">
-                        🏆 Peak
+                      <span className="font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-fg-subtle">
+                        {level}
                       </span>
-                    )}
-                    <span className="text-xs text-fg-muted bg-bg-raised px-2 py-1 rounded border border-rule">
-                      {activityInfo.level}
-                    </span>
-                  </div>
-
-                  <div className="text-right">
-                    <div className="font-semibold text-fg">
-                      {formatNumber(year.totalScore)}
+                      {(isCurrentYear || isPeak) && (
+                        <span className="font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-accent">
+                          {isPeak && isCurrentYear
+                            ? "current · peak"
+                            : isPeak
+                              ? "peak"
+                              : "current"}
+                        </span>
+                      )}
                     </div>
-                    <div className="text-xs text-fg-muted">Total Score</div>
+                    <div className="flex items-center gap-x-6 gap-y-1 flex-wrap font-mono text-[0.75rem] text-fg-muted tabular-nums">
+                      <span>
+                        {year.ecosystems}{" "}
+                        {year.ecosystems === 1 ? "ecosystem" : "ecosystems"}
+                      </span>
+                      <span>{year.repos} repositories</span>
+                      <span>{avgScore} avg score</span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <span className="font-display text-[1.5rem] leading-[1] font-semibold tabular-nums text-fg">
+                      {formatNumber(year.totalScore)}
+                    </span>
+                    <SmallCapsLabel tone="subtle">Total Score</SmallCapsLabel>
                   </div>
                 </div>
 
-                {/* Activity Metrics */}
-                <div className="grid grid-cols-3 gap-4 text-xs">
-                  <div className="flex items-center gap-1">
-                    <Activity size={10} className="text-fg-muted" />
-                    <span className="text-fg-muted">
-                      {year.ecosystems} ecosystem
-                      {year.ecosystems !== 1 ? "s" : ""}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Calendar size={10} className="text-fg-muted" />
-                    <span className="text-fg-muted">
-                      {year.repos} repositories
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <TrendingUp size={10} className="text-fg-muted" />
-                    <span className="text-fg-muted">
-                      {Math.round(year.totalScore / year.repos)} avg score
-                    </span>
-                  </div>
-                </div>
-
-                {/* Visual Activity Bar */}
-                <div className="relative h-2 bg-rule rounded-full overflow-hidden">
+                {/* Activity bar — flat 2px line, no rounding, accent fill */}
+                <div
+                  className="relative h-[2px] bg-rule"
+                  role="presentation"
+                  aria-hidden
+                >
                   <div
-                    className="h-full transition-all duration-500 ease-out bg-primary dark:bg-primary rounded-full"
+                    className="h-full bg-accent transition-[width] duration-500 ease-out"
                     style={{
                       width: `${scorePercentage}%`,
-                      minWidth: scorePercentage > 0 ? "8px" : "0px",
+                      minWidth: scorePercentage > 0 ? "4px" : "0",
                     }}
                   />
                 </div>
-              </div>
+              </li>
             );
           })}
-        </div>
+        </ul>
       </div>
 
-      {/* Activity Insights */}
-      <div className="grid gap-4 md:grid-cols-2">
-        {/* Journey Timeline */}
-        <div className="border border-rule rounded-[2px] p-4 bg-bg-raised">
-          <div className="flex items-center gap-2 mb-4">
-            <Clock size={14} className="text-fg-muted" />
-            <h3 className="text-sm font-medium text-fg">Development Journey</h3>
-          </div>
-
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 border border-rule rounded-[2px]">
-              <div className="flex items-center gap-2">
-                <Calendar size={12} className="text-fg-muted" />
-                <span className="text-sm font-medium text-fg">Started</span>
-              </div>
-              <span className="text-sm font-semibold text-fg">
-                {new Date(firstActivity).toLocaleDateString()}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between p-3 border border-rule rounded-[2px]">
-              <div className="flex items-center gap-2">
-                <Zap size={12} className="text-fg-muted" />
-                <span className="text-sm font-medium text-fg">
-                  Latest Activity
+      {/* Journey + Patterns — side-by-side hairline ledgers */}
+      <div className="grid md:grid-cols-2 gap-x-12 gap-y-10">
+        <div className="flex flex-col">
+          <SmallCapsLabel className="mb-4">Development Journey</SmallCapsLabel>
+          <dl className="grid grid-cols-[auto_1fr] border-t border-rule divide-y divide-rule">
+            <JourneyRow
+              label="Started"
+              value={dateFmt.format(new Date(firstActivity))}
+            />
+            <JourneyRow
+              label="Latest Activity"
+              value={dateFmt.format(new Date(lastActivity))}
+            />
+            <JourneyRow
+              label="Peak Period"
+              value={`${mostActiveYear.year} · ${formatNumber(
+                mostActiveYear.totalScore,
+              )}`}
+            />
+            <JourneyRow
+              label="Status"
+              value={
+                <span className="font-mono text-[0.75rem] uppercase tracking-[0.14em] text-accent">
+                  {recentActivity
+                    ? "Active Developer"
+                    : "Historical Contributor"}
                 </span>
-              </div>
-              <span className="text-sm font-semibold text-fg">
-                {new Date(lastActivity).toLocaleDateString()}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between p-3 border border-rule rounded-[2px]">
-              <div className="flex items-center gap-2">
-                <TrendingUp size={12} className="text-fg-muted" />
-                <span className="text-sm font-medium text-fg">Peak Period</span>
-              </div>
-              <span className="text-sm font-semibold text-fg">
-                {mostActiveYear.year} ({formatNumber(mostActiveYear.totalScore)}
-                )
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between p-3 border border-rule rounded-[2px]">
-              <div className="flex items-center gap-2">
-                <Activity size={12} className="text-fg-muted" />
-                <span className="text-sm font-medium text-fg">Status</span>
-              </div>
-              <span className="text-xs text-fg-muted bg-rule px-2 py-1 rounded">
-                {recentActivity
-                  ? "🔥 Active Developer"
-                  : "📚 Historical Contributor"}
-              </span>
-            </div>
-          </div>
+              }
+            />
+          </dl>
         </div>
 
-        {/* Activity Patterns */}
-        <div className="border border-rule rounded-[2px] p-4 bg-bg-raised">
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingUp size={14} className="text-fg-muted" />
-            <h3 className="text-sm font-medium text-fg">
-              Contribution Patterns
-            </h3>
-          </div>
-
-          <div className="space-y-3">
-            <div className="p-3 border border-rule rounded-[2px]">
-              <div className="text-sm font-medium text-fg mb-2">
-                Consistency Score
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="text-xs text-fg-muted">
-                  Based on year-over-year activity
-                </div>
-                <div className="text-sm font-semibold text-fg">
-                  {yearsActive > 3
-                    ? "High"
-                    : yearsActive > 1
-                      ? "Medium"
-                      : "Building"}
-                </div>
-              </div>
-            </div>
-
-            <div className="p-3 border border-rule rounded-[2px]">
-              <div className="text-sm font-medium text-fg mb-2">
-                Growth Trajectory
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="text-xs text-fg-muted">
-                  Ecosystem expansion over time
-                </div>
-                <div className="text-sm font-semibold text-fg">
-                  {totalEcosystems > 10
-                    ? "Diverse"
-                    : totalEcosystems > 5
-                      ? "Expanding"
-                      : "Focused"}
-                </div>
-              </div>
-            </div>
-
-            <div className="p-3 border border-rule rounded-[2px]">
-              <div className="text-sm font-medium text-fg mb-2">
-                Impact Level
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="text-xs text-fg-muted">
-                  Peak year contribution intensity
-                </div>
-                <div className="text-sm font-semibold text-fg">
-                  {mostActiveYear.totalScore > 2000
-                    ? "High Impact"
-                    : mostActiveYear.totalScore > 1000
-                      ? "Solid Contributor"
-                      : "Steady Builder"}
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="flex flex-col">
+          <SmallCapsLabel className="mb-4">
+            Contribution Patterns
+          </SmallCapsLabel>
+          <dl className="grid grid-cols-[1fr_auto] border-t border-rule divide-y divide-rule">
+            <PatternRow
+              label="Consistency Score"
+              hint="Based on year-over-year activity"
+              value={consistencyLabel}
+            />
+            <PatternRow
+              label="Growth Trajectory"
+              hint="Ecosystem expansion over time"
+              value={growthLabel}
+            />
+            <PatternRow
+              label="Impact Level"
+              hint="Peak year contribution intensity"
+              value={impactLabel}
+            />
+          </dl>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
