@@ -9,6 +9,7 @@ import { ApiModule } from './api/api.module';
 import { AppAuthGuard } from './auth/app.auth.guard';
 import { AppConfigModule } from './app/config/config.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { RpcModule } from './rpc/rpc.module';
 
 @Module({
   imports: [
@@ -19,8 +20,8 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     DataModule,
     ApiModule,
     AppConfigModule,
-    AuthModule,
     EventEmitterModule.forRoot(),
+    RpcModule,
   ],
   controllers: [],
   providers: [AppAuthGuard, JwtService],

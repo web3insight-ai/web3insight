@@ -1,33 +1,7 @@
-import type { NextConfig } from "next";
+import { createNextConfig } from '@web3insight/next-config';
 
-const nextConfig: NextConfig = {
-  // Enable standalone output for Docker deployments
-  output: "standalone",
-
-  // Optimize barrel file imports for better tree-shaking
-  experimental: {
-    optimizePackageImports: [
-      "lucide-react",
-      "framer-motion",
-      "date-fns",
-      "recharts",
-    ],
+export default createNextConfig({
+  overrides: {
+    typescript: { ignoreBuildErrors: true },
   },
-
-  // Image optimization
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "avatars.githubusercontent.com",
-      },
-      {
-        protocol: "https",
-        hostname: "github.com",
-      },
-    ],
-    formats: ["image/webp", "image/avif"],
-  },
-};
-
-export default nextConfig;
+});

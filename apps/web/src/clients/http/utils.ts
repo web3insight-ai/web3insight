@@ -37,7 +37,7 @@ export function normalizeRestfulResponse<T>(response: unknown): ResponseResult<T
   if (response && typeof response === 'object' && ('status' in response || 'ok' in response)) {
     const responseObj = response as Record<string, unknown>;
     if (responseObj.status === 'success' || responseObj.ok) {
-      return generateSuccessResponse(responseObj.data || response);
+      return generateSuccessResponse((responseObj.data ?? response) as T);
     }
 
     if (responseObj.status === 'error' || responseObj.error) {
