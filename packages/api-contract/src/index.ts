@@ -13,12 +13,13 @@ import {
  * Root oRPC contract — single source of truth for all backend endpoints.
  *
  * Used by:
- * - apps/api (NestJS) to implement handlers via `implement(contract).$context<Ctx>()`
+ * - apps/api (Hono) to implement handlers via `os.<router>.<proc>.handler(...)`
+ *   in `apps/api/src/rpc-hono/handlers/`
  * - apps/dashboard, apps/web, apps/dev-card to call typed RPC procedures via
- *   `createORPCClient(new RPCLink({ url }))`
+ *   `createWeb3InsightClient` (see `@web3insight/orpc-client`)
  *
- * Each sub-router corresponds to one legacy NestJS controller under
- * `apps/api/src/api/controller/`.
+ * Each sub-router corresponds to one handler module under
+ * `apps/api/src/rpc-hono/handlers/`.
  */
 export const contract = {
   total: totalContract,

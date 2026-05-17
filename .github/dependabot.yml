@@ -1,0 +1,150 @@
+version: 2
+
+# Reason: this repo is a pnpm@10 catalog-based Turborepo. Dependabot's npm
+# ecosystem driver understands pnpm-workspace.yaml `catalog:` entries, so a
+# single root entry covers every workspace package without per-app duplication.
+# PRs land on `dev` first so the Vercel preview + CI gate them before they
+# graduate to `main`.
+
+updates:
+  # ---------------------------------------------------------------------------
+  # JavaScript / TypeScript dependencies (pnpm catalog + workspace pkgs)
+  # ---------------------------------------------------------------------------
+  - package-ecosystem: npm
+    directory: '/'
+    target-branch: dev
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: Etc/UTC
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: 'chore(deps)'
+      prefix-development: 'chore(dev-deps)'
+      include: scope
+    labels:
+      - dependencies
+    # Minor / patch bumps collapse into one PR per ecosystem to keep noise
+    # bounded; majors stay individual so they can be reviewed (and reverted)
+    # in isolation.
+    groups:
+      next-and-react:
+        applies-to: version-updates
+        patterns:
+          - 'next'
+          - 'react'
+          - 'react-dom'
+          - '@types/react'
+          - '@types/react-dom'
+        update-types: [minor, patch]
+      orpc:
+        applies-to: version-updates
+        patterns:
+          - '@orpc/*'
+        update-types: [minor, patch]
+      hono:
+        applies-to: version-updates
+        patterns:
+          - 'hono'
+          - '@hono/*'
+          - '@scalar/hono-api-reference'
+        update-types: [minor, patch]
+      tanstack:
+        applies-to: version-updates
+        patterns:
+          - '@tanstack/*'
+        update-types: [minor, patch]
+      ai-sdk:
+        applies-to: version-updates
+        patterns:
+          - 'ai'
+          - '@ai-sdk/*'
+        update-types: [minor, patch]
+      tailwind:
+        applies-to: version-updates
+        patterns:
+          - 'tailwindcss'
+          - '@tailwindcss/*'
+          - 'tailwind-merge'
+          - 'class-variance-authority'
+          - 'clsx'
+        update-types: [minor, patch]
+      data-layer:
+        applies-to: version-updates
+        patterns:
+          - 'kysely'
+          - 'kysely-codegen'
+          - 'pg'
+          - 'pg-cursor'
+          - '@types/pg'
+          - '@types/pg-cursor'
+        update-types: [minor, patch]
+      auth:
+        applies-to: version-updates
+        patterns:
+          - '@privy-io/*'
+          - 'jose'
+        update-types: [minor, patch]
+      eslint-prettier:
+        applies-to: version-updates
+        patterns:
+          - 'eslint'
+          - 'eslint-*'
+          - '@eslint/*'
+          - 'typescript-eslint'
+          - 'prettier'
+          - 'eslint-config-prettier'
+          - 'eslint-plugin-prettier'
+        update-types: [minor, patch]
+      build-tooling:
+        applies-to: version-updates
+        patterns:
+          - 'turbo'
+          - 'tsx'
+          - 'esbuild'
+          - 'typescript'
+          - '@types/node'
+          - 'vitest'
+          - '@vitest/*'
+          - 'syncpack'
+          - 'husky'
+          - 'lint-staged'
+        update-types: [minor, patch]
+    ignore:
+      # Pin React 19 / Next 16 majors — chase them deliberately, not on a
+      # weekly drip, because they ripple through the catalog.
+      - dependency-name: 'react'
+        update-types: [version-update:semver-major]
+      - dependency-name: 'react-dom'
+        update-types: [version-update:semver-major]
+      - dependency-name: 'next'
+        update-types: [version-update:semver-major]
+      # Same for the type definitions so they don't sneak ahead of the runtime.
+      - dependency-name: '@types/react'
+        update-types: [version-update:semver-major]
+      - dependency-name: '@types/react-dom'
+        update-types: [version-update:semver-major]
+
+  # ---------------------------------------------------------------------------
+  # GitHub Actions used by .github/workflows/*
+  # ---------------------------------------------------------------------------
+  - package-ecosystem: github-actions
+    directory: '/'
+    target-branch: dev
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: Etc/UTC
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: 'chore(ci)'
+      include: scope
+    labels:
+      - dependencies
+      - ci
+    groups:
+      actions-minor-patch:
+        applies-to: version-updates
+        update-types: [minor, patch]

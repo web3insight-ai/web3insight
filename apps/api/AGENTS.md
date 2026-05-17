@@ -4,13 +4,15 @@
 
 ## 技术栈
 
-- TypeScript + NestJS
+- TypeScript + Hono + oRPC（contract-first，契约见 `@web3insight/api-contract`）
 - PostgreSQL + Kysely
-- PNPM
+- Inngest（长任务工作流，`src/inngest/functions/`）
+- 运行时：Vercel Build Output API（`src/serverless/*.ts` 经 `scripts/bundle-functions.ts` 打包）
+- PNPM workspace（根仓 turbo 编排）
 
 ## 输出规范（AI 必须遵循）
 
-1. 解释“做了什么”，按执行顺序编号。
+1. 解释"做了什么"，按执行顺序编号。
 2. 每个函数、方法、步骤都要覆盖到。
 3. SQL 语句完整、可读，不做简写。
 4. 使用简体中文回复。
@@ -43,11 +45,19 @@
 
 ## 重要文件
 
-- `src/app/db/dto/db.dto.ts` 数据库表结构定义
-- `src/api/services/github.services.ts` GitHub API 数据获取，统一封装。
+- `src/app/db/dto/db.dto.ts` — 数据库表结构定义（Kysely 生成）
+- `src/services/github.service.ts` — GitHub API 数据获取，统一封装
+- `src/services/auth.service.ts` — JWT + Privy 绑定逻辑（Phase D 从 NestJS 移植）
+- `src/rpc-hono/handlers/*.ts` — 各 oRPC 子路由的处理器
+- `src/app/container.ts` — 服务容器（懒加载、复用同一 Postgres pool）
+- `src/app/create-app.ts` — Hono 应用工厂（路由 + middleware + RPC mounting）
+- `src/serverless/api-hono.ts` — Vercel 函数入口（Node→Web Request adapter）
+- `src/inngest/functions/*.ts` — 长任务工作流（取代旧 nestjs-console sync 任务）
 
 ## 第三方库文档
 
+- Hono https://hono.dev/llms-full.txt
+- oRPC https://orpc.unnoq.com/llms-full.txt
 - Kysely https://kysely.dev/llms-full.txt
 
 未查找到示例或者参考代码以及未提供 llms.txt 的情况下，询问是否使用 context7 mcp（use context7） 获取文档。
