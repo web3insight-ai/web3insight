@@ -11,7 +11,13 @@ import {
   Min,
   ValidateIf,
 } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+// Reason: @nestjs/swagger removed after Hono migration. Stub ApiProperty as a
+// no-op decorator factory so legacy DTO classes keep their decorator metadata
+// (used by class-validator) without pulling in the NestJS swagger runtime.
+const ApiProperty =
+  (_options?: unknown): PropertyDecorator =>
+  () =>
+    undefined;
 import {
   ActorsScopeType,
   ECO_ALL,

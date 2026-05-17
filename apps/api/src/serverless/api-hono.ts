@@ -1,12 +1,19 @@
-import { createApp } from '../src/app/create-app';
-import { getContainer } from '../src/app/container';
-import { env } from '../src/config/env';
+import { createApp } from '../app/create-app';
+import { getContainer } from '../app/container';
+import { env } from '../config/env';
 
 const app = createApp({
   container: getContainer(env),
   jwtSecret: env.JWT_SECRET,
 });
 
+/**
+ * Vercel Build Output API serverless entry — bundled by
+ * scripts/bundle-functions.ts into .vercel/output/functions/api/hono.func/.
+ *
+ * vercel.json catch-all rewrites every URL to `/api/hono?path=<original>`,
+ * so we reconstruct the original pathname before passing to the Hono router.
+ */
 export default async function handler(req: Request): Promise<Response> {
   const url = new URL(req.url);
   const original = url.searchParams.get('path');
@@ -17,7 +24,3 @@ export default async function handler(req: Request): Promise<Response> {
   }
   return app.fetch(req);
 }
-
-export const config = {
-  runtime: 'nodejs',
-};

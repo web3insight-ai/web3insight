@@ -3,21 +3,7 @@
   "buildCommand": "cd ../.. && pnpm turbo build --filter=@web3insight/api",
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
   "framework": null,
-  "functions": {
-    "api/hono.js": { "maxDuration": 60, "memory": 1024 },
-    "api/cron/**/*.js": { "maxDuration": 300, "memory": 512 }
-  },
   "crons": [
     { "path": "/api/cron/cache-clear", "schedule": "0 4 * * *" }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/cron/:path*",
-      "destination": "/api/cron/:path*"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/api/hono?path=/$1"
-    }
   ]
 }

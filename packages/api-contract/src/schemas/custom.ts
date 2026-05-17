@@ -16,13 +16,18 @@ export const CustomQueryUsersOrderInputSchema = z.object({
   direction: DirectionSchema,
 });
 
-export const ApiAnalysisUserSchema = z.object({
-  id: z.number().int(),
-  intent: IntentSchema,
-  description: z.string().nullable(),
-  share: z.boolean(),
-  created_at: z.string(),
-});
+// Reason: dev-card analysis polling reads many derived fields (status, result,
+// users[], etc.) populated by the analysis pipeline. `.loose()` lets the orpc
+// client surface those without declaring each one here.
+export const ApiAnalysisUserSchema = z
+  .object({
+    id: z.number().int(),
+    intent: IntentSchema,
+    description: z.string().nullable(),
+    share: z.boolean(),
+    created_at: z.string(),
+  })
+  .loose();
 
 export const CustomQueryUsersListSchema = z.object({
   list: z.array(ApiAnalysisUserSchema),
@@ -39,9 +44,14 @@ export const CustomShareInputSchema = z.object({
   share: z.boolean().default(false),
 });
 
-export const GithubUserSchema = z.object({
-  login: z.string(),
-  id: z.number().int(),
-  created_at: z.string(),
-  updated_at: z.string(),
-});
+// Reason: dev-card UI reads eco_score.ecosystems[], avatar_url, name, bio, and
+// other fields from the external GitHub/profile responses. `.loose()` exposes
+// them through the orpc client without enumerating every field here.
+export const GithubUserSchema = z
+  .object({
+    login: z.string(),
+    id: z.number().int(),
+    created_at: z.string(),
+    updated_at: z.string(),
+  })
+  .loose();
