@@ -1,0 +1,44 @@
+# PgBouncer in front of self-hosted Postgres at 95.217.113.40:5432
+# See README.md in this directory for full deploy instructions.
+#
+# Run on the same VM as Postgres so the upstream link is over loopback.
+
+services:
+  pgbouncer:
+    image: edoburu/pgbouncer:1.23.1
+    container_name: web3insight-pgbouncer
+    restart: unless-stopped
+    network_mode: host  # so DB_HOST=127.0.0.1 hits the Postgres on the same VM
+    environment:
+      # Upstream Postgres (loopback — never expose Postgres credentials over the wire)
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_NAME: data
+      # Pooling
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 1000
+      DEFAULT_POOL_SIZE: 25
+      RESERVE_POOL_SIZE: 5
+      RESERVE_POOL_TIMEOUT: 3
+      SERVER_RESET_QUERY: DISCARD ALL
+      # Auth (userlist.txt mounted below; password is md5-hashed)
+      AUTH_TYPE: md5
+      AUTH_FILE: /etc/pgbouncer/userlist.txt
+      # Listen on 6432 on all interfaces (host network)
+      LISTEN_ADDR: 0.0.0.0
+      LISTEN_PORT: 6432
+      # Admin
+      ADMIN_USERS: postgres
+      STATS_USERS: postgres
+      # Limits
+      SERVER_IDLE_TIMEOUT: 600
+      QUERY_TIMEOUT: 60
+      QUERY_WAIT_TIMEOUT: 30
+    volumes:
+      - ./userlist.txt:/etc/pgbouncer/userlist.txt:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -h 127.0.0.1 -p 6432 -U postgres']
+      interval: 30s
+      timeout: 5s
+      retries: 3

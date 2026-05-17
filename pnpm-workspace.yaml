@@ -50,7 +50,16 @@ catalog:
   '@ai-sdk/azure': 3.0.65
   '@ai-sdk/react': 3.0.186
 
-  # Backend (NestJS)
+  # Backend (Hono on Vercel — replacing NestJS)
+  hono: 4.12.19
+  '@hono/zod-validator': 0.8.0
+  '@scalar/hono-api-reference': 0.10.16
+  '@t3-oss/env-core': 0.13.11
+  jose: 6.2.3
+  inngest: 4.4.0
+
+  # Legacy NestJS (still installed for unmigrated apps/api during Hono rewrite —
+  # remove once Phase B deletes the NestJS scaffold)
   '@nestjs/common': 11.1.21
   '@nestjs/core': 11.1.21
   '@nestjs/platform-express': 11.1.21

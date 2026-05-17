@@ -2,12 +2,11 @@ import { ORPCError } from '@orpc/server';
 import { os } from '../orpc';
 
 /**
- * Stub routers for the 7 sub-contracts not yet migrated from REST controllers.
- * Each procedure throws NOT_IMPLEMENTED so the contract surface compiles
- * end-to-end and the client can discover available routes via OpenAPI.
+ * Stub routers for the 7 sub-contracts not yet migrated to Hono context handlers.
+ * Each procedure throws NOT_IMPLEMENTED so the contract surface compiles end-to-end.
  *
- * To migrate a router: replace the stub here with handlers/<router>.ts
- * following the pattern in handlers/total.ts.
+ * Migration path: replace each stub here with `handlers/<router>.ts` reusing the
+ * pattern in `handlers/total.ts` (`os.<router>.<proc>.handler(({ input, context }) => ...)`).
  */
 
 function notImplemented<T>(): T {

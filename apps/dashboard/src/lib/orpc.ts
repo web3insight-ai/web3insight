@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { createWeb3InsightClient } from '@web3insight/orpc-client';
-import { env } from '@/env';
+import { createWeb3InsightClient } from "@web3insight/orpc-client";
+import { env } from "@/env";
 
 /**
  * Typed RPC client + TanStack Query utils for dashboard.
@@ -14,7 +14,7 @@ import { env } from '@/env';
 const { client, orpc, link } = createWeb3InsightClient({
   url: `${env.DATA_API_URL}/rpc`,
   token: () => {
-    if (typeof document === 'undefined') return undefined;
+    if (typeof document === "undefined") return undefined;
     const match = document.cookie.match(/(?:^|; )auth-token=([^;]+)/);
     return match ? decodeURIComponent(match[1]) : undefined;
   },

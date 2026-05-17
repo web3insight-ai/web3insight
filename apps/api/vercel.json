@@ -5,16 +5,86 @@
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
   "framework": null,
   "functions": {
-    "api/index.ts": {
-      "maxDuration": 60,
-      "memory": 1024
-    }
+    "api/index.ts": { "maxDuration": 60, "memory": 1024 },
+    "api/hono.ts": { "maxDuration": 60, "memory": 1024 },
+    "api/inngest/[...slug].ts": { "maxDuration": 300, "memory": 1024 },
+    "api/cron/cache-clear.ts": { "maxDuration": 300, "memory": 512 }
   },
+  "crons": [
+    { "path": "/api/cron/cache-clear", "schedule": "0 4 * * *" }
+  ],
   "rewrites": [
-    { "source": "/doc/(.*)", "destination": "/api?path=/doc/$1" },
-    { "source": "/rpc/(.*)", "destination": "/api?path=/rpc/$1" },
-    { "source": "/v1/(.*)", "destination": "/api?path=/v1/$1" },
-    { "source": "/v2/(.*)", "destination": "/api?path=/v2/$1" },
-    { "source": "/(.*)", "destination": "/api?path=/$1" }
+    {
+      "source": "/api/inngest/:path*",
+      "destination": "/api/inngest/:path*"
+    },
+    {
+      "source": "/api/cron/:path*",
+      "destination": "/api/cron/:path*"
+    },
+    {
+      "source": "/doc/:path*",
+      "destination": "/api?path=/doc/:path*"
+    },
+    {
+      "source": "/v1/auth/:path*",
+      "destination": "/api?path=/v1/auth/:path*"
+    },
+    {
+      "source": "/v1/user/:path*",
+      "destination": "/api?path=/v1/user/:path*"
+    },
+    {
+      "source": "/v2/user/:path*",
+      "destination": "/api?path=/v2/user/:path*"
+    },
+    {
+      "source": "/v1/magic",
+      "destination": "/api?path=/v1/magic"
+    },
+    {
+      "source": "/v1/bind/:path*",
+      "destination": "/api?path=/v1/bind/:path*"
+    },
+    {
+      "source": "/v1/privy/:path*",
+      "destination": "/api?path=/v1/privy/:path*"
+    },
+    {
+      "source": "/v1/openbuild/:path*",
+      "destination": "/api?path=/v1/openbuild/:path*"
+    },
+    {
+      "source": "/v1/login/:path*",
+      "destination": "/api?path=/v1/login/:path*"
+    },
+    {
+      "source": "/v1/ai/:path*",
+      "destination": "/api?path=/v1/ai/:path*"
+    },
+    {
+      "source": "/rpc/auth/:path*",
+      "destination": "/api?path=/rpc/auth/:path*"
+    },
+    {
+      "source": "/rpc/:path*",
+      "destination": "/api/hono?path=/rpc/:path*"
+    },
+    {
+      "source": "/v1/:path*",
+      "destination": "/api/hono?path=/v1/:path*"
+    },
+    {
+      "source": "/v2/:path*",
+      "destination": "/api/hono?path=/v2/:path*"
+    },
+    {
+      "source": "/health",
+      "destination": "/api/hono?path=/health"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/api?path=/$1"
+    }
   ]
 }

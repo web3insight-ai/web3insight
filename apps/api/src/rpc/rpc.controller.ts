@@ -35,7 +35,10 @@ export class RpcController implements OnModuleInit {
       res,
       headers: { authorization: req.header('authorization') ?? undefined },
     };
-    const { matched } = await this.handler.handle(req, res, { prefix: '/rpc', context });
+    const { matched } = await this.handler.handle(req, res, {
+      prefix: '/rpc',
+      context,
+    });
     if (!matched) {
       res.status(404).json({ error: 'RPC procedure not found' });
     }
