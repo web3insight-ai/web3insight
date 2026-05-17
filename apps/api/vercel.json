@@ -7,8 +7,8 @@
   "functions": {
     "api/index.ts": { "maxDuration": 60, "memory": 1024 },
     "api/hono.ts": { "maxDuration": 60, "memory": 1024 },
-    "api/inngest/[...slug].ts": { "maxDuration": 300, "memory": 1024 },
-    "api/cron/cache-clear.ts": { "maxDuration": 300, "memory": 512 }
+    "api/inngest/**/*.ts": { "maxDuration": 300, "memory": 1024 },
+    "api/cron/**/*.ts": { "maxDuration": 300, "memory": 512 }
   },
   "crons": [
     { "path": "/api/cron/cache-clear", "schedule": "0 4 * * *" }
