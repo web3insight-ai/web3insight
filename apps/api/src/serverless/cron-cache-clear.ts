@@ -1,3 +1,8 @@
+// Reason: legacy DTOs in src/api/dto/* still use class-validator decorators;
+// reflect-metadata must be installed at process entry or `Reflect.getMetadata`
+// crashes when the service modules load.
+import 'reflect-metadata';
+
 import { getContainer } from '../app/container';
 import { env } from '../config/env';
 

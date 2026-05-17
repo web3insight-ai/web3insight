@@ -1,3 +1,11 @@
+// Reason: legacy DTOs in src/api/dto/* still use class-validator decorators,
+// which require the reflect-metadata polyfill installed at process entry. The
+// NestJS main.ts that used to load this was deleted in L5, so the bundled
+// function crashed with `TypeError: Reflect.getMetadata is not a function`.
+// Loading the polyfill once at the Hono entry restores decorator metadata for
+// all downstream service imports.
+import 'reflect-metadata';
+
 import { createApp } from '../app/create-app';
 import { getContainer } from '../app/container';
 import { env } from '../config/env';
