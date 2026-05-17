@@ -1,0 +1,18 @@
+{
+  "name": "@web3insight/typescript-config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "files": [
+    "base.json",
+    "nextjs.json",
+    "node.json",
+    "library.json"
+  ],
+  "exports": {
+    "./base.json": "./base.json",
+    "./nextjs.json": "./nextjs.json",
+    "./node.json": "./node.json",
+    "./library.json": "./library.json"
+  }
+}

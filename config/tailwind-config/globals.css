@@ -1,0 +1,37 @@
+/* Shared Tailwind v4 globals for Web3Insight apps.
+ * Each app imports this and may extend with app-specific overrides in its own globals.css. */
+
+@import 'tailwindcss';
+
+@theme {
+  --color-bg: oklch(99% 0.005 247);
+  --color-fg: oklch(15% 0.02 247);
+  --color-surface: oklch(97% 0.005 247);
+  --color-accent: oklch(60% 0.18 195);
+  --color-warn: oklch(75% 0.16 80);
+  --color-danger: oklch(60% 0.22 25);
+
+  /* Teal ramp for charts */
+  --color-teal-50: oklch(97% 0.02 195);
+  --color-teal-100: oklch(93% 0.04 195);
+  --color-teal-200: oklch(86% 0.07 195);
+  --color-teal-300: oklch(78% 0.11 195);
+  --color-teal-400: oklch(70% 0.14 195);
+  --color-teal-500: oklch(60% 0.18 195);
+  --color-teal-600: oklch(52% 0.16 195);
+  --color-teal-700: oklch(44% 0.13 195);
+  --color-teal-800: oklch(36% 0.10 195);
+  --color-teal-900: oklch(28% 0.08 195);
+  --color-teal-950: oklch(20% 0.06 195);
+
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+}
+
+[data-theme='dark'] {
+  --color-bg: oklch(15% 0.02 247);
+  --color-fg: oklch(95% 0.005 247);
+  --color-surface: oklch(20% 0.02 247);
+}

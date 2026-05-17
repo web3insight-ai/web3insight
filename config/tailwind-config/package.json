@@ -1,0 +1,16 @@
+{
+  "name": "@web3insight/tailwind-config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "files": ["preset.ts", "postcss.config.mjs", "globals.css"],
+  "exports": {
+    "./preset": "./preset.ts",
+    "./postcss": "./postcss.config.mjs",
+    "./globals.css": "./globals.css"
+  },
+  "peerDependencies": {
+    "tailwindcss": "catalog:",
+    "@tailwindcss/postcss": "catalog:"
+  }
+}
