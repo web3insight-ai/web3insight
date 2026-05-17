@@ -1,0 +1,47 @@
+{
+  "name": "web3insight",
+  "private": true,
+  "type": "module",
+  "version": "0.3.0",
+  "packageManager": "pnpm@10.29.3",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "build:packages": "turbo run build --filter=\"./packages/*\" --filter=\"./config/*\"",
+    "dev": "turbo run dev --concurrency=20",
+    "dev:dashboard": "turbo run dev --filter=@web3insight/dashboard",
+    "dev:web": "turbo run dev --filter=@web3insight/web",
+    "dev:dev-card": "turbo run dev --filter=@web3insight/dev-card",
+    "dev:api": "turbo run start:dev --filter=@web3insight/api",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:e2e": "turbo run test:e2e",
+    "clean": "turbo run clean && rm -rf node_modules .turbo apps/*/node_modules apps/*/.turbo apps/*/.next apps/*/dist packages/*/node_modules packages/*/.turbo packages/*/dist config/*/node_modules config/*/.turbo",
+    "console:dev": "pnpm --filter @web3insight/api console:dev",
+    "console:prod": "pnpm --filter @web3insight/api console:prod",
+    "syncpack:lint": "syncpack lint",
+    "syncpack:fix": "syncpack fix-mismatches",
+    "prepare": "husky || exit 0"
+  },
+  "devDependencies": {
+    "husky": "9.1.7",
+    "lint-staged": "17.0.5",
+    "syncpack": "15.1.2",
+    "turbo": "2.9.14"
+  },
+  "lint-staged": {
+    "apps/api/**/*.{js,ts}": "pnpm -C apps/api exec eslint --cache --fix",
+    "apps/dashboard/**/*.{js,ts,tsx}": [
+      "pnpm -C apps/dashboard exec prettier --ignore-unknown --ignore-path ./.gitignore --write",
+      "pnpm -C apps/dashboard exec eslint --cache --fix"
+    ],
+    "apps/web/**/*.{ts,tsx,js,jsx}": "pnpm -C apps/web exec eslint --cache --fix",
+    "apps/dev-card/**/*.{ts,tsx,js,jsx}": "pnpm -C apps/dev-card exec eslint --cache --fix",
+    "packages/**/*.{ts,tsx}": "eslint --cache --fix",
+    "config/**/*.{ts,mjs,js}": "eslint --cache --fix"
+  }
+}

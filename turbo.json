@@ -1,0 +1,88 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "globalPassThroughEnv": ["NODE_ENV"],
+  "globalEnv": [
+    "DATABASE_URL",
+    "DATABASE_URL_DIRECT",
+    "DATA_API_URL",
+    "DATA_API_TOKEN",
+    "OSSINSIGHT_URL",
+    "HTTP_TIMEOUT",
+    "JWT_SECRET",
+    "PRIVY_APP_ID",
+    "PRIVY_APP_SECRET",
+    "NEXT_PUBLIC_PRIVY_APP_ID",
+    "OPENROUTER_API_KEY",
+    "OPENROUTER_BASE_URL",
+    "OPENROUTER_MODEL",
+    "OPENAI_API_KEY",
+    "OPENAI_BASE_URL",
+    "OPENAI_MODEL",
+    "COPILOT_DATABASE_URL",
+    "COPILOT_DATABASE_WRITE_URL",
+    "RSSHUB_API_URL",
+    "TWITTER_API_URL",
+    "NEXT_PUBLIC_OPENBUILD_CLIENT_ID",
+    "NEXT_PUBLIC_UMAMI_WEBSITE_ID",
+    "NEXT_PUBLIC_UMAMI_URL",
+    "UPSTASH_REDIS_REST_URL",
+    "UPSTASH_REDIS_REST_TOKEN",
+    "USE_REDIS_POOL",
+    "SKIP_ENV_VALIDATION"
+  ],
+  "globalDependencies": [".env*", ".nvmrc", "pnpm-workspace.yaml"],
+  "tasks": {
+    "build": {
+      "inputs": ["$TURBO_DEFAULT$"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+      "dependsOn": ["^build"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "start:dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "start": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["build"]
+    },
+    "start:prod": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["build"]
+    },
+    "lint": {
+      "outputs": []
+    },
+    "lint:fix": {
+      "cache": false
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "src/**/*.test.ts",
+        "src/**/*.test.tsx",
+        "test/**/*.ts"
+      ],
+      "outputs": ["coverage/**"]
+    },
+    "test:e2e": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
+    "clean": {
+      "cache": false
+    }
+  }
+}

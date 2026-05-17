@@ -1,8 +1,50 @@
-# Monorepo root gitignore — will be expanded in Phase 2
+# Dependencies
 node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+.next/
 .turbo/
-.DS_Store
-*.log
+out/
+*.tsbuildinfo
+.eslintcache
+
+# Environment
 .env
 .env.local
 .env.*.local
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Editor
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Test
+coverage/
+.nyc_output/
+
+# Vercel
+.vercel/
+
+# Claude / agents (per-machine)
+.claude/scheduled_tasks.lock
+.claude/settings.local.json
+
+# Playwright MCP cache
+.playwright-mcp/
+
+# Misc
+*.pid
+.tmp/
