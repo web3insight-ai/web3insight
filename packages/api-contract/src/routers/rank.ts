@@ -3,10 +3,13 @@ import { z } from 'zod';
 import { EcoNameSchema } from '../schemas/shared.js';
 import {
   EcoRankListSchema,
-  TopRepoListSchema,
   TopActorListSchema,
-  YearlyDeveloperStatListSchema,
 } from '../schemas/rank.js';
+
+// Reason: TopRepoListSchema authored required fields (description, all the
+// numeric fields populated) the legacy cache JSONB does not necessarily
+// store. Until the sync jobs and the schema are reconciled, expose raw.
+const RepoRankPassthrough = z.unknown();
 
 export const rankContract = oc.tag('Rank').router({
   /** GET /v1/ecosystems/top */
@@ -18,19 +21,19 @@ export const rankContract = oc.tag('Rank').router({
   reposTop: oc
     .route({ method: 'GET', path: '/repos/top' })
     .input(z.object({ eco_name: EcoNameSchema }))
-    .output(TopRepoListSchema),
+    .output(RepoRankPassthrough),
 
   /** GET /v1/repos/top/7d */
   reposTop7d: oc
     .route({ method: 'GET', path: '/repos/top/7d' })
     .input(z.object({ eco_name: EcoNameSchema }))
-    .output(TopRepoListSchema),
+    .output(RepoRankPassthrough),
 
   /** GET /v1/repos/top/dev/7d */
   reposTopByDev7d: oc
     .route({ method: 'GET', path: '/repos/top/dev/7d' })
     .input(z.object({ eco_name: EcoNameSchema }))
-    .output(TopRepoListSchema),
+    .output(RepoRankPassthrough),
 
   /** GET /v1/actors/top */
   actorsTop: oc
