@@ -28,6 +28,12 @@ export const env = createEnv({
     INNGEST_SIGNING_KEY: z.string().optional(),
     INNGEST_EVENT_KEY: z.string().optional(),
     CRON_SECRET: z.string().min(32).optional(),
+    // Reason: comma-separated CORS allowlist. Browsers reject responses
+    // that combine `Access-Control-Allow-Origin: *` with credentials, so we
+    // must either echo the request's Origin or enumerate concrete origins.
+    // Unset → echo any Origin (legacy behavior, kept for previews).
+    ALLOWED_ORIGINS: z.string().optional(),
+    LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).optional(),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

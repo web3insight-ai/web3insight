@@ -1,5 +1,6 @@
 import { jwtVerify } from 'jose';
 import type { MiddlewareHandler } from 'hono';
+import { getCookie } from 'hono/cookie';
 import type { AppBindings } from '@/app/create-app';
 
 /**
@@ -17,14 +18,11 @@ export function createAuthMiddleware(
   const secret = new TextEncoder().encode(jwtSecret);
 
   return async (c, next) => {
-    const cookie = c.req.header('cookie') ?? '';
-    const cookieMatch = cookie.match(/(?:^|;\s*)auth-token=([^;]+)/);
+    const cookieToken = getCookie(c, 'auth-token');
     const headerToken = c.req
       .header('authorization')
       ?.replace(/^Bearer\s+/i, '');
-    const rawToken = cookieMatch?.[1]
-      ? decodeURIComponent(cookieMatch[1])
-      : headerToken;
+    const rawToken = cookieToken ?? headerToken;
 
     if (rawToken) {
       try {

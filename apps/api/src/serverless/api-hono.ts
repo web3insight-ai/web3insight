@@ -7,6 +7,7 @@ import { env } from '../config/env';
 const app = createApp({
   container: getContainer(env),
   jwtSecret: env.JWT_SECRET,
+  allowedOrigins: env.ALLOWED_ORIGINS,
 });
 
 /**
