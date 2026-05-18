@@ -52,15 +52,9 @@ async function main() {
         format: 'cjs',
         sourcemap: 'inline',
         tsconfig: join(ROOT, 'tsconfig.json'),
-        // Reason: optional NestJS peers + native pg that aren't installed and
-        // aren't needed for our runtime path.
-        external: [
-          'pg-native',
-          '@nestjs/websockets/socket-module',
-          '@nestjs/microservices',
-          '@nestjs/microservices/microservices-module',
-          'class-transformer/storage',
-        ],
+        // Reason: native pg binding isn't installed and isn't needed for our
+        // runtime path; pg uses the JS fallback automatically.
+        external: ['pg-native'],
         // Reason: bundle every workspace + npm dep into a self-contained file
         // so the Vercel Node runtime never needs a second-pass pnpm install
         // (workspace:* refs always fail in that sandbox).

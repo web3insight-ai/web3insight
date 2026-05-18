@@ -9,17 +9,11 @@ import { customRouter } from './handlers/custom';
 import { authRouter } from './handlers/auth';
 
 /**
- * Root router for the Hono runtime. Migration status:
- * - ✅ total (6 procedures, via container.services.cache)
- * - ✅ donate (5 procedures, via container.services.donate)
- * - ✅ github (1 procedure, via container.services.github)
- * - ✅ repo (1 procedure, via container.services.repos)
- * - ✅ rank (6 procedures, via container.services.{cache,rank})
- * - ✅ admin (4 procedures, via container.services.{eco,repos})
- * - ✅ custom (11 procedures, via container.services.users)
- * - 🚧 auth (13 procedures, STUB — Phase D ports AuthService)
- *
- * Total: 34 of 47 procedures live; 13 auth procedures stubbed.
+ * Root router for the Hono runtime. All 47/47 oRPC procedures live here:
+ *   total (6) · donate (5) · github (1) · repo (1) · rank (6)
+ *   admin (4) · custom (11) · auth (13)
+ * Auth is the Phase D Privy-only port — legacy GitHub OAuth + wallet bind +
+ * magic number were intentionally dropped from the contract.
  */
 export const router = os.router({
   total: totalRouter,

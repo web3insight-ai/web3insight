@@ -28,18 +28,14 @@
     "@t3-oss/env-core": "0.13.11",
     "@web3insight/api-contract": "workspace:*",
     "ai": "catalog:",
-    "class-transformer": "^0.5.1",
-    "class-validator": "^0.15.1",
     "drizzle-orm": "catalog:",
     "ethers": "^6.16.0",
     "exceljs": "^4.4.0",
     "fp-ts": "^2.16.11",
     "hono": "4.12.19",
-    "@hono/zod-validator": "0.8.0",
     "inngest": "4.4.0",
     "jose": "^6.2.3",
     "pg": "catalog:",
-    "reflect-metadata": "^0.2.2",
     "zod": "catalog:"
   },
   "devDependencies": {

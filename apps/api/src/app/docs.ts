@@ -16,7 +16,13 @@ export async function getOpenApiSpec(): Promise<object> {
       description:
         'Hono runtime — oRPC contract-first API for Web3Insight ecosystem analytics.',
     },
-    servers: [{ url: '/rpc', description: 'Hono RPC endpoint' }],
+    // Reason: Scalar "Try it" sends HTTP requests against the URLs in the
+    // spec; oRPC contract paths are REST-shaped (e.g. /repos/total) and
+    // served by the OpenAPIHandler shim under /v1. /rpc is the binary
+    // oRPC protocol and would 404 every "Try it" request.
+    servers: [
+      { url: '/v1', description: 'REST compatibility shim (OpenAPIHandler)' },
+    ],
   });
   return cachedSpec;
 }
