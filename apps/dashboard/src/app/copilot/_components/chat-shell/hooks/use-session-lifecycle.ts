@@ -92,10 +92,10 @@ function buildThreadHistorySnapshot(
   const latestSelection = buildLatestBranchSelection(history);
   const selectionSeed = preferredLeafMessageId
     ? applyPreferredLeafSelection(
-        history,
-        latestSelection,
-        preferredLeafMessageId,
-      )
+      history,
+      latestSelection,
+      preferredLeafMessageId,
+    )
     : latestSelection;
   const { messages, selections } = resolveActivePathFromHistory(
     history,

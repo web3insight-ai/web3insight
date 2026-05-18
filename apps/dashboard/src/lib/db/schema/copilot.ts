@@ -63,8 +63,27 @@ export const copilot_feedback = apiSchema.table("copilot_feedback", {
     .default(sql`now()`),
 });
 
+// Reason: Personal access tokens that let third-party MCP clients call
+// /api/ai/mcp on the user's behalf. Plaintext token is hashed via HMAC-SHA256
+// using AUTH_SECRET; only the prefix is kept for display in the UI.
+export const copilot_mcp_tokens = apiSchema.table("copilot_mcp_tokens", {
+  id: text("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()::TEXT`),
+  user_id: varchar("user_id", { length: 255 }).notNull(),
+  name: varchar("name", { length: 80 }).notNull(),
+  token_hash: varchar("token_hash", { length: 128 }).notNull().unique(),
+  token_preview: varchar("token_preview", { length: 32 }).notNull(),
+  last_used_at: timestamp("last_used_at", { withTimezone: true }),
+  revoked_at: timestamp("revoked_at", { withTimezone: true }),
+  created_at: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .default(sql`now()`),
+});
+
 export const schema = {
   copilot_sessions,
   copilot_messages,
   copilot_feedback,
+  copilot_mcp_tokens,
 };

@@ -284,39 +284,39 @@ export function useCopilotRuntimeActions({
 
       try {
         switch (action) {
-          case "archive": {
-            const res = await fetch(
-              `/api/ai/sessions/${targetSessionId}/archive`,
-              { method: "POST" },
-            );
-            if (!res.ok) {
-              throw new Error("Failed to archive thread");
-            }
-            break;
+        case "archive": {
+          const res = await fetch(
+            `/api/ai/sessions/${targetSessionId}/archive`,
+            { method: "POST" },
+          );
+          if (!res.ok) {
+            throw new Error("Failed to archive thread");
           }
-          case "unarchive": {
-            const res = await fetch(
-              `/api/ai/sessions/${targetSessionId}/unarchive`,
-              { method: "POST" },
-            );
-            if (!res.ok) {
-              throw new Error("Failed to unarchive thread");
-            }
-            break;
+          break;
+        }
+        case "unarchive": {
+          const res = await fetch(
+            `/api/ai/sessions/${targetSessionId}/unarchive`,
+            { method: "POST" },
+          );
+          if (!res.ok) {
+            throw new Error("Failed to unarchive thread");
           }
-          case "delete": {
-            const res = await fetch(`/api/ai/sessions/${targetSessionId}`, {
-              method: "DELETE",
-            });
-            if (!res.ok) {
-              throw new Error("Failed to delete thread");
-            }
-            break;
+          break;
+        }
+        case "delete": {
+          const res = await fetch(`/api/ai/sessions/${targetSessionId}`, {
+            method: "DELETE",
+          });
+          if (!res.ok) {
+            throw new Error("Failed to delete thread");
           }
-          default: {
-            const unreachableAction: never = action;
-            throw new Error(`Unhandled thread action: ${unreachableAction}`);
-          }
+          break;
+        }
+        default: {
+          const unreachableAction: never = action;
+          throw new Error(`Unhandled thread action: ${unreachableAction}`);
+        }
         }
 
         const activeSessionId = jotaiStore.get(copilotSessionIdAtom);

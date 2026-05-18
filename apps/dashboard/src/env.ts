@@ -31,6 +31,10 @@ export const env = createEnv({
     COPILOT_DATABASE_URL: z.string().url().optional(),
     COPILOT_DATABASE_WRITE_URL: z.string().url().optional(),
 
+    // Reason: HMAC-SHA256 secret for hashing MCP bearer tokens at rest.
+    // /api/ai/mcp refuses requests when this is unset.
+    AUTH_SECRET: z.string().min(16).optional(),
+
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -63,6 +67,7 @@ export const env = createEnv({
     HTTP_TIMEOUT: process.env.HTTP_TIMEOUT,
     COPILOT_DATABASE_URL: process.env.COPILOT_DATABASE_URL,
     COPILOT_DATABASE_WRITE_URL: process.env.COPILOT_DATABASE_WRITE_URL,
+    AUTH_SECRET: process.env.AUTH_SECRET,
     NODE_ENV: process.env.NODE_ENV,
 
     // Client vars

@@ -93,13 +93,27 @@ CREATE TABLE IF NOT EXISTS "api"."copilot_feedback" (
   "created_at"    TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS "api"."copilot_mcp_tokens" (
+  "id"            TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  "user_id"       VARCHAR(255) NOT NULL,
+  "name"          VARCHAR(80) NOT NULL,
+  "token_hash"    VARCHAR(128) NOT NULL UNIQUE,
+  "token_preview" VARCHAR(32) NOT NULL,
+  "last_used_at"  TIMESTAMP WITH TIME ZONE,
+  "revoked_at"    TIMESTAMP WITH TIME ZONE,
+  "created_at"    TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+
 CREATE INDEX IF NOT EXISTS idx_copilot_sessions_user ON "api"."copilot_sessions" ("user_id");
 CREATE INDEX IF NOT EXISTS idx_copilot_sessions_active ON "api"."copilot_sessions" ("last_active_at" DESC);
 CREATE INDEX IF NOT EXISTS idx_copilot_messages_session ON "api"."copilot_messages" ("session_id");
 CREATE INDEX IF NOT EXISTS idx_copilot_feedback_message ON "api"."copilot_feedback" ("message_id");
+CREATE INDEX IF NOT EXISTS idx_copilot_mcp_tokens_user ON "api"."copilot_mcp_tokens" ("user_id");
+CREATE INDEX IF NOT EXISTS idx_copilot_mcp_tokens_active ON "api"."copilot_mcp_tokens" ("user_id") WHERE "revoked_at" IS NULL;
 
 -- Grant permissions to the app user
 GRANT SELECT, INSERT, UPDATE, DELETE ON "api"."copilot_sessions" TO web3_report;
 GRANT SELECT, INSERT, UPDATE, DELETE ON "api"."copilot_messages" TO web3_report;
 GRANT SELECT, INSERT, UPDATE, DELETE ON "api"."copilot_feedback" TO web3_report;
+GRANT SELECT, INSERT, UPDATE, DELETE ON "api"."copilot_mcp_tokens" TO web3_report;
 `;

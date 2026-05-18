@@ -12,8 +12,10 @@ import { copilotIsThreadActionPendingAtom } from "../../state/atoms";
 import type { CopilotThreadQueryState, ThreadItem } from "../../types";
 import { CopilotArchivedChatsDialog } from "../settings/panels/data-control/archived-chats/archived-chats-dialog";
 import { CopilotDeleteArchivedChatDialog } from "../settings/panels/data-control/archived-chats/delete-archived-chat-dialog";
+import { CopilotMcpTokensDialog } from "../settings/panels/mcp/mcp-tokens-dialog";
 import {
   COPILOT_ARCHIVED_CHATS_DIALOG_QUERY_KEY,
+  COPILOT_MCP_TOKENS_DIALOG_QUERY_KEY,
   COPILOT_SETTINGS_DIALOG_QUERY_KEY,
   copilotDialogOpenParser,
 } from "../settings/query-state";
@@ -39,6 +41,10 @@ export function CopilotThreadSettings({
     COPILOT_SETTINGS_DIALOG_QUERY_KEY,
     copilotDialogOpenParser,
   );
+  const [mcpTokensDialogState, setMcpTokensDialogState] = useQueryState(
+    COPILOT_MCP_TOKENS_DIALOG_QUERY_KEY,
+    copilotDialogOpenParser,
+  );
 
   const [deleteCandidate, setDeleteCandidate] = useState<ThreadItem | null>(
     null,
@@ -47,6 +53,7 @@ export function CopilotThreadSettings({
 
   const isArchivedDialogOpen = archivedChatsDialogState === "open";
   const isSettingsDialogOpen = settingsDialogState === "open";
+  const isMcpTokensDialogOpen = mcpTokensDialogState === "open";
 
   const handleSettingsDialogOpenChange = useCallback(
     (open: boolean) => {
@@ -65,6 +72,13 @@ export function CopilotThreadSettings({
       }
     },
     [setArchivedChatsDialogState],
+  );
+
+  const handleMcpTokensDialogOpenChange = useCallback(
+    (open: boolean) => {
+      void setMcpTokensDialogState(open ? "open" : null);
+    },
+    [setMcpTokensDialogState],
   );
 
   const handleDeleteThread = useCallback(
@@ -122,6 +136,14 @@ export function CopilotThreadSettings({
         onManageArchivedChats={() => {
           handleArchivedDialogOpenChange(true);
         }}
+        onManageMcpTokens={() => {
+          handleMcpTokensDialogOpenChange(true);
+        }}
+      />
+
+      <CopilotMcpTokensDialog
+        isOpen={isMcpTokensDialogOpen}
+        onOpenChange={handleMcpTokensDialogOpenChange}
       />
 
       <CopilotArchivedChatsDialog
