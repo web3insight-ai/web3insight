@@ -6,6 +6,9 @@ import {
   type EcoInfo,
   type RoastReport,
 } from '@/ai/prompts/developer-roast.prompt';
+import { logger } from '@/app/logger';
+
+const log = logger.child({ service: 'developer-analysis' });
 
 /**
  * Pure-class port of ai/services/developer-analysis.service.ts. Drops
@@ -108,9 +111,7 @@ export class DeveloperAnalysisService {
 
   constructor(private readonly config: DeveloperAnalysisConfig) {
     if (!config.apiKey) {
-      console.warn(
-        '[DeveloperAnalysisService] OPENROUTER_API_KEY not configured — analyze() will fail',
-      );
+      log.warn('OPENROUTER_API_KEY not configured — analyze() will fail');
     }
 
     this.openai = createOpenAI({
@@ -234,9 +235,7 @@ export class DeveloperAnalysisService {
         english: parsed.english || '',
       };
     } catch {
-      console.warn(
-        '[DeveloperAnalysisService] Failed to parse AI response as JSON, using raw text',
-      );
+      log.warn('failed to parse AI response as JSON, using raw text');
       return { chinese: text, english: text };
     }
   }

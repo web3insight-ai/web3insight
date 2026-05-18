@@ -33,6 +33,9 @@ import {
   SucessResDto,
 } from '@/api/dto/api.dto';
 import { chunkArray } from '@/helper';
+import { logger } from '@/app/logger';
+
+const log = logger.child({ service: 'repos' });
 
 /**
  * Pure-class port of data/services/repos.services.ts. NestJS NotFoundException
@@ -184,7 +187,13 @@ export class ReposService {
             );
             return data as RepoInfo;
           } catch (e) {
-            console.log(`Failed to fetch repo ${repoIdentifier}:`, e);
+            log.warn(
+              'failed to fetch repo from github, falling back to db cache',
+              {
+                repoIdentifier,
+                err: e instanceof Error ? e.message : String(e),
+              },
+            );
             const apiRow = await first(
               this.db
                 .select({ api: data_repos.api })
@@ -289,10 +298,11 @@ export class ReposService {
         ) {
           continue;
         }
-        console.log(
-          `Failed to fetch contributors for ${owner}/${repo}:`,
-          error,
-        );
+        log.warn('failed to fetch contributors', {
+          owner,
+          repo,
+          err: error instanceof Error ? error.message : String(error),
+        });
         return null;
       }
     }
@@ -303,7 +313,7 @@ export class ReposService {
   async exportContributorsToCsv(filePath: string) {
     const repoInputs = await this.loadReposFromFile(filePath);
     if (repoInputs.length === 0) {
-      console.log('No repositories found in file.');
+      log.info('no repositories found in file', { filePath });
       return 0;
     }
     const outputPath = this.getContributorsCsvPath(filePath);
@@ -343,7 +353,7 @@ export class ReposService {
     }
 
     await workbook.csv.writeFile(outputPath);
-    console.log(`Exported ${rowCount} rows to ${outputPath}`);
+    log.info('contributors exported to csv', { rowCount, outputPath });
     return rowCount;
   }
 

@@ -19,6 +19,9 @@ import type {
   QueryTopStar,
   QueryTopStarRepo,
 } from '@/data/dto/query.dto';
+import { logger } from '@/app/logger';
+
+const log = logger.child({ service: 'rank' });
 
 export class EcoRankItem {
   eco_name!: string;
@@ -694,7 +697,7 @@ WHERE eco.name = dpe.ecosystem_name;
 
     const results = await executeRaw(this.db, sqlRawQuery);
 
-    console.log('Ecosystem rank updated:', results);
+    log.info('ecosystem rank updated', { results });
     return results;
   }
 
@@ -702,15 +705,15 @@ WHERE eco.name = dpe.ecosystem_name;
   async syncAll() {
     const ecoTypes = await this.ecoService.getEcoNameFilters();
     await this.EcoRank();
-    console.log('Ecosystem rank synchronized');
+    log.info('sync step done', { step: 'ecosystem-rank' });
     await this.getTopScoreActors(ecoTypes);
-    console.log('Top score actors synchronized');
+    log.info('sync step done', { step: 'top-score-actors' });
     await this.repoStarRank(ecoTypes);
-    console.log('Repository star rank synchronized');
+    log.info('sync step done', { step: 'repo-star-rank' });
     await this.ecoRankTotal(ECO_ALL, false);
-    console.log('Ecosystem total rank synchronized');
+    log.info('sync step done', { step: 'ecosystem-total-rank' });
     await this.get7daysTopStarRepos(ecoTypes);
-    console.log('7 days top star repositories synchronized');
+    log.info('sync step done', { step: '7d-top-star-repos' });
     await this.get7daysDevelopersRank();
   }
 

@@ -23,6 +23,9 @@ import {
   type GithubUsersDto,
   Intent,
 } from '@/api/dto/api.dto';
+import { logger } from '@/app/logger';
+
+const log = logger.child({ service: 'users' });
 
 type ApiAnalysisUsers = typeof api_analysis_users.$inferSelect;
 
@@ -166,7 +169,10 @@ export class UsersService {
             return { username, data: response.data };
           } catch (error) {
             if (username) fail.push(username);
-            console.error(`Failed to process user ${username}:`, error);
+            log.error('failed to process user', {
+              username,
+              err: error instanceof Error ? error.message : String(error),
+            });
             return null;
           }
         }),
@@ -1174,7 +1180,7 @@ export class UsersService {
     }
 
     try {
-      console.log(`Starting AI analysis for user analysis id: ${payload.id}`);
+      log.info('ai analysis start', { analysisId: payload.id });
 
       const analysisData = {
         id: String(newData.id),
@@ -1191,17 +1197,17 @@ export class UsersService {
 
       const aiData = await analyzer.analyze(analysisData);
 
-      console.log(`AI analysis completed for user analysis id: ${payload.id}`);
+      log.info('ai analysis complete', { analysisId: payload.id });
 
       await this.db
         .update(api_analysis_users)
         .set({ ai: aiData })
         .where(eq(api_analysis_users.id, String(payload.id)));
     } catch (error) {
-      console.error(
-        `AI analysis failed for user analysis id: ${payload.id}`,
-        error,
-      );
+      log.error('ai analysis failed', {
+        analysisId: payload.id,
+        err: error instanceof Error ? error.message : String(error),
+      });
       // Record empty AI data rather than failing the request
       await this.db
         .update(api_analysis_users)

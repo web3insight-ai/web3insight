@@ -12,6 +12,9 @@ import type {
   QueryReposTotal,
 } from '@/data/dto/query.dto';
 import { ActorCountryStatListDto, ActorDateListDto } from '@/api/dto/api.dto';
+import { logger } from '@/app/logger';
+
+const log = logger.child({ service: 'total' });
 
 /**
  * Pure-class port of data/services/total.services.ts. All SQL is verbatim.
@@ -346,7 +349,7 @@ WHERE r.repo_id = rj.repo_id;
 `;
     const exec = await executeRaw(this.db, sqlRawQuery);
 
-    console.log('Indexer monthly dev updated rows:', exec);
+    log.info('indexer monthly dev updated', { rows: exec });
 
     const sqlRawQuery2 = `
 WITH monthly_star AS (SELECT e.repo_id,
@@ -373,7 +376,7 @@ WHERE r.repo_id = rj.repo_id;
 `;
     const exec2 = await executeRaw(this.db, sqlRawQuery2);
 
-    console.log('Indexer star updated rows:', exec2);
+    log.info('indexer star updated', { rows: exec2 });
   }
 
   /** Original sync:eco:total command body, exposed as a method for Cron/Inngest. */

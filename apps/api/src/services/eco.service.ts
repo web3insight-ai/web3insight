@@ -2,6 +2,9 @@ import { asc, desc, eq } from 'drizzle-orm';
 import type { DbClient } from '@/db/client';
 import { data_ecosystems } from '@/db/schema';
 import { ECO_ALL } from '@/data/dto/data.dto';
+import { logger } from '@/app/logger';
+
+const log = logger.child({ service: 'eco' });
 
 /**
  * Pure-class port of data/services/eco.services.ts (NestJS @Injectable removed).
@@ -48,7 +51,7 @@ export class EcoService {
   ${eco.name.replaceAll(' ', '_').replaceAll('.', '_').replaceAll('(', '').replaceAll(')', '').replaceAll('-', '')} = '${eco.name}'`;
       })
       .join();
-    console.log(`export enum EcoType {${text}}`);
+    log.info('printEcoTop300 enum dump', { text });
     return text;
   }
 }
