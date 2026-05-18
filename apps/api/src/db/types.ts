@@ -18,7 +18,7 @@ export const int8 = customType<{
   },
   fromDriver(value) {
     if (value === null || value === undefined) {
-      return value as unknown as string;
+      return value;
     }
     return String(value);
   },
@@ -40,7 +40,7 @@ export const int8Identity = customType<{
   },
   fromDriver(value) {
     if (value === null || value === undefined) {
-      return value as unknown as string;
+      return value;
     }
     return String(value);
   },

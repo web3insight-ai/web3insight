@@ -23,6 +23,7 @@ import type { GithubService } from '@/services/github.service';
 import { ECO_ALL } from '@/data/dto/data.dto';
 import {
   type BaseIdReqAndResDto,
+  DirectionEnum,
   GetReposMarkResDto,
   RepoActiveDevDto,
   type RepoMarkDto,
@@ -91,7 +92,7 @@ export class ReposService {
       .from(data_repos)
       .where(whereClause);
 
-    const direction = params.direction === 'desc' ? desc : asc;
+    const direction = params.direction === DirectionEnum.DESC ? desc : asc;
     let listQuery = this.db
       .select()
       .from(data_repos)

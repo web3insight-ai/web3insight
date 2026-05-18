@@ -19,6 +19,7 @@ import {
   CustomQueryUsersResDto,
   type CustomShareReqDto,
   CustomUploadResDto,
+  DirectionEnum,
   type GithubUsersDto,
   Intent,
 } from '@/api/dto/api.dto';
@@ -132,7 +133,7 @@ export class UsersService {
 
       if (existing) {
         const res = new CustomUploadResDto();
-        res.users = existing.github as unknown as GithubUsersDto[];
+        res.users = existing.github as GithubUsersDto[];
         res.id = Number(existing.id);
         return res;
       }
@@ -291,7 +292,8 @@ export class UsersService {
       .from(api_analysis_users)
       .where(whereClause);
 
-    const direction = params.direction === 'desc' ? sql`desc` : sql`asc`;
+    const direction =
+      params.direction === DirectionEnum.DESC ? sql`desc` : sql`asc`;
     const find = await this.db
       .select({
         id: api_analysis_users.id,
@@ -322,7 +324,8 @@ export class UsersService {
       .from(api_analysis_users)
       .where(whereClause);
 
-    const direction = params.direction === 'desc' ? sql`desc` : sql`asc`;
+    const direction =
+      params.direction === DirectionEnum.DESC ? sql`desc` : sql`asc`;
     const find = await this.db
       .select({
         id: api_analysis_users.id,
@@ -1192,7 +1195,7 @@ export class UsersService {
 
       await this.db
         .update(api_analysis_users)
-        .set({ ai: aiData as Record<string, unknown> })
+        .set({ ai: aiData })
         .where(eq(api_analysis_users.id, String(payload.id)));
     } catch (error) {
       console.error(
