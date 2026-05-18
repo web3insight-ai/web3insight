@@ -14,6 +14,10 @@ env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: ${{ vars.TURBO_TEAM }}
   SKIP_ENV_VALIDATION: 'true'
+  # Non-JS packages have their own dedicated workflows (indexer-ci.yml,
+  # contracts-ci.yml) that install the right toolchain. Excluding them
+  # here keeps the root CI Node-only.
+  TURBO_EXCLUDE_NON_JS: --filter=!@web3insight/indexer --filter=!@web3insight/contracts
 
 jobs:
   lint:
@@ -24,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
-      - run: pnpm turbo run lint --cache-dir=.turbo
+      - run: pnpm turbo run lint $TURBO_EXCLUDE_NON_JS --cache-dir=.turbo
 
   typecheck:
     name: Typecheck
@@ -34,7 +38,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
-      - run: pnpm turbo run typecheck --cache-dir=.turbo
+      - run: pnpm turbo run typecheck $TURBO_EXCLUDE_NON_JS --cache-dir=.turbo
 
   build:
     name: Build
@@ -47,7 +51,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
-      - run: pnpm turbo run build --cache-dir=.turbo
+      - run: pnpm turbo run build $TURBO_EXCLUDE_NON_JS --cache-dir=.turbo
 
   test:
     name: Test
@@ -55,4 +59,4 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
-      - run: pnpm turbo run test --cache-dir=.turbo
+      - run: pnpm turbo run test $TURBO_EXCLUDE_NON_JS --cache-dir=.turbo

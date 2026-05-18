@@ -1,0 +1,55 @@
+name: Contracts CI
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - 'packages/contracts/**'
+      - '.github/workflows/contracts-ci.yml'
+      - '.gitmodules'
+  pull_request:
+    branches: [main, dev]
+    paths:
+      - 'packages/contracts/**'
+      - '.github/workflows/contracts-ci.yml'
+      - '.gitmodules'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: packages/contracts
+
+jobs:
+  foundry:
+    name: ${{ matrix.task }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        task: [format, build, test]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          # Foundry deps (forge-std, openzeppelin-contracts) are registered
+          # in root .gitmodules; submodules: recursive pulls them.
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Format check
+        if: matrix.task == 'format'
+        run: forge fmt --check
+
+      - name: Build
+        if: matrix.task == 'build'
+        run: forge build --sizes
+
+      - name: Test
+        if: matrix.task == 'test'
+        run: forge test -vvv
