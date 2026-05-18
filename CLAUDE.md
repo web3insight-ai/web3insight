@@ -25,6 +25,14 @@ Data sources: GitHub API, OSS Insight, RSS3, Privy. The `indexer` is a one-shot 
 | `@web3insight/env-base` | Shared `@t3-oss/env-nextjs` schema fragments (DATA_API_URL, DATA_API_TOKEN, HTTP_TIMEOUT) |
 | `@web3insight/query-keys` | TanStack Query key factory + STATS/USER cache option presets |
 | `@web3insight/auth-privy` | Shared Privy provider + `usePrivyAuthSync` JWT-exchange hook |
+| `@web3insight/contracts` | Solidity Foundry project — Web3Insight Monad NFT (ERC721). Build/test/format via `forge` wrapped in package.json scripts. Depends on `forge-std` + `openzeppelin-contracts` (registered in root `.gitmodules`) |
+
+### Other top-level directories
+
+| Path | Purpose |
+|---|---|
+| `tools/graph/` | Neo4j research toolkit imported from the (deprecated) `web3insight-data` repo — `cypher/` holds PageRank / Dijkstra / repo community detection algorithms over the `data.*` PG schema. No app consumes them yet; landing here so future api/dashboard work can surface graph analytics. |
+| `external/crypto-ecosystems` | **Submodule** — fork of `electric-capital/open-dev-data` (188MB Python taxonomy of crypto/blockchain ecosystems). Pinned by commit SHA so the monorepo size stays small. Bump with `git submodule update --remote external/crypto-ecosystems`. |
 
 ### Config packages (`config/*`)
 
@@ -66,6 +74,9 @@ JWTs are minted and verified by `src/services/auth.service.ts` (the Phase D Priv
 # Install everything (root, single shared lockfile)
 pnpm install
 
+# First clone — also fetch submodules (Foundry deps + crypto-ecosystems fork)
+git submodule update --init --recursive
+
 # Dev — start all 4 apps in parallel
 pnpm dev
 
@@ -100,6 +111,11 @@ pnpm --filter @web3insight/indexer start       # cargo run --release
 pnpm --filter @web3insight/indexer test        # cargo test --all
 pnpm --filter @web3insight/indexer lint        # cargo clippy -D warnings
 pnpm --filter @web3insight/indexer format      # cargo fmt --all
+
+# Contracts (Solidity) — requires Foundry (`curl -L https://foundry.paradigm.xyz | bash`)
+pnpm --filter @web3insight/contracts build     # forge build
+pnpm --filter @web3insight/contracts test      # forge test
+pnpm --filter @web3insight/contracts format    # forge fmt
 ```
 
 > The `nestjs-console` runner was removed in the L5 purge along with the root `console:dev` / `console:prod` scripts. Any remaining ad-hoc job should be wired into Inngest (`apps/api/src/inngest/functions/`) and scheduled via `vercel.json` `crons`.
@@ -238,6 +254,24 @@ When invoking, just type `/<skill-name>` — Claude Code will read the matching 
 - `apps/dashboard/CLAUDE.md` — DDD layout, Jotai, TanStack Query, AI copilot
 - `apps/dev-card/CLAUDE.md` — Privy + ecosystem theming + card generation
 - `apps/indexer/README.md` (+ `README_CN.md`) — Rust CLI usage, env vars, schema notes
+- `packages/contracts/README.md` — Foundry layout, deployed Monad NFT address, deploy script
+- `tools/graph/readme.md` — Neo4j install + PG→Neo4j ETL + Cypher algorithm catalogue
+
+## Related repositories (web3insight-ai org)
+
+Historical lineage for context (use `git log -- apps/<name>/` for the full per-app history backfilled into this repo):
+
+| Repo | Status | Notes |
+|---|---|---|
+| `web3insight-api` | merged into `apps/api` | 266 commits backfilled, original repo retained as read-only mirror |
+| `web3insight-dev-card` | merged into `apps/dev-card` | 72 commits backfilled |
+| `web3insight.ai` | merged into `apps/web` | 33 commits backfilled (landing page) |
+| `web3insight-indexer` | merged into `apps/indexer` | 33 commits, still updated upstream until cutover |
+| `web3insight-contracts` | merged into `packages/contracts` | 3 commits, Foundry Monad NFT |
+| `web3insight-data` | **partial** merge into `tools/graph` | only `for_neo4j/` subdirectory (1 commit); SQL/ and Data_process/ superseded by api + indexer |
+| `crypto-ecosystems` | submodule at `external/crypto-ecosystems` | fork of `electric-capital/open-dev-data`; 188MB, pinned by SHA |
+| `web3insight-profile` / `n8n-workflows` / `web3insight-ai-service` / `strapi-cms` / `agent-db` / `demo-repository` / `parser-demo` | **archived on GitHub** | superseded or unused; read-only on GitHub for historical reference |
+| `gharchive-downloader` / `indexer-rs` | archived (pre-existing) | predecessors of `web3insight-indexer` |
 
 ## Known issues / migration notes
 

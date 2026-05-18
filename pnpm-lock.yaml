@@ -836,6 +836,8 @@ importers:
         specifier: 'catalog:'
         version: 6.0.3
 
+  packages/contracts: {}
+
   packages/env-base:
     dependencies:
       '@t3-oss/env-nextjs':
