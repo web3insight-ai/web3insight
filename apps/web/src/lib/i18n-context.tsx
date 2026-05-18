@@ -81,6 +81,24 @@ const translations: Record<Locale, Record<string, string>> = {
     // Partners
     "partners.title": "Trusted by leading Web3 ecosystems",
 
+    // MCP
+    "mcp.eyebrow": "Model Context Protocol",
+    "mcp.title": "Use Web3Insight in your AI tools",
+    "mcp.description":
+      "Connect Web3Insight Copilot to Claude Desktop, Cursor, VS Code, or any MCP-compatible client. Query ecosystems, repos, developers, and trends from the same chat where you already write code.",
+    "mcp.endpoint.label": "MCP endpoint",
+    "mcp.config.label": "mcp.json snippet",
+    "mcp.config.copy": "Copy",
+    "mcp.config.copied": "Copied",
+    "mcp.config.hint":
+      "Replace `w3i_mcp_<your-token>` with a personal token issued from the Copilot settings dialog.",
+    "mcp.clients.label": "Supported clients",
+    "mcp.steps.label": "Get started",
+    "mcp.steps.one": "Sign in to the dashboard and open Copilot settings.",
+    "mcp.steps.two": "Issue a personal MCP token (shown once — save it).",
+    "mcp.steps.three": "Paste the JSON snippet into your client's mcp.json and restart.",
+    "mcp.cta": "Issue a token",
+
     // Footer
     "footer.description":
       "Discover, analyze, and connect with Web3 developers. Powered by GitHub data and on-chain activity for ecosystem growth.",
@@ -152,6 +170,24 @@ const translations: Record<Locale, Record<string, string>> = {
 
     // Partners
     "partners.title": "受领先 Web3 生态系统信赖",
+
+    // MCP
+    "mcp.eyebrow": "Model Context Protocol",
+    "mcp.title": "在你的 AI 工具里直接使用 Web3Insight",
+    "mcp.description":
+      "把 Web3Insight Copilot 接入 Claude Desktop、Cursor、VS Code 或任何兼容 MCP 的客户端。在写代码的同一个对话里查询生态、仓库、开发者和趋势。",
+    "mcp.endpoint.label": "MCP 端点",
+    "mcp.config.label": "mcp.json 配置片段",
+    "mcp.config.copy": "复制",
+    "mcp.config.copied": "已复制",
+    "mcp.config.hint":
+      "把 `w3i_mcp_<your-token>` 替换为在 Copilot 设置面板里签发的个人 token。",
+    "mcp.clients.label": "支持的客户端",
+    "mcp.steps.label": "开始使用",
+    "mcp.steps.one": "登录控制台，打开 Copilot 设置。",
+    "mcp.steps.two": "签发一个 MCP 个人 token（只显示一次，记得保存）。",
+    "mcp.steps.three": "把 JSON 片段粘贴到客户端的 mcp.json，然后重启。",
+    "mcp.cta": "签发 Token",
 
     // Footer
     "footer.description": "发现、分析并连接 Web3 开发者。基于 GitHub 数据和链上活动，助力生态增长。",

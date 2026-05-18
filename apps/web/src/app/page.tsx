@@ -14,6 +14,10 @@ const UseCasesSection = dynamic(
   () => import("@/components/use-cases-section").then((mod) => mod.UseCasesSection),
   { ssr: true }
 )
+const McpSection = dynamic(
+  () => import("@/components/mcp-section").then((mod) => mod.McpSection),
+  { ssr: true }
+)
 const PartnersSection = dynamic(
   () => import("@/components/partners-section").then((mod) => mod.PartnersSection),
   { ssr: true }
@@ -36,6 +40,9 @@ export default function HomePage() {
       </Suspense>
       <Suspense fallback={null}>
         <UseCasesSection />
+      </Suspense>
+      <Suspense fallback={null}>
+        <McpSection />
       </Suspense>
       <Suspense fallback={null}>
         <PartnersSection />

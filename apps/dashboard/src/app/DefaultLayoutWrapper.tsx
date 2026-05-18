@@ -5,6 +5,7 @@ import AuthFormDialogViewWidget from "~/auth/views/auth-form-dialog";
 import Navbar from "$/navbar";
 import NavigationMenu from "$/navbar/NavigationMenu";
 import { SmallCapsLabel } from "$/primitives";
+import { McpBanner } from "$/widgets/mcp-banner";
 import type { ApiUser } from "~/auth/typing";
 
 interface DefaultLayoutWrapperProps {
@@ -29,6 +30,8 @@ export default function DefaultLayoutWrapper({
           extra={<NavigationMenu />}
         />
       </header>
+
+      <McpBanner />
 
       <main className="flex-1 pb-20">{children}</main>
 

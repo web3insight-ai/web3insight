@@ -103,14 +103,32 @@ interface ChatRequestBody {
 }
 
 export async function POST(request: Request) {
-  const { messages, sessionId } = (await request.json()) as ChatRequestBody;
+  const { messages: rawMessages, sessionId } = (await request.json()) as ChatRequestBody;
 
-  if (!messages || messages.length === 0) {
+  if (!rawMessages || rawMessages.length === 0) {
     return new Response(JSON.stringify({ error: "Messages are required" }), {
       status: 400,
       headers: { "Content-Type": "application/json" },
     });
   }
+
+  // Reason: AI SDK v6 convertToModelMessages calls `parts.map(...)` and
+  // crashes on undefined. Guard against legacy clients or rehydrated rows
+  // that omit `parts` — normalise them to an empty array so the request
+  // surfaces a real model response instead of a 500.
+  const messages = rawMessages.map((message) => {
+    if (Array.isArray((message as { parts?: unknown }).parts)) {
+      return message;
+    }
+    const legacy = message as { content?: unknown };
+    if (typeof legacy.content === "string") {
+      return {
+        ...message,
+        parts: [{ type: "text", text: legacy.content }],
+      } as UIMessage;
+    }
+    return { ...message, parts: [] } as UIMessage;
+  });
 
   // Reason: Resolve userId once so persistence functions can scope session
   // updates to the current user, preventing cross-user writes.
