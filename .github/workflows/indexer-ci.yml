@@ -1,0 +1,57 @@
+name: Indexer CI
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - 'apps/indexer/**'
+      - '.github/workflows/indexer-ci.yml'
+  pull_request:
+    branches: [main, dev]
+    paths:
+      - 'apps/indexer/**'
+      - '.github/workflows/indexer-ci.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: apps/indexer
+
+jobs:
+  rust:
+    name: ${{ matrix.task }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        task: [format, clippy, test]
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/indexer
+          key: ${{ matrix.task }}
+          cache-on-failure: true
+
+      - name: Format check
+        if: matrix.task == 'format'
+        run: cargo fmt --all -- --check
+
+      - name: Clippy
+        if: matrix.task == 'clippy'
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: Test
+        if: matrix.task == 'test'
+        run: cargo test --all

@@ -88,7 +88,7 @@ impl EventTableStruct {
         events: Vec<EventTableStruct>,
         _path: &String,
     ) -> Result<()> {
-        if events.len() == 0 {
+        if events.is_empty() {
             return Ok(());
         }
 

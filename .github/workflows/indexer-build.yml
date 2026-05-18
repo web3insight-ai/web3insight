@@ -1,38 +1,47 @@
-name: Build
+name: Indexer Release Build
 
 on:
   workflow_dispatch:
   push:
     tags:
-      - "v*"
+      # Namespaced to avoid colliding with monorepo-wide tags (e.g. v1.0.0)
+      # consumed by the root release.yml.
+      - 'indexer-v*'
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    working-directory: apps/indexer
 
 jobs:
   build:
     name: Build for ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
-          - os: macos-13 # Intel
+          - os: macos-13
             target: x86_64-apple-darwin
-          - os: macos-14 # ARM
+          - os: macos-14
             target: aarch64-apple-darwin
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - name: Setup Rust
+      - name: Setup Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
           targets: ${{ matrix.target }}
 
-      - name: Cache Rust dependencies
+      - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
         with:
+          workspaces: apps/indexer
           key: ${{ matrix.target }}
           cache-on-failure: true
 
@@ -46,11 +55,16 @@ jobs:
           cd target/${{ matrix.target }}/release
           strip web3insights-dw || true
           tar -czvf ../../../web3insights-dw-${{ matrix.target }}.tar.gz web3insights-dw
-          cd ../../../
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: web3insights-dw-${{ matrix.target }}
-          path: web3insights-dw-${{ matrix.target }}.tar.gz
+          path: apps/indexer/web3insights-dw-${{ matrix.target }}.tar.gz
           retention-days: 30
+
+      - name: Attach to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/indexer-v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: apps/indexer/web3insights-dw-${{ matrix.target }}.tar.gz

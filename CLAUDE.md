@@ -12,8 +12,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | `@web3insight/dashboard` | `apps/dashboard` | Next.js 16 + Turbopack + oRPC client | 3000 | Vercel |
 | `@web3insight/web` | `apps/web` | Next.js 16 + oRPC client | 3001 | Vercel |
 | `@web3insight/dev-card` | `apps/dev-card` | Next.js 16 + Privy + oRPC client | 3002 | Vercel |
+| `@web3insight/indexer` | `apps/indexer` | Rust 2024 (tokio + sqlx + octocrab) | n/a (CLI) | GitHub Releases binaries |
 
-Data sources: GitHub API, OSS Insight, RSS3, Privy.
+Data sources: GitHub API, OSS Insight, RSS3, Privy. The `indexer` is a one-shot CLI binary that ingests GHArchive events into the shared PostgreSQL `data.*` schema consumed by `apps/api`.
 
 ### Shared packages (`packages/*`)
 
@@ -40,11 +41,14 @@ Data sources: GitHub API, OSS Insight, RSS3, Privy.
 dashboard ──┐
             │
 web ────────┼──▶ api (Hono + oRPC) ──▶ PostgreSQL (Drizzle)
-            │           │
-dev-card ───┘           ├──▶ Inngest (durable sync workflows)
-                        ├──▶ GitHub API / OSS Insight / RSS3
-                        ├──▶ OpenAI / OpenRouter
-                        └──▶ Privy
+            │           │                       ▲
+dev-card ───┘           ├──▶ Inngest             │  data.*
+                        ├──▶ GitHub API          │  schema
+                        ├──▶ OSS Insight / RSS3  │
+                        ├──▶ OpenAI / OpenRouter │
+                        └──▶ Privy               │
+                                                 │
+                  GHArchive ──▶ indexer (Rust) ──┘
 ```
 
 All 3 frontends call `api` through end-to-end typed oRPC procedures defined in `@web3insight/api-contract`. The API ships as **two Vercel Functions** bundled via `apps/api/scripts/bundle-functions.ts` (esbuild → `.vercel/output/functions/`):
@@ -89,6 +93,13 @@ pnpm syncpack:fix             # auto-fix mismatches
 
 # Bundle apps/api into Vercel Build Output (.vercel/output/functions/*)
 pnpm --filter @web3insight/api build
+
+# Indexer (Rust) — requires the stable Rust toolchain (rustup default stable)
+pnpm --filter @web3insight/indexer build       # cargo build --release
+pnpm --filter @web3insight/indexer start       # cargo run --release
+pnpm --filter @web3insight/indexer test        # cargo test --all
+pnpm --filter @web3insight/indexer lint        # cargo clippy -D warnings
+pnpm --filter @web3insight/indexer format      # cargo fmt --all
 ```
 
 > The `nestjs-console` runner was removed in the L5 purge along with the root `console:dev` / `console:prod` scripts. Any remaining ad-hoc job should be wired into Inngest (`apps/api/src/inngest/functions/`) and scheduled via `vercel.json` `crons`.
@@ -116,6 +127,15 @@ Each app has its own Vercel project, all pointing to the same Git repo with diff
 | `web3insight-api` | `apps/api` | `main` | `dev` |
 
 The `api` project does **not** use `@vendia/serverless-express` or any framework auto-detection — `vercel.json` sets `"framework": null` and the build script (`tsx scripts/bundle-functions.ts`) writes ready-to-serve functions into `.vercel/output/functions/` using esbuild. This avoids the Vercel pipeline scanning `src/serverless/*` and triggering per-file installs that would choke on `workspace:*` references.
+
+### Indexer — GitHub Releases binaries
+
+`apps/indexer` is a one-shot Rust CLI that downloads GHArchive files and bulk-inserts events into the shared `data.*` schema. It is **not** deployed to Vercel.
+
+- `.github/workflows/indexer-ci.yml` runs `cargo fmt --check`, `cargo clippy -D warnings`, and `cargo test` on every push/PR that touches `apps/indexer/**`.
+- `.github/workflows/indexer-build.yml` triggers on `indexer-v*` tag pushes (or `workflow_dispatch`) and produces cross-platform binaries (`x86_64-apple-darwin`, `aarch64-apple-darwin`, `x86_64-unknown-linux-gnu`), uploading each as a GitHub Release asset.
+- Cut a release with: `git tag indexer-v0.x.y && git push origin indexer-v0.x.y`. The root `release.yml` (`v*` → changelogithub) excludes `indexer-v*` so the two tag namespaces never collide.
+- Runs against any PostgreSQL with the `data` schema; see `apps/indexer/.env.example` for required env vars (`DATABASE_URL`, time-window + concurrency knobs).
 
 **Each Vercel project requires env vars set in both `production` and `preview` scopes.** See `apps/<name>/.env.example` for the variable list per app.
 
@@ -217,6 +237,7 @@ When invoking, just type `/<skill-name>` — Claude Code will read the matching 
 - `apps/api/AGENTS.md` — SQL / Drizzle conventions and `data.*` schema rules
 - `apps/dashboard/CLAUDE.md` — DDD layout, Jotai, TanStack Query, AI copilot
 - `apps/dev-card/CLAUDE.md` — Privy + ecosystem theming + card generation
+- `apps/indexer/README.md` (+ `README_CN.md`) — Rust CLI usage, env vars, schema notes
 
 ## Known issues / migration notes
 

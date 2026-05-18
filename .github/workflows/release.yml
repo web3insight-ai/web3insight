@@ -6,7 +6,10 @@ permissions:
 on:
   push:
     tags:
+      # Match monorepo-wide release tags only; indexer publishes binaries
+      # via .github/workflows/indexer-build.yml on `indexer-v*` tags.
       - 'v*'
+      - '!indexer-v*'
 
 jobs:
   release:

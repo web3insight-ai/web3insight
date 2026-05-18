@@ -1,0 +1,22 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "inputs": ["src/**", "Cargo.toml", "Cargo.lock", "migrations/**"],
+      "outputs": ["target/release/web3insights-dw", "target/release/web3insights-dw.exe"]
+    },
+    "test": {
+      "inputs": ["src/**", "Cargo.toml", "Cargo.lock"],
+      "outputs": []
+    },
+    "lint": {
+      "inputs": ["src/**", "Cargo.toml", "Cargo.lock"],
+      "outputs": []
+    },
+    "typecheck": {
+      "inputs": ["src/**", "Cargo.toml", "Cargo.lock"],
+      "outputs": []
+    }
+  }
+}

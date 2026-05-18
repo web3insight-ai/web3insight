@@ -293,9 +293,11 @@ fn format_event_module(event: Event) -> Option<EventTableStruct> {
         body: (!get_env_bool("FILTER_OUT_BODY"))
             .then(|| body_raw.cloned())
             .flatten(),
-        payload: (!get_env_bool("FILTER_OUT_PAYLOAD"))
-            .then(|| serde_json::to_string(&event.payload).unwrap_or_default())
-            .unwrap_or_else(|| "{}".to_string()),
+        payload: if get_env_bool("FILTER_OUT_PAYLOAD") {
+            "{}".to_string()
+        } else {
+            serde_json::to_string(&event.payload).unwrap_or_default()
+        },
         abnormal: if check_bot { 1 } else { 0 },
         created_at: event.created_at,
     })
