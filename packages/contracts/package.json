@@ -1,0 +1,14 @@
+{
+  "name": "@web3insight/contracts",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Web3Insight Monad NFT (ERC721) contract — developer profile minting with skills/ecosystems/score on Monad Testnet. Built with Foundry.",
+  "scripts": {
+    "build": "forge build",
+    "test": "forge test",
+    "format": "forge fmt",
+    "format:check": "forge fmt --check",
+    "clean": "forge clean",
+    "deploy:testnet": "forge script script/DeployWeb3Insight.s.sol --rpc-url monadTestnet --broadcast"
+  }
+}

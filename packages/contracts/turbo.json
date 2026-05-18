@@ -1,0 +1,18 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "inputs": ["src/**", "script/**", "foundry.toml", "remappings.txt"],
+      "outputs": ["out/**", "cache/**"]
+    },
+    "test": {
+      "inputs": ["src/**", "test/**", "foundry.toml"],
+      "outputs": []
+    },
+    "format:check": {
+      "inputs": ["src/**", "script/**", "test/**", "foundry.toml"],
+      "outputs": []
+    }
+  }
+}
