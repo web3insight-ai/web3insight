@@ -40,7 +40,7 @@ Want the plugin to walk a teammate through it? Run `/web3insight-setup`.
 For clients without MCP support, install just the SKILL.md so the assistant knows how to talk *about* Web3Insight (it will tell the user to hit the dashboard or REST API directly):
 
 ```bash
-npx skills add web3insight-ai/web3insight -s web3insight
+npx skills add web3insight-ai/web3insight
 ```
 
 ### Option C — Manual MCP config

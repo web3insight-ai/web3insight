@@ -24,9 +24,7 @@ const PLUGIN_COMMAND = `/plugin marketplace add web3insight-ai/web3insight
 /plugin install web3insight@web3insight
 export WEB3INSIGHT_MCP_TOKEN="w3i_mcp_<your-token>"`
 
-const SKILL_COMMAND = `npx skills add web3insight-ai/web3insight \\
-  -a claude-code -a universal \\
-  -s web3insight -y --copy`
+const SKILL_COMMAND = `npx skills add web3insight-ai/web3insight`
 
 const MANUAL_SNIPPET = JSON.stringify(
   {
