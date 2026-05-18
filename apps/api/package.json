@@ -17,7 +17,6 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "catalog:",
-    "@js-temporal/polyfill": "^0.5.1",
     "@octokit/rest": "22.0.1",
     "@orpc/contract": "catalog:",
     "@orpc/openapi": "catalog:",
@@ -29,9 +28,7 @@
     "@web3insight/api-contract": "workspace:*",
     "ai": "catalog:",
     "drizzle-orm": "catalog:",
-    "ethers": "^6.16.0",
     "exceljs": "^4.4.0",
-    "fp-ts": "^2.16.11",
     "hono": "4.12.19",
     "inngest": "4.4.0",
     "jose": "^6.2.3",
@@ -39,7 +36,6 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^10.0.1",
     "@octokit/types": "^16.0.0",
     "@types/node": "catalog:",
