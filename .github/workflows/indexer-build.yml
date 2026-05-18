@@ -57,7 +57,7 @@ jobs:
           tar -czvf ../../../web3insights-dw-${{ matrix.target }}.tar.gz web3insights-dw
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: web3insights-dw-${{ matrix.target }}
           path: apps/indexer/web3insights-dw-${{ matrix.target }}.tar.gz
