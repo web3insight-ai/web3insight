@@ -1,13 +1,13 @@
 "use client";
 
 import {
-  Github,
   Star,
   GitCommit,
   GitPullRequest,
   CircleDot,
   Award,
 } from "lucide-react";
+import { GithubIcon as Github } from "$/brand-icons";
 
 interface GitHubStats {
   rank: string | null;

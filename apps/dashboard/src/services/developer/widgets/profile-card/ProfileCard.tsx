@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { Avatar } from "@/components/ui";
-import { Github } from "lucide-react";
+import { GithubIcon as Github } from "$/brand-icons";
 
 import type { ProfileCardWidgetProps } from "./typing";
 import { useGitHubStats } from "../../../../hooks/useGitHubStats";

@@ -1,6 +1,8 @@
 "use client";
 
-import { ExternalLink, Github, Globe, MapPin, Twitter } from "lucide-react";
+import { ExternalLink, Globe, MapPin } from "lucide-react";
+import type { ComponentType, SVGProps } from "react";
+import { GithubIcon, XIcon } from "$/brand-icons";
 import { ToolResultCard, formatNumber, toNumber } from "./index";
 
 interface DeveloperProfileData {
@@ -48,7 +50,7 @@ function isValidData(data: unknown): data is DeveloperProfileData {
 interface SocialLink {
   label: string;
   url: string;
-  Icon: typeof Github;
+  Icon: ComponentType<SVGProps<SVGSVGElement>>;
 }
 
 function buildSocialLinks(
@@ -57,10 +59,10 @@ function buildSocialLinks(
   const links: SocialLink[] = [];
 
   if (social.github) {
-    links.push({ label: "GitHub", url: social.github, Icon: Github });
+    links.push({ label: "GitHub", url: social.github, Icon: GithubIcon });
   }
   if (social.twitter) {
-    links.push({ label: "Twitter", url: social.twitter, Icon: Twitter });
+    links.push({ label: "Twitter", url: social.twitter, Icon: XIcon });
   }
   if (social.website) {
     links.push({ label: "Website", url: social.website, Icon: Globe });

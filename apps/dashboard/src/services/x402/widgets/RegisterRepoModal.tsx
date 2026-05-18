@@ -15,8 +15,8 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { usePrivy } from "@privy-io/react-auth";
+import { GithubIcon as Github } from "$/brand-icons";
 import {
-  Github,
   AlertCircle,
   CheckCircle,
   Loader2,

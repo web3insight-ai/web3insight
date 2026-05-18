@@ -1,12 +1,12 @@
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui";
 import {
-  Github,
   ExternalLink,
   Share2,
   Copy,
   Loader2,
   Lock,
 } from "lucide-react";
+import { GithubIcon as Github } from "$/brand-icons";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useMemo, useCallback } from "react";

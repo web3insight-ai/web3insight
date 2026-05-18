@@ -1,5 +1,6 @@
-import { Github, Globe, Star, GitFork, AlertCircle } from "lucide-react";
+import { Globe, Star, GitFork, AlertCircle } from "lucide-react";
 import { Chip } from "@/components/ui";
+import { GithubIcon as Github } from "$/brand-icons";
 
 import type { RepositoryHeaderProps } from "./typing";
 

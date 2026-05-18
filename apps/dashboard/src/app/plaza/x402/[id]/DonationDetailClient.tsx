@@ -6,7 +6,6 @@ import {
   Star,
   GitFork,
   AlertCircle,
-  Github,
   Globe,
   ArrowLeft,
   Copy,
@@ -16,6 +15,7 @@ import {
   UserCheck,
   Layers,
 } from "lucide-react";
+import { GithubIcon as Github } from "$/brand-icons";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import NextLink from "next/link";

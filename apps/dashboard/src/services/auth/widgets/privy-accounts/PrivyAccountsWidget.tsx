@@ -4,13 +4,13 @@ import { useState } from "react";
 import { Button } from "@/components/ui";
 import { usePrivy } from "@privy-io/react-auth";
 import {
-  Github,
   Mail,
   Wallet,
   Trash2,
   Loader2,
   CheckCircle,
 } from "lucide-react";
+import { GithubIcon as Github } from "$/brand-icons";
 
 interface PrivyAccountsWidgetProps {
   className?: string;

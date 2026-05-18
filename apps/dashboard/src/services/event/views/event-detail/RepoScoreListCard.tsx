@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Card, CardBody, Chip } from "@/components/ui";
 import Link from "next/link";
-import { Github, Trophy, ChevronDown, ChevronUp } from "lucide-react";
+import { Trophy, ChevronDown, ChevronUp } from "lucide-react";
+import { GithubIcon as Github } from "$/brand-icons";
 
 import type { RepoScoreListCardProps } from "./typing";
 

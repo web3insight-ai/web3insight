@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useCallback, memo, useMemo } from "react"
-import { Share2, Twitter, Link2, Check } from "lucide-react"
+import { Share2, Link2, Check } from "lucide-react"
+import { XIcon as Twitter } from "./brand-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 interface ShareButtonProps {

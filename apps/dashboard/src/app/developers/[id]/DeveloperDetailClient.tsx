@@ -1,7 +1,7 @@
 "use client";
 
 import { Skeleton } from "@/components/ui";
-import { Github } from "lucide-react";
+import { GithubIcon as Github } from "$/brand-icons";
 
 import { CardSkeleton, ChartSkeleton, TableSkeleton } from "$/loading";
 import ClientOnly from "$/ClientOnly";

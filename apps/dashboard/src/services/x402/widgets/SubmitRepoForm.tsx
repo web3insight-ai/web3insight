@@ -14,7 +14,8 @@ import {
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { usePrivy } from "@privy-io/react-auth";
-import { Github, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
+import { AlertCircle, CheckCircle, Loader2 } from "lucide-react";
+import { GithubIcon as Github } from "$/brand-icons";
 import { FormInput } from "@/lib/form/components";
 import {
   donateRepoSubmitSchema,

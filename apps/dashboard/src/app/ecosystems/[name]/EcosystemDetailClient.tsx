@@ -1,7 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Github, Users, TrendingUp } from "lucide-react";
+import { Users, TrendingUp } from "lucide-react";
+import { GithubIcon as Github } from "$/brand-icons";
 
 import { CardSkeleton, ChartSkeleton, TableSkeleton } from "$/loading";
 import { Panel } from "$/blueprint";
