@@ -4,3 +4,6 @@
 [submodule "packages/contracts/lib/openzeppelin-contracts"]
 	path = packages/contracts/lib/openzeppelin-contracts
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "external/crypto-ecosystems"]
+	path = external/crypto-ecosystems
+	url = https://github.com/web3insight-ai/crypto-ecosystems.git
