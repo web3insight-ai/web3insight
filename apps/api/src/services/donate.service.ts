@@ -112,10 +112,16 @@ export class DonateService {
   }
 
   async list() {
+    // Reason: defensive upper bound. The donate repos table grows monotonically
+    // and the dashboard's plaza renders all rows at once — without a cap, a
+    // future spike in registrations would silently turn this into an
+    // unbounded scan + multi-MB JSON payload. 500 leaves plenty of headroom
+    // over today's volume while keeping the response under ~1 MB.
     return this.db
       .select()
       .from(api_donate_repos)
-      .orderBy(desc(api_donate_repos.created_at));
+      .orderBy(desc(api_donate_repos.created_at))
+      .limit(500);
   }
 
   async detail(repoId: number) {
