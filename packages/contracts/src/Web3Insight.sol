@@ -64,7 +64,6 @@ contract Web3Insight is ERC721, ERC721URIStorage, Ownable {
         string[] memory ecosystems,
         string memory metadataURI
     ) external payable {
-
         uint256 tokenId = _nextTokenId++;
 
         // Store profile data
@@ -102,7 +101,6 @@ contract Web3Insight is ERC721, ERC721URIStorage, Ownable {
         string[] memory ecosystems,
         string memory metadataURI
     ) external onlyOwner {
-
         uint256 tokenId = _nextTokenId++;
 
         // Store profile data
