@@ -36,13 +36,13 @@ export default function HomePage() {
         <StatsSection />
       </Suspense>
       <Suspense fallback={null}>
+        <McpSection />
+      </Suspense>
+      <Suspense fallback={null}>
         <FeaturesSection />
       </Suspense>
       <Suspense fallback={null}>
         <UseCasesSection />
-      </Suspense>
-      <Suspense fallback={null}>
-        <McpSection />
       </Suspense>
       <Suspense fallback={null}>
         <PartnersSection />

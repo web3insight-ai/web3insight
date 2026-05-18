@@ -82,10 +82,10 @@ const translations: Record<Locale, Record<string, string>> = {
     "partners.title": "Trusted by leading Web3 ecosystems",
 
     // MCP
-    "mcp.eyebrow": "Model Context Protocol",
+    "mcp.eyebrow": "Model Context Protocol · Featured",
     "mcp.title": "Use Web3Insight in your AI tools",
     "mcp.description":
-      "Connect Web3Insight Copilot to Claude Desktop, Cursor, VS Code, or any MCP-compatible client. Query ecosystems, repos, developers, and trends from the same chat where you already write code.",
+      "Connect Web3Insight Copilot to Claude Code, Claude Desktop, Cursor, VS Code, or any MCP-compatible client. Query ecosystems, repos, developers, and trends from the same chat where you already write code.",
     "mcp.endpoint.label": "MCP endpoint",
     "mcp.config.label": "mcp.json snippet",
     "mcp.config.copy": "Copy",
@@ -96,12 +96,23 @@ const translations: Record<Locale, Record<string, string>> = {
     "mcp.steps.label": "Get started",
     "mcp.steps.one": "Sign in to the dashboard and open Copilot settings.",
     "mcp.steps.two": "Issue a personal MCP token (shown once — save it).",
-    "mcp.steps.three": "Paste the JSON snippet into your client's mcp.json and restart.",
+    "mcp.steps.three": "Drop the install command (or JSON) into your client and restart.",
     "mcp.cta": "Issue a token",
-    "mcp.plugin.label": "Claude Code shortcut",
-    "mcp.plugin.description":
-      "Skip the manual JSON edit — install the Web3Insight plugin to auto-register the MCP server and ship a SKILL that picks the right tool for you.",
-    "mcp.plugin.cta": "Install the plugin",
+    "mcp.install.label": "Install — pick your path",
+    "mcp.install.plugin.tab": "Claude Code plugin",
+    "mcp.install.plugin.recommended": "Recommended",
+    "mcp.install.plugin.description":
+      "One-command install. Auto-registers the MCP server and ships a SKILL that picks the right tool for you. Zero JSON editing.",
+    "mcp.install.plugin.cta": "View plugin README",
+    "mcp.install.skill.tab": "Skill only",
+    "mcp.install.skill.description":
+      "For agents and clients without MCP support. Installs just the tool-picker SKILL via npx skills — no token required.",
+    "mcp.install.skill.cta": "Browse the SKILL",
+    "mcp.install.manual.tab": "Manual mcp.json",
+    "mcp.install.manual.description":
+      "Drop this snippet into Claude Desktop, Cursor, VS Code, or any client that accepts an HTTP MCP config.",
+    "mcp.install.copy": "Copy",
+    "mcp.install.copied": "Copied",
 
     // Footer
     "footer.description":
@@ -176,10 +187,10 @@ const translations: Record<Locale, Record<string, string>> = {
     "partners.title": "受领先 Web3 生态系统信赖",
 
     // MCP
-    "mcp.eyebrow": "Model Context Protocol",
+    "mcp.eyebrow": "Model Context Protocol · 重点功能",
     "mcp.title": "在你的 AI 工具里直接使用 Web3Insight",
     "mcp.description":
-      "把 Web3Insight Copilot 接入 Claude Desktop、Cursor、VS Code 或任何兼容 MCP 的客户端。在写代码的同一个对话里查询生态、仓库、开发者和趋势。",
+      "把 Web3Insight Copilot 接入 Claude Code、Claude Desktop、Cursor、VS Code 或任何兼容 MCP 的客户端。在写代码的同一个对话里查询生态、仓库、开发者和趋势。",
     "mcp.endpoint.label": "MCP 端点",
     "mcp.config.label": "mcp.json 配置片段",
     "mcp.config.copy": "复制",
@@ -190,12 +201,23 @@ const translations: Record<Locale, Record<string, string>> = {
     "mcp.steps.label": "开始使用",
     "mcp.steps.one": "登录控制台，打开 Copilot 设置。",
     "mcp.steps.two": "签发一个 MCP 个人 token（只显示一次，记得保存）。",
-    "mcp.steps.three": "把 JSON 片段粘贴到客户端的 mcp.json，然后重启。",
+    "mcp.steps.three": "把安装命令（或 JSON）放到客户端里，然后重启。",
     "mcp.cta": "签发 Token",
-    "mcp.plugin.label": "Claude Code 一键安装",
-    "mcp.plugin.description":
-      "无需手动改 JSON — 安装 Web3Insight 插件，一条命令注册 MCP server，并自带 SKILL 帮你自动选用合适的工具。",
-    "mcp.plugin.cta": "安装插件",
+    "mcp.install.label": "安装方式 — 任选其一",
+    "mcp.install.plugin.tab": "Claude Code 插件",
+    "mcp.install.plugin.recommended": "推荐",
+    "mcp.install.plugin.description":
+      "一条命令搞定。自动注册 MCP server，并附带 SKILL 帮你选用合适的工具，无需手改 JSON。",
+    "mcp.install.plugin.cta": "查看插件 README",
+    "mcp.install.skill.tab": "仅 Skill",
+    "mcp.install.skill.description":
+      "面向不支持 MCP 的 agent 与客户端。通过 npx skills 仅安装工具选择器 SKILL，无需 token。",
+    "mcp.install.skill.cta": "查看 SKILL",
+    "mcp.install.manual.tab": "手动 mcp.json",
+    "mcp.install.manual.description":
+      "把这段 JSON 直接粘到 Claude Desktop、Cursor、VS Code 或任何接受 HTTP MCP 配置的客户端。",
+    "mcp.install.copy": "复制",
+    "mcp.install.copied": "已复制",
 
     // Footer
     "footer.description": "发现、分析并连接 Web3 开发者。基于 GitHub 数据和链上活动，助力生态增长。",

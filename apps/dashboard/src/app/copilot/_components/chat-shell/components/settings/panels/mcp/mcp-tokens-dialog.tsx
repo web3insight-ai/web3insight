@@ -238,8 +238,8 @@ export function CopilotMcpTokensDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full max-w-[calc(100%-2rem)] gap-0 p-0 sm:max-w-2xl">
-        <DialogHeader className="border-b border-rule px-5 py-4">
+      <DialogContent className="flex max-h-[calc(100vh-4rem)] w-full max-w-[calc(100%-2rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl">
+        <DialogHeader className="shrink-0 border-b border-rule px-5 py-4">
           <DialogTitle className="text-balance text-base font-semibold">
             MCP access tokens
           </DialogTitle>
@@ -250,7 +250,7 @@ export function CopilotMcpTokensDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-5 px-5 py-5">
+        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 py-5">
           {errorMessage ? (
             <div className="border-destructive/30 bg-destructive/5 text-destructive border px-3 py-2 text-xs">
               {errorMessage}
@@ -452,7 +452,7 @@ export function CopilotMcpTokensDialog({
           </section>
         </div>
 
-        <div className="border-rule flex justify-end border-t px-5 py-3">
+        <div className="border-rule flex shrink-0 justify-end border-t px-5 py-3">
           <Button
             type="button"
             variant="outline"
