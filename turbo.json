@@ -29,7 +29,15 @@
     "UPSTASH_REDIS_REST_URL",
     "UPSTASH_REDIS_REST_TOKEN",
     "USE_REDIS_POOL",
-    "SKIP_ENV_VALIDATION"
+    "SKIP_ENV_VALIDATION",
+    "ALLOWED_ORIGINS",
+    "CRON_SECRET",
+    "INNGEST_SIGNING_KEY",
+    "INNGEST_EVENT_KEY",
+    "GITHUB_TOKENS",
+    "OPENBUILD_OAUTH_CLIENT",
+    "OPENBUILD_OAUTH_SECRET",
+    "LOG_LEVEL"
   ],
   "globalDependencies": [".env*", ".nvmrc", "pnpm-workspace.yaml"],
   "tasks": {
