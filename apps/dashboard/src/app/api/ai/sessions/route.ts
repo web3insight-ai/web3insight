@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
       user_id: userId,
       is_archived: false,
       deleted_at: null,
+      access_level: "private",
       last_active_at: new Date(),
       created_at: new Date(),
     });

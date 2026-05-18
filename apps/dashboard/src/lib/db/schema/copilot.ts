@@ -23,6 +23,11 @@ export const copilot_sessions = apiSchema.table("copilot_sessions", {
     .default(sql`now()`),
   is_archived: boolean("is_archived").notNull().default(false),
   deleted_at: timestamp("deleted_at", { withTimezone: true }),
+  // Reason: Controls who can read the thread. 'private' is owner-only;
+  // 'public' allows anonymous reads via the /copilot/share/[sessionId] page.
+  access_level: varchar("access_level", { length: 16 })
+    .notNull()
+    .default("private"),
   created_at: timestamp("created_at", { withTimezone: true })
     .notNull()
     .default(sql`now()`),

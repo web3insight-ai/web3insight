@@ -4,8 +4,10 @@ import {
   Loader2Icon,
   MoreHorizontalIcon,
   PlusIcon,
+  Share2Icon,
   TrashIcon,
 } from "lucide-react";
+import { useState } from "react";
 
 import { ShadcnButton as Button } from "@/components/ui/shadcn-button";
 import {
@@ -22,6 +24,7 @@ import {
   copilotSessionIdAtom,
 } from "../../state/atoms";
 import type { CopilotThreadQueryState, ThreadItem } from "../../types";
+import { CopilotShareDialog } from "./share-dialog";
 import { CopilotThreadSettings } from "./thread-settings";
 
 interface CopilotThreadActionsMenuProps {
@@ -36,6 +39,7 @@ export function CopilotThreadActionsMenu({
   const actions = useCopilotActions();
   const sessionId = useAtomValue(copilotSessionIdAtom);
   const isPending = useAtomValue(copilotIsThreadActionPendingAtom);
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const isCurrentThreadArchived = Boolean(
     sessionId &&
     archivedThreads.some((thread) => thread.remoteId === sessionId),
@@ -78,6 +82,16 @@ export function CopilotThreadActionsMenu({
           </DropdownMenuTrigger>
 
           <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              disabled={isPending}
+              onSelect={() => {
+                setIsShareDialogOpen(true);
+              }}
+            >
+              <Share2Icon className="mr-2 size-4" />
+              Share
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             {isCurrentThreadArchived ? (
               <DropdownMenuItem
                 disabled={isPending}
@@ -112,6 +126,14 @@ export function CopilotThreadActionsMenu({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+      ) : null}
+
+      {sessionId ? (
+        <CopilotShareDialog
+          isOpen={isShareDialogOpen}
+          onOpenChange={setIsShareDialogOpen}
+          sessionId={sessionId}
+        />
       ) : null}
     </div>
   );

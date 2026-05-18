@@ -19,11 +19,7 @@ import { CopilotThreadActionsMenu } from "./components/thread/thread-actions-men
 import { useCopilotChatController } from "./hooks/use-chat-controller";
 import { useCopilotActions } from "./state/actions";
 
-interface CopilotChatShellProps {
-  initialRemoteId: string | null;
-}
-
-export function CopilotChatShell({ initialRemoteId }: CopilotChatShellProps) {
+export function CopilotChatShell() {
   const {
     archivedQueryState,
     archivedThreads,
@@ -32,9 +28,7 @@ export function CopilotChatShell({ initialRemoteId }: CopilotChatShellProps) {
     historyThreads,
     messages,
     status,
-  } = useCopilotChatController({
-    initialRemoteId,
-  });
+  } = useCopilotChatController();
 
   const actions = useCopilotActions();
 

@@ -3,6 +3,7 @@ import { useSetAtom, useStore } from "jotai";
 import type { RefObject } from "react";
 import { useCallback, useEffect, useMemo } from "react";
 import type { CopilotUIMessage } from "~/ai/copilot-types";
+import type { CopilotChatInstanceEntry } from "../lib/chat-instance-cache";
 import {
   copilotIsSessionMenuOpenAtom,
   copilotIsThreadActionPendingAtom,
@@ -29,22 +30,17 @@ type SendMessageFn = (message?: {
   messageId?: string;
 }) => Promise<void>;
 type RegenerateFn = (options: { messageId: string }) => Promise<void>;
-type SetMessagesFn = (
-  messages:
-    | CopilotUIMessage[]
-    | ((messages: CopilotUIMessage[]) => CopilotUIMessage[]),
-) => void;
 
 interface UseCopilotRuntimeActionsProps {
   archivedQuery: ThreadQueryControls;
   ensureSession: () => Promise<string>;
+  getChatEntry: (sessionId: string | null) => CopilotChatInstanceEntry;
   getCurrentMessages: () => CopilotUIMessage[];
   historyQuery: ThreadQueryControls;
   invalidateThreadQueries: () => void;
   regenerate: RegenerateFn;
   selectPathToMessageId: (targetMessageId: string) => boolean;
   selectBranchByMessageId: (parentKey: string, targetMessageId: string) => void;
-  setMessages: SetMessagesFn;
   sendMessage: SendMessageFn;
   sessionRef: RefObject<string | null>;
   statusRef: RefObject<ChatStatus>;
@@ -57,21 +53,26 @@ interface UseCopilotRuntimeActionsProps {
 
 /**
  * Wires up all runtime actions (send, regenerate, feedback, thread CRUD,
- * pagination, branch selection) and publishes them to Jotai so that any
- * component in the tree can trigger copilot operations.
+ * pagination, branch selection) and publishes them to Jotai so any component
+ * in the tree can trigger copilot operations.
  *
- * All backend mutations use direct fetch calls instead of oRPC.
+ * Notable upgrades over the previous version:
+ *   - `stopGeneration` now POSTs /api/ai/chat/cancel so the server stops
+ *     spending tokens, in addition to aborting the client stream.
+ *   - `handleSubmitEditedMessage` mutates `chat.messages` directly via the
+ *     pooled entry so the edit is visible synchronously before send (a React
+ *     setMessages would race with the next sendMessage).
  */
 export function useCopilotRuntimeActions({
   archivedQuery,
   ensureSession,
+  getChatEntry,
   getCurrentMessages,
   historyQuery,
   invalidateThreadQueries,
   regenerate,
   selectPathToMessageId,
   selectBranchByMessageId,
-  setMessages,
   sendMessage,
   sessionRef,
   statusRef,
@@ -82,6 +83,7 @@ export function useCopilotRuntimeActions({
   const setIsSessionMenuOpenState = useSetAtom(copilotIsSessionMenuOpenAtom);
   const setIsThreadActionPending = useSetAtom(copilotIsThreadActionPendingAtom);
   const setRuntimeActions = useSetAtom(copilotRuntimeActionsAtom);
+
   const {
     fetchNextPage: fetchNextArchivedPage,
     hasNextPage: hasNextArchivedPage,
@@ -93,25 +95,34 @@ export function useCopilotRuntimeActions({
     isFetchingNextPage: isFetchingHistoryNextPage,
   } = historyQuery;
 
+  const prepareForRequest = useCallback(() => {
+    const status = statusRef.current;
+    if (status === "streaming" || status === "submitted") {
+      return false;
+    }
+    return true;
+  }, [statusRef]);
+
   const handleSendMessage = useCallback(
     async (text: string) => {
       const trimmed = text.trim();
       if (!trimmed) {
         return;
       }
-
+      if (!prepareForRequest()) {
+        return;
+      }
       await ensureSession();
       await sendMessage({ text: trimmed });
     },
-    [ensureSession, sendMessage],
+    [ensureSession, prepareForRequest, sendMessage],
   );
 
   const handleRegenerate = useCallback(
     async (messageId: string) => {
-      if (statusRef.current !== "ready") {
+      if (!prepareForRequest()) {
         return;
       }
-
       await ensureSession();
 
       const currentMessages = getCurrentMessages();
@@ -125,8 +136,6 @@ export function useCopilotRuntimeActions({
       try {
         await regenerate({ messageId });
       } catch (regenerateError) {
-        // Reason: The message might not be in the Chat instance's internal state
-        // if the user navigated branches. Attempt to sync the branch first.
         const isMissingMessageError =
           regenerateError instanceof Error &&
           regenerateError.message.includes(`message ${messageId} not found`);
@@ -160,9 +169,9 @@ export function useCopilotRuntimeActions({
     [
       ensureSession,
       getCurrentMessages,
+      prepareForRequest,
       regenerate,
       selectPathToMessageId,
-      statusRef,
     ],
   );
 
@@ -206,12 +215,11 @@ export function useCopilotRuntimeActions({
 
   const handleSubmitEditedMessage = useCallback(
     async (messageId: string, nextText: string) => {
-      if (statusRef.current !== "ready") {
-        return false;
-      }
-
       const trimmed = nextText.trim();
       if (!trimmed) {
+        return false;
+      }
+      if (!prepareForRequest()) {
         return false;
       }
 
@@ -228,22 +236,25 @@ export function useCopilotRuntimeActions({
         return false;
       }
 
+      const { metadata: _metadata, ...messageWithoutMetadata } = targetMessage;
       const editedUserMessage: CopilotUIMessage = {
-        ...targetMessage,
+        ...messageWithoutMetadata,
         id: crypto.randomUUID(),
         parts: [{ type: "text", text: trimmed }],
         role: "user",
       };
 
-      await ensureSession();
-      setMessages([
+      const sessionId = await ensureSession();
+      const chat = getChatEntry(sessionId).chat;
+      chat.messages = [
         ...currentMessages.slice(0, messageIndex),
         editedUserMessage,
-      ]);
-      await sendMessage();
+      ];
+      chat.clearError();
+      await chat.sendMessage();
       return true;
     },
-    [ensureSession, getCurrentMessages, sendMessage, setMessages, statusRef],
+    [ensureSession, getChatEntry, getCurrentMessages, prepareForRequest],
   );
 
   const handleBranchChange = useCallback(
@@ -251,22 +262,15 @@ export function useCopilotRuntimeActions({
       if (statusRef.current !== "ready") {
         return;
       }
-
       const nextNode = branchMeta.siblings[nextIndex];
       if (!nextNode) {
         return;
       }
-
       selectBranchByMessageId(branchMeta.parentKey, nextNode.message.id);
     },
     [selectBranchByMessageId, statusRef],
   );
 
-  /**
-   * Executes a thread mutation (archive/unarchive/delete) by calling the
-   * appropriate REST endpoint. Resets the active session when archiving or
-   * deleting the currently active thread.
-   */
   const mutateThreadById = useCallback(
     async (targetSessionId: string, action: ThreadAction) => {
       if (
@@ -280,39 +284,39 @@ export function useCopilotRuntimeActions({
 
       try {
         switch (action) {
-        case "archive": {
-          const res = await fetch(
-            `/api/ai/sessions/${targetSessionId}/archive`,
-            { method: "POST" },
-          );
-          if (!res.ok) {
-            throw new Error("Failed to archive thread");
+          case "archive": {
+            const res = await fetch(
+              `/api/ai/sessions/${targetSessionId}/archive`,
+              { method: "POST" },
+            );
+            if (!res.ok) {
+              throw new Error("Failed to archive thread");
+            }
+            break;
           }
-          break;
-        }
-        case "unarchive": {
-          const res = await fetch(
-            `/api/ai/sessions/${targetSessionId}/unarchive`,
-            { method: "POST" },
-          );
-          if (!res.ok) {
-            throw new Error("Failed to unarchive thread");
+          case "unarchive": {
+            const res = await fetch(
+              `/api/ai/sessions/${targetSessionId}/unarchive`,
+              { method: "POST" },
+            );
+            if (!res.ok) {
+              throw new Error("Failed to unarchive thread");
+            }
+            break;
           }
-          break;
-        }
-        case "delete": {
-          const res = await fetch(`/api/ai/sessions/${targetSessionId}`, {
-            method: "DELETE",
-          });
-          if (!res.ok) {
-            throw new Error("Failed to delete thread");
+          case "delete": {
+            const res = await fetch(`/api/ai/sessions/${targetSessionId}`, {
+              method: "DELETE",
+            });
+            if (!res.ok) {
+              throw new Error("Failed to delete thread");
+            }
+            break;
           }
-          break;
-        }
-        default: {
-          const unreachableAction: never = action;
-          throw new Error(`Unhandled thread action: ${unreachableAction}`);
-        }
+          default: {
+            const unreachableAction: never = action;
+            throw new Error(`Unhandled thread action: ${unreachableAction}`);
+          }
         }
 
         const activeSessionId = jotaiStore.get(copilotSessionIdAtom);
@@ -349,23 +353,18 @@ export function useCopilotRuntimeActions({
       if (!activeSessionId) {
         return;
       }
-
       await mutateThreadById(activeSessionId, action);
     },
     [jotaiStore, mutateThreadById],
   );
 
   const unarchiveThreadById = useCallback(
-    async (sessionId: string) => {
-      return mutateThreadById(sessionId, "unarchive");
-    },
+    async (sessionId: string) => mutateThreadById(sessionId, "unarchive"),
     [mutateThreadById],
   );
 
   const deleteThreadById = useCallback(
-    async (sessionId: string) => {
-      return mutateThreadById(sessionId, "delete");
-    },
+    async (sessionId: string) => mutateThreadById(sessionId, "delete"),
     [mutateThreadById],
   );
 
@@ -384,16 +383,13 @@ export function useCopilotRuntimeActions({
   const selectHistoryThread = useCallback(
     (thread: ThreadItem) => {
       setIsSessionMenuOpenState(false);
-      void switchToSession(thread.remoteId, {
-        fallbackToNewOnError: true,
-        navigation: "push",
-      });
+      void switchToSession(thread.remoteId, { navigation: "push" });
     },
     [setIsSessionMenuOpenState, switchToSession],
   );
 
-  const runtimeActions = useMemo<CopilotRuntimeActions>(() => {
-    return {
+  const runtimeActions = useMemo<CopilotRuntimeActions>(
+    () => ({
       createNewChat: () => {
         void switchToSession(null, { navigation: "push" });
       },
@@ -408,32 +404,55 @@ export function useCopilotRuntimeActions({
       submitEditedMessage: handleSubmitEditedMessage,
       submitFeedback: submitFeedbackForMessage,
       stopGeneration: () => {
-        stopRef.current();
+        const activeSessionId = sessionRef.current;
+        const isStreaming =
+          statusRef.current === "streaming" ||
+          statusRef.current === "submitted";
+
+        if (isStreaming) {
+          if (activeSessionId) {
+            getChatEntry(activeSessionId).abortReconnectStream();
+          }
+          stopRef.current();
+        }
+
+        if (activeSessionId && isStreaming) {
+          void fetch("/api/ai/chat/cancel", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sessionId: activeSessionId }),
+          }).catch((cancelError) => {
+            console.error(
+              "[copilot-thread] Failed to stop stream on server:",
+              cancelError,
+            );
+          });
+        }
       },
       unarchiveThreadById,
-    };
-  }, [
-    deleteThreadById,
-    executeThreadAction,
-    loadMoreArchived,
-    loadMoreHistory,
-    handleRegenerate,
-    handleBranchChange,
-    selectHistoryThread,
-    handleSendMessage,
-    handleSubmitEditedMessage,
-    submitFeedbackForMessage,
-    stopRef,
-    unarchiveThreadById,
-    switchToSession,
-  ]);
+    }),
+    [
+      deleteThreadById,
+      executeThreadAction,
+      getChatEntry,
+      handleBranchChange,
+      handleRegenerate,
+      handleSendMessage,
+      handleSubmitEditedMessage,
+      loadMoreArchived,
+      loadMoreHistory,
+      selectHistoryThread,
+      sessionRef,
+      statusRef,
+      stopRef,
+      submitFeedbackForMessage,
+      switchToSession,
+      unarchiveThreadById,
+    ],
+  );
 
-  // Reason: Publish the runtime actions to a global Jotai atom so that any
-  // component (e.g. the sidebar, message toolbar) can invoke them without
-  // deep prop drilling.
   useEffect(() => {
     setRuntimeActions(runtimeActions);
-
     return () => {
       setRuntimeActions(null);
     };

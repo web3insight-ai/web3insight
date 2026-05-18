@@ -19,22 +19,32 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     const userId = await getCopilotUserId();
     const db = getCopilotDb();
 
-    // Verify session exists, is not deleted, and belongs to the current user
+    // Reason: Resolve the session first to learn its access_level. Owners can
+    // always read; public threads are readable by anyone (including anonymous);
+    // private threads are owner-only.
     const sessionRows = await db
-      .select({ session_id: copilot_sessions.session_id })
+      .select({
+        access_level: copilot_sessions.access_level,
+        user_id: copilot_sessions.user_id,
+      })
       .from(copilot_sessions)
       .where(
         and(
           eq(copilot_sessions.session_id, sessionId),
           isNull(copilot_sessions.deleted_at),
-          userId
-            ? eq(copilot_sessions.user_id, userId)
-            : isNull(copilot_sessions.user_id),
         ),
       )
       .limit(1);
 
-    if (sessionRows.length === 0) {
+    const session = sessionRows[0];
+    if (!session) {
+      return NextResponse.json({ error: "Session not found" }, { status: 404 });
+    }
+
+    const isOwner =
+      userId !== null && session.user_id !== null && session.user_id === userId;
+    const isPublicReadable = session.access_level === "public";
+    if (!isOwner && !isPublicReadable) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
     }
 

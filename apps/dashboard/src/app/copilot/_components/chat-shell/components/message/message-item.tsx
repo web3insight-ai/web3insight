@@ -2,6 +2,7 @@ import { isToolUIPart } from "ai";
 import type { ChatStatus } from "ai";
 import { useCallback, useMemo, useState } from "react";
 
+import { SPEC_DATA_PART_TYPE } from "@json-render/core";
 import { Message, MessageContent } from "@/components/ai-elements/message";
 import type { CopilotUIMessage } from "~/ai/copilot-types";
 
@@ -15,6 +16,9 @@ interface CopilotMessageItemProps {
   hasBranchSelector: boolean;
   isLastMessage: boolean;
   message: CopilotUIMessage;
+  // Reason: Wired down to the toolbar so the read-only share view can hide
+  // every mutating action while still allowing copy.
+  readOnly?: boolean;
   status: ChatStatus;
 }
 
@@ -24,6 +28,7 @@ export function CopilotMessageItem({
   hasBranchSelector,
   isLastMessage,
   message,
+  readOnly = false,
   status,
 }: CopilotMessageItemProps) {
   const actions = useCopilotActions();
@@ -59,6 +64,10 @@ export function CopilotMessageItem({
         return part.text.trim().length > 0;
       }
 
+      if (part.type === SPEC_DATA_PART_TYPE) {
+        return true;
+      }
+
       return isToolUIPart(part);
     });
   }, [message.parts]);
@@ -69,15 +78,22 @@ export function CopilotMessageItem({
     isLastMessage &&
     (status === "streaming" || status === "submitted") &&
     !hasDisplayableParts;
+  // Reason: Hide the toolbar while the assistant turn is still streaming so
+  // the regenerate/feedback buttons do not flash before the message even
+  // exists. Matches the euka behaviour.
+  const isAssistantTurnInFlight =
+    !isUserMessage &&
+    isLastMessage &&
+    (status === "streaming" || status === "submitted");
 
   const handleBeginEdit = useCallback(() => {
-    if (!isReady || !isUserMessage) {
+    if (!isReady || !isUserMessage || readOnly) {
       return;
     }
 
     setEditDraft(messageTextForCopy);
     setMode("edit");
-  }, [isReady, isUserMessage, messageTextForCopy]);
+  }, [isReady, isUserMessage, messageTextForCopy, readOnly]);
 
   const handleCancelEdit = useCallback(() => {
     setMode("view");
@@ -164,17 +180,18 @@ export function CopilotMessageItem({
         )}
       </Message>
 
-      {isEditing ? null : (
+      {!isEditing && !isAssistantTurnInFlight ? (
         <CopilotMessageToolbar
           canCopy={canCopy}
           copyText={messageTextForCopy}
           hasBranchSelector={hasBranchSelector}
           messageId={message.id}
           onEdit={isUserMessage ? handleBeginEdit : undefined}
+          readOnly={readOnly}
           role={isUserMessage ? "user" : "assistant"}
           status={status}
         />
-      )}
+      ) : null}
     </div>
   );
 }

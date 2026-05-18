@@ -7,11 +7,13 @@ export default async function CopilotSessionPage({
 }: {
   params: Promise<{ sessionId: string }>;
 }) {
-  const [user, { sessionId }] = await Promise.all([getUser(), params]);
+  // Reason: We still resolve params so Next can render the segment, but the
+  // active session is derived from usePathname inside useCopilotSessionLifecycle.
+  const [user] = await Promise.all([getUser(), params]);
 
   return (
     <DefaultLayoutWrapper user={user} hideFooter>
-      <CopilotPageClient initialRemoteId={sessionId} />
+      <CopilotPageClient />
     </DefaultLayoutWrapper>
   );
 }

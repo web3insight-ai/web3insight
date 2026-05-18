@@ -67,8 +67,13 @@ CREATE TABLE IF NOT EXISTS "api"."copilot_sessions" (
   "last_active_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   "is_archived"    BOOLEAN NOT NULL DEFAULT FALSE,
   "deleted_at"     TIMESTAMP WITH TIME ZONE,
+  "access_level"   VARCHAR(16) NOT NULL DEFAULT 'private',
   "created_at"     TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
+
+-- Reason: idempotent guard for installs that ran an older COPILOT_TABLES_SQL.
+ALTER TABLE "api"."copilot_sessions"
+  ADD COLUMN IF NOT EXISTS "access_level" VARCHAR(16) NOT NULL DEFAULT 'private';
 
 CREATE TABLE IF NOT EXISTS "api"."copilot_messages" (
   "message_id" TEXT PRIMARY KEY,

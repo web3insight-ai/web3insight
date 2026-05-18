@@ -1,23 +1,18 @@
 "use client";
 
-const noop = () => {
-  /* placeholder assigned by useChatRuntimeActions */
-};
-
 import { useChat } from "@ai-sdk/react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { ChatStatus } from "ai";
+import { useAtomValue } from "jotai";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import type { CopilotUIMessage } from "~/ai/copilot-types";
+import type { CopilotChatFinishHandler } from "../lib/chat-instance-cache";
 import { getOrCreateCopilotChatInstance } from "../lib/chat-instance-cache";
+import { copilotSessionIdAtom } from "../state/atoms";
 import type { CopilotThreadQueryState, ThreadItem } from "../types";
 import { useCopilotRuntimeActions } from "./use-chat-runtime-actions";
 import { useCopilotSessionLifecycle } from "./use-session-lifecycle";
 import { useCopilotThreadQueries } from "./use-thread-queries";
-
-interface UseCopilotChatControllerProps {
-  initialRemoteId: string | null;
-}
 
 interface CopilotChatControllerState {
   archivedQueryState: CopilotThreadQueryState;
@@ -33,21 +28,28 @@ interface CopilotChatControllerState {
  * Top-level orchestrator hook that ties together thread queries, session
  * lifecycle, and runtime actions into a single coherent state object.
  *
- * This is the only hook that page-level components need to consume.
- * All euka-specific props (storeId, sellerId, region) have been removed.
+ * Rewired to use the per-session chat instance pool (chat-instance-cache.ts)
+ * so switching sessions or refreshing the page can resume an in-flight
+ * stream via `useChat({ resume: true })` + the new GET /api/ai/chat/resume.
+ *
+ * The `initialRemoteId` prop has been dropped — `usePathname` inside
+ * `useCopilotSessionLifecycle` handles bootstrap from the URL.
  */
-export function useCopilotChatController({
-  initialRemoteId,
-}: UseCopilotChatControllerProps): CopilotChatControllerState {
+export function useCopilotChatController(): CopilotChatControllerState {
   const queryClient = useQueryClient();
+  const activeSessionId = useAtomValue(copilotSessionIdAtom);
 
   const switchRequestIdRef = useRef(0);
   const isCreatingSessionRef = useRef<Promise<string> | null>(null);
   const lastSyncedAssistantMessageIdRef = useRef<string | null>(null);
+  const finishHandlerRef = useRef<CopilotChatFinishHandler>(() => {
+    /* assigned after lifecycle exposes handleChatFinish */
+  });
+  const sessionRef = useRef<string | null>(activeSessionId);
   const statusRef = useRef<ChatStatus>("ready");
-  // Reason: noop callbacks assigned later by useChatRuntimeActions
-  const stopRef = useRef<() => void>(noop);
-  const clearErrorRef = useRef<() => void>(noop);
+  const stopRef = useRef<() => void>(() => {
+    /* assigned after useChat returns */
+  });
 
   const invalidateThreadQueries = useCallback(() => {
     void queryClient.invalidateQueries({
@@ -56,49 +58,41 @@ export function useCopilotChatController({
     });
   }, [queryClient]);
 
-  const chatEntry = useMemo(() => {
-    return getOrCreateCopilotChatInstance({
-      invalidateThreadQueries,
+  const getChatEntry = useCallback(
+    (sessionId: string | null) =>
+      getOrCreateCopilotChatInstance({
+        getFinishHandler: () => finishHandlerRef.current,
+        invalidateThreadQueries,
+        sessionId,
+      }),
+    [invalidateThreadQueries],
+  );
+
+  const chatEntry = useMemo(
+    () => getChatEntry(activeSessionId),
+    [activeSessionId, getChatEntry],
+  );
+
+  const { error, messages, regenerate, sendMessage, status, stop } =
+    useChat<CopilotUIMessage>({
+      chat: chatEntry.chat,
+      experimental_throttle: 50,
+      resume: true,
     });
-  }, [invalidateThreadQueries]);
 
-  const {
-    clearError,
-    error,
-    messages,
-    regenerate,
-    sendMessage,
-    setMessages,
-    status,
-    stop,
-  } = useChat<CopilotUIMessage>({
-    chat: chatEntry.chat,
-    experimental_throttle: 50,
-  });
-
-  const setMessagesRef = useRef(setMessages);
-
-  // Reason: Keep refs in sync with the latest callback identities so that
-  // imperative code (e.g. session switching, abort) works correctly.
   useEffect(() => {
     statusRef.current = status;
   }, [status]);
 
   useEffect(() => {
+    sessionRef.current = activeSessionId;
+  }, [activeSessionId, sessionRef]);
+
+  useEffect(() => {
     stopRef.current = stop;
   }, [stop]);
 
-  useEffect(() => {
-    clearErrorRef.current = clearError;
-  }, [clearError]);
-
-  useEffect(() => {
-    setMessagesRef.current = setMessages;
-  }, [setMessages]);
-
-  const getCurrentMessages = useCallback(() => {
-    return [...messages];
-  }, [messages]);
+  const getCurrentMessages = useCallback(() => [...messages], [messages]);
 
   const {
     archivedQuery,
@@ -111,36 +105,40 @@ export function useCopilotChatController({
 
   const {
     ensureSession,
+    handleChatFinish,
     selectPathToMessageId,
     selectBranchByMessageId,
     switchToSession,
   } = useCopilotSessionLifecycle({
-    clearErrorRef,
-    getCurrentMessages,
-    initialRemoteId,
+    getChatEntry,
     invalidateThreadQueries,
     isCreatingSessionRef,
     lastSyncedAssistantMessageIdRef,
-    sessionRef: chatEntry.sessionRef,
-    setMessagesRef,
-    status,
+    sessionRef,
     statusRef,
-    stopRef,
     switchRequestIdRef,
   });
+
+  // Reason: Keep the finish handler ref + cache entry pointing at the latest
+  // lifecycle callback so the asynchronous onFinish event always resolves
+  // against the current session's state.
+  useEffect(() => {
+    finishHandlerRef.current = handleChatFinish;
+    chatEntry.onFinishRef.current = handleChatFinish;
+  }, [chatEntry, handleChatFinish]);
 
   useCopilotRuntimeActions({
     archivedQuery,
     ensureSession,
+    getChatEntry,
     getCurrentMessages,
     historyQuery,
     invalidateThreadQueries,
     regenerate,
     selectPathToMessageId,
     selectBranchByMessageId,
-    setMessages,
     sendMessage,
-    sessionRef: chatEntry.sessionRef,
+    sessionRef,
     statusRef,
     stopRef,
     switchToSession,

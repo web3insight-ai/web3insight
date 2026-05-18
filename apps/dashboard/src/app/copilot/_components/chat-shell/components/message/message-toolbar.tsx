@@ -32,6 +32,10 @@ interface CopilotMessageToolbarProps {
   hasBranchSelector: boolean;
   messageId: string;
   onEdit?: () => void;
+  // Reason: When the message is shown in the read-only share view, hide
+  // every action that would mutate state (regenerate, feedback, edit).
+  // Copy remains available because it does not touch the server.
+  readOnly?: boolean;
   role: MessageRole;
   status: ChatStatus;
 }
@@ -54,6 +58,7 @@ export function CopilotMessageToolbar({
   hasBranchSelector,
   messageId,
   onEdit,
+  readOnly = false,
   role,
   status,
 }: CopilotMessageToolbarProps) {
@@ -69,8 +74,9 @@ export function CopilotMessageToolbar({
 
   const hasSession = Boolean(sessionId);
   const isReady = status === "ready";
-  const canRegenerate = isReady && hasSession;
-  const canSubmitFeedback = isReady && hasSession;
+  const canRegenerate = !readOnly && isReady && hasSession;
+  const canSubmitFeedback = !readOnly && isReady && hasSession;
+  const canEdit = !readOnly && isReady && Boolean(onEdit);
 
   const handleCopy = useCallback(() => {
     if (!canCopy) {
@@ -234,11 +240,7 @@ export function CopilotMessageToolbar({
             <CopyIcon className="size-4" />
           )}
         </MessageAction>
-        <MessageAction
-          tooltip="Edit"
-          disabled={!isReady || !onEdit}
-          onClick={onEdit}
-        >
+        <MessageAction tooltip="Edit" disabled={!canEdit} onClick={onEdit}>
           <PencilIcon className="size-4" />
         </MessageAction>
       </MessageActions>

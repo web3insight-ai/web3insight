@@ -1,6 +1,7 @@
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ChatStatus } from "ai";
-import { useAtom, useSetAtom, useStore } from "jotai";
+import { useSetAtom, useStore } from "jotai";
+import { usePathname } from "next/navigation";
 import type { RefObject } from "react";
 import { useCallback, useEffect, useRef } from "react";
 import type { CopilotUIMessage } from "~/ai/copilot-types";
@@ -9,6 +10,10 @@ import {
   buildLatestBranchSelection,
   resolveActivePathFromHistory,
 } from "../lib/branch-graph";
+import type {
+  CopilotChatFinishEvent,
+  CopilotChatInstanceEntry,
+} from "../lib/chat-instance-cache";
 import {
   getCopilotSessionIdFromPathname,
   pushCopilotPath,
@@ -29,29 +34,31 @@ import type {
   ThreadHistoryEntry,
 } from "../types";
 
-type SetMessagesFn = (
-  messages:
-    | CopilotUIMessage[]
-    | ((messages: CopilotUIMessage[]) => CopilotUIMessage[]),
-) => void;
+type ThreadHistoryRows = Parameters<typeof mapHistoryRowsToEntries>[0];
+
+interface ThreadHistoryResponse {
+  messages: Array<{ message: CopilotUIMessage; parentId: string | null }>;
+}
+
+interface ThreadHistorySnapshot {
+  history: ThreadHistoryEntry[];
+  messages: CopilotUIMessage[];
+  selections: Record<string, string>;
+}
 
 interface UseCopilotSessionLifecycleProps {
-  clearErrorRef: RefObject<() => void>;
-  getCurrentMessages: () => CopilotUIMessage[];
-  initialRemoteId: string | null;
+  getChatEntry: (sessionId: string | null) => CopilotChatInstanceEntry;
   invalidateThreadQueries: () => void;
   isCreatingSessionRef: RefObject<Promise<string> | null>;
   lastSyncedAssistantMessageIdRef: RefObject<string | null>;
   sessionRef: RefObject<string | null>;
-  setMessagesRef: RefObject<SetMessagesFn>;
-  status: ChatStatus;
   statusRef: RefObject<ChatStatus>;
-  stopRef: RefObject<() => void>;
   switchRequestIdRef: RefObject<number>;
 }
 
 interface SessionLifecycleResult {
   ensureSession: () => Promise<string>;
+  handleChatFinish: (event: CopilotChatFinishEvent) => void;
   selectPathToMessageId: (targetMessageId: string) => boolean;
   selectBranchByMessageId: (parentKey: string, targetMessageId: string) => void;
   switchToSession: (
@@ -60,47 +67,113 @@ interface SessionLifecycleResult {
   ) => Promise<boolean>;
 }
 
-/** Response shape from GET /api/ai/sessions/[sessionId]/history */
-interface ThreadHistoryResponse {
-  messages: Array<{ message: CopilotUIMessage; parentId: string | null }>;
+const HISTORY_SYNC_RETRY_DELAY_MS = 750;
+const THREAD_HISTORY_QUERY_KEY = "threadHistory";
+
+function getThreadHistoryQueryKey(sessionId: string) {
+  return ["copilot", THREAD_HISTORY_QUERY_KEY, sessionId] as const;
+}
+
+async function fetchThreadHistoryFromApi(
+  sessionId: string,
+): Promise<ThreadHistoryResponse> {
+  const res = await fetch(`/api/ai/sessions/${sessionId}/history`);
+  if (!res.ok) {
+    throw new Error("Failed to load thread history");
+  }
+  return res.json() as Promise<ThreadHistoryResponse>;
+}
+
+function buildThreadHistorySnapshot(
+  historyRows: ThreadHistoryRows,
+  preferredLeafMessageId?: string,
+): ThreadHistorySnapshot {
+  const history = mapHistoryRowsToEntries(historyRows);
+  const latestSelection = buildLatestBranchSelection(history);
+  const selectionSeed = preferredLeafMessageId
+    ? applyPreferredLeafSelection(
+        history,
+        latestSelection,
+        preferredLeafMessageId,
+      )
+    : latestSelection;
+  const { messages, selections } = resolveActivePathFromHistory(
+    history,
+    selectionSeed,
+  );
+
+  return { history, messages, selections };
 }
 
 /**
- * Manages the full session lifecycle: creating sessions, switching between them,
- * handling browser navigation (popstate), bootstrapping from URL, and syncing
- * thread history after the AI finishes a response.
+ * Manages the full session lifecycle: creating sessions, switching between
+ * them, syncing thread history after the AI finishes a response, and keeping
+ * the active session in step with the URL path.
  *
- * Replaces euka's oRPC mutation-based session creation with direct fetch calls.
+ * Two big departures from the previous version:
+ *   1. Completion is driven by a `handleChatFinish` callback wired through
+ *      `chat-instance-cache`'s `onFinishRef`, instead of a `useEffect` on
+ *      `status`. The callback runs once per finished stream — no race with
+ *      mid-stream renders.
+ *   2. Route sync uses Next's `usePathname` instead of a custom `popstate`
+ *      listener; `pathSessionId` is derived from `pathname` and effects react
+ *      to changes. This matches the App Router's own navigation model.
  */
 export function useCopilotSessionLifecycle({
-  clearErrorRef,
-  getCurrentMessages,
-  initialRemoteId,
+  getChatEntry,
   invalidateThreadQueries,
   isCreatingSessionRef,
   lastSyncedAssistantMessageIdRef,
   sessionRef,
-  setMessagesRef,
-  status,
   statusRef,
-  stopRef,
   switchRequestIdRef,
 }: UseCopilotSessionLifecycleProps): SessionLifecycleResult {
   const jotaiStore = useStore();
+  const pathname = usePathname();
   const queryClient = useQueryClient();
 
-  const [sessionId, setSessionId] = useAtom(copilotSessionIdAtom);
+  const setSessionId = useSetAtom(copilotSessionIdAtom);
   const setBranchSelection = useSetAtom(copilotBranchSelectionAtom);
   const setIsBootstrapping = useSetAtom(copilotIsBootstrappingAtom);
   const setIsSessionMenuOpenState = useSetAtom(copilotIsSessionMenuOpenAtom);
   const setIsThreadActionPending = useSetAtom(copilotIsThreadActionPendingAtom);
   const setThreadHistory = useSetAtom(copilotThreadHistoryAtom);
 
-  // Reason: Keep the ref in sync so imperative code outside React's render
-  // cycle always sees the latest session ID without triggering re-renders.
-  useEffect(() => {
-    sessionRef.current = sessionId;
-  }, [sessionId, sessionRef]);
+  const didBootstrapInitialSessionRef = useRef(false);
+  const didMountRouteSyncRef = useRef(false);
+  const skipPathSyncRef = useRef(false);
+
+  const initializeThreadMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch("/api/ai/sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ localId: crypto.randomUUID() }),
+      });
+      if (!res.ok) {
+        throw new Error("Failed to create session");
+      }
+      return res.json() as Promise<{ remoteId: string }>;
+    },
+  });
+
+  const resetThreadState = useCallback(() => {
+    setThreadHistory([]);
+    setBranchSelection({});
+    lastSyncedAssistantMessageIdRef.current = null;
+  }, [lastSyncedAssistantMessageIdRef, setBranchSelection, setThreadHistory]);
+
+  const applyMessages = useCallback(
+    (targetSessionId: string | null, nextMessages: CopilotUIMessage[]) => {
+      // Reason: We mutate Chat.messages directly (mirroring euka) so the
+      // change is visible synchronously — feeding through React state would
+      // race with the next sendMessage call.
+      const chat = getChatEntry(targetSessionId).chat;
+      chat.messages = nextMessages;
+      chat.clearError();
+    },
+    [getChatEntry],
+  );
 
   const navigateToSessionPath = useCallback(
     (targetSessionId: string | null, navigation: SessionNavigationMode) => {
@@ -108,7 +181,6 @@ export function useCopilotSessionLifecycle({
         pushCopilotPath(targetSessionId);
         return;
       }
-
       if (navigation === "replace") {
         replaceCopilotPath(targetSessionId);
       }
@@ -119,80 +191,82 @@ export function useCopilotSessionLifecycle({
   const clearActiveSession = useCallback(() => {
     sessionRef.current = null;
     setSessionId(null);
-    setThreadHistory([]);
-    setBranchSelection({});
-    lastSyncedAssistantMessageIdRef.current = null;
-    setMessagesRef.current([]);
-    clearErrorRef.current();
-  }, [
-    clearErrorRef,
-    lastSyncedAssistantMessageIdRef,
-    sessionRef,
-    setBranchSelection,
-    setMessagesRef,
-    setSessionId,
-    setThreadHistory,
-  ]);
+    resetThreadState();
+    applyMessages(null, []);
+  }, [applyMessages, resetThreadState, sessionRef, setSessionId]);
 
   const applyActiveSession = useCallback(
     (targetSessionId: string, nextMessages: CopilotUIMessage[]) => {
       sessionRef.current = targetSessionId;
       setSessionId(targetSessionId);
-      setMessagesRef.current(nextMessages);
-      clearErrorRef.current();
+      applyMessages(targetSessionId, nextMessages);
     },
-    [clearErrorRef, sessionRef, setMessagesRef, setSessionId],
+    [applyMessages, sessionRef, setSessionId],
   );
 
-  const applyThreadHistoryToChat = useCallback(
-    (
-      nextHistory: ThreadHistoryEntry[],
-      preferredSelections?: Record<string, string>,
-      options?: { skipMessageUpdate?: boolean },
-    ) => {
-      const selectionSeed =
-        preferredSelections ?? buildLatestBranchSelection(nextHistory);
-      const { messages: nextMessages, selections } =
-        resolveActivePathFromHistory(nextHistory, selectionSeed);
-
-      setThreadHistory(nextHistory);
-      setBranchSelection(selections);
-
-      // Reason: After streaming completes, the chat already has messages with
-      // rich tool output from the streaming protocol. Replacing them with
-      // DB-loaded messages would lose the output data (race condition with
-      // onFinish persistence) or have different serialization. Only update
-      // messages when explicitly needed (e.g. session switch, page load).
-      if (!options?.skipMessageUpdate) {
-        setMessagesRef.current(nextMessages);
+  const resolveDisplayMessages = useCallback(
+    (targetSessionId: string, persistedMessages: CopilotUIMessage[]) => {
+      const isActiveSession = sessionRef.current === targetSessionId;
+      const isStreaming =
+        statusRef.current === "streaming" || statusRef.current === "submitted";
+      if (!isActiveSession || !isStreaming) {
+        return persistedMessages;
       }
 
-      clearErrorRef.current();
+      const liveMessages = getChatEntry(targetSessionId).chat.messages;
+      if (
+        liveMessages.length === 0 ||
+        persistedMessages.length > liveMessages.length
+      ) {
+        return persistedMessages;
+      }
+
+      const persistedIsPrefixOfLive = persistedMessages.every(
+        (message, index) => liveMessages[index]?.id === message.id,
+      );
+
+      // Reason: During first-message bootstrap the DB snapshot can briefly lag
+      // behind the optimistic client state. If persisted is just a prefix of
+      // live, preserve live so the user's submitted message does not vanish.
+      return persistedIsPrefixOfLive ? liveMessages : persistedMessages;
     },
-    [clearErrorRef, setBranchSelection, setMessagesRef, setThreadHistory],
+    [getChatEntry, sessionRef, statusRef],
   );
 
-  /**
-   * Fetches thread history via the REST endpoint, leveraging TanStack Query's
-   * cache and deduplication. When `fresh` is true the cache is bypassed.
-   */
+  const applyHistoryRows = useCallback(
+    (
+      targetSessionId: string,
+      historyRows: ThreadHistoryRows,
+      preferredLeafMessageId?: string,
+    ) => {
+      const { history, messages, selections } = buildThreadHistorySnapshot(
+        historyRows,
+        preferredLeafMessageId,
+      );
+
+      setThreadHistory(history);
+      setBranchSelection(selections);
+      applyMessages(
+        targetSessionId,
+        resolveDisplayMessages(targetSessionId, messages),
+      );
+    },
+    [
+      applyMessages,
+      resolveDisplayMessages,
+      setBranchSelection,
+      setThreadHistory,
+    ],
+  );
+
   const fetchThreadHistory = useCallback(
     async (
       targetSessionId: string,
       options?: { fresh?: boolean },
     ): Promise<ThreadHistoryResponse> => {
-      const queryKey = ["copilot", "threadHistory", targetSessionId];
       return queryClient.fetchQuery({
-        queryKey,
-        queryFn: async (): Promise<ThreadHistoryResponse> => {
-          const res = await fetch(
-            `/api/ai/sessions/${targetSessionId}/history`,
-          );
-          if (!res.ok) {
-            throw new Error("Failed to load thread history");
-          }
-          return res.json() as Promise<ThreadHistoryResponse>;
-        },
+        queryKey: getThreadHistoryQueryKey(targetSessionId),
+        queryFn: () => fetchThreadHistoryFromApi(targetSessionId),
         staleTime: options?.fresh ? 0 : 60_000,
       });
     },
@@ -201,58 +275,75 @@ export function useCopilotSessionLifecycle({
 
   const getCachedThreadHistory = useCallback(
     (targetSessionId: string) => {
-      const queryKey = ["copilot", "threadHistory", targetSessionId];
-      return queryClient.getQueryData<ThreadHistoryResponse>(queryKey);
+      return queryClient.getQueryData<ThreadHistoryResponse>(
+        getThreadHistoryQueryKey(targetSessionId),
+      );
     },
     [queryClient],
   );
 
-  /**
-   * Re-fetches history from the server and re-applies it to the chat.
-   * Called after the AI finishes responding so the branch graph stays current.
-   *
-   * When `skipMessageUpdate` is true, only thread history and branch state
-   * are updated — chat messages are NOT replaced. This is used after streaming
-   * completes to avoid overwriting rich tool output with DB-loaded versions.
-   */
-  const refreshThreadHistory = useCallback(
-    async (
-      targetSessionId: string,
-      preferredLeafMessageId?: string,
-      options?: { skipMessageUpdate?: boolean },
-    ) => {
-      try {
-        const { messages: historyRows } = await fetchThreadHistory(
-          targetSessionId,
-          { fresh: true },
+  const syncCompletedResponse = useCallback(
+    async (targetSessionId: string, assistantMessageId: string) => {
+      const fetchPersisted = async (): Promise<ThreadHistoryRows | null> => {
+        const { messages: rows } = await fetchThreadHistory(targetSessionId, {
+          fresh: true,
+        });
+        if (sessionRef.current !== targetSessionId) {
+          return null;
+        }
+        return rows;
+      };
+
+      const hasAssistantMessage = (rows: ThreadHistoryRows) =>
+        mapHistoryRowsToEntries(rows).some(
+          (entry) => entry.message.id === assistantMessageId,
         );
 
-        if (sessionRef.current !== targetSessionId) {
+      try {
+        let rows = await fetchPersisted();
+        if (!rows) {
           return;
         }
 
-        const nextHistory = mapHistoryRowsToEntries(historyRows);
+        if (!hasAssistantMessage(rows)) {
+          await new Promise((resolve) =>
+            setTimeout(resolve, HISTORY_SYNC_RETRY_DELAY_MS),
+          );
+          rows = await fetchPersisted();
+          if (!rows) {
+            return;
+          }
+        }
 
-        const latestSelection = buildLatestBranchSelection(nextHistory);
-        const selectionSeed = preferredLeafMessageId
-          ? applyPreferredLeafSelection(
-            nextHistory,
-            latestSelection,
-            preferredLeafMessageId,
-          )
-          : latestSelection;
+        if (!hasAssistantMessage(rows)) {
+          console.warn(
+            "[copilot-thread] Assistant message not yet persisted after retry:",
+            assistantMessageId,
+          );
+          return;
+        }
 
-        applyThreadHistoryToChat(nextHistory, selectionSeed, {
-          skipMessageUpdate: options?.skipMessageUpdate,
-        });
-      } catch (refreshError) {
+        if (lastSyncedAssistantMessageIdRef.current === assistantMessageId) {
+          return;
+        }
+
+        lastSyncedAssistantMessageIdRef.current = assistantMessageId;
+        invalidateThreadQueries();
+        applyHistoryRows(targetSessionId, rows, assistantMessageId);
+      } catch (syncError) {
         console.error(
-          "[copilot-thread] Failed to refresh thread history:",
-          refreshError,
+          "[copilot-thread] Failed to sync completed response history:",
+          syncError,
         );
       }
     },
-    [applyThreadHistoryToChat, fetchThreadHistory, sessionRef],
+    [
+      applyHistoryRows,
+      fetchThreadHistory,
+      invalidateThreadQueries,
+      lastSyncedAssistantMessageIdRef,
+      sessionRef,
+    ],
   );
 
   const selectBranchByMessageId = useCallback(
@@ -262,20 +353,19 @@ export function useCopilotSessionLifecycle({
         return;
       }
 
-      const nextPreferredSelections = {
+      const nextSelections = {
         ...currentSelections,
         [parentKey]: targetMessageId,
       };
 
       const currentHistory = jotaiStore.get(copilotThreadHistoryAtom);
       const { messages: nextMessages, selections } =
-        resolveActivePathFromHistory(currentHistory, nextPreferredSelections);
+        resolveActivePathFromHistory(currentHistory, nextSelections);
 
       setBranchSelection(selections);
-      setMessagesRef.current(nextMessages);
-      clearErrorRef.current();
+      applyMessages(sessionRef.current, nextMessages);
     },
-    [clearErrorRef, jotaiStore, setBranchSelection, setMessagesRef],
+    [applyMessages, jotaiStore, sessionRef, setBranchSelection],
   );
 
   const selectPathToMessageId = useCallback(
@@ -288,31 +378,73 @@ export function useCopilotSessionLifecycle({
       }
 
       const currentSelections = jotaiStore.get(copilotBranchSelectionAtom);
-      const nextPreferredSelections = applyPreferredLeafSelection(
+      const nextSelections = applyPreferredLeafSelection(
         currentHistory,
         currentSelections,
         targetMessageId,
       );
 
       const { messages: nextMessages, selections } =
-        resolveActivePathFromHistory(currentHistory, nextPreferredSelections);
+        resolveActivePathFromHistory(currentHistory, nextSelections);
+
       if (!nextMessages.some((message) => message.id === targetMessageId)) {
         return false;
       }
 
       setBranchSelection(selections);
-      setMessagesRef.current(nextMessages);
-      clearErrorRef.current();
+      applyMessages(sessionRef.current, nextMessages);
       return true;
     },
-    [clearErrorRef, jotaiStore, setBranchSelection, setMessagesRef],
+    [applyMessages, jotaiStore, sessionRef, setBranchSelection],
   );
 
-  /**
-   * Lazily creates a new backend session via POST /api/ai/sessions.
-   * Returns the existing session ID if one is already active, and deduplicates
-   * concurrent calls by sharing a single in-flight promise.
-   */
+  const bootstrapActiveSession = useCallback(
+    async (targetSessionId: string) => {
+      const requestId = ++switchRequestIdRef.current;
+      const isLatestRequest = () => requestId === switchRequestIdRef.current;
+
+      try {
+        const cachedHistoryResponse = getCachedThreadHistory(targetSessionId);
+        if (cachedHistoryResponse) {
+          applyHistoryRows(targetSessionId, cachedHistoryResponse.messages);
+        } else {
+          setIsBootstrapping(true);
+        }
+
+        const { messages: historyRows } =
+          await fetchThreadHistory(targetSessionId);
+        if (!isLatestRequest() || sessionRef.current !== targetSessionId) {
+          return true;
+        }
+
+        applyHistoryRows(targetSessionId, historyRows);
+        return true;
+      } catch (bootstrapError) {
+        if (!isLatestRequest()) {
+          return true;
+        }
+
+        console.error(
+          "[copilot-thread] Failed to bootstrap active thread:",
+          bootstrapError,
+        );
+        return false;
+      } finally {
+        if (isLatestRequest()) {
+          setIsBootstrapping(false);
+        }
+      }
+    },
+    [
+      applyHistoryRows,
+      fetchThreadHistory,
+      getCachedThreadHistory,
+      sessionRef,
+      setIsBootstrapping,
+      switchRequestIdRef,
+    ],
+  );
+
   const ensureSession = useCallback(async () => {
     if (sessionRef.current) {
       return sessionRef.current;
@@ -322,64 +454,43 @@ export function useCopilotSessionLifecycle({
       return isCreatingSessionRef.current;
     }
 
-    const createSessionPromise = fetch("/api/ai/sessions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ localId: crypto.randomUUID() }),
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          throw new Error("Failed to create session");
-        }
-        return res.json() as Promise<{ remoteId: string }>;
-      })
+    const createPromise = initializeThreadMutation
+      .mutateAsync()
       .then((thread) => {
-        setThreadHistory([]);
-        setBranchSelection({});
-        lastSyncedAssistantMessageIdRef.current = null;
+        resetThreadState();
         applyActiveSession(thread.remoteId, []);
         navigateToSessionPath(thread.remoteId, "push");
         invalidateThreadQueries();
         return thread.remoteId;
       })
       .finally(() => {
-        if (isCreatingSessionRef.current === createSessionPromise) {
+        if (isCreatingSessionRef.current === createPromise) {
           isCreatingSessionRef.current = null;
         }
       });
 
-    isCreatingSessionRef.current = createSessionPromise;
-    return createSessionPromise;
+    isCreatingSessionRef.current = createPromise;
+    return createPromise;
   }, [
     applyActiveSession,
+    initializeThreadMutation,
     invalidateThreadQueries,
     isCreatingSessionRef,
-    lastSyncedAssistantMessageIdRef,
     navigateToSessionPath,
+    resetThreadState,
     sessionRef,
-    setBranchSelection,
-    setThreadHistory,
   ]);
 
-  /**
-   * Switches the active session. Handles loading history from cache first
-   * for a fast optimistic UI, then fetches fresh data from the server.
-   * Supports rollback on error and concurrent-request deduplication.
-   */
   const switchToSession = useCallback(
     async (
       nextSessionId: string | null,
       options: SwitchSessionOptions = {},
     ) => {
-      const { fallbackToNewOnError = false, navigation = "none" } = options;
-      const previousSessionId = sessionRef.current;
-      const previousThreadHistory = jotaiStore.get(copilotThreadHistoryAtom);
-      const previousBranchSelection = jotaiStore.get(
-        copilotBranchSelectionAtom,
-      );
-      const previousMessages = getCurrentMessages();
+      const navigation = options.navigation ?? "none";
+      const isSameSession =
+        nextSessionId !== null && nextSessionId === sessionRef.current;
 
-      if (nextSessionId === sessionRef.current) {
+      if (isSameSession) {
         navigateToSessionPath(nextSessionId, navigation);
         return true;
       }
@@ -387,18 +498,10 @@ export function useCopilotSessionLifecycle({
       const requestId = ++switchRequestIdRef.current;
       const isLatestRequest = () => requestId === switchRequestIdRef.current;
 
-      if (
-        statusRef.current === "streaming" ||
-        statusRef.current === "submitted"
-      ) {
-        stopRef.current();
-      }
-
       if (!nextSessionId) {
         if (!isLatestRequest()) {
           return true;
         }
-
         setIsBootstrapping(false);
         clearActiveSession();
         navigateToSessionPath(null, navigation);
@@ -406,77 +509,30 @@ export function useCopilotSessionLifecycle({
       }
 
       try {
+        resetThreadState();
+        applyActiveSession(nextSessionId, []);
         navigateToSessionPath(nextSessionId, navigation);
 
-        setThreadHistory([]);
-        setBranchSelection({});
-        lastSyncedAssistantMessageIdRef.current = null;
-        applyActiveSession(nextSessionId, []);
-
-        // Reason: Show cached data immediately for a snappy UX, then replace
-        // with fresh data below.
         const cachedHistoryResponse = getCachedThreadHistory(nextSessionId);
         if (cachedHistoryResponse) {
-          const cachedHistory = mapHistoryRowsToEntries(
-            cachedHistoryResponse.messages,
-          );
-          const { messages: cachedMessages, selections: cachedSelections } =
-            resolveActivePathFromHistory(
-              cachedHistory,
-              buildLatestBranchSelection(cachedHistory),
-            );
-
-          setThreadHistory(cachedHistory);
-          setBranchSelection(cachedSelections);
-          lastSyncedAssistantMessageIdRef.current = null;
-          applyActiveSession(nextSessionId, cachedMessages);
+          applyHistoryRows(nextSessionId, cachedHistoryResponse.messages);
         } else {
           setIsBootstrapping(true);
         }
 
         const { messages: historyRows } =
           await fetchThreadHistory(nextSessionId);
-
         if (!isLatestRequest()) {
           return true;
         }
 
-        const nextHistory = mapHistoryRowsToEntries(historyRows);
-
-        const { messages: nextMessages, selections } =
-          resolveActivePathFromHistory(
-            nextHistory,
-            buildLatestBranchSelection(nextHistory),
-          );
-
-        setThreadHistory(nextHistory);
-        setBranchSelection(selections);
-        lastSyncedAssistantMessageIdRef.current = null;
-        applyActiveSession(nextSessionId, nextMessages);
-
+        applyHistoryRows(nextSessionId, historyRows);
         return true;
       } catch (switchError) {
         if (!isLatestRequest()) {
           return true;
         }
-
         console.error("[copilot-thread] Failed to switch thread:", switchError);
-
-        if (!fallbackToNewOnError) {
-          if (previousSessionId) {
-            setThreadHistory(previousThreadHistory);
-            setBranchSelection(previousBranchSelection);
-            applyActiveSession(previousSessionId, previousMessages);
-          } else {
-            clearActiveSession();
-          }
-
-          if (navigation !== "none") {
-            navigateToSessionPath(previousSessionId, "replace");
-          }
-          return false;
-        }
-
         clearActiveSession();
         navigateToSessionPath(null, "replace");
         return false;
@@ -488,164 +544,98 @@ export function useCopilotSessionLifecycle({
     },
     [
       applyActiveSession,
+      applyHistoryRows,
       clearActiveSession,
       fetchThreadHistory,
       getCachedThreadHistory,
-      getCurrentMessages,
-      jotaiStore,
-      lastSyncedAssistantMessageIdRef,
       navigateToSessionPath,
+      resetThreadState,
       sessionRef,
       setIsBootstrapping,
-      setBranchSelection,
-      setThreadHistory,
-      statusRef,
-      stopRef,
       switchRequestIdRef,
     ],
   );
 
-  const switchToSessionRef = useRef(switchToSession);
+  const pathSessionId = getCopilotSessionIdFromPathname(pathname);
 
   useEffect(() => {
-    switchToSessionRef.current = switchToSession;
-  }, [switchToSession]);
-
-  // Reason: Bootstrap the session from the URL on mount. Resets all state
-  // and attempts to load the session specified in the initial URL path.
-  useEffect(() => {
-    let cancelled = false;
-
     setIsSessionMenuOpenState(false);
     setIsThreadActionPending(false);
-    setBranchSelection({});
-    setThreadHistory([]);
-    setMessagesRef.current([]);
-    clearErrorRef.current();
-    setIsBootstrapping(Boolean(initialRemoteId));
+  }, [setIsSessionMenuOpenState, setIsThreadActionPending]);
 
-    const bootstrap = async () => {
-      const didSwitch = await switchToSessionRef.current(initialRemoteId, {
-        fallbackToNewOnError: true,
-        navigation: "replace",
-      });
-
-      if (!cancelled && !didSwitch) {
-        clearActiveSession();
-      }
-
-      if (!cancelled) {
-        setIsBootstrapping(false);
-      }
-    };
-
-    void bootstrap();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    clearActiveSession,
-    clearErrorRef,
-    initialRemoteId,
-    setBranchSelection,
-    setIsBootstrapping,
-    setIsSessionMenuOpenState,
-    setIsThreadActionPending,
-    setMessagesRef,
-    setThreadHistory,
-  ]);
-
-  // Reason: Handle browser back/forward navigation to keep session state
-  // in sync with the URL without a full page reload.
   useEffect(() => {
-    let disposed = false;
+    if (didBootstrapInitialSessionRef.current) {
+      return;
+    }
+    didBootstrapInitialSessionRef.current = true;
 
-    const handlePopState = () => {
-      const pathSessionId = getCopilotSessionIdFromPathname(
-        window.location.pathname,
+    if (!pathSessionId) {
+      return;
+    }
+
+    // Reason: First-mount bootstrap — sync sessionRef + active state before
+    // fetching history, so resolveDisplayMessages can pick the right path.
+    sessionRef.current = pathSessionId;
+    setSessionId(pathSessionId);
+
+    void bootstrapActiveSession(pathSessionId).catch((bootstrapError) => {
+      console.error(
+        "[copilot-route] Failed to bootstrap initial session:",
+        bootstrapError,
       );
-      if (pathSessionId === sessionRef.current) {
+    });
+  }, [bootstrapActiveSession, pathSessionId, sessionRef, setSessionId]);
+
+  useEffect(() => {
+    if (skipPathSyncRef.current) {
+      skipPathSyncRef.current = false;
+      return;
+    }
+
+    if (!didMountRouteSyncRef.current) {
+      didMountRouteSyncRef.current = true;
+      return;
+    }
+
+    if (pathSessionId === sessionRef.current) {
+      return;
+    }
+
+    void switchToSession(pathSessionId, { navigation: "none" }).catch(
+      (navigationError) => {
+        console.error(
+          "[copilot-route] Failed to sync route session:",
+          navigationError,
+        );
+      },
+    );
+  }, [pathSessionId, sessionRef, switchToSession]);
+
+  const handleChatFinish = useCallback(
+    ({
+      isAbort,
+      isDisconnect,
+      isError,
+      message,
+      sessionId,
+    }: CopilotChatFinishEvent) => {
+      if (isAbort || isDisconnect || isError || message.role !== "assistant") {
         return;
       }
-
-      void switchToSessionRef
-        .current(pathSessionId, {
-          fallbackToNewOnError: true,
-          navigation: "none",
-        })
-        .catch((navigationError) => {
-          if (!disposed) {
-            console.error(
-              "[copilot-route] Failed to switch from browser navigation:",
-              navigationError,
-            );
-          }
-        });
-    };
-
-    window.addEventListener("popstate", handlePopState);
-    return () => {
-      disposed = true;
-      window.removeEventListener("popstate", handlePopState);
-    };
-  }, [sessionRef]);
-
-  const previousStatusRef = useRef<ChatStatus>("ready");
-
-  // Reason: After the AI completes a response (status transitions from
-  // streaming/submitted to ready), refresh the thread history so the branch
-  // graph and sidebar reflect the new message.
-  useEffect(() => {
-    const previousStatus = previousStatusRef.current;
-    previousStatusRef.current = status;
-
-    const didCompleteResponse =
-      status === "ready" &&
-      (previousStatus === "streaming" || previousStatus === "submitted");
-
-    if (!didCompleteResponse) {
-      return;
-    }
-
-    const activeSessionId = sessionRef.current;
-    if (!activeSessionId) {
-      return;
-    }
-
-    const currentMessages = getCurrentMessages();
-    const lastMessage = currentMessages[currentMessages.length - 1];
-    if (!lastMessage || lastMessage.role !== "assistant") {
-      return;
-    }
-
-    if (lastSyncedAssistantMessageIdRef.current === lastMessage.id) {
-      return;
-    }
-
-    lastSyncedAssistantMessageIdRef.current = lastMessage.id;
-    invalidateThreadQueries();
-
-    // Reason: After streaming completes, the chat already has messages with
-    // correct tool output from the streaming protocol. We refresh thread
-    // history for sidebar/branch UI but skip replacing chat messages to
-    // avoid overwriting rich output with DB-loaded versions that may be
-    // incomplete (race with server-side onFinish persistence) or serialized
-    // differently.
-    void refreshThreadHistory(activeSessionId, lastMessage.id, {
-      skipMessageUpdate: true,
-    });
-  }, [
-    getCurrentMessages,
-    invalidateThreadQueries,
-    lastSyncedAssistantMessageIdRef,
-    refreshThreadHistory,
-    sessionRef,
-    status,
-  ]);
+      if (!sessionId || sessionRef.current !== sessionId) {
+        return;
+      }
+      if (lastSyncedAssistantMessageIdRef.current === message.id) {
+        return;
+      }
+      void syncCompletedResponse(sessionId, message.id);
+    },
+    [lastSyncedAssistantMessageIdRef, sessionRef, syncCompletedResponse],
+  );
 
   return {
     ensureSession,
+    handleChatFinish,
     selectPathToMessageId,
     selectBranchByMessageId,
     switchToSession,

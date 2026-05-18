@@ -24,8 +24,9 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     const userId = await getCopilotUserId();
     const db = getCopilotDb();
 
-    // Reason: If authenticated, only allow access to own sessions.
-    // Anonymous sessions (user_id IS NULL) are accessible when no user is logged in.
+    // Reason: Two-step lookup so we can distinguish "not found" from
+    // "private to someone else". A non-owner viewing a `public` session sees
+    // the title/timestamps but no mutation actions (the share view).
     const rows = await db
       .select()
       .from(copilot_sessions)
@@ -33,9 +34,6 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
         and(
           eq(copilot_sessions.session_id, sessionId),
           isNull(copilot_sessions.deleted_at),
-          userId
-            ? eq(copilot_sessions.user_id, userId)
-            : isNull(copilot_sessions.user_id),
         ),
       )
       .limit(1);
@@ -43,6 +41,13 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     const session = rows[0];
 
     if (!session) {
+      return NextResponse.json({ error: "Session not found" }, { status: 404 });
+    }
+
+    const isOwner =
+      userId !== null && session.user_id !== null && session.user_id === userId;
+    const isPublicReadable = session.access_level === "public";
+    if (!isOwner && !isPublicReadable) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
     }
 

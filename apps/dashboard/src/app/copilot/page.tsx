@@ -7,7 +7,7 @@ export default async function CopilotPage() {
 
   return (
     <DefaultLayoutWrapper user={user} hideFooter>
-      <CopilotPageClient initialRemoteId={null} />
+      <CopilotPageClient />
     </DefaultLayoutWrapper>
   );
 }
