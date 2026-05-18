@@ -5,21 +5,12 @@ import {
   CheckIcon,
   CopyIcon,
   ExternalLinkIcon,
-  SparklesIcon,
   TerminalIcon,
 } from "lucide-react"
 import { useI18n } from "@/lib/i18n-context"
 import { motion } from "framer-motion"
 import { fadeInUp, ScrollReveal, stagger } from "@/components/ui/motion"
 import { Panel } from "@/components/blueprint"
-
-function SectionLabel({ children }: { children: string }) {
-  return (
-    <div className="text-muted-foreground font-mono text-[10px] uppercase tracking-[0.18em]">
-      {children}
-    </div>
-  )
-}
 
 const MCP_ENDPOINT_URL = "https://dash.web3insight.ai/api/ai/mcp"
 const PLUGIN_README_URL =
@@ -128,27 +119,19 @@ export function McpSection() {
   return (
     <section
       id="mcp"
-      className="relative overflow-hidden border-y border-border bg-gradient-to-b from-transparent via-accent/[0.03] to-transparent py-28"
+      className="relative overflow-hidden border-b border-border py-28"
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent"
-      />
-
       <div className="max-w-content mx-auto px-6">
-        <ScrollReveal>
-          <div className="mb-14 max-w-3xl">
-            <div className="text-accent mb-4 inline-flex items-center gap-2 border border-accent/30 bg-accent/5 px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.18em]">
-              <SparklesIcon className="size-3.5" />
-              <span>{t("mcp.eyebrow")}</span>
-            </div>
-            <h2 className="font-display mb-5 text-balance text-4xl font-semibold text-foreground sm:text-5xl">
-              {t("mcp.title")}
-            </h2>
-            <p className="text-muted-foreground text-pretty text-base leading-relaxed sm:text-lg">
-              {t("mcp.description")}
-            </p>
-          </div>
+        <ScrollReveal className="mb-12 max-w-3xl" margin="-15% 0px -10% 0px">
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+            02 · {t("mcp.eyebrow")}
+          </p>
+          <h2 className="font-display mt-3 text-balance text-3xl font-semibold text-foreground sm:text-4xl">
+            {t("mcp.title")}
+          </h2>
+          <p className="text-muted-foreground mt-4 text-pretty text-base leading-relaxed sm:text-lg">
+            {t("mcp.description")}
+          </p>
         </ScrollReveal>
 
         <motion.div
@@ -158,15 +141,15 @@ export function McpSection() {
           viewport={{ once: true, margin: "-10% 0px" }}
           className="grid gap-6 lg:grid-cols-[1.4fr_1fr]"
         >
-          {/* LEFT — install tabs (the hero) */}
+          {/* LEFT — install tabs */}
           <motion.div variants={fadeInUp()}>
-            <Panel className="h-full p-6 sm:p-8">
-              <div className="mb-5 flex items-center justify-between gap-3">
-                <SectionLabel>{t("mcp.install.label")}</SectionLabel>
-              </div>
-
+            <Panel
+              label={{ text: t("mcp.install.label").toLowerCase(), position: "tl" }}
+              code="M01"
+              className="h-full p-6 sm:p-8"
+            >
               {/* Tab strip */}
-              <div className="flex flex-wrap items-stretch gap-2 border-b border-border-soft pb-0">
+              <div className="flex flex-wrap items-stretch gap-2 border-b border-border-soft">
                 {TABS.map((tab) => {
                   const isActive = activeTab === tab.id
                   return (
@@ -176,7 +159,7 @@ export function McpSection() {
                       onClick={() => setActiveTab(tab.id)}
                       className={`-mb-px inline-flex items-center gap-2 border-b-2 px-3 py-2.5 font-mono text-xs uppercase tracking-[0.12em] transition-colors ${
                         isActive
-                          ? "border-accent text-foreground"
+                          ? "border-foreground text-foreground"
                           : "border-transparent text-muted-foreground hover:text-foreground"
                       }`}
                     >
@@ -185,7 +168,7 @@ export function McpSection() {
                         <span
                           className={`border px-1.5 py-0.5 text-[9px] tracking-[0.12em] ${
                             isActive
-                              ? "border-accent/40 bg-accent/10 text-accent"
+                              ? "border-foreground text-foreground"
                               : "border-border-soft text-muted-foreground"
                           }`}
                         >
@@ -206,7 +189,7 @@ export function McpSection() {
                 <div>
                   <div className="text-muted-foreground mb-2 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em]">
                     <span>
-                      {activeTab === "manual" ? t("mcp.config.label") : "Run"}
+                      {activeTab === "manual" ? t("mcp.config.label") : "run"}
                     </span>
                     <button
                       type="button"
@@ -237,7 +220,7 @@ export function McpSection() {
                     href={activeContent.ctaUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="bg-foreground text-background hover:bg-foreground/90 inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition-colors"
+                    className="border-foreground text-foreground hover:bg-foreground hover:text-background inline-flex items-center gap-2 border px-4 py-2 text-sm font-medium transition-colors"
                   >
                     {activeContent.ctaLabel}
                     <ExternalLinkIcon className="size-3.5" />
@@ -247,7 +230,7 @@ export function McpSection() {
                       href={TOKEN_ISSUE_URL}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="border-border-soft text-foreground/80 hover:border-foreground hover:text-foreground inline-flex items-center gap-2 border px-5 py-2.5 text-sm font-medium transition-colors"
+                      className="border-border-soft text-foreground/80 hover:border-foreground hover:text-foreground inline-flex items-center gap-2 border px-4 py-2 text-sm font-medium transition-colors"
                     >
                       {t("mcp.cta")}
                       <ExternalLinkIcon className="size-3.5" />
@@ -258,9 +241,13 @@ export function McpSection() {
             </Panel>
           </motion.div>
 
-          {/* RIGHT — endpoint + clients + steps (reference) */}
+          {/* RIGHT — endpoint + clients + steps */}
           <motion.div variants={fadeInUp(0.05)} className="flex flex-col gap-6">
-            <Panel className="p-6">
+            <Panel
+              label={{ text: "endpoint", position: "tl" }}
+              code="M02"
+              className="p-6"
+            >
               <div className="text-muted-foreground mb-3 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em]">
                 <TerminalIcon className="size-3" />
                 <span>{t("mcp.endpoint.label")}</span>
@@ -270,10 +257,16 @@ export function McpSection() {
               </code>
             </Panel>
 
-            <Panel className="p-6">
-              <SectionLabel>{t("mcp.clients.label")}</SectionLabel>
-              <div className="mb-4" />
-              <ul className="space-y-3">
+            <Panel
+              ground="dotted"
+              label={{ text: "clients · n=4", position: "tl" }}
+              code="M03"
+              className="p-6"
+            >
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                {t("mcp.clients.label")}
+              </p>
+              <ul className="mt-4 space-y-3">
                 {CLIENTS.map((client) => (
                   <li
                     key={client.id}
@@ -290,24 +283,29 @@ export function McpSection() {
               </ul>
             </Panel>
 
-            <Panel className="p-6">
-              <SectionLabel>{t("mcp.steps.label")}</SectionLabel>
-              <div className="mb-4" />
-              <ol className="space-y-3 text-sm">
+            <Panel
+              label={{ text: "steps · 3", position: "tl" }}
+              code="M04"
+              className="p-6"
+            >
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                {t("mcp.steps.label")}
+              </p>
+              <ol className="mt-4 space-y-3 text-sm">
                 <li className="flex gap-3">
-                  <span className="text-accent font-mono text-xs">01</span>
+                  <span className="text-teal-500 font-mono text-xs">01</span>
                   <span className="text-foreground/90">
                     {t("mcp.steps.one")}
                   </span>
                 </li>
                 <li className="flex gap-3">
-                  <span className="text-accent font-mono text-xs">02</span>
+                  <span className="text-teal-500 font-mono text-xs">02</span>
                   <span className="text-foreground/90">
                     {t("mcp.steps.two")}
                   </span>
                 </li>
                 <li className="flex gap-3">
-                  <span className="text-accent font-mono text-xs">03</span>
+                  <span className="text-teal-500 font-mono text-xs">03</span>
                   <span className="text-foreground/90">
                     {t("mcp.steps.three")}
                   </span>

@@ -60,28 +60,38 @@ export function HeroSection() {
   const { data: statsData, isLoading } = useQuery(orpc.statistics.get.queryOptions())
 
   const terminalLines: Line[] = [
-    [
-      { type: "comment", text: "// ask anything. AI-powered." },
-    ],
+    [{ type: "comment", text: "// from claude code, cursor, or any mcp client" }],
     [
       { type: "prompt", text: "> " },
-      { type: "keyword", text: "query" },
-      { type: "punct", text: "(" },
-      { type: "string", text: "\"top contributors of ethereum\"" },
-      { type: "punct", text: ")" },
+      { type: "plain", text: "top contributors to ethereum?" },
+    ],
+    [{ type: "comment", text: "// tool call dispatched via mcp" }],
+    [
+      { type: "ident", text: "web3insight" },
+      { type: "punct", text: "." },
+      { type: "keyword", text: "rankContributors" },
+      { type: "punct", text: "({ " },
+      { type: "ident", text: "eco_name" },
+      { type: "punct", text: ": " },
+      { type: "string", text: "\"ethereum\"" },
+      { type: "punct", text: ", " },
+      { type: "ident", text: "limit" },
+      { type: "punct", text: ": " },
+      { type: "plain", text: "3" },
+      { type: "punct", text: " })" },
+    ],
+    [{ type: "comment", text: "// streaming · 3 of 24 tools" }],
+    [
+      { type: "plain", text: "✓ vbuterin       " },
+      { type: "string", text: "1,238" },
+      { type: "punct", text: " " },
+      { type: "comment", text: "commits" },
     ],
     [
-      { type: "comment", text: "// filter window, then rank" },
-    ],
-    [
-      { type: "prompt", text: "> " },
-      { type: "keyword", text: "since" },
-      { type: "plain", text: " " },
-      { type: "string", text: "\"30d\"" },
-      { type: "plain", text: " | " },
-      { type: "keyword", text: "rank" },
-      { type: "plain", text: " " },
-      { type: "ident", text: "by.commits" },
+      { type: "plain", text: "✓ pipermerriam   " },
+      { type: "string", text: "  894" },
+      { type: "punct", text: " " },
+      { type: "comment", text: "commits" },
     ],
   ]
 
@@ -185,12 +195,12 @@ export function HeroSection() {
 
           <div className="relative z-10 flex flex-col gap-4">
             <Panel
-              label={{ text: "query · nl", position: "tl" }}
+              label={{ text: "mcp · tool-call", position: "tl" }}
               code="01"
               className="p-0"
             >
               <TerminalPanel
-                title="web3insight · nl-query"
+                title="claude > web3insight"
                 lines={terminalLines}
                 className="border-0"
               />

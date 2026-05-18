@@ -33,7 +33,7 @@ export function UseCasesSection() {
       <div className="relative mx-auto max-w-7xl px-6 pt-20 lg:px-8">
         <ScrollReveal className="mb-14 max-w-3xl" margin="-15% 0px -10% 0px">
           <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-            deployments · live
+            04 · deployments · live
           </p>
           <h2 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
             {t("useCases.title")}

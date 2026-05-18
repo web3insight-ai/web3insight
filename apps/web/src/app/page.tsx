@@ -18,6 +18,10 @@ const McpSection = dynamic(
   () => import("@/components/mcp-section").then((mod) => mod.McpSection),
   { ssr: true }
 )
+const ToolsCatalogSection = dynamic(
+  () => import("@/components/tools-catalog-section").then((mod) => mod.ToolsCatalogSection),
+  { ssr: true }
+)
 const PartnersSection = dynamic(
   () => import("@/components/partners-section").then((mod) => mod.PartnersSection),
   { ssr: true }
@@ -43,6 +47,9 @@ export default function HomePage() {
       </Suspense>
       <Suspense fallback={null}>
         <UseCasesSection />
+      </Suspense>
+      <Suspense fallback={null}>
+        <ToolsCatalogSection />
       </Suspense>
       <Suspense fallback={null}>
         <PartnersSection />

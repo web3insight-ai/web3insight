@@ -57,14 +57,14 @@ export function StatsSection() {
         <div className="mb-10 flex items-end justify-between">
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-              signal · density
+              01 · signal · density
             </p>
             <h2 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
               At a glance
             </h2>
           </div>
           <span className="hidden font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground sm:inline-block">
-            sheet 02/04
+            sheet 01/06
           </span>
         </div>
 

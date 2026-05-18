@@ -187,7 +187,7 @@ export function FeaturesSection() {
       <div className="relative mx-auto max-w-7xl px-6 pt-20 lg:px-8">
         <ScrollReveal className="mb-16 max-w-3xl" margin="-15% 0px -15% 0px">
           <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-            capability · matrix
+            03 · capability · matrix
           </p>
           <h2 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
             {t("features.title")}

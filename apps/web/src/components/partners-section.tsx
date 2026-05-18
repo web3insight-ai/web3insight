@@ -55,14 +55,14 @@ export function PartnersSection() {
         <ScrollReveal className="mb-10 flex items-end justify-between" margin="-20% 0px -10% 0px">
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-              partners · n={partners.length}
+              06 · partners · n={partners.length}
             </p>
             <h2 className="mt-2 font-[family-name:var(--font-display)] text-2xl font-semibold text-foreground">
               {t("partners.title")}
             </h2>
           </div>
           <span className="hidden font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground sm:inline-block">
-            sheet 04/04
+            sheet 06/06
           </span>
         </ScrollReveal>
 
