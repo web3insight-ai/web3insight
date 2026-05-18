@@ -187,20 +187,20 @@ export default function DonationDetailClient({
   const latestActiveDeveloper =
     monthKeys.length > 0
       ? {
-        month: monthKeys[monthKeys.length - 1],
-        developers:
+          month: monthKeys[monthKeys.length - 1],
+          developers:
             activeDeveloperChartValues[activeDeveloperChartValues.length - 1] ??
             0,
-      }
+        }
       : null;
   const previousActiveDeveloper =
     monthKeys.length > 1
       ? {
-        month: monthKeys[monthKeys.length - 2],
-        developers:
+          month: monthKeys[monthKeys.length - 2],
+          developers:
             activeDeveloperChartValues[activeDeveloperChartValues.length - 2] ??
             0,
-      }
+        }
       : null;
   const activeDeveloperChange =
     latestActiveDeveloper && previousActiveDeveloper
@@ -210,25 +210,25 @@ export default function DonationDetailClient({
   const averageActiveDevelopers =
     monthKeys.length > 0
       ? Math.round(
-        activeDeveloperChartValues.reduce((sum, value) => sum + value, 0) /
+          activeDeveloperChartValues.reduce((sum, value) => sum + value, 0) /
             monthKeys.length,
-      )
+        )
       : null;
 
   const peakIndex =
     activeDeveloperChartValues.length > 0
       ? activeDeveloperChartValues.reduce(
-        (peak, value, index, array) => (value > array[peak] ? index : peak),
-        0,
-      )
+          (peak, value, index, array) => (value > array[peak] ? index : peak),
+          0,
+        )
       : null;
 
   const peakActiveDeveloper =
     peakIndex !== null && peakIndex !== undefined
       ? {
-        month: monthKeys[peakIndex],
-        developers: activeDeveloperChartValues[peakIndex],
-      }
+          month: monthKeys[peakIndex],
+          developers: activeDeveloperChartValues[peakIndex],
+        }
       : null;
 
   const activeDeveloperAxisLabels = monthKeys.map(formatMonthLabel);
@@ -490,18 +490,18 @@ export default function DonationDetailClient({
                   </p>
                   {previousActiveDeveloper &&
                     activeDeveloperChange !== null && (
-                    <p
-                      className={`text-xs font-medium ${
-                        activeDeveloperChange >= 0
-                          ? "text-emerald-600 dark:text-emerald-400"
-                          : "text-rose-600 dark:text-rose-400"
-                      }`}
-                    >
-                      {activeDeveloperChange >= 0 ? "▲" : "▼"}{" "}
-                      {Math.abs(activeDeveloperChange)} vs{" "}
-                      {formatMonthLabel(previousActiveDeveloper.month)}
-                    </p>
-                  )}
+                      <p
+                        className={`text-xs font-medium ${
+                          activeDeveloperChange >= 0
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-rose-600 dark:text-rose-400"
+                        }`}
+                      >
+                        {activeDeveloperChange >= 0 ? "▲" : "▼"}{" "}
+                        {Math.abs(activeDeveloperChange)} vs{" "}
+                        {formatMonthLabel(previousActiveDeveloper.month)}
+                      </p>
+                    )}
                 </div>
               )}
             </div>

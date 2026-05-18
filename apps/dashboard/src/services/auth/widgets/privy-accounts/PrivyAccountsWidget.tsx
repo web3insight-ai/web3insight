@@ -3,13 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui";
 import { usePrivy } from "@privy-io/react-auth";
-import {
-  Mail,
-  Wallet,
-  Trash2,
-  Loader2,
-  CheckCircle,
-} from "lucide-react";
+import { Mail, Wallet, Trash2, Loader2, CheckCircle } from "lucide-react";
 import { GithubIcon as Github } from "$/brand-icons";
 
 interface PrivyAccountsWidgetProps {
@@ -248,21 +242,21 @@ export function PrivyAccountsWidget({
               </div>
               {walletAccounts.length > 1 &&
                 account.walletClient !== "privy" && (
-                <Button
-                  isIconOnly
-                  size="sm"
-                  variant="light"
-                  color="danger"
-                  onPress={() => handleUnlinkWallet(account.address)}
-                  isLoading={unlinkingId === account.address}
-                >
-                  {unlinkingId === account.address ? (
-                    <Loader2 size={16} className="animate-spin" />
-                  ) : (
-                    <Trash2 size={16} />
-                  )}
-                </Button>
-              )}
+                  <Button
+                    isIconOnly
+                    size="sm"
+                    variant="light"
+                    color="danger"
+                    onPress={() => handleUnlinkWallet(account.address)}
+                    isLoading={unlinkingId === account.address}
+                  >
+                    {unlinkingId === account.address ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <Trash2 size={16} />
+                    )}
+                  </Button>
+                )}
             </div>
           </div>
         ))}
