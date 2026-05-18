@@ -1,80 +1,96 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Project-scoped guidance for `apps/dashboard` (`@web3insight/dashboard`).
+For monorepo-wide conventions see `../../CLAUDE.md`.
 
-## Project Overview
+## Project overview
 
-Web3Insight is a Web3 developer analytics platform. Part of a pnpm workspace with:
-- **web3insight-api** (NestJS backend at `../web3insight-api/`)
-- **web3insight** (this Next.js 16 frontend)
+The Web3Insight analytics dashboard — Next.js 16 App Router (Turbopack in dev,
+webpack in prod build of dev-card only; dashboard uses Turbopack throughout).
+Lives in the Turborepo monorepo alongside `@web3insight/api` (Hono + oRPC),
+`@web3insight/web` (landing), `@web3insight/dev-card`, and the shared
+`packages/*` (api-contract, orpc-client, query-keys, env-base, auth-privy).
 
-## Essential Commands
+## Essential commands
 
 ```bash
-pnpm dev              # Development with Turbopack (auto-runs env setup)
-pnpm build            # Production build (uses webpack)
-pnpm lint             # ESLint
-pnpm typecheck        # TypeScript check (uses || true for third-party type errors)
+pnpm dev:dashboard          # local dev on :3000 (Turbopack)
+pnpm --filter @web3insight/dashboard build
+pnpm --filter @web3insight/dashboard lint
+pnpm --filter @web3insight/dashboard typecheck
 ```
 
-**Pre-commit hooks** enforce: 2-space indent, semicolons, Prettier formatting.
+Run from repo root or with `--filter`. Pre-commit hooks enforce 2-space
+indent, semicolons, and Prettier formatting.
 
 ## Architecture
 
-Next.js 16 App Router with Domain-Driven Design in `/src/`:
+Next.js 16 App Router with Domain-Driven Design under `/src/`.
 
-### `/src/app/` - Routes & API
-- `page.tsx` / `layout.tsx` - Routes and layouts
-- `api/` - Next.js API routes (proxy to backend)
-- `atoms.ts` - Jotai global state atoms
+### `/src/app/` — routes & API
+- `page.tsx` / `layout.tsx` — route segments and layouts
+- `api/` — Next.js Route Handlers that proxy or compose backend calls
+- `atoms.ts` — Jotai global state atoms
 
-### `/src/services/` - Domain Modules
-Each domain follows this structure:
+### `/src/services/` — domain modules
+Each domain follows:
 ```
 domain/
-├── typing.ts        # Type definitions
-├── repository.ts    # Data access (API calls)
-├── helper.ts        # Business logic
-├── views/           # Page components
-├── widgets/         # Reusable UI components
-└── hooks/           # Domain-specific hooks (optional)
+├── typing.ts        # type definitions
+├── repository.ts    # data access (API calls)
+├── helper.ts        # business logic
+├── views/           # page-level components
+├── widgets/         # reusable UI for this domain
+└── hooks/           # domain-specific hooks (optional)
 ```
 
-**Current domains**: admin, ai, auth, developer, ecosystem, event, github, profile-analysis, repository
+Domains: admin, ai, auth, developer, ecosystem, event, github,
+profile-analysis, repository, x402.
 
-### `/src/lib/` - Shared Infrastructure
-- `api/client.ts` - Centralized API client with typed endpoints
-- `api/types.ts` - Shared API response types
-- `query/keys.ts` - TanStack Query key factory
-- `form/components.tsx` - React Hook Form + NextUI form components
+### `/src/lib/` — shared infrastructure
+- `orpc.ts` — typed oRPC client + TanStack Query utils (preferred)
+- `api/client.ts` — legacy REST proxy client (use only for routes not yet on oRPC)
+- `api/types.ts` — shared REST response types
+- `query/keys.ts` — TanStack Query key factory for non-RPC keys
+- `form/components.tsx` — React Hook Form + HeroUI form components
 
-### `/src/hooks/api/` - Data Fetching Hooks
-TanStack Query hooks with query options pattern:
+### `/src/hooks/api/` — data-fetching hooks
+TanStack Query hooks with the queryOptions factory pattern:
+
 ```typescript
-// Hook definition pattern
+// oRPC-backed (preferred)
+'use client';
+import { useQuery } from '@tanstack/react-query';
+import { orpc } from '@/lib/orpc';
+import { STATS_CACHE_OPTIONS } from '@web3insight/query-keys';
+
+export function useTotalReposRpc(ecoName = 'all') {
+  return useQuery({
+    ...orpc.total.repos.queryOptions({ input: { eco_name: ecoName } }),
+    ...STATS_CACHE_OPTIONS,
+  });
+}
+```
+
+```typescript
+// REST-backed (legacy — only for endpoints not in @web3insight/api-contract)
+import { useQuery, queryOptions } from '@tanstack/react-query';
+
 export const ecosystemQueryOptions = {
   list: () => queryOptions({
     queryKey: queryKeys.ecosystems.list(),
-    queryFn: async () => { /* fetch */ },
+    queryFn: async () => { /* fetch from Next.js Route Handler */ },
     staleTime: 5 * 60 * 1000,
   }),
 };
-
-export function useEcosystemList() {
-  return useQuery(ecosystemQueryOptions.list());
-}
-
-export function useSuspenseEcosystemList() {
-  return useSuspenseQuery(ecosystemQueryOptions.list());
-}
 ```
 
-### `/src/components/` - Shared UI
-- `controls/` - Complex reusable components
-- `loading/` - Skeleton components
-- `widgets/` - Specialized UI components
+### `/src/components/` — shared UI
+- `controls/` — complex reusable components
+- `loading/` — skeleton components
+- `widgets/` — specialized UI widgets
 
-## Path Aliases
+## Path aliases
 
 ```
 @env  → ./src/env.ts
@@ -84,29 +100,33 @@ export function useSuspenseEcosystemList() {
 $/*   → ./src/components/*
 ```
 
-## Key Patterns
+## Key patterns
 
-### Data Fetching with TanStack Query
-Client components use hooks from `/src/hooks/api/`:
+### Data fetching — prefer oRPC
+End-to-end typed via `@web3insight/api-contract`. All 47 procedures live on
+the Hono runtime; legacy REST `/v1` / `/v2` paths are only kept as a
+compatibility shim for external consumers.
+
 ```typescript
 'use client';
-import { useDeveloperList } from '@/hooks/api/useDeveloper';
+import { orpc } from '@/lib/orpc';
+import { useQuery } from '@tanstack/react-query';
 
-function Component() {
-  const { data, isLoading } = useDeveloperList();
-}
+const { data } = useQuery(orpc.total.repos.queryOptions({ input: { eco_name: 'all' } }));
 ```
 
 ### Forms with React Hook Form + Zod
+
 ```typescript
 'use client';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormInput, FormSelect } from '@/lib/form/components';
+import { z } from 'zod';
 
 const schema = z.object({ name: z.string().min(1) });
 
-function Form() {
+function MyForm() {
   const methods = useForm({ resolver: zodResolver(schema) });
   return (
     <FormProvider {...methods}>
@@ -118,8 +138,10 @@ function Form() {
 }
 ```
 
-### API Response Types
-All API responses follow `ResponseResult<T>` from `/src/lib/api/types.ts`:
+### REST response shape (legacy proxy routes only)
+Next.js Route Handlers that still proxy REST use `ResponseResult<T>` from
+`/src/lib/api/types.ts`:
+
 ```typescript
 interface ResponseResult<T> {
   success: boolean;
@@ -129,33 +151,40 @@ interface ResponseResult<T> {
 }
 ```
 
+oRPC procedures return plain data — no envelope.
+
 ### Server vs Client Components
 - Default: Server Components (no directive)
-- Use `"use client"` only for: hooks, browser APIs, event handlers, TanStack Query
+- `'use client'` only for: hooks, browser APIs, event handlers, TanStack Query
 
-## Environment Variables
+## Environment variables
 
-Validated via `@t3-oss/env-nextjs` in `/src/env.ts`:
+Validated via `@t3-oss/env-nextjs` in `/src/env.ts`.
 
-**Required**:
-- `DATA_API_URL` - Backend API URL
-- `DATA_API_TOKEN` - API auth token
-- `OPENAI_API_KEY` - OpenAI API key
+**Required**
+- `DATA_API_URL` — `@web3insight/api` base URL (the oRPC client appends `/rpc`)
+- `DATA_API_TOKEN` — service token sent as Bearer on server-side calls
+- `OPENAI_API_KEY` — OpenAI key for the AI copilot
 
-**Optional**:
-- `OSSINSIGHT_URL` - OSS Insight API
-- `OPENAI_BASE_URL`, `OPENAI_MODEL` - OpenAI config
-- `HTTP_TIMEOUT` - Client timeout (default: 30000ms)
-- `NEXT_PUBLIC_PRIVY_APP_ID` - Privy auth
-- `NEXT_PUBLIC_UMAMI_WEBSITE_ID` - Analytics
+**Optional**
+- `OSSINSIGHT_URL` — OSS Insight API
+- `OPENAI_BASE_URL`, `OPENAI_MODEL` — OpenAI config
+- `HTTP_TIMEOUT` — client timeout (default 30000 ms)
+- `NEXT_PUBLIC_PRIVY_APP_ID` — Privy auth
+- `NEXT_PUBLIC_UMAMI_WEBSITE_ID` — analytics
 
-## External Services
+## External services
 
-- **Backend API** (web3insight-api): Data, auth, GitHub OAuth
-- **OSS Insight**: GitHub analytics
-- **OpenAI**: AI-powered analysis with streaming
+- **`@web3insight/api`** — data, auth (Privy-only since Phase D), donate, rank,
+  total, repo, admin, custom, github
+- **OSS Insight** — GitHub analytics (queried directly from some routes)
+- **OpenAI** — AI-powered analysis with streaming via Vercel AI SDK
 
-## Known Issues
+## Known issues
 
-- `pnpm typecheck` uses `|| true` due to third-party library type errors
-- `ignoreBuildErrors: true` temporarily enabled in next.config.ts
+- `pnpm typecheck` uses `|| true` to swallow third-party HeroUI / React 19
+  type errors. Re-enable strict mode once HeroUI ships React 19-compatible types.
+- `ignoreBuildErrors: true` in `next.config.ts` — same reason.
+- A handful of REST-shaped Next.js Route Handlers under `/src/app/api/` proxy
+  to the backend even though equivalent oRPC procedures exist. Migration to
+  direct oRPC calls is incremental.
