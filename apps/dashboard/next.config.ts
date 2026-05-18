@@ -24,11 +24,11 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // External packages that should not be bundled by server components
-  // This helps with pino, WalletConnect, and other Node.js-specific modules
-  // Reason: kysely + pg are used by copilot DB (server-only). @json-render/core
-  // is used by pipeJsonRender in the chat route. Externalizing them avoids
-  // webpack processing their dependency trees, reducing peak memory.
+  // External packages that should not be bundled by server components.
+  // Reason: pg powers the copilot DB; pino + transitive deps drive structured
+  // logging; @json-render/core is used by pipeJsonRender in the chat route.
+  // Externalizing them avoids webpack processing their dependency trees,
+  // reducing peak memory. kysely was removed when the ORM moved to Drizzle.
   serverExternalPackages: [
     "pino",
     "pino-pretty",
@@ -36,7 +36,6 @@ const nextConfig: NextConfig = {
     "sonic-boom",
     "fastbench",
     "encoding",
-    "kysely",
     "pg",
     "@json-render/core",
   ],
