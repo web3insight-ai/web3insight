@@ -1,0 +1,22 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "web3insight",
+  "description": "Web3Insight Copilot — Web3 developer analytics over MCP, with a bundled skill describing every tool.",
+  "owner": {
+    "name": "Web3Insight",
+    "url": "https://web3insight.ai"
+  },
+  "plugins": [
+    {
+      "name": "web3insight",
+      "description": "Query Web3 ecosystems, repositories, developers, donations, hackathon profiles, and free-form SQL via the Web3Insight Copilot MCP server. Ships with a SKILL describing all 24 tools and a /web3insight-setup walk-through.",
+      "source": "./plugins/web3insight",
+      "category": "data",
+      "homepage": "https://web3insight.ai",
+      "author": {
+        "name": "Web3Insight",
+        "url": "https://web3insight.ai"
+      }
+    }
+  ]
+}

@@ -98,6 +98,10 @@ const translations: Record<Locale, Record<string, string>> = {
     "mcp.steps.two": "Issue a personal MCP token (shown once — save it).",
     "mcp.steps.three": "Paste the JSON snippet into your client's mcp.json and restart.",
     "mcp.cta": "Issue a token",
+    "mcp.plugin.label": "Claude Code shortcut",
+    "mcp.plugin.description":
+      "Skip the manual JSON edit — install the Web3Insight plugin to auto-register the MCP server and ship a SKILL that picks the right tool for you.",
+    "mcp.plugin.cta": "Install the plugin",
 
     // Footer
     "footer.description":
@@ -188,6 +192,10 @@ const translations: Record<Locale, Record<string, string>> = {
     "mcp.steps.two": "签发一个 MCP 个人 token（只显示一次，记得保存）。",
     "mcp.steps.three": "把 JSON 片段粘贴到客户端的 mcp.json，然后重启。",
     "mcp.cta": "签发 Token",
+    "mcp.plugin.label": "Claude Code 一键安装",
+    "mcp.plugin.description":
+      "无需手动改 JSON — 安装 Web3Insight 插件，一条命令注册 MCP server，并自带 SKILL 帮你自动选用合适的工具。",
+    "mcp.plugin.cta": "安装插件",
 
     // Footer
     "footer.description": "发现、分析并连接 Web3 开发者。基于 GitHub 数据和链上活动，助力生态增长。",

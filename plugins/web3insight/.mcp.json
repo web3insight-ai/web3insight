@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "web3insight": {
+      "type": "http",
+      "url": "https://dash.web3insight.ai/api/ai/mcp",
+      "headers": {
+        "Authorization": "Bearer ${WEB3INSIGHT_MCP_TOKEN}"
+      }
+    }
+  }
+}

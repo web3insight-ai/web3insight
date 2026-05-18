@@ -265,10 +265,25 @@ export function CopilotMcpTokensDialog({
             </code>
             <p className="text-fg-muted text-[11px] leading-relaxed">
               Send your token as{" "}
-              <code className="font-mono">Authorization: Bearer &lt;token&gt;</code>.
-              Clients that accept a <code className="font-mono">url</code> +{" "}
+              <code className="font-mono">
+                Authorization: Bearer &lt;token&gt;
+              </code>
+              . Clients that accept a <code className="font-mono">url</code> +{" "}
               <code className="font-mono">headers</code> JSON config can paste
               the snippet shown when you create a token.
+            </p>
+            <p className="text-fg-muted text-[11px] leading-relaxed">
+              Using Claude Code?{" "}
+              <a
+                href="https://github.com/web3insight-ai/web3insight/blob/main/plugins/web3insight/README.md"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent underline-offset-2 hover:underline"
+              >
+                Install the Web3Insight plugin
+              </a>{" "}
+              to auto-register this MCP server and the bundled SKILL with one
+              command.
             </p>
           </section>
 
@@ -330,9 +345,11 @@ export function CopilotMcpTokensDialog({
                   {configSnippet}
                 </pre>
                 <p className="text-fg-muted text-[11px] leading-relaxed">
-                  Paste into <code className="font-mono">~/.cursor/mcp.json</code>,{" "}
+                  Paste into{" "}
+                  <code className="font-mono">~/.cursor/mcp.json</code>,{" "}
                   <code className="font-mono">
-                    ~/Library/Application Support/Claude/claude_desktop_config.json
+                    ~/Library/Application
+                    Support/Claude/claude_desktop_config.json
                   </code>
                   , or your client's equivalent, then restart the client.
                 </p>
@@ -399,10 +416,10 @@ export function CopilotMcpTokensDialog({
                           {token.name}
                         </div>
                         <div className="text-fg-muted mt-0.5 flex flex-wrap gap-x-3 text-[11px]">
-                          <span className="font-mono">{token.tokenPreview}</span>
-                          <span>
-                            Created {formatRelative(token.createdAt)}
+                          <span className="font-mono">
+                            {token.tokenPreview}
                           </span>
+                          <span>Created {formatRelative(token.createdAt)}</span>
                           <span>
                             Last used {formatRelative(token.lastUsedAt)}
                           </span>

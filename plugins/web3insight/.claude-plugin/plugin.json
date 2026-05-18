@@ -1,0 +1,20 @@
+{
+  "name": "web3insight",
+  "version": "0.1.0",
+  "description": "Web3Insight Copilot MCP — query Web3 ecosystems, repos, developers, and donations from any MCP-capable client. Bundles a SKILL with the full tool reference and a /web3insight-setup walk-through.",
+  "author": {
+    "name": "Web3Insight",
+    "url": "https://web3insight.ai"
+  },
+  "homepage": "https://web3insight.ai",
+  "repository": "https://github.com/web3insight-ai/web3insight",
+  "license": "MIT",
+  "keywords": [
+    "web3",
+    "mcp",
+    "analytics",
+    "developer",
+    "ecosystem",
+    "github"
+  ]
+}

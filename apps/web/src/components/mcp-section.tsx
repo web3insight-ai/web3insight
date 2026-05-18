@@ -178,6 +178,27 @@ export function McpSection() {
                 <ExternalLinkIcon className="size-3.5" />
               </a>
             </Panel>
+
+            <Panel className="p-6">
+              <SectionLabel>{t("mcp.plugin.label")}</SectionLabel>
+              <div className="mb-4" />
+              <p className="text-foreground/80 text-sm leading-relaxed">
+                {t("mcp.plugin.description")}
+              </p>
+              <pre className="border-border-soft bg-background mt-4 overflow-x-auto border p-4 font-mono text-[11px] leading-relaxed sm:text-xs">
+                {`/plugin marketplace add web3insight-ai/web3insight
+/plugin install web3insight@web3insight`}
+              </pre>
+              <a
+                href="https://github.com/web3insight-ai/web3insight/blob/main/plugins/web3insight/README.md"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="border-foreground text-foreground hover:bg-foreground hover:text-background mt-6 inline-flex items-center gap-2 border px-4 py-2 text-sm font-medium transition-colors"
+              >
+                {t("mcp.plugin.cta")}
+                <ExternalLinkIcon className="size-3.5" />
+              </a>
+            </Panel>
           </motion.div>
         </motion.div>
       </div>
