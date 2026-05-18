@@ -3,8 +3,9 @@ version: 2
 # Reason: this repo is a pnpm@10 catalog-based Turborepo. Dependabot's npm
 # ecosystem driver understands pnpm-workspace.yaml `catalog:` entries, so a
 # single root entry covers every workspace package without per-app duplication.
-# PRs land on `dev` first so the Vercel preview + CI gate them before they
-# graduate to `main`.
+# PRs target `main` directly so dep bumps flow through the production build
+# and stay close to released code (cardbox / aimage-monorepo follow the same
+# pattern). Preview/staging coverage still comes from each PR's Vercel preview.
 
 updates:
   # ---------------------------------------------------------------------------
@@ -12,7 +13,7 @@ updates:
   # ---------------------------------------------------------------------------
   - package-ecosystem: npm
     directory: '/'
-    target-branch: dev
+    target-branch: main
     schedule:
       interval: weekly
       day: monday
@@ -131,7 +132,7 @@ updates:
   # ---------------------------------------------------------------------------
   - package-ecosystem: github-actions
     directory: '/'
-    target-branch: dev
+    target-branch: main
     schedule:
       interval: weekly
       day: monday
