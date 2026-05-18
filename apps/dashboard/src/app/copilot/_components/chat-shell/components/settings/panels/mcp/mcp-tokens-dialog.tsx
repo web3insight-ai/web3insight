@@ -15,11 +15,9 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/shadcn-dialog";
-import { Input } from "@/components/ui/input";
 
 interface TokenRecord {
   createdAt: string;
@@ -79,6 +77,14 @@ function buildMcpServersConfig(endpointUrl: string, token: string): string {
   );
 }
 
+function SectionLabel({ children }: { children: string }) {
+  return (
+    <div className="text-fg-muted font-mono text-[10px] uppercase tracking-[0.18em]">
+      {children}
+    </div>
+  );
+}
+
 interface CopilotMcpTokensDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
@@ -113,9 +119,7 @@ export function CopilotMcpTokensDialog({
     setIsLoading(true);
     setErrorMessage(null);
     try {
-      const res = await fetch("/api/ai/mcp/tokens", {
-        cache: "no-store",
-      });
+      const res = await fetch("/api/ai/mcp/tokens", { cache: "no-store" });
       const body = (await res.json().catch(() => ({}))) as
         | { tokens?: TokenRecord[] }
         | { error?: string };
@@ -234,94 +238,122 @@ export function CopilotMcpTokensDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full max-w-[calc(100%-2rem)] p-0 sm:max-w-2xl">
-        <DialogHeader className="px-6 pt-6 pb-0">
-          <DialogTitle className="text-balance">MCP access tokens</DialogTitle>
-          <DialogDescription className="text-pretty">
+      <DialogContent className="w-full max-w-[calc(100%-2rem)] gap-0 p-0 sm:max-w-2xl">
+        <DialogHeader className="border-b border-rule px-5 py-4">
+          <DialogTitle className="text-balance text-base font-semibold">
+            MCP access tokens
+          </DialogTitle>
+          <DialogDescription className="text-fg-muted text-pretty text-xs leading-relaxed">
             Personal access tokens that let MCP-compatible clients (Claude
-            Desktop, VS Code, Cursor, etc.) call Web3Insight Copilot tools on
-            your behalf.
+            Desktop, Cursor, VS Code, …) call Web3Insight Copilot tools on your
+            behalf.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 p-4 sm:p-6">
-          {errorMessage && (
-            <div className="rounded-[2px] border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+        <div className="space-y-5 px-5 py-5">
+          {errorMessage ? (
+            <div className="border-destructive/30 bg-destructive/5 text-destructive border px-3 py-2 text-xs">
               {errorMessage}
             </div>
-          )}
+          ) : null}
+
+          {/* Endpoint info — fixed reference, always visible at top */}
+          <section className="border-rule bg-bg-sunken/40 space-y-2 border p-3">
+            <SectionLabel>Endpoint</SectionLabel>
+            <code className="border-rule bg-bg block break-all border px-2.5 py-1.5 font-mono text-[11px]">
+              {endpointUrl}
+            </code>
+            <p className="text-fg-muted text-[11px] leading-relaxed">
+              Send your token as{" "}
+              <code className="font-mono">Authorization: Bearer &lt;token&gt;</code>.
+              Clients that accept a <code className="font-mono">url</code> +{" "}
+              <code className="font-mono">headers</code> JSON config can paste
+              the snippet shown when you create a token.
+            </p>
+          </section>
 
           {createdToken ? (
-            <section className="rounded-[2px] border border-primary/30 bg-primary/5 p-4">
-              <h3 className="text-sm font-medium">
-                Token created. Save it now — it will not be shown again.
-              </h3>
-              <div className="mt-3 flex items-center gap-2">
-                <code className="flex-1 truncate rounded-[2px] border border-rule bg-background px-3 py-2 font-mono text-xs">
-                  {createdToken.token}
-                </code>
-                <Button
+            <section className="border-accent/40 bg-accent/5 space-y-3 border p-3">
+              <div className="flex items-baseline justify-between gap-3">
+                <SectionLabel>Token created</SectionLabel>
+                <button
                   type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleCopy(createdToken.token, "token")}
-                >
-                  {copiedToken ? (
-                    <CheckIcon className="size-3.5" />
-                  ) : (
-                    <CopyIcon className="size-3.5" />
-                  )}
-                  {copiedToken ? "Copied" : "Copy token"}
-                </Button>
-              </div>
-              <h4 className="mt-4 text-xs font-medium text-muted-foreground">
-                Add to your MCP client config (`~/.cursor/mcp.json`,
-                `~/Library/Application
-                Support/Claude/claude_desktop_config.json`, etc.)
-              </h4>
-              <div className="mt-2 flex items-start gap-2">
-                <pre className="flex-1 overflow-auto rounded-[2px] border border-rule bg-background px-3 py-2 font-mono text-xs leading-relaxed">
-                  {configSnippet}
-                </pre>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleCopy(configSnippet, "config")}
-                >
-                  {copiedConfig ? (
-                    <CheckIcon className="size-3.5" />
-                  ) : (
-                    <CopyIcon className="size-3.5" />
-                  )}
-                  {copiedConfig ? "Copied" : "Copy config"}
-                </Button>
-              </div>
-              <div className="mt-3 text-right">
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
                   onClick={() => setCreatedToken(null)}
+                  className="text-fg-muted hover:text-fg text-[11px] underline-offset-2 hover:underline"
                 >
                   Dismiss
-                </Button>
+                </button>
+              </div>
+              <p className="text-fg text-xs leading-relaxed">
+                Save it now — it will not be shown again.
+              </p>
+
+              <div className="space-y-1.5">
+                <SectionLabel>Token</SectionLabel>
+                <div className="flex items-stretch gap-2">
+                  <code className="border-rule bg-bg flex-1 truncate border px-2.5 py-1.5 font-mono text-[11px]">
+                    {createdToken.token}
+                  </code>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleCopy(createdToken.token, "token")}
+                  >
+                    {copiedToken ? (
+                      <CheckIcon className="size-3.5" />
+                    ) : (
+                      <CopyIcon className="size-3.5" />
+                    )}
+                    {copiedToken ? "Copied" : "Copy"}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex items-baseline justify-between gap-2">
+                  <SectionLabel>mcp.json snippet</SectionLabel>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(configSnippet, "config")}
+                    className="text-fg-muted hover:text-fg flex items-center gap-1 text-[11px]"
+                  >
+                    {copiedConfig ? (
+                      <CheckIcon className="size-3" />
+                    ) : (
+                      <CopyIcon className="size-3" />
+                    )}
+                    {copiedConfig ? "Copied" : "Copy config"}
+                  </button>
+                </div>
+                <pre className="border-rule bg-bg overflow-x-auto border p-2.5 font-mono text-[11px] leading-relaxed">
+                  {configSnippet}
+                </pre>
+                <p className="text-fg-muted text-[11px] leading-relaxed">
+                  Paste into <code className="font-mono">~/.cursor/mcp.json</code>,{" "}
+                  <code className="font-mono">
+                    ~/Library/Application Support/Claude/claude_desktop_config.json
+                  </code>
+                  , or your client's equivalent, then restart the client.
+                </p>
               </div>
             </section>
           ) : (
-            <section>
-              <h3 className="text-sm font-medium">Create a new token</h3>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Give it a name you'll recognize (e.g. "claude-desktop").
+            <section className="space-y-2">
+              <SectionLabel>Create a new token</SectionLabel>
+              <p className="text-fg-muted text-[11px] leading-relaxed">
+                Give it a name you'll recognize (e.g.{" "}
+                <code className="font-mono">claude-desktop</code>).
               </p>
-              <div className="mt-3 flex items-center gap-2">
-                <Input
+              <div className="flex items-stretch gap-2">
+                <input
+                  type="text"
                   value={newTokenName}
                   onChange={(event) => setNewTokenName(event.target.value)}
                   placeholder="Token name"
                   maxLength={80}
                   disabled={isCreating}
-                  className="flex-1"
+                  className="border-rule bg-bg focus:border-accent placeholder:text-fg-muted/60 flex-1 border px-2.5 py-1.5 text-xs outline-none transition-colors disabled:opacity-50"
                 />
                 <Button
                   type="button"
@@ -334,97 +366,85 @@ export function CopilotMcpTokensDialog({
                   ) : (
                     <PlusIcon className="size-3.5" />
                   )}
-                  Create token
+                  Create
                 </Button>
               </div>
             </section>
           )}
 
-          <section>
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-medium">Active tokens</h3>
-              {!isLoading && tokens && (
-                <span className="text-xs text-muted-foreground">
+          <section className="space-y-2">
+            <div className="flex items-baseline justify-between">
+              <SectionLabel>Active tokens</SectionLabel>
+              {!isLoading && tokens ? (
+                <span className="text-fg-muted text-[11px]">
                   {tokens.length} {tokens.length === 1 ? "token" : "tokens"}
                 </span>
-              )}
+              ) : null}
             </div>
-            <div className="mt-3 space-y-2">
+            <div className="border-rule border">
               {isLoading ? (
-                <div className="flex items-center justify-center py-8 text-muted-foreground">
+                <div className="text-fg-muted flex items-center justify-center py-6">
                   <Loader2Icon className="size-4 animate-spin" />
                 </div>
               ) : tokens && tokens.length > 0 ? (
-                tokens.map((token) => (
-                  <div
-                    key={token.id}
-                    className="flex items-center justify-between gap-3 rounded-[2px] border border-rule px-3 py-2"
-                  >
-                    <div className="flex min-w-0 flex-1 items-center gap-3">
-                      <KeyRoundIcon className="text-muted-foreground size-4 shrink-0" />
+                <ul className="divide-rule divide-y">
+                  {tokens.map((token) => (
+                    <li
+                      key={token.id}
+                      className="flex items-center gap-3 px-3 py-2.5"
+                    >
+                      <KeyRoundIcon className="text-fg-muted size-3.5 shrink-0" />
                       <div className="min-w-0 flex-1">
-                        <div className="truncate text-sm font-medium">
+                        <div className="truncate text-xs font-medium">
                           {token.name}
                         </div>
-                        <div className="text-muted-foreground flex flex-wrap gap-x-3 text-xs">
-                          <span className="font-mono">
-                            {token.tokenPreview}
+                        <div className="text-fg-muted mt-0.5 flex flex-wrap gap-x-3 text-[11px]">
+                          <span className="font-mono">{token.tokenPreview}</span>
+                          <span>
+                            Created {formatRelative(token.createdAt)}
                           </span>
-                          <span>Created {formatRelative(token.createdAt)}</span>
                           <span>
                             Last used {formatRelative(token.lastUsedAt)}
                           </span>
                         </div>
                       </div>
-                    </div>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleRevoke(token.id)}
-                      disabled={revokingId === token.id}
-                    >
-                      {revokingId === token.id ? (
-                        <Loader2Icon className="size-3.5 animate-spin" />
-                      ) : (
-                        <Trash2Icon className="size-3.5" />
-                      )}
-                      Revoke
-                    </Button>
-                  </div>
-                ))
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleRevoke(token.id)}
+                        disabled={revokingId === token.id}
+                      >
+                        {revokingId === token.id ? (
+                          <Loader2Icon className="size-3.5 animate-spin" />
+                        ) : (
+                          <Trash2Icon className="size-3.5" />
+                        )}
+                        Revoke
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
               ) : (
-                <div className="rounded-[2px] border border-dashed border-rule px-4 py-6 text-center text-sm text-muted-foreground">
-                  No active tokens. Create one above to start using the
+                <div className="text-fg-muted px-4 py-6 text-center text-xs">
+                  No active tokens yet. Create one above to start using the
                   Web3Insight MCP endpoint.
                 </div>
               )}
             </div>
           </section>
-
-          <section className="rounded-[2px] border border-rule bg-muted/30 p-3 text-xs text-muted-foreground">
-            <p>
-              <span className="font-medium text-foreground">Endpoint:</span>{" "}
-              <code className="font-mono">{endpointUrl}</code>
-            </p>
-            <p className="mt-1">
-              Send your token as{" "}
-              <code>Authorization: Bearer &lt;token&gt;</code>. MCP clients that
-              take a `url` + `headers` JSON config can use the snippet shown
-              above when you create a token.
-            </p>
-          </section>
         </div>
 
-        <DialogFooter className="border-t border-rule px-4 py-3 sm:px-6">
+        <div className="border-rule flex justify-end border-t px-5 py-3">
           <Button
             type="button"
             variant="outline"
+            size="sm"
             onClick={() => onOpenChange(false)}
           >
             Close
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );

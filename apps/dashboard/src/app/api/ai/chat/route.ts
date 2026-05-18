@@ -103,7 +103,8 @@ interface ChatRequestBody {
 }
 
 export async function POST(request: Request) {
-  const { messages: rawMessages, sessionId } = (await request.json()) as ChatRequestBody;
+  const { messages: rawMessages, sessionId } =
+    (await request.json()) as ChatRequestBody;
 
   if (!rawMessages || rawMessages.length === 0) {
     return new Response(JSON.stringify({ error: "Messages are required" }), {
@@ -620,8 +621,17 @@ export async function OPTIONS() {
   return new Response(null, {
     headers: {
       "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     },
   });
+}
+
+// Reason: useChat({ resume: true }) probes this endpoint with GET on mount
+// before any session exists. Returning 405 (the Next.js default) flips
+// useChat's `error` state to "Failed to fetch", which renders the
+// "Copilot request failed" alert on a fresh chat. A 204 No Content tells
+// the SDK there's nothing to resume without surfacing an error.
+export async function GET() {
+  return new Response(null, { status: 204 });
 }
