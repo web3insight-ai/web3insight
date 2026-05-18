@@ -1,6 +1,9 @@
+import { desc, eq, sql } from 'drizzle-orm';
 import type { DbClient } from '@/db/client';
 import type { TokenPoolService } from '@/services/token-pool.service';
 import type { GithubService } from '@/services/github.service';
+import { api_donate_repos } from '@/db/schema';
+import { first, firstOrThrow } from '@/db/helpers';
 import { Buffer } from 'buffer';
 
 /**
@@ -71,55 +74,58 @@ export class DonateService {
       repoInfo.default_branch,
     );
 
-    const exists = await this.db
-      .selectFrom('api.donate_repos')
-      .select(['repo_id'])
-      .where('repo_id', '=', String(repoInfo.id))
-      .executeTakeFirst();
+    const exists = await first(
+      this.db
+        .select({ repo_id: api_donate_repos.repo_id })
+        .from(api_donate_repos)
+        .where(eq(api_donate_repos.repo_id, String(repoInfo.id)))
+        .limit(1),
+    );
 
     if (exists) {
-      const updated = await this.db
-        .updateTable('api.donate_repos')
-        .set({
+      return firstOrThrow(
+        this.db
+          .update(api_donate_repos)
+          .set({
+            repo_info: repoInfo as any,
+            repo_donate_data: repoDonateData,
+            submitter_id: submitterId,
+          })
+          .where(eq(api_donate_repos.repo_id, String(repoInfo.id)))
+          .returning(),
+        'Failed to update donate repo',
+      );
+    }
+
+    return firstOrThrow(
+      this.db
+        .insert(api_donate_repos)
+        .values({
+          repo_id: String(repoInfo.id),
           repo_info: repoInfo as any,
           repo_donate_data: repoDonateData,
           submitter_id: submitterId,
         })
-        .where('repo_id', '=', String(repoInfo.id))
-        .returningAll()
-        .executeTakeFirstOrThrow();
-
-      return updated;
-    }
-
-    const inserted = await this.db
-      .insertInto('api.donate_repos')
-      .values({
-        repo_id: repoInfo.id,
-        repo_info: repoInfo as any,
-        repo_donate_data: repoDonateData,
-        submitter_id: submitterId,
-      })
-      .returningAll()
-      .executeTakeFirstOrThrow();
-
-    return inserted;
+        .returning(),
+      'Failed to insert donate repo',
+    );
   }
 
   async list() {
-    return await this.db
-      .selectFrom('api.donate_repos')
-      .selectAll()
-      .orderBy('created_at', 'desc')
-      .execute();
+    return this.db
+      .select()
+      .from(api_donate_repos)
+      .orderBy(desc(api_donate_repos.created_at));
   }
 
   async detail(repoId: number) {
-    const record = await this.db
-      .selectFrom('api.donate_repos')
-      .selectAll()
-      .where('repo_id', '=', String(repoId))
-      .executeTakeFirst();
+    const record = await first(
+      this.db
+        .select()
+        .from(api_donate_repos)
+        .where(eq(api_donate_repos.repo_id, String(repoId)))
+        .limit(1),
+    );
 
     if (!record) {
       throw new Error('Repository not found');
@@ -129,11 +135,15 @@ export class DonateService {
   }
 
   async detailByName(repoFullName: string) {
-    const record = await this.db
-      .selectFrom('api.donate_repos')
-      .selectAll()
-      .where('repo_info', '@>', JSON.stringify({ full_name: repoFullName }))
-      .executeTakeFirst();
+    const record = await first(
+      this.db
+        .select()
+        .from(api_donate_repos)
+        .where(
+          sql`${api_donate_repos.repo_info} @> ${JSON.stringify({ full_name: repoFullName })}::jsonb`,
+        )
+        .limit(1),
+    );
 
     if (!record) {
       throw new Error('Repository not found');
@@ -147,24 +157,25 @@ export class DonateService {
       throw new Error('repo_donate_data is required');
     }
 
-    const exists = await this.db
-      .selectFrom('api.donate_repos')
-      .select(['repo_id'])
-      .where('repo_id', '=', String(repoId))
-      .executeTakeFirst();
+    const exists = await first(
+      this.db
+        .select({ repo_id: api_donate_repos.repo_id })
+        .from(api_donate_repos)
+        .where(eq(api_donate_repos.repo_id, String(repoId)))
+        .limit(1),
+    );
 
     if (!exists) {
       throw new Error('Repository not found');
     }
 
     await this.db
-      .updateTable('api.donate_repos')
+      .update(api_donate_repos)
       .set({
         repo_donate_data: repoDonateData,
       })
-      .where('repo_id', '=', String(repoId))
-      .execute();
+      .where(eq(api_donate_repos.repo_id, String(repoId)));
 
-    return await this.detail(repoId);
+    return this.detail(repoId);
   }
 }

@@ -1,11 +1,11 @@
 ## 目标
 
-分析 GitHub 开发者数据，生成 SQL 或 Kysely 查询。
+分析 GitHub 开发者数据，生成 SQL 或 Drizzle 查询。
 
 ## 技术栈
 
 - TypeScript + Hono + oRPC（contract-first，契约见 `@web3insight/api-contract`）
-- PostgreSQL + Kysely
+- PostgreSQL + Drizzle ORM
 - Inngest（长任务工作流，`src/inngest/functions/`）
 - 运行时：Vercel Build Output API（`src/serverless/*.ts` 经 `scripts/bundle-functions.ts` 打包）
 - PNPM workspace（根仓 turbo 编排）
@@ -36,16 +36,31 @@
 1. 先理解自然语言需求，确认表、字段、条件与聚合逻辑。
 2. 仅使用 PostgreSQL 最新版本语法。
 3. 输出可执行的完整 SQL。
+4. 大段 analytics SQL（含递归 CTE、窗口函数、jsonb_object_keys 等）保留原始 SQL 文本，通过 `executeRaw(this.db, sql, params)` 适配器执行 —— 见 `src/db/helpers.ts`。
 
 ## 数据库 api schema（业务查询规则）
 
-1. 使用 Kysely 查询构建器完成功能。
-2. api.auth_users 为用户表。
-3. api.auth_users_binds 为用户授权绑定表，目前使用 privy 第三方管理授权。
+1. 使用 Drizzle 查询构建器完成功能（`db.select()/insert()/update()/delete()`）。
+2. 表对象从 `@/db/schema` 导入，命名保持 snake_case（如 `api_auth_users`、`data_repos`），列字段名与列名一致。
+3. JSONB 写入直接传 JS 对象（Drizzle 自动 stringify），不要再 `JSON.stringify(...)`。
+4. JSONB `?`（key 存在）操作符用 `sql\`jsonb_exists(${col}, ${name})\`` 表达，避免 pg 占位符冲突。
+5. JSONB `@>`（contains）写成 `sql\`${col} @> ${value}::jsonb\``。
+6. api.auth_users 为用户表。
+7. api.auth_users_binds 为用户授权绑定表，目前使用 privy 第三方管理授权。
+
+## Schema 维护
+
+- 源头：生产 Postgres。
+- 工具：`pnpm db:pull` —— 调用 drizzle-kit introspect，把生产数据库 schema 写到 `apps/api/drizzle/`。
+- 流程：上游 schema 有变更时跑 `pnpm db:pull`，把 diff 手工合并进 `src/db/schema/api.ts` / `data.ts`，保持 JS 字段名 snake_case、`int8` 当字符串处理、timestamp 用 `mode: 'string'`。
+- `bigint generated always as identity` 列使用 `int8Identity('col').notNull().$defaultFn(() => undefined as unknown as string)`（见 `src/db/types.ts`），让 TS 把列视为插入可选 + select 非空。
 
 ## 重要文件
 
-- `src/app/db/dto/db.dto.ts` — 数据库表结构定义（Kysely 生成）
+- `src/db/schema/api.ts` / `data.ts` — Drizzle pgSchema 表定义（替代旧 `db.dto.ts`）
+- `src/db/client.ts` — `createDbClient()` 返回 `NodePgDatabase<typeof schema>`
+- `src/db/helpers.ts` — `first`、`firstOrThrow`、`executeRaw` 三个适配器
+- `src/db/types.ts` — `int8` / `int8Identity` 自定义列类型
 - `src/services/github.service.ts` — GitHub API 数据获取，统一封装
 - `src/services/auth.service.ts` — JWT + Privy 绑定逻辑（Phase D 从 NestJS 移植）
 - `src/rpc-hono/handlers/*.ts` — 各 oRPC 子路由的处理器
@@ -58,6 +73,6 @@
 
 - Hono https://hono.dev/llms-full.txt
 - oRPC https://orpc.unnoq.com/llms-full.txt
-- Kysely https://kysely.dev/llms-full.txt
+- Drizzle ORM https://orm.drizzle.team/llms-full.txt
 
 未查找到示例或者参考代码以及未提供 llms.txt 的情况下，询问是否使用 context7 mcp（use context7） 获取文档。

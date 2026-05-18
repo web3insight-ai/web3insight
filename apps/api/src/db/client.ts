@@ -1,9 +1,8 @@
-import { Kysely, PostgresDialect } from 'kysely';
+import { drizzle, type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
-import Cursor from 'pg-cursor';
-import type { DB } from '@/app/db/dto/db.dto';
+import { schema } from '@/db/schema';
 
-export type DbClient = Kysely<DB>;
+export type DbClient = NodePgDatabase<typeof schema>;
 
 export interface CreateDbClientOptions {
   databaseUrl: string;
@@ -17,7 +16,7 @@ export interface CreateDbClientOptions {
 }
 
 /**
- * Create a Kysely instance backed by node-postgres. Single shared signature for
+ * Create a Drizzle instance backed by node-postgres. Single shared signature for
  * Hono request handlers, Vercel cron handlers, and Inngest step functions.
  */
 export function createDbClient(opts: CreateDbClientOptions): DbClient {
@@ -26,7 +25,5 @@ export function createDbClient(opts: CreateDbClientOptions): DbClient {
     max: opts.maxConnections ?? 1,
     idleTimeoutMillis: opts.idleTimeoutMillis ?? 30_000,
   });
-  return new Kysely<DB>({
-    dialect: new PostgresDialect({ cursor: Cursor, pool }),
-  });
+  return drizzle(pool, { schema });
 }

@@ -11,7 +11,9 @@
     "dev": "next dev --turbopack --port 3000",
     "lint": "eslint .",
     "start": "next start",
-    "typecheck": "tsc --noEmit || true"
+    "typecheck": "tsc --noEmit || true",
+    "db:pull": "drizzle-kit pull",
+    "db:check": "drizzle-kit check"
   },
   "dependencies": {
     "@ai-sdk/azure": "catalog:",
@@ -55,7 +57,7 @@
     "highcharts-react-official": "^3.2.3",
     "jose": "^6.2.3",
     "jotai": "^2.20.0",
-    "kysely": "catalog:",
+    "drizzle-orm": "catalog:",
     "lucide-react": "catalog:",
     "motion": "^12.38.0",
     "next": "catalog:",
@@ -95,6 +97,8 @@
     "@web3insight/next-config": "workspace:*",
     "@web3insight/typescript-config": "workspace:*",
     "autoprefixer": "^10.5.0",
+    "dotenv": "^17.4.2",
+    "drizzle-kit": "catalog:",
     "eslint": "catalog:",
     "eslint-config-next": "^16.2.6",
     "eslint-import-resolver-typescript": "^4.4.4",

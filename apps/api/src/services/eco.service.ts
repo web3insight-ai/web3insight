@@ -1,4 +1,6 @@
+import { asc, desc, eq } from 'drizzle-orm';
 import type { DbClient } from '@/db/client';
+import { data_ecosystems } from '@/db/schema';
 import { ECO_ALL } from '@/data/dto/data.dto';
 
 /**
@@ -12,26 +14,20 @@ export class EcoService {
   constructor(private readonly db: DbClient) {}
 
   async getEcoTop300() {
-    const data = await this.db
-      .selectFrom('data.ecosystems')
-      .selectAll()
-      .where('active', '=', true)
-      .orderBy('score', 'desc')
-      .orderBy('name', 'asc')
-      .limit(300)
-      .execute();
-    return data;
+    return this.db
+      .select()
+      .from(data_ecosystems)
+      .where(eq(data_ecosystems.active, true))
+      .orderBy(desc(data_ecosystems.score), asc(data_ecosystems.name))
+      .limit(300);
   }
 
   async getEcoTopAll() {
-    const data = await this.db
-      .selectFrom('data.ecosystems')
-      .selectAll()
-      .where('active', '=', true)
-      .orderBy('score', 'desc')
-      .orderBy('name', 'asc')
-      .execute();
-    return data;
+    return this.db
+      .select()
+      .from(data_ecosystems)
+      .where(eq(data_ecosystems.active, true))
+      .orderBy(desc(data_ecosystems.score), asc(data_ecosystems.name));
   }
 
   async getActiveEcoNames(): Promise<string[]> {

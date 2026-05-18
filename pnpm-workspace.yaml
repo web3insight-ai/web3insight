@@ -60,9 +60,9 @@ catalog:
   inngest: 4.4.0
 
   # Data layer
-  kysely: 0.29.2
+  'drizzle-orm': 0.45.2
+  'drizzle-kit': 0.31.10
   pg: 8.20.0
-  'pg-cursor': 2.19.0
   '@octokit/rest': 22.0.1
 
   # Logging

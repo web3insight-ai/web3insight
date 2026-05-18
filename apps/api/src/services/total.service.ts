@@ -1,5 +1,5 @@
-import { CompiledQuery } from 'kysely';
 import type { DbClient } from '@/db/client';
+import { executeRaw } from '@/db/helpers';
 import type { CacheService } from '@/services/cache.service';
 import type { EcoService } from '@/services/eco.service';
 import { CacheKey, type CacheKeyValue } from '@/data/dto/cache.dto';
@@ -60,9 +60,7 @@ LEFT JOIN
     repo_counts rc ON el.ecosystem_name = rc.ecosystem
 ORDER BY
     repo_count DESC;`;
-    const query = CompiledQuery.raw(sqlRawQuery, [ecoNames]);
-
-    const results = await this.db.executeQuery(query);
+    const results = await executeRaw(this.db, sqlRawQuery, [ecoNames]);
 
     for (const row of results.rows as QueryReposTotal[]) {
       await this.cacheService.update(
@@ -124,9 +122,7 @@ FROM ecosystem_list el
          LEFT JOIN total_participants tp ON el.ecosystem_name = tp.ecosystem_name
          LEFT JOIN active_participants ap ON el.ecosystem_name = ap.ecosystem_name
          LEFT JOIN new_developers nd ON el.ecosystem_name = nd.ecosystem_name;`;
-    const query = CompiledQuery.raw(sqlRawQuery, [ecoNames]);
-
-    const results = await this.db.executeQuery(query);
+    const results = await executeRaw(this.db, sqlRawQuery, [ecoNames]);
 
     for (const row of results.rows as QueryActorsTotal[]) {
       await this.cacheService.update(
@@ -158,9 +154,7 @@ FROM (
     FROM data.repos
     WHERE upstream_marks != '{}'::jsonb
 ) AS ecosystems;`;
-    const query = CompiledQuery.raw(sqlRawQuery);
-
-    const results = await this.db.executeQuery(query);
+    const results = await executeRaw(this.db, sqlRawQuery);
 
     for (const row of results.rows as QueryEcoTotal[]) {
       await this.cacheService.update(
@@ -217,9 +211,10 @@ WHERE rn <= 8
 GROUP BY ecosystem_name, time_unit
 ORDER BY ecosystem_name, time_unit;
 `;
-    const query = CompiledQuery.raw(sqlRawQuery, [ecoNames, ['week', 'month']]);
-
-    const exec = await this.db.executeQuery(query);
+    const exec = await executeRaw(this.db, sqlRawQuery, [
+      ecoNames,
+      ['week', 'month'],
+    ]);
 
     const results = exec.rows as QueryActorDate[];
 
@@ -266,8 +261,7 @@ SELECT ecosystem_name, country, actor_count
 FROM actor_countries
 ORDER BY ecosystem_name, actor_count DESC, country ASC;
 `;
-    const query = CompiledQuery.raw(sqlRawQuery, [ecoNames]);
-    const exec = await this.db.executeQuery(query);
+    const exec = await executeRaw(this.db, sqlRawQuery, [ecoNames]);
     const rows = exec.rows as (QueryActorCountryStat & {
       ecosystem_name: string;
     })[];
@@ -304,8 +298,7 @@ WHERE country IS NOT NULL AND country <> ''
 GROUP BY country
 ORDER BY actor_count DESC, country ASC;
 `;
-    const globalQuery = CompiledQuery.raw(globalSqlRawQuery);
-    const globalExec = await this.db.executeQuery(globalQuery);
+    const globalExec = await executeRaw(this.db, globalSqlRawQuery);
     const globalRows = globalExec.rows as QueryActorCountryStat[];
 
     const globalResult = new ActorCountryStatListDto();
@@ -351,9 +344,7 @@ SET active_developers = rj.active_developers
 FROM repo_json rj
 WHERE r.repo_id = rj.repo_id;
 `;
-    const query = CompiledQuery.raw(sqlRawQuery);
-
-    const exec = await this.db.executeQuery(query);
+    const exec = await executeRaw(this.db, sqlRawQuery);
 
     console.log('Indexer monthly dev updated rows:', exec);
 
@@ -380,9 +371,7 @@ SET star_history = rj.star_history
 FROM repo_json rj
 WHERE r.repo_id = rj.repo_id;
 `;
-    const query2 = CompiledQuery.raw(sqlRawQuery2);
-
-    const exec2 = await this.db.executeQuery(query2);
+    const exec2 = await executeRaw(this.db, sqlRawQuery2);
 
     console.log('Indexer star updated rows:', exec2);
   }

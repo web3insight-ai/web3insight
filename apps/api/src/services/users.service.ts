@@ -1,10 +1,17 @@
 import { Workbook } from 'exceljs';
 import { existsSync } from 'fs';
 import { isAbsolute, join, parse } from 'path';
+import { and, count, eq, inArray, ne, sql } from 'drizzle-orm';
 import type { DbClient } from '@/db/client';
 import type { TokenPoolService } from '@/services/token-pool.service';
 import type { GithubService } from '@/services/github.service';
-import type { ApiAnalysisUsers } from '@/app/db/dto/db.dto';
+import {
+  api_analysis_users,
+  api_auth_users_binds,
+  data_actors,
+  data_ecosystems,
+} from '@/db/schema';
+import { first, firstOrThrow } from '@/db/helpers';
 import {
   type BaseIdReqAndResDto,
   type CustomQueryUsersOrderReqDto,
@@ -15,6 +22,8 @@ import {
   type GithubUsersDto,
   Intent,
 } from '@/api/dto/api.dto';
+
+type ApiAnalysisUsers = typeof api_analysis_users.$inferSelect;
 
 type UserTopLangsResult = {
   username: string;
@@ -103,12 +112,23 @@ export class UsersService {
     );
 
     if (body.intent === Intent.Profile) {
-      const existing = await this.db
-        .selectFrom('api.analysis_users')
-        .select(['id', 'github', 'public', 'submitter_id'])
-        .where('submitter_id', '=', uid)
-        .where('intent', '=', body.intent)
-        .executeTakeFirst();
+      const existing = await first(
+        this.db
+          .select({
+            id: api_analysis_users.id,
+            github: api_analysis_users.github,
+            public: api_analysis_users.public,
+            submitter_id: api_analysis_users.submitter_id,
+          })
+          .from(api_analysis_users)
+          .where(
+            and(
+              eq(api_analysis_users.submitter_id, uid),
+              eq(api_analysis_users.intent, body.intent),
+            ),
+          )
+          .limit(1),
+      );
 
       if (existing) {
         const res = new CustomUploadResDto();
@@ -163,33 +183,34 @@ export class UsersService {
     res.fail = fail;
 
     if (ref === '') {
-      const id = await this.db
-        .insertInto('api.analysis_users')
-        .values({
-          request_data: { urls: body.request_data },
-          github: JSON.stringify({ users: githubData }),
-          intent: body.intent,
-          submitter_id: uid,
-          description: body.description,
-        })
-        .returning('id')
-        .executeTakeFirstOrThrow();
+      const inserted = await firstOrThrow(
+        this.db
+          .insert(api_analysis_users)
+          .values({
+            request_data: { urls: body.request_data },
+            github: { users: githubData },
+            intent: body.intent,
+            submitter_id: uid,
+            description: body.description,
+          })
+          .returning({ id: api_analysis_users.id }),
+        'Failed to insert analysis_users',
+      );
 
-      res.id = Number(id.id);
+      res.id = Number(inserted.id);
     } else {
       res.id = Number(ref);
       await this.db
-        .updateTable('api.analysis_users')
+        .update(api_analysis_users)
         .set({
           request_data: { urls: body.request_data },
-          github: JSON.stringify({ users: githubData }),
+          github: { users: githubData },
           intent: body.intent,
           description: body.description,
-          data: JSON.stringify({}),
-          ai: JSON.stringify({}),
+          data: {},
+          ai: {},
         })
-        .where('id', '=', String(ref))
-        .execute();
+        .where(eq(api_analysis_users.id, String(ref)));
     }
 
     // TODO(phase-f): originally this.eventEmitter.emit('api.custom.analysis.createdv2', res)
@@ -204,110 +225,132 @@ export class UsersService {
     params: BaseIdReqAndResDto,
     body: CustomShareReqDto,
   ) {
-    const existing = await this.db
-      .selectFrom('api.analysis_users')
-      .select(['id', 'public'])
-      .where('submitter_id', '=', uid)
-      .where('intent', '=', Intent.Profile)
-      .where('id', '=', String(params.id))
-      .executeTakeFirst();
+    const existing = await first(
+      this.db
+        .select({
+          id: api_analysis_users.id,
+          public: api_analysis_users.public,
+        })
+        .from(api_analysis_users)
+        .where(
+          and(
+            eq(api_analysis_users.submitter_id, uid),
+            eq(api_analysis_users.intent, Intent.Profile),
+            eq(api_analysis_users.id, String(params.id)),
+          ),
+        )
+        .limit(1),
+    );
 
     if (!existing) {
       throw new Error('Analysis not found');
     }
 
     await this.db
-      .updateTable('api.analysis_users')
-      .where('id', '=', String(params.id))
-      .set({
-        public: body.share,
-      })
-      .execute();
+      .update(api_analysis_users)
+      .set({ public: body.share })
+      .where(eq(api_analysis_users.id, String(params.id)));
 
     return new Object();
   }
 
   async remove(uid: string, params: BaseIdReqAndResDto) {
-    const existing = await this.db
-      .selectFrom('api.analysis_users')
-      .select(['id'])
-      .where('submitter_id', '=', uid)
-      .where('intent', '=', Intent.Profile)
-      .where('id', '=', String(params.id))
-      .executeTakeFirst();
+    const existing = await first(
+      this.db
+        .select({ id: api_analysis_users.id })
+        .from(api_analysis_users)
+        .where(
+          and(
+            eq(api_analysis_users.submitter_id, uid),
+            eq(api_analysis_users.intent, Intent.Profile),
+            eq(api_analysis_users.id, String(params.id)),
+          ),
+        )
+        .limit(1),
+    );
 
     if (!existing) {
       throw new Error('Analysis not found');
     }
 
     await this.db
-      .deleteFrom('api.analysis_users')
-      .where('id', '=', String(params.id))
-      .execute();
+      .delete(api_analysis_users)
+      .where(eq(api_analysis_users.id, String(params.id)));
 
     return new Object();
   }
 
   async getList(params: CustomQueryUsersOrderReqDto, uid: string) {
-    let query = this.db
-      .selectFrom('api.analysis_users')
-      .where('submitter_id', '=', uid)
-      .where('intent', '=', params.intent);
+    const whereClause = and(
+      eq(api_analysis_users.submitter_id, uid),
+      eq(api_analysis_users.intent, params.intent),
+    );
 
-    const total = await query
-      .select(this.db.fn.count('id').as('total'))
-      .execute();
+    const totalRow = await this.db
+      .select({ total: count(api_analysis_users.id) })
+      .from(api_analysis_users)
+      .where(whereClause);
 
-    query = query.orderBy('id', params.direction);
-    query = query.offset(params.skip);
-    query = query.limit(params.take);
-
-    const find = await query
-      .select(['id', 'description', 'created_at'])
-      .execute();
+    const direction = params.direction === 'desc' ? sql`desc` : sql`asc`;
+    const find = await this.db
+      .select({
+        id: api_analysis_users.id,
+        description: api_analysis_users.description,
+        created_at: api_analysis_users.created_at,
+      })
+      .from(api_analysis_users)
+      .where(whereClause)
+      .orderBy(sql`${api_analysis_users.id} ${direction}`)
+      .offset(params.skip)
+      .limit(params.take);
 
     const res = new CustomQueryUsersResDto();
     res.list = find as unknown as ApiAnalysisUsers[];
-    res.total = total[0].total as number;
+    res.total = Number(totalRow[0].total);
 
     return res;
   }
 
   async getPublicList(params: CustomQueryUsersOrderReqDto) {
-    let query = this.db
-      .selectFrom('api.analysis_users')
-      .where('public', '=', true)
-      .where('intent', '=', 'hackathon');
+    const whereClause = and(
+      eq(api_analysis_users.public, true),
+      eq(api_analysis_users.intent, 'hackathon'),
+    );
 
-    const total = await query
-      .select(this.db.fn.count('id').as('total'))
-      .execute();
+    const totalRow = await this.db
+      .select({ total: count(api_analysis_users.id) })
+      .from(api_analysis_users)
+      .where(whereClause);
 
-    query = query.orderBy('id', params.direction);
-    query = query.offset(params.skip);
-    query = query.limit(params.take);
-
-    const find = await query
-      .select(['id', 'description', 'created_at'])
-      .execute();
+    const direction = params.direction === 'desc' ? sql`desc` : sql`asc`;
+    const find = await this.db
+      .select({
+        id: api_analysis_users.id,
+        description: api_analysis_users.description,
+        created_at: api_analysis_users.created_at,
+      })
+      .from(api_analysis_users)
+      .where(whereClause)
+      .orderBy(sql`${api_analysis_users.id} ${direction}`)
+      .offset(params.skip)
+      .limit(params.take);
 
     const res = new CustomQueryUsersResDto();
     res.list = find as unknown as ApiAnalysisUsers[];
-    res.total = total[0].total as number;
+    res.total = Number(totalRow[0].total);
 
     return res;
   }
 
   async analysisUsers(params: BaseIdReqAndResDto) {
-    const analysis = await this.db
-      .selectFrom('api.analysis_users')
-      .selectAll()
-      .where('id', '=', String(params.id))
-      .executeTakeFirstOrThrow();
-
-    if (!analysis) {
-      throw new Error('Analysis not found');
-    }
+    const analysis = await firstOrThrow(
+      this.db
+        .select()
+        .from(api_analysis_users)
+        .where(eq(api_analysis_users.id, String(params.id)))
+        .limit(1),
+      'Analysis not found',
+    );
 
     if (analysis.data && Object.keys(analysis.data).length > 0) {
       return analysis;
@@ -324,11 +367,16 @@ export class UsersService {
       throw new Error('analysisId is required');
     }
 
-    const analysis = await this.db
-      .selectFrom('api.analysis_users')
-      .select(['id', 'github'])
-      .where('id', '=', analysisIdValue)
-      .executeTakeFirst();
+    const analysis = await first(
+      this.db
+        .select({
+          id: api_analysis_users.id,
+          github: api_analysis_users.github,
+        })
+        .from(api_analysis_users)
+        .where(eq(api_analysis_users.id, analysisIdValue))
+        .limit(1),
+    );
 
     if (!analysis) {
       throw new Error('Analysis not found');
@@ -408,19 +456,24 @@ export class UsersService {
   }
 
   async getTopFormUserName(username: string) {
-    const analysis = await this.db
-      .selectFrom('api.analysis_users')
-      .select(['data', 'github'])
-      .where('intent', '=', Intent.Profile)
-      .where('data', '!=', '{}')
-      .where(
-        'github',
-        '@>',
-        JSON.stringify({
-          users: [{ login: username }],
-        }),
-      )
-      .executeTakeFirst();
+    const analysis = await first(
+      this.db
+        .select({
+          data: api_analysis_users.data,
+          github: api_analysis_users.github,
+        })
+        .from(api_analysis_users)
+        .where(
+          and(
+            eq(api_analysis_users.intent, Intent.Profile),
+            ne(api_analysis_users.data, {}),
+            sql`${api_analysis_users.github} @> ${JSON.stringify({
+              users: [{ login: username }],
+            })}::jsonb`,
+          ),
+        )
+        .limit(1),
+    );
 
     if (!analysis) {
       return {
@@ -784,11 +837,17 @@ export class UsersService {
   }
 
   async getTopFormUserId(id: string) {
-    const analysis = await this.db
-      .selectFrom('data.actors')
-      .select(['eco_score', 'actor_id', 'actor_login'])
-      .where('actor_id', '=', id)
-      .executeTakeFirst();
+    const analysis = await first(
+      this.db
+        .select({
+          eco_score: data_actors.eco_score,
+          actor_id: data_actors.actor_id,
+          actor_login: data_actors.actor_login,
+        })
+        .from(data_actors)
+        .where(eq(data_actors.actor_id, id))
+        .limit(1),
+    );
     if (!analysis) {
       return {};
     }
@@ -845,11 +904,17 @@ export class UsersService {
 
     for (const condition of conditions) {
       const rows = await this.db
-        .selectFrom('api.analysis_users')
-        .select(['id', 'description'])
-        .where('github', '@>', JSON.stringify(condition))
-        .where('intent', '=', Intent.Hackathon)
-        .execute();
+        .select({
+          id: api_analysis_users.id,
+          description: api_analysis_users.description,
+        })
+        .from(api_analysis_users)
+        .where(
+          and(
+            sql`${api_analysis_users.github} @> ${JSON.stringify(condition)}::jsonb`,
+            eq(api_analysis_users.intent, Intent.Hackathon),
+          ),
+        );
 
       for (const row of rows) {
         const rowId = Number(row.id);
@@ -882,22 +947,31 @@ export class UsersService {
     }
 
     const activeEcosystems = await this.db
-      .selectFrom('data.ecosystems')
-      .select(['name'])
-      .where('name', 'in', uniqueNames)
-      .where('active', '=', true)
-      .execute();
+      .select({ name: data_ecosystems.name })
+      .from(data_ecosystems)
+      .where(
+        and(
+          inArray(data_ecosystems.name, uniqueNames),
+          eq(data_ecosystems.active, true),
+        ),
+      );
 
     return activeEcosystems.map((ecosystem) => ecosystem.name);
   }
 
   async getPrivyGithubUsername(uid: string): Promise<string | null> {
-    const privyBind = await this.db
-      .selectFrom('api.auth_users_binds')
-      .select(['bind_openid'])
-      .where('bind_uid', '=', uid)
-      .where('bind_type', '=', 'privy')
-      .executeTakeFirst();
+    const privyBind = await first(
+      this.db
+        .select({ bind_openid: api_auth_users_binds.bind_openid })
+        .from(api_auth_users_binds)
+        .where(
+          and(
+            eq(api_auth_users_binds.bind_uid, uid),
+            eq(api_auth_users_binds.bind_type, 'privy'),
+          ),
+        )
+        .limit(1),
+    );
 
     const account = await this.deps
       .getAuthService()
@@ -927,11 +1001,13 @@ export class UsersService {
     const ids = payload.users.map((user: { id: number }) => user.id);
 
     const actors = await this.db
-      .selectFrom('data.actors')
-      .select(['actor_id', 'eco_score'])
+      .select({
+        actor_id: data_actors.actor_id,
+        eco_score: data_actors.eco_score,
+      })
+      .from(data_actors)
       // actor_id column is text in the schema; cast number[] → string[] for the IN clause.
-      .where('actor_id', 'in', ids.map(String))
-      .execute();
+      .where(inArray(data_actors.actor_id, ids.map(String)));
 
     const rows = actors
       .filter((actor) => actor.eco_score && typeof actor.eco_score === 'object')
@@ -971,11 +1047,14 @@ export class UsersService {
 
     if (uniqueEcosystems.length > 0) {
       const ecosystemDB = await this.db
-        .selectFrom('data.ecosystems')
-        .where('name', 'in', uniqueEcosystems)
-        .where('active', '=', true)
-        .selectAll()
-        .execute();
+        .select()
+        .from(data_ecosystems)
+        .where(
+          and(
+            inArray(data_ecosystems.name, uniqueEcosystems),
+            eq(data_ecosystems.active, true),
+          ),
+        );
 
       const activeEcosystemNames = new Set(
         ecosystemDB.map((item) => item.name),
@@ -1064,28 +1143,25 @@ export class UsersService {
     data.contribution_percentage = contributionPercentage;
     data.ecosystem_ranking = ecosystemRanking;
 
-    const body = JSON.stringify(data);
-
     if (filteredRows.length > 0) {
-      const update = this.db
-        .updateTable('api.analysis_users')
-        .where('id', '=', String(payload.id))
-        .set({
-          data: body,
-        })
-        .returningAll();
-      await this.db.executeQuery(update);
+      await this.db
+        .update(api_analysis_users)
+        .set({ data })
+        .where(eq(api_analysis_users.id, String(payload.id)));
     }
 
     if (ids.length > 1) {
       return;
     }
 
-    const newData = await this.db
-      .selectFrom('api.analysis_users')
-      .selectAll()
-      .where('id', '=', String(payload.id))
-      .executeTakeFirstOrThrow();
+    const newData = await firstOrThrow(
+      this.db
+        .select()
+        .from(api_analysis_users)
+        .where(eq(api_analysis_users.id, String(payload.id)))
+        .limit(1),
+      'Analysis not found',
+    );
 
     // TODO(phase-e): port DeveloperAnalysisService to Hono-friendly streaming.
     // Until then, skip AI augmentation if the analyzer isn't wired into deps.
@@ -1103,8 +1179,8 @@ export class UsersService {
         request_data: newData.request_data as { urls: string[] },
         github: newData.github as { users: unknown[] },
         data: newData.data as { users: unknown[] },
-        created_at: newData.created_at?.toISOString() || '',
-        updated_at: newData.updated_at?.toISOString() || '',
+        created_at: newData.created_at ?? '',
+        updated_at: newData.updated_at ?? '',
         description: newData.description || '',
         submitter_id: newData.submitter_id || '',
         public: newData.public || false,
@@ -1114,28 +1190,20 @@ export class UsersService {
 
       console.log(`AI analysis completed for user analysis id: ${payload.id}`);
 
-      const update = this.db
-        .updateTable('api.analysis_users')
-        .where('id', '=', String(payload.id))
-        .set({
-          ai: JSON.stringify(aiData),
-        })
-        .returningAll();
-      await this.db.executeQuery(update);
+      await this.db
+        .update(api_analysis_users)
+        .set({ ai: aiData as Record<string, unknown> })
+        .where(eq(api_analysis_users.id, String(payload.id)));
     } catch (error) {
       console.error(
         `AI analysis failed for user analysis id: ${payload.id}`,
         error,
       );
       // Record empty AI data rather than failing the request
-      const update = this.db
-        .updateTable('api.analysis_users')
-        .where('id', '=', String(payload.id))
-        .set({
-          ai: JSON.stringify({ success: false, error: String(error) }),
-        })
-        .returningAll();
-      await this.db.executeQuery(update);
+      await this.db
+        .update(api_analysis_users)
+        .set({ ai: { success: false, error: String(error) } })
+        .where(eq(api_analysis_users.id, String(payload.id)));
     }
   }
 }

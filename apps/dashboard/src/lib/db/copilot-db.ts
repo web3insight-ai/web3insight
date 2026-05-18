@@ -1,72 +1,40 @@
 import "server-only";
 
-import { Kysely, PostgresDialect } from "kysely";
+import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { env } from "@env";
+import {
+  schema,
+  copilot_sessions,
+  copilot_messages,
+  copilot_feedback,
+} from "./schema/copilot";
 
-// -- Table type definitions --------------------------------------------------
+// Inferred row types — exported for callers that previously imported the
+// hand-written Kysely interfaces of the same name.
+export type CopilotSessionsTable = typeof copilot_sessions.$inferSelect;
+export type CopilotMessagesTable = typeof copilot_messages.$inferSelect;
+export type CopilotFeedbackTable = typeof copilot_feedback.$inferSelect;
 
-interface CopilotSessionsTable {
-  session_id: string; // UUID, PK
-  user_id: string | null;
-  title: string | null;
-  last_active_at: Date;
-  is_archived: boolean;
-  deleted_at: Date | null;
-  created_at: Date;
-}
+export type CopilotDb = NodePgDatabase<typeof schema>;
 
-interface CopilotMessagesTable {
-  message_id: string; // UUID, PK
-  session_id: string; // UUID, FK -> copilot_sessions
-  parent_id: string | null; // UUID, for branching
-  role: "user" | "assistant";
-  ui_message: unknown; // JSONB column
-  created_at: Date;
-}
-
-interface CopilotFeedbackTable {
-  id: string; // UUID, PK
-  session_id: string; // UUID, FK -> copilot_sessions
-  message_id: string; // UUID, FK -> copilot_messages
-  feedback_type: "thumbs_up" | "thumbs_down";
-  comment: string | null;
-  created_at: Date;
-}
-
-export interface CopilotDatabase {
-  "api.copilot_sessions": CopilotSessionsTable;
-  "api.copilot_messages": CopilotMessagesTable;
-  "api.copilot_feedback": CopilotFeedbackTable;
-}
-
-export type {
-  CopilotSessionsTable,
-  CopilotMessagesTable,
-  CopilotFeedbackTable,
-};
-
-// -- Singleton Kysely instances ----------------------------------------------
+// -- Singleton Drizzle instances ---------------------------------------------
 // Reason: Separate read (read-only account) and write (admin account) pools
 // so that AI queries use the read-only user while session persistence uses admin.
 
-let readDb: Kysely<CopilotDatabase> | null = null;
-let writeDb: Kysely<CopilotDatabase> | null = null;
+let readDb: CopilotDb | null = null;
+let writeDb: CopilotDb | null = null;
 
-function createKyselyInstance(
-  connectionString: string,
-): Kysely<CopilotDatabase> {
-  const dialect = new PostgresDialect({
-    pool: new Pool({ connectionString }),
-  });
-  return new Kysely<CopilotDatabase>({ dialect });
+function createDrizzleInstance(connectionString: string): CopilotDb {
+  const pool = new Pool({ connectionString });
+  return drizzle(pool, { schema });
 }
 
 /**
  * Read-only database connection (uses COPILOT_DATABASE_URL).
  * Used for SELECT queries like listing sessions and loading history.
  */
-export function getCopilotDb(): Kysely<CopilotDatabase> {
+export function getCopilotDb(): CopilotDb {
   if (readDb) {
     return readDb;
   }
@@ -78,7 +46,7 @@ export function getCopilotDb(): Kysely<CopilotDatabase> {
     );
   }
 
-  readDb = createKyselyInstance(connectionString);
+  readDb = createDrizzleInstance(connectionString);
   return readDb;
 }
 
@@ -87,7 +55,7 @@ export function getCopilotDb(): Kysely<CopilotDatabase> {
  * Falls back to COPILOT_DATABASE_URL if write URL is not configured.
  * Used for INSERT/UPDATE/DELETE operations on sessions and messages.
  */
-export function getCopilotWriteDb(): Kysely<CopilotDatabase> {
+export function getCopilotWriteDb(): CopilotDb {
   if (writeDb) {
     return writeDb;
   }
@@ -100,6 +68,6 @@ export function getCopilotWriteDb(): Kysely<CopilotDatabase> {
     );
   }
 
-  writeDb = createKyselyInstance(connectionString);
+  writeDb = createDrizzleInstance(connectionString);
   return writeDb;
 }

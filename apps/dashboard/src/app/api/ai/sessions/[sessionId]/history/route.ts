@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { and, asc, eq, isNull } from "drizzle-orm";
 import { getCopilotDb } from "@/lib/db/copilot-db";
 import { isCopilotDbReady } from "@/lib/db/copilot-init";
+import { copilot_messages, copilot_sessions } from "@/lib/db/schema/copilot";
 import { getCopilotUserId } from "@/lib/auth/copilot-auth";
 
 type RouteParams = { params: Promise<{ sessionId: string }> };
@@ -18,30 +20,32 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     const db = getCopilotDb();
 
     // Verify session exists, is not deleted, and belongs to the current user
-    let sessionQuery = db
-      .selectFrom("api.copilot_sessions")
-      .select("session_id")
-      .where("session_id", "=", sessionId)
-      .where("deleted_at", "is", null);
+    const sessionRows = await db
+      .select({ session_id: copilot_sessions.session_id })
+      .from(copilot_sessions)
+      .where(
+        and(
+          eq(copilot_sessions.session_id, sessionId),
+          isNull(copilot_sessions.deleted_at),
+          userId
+            ? eq(copilot_sessions.user_id, userId)
+            : isNull(copilot_sessions.user_id),
+        ),
+      )
+      .limit(1);
 
-    if (userId) {
-      sessionQuery = sessionQuery.where("user_id", "=", userId);
-    } else {
-      sessionQuery = sessionQuery.where("user_id", "is", null);
-    }
-
-    const session = await sessionQuery.executeTakeFirst();
-
-    if (!session) {
+    if (sessionRows.length === 0) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
     }
 
     const rows = await db
-      .selectFrom("api.copilot_messages")
-      .select(["ui_message", "parent_id"])
-      .where("session_id", "=", sessionId)
-      .orderBy("created_at", "asc")
-      .execute();
+      .select({
+        ui_message: copilot_messages.ui_message,
+        parent_id: copilot_messages.parent_id,
+      })
+      .from(copilot_messages)
+      .where(eq(copilot_messages.session_id, sessionId))
+      .orderBy(asc(copilot_messages.created_at));
 
     const messages = rows.map((row) => ({
       message: row.ui_message,

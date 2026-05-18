@@ -30,7 +30,8 @@ import {
   QueryTopActor,
   QueryTopStarRepo,
 } from '@/data/dto/query.dto';
-import { ApiAnalysisUsers } from '@/app/db/dto/db.dto';
+import type { api_analysis_users } from '@/db/schema';
+type ApiAnalysisUsers = typeof api_analysis_users.$inferSelect;
 
 export class GetTotalReqDto {
   @IsString()

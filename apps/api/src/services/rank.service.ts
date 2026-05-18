@@ -1,5 +1,7 @@
-import { CompiledQuery } from 'kysely';
+import { and, asc, desc, eq, inArray } from 'drizzle-orm';
 import type { DbClient } from '@/db/client';
+import { executeRaw } from '@/db/helpers';
+import { data_ecosystems } from '@/db/schema';
 import type { CacheService } from '@/services/cache.service';
 import type { ReposService } from '@/services/repos.service';
 import type { EcoService } from '@/services/eco.service';
@@ -92,13 +94,18 @@ export class RankService {
     const ecoNames = data.map((item) => item.eco_name);
 
     const kind = await this.db
-      .selectFrom('data.ecosystems')
-      .select(['name', 'kind'])
-      .where('active', '=', true)
-      .where('name', 'in', ecoNames)
-      .orderBy('score', 'desc')
-      .orderBy('name', 'asc')
-      .execute();
+      .select({
+        name: data_ecosystems.name,
+        kind: data_ecosystems.kind,
+      })
+      .from(data_ecosystems)
+      .where(
+        and(
+          eq(data_ecosystems.active, true),
+          inArray(data_ecosystems.name, ecoNames),
+        ),
+      )
+      .orderBy(desc(data_ecosystems.score), asc(data_ecosystems.name));
 
     data.forEach((item) => {
       const ecoKind = kind.find((k) => k.name === item.eco_name);
@@ -183,9 +190,7 @@ FROM top_contributors
 GROUP BY ecosystem
 ORDER BY ecosystem;
 `;
-    const query = CompiledQuery.raw(sqlRawQuery, [ecoNames]);
-
-    const results = await this.db.executeQuery(query);
+    const results = await executeRaw(this.db, sqlRawQuery, [ecoNames]);
 
     for (const row of results.rows as QueryTopActors[]) {
       row.top_actors.forEach((actor) => {
@@ -251,9 +256,7 @@ WHERE ranking <= 200
 GROUP BY ecosystem
 ORDER BY ecosystem;`;
 
-    const query = CompiledQuery.raw(sqlRawQuery, [ecoNames]);
-
-    const results = await this.db.executeQuery(query);
+    const results = await executeRaw(this.db, sqlRawQuery, [ecoNames]);
 
     for (const row of results.rows as QueryTopStar[]) {
       const ids = row.top_repositories.map((repo) => repo.repo_id);
@@ -314,9 +317,7 @@ SELECT json_agg(
 FROM top200_repo tr
          JOIN data.repos r ON r.repo_id = tr.repo_id;`;
 
-    const query = CompiledQuery.raw(sqlRawQuery);
-
-    const results = await this.db.executeQuery(query);
+    const results = await executeRaw(this.db, sqlRawQuery);
 
     for (const row of results.rows as QueryTopStar[]) {
       const ids = row.top_repositories.map((repo) => repo.repo_id);
@@ -397,9 +398,7 @@ FROM ranked
 WHERE ranking <= 200
 GROUP BY ecosystem
 ORDER BY ecosystem;`;
-    const query = CompiledQuery.raw(sqlRawQuery, [ecoNames]);
-
-    const results = await this.db.executeQuery(query);
+    const results = await executeRaw(this.db, sqlRawQuery, [ecoNames]);
 
     for (const row of results.rows as QueryTopStar[]) {
       const ids = row.top_repositories.map((repo) => repo.repo_id);
@@ -630,8 +629,7 @@ ORDER BY ecosystem;`;
           rn;
     `;
 
-    const query = CompiledQuery.raw(sqlRawQuery, [ecoNames]);
-    const results = await this.db.executeQuery(query);
+    const results = await executeRaw(this.db, sqlRawQuery, [ecoNames]);
 
     // Group results by ecosystem
     const groupedResults: { [key: string]: EcoRankItem[] } = {};
@@ -694,8 +692,7 @@ FROM dev_per_eco dpe
 WHERE eco.name = dpe.ecosystem_name;
 `;
 
-    const query = CompiledQuery.raw(sqlRawQuery);
-    const results = await this.db.executeQuery(query);
+    const results = await executeRaw(this.db, sqlRawQuery);
 
     console.log('Ecosystem rank updated:', results);
     return results;

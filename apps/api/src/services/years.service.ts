@@ -1,5 +1,5 @@
-import { CompiledQuery } from 'kysely';
 import type { DbClient } from '@/db/client';
+import { executeRaw } from '@/db/helpers';
 import type { CacheService } from '@/services/cache.service';
 import { CacheKey } from '@/data/dto/cache.dto';
 import type {
@@ -71,12 +71,10 @@ FROM yearly_growth
 WHERE activity_year BETWEEN $2 - 5 AND $2
 ORDER BY activity_year;
 `;
-    const query = CompiledQuery.raw(sqlRawQuery, [
+    const results = await executeRaw(this.db, sqlRawQuery, [
       this.chineseCountryCodes,
       targetYear,
     ]);
-
-    const results = await this.db.executeQuery(query);
 
     return results.rows as QueryYearlyDeveloperStat[];
   }
@@ -119,12 +117,10 @@ FROM data.ecosystems eco
 WHERE eac.developer_count > 0
 ORDER BY eac.developer_count DESC, eco.name ASC;
 `;
-    const query = CompiledQuery.raw(sqlRawQuery, [
+    const results = await executeRaw(this.db, sqlRawQuery, [
       this.chineseCountryCodes,
       targetYear,
     ]);
-
-    const results = await this.db.executeQuery(query);
     return results.rows as QueryChineseEcosystemParticipation[];
   }
 
@@ -173,12 +169,10 @@ FROM data.ecosystems eco
 WHERE nd.new_developer_count > 0
 ORDER BY nd.new_developer_count DESC, eco.name ASC;
 `;
-    const query = CompiledQuery.raw(sqlRawQuery, [
+    const results = await executeRaw(this.db, sqlRawQuery, [
       this.chineseCountryCodes,
       targetYear,
     ]);
-
-    const results = await this.db.executeQuery(query);
     return results.rows as QueryChineseEcosystemNewDevelopers[];
   }
 
@@ -223,13 +217,11 @@ FROM repo_developer_counts rdc
 ORDER BY rdc.developer_count DESC, r.repo_name ASC
 LIMIT $3;
 `;
-    const query = CompiledQuery.raw(sqlRawQuery, [
+    const results = await executeRaw(this.db, sqlRawQuery, [
       this.chineseCountryCodes,
       targetYear,
       limit,
     ]);
-
-    const results = await this.db.executeQuery(query);
     return results.rows as QueryChineseRepoParticipation[];
   }
 

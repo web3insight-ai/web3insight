@@ -6,12 +6,14 @@ import {
   stepCountIs,
   type UIMessage,
 } from "ai";
+import { and, eq, isNull } from "drizzle-orm";
 import { pipeJsonRender } from "@json-render/core";
 import { getModel } from "~/ai/repository/client";
 import { web3InsightTools } from "~/ai/tools";
 import { WEB3_JSON_RENDER_PROMPT } from "@/lib/json-render/catalog-prompt";
 import { getCopilotWriteDb } from "@/lib/db/copilot-db";
 import { isCopilotDbReady } from "@/lib/db/copilot-init";
+import { copilot_messages, copilot_sessions } from "@/lib/db/schema/copilot";
 import { getCopilotUserId } from "@/lib/auth/copilot-auth";
 
 const SYSTEM_PROMPT = `You are Web3Insight AI, a specialized assistant for Web3 developer analytics.
@@ -172,31 +174,29 @@ async function persistUserMessage(
   const parentId = resolveParentId(messages, lastUserMessage);
 
   await db
-    .insertInto("api.copilot_messages")
+    .insert(copilot_messages)
     .values({
       message_id: lastUserMessage.id,
       session_id: sessionId,
       parent_id: parentId,
       role: "user",
-      ui_message: JSON.stringify(lastUserMessage),
+      ui_message: lastUserMessage,
       created_at: new Date(),
     })
-    .onConflict((oc) => oc.column("message_id").doNothing())
-    .execute();
+    .onConflictDoNothing({ target: copilot_messages.message_id });
 
   // Reason: Scope session update to the current user to prevent cross-user writes
-  let sessionUpdate = db
-    .updateTable("api.copilot_sessions")
+  await db
+    .update(copilot_sessions)
     .set({ last_active_at: new Date() })
-    .where("session_id", "=", sessionId);
-
-  if (userId) {
-    sessionUpdate = sessionUpdate.where("user_id", "=", userId);
-  } else {
-    sessionUpdate = sessionUpdate.where("user_id", "is", null);
-  }
-
-  await sessionUpdate.execute();
+    .where(
+      and(
+        eq(copilot_sessions.session_id, sessionId),
+        userId
+          ? eq(copilot_sessions.user_id, userId)
+          : isNull(copilot_sessions.user_id),
+      ),
+    );
 
   // Derive a title from the first user message if the session has no title yet
   const isFirstMessage = messages.filter((m) => m.role === "user").length === 1;
@@ -258,31 +258,29 @@ async function persistAssistantMessage(
   const parentId = lastUserMessage?.id ?? null;
 
   await db
-    .insertInto("api.copilot_messages")
+    .insert(copilot_messages)
     .values({
       message_id: responseMessage.id,
       session_id: sessionId,
       parent_id: parentId,
       role: "assistant",
-      ui_message: JSON.stringify(responseMessage),
+      ui_message: responseMessage,
       created_at: new Date(),
     })
-    .onConflict((oc) => oc.column("message_id").doNothing())
-    .execute();
+    .onConflictDoNothing({ target: copilot_messages.message_id });
 
   // Reason: Scope session update to the current user to prevent cross-user writes
-  let sessionUpdate = db
-    .updateTable("api.copilot_sessions")
+  await db
+    .update(copilot_sessions)
     .set({ last_active_at: new Date() })
-    .where("session_id", "=", sessionId);
-
-  if (userId) {
-    sessionUpdate = sessionUpdate.where("user_id", "=", userId);
-  } else {
-    sessionUpdate = sessionUpdate.where("user_id", "is", null);
-  }
-
-  await sessionUpdate.execute();
+    .where(
+      and(
+        eq(copilot_sessions.session_id, sessionId),
+        userId
+          ? eq(copilot_sessions.user_id, userId)
+          : isNull(copilot_sessions.user_id),
+      ),
+    );
 }
 
 /**
@@ -338,19 +336,18 @@ async function deriveSessionTitle(
   const title = rawText.length > 100 ? rawText.slice(0, 97) + "..." : rawText;
   const db = getCopilotWriteDb();
 
-  let query = db
-    .updateTable("api.copilot_sessions")
+  await db
+    .update(copilot_sessions)
     .set({ title })
-    .where("session_id", "=", sessionId)
-    .where("title", "is", null);
-
-  if (userId) {
-    query = query.where("user_id", "=", userId);
-  } else {
-    query = query.where("user_id", "is", null);
-  }
-
-  await query.execute();
+    .where(
+      and(
+        eq(copilot_sessions.session_id, sessionId),
+        isNull(copilot_sessions.title),
+        userId
+          ? eq(copilot_sessions.user_id, userId)
+          : isNull(copilot_sessions.user_id),
+      ),
+    );
 }
 
 export async function OPTIONS() {

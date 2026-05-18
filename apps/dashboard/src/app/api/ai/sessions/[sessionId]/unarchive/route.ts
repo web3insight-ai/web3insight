@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { and, eq, isNull } from "drizzle-orm";
 import { getCopilotWriteDb } from "@/lib/db/copilot-db";
 import { isCopilotDbReady } from "@/lib/db/copilot-init";
+import { copilot_sessions } from "@/lib/db/schema/copilot";
 import { getCopilotUserId } from "@/lib/auth/copilot-auth";
 
 type RouteParams = { params: Promise<{ sessionId: string }> };
@@ -16,21 +18,21 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
     const userId = await getCopilotUserId();
     const db = getCopilotWriteDb();
 
-    let query = db
-      .updateTable("api.copilot_sessions")
+    const result = await db
+      .update(copilot_sessions)
       .set({ is_archived: false })
-      .where("session_id", "=", sessionId)
-      .where("deleted_at", "is", null);
+      .where(
+        and(
+          eq(copilot_sessions.session_id, sessionId),
+          isNull(copilot_sessions.deleted_at),
+          userId
+            ? eq(copilot_sessions.user_id, userId)
+            : isNull(copilot_sessions.user_id),
+        ),
+      )
+      .returning({ session_id: copilot_sessions.session_id });
 
-    if (userId) {
-      query = query.where("user_id", "=", userId);
-    } else {
-      query = query.where("user_id", "is", null);
-    }
-
-    const result = await query.executeTakeFirst();
-
-    if (result.numUpdatedRows === 0n) {
+    if (result.length === 0) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
     }
 

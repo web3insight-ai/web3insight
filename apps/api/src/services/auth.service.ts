@@ -1,9 +1,16 @@
 import { SignJWT } from 'jose';
-import type { Updateable } from 'kysely';
+import { and, eq } from 'drizzle-orm';
 import { PrivyClient, type LinkedAccount } from '@privy-io/node';
 
 import type { DbClient } from '@/db/client';
-import type { ApiAuthUsers, ApiAuthUsersInfo, Json } from '@/app/db/dto/db.dto';
+import {
+  api_auth_users,
+  api_auth_users_binds,
+  api_auth_users_info,
+  api_auth_users_roles,
+  api_users_invite,
+} from '@/db/schema';
+import { first } from '@/db/helpers';
 import type { UsersService } from '@/services/users.service';
 
 /**
@@ -87,6 +94,9 @@ export interface UpdateUserExtraInput {
   user_extra: Record<string, unknown>;
 }
 
+type AuthUserUpdate = Partial<typeof api_auth_users.$inferInsert>;
+type AuthUserInfoUpdate = Partial<typeof api_auth_users_info.$inferInsert>;
+
 export class AuthService {
   private usersService: UsersService | null = null;
 
@@ -108,27 +118,30 @@ export class AuthService {
   }
 
   async getUserInfo(data: JwtPayload) {
-    const user = await this.db
-      .selectFrom('api.auth_users')
-      .selectAll()
-      .where('user_id', '=', data.uid)
-      .executeTakeFirst();
+    const user = await first(
+      this.db
+        .select()
+        .from(api_auth_users)
+        .where(eq(api_auth_users.user_id, data.uid))
+        .limit(1),
+    );
 
     const binds = await this.db
-      .selectFrom('api.auth_users_binds')
-      .select(['bind_key', 'bind_type'])
-      .where('bind_uid', '=', data.uid)
-      .execute();
+      .select({
+        bind_key: api_auth_users_binds.bind_key,
+        bind_type: api_auth_users_binds.bind_type,
+      })
+      .from(api_auth_users_binds)
+      .where(eq(api_auth_users_binds.bind_uid, data.uid));
 
     if (!user) {
       throw new Error('User not found');
     }
 
     const role = await this.db
-      .selectFrom('api.auth_users_roles')
-      .select(['user_role_name'])
-      .where('user_role_uid', '=', data.uid)
-      .execute();
+      .select({ user_role_name: api_auth_users_roles.user_role_name })
+      .from(api_auth_users_roles)
+      .where(eq(api_auth_users_roles.user_role_uid, data.uid));
 
     return {
       profile: user,
@@ -147,12 +160,22 @@ export class AuthService {
       throw new Error('user_info_type is required');
     }
 
-    const userInfo = await this.db
-      .selectFrom('api.auth_users_info')
-      .select(['user_info_type', 'user_extra', 'updated_at'])
-      .where('user_id', '=', user.uid)
-      .where('user_info_type', '=', normalizedTag)
-      .executeTakeFirst();
+    const userInfo = await first(
+      this.db
+        .select({
+          user_info_type: api_auth_users_info.user_info_type,
+          user_extra: api_auth_users_info.user_extra,
+          updated_at: api_auth_users_info.updated_at,
+        })
+        .from(api_auth_users_info)
+        .where(
+          and(
+            eq(api_auth_users_info.user_id, user.uid),
+            eq(api_auth_users_info.user_info_type, normalizedTag),
+          ),
+        )
+        .limit(1),
+    );
 
     return {
       user_id: user.uid,
@@ -172,45 +195,53 @@ export class AuthService {
       throw new Error('user_info_type is required');
     }
 
-    const userExtraPayload = JSON.stringify(body.user_extra ?? {}) as Json;
+    const userExtraPayload = body.user_extra ?? {};
 
-    const existingRecord = await this.db
-      .selectFrom('api.auth_users_info')
-      .select(['user_id'])
-      .where('user_id', '=', user.uid)
-      .where('user_info_type', '=', normalizedTag)
-      .executeTakeFirst();
+    const existingRecord = await first(
+      this.db
+        .select({ user_id: api_auth_users_info.user_id })
+        .from(api_auth_users_info)
+        .where(
+          and(
+            eq(api_auth_users_info.user_id, user.uid),
+            eq(api_auth_users_info.user_info_type, normalizedTag),
+          ),
+        )
+        .limit(1),
+    );
 
     if (existingRecord) {
       await this.db
-        .updateTable('api.auth_users_info')
+        .update(api_auth_users_info)
         .set({
           user_extra: userExtraPayload,
           updated_at: new Date().toISOString(),
         })
-        .where('user_id', '=', user.uid)
-        .where('user_info_type', '=', normalizedTag)
-        .execute();
+        .where(
+          and(
+            eq(api_auth_users_info.user_id, user.uid),
+            eq(api_auth_users_info.user_info_type, normalizedTag),
+          ),
+        );
     } else {
-      await this.db
-        .insertInto('api.auth_users_info')
-        .values({
-          user_id: user.uid,
-          user_info_type: normalizedTag,
-          user_extra: userExtraPayload,
-        })
-        .execute();
+      await this.db.insert(api_auth_users_info).values({
+        user_id: user.uid,
+        user_info_type: normalizedTag,
+        user_extra: userExtraPayload,
+      });
     }
 
     return this.getUserExtra(user, normalizedTag);
   }
 
   async getUserInfoFormId(uid: string) {
-    const user = await this.db
-      .selectFrom('api.auth_users')
-      .selectAll()
-      .where('user_id', '=', uid)
-      .executeTakeFirst();
+    const user = await first(
+      this.db
+        .select()
+        .from(api_auth_users)
+        .where(eq(api_auth_users.user_id, uid))
+        .limit(1),
+    );
 
     if (!user) {
       throw new Error('User not found');
@@ -224,12 +255,18 @@ export class AuthService {
   }
 
   async getUserInfoFormIdV2(uid: string, tag: string) {
-    const user = await this.db
-      .selectFrom('api.auth_users_info')
-      .selectAll()
-      .where('user_id', '=', uid)
-      .where('user_info_type', '=', tag)
-      .executeTakeFirst();
+    const user = await first(
+      this.db
+        .select()
+        .from(api_auth_users_info)
+        .where(
+          and(
+            eq(api_auth_users_info.user_id, uid),
+            eq(api_auth_users_info.user_info_type, tag),
+          ),
+        )
+        .limit(1),
+    );
 
     if (!user) {
       throw new Error('User not found');
@@ -244,12 +281,18 @@ export class AuthService {
   }
 
   async getInviterByUid(uid: string, tag: string) {
-    const invite = await this.db
-      .selectFrom('api.users_invite')
-      .selectAll()
-      .where('invite_uid', '=', uid)
-      .where('invite_source_type', '=', tag)
-      .executeTakeFirst();
+    const invite = await first(
+      this.db
+        .select()
+        .from(api_users_invite)
+        .where(
+          and(
+            eq(api_users_invite.invite_uid, uid),
+            eq(api_users_invite.invite_source_type, tag),
+          ),
+        )
+        .limit(1),
+    );
 
     return invite ?? null;
   }
@@ -257,26 +300,19 @@ export class AuthService {
   async updateUserInfo(user: JwtPayload, body: UpdateUserInput) {
     const updatePayload = Object.fromEntries(
       Object.entries(body).filter(([, value]) => value !== undefined),
-    ) as Partial<Updateable<ApiAuthUsers>>;
-
-    if (Array.isArray(updatePayload.user_custom_labels)) {
-      updatePayload.user_custom_labels = JSON.stringify(
-        updatePayload.user_custom_labels,
-      );
-    }
+    ) as AuthUserUpdate;
 
     if (Object.keys(updatePayload).length === 0) {
       return this.getUserInfo(user);
     }
 
     await this.db
-      .updateTable('api.auth_users')
+      .update(api_auth_users)
       .set({
         ...updatePayload,
         updated_at: new Date().toISOString(),
       })
-      .where('user_id', '=', user.uid)
-      .execute();
+      .where(eq(api_auth_users.user_id, user.uid));
 
     return this.getUserInfo(user);
   }
@@ -285,43 +321,42 @@ export class AuthService {
     const { invite_code, ...userInfoFields } = body;
 
     if (invite_code) {
-      const existingInvite = await this.db
-        .selectFrom('api.users_invite')
-        .select(['id'])
-        .where('invite_uid', '=', user.uid)
-        .where('invite_source_type', '=', tag)
-        .executeTakeFirst();
+      const existingInvite = await first(
+        this.db
+          .select({ id: api_users_invite.id })
+          .from(api_users_invite)
+          .where(
+            and(
+              eq(api_users_invite.invite_uid, user.uid),
+              eq(api_users_invite.invite_source_type, tag),
+            ),
+          )
+          .limit(1),
+      );
 
       if (!existingInvite) {
-        const inviterExists = await this.db
-          .selectFrom('api.auth_users')
-          .select(['user_id'])
-          .where('user_id', '=', invite_code)
-          .executeTakeFirst();
+        const inviterExists = await first(
+          this.db
+            .select({ user_id: api_auth_users.user_id })
+            .from(api_auth_users)
+            .where(eq(api_auth_users.user_id, invite_code))
+            .limit(1),
+        );
 
         if (inviterExists && invite_code !== user.uid) {
-          await this.db
-            .insertInto('api.users_invite')
-            .values({
-              invite_source_id: invite_code,
-              invite_source_type: tag,
-              invite_source_uid: invite_code,
-              invite_uid: user.uid,
-            })
-            .execute();
+          await this.db.insert(api_users_invite).values({
+            invite_source_id: invite_code,
+            invite_source_type: tag,
+            invite_source_uid: invite_code,
+            invite_uid: user.uid,
+          });
         }
       }
     }
 
     const updatePayload = Object.fromEntries(
       Object.entries(userInfoFields).filter(([, value]) => value !== undefined),
-    ) as Partial<Updateable<ApiAuthUsersInfo>>;
-
-    if (Array.isArray(updatePayload.user_custom_labels)) {
-      updatePayload.user_custom_labels = JSON.stringify(
-        updatePayload.user_custom_labels,
-      );
-    }
+    ) as AuthUserInfoUpdate;
 
     updatePayload.user_info_type = tag;
 
@@ -329,31 +364,37 @@ export class AuthService {
       return this.getUserInfo(user);
     }
 
-    const existingRecord = await this.db
-      .selectFrom('api.auth_users_info')
-      .select(['user_id'])
-      .where('user_id', '=', user.uid)
-      .where('user_info_type', '=', tag)
-      .executeTakeFirst();
+    const existingRecord = await first(
+      this.db
+        .select({ user_id: api_auth_users_info.user_id })
+        .from(api_auth_users_info)
+        .where(
+          and(
+            eq(api_auth_users_info.user_id, user.uid),
+            eq(api_auth_users_info.user_info_type, tag),
+          ),
+        )
+        .limit(1),
+    );
 
     if (existingRecord) {
       await this.db
-        .updateTable('api.auth_users_info')
+        .update(api_auth_users_info)
         .set({
           ...updatePayload,
           updated_at: new Date().toISOString(),
         })
-        .where('user_id', '=', user.uid)
-        .where('user_info_type', '=', tag)
-        .execute();
+        .where(
+          and(
+            eq(api_auth_users_info.user_id, user.uid),
+            eq(api_auth_users_info.user_info_type, tag),
+          ),
+        );
     } else {
-      await this.db
-        .insertInto('api.auth_users_info')
-        .values({
-          user_id: user.uid,
-          ...updatePayload,
-        })
-        .execute();
+      await this.db.insert(api_auth_users_info).values({
+        user_id: user.uid,
+        ...updatePayload,
+      });
     }
 
     return this.getUserInfo(user);
@@ -370,10 +411,9 @@ export class AuthService {
    */
   async generateOAuthServerToken(uid: string, type: string): Promise<string> {
     const roles = await this.db
-      .selectFrom('api.auth_users_roles')
-      .select(['user_role_name'])
-      .where('user_role_uid', '=', uid)
-      .execute();
+      .select({ user_role_name: api_auth_users_roles.user_role_name })
+      .from(api_auth_users_roles)
+      .where(eq(api_auth_users_roles.user_role_uid, uid));
 
     const allowedRoles = ['user', ...roles.map((r) => r.user_role_name)];
 
@@ -505,12 +545,22 @@ export class AuthService {
     const openBuildId = String(res.data.id);
     const openBuildKey = res.data.username || openBuildId;
 
-    const existingOpenBuildBind = await this.db
-      .selectFrom('api.auth_users_binds')
-      .select(['bind_id', 'bind_uid', 'bind_openid'])
-      .where('bind_type', '=', 'openbuild')
-      .where('bind_openid', '=', openBuildId)
-      .executeTakeFirst();
+    const existingOpenBuildBind = await first(
+      this.db
+        .select({
+          bind_id: api_auth_users_binds.bind_id,
+          bind_uid: api_auth_users_binds.bind_uid,
+          bind_openid: api_auth_users_binds.bind_openid,
+        })
+        .from(api_auth_users_binds)
+        .where(
+          and(
+            eq(api_auth_users_binds.bind_type, 'openbuild'),
+            eq(api_auth_users_binds.bind_openid, openBuildId),
+          ),
+        )
+        .limit(1),
+    );
 
     if (
       existingOpenBuildBind &&
@@ -519,12 +569,21 @@ export class AuthService {
       throw new Error('OpenBuild account already bound to another user');
     }
 
-    const userOpenBuildBind = await this.db
-      .selectFrom('api.auth_users_binds')
-      .select(['bind_id', 'bind_openid'])
-      .where('bind_type', '=', 'openbuild')
-      .where('bind_uid', '=', uid)
-      .executeTakeFirst();
+    const userOpenBuildBind = await first(
+      this.db
+        .select({
+          bind_id: api_auth_users_binds.bind_id,
+          bind_openid: api_auth_users_binds.bind_openid,
+        })
+        .from(api_auth_users_binds)
+        .where(
+          and(
+            eq(api_auth_users_binds.bind_type, 'openbuild'),
+            eq(api_auth_users_binds.bind_uid, uid),
+          ),
+        )
+        .limit(1),
+    );
 
     if (
       userOpenBuildBind &&
@@ -538,40 +597,42 @@ export class AuthService {
 
     if (targetBind) {
       await this.db
-        .updateTable('api.auth_users_binds')
+        .update(api_auth_users_binds)
         .set({
           bind_key: openBuildKey,
           bind_openid: openBuildId,
           bind_secret: res.token.access_token,
           updated_at: new Date().toISOString(),
         })
-        .where('bind_id', '=', targetBind.bind_id)
-        .execute();
+        .where(eq(api_auth_users_binds.bind_id, targetBind.bind_id));
     } else {
-      await this.db
-        .insertInto('api.auth_users_binds')
-        .values({
-          bind_key: openBuildKey,
-          bind_openid: openBuildId,
-          bind_secret: res.token.access_token,
-          bind_type: 'openbuild',
-          bind_uid: uid,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .execute();
+      await this.db.insert(api_auth_users_binds).values({
+        bind_key: openBuildKey,
+        bind_openid: openBuildId,
+        bind_secret: res.token.access_token,
+        bind_type: 'openbuild',
+        bind_uid: uid,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
     }
 
     return { success: true };
   }
 
   async getOpenBuildUserRecord(uid: string): Promise<unknown> {
-    const bind = await this.db
-      .selectFrom('api.auth_users_binds')
-      .select(['bind_secret'])
-      .where('bind_uid', '=', uid)
-      .where('bind_type', '=', 'openbuild')
-      .executeTakeFirst();
+    const bind = await first(
+      this.db
+        .select({ bind_secret: api_auth_users_binds.bind_secret })
+        .from(api_auth_users_binds)
+        .where(
+          and(
+            eq(api_auth_users_binds.bind_uid, uid),
+            eq(api_auth_users_binds.bind_type, 'openbuild'),
+          ),
+        )
+        .limit(1),
+    );
 
     const accessToken = bind?.bind_secret?.trim();
     if (!accessToken) {
@@ -604,41 +665,43 @@ export class AuthService {
     const client = this.createPrivyClient();
     const user = await client.users().get({ id_token: privyToken });
 
-    const findUser = await this.db
-      .selectFrom('api.auth_users_binds')
-      .selectAll()
-      .where('bind_openid', '=', String(user.id))
-      .where('bind_type', '=', 'privy')
-      .executeTakeFirst();
+    const findUser = await first(
+      this.db
+        .select()
+        .from(api_auth_users_binds)
+        .where(
+          and(
+            eq(api_auth_users_binds.bind_openid, String(user.id)),
+            eq(api_auth_users_binds.bind_type, 'privy'),
+          ),
+        )
+        .limit(1),
+    );
 
     let uid = findUser?.bind_uid || '0';
 
     if (!findUser) {
       const [newUser] = await this.db
-        .insertInto('api.auth_users')
+        .insert(api_auth_users)
         .values({
           user_nick_name: '',
           user_avatar: '',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
-        .returningAll()
-        .execute();
+        .returning();
 
-      await this.db
-        .insertInto('api.auth_users_binds')
-        .values([
-          {
-            bind_key: '',
-            bind_openid: user.id,
-            bind_secret: privyToken,
-            bind_type: 'privy',
-            bind_uid: newUser.user_id,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-        ])
-        .execute();
+      await this.db.insert(api_auth_users_binds).values([
+        {
+          bind_key: '',
+          bind_openid: user.id,
+          bind_secret: privyToken,
+          bind_type: 'privy',
+          bind_uid: newUser.user_id,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      ]);
 
       uid = newUser.user_id;
     }

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { getCopilotDb, getCopilotWriteDb } from "@/lib/db/copilot-db";
 import { isCopilotDbReady } from "@/lib/db/copilot-init";
+import { copilot_sessions } from "@/lib/db/schema/copilot";
 import { getCopilotUserId } from "@/lib/auth/copilot-auth";
 
 export async function POST(request: NextRequest) {
@@ -17,18 +19,15 @@ export async function POST(request: NextRequest) {
     }
 
     const db = getCopilotWriteDb();
-    await db
-      .insertInto("api.copilot_sessions")
-      .values({
-        session_id: sessionId,
-        title: null,
-        user_id: userId,
-        is_archived: false,
-        deleted_at: null,
-        last_active_at: new Date(),
-        created_at: new Date(),
-      })
-      .execute();
+    await db.insert(copilot_sessions).values({
+      session_id: sessionId,
+      title: null,
+      user_id: userId,
+      is_archived: false,
+      deleted_at: null,
+      last_active_at: new Date(),
+      created_at: new Date(),
+    });
 
     return NextResponse.json({ remoteId: sessionId });
   } catch (error) {
@@ -61,25 +60,28 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(Number(searchParams.get("limit") ?? 50), 100);
     const offset = Number(searchParams.get("offset") ?? 0);
 
-    const threads = await db
-      .selectFrom("api.copilot_sessions")
-      .select([
-        "session_id as remoteId",
-        "title",
-        "created_at as createdAt",
-        "last_active_at as lastActiveAt",
-      ])
-      .where("deleted_at", "is", null)
-      .where("is_archived", "=", archived)
-      .where("user_id", "=", userId)
-      .orderBy("last_active_at", "desc")
+    const rows = await db
+      .select({
+        remoteId: copilot_sessions.session_id,
+        title: copilot_sessions.title,
+        createdAt: copilot_sessions.created_at,
+        lastActiveAt: copilot_sessions.last_active_at,
+      })
+      .from(copilot_sessions)
+      .where(
+        and(
+          isNull(copilot_sessions.deleted_at),
+          eq(copilot_sessions.is_archived, archived),
+          eq(copilot_sessions.user_id, userId),
+        ),
+      )
+      .orderBy(desc(copilot_sessions.last_active_at))
       .limit(limit + 1)
-      .offset(offset)
-      .execute();
+      .offset(offset);
 
     // Reason: Fetch one extra row to determine if there is a next page
-    const hasMore = threads.length > limit;
-    const page = hasMore ? threads.slice(0, limit) : threads;
+    const hasMore = rows.length > limit;
+    const page = hasMore ? rows.slice(0, limit) : rows;
     const nextOffset = hasMore ? offset + limit : null;
 
     return NextResponse.json({ threads: page, nextOffset });

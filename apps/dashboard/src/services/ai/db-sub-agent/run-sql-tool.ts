@@ -1,6 +1,6 @@
 import { tool } from "ai";
 import { z } from "zod";
-import { sql } from "kysely";
+import { sql } from "drizzle-orm";
 import { getCopilotDb } from "@/lib/db/copilot-db";
 import {
   validateReadOnlySQL,
@@ -51,13 +51,15 @@ export const runSqlTool = tool({
 
       // Reason: Execute inside a transaction with READ ONLY and a statement
       // timeout so that even if validation is bypassed, the DB enforces safety.
-      const rows = await db.transaction().execute(async (trx) => {
-        await sql`SET LOCAL statement_timeout = ${sql.lit(SQL_TIMEOUT_MS)}`.execute(
-          trx,
+      // SET LOCAL doesn't accept parameter binding, so SQL_TIMEOUT_MS is
+      // inlined via sql.raw() instead of as a template parameter.
+      const rows = await db.transaction(async (trx) => {
+        await trx.execute(
+          sql`SET LOCAL statement_timeout = ${sql.raw(String(SQL_TIMEOUT_MS))}`,
         );
-        await sql`SET TRANSACTION READ ONLY`.execute(trx);
-        const { rows: resultRows } = await sql.raw(wrappedQuery).execute(trx);
-        return resultRows;
+        await trx.execute(sql`SET TRANSACTION READ ONLY`);
+        const result = await trx.execute(sql.raw(wrappedQuery));
+        return result.rows;
       });
 
       const resultRows = rows as Record<string, unknown>[];

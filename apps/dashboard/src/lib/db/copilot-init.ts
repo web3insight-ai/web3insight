@@ -1,6 +1,6 @@
 import "server-only";
 
-import { sql } from "kysely";
+import { sql } from "drizzle-orm";
 import { getCopilotDb } from "./copilot-db";
 
 let dbAvailable: boolean | null = null;
@@ -18,13 +18,13 @@ export async function isCopilotDbReady(): Promise<boolean> {
   try {
     const db = getCopilotDb();
 
-    const result = await sql<{ exists: boolean }>`
+    const result = await db.execute<{ exists: boolean }>(sql`
       SELECT EXISTS (
         SELECT 1 FROM information_schema.tables
         WHERE table_schema = 'api'
           AND table_name = 'copilot_sessions'
       ) as exists
-    `.execute(db);
+    `);
 
     dbAvailable = result.rows[0]?.exists === true;
 

@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 | Package | Path | Stack | Default port | Deploy target |
 |---|---|---|---|---|
-| `@web3insight/api` | `apps/api` | Hono + oRPC + Kysely + PostgreSQL + Inngest | 3010 | Vercel Build Output API (HTTP + Cron) |
+| `@web3insight/api` | `apps/api` | Hono + oRPC + Drizzle + PostgreSQL + Inngest | 3010 | Vercel Build Output API (HTTP + Cron) |
 | `@web3insight/dashboard` | `apps/dashboard` | Next.js 16 + Turbopack + oRPC client | 3000 | Vercel |
 | `@web3insight/web` | `apps/web` | Next.js 16 + oRPC client | 3001 | Vercel |
 | `@web3insight/dev-card` | `apps/dev-card` | Next.js 16 + Privy + oRPC client | 3002 | Vercel |
@@ -39,7 +39,7 @@ Data sources: GitHub API, OSS Insight, RSS3, Privy.
 ```
 dashboard ──┐
             │
-web ────────┼──▶ api (Hono + oRPC) ──▶ PostgreSQL (Kysely)
+web ────────┼──▶ api (Hono + oRPC) ──▶ PostgreSQL (Drizzle)
             │           │
 dev-card ───┘           ├──▶ Inngest (durable sync workflows)
                         ├──▶ GitHub API / OSS Insight / RSS3
@@ -202,7 +202,7 @@ Currently installed (43 skills):
 |---|---|
 | **Hono / Next.js / Vercel** | `hono`, `next-best-practices`, `next-cache-components`, `next-upgrade`, `vercel-composition-patterns`, `vercel-cli-with-tokens`, `vercel-react-best-practices`, `vercel-react-view-transitions`, `deploy-to-vercel`, `web-design-guidelines` |
 | **Monorepo tooling** | `turborepo` (official `vercel/turborepo` skill — pipeline/cache/filtering/CI), `monorepo-management`, `pnpm` |
-| **Auth / DB** | `privy`, `drizzle-orm-patterns` (reference only — we use Kysely) |
+| **Auth / DB** | `privy`, `drizzle-orm-patterns` |
 | **Frontend & forms** | `tanstack-query-best-practices`, `tailwind-design-system`, `frontend-design`, `react-hook-form`, `zod`, `frontend-state-management` |
 | **Testing** | `vitest`, `playwright-best-practices`, `playwright-cli`, `unit-testing-framework`, `integration-testing`, `e2e-testing-automation`, `webapp-testing` |
 | **Security** | `api-security-hardening`, `xss-prevention`, `csrf-protection`, `sql-injection-prevention`, `secrets-management` |
@@ -214,7 +214,7 @@ When invoking, just type `/<skill-name>` — Claude Code will read the matching 
 ## Per-app guides
 
 - `apps/api/README.md` — layout + scripts + dev workflow
-- `apps/api/AGENTS.md` — SQL / Kysely conventions and `data.*` schema rules
+- `apps/api/AGENTS.md` — SQL / Drizzle conventions and `data.*` schema rules
 - `apps/dashboard/CLAUDE.md` — DDD layout, Jotai, TanStack Query, AI copilot
 - `apps/dev-card/CLAUDE.md` — Privy + ecosystem theming + card generation
 

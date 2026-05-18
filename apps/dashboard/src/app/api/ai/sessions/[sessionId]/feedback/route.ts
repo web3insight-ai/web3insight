@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { and, eq, isNull } from "drizzle-orm";
 import { getCopilotDb, getCopilotWriteDb } from "@/lib/db/copilot-db";
 import { isCopilotDbReady } from "@/lib/db/copilot-init";
+import { copilot_feedback, copilot_sessions } from "@/lib/db/schema/copilot";
 import { getCopilotUserId } from "@/lib/auth/copilot-auth";
 
 type RouteParams = { params: Promise<{ sessionId: string }> };
@@ -38,36 +40,33 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     // Verify session exists, is not deleted, and belongs to the current user
     const db = getCopilotDb();
-    let sessionQuery = db
-      .selectFrom("api.copilot_sessions")
-      .select("session_id")
-      .where("session_id", "=", sessionId)
-      .where("deleted_at", "is", null);
+    const sessionRows = await db
+      .select({ session_id: copilot_sessions.session_id })
+      .from(copilot_sessions)
+      .where(
+        and(
+          eq(copilot_sessions.session_id, sessionId),
+          isNull(copilot_sessions.deleted_at),
+          userId
+            ? eq(copilot_sessions.user_id, userId)
+            : isNull(copilot_sessions.user_id),
+        ),
+      )
+      .limit(1);
 
-    if (userId) {
-      sessionQuery = sessionQuery.where("user_id", "=", userId);
-    } else {
-      sessionQuery = sessionQuery.where("user_id", "is", null);
-    }
-
-    const session = await sessionQuery.executeTakeFirst();
-
-    if (!session) {
+    if (sessionRows.length === 0) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
     }
 
     const writeDb = getCopilotWriteDb();
-    await writeDb
-      .insertInto("api.copilot_feedback")
-      .values({
-        id: crypto.randomUUID(),
-        session_id: sessionId,
-        message_id: body.messageId,
-        feedback_type: body.type,
-        comment: body.comment ?? null,
-        created_at: new Date(),
-      })
-      .execute();
+    await writeDb.insert(copilot_feedback).values({
+      id: crypto.randomUUID(),
+      session_id: sessionId,
+      message_id: body.messageId,
+      feedback_type: body.type,
+      comment: body.comment ?? null,
+      created_at: new Date(),
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

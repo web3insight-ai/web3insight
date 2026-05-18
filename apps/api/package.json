@@ -1,7 +1,7 @@
 {
   "name": "@web3insight/api",
   "version": "0.0.1",
-  "description": "Web3Insight API — Hono + oRPC + Kysely on Vercel",
+  "description": "Web3Insight API — Hono + oRPC + Drizzle on Vercel",
   "author": "",
   "private": true,
   "license": "UNLICENSED",
@@ -11,7 +11,9 @@
     "lint": "eslint \"src/**/*.ts\" --fix",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "db:pull": "drizzle-kit pull",
+    "db:check": "drizzle-kit check"
   },
   "dependencies": {
     "@ai-sdk/openai": "catalog:",
@@ -28,6 +30,7 @@
     "ai": "catalog:",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
+    "drizzle-orm": "catalog:",
     "ethers": "^6.16.0",
     "exceljs": "^4.4.0",
     "fp-ts": "^2.16.11",
@@ -35,9 +38,7 @@
     "@hono/zod-validator": "0.8.0",
     "inngest": "4.4.0",
     "jose": "^6.2.3",
-    "kysely": "catalog:",
     "pg": "catalog:",
-    "pg-cursor": "^2.19.0",
     "reflect-metadata": "^0.2.2",
     "zod": "catalog:"
   },
@@ -47,14 +48,13 @@
     "@octokit/types": "^16.0.0",
     "@types/node": "catalog:",
     "@types/pg": "^8.20.0",
-    "@types/pg-cursor": "^2.7.2",
     "dotenv": "^17.4.2",
+    "drizzle-kit": "catalog:",
     "esbuild": "^0.28.0",
     "eslint": "catalog:",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "globals": "^17.6.0",
-    "kysely-codegen": "^0.20.0",
     "prettier": "^3.8.3",
     "tsx": "catalog:",
     "typescript": "catalog:",

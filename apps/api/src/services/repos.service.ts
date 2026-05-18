@@ -1,6 +1,19 @@
 import { Workbook } from 'exceljs';
 import { isAbsolute, join, parse } from 'path';
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  ilike,
+  inArray,
+  sql,
+  type SQL,
+} from 'drizzle-orm';
 import type { DbClient } from '@/db/client';
+import { data_repos } from '@/db/schema';
+import { first } from '@/db/helpers';
 import type {
   TokenPoolService,
   RepoContributor,
@@ -57,31 +70,43 @@ export class ReposService {
   ) {}
 
   async getReposByEcoName(params: ReposOrderReqDto) {
-    let query = this.db.selectFrom('data.repos');
+    const conditions: SQL[] = [];
     if (params.eco_name !== ECO_ALL) {
-      query = query.where('upstream_marks', '?', params.eco_name);
+      // Reason: Drizzle's `sql` template can't embed a literal '?' (collides
+      // with pg parameter binding), so we use the function form of the JSONB
+      // key-exists operator instead — semantically identical to `col ? key`.
+      conditions.push(
+        sql`jsonb_exists(${data_repos.upstream_marks}, ${params.eco_name})`,
+      );
     }
 
     if (params.search && params.search !== '') {
-      query = query.where('repo_name', 'ilike', `%${params.search}%`);
+      conditions.push(ilike(data_repos.repo_name, `%${params.search}%`));
     }
 
-    const total = await query
-      .select(this.db.fn.count('repo_id').as('total'))
-      .execute();
+    const whereClause = conditions.length ? and(...conditions) : undefined;
+
+    const totalRows = await this.db
+      .select({ total: count(data_repos.repo_id) })
+      .from(data_repos)
+      .where(whereClause);
+
+    const direction = params.direction === 'desc' ? desc : asc;
+    let listQuery = this.db
+      .select()
+      .from(data_repos)
+      .where(whereClause)
+      .$dynamic();
 
     if (params.order === ReposOrderEnum.ID) {
-      query = query.orderBy('repo_id', params.direction);
+      listQuery = listQuery.orderBy(direction(data_repos.repo_id));
     }
 
     if (params.order === ReposOrderEnum.ORG) {
-      query = query.orderBy('repo_name', params.direction);
+      listQuery = listQuery.orderBy(direction(data_repos.repo_name));
     }
 
-    query = query.offset(params.skip);
-    query = query.limit(params.take);
-
-    const find = await query.selectAll().execute();
+    const find = await listQuery.offset(params.skip).limit(params.take);
 
     const list: RepoMarkDto[] = find.map((item) => ({
       repo_id: item.repo_id as unknown as number,
@@ -92,29 +117,30 @@ export class ReposService {
 
     const res = new GetReposMarkResDto();
     res.list = list;
-    res.total = total[0].total as number;
+    res.total = Number(totalRows[0].total);
 
     return res;
   }
 
   async markRepo(param: BaseIdReqAndResDto, body: ReposCustomMarkReqDto) {
-    const repo = await this.db
-      .selectFrom('data.repos')
-      .selectAll()
-      .where('repo_id', '=', String(param.id))
-      .executeTakeFirst();
+    const repo = await first(
+      this.db
+        .select()
+        .from(data_repos)
+        .where(eq(data_repos.repo_id, String(param.id)))
+        .limit(1),
+    );
     if (!repo) {
       throw new Error(`Repo with id ${param.id} not found`);
     }
-    const custom_marks = repo.custom_marks ?? {};
+    const custom_marks = (repo.custom_marks ?? {}) as Record<string, unknown>;
     custom_marks[body.eco_name] = body.mark;
     await this.db
-      .updateTable('data.repos')
+      .update(data_repos)
       .set({
-        custom_marks: custom_marks,
+        custom_marks,
       })
-      .where('repo_id', '=', String(param.id))
-      .execute();
+      .where(eq(data_repos.repo_id, String(param.id)));
     return (new SucessResDto().sucess = true);
   }
 
@@ -122,19 +148,20 @@ export class ReposService {
     const results: RepoInfo[][] = [];
     const repoIdentifiers: number[] = [];
     const db = await this.db
-      .selectFrom('data.repos')
-      .selectAll()
+      .select()
+      .from(data_repos)
       .where(
-        'repo_id',
-        'in',
-        list.map((id) => String(id)),
-      )
-      .execute();
+        inArray(
+          data_repos.repo_id,
+          list.map((id) => String(id)),
+        ),
+      );
 
     for (const repo of db) {
       if (
-        repo.api_updated_at > new Date(Date.now() - 24 * 60 * 60 * 1000) ||
-        repo.created_at < repo.api_updated_at
+        new Date(repo.api_updated_at) >
+          new Date(Date.now() - 24 * 60 * 60 * 1000) ||
+        new Date(repo.created_at) < new Date(repo.api_updated_at)
       ) {
         results.push([repo.api as RepoInfo]);
       } else {
@@ -157,13 +184,15 @@ export class ReposService {
             return data as RepoInfo;
           } catch (e) {
             console.log(`Failed to fetch repo ${repoIdentifier}:`, e);
-            const api = await this.db
-              .selectFrom('data.repos')
-              .select('api')
-              .where('repo_id', '=', String(repoIdentifier))
-              .executeTakeFirst();
-            if (api && api.api) {
-              return api.api as RepoInfo;
+            const apiRow = await first(
+              this.db
+                .select({ api: data_repos.api })
+                .from(data_repos)
+                .where(eq(data_repos.repo_id, String(repoIdentifier)))
+                .limit(1),
+            );
+            if (apiRow && apiRow.api) {
+              return apiRow.api as RepoInfo;
             }
             throw new Error(
               `Repo with id ${repoIdentifier} not found in API or database`,
@@ -174,18 +203,17 @@ export class ReposService {
       );
       results.push(batchResults);
 
-      await this.db.transaction().execute(async (trx) =>
+      await this.db.transaction(async (trx) =>
         Promise.all(
           batchResults.map((repo) =>
             trx
-              .updateTable('data.repos')
+              .update(data_repos)
               .set({
-                repo_id: repo.id,
+                repo_id: String(repo.id),
                 api: repo,
-                api_updated_at: new Date(),
+                api_updated_at: new Date().toISOString(),
               })
-              .where('repo_id', '=', String(repo.id))
-              .execute(),
+              .where(eq(data_repos.repo_id, String(repo.id))),
           ),
         ),
       );
@@ -377,11 +405,13 @@ export class ReposService {
   }
 
   async getRepoActiveDevelopers(repoId: number): Promise<RepoActiveDevDto> {
-    const repo = await this.db
-      .selectFrom('data.repos')
-      .selectAll()
-      .where('repo_id', '=', String(repoId))
-      .executeTakeFirst();
+    const repo = await first(
+      this.db
+        .select()
+        .from(data_repos)
+        .where(eq(data_repos.repo_id, String(repoId)))
+        .limit(1),
+    );
     if (!repo) {
       throw new Error(`Repo with id ${repoId} not found`);
     }
