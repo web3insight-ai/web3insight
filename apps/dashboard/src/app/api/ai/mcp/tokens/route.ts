@@ -41,7 +41,7 @@ function rowToRecord(row: {
 
 export async function GET(): Promise<
   NextResponse<{ tokens: TokenRecord[] } | { error: string }>
-> {
+  > {
   try {
     const dbReady = await isCopilotDbReady();
     if (!dbReady) {
