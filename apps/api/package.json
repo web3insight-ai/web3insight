@@ -50,7 +50,7 @@
     "prettier": "^3.8.3",
     "tsx": "catalog:",
     "typescript": "catalog:",
-    "typescript-eslint": "^8.59.3",
+    "typescript-eslint": "^8.59.4",
     "vitest": "catalog:"
   }
 }
