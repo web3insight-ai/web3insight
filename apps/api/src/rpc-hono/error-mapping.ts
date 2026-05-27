@@ -73,7 +73,9 @@ export async function mapServiceError<T>(fn: () => Promise<T>): Promise<T> {
       if (status === 400)
         throw new ORPCError('BAD_REQUEST', { message: message || `${status}` });
       if (status === 401)
-        throw new ORPCError('UNAUTHORIZED', { message: message || `${status}` });
+        throw new ORPCError('UNAUTHORIZED', {
+          message: message || `${status}`,
+        });
       if (status === 403)
         throw new ORPCError('FORBIDDEN', { message: message || `${status}` });
       if (status === 404)

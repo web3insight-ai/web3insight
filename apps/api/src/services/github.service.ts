@@ -174,7 +174,9 @@ export class GithubService {
       const message =
         (data as { message?: string })?.message ||
         `GitHub API ${response.status}`;
-      const err = new Error(`GitHub API ${response.status}: ${message}`) as Error & {
+      const err = new Error(
+        `GitHub API ${response.status}: ${message}`,
+      ) as Error & {
         status: number;
       };
       err.status = response.status;
