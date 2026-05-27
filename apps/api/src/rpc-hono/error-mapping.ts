@@ -49,6 +49,20 @@ export async function mapServiceError<T>(fn: () => Promise<T>): Promise<T> {
       throw new ORPCError('BAD_GATEWAY', { message });
     }
 
+    // Privy SDK's `InvalidAuthTokenError` (extends PrivyAPIError extends
+    // Error, no `.status` field) wraps every local-verify failure in one of
+    // a fixed set of messages. Treat them as 401 — the caller's identity
+    // token is the cause, not server state.
+    if (
+      /^Authentication token /i.test(message) ||
+      /^Failed to verify authentication token$/i.test(message) ||
+      /^Unable to parse identity token$/i.test(message) ||
+      /^Token's payload is invalid$/i.test(message) ||
+      /^Failed to import the provided verification key/i.test(message)
+    ) {
+      throw new ORPCError('UNAUTHORIZED', { message });
+    }
+
     // Upstream SDK errors that follow the {status, message} convention —
     // PrivyAPIError, Octokit RequestError, openapi-fetch, etc. — attach a
     // numeric `.status` field. Map it to the matching ORPCError so caller-
