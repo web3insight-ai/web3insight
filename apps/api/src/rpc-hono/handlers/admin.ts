@@ -1,5 +1,6 @@
 import { ORPCError } from '@orpc/server';
 import { os } from '../orpc';
+import { mapServiceError } from '../error-mapping';
 
 /**
  * Admin handlers — port of api/controller/admin.controller.ts.
@@ -35,9 +36,8 @@ export const listEcosystemReposHandler = os.admin.listEcosystemRepos.handler(
 export const markEcosystemRepoHandler = os.admin.markEcosystemRepo.handler(
   async ({ input, context }) => {
     requireUser(context.user);
-    await context.container.services.repos.markRepo(
-      { id: input.id },
-      input.data,
+    await mapServiceError(() =>
+      context.container.services.repos.markRepo({ id: input.id }, input.data),
     );
     return { success: true as const };
   },

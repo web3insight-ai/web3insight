@@ -1,5 +1,6 @@
 import { ORPCError } from '@orpc/server';
 import { os } from '../orpc';
+import { mapServiceError as mapNotFound } from '../error-mapping';
 
 /**
  * Custom analysis handlers — port of api/controller/custom.controller.ts.
@@ -26,19 +27,22 @@ export const createAnalysisHandler = os.custom.createAnalysis.handler(
 export const updateAnalysisHandler = os.custom.updateAnalysis.handler(
   async ({ input, context }) => {
     const uid = requireUid(context.user);
-    return (await context.container.services.users.uploadAndGetUsers(
-      input.data as never,
-      uid,
-      String(input.id),
-    )) as never;
+    return await mapNotFound(
+      async () =>
+        (await context.container.services.users.uploadAndGetUsers(
+          input.data as never,
+          uid,
+          String(input.id),
+        )) as never,
+    );
   },
 );
 
 export const deleteAnalysisHandler = os.custom.deleteAnalysis.handler(
   async ({ input, context }) => {
     const uid = requireUid(context.user);
-    await context.container.services.users.remove(uid, {
-      id: input.id,
+    await mapNotFound(async () => {
+      await context.container.services.users.remove(uid, { id: input.id });
     });
     return { success: true as const };
   },
@@ -47,11 +51,13 @@ export const deleteAnalysisHandler = os.custom.deleteAnalysis.handler(
 export const shareAnalysisHandler = os.custom.shareAnalysis.handler(
   async ({ input, context }) => {
     const uid = requireUid(context.user);
-    await context.container.services.users.share(
-      uid,
-      { id: input.id },
-      input.data,
-    );
+    await mapNotFound(async () => {
+      await context.container.services.users.share(
+        uid,
+        { id: input.id },
+        input.data,
+      );
+    });
     return { success: true as const };
   },
 );
@@ -76,9 +82,12 @@ export const listPublicAnalysesHandler = os.custom.listPublicAnalyses.handler(
 
 export const getAnalysisHandler = os.custom.getAnalysis.handler(
   async ({ input, context }) => {
-    return (await context.container.services.users.analysisUsers({
-      id: input.id,
-    })) as never;
+    return await mapNotFound(
+      async () =>
+        (await context.container.services.users.analysisUsers({
+          id: input.id,
+        })) as never,
+    );
   },
 );
 

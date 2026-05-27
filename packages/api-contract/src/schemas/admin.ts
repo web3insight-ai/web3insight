@@ -11,11 +11,21 @@ export const ReposOrderInputSchema = z.object({
   search: z.string().max(50).optional(),
 });
 
+// Reason: data_repos.repo_id is a pg bigint serialised as string by the
+// driver; repo_name + the JSONB mark columns can be NULL in older rows.
+// Coerce to int and accept null defaults so the output validator stops
+// rejecting valid DB rows.
 export const RepoMarkSchema = z.object({
-  repo_id: z.number().int(),
-  repo_name: z.string(),
-  upstream_marks: z.record(z.string(), z.unknown()).default({}),
-  custom_marks: z.record(z.string(), z.unknown()).default({}),
+  repo_id: z.coerce.number().int(),
+  repo_name: z.string().nullable().default(''),
+  upstream_marks: z
+    .record(z.string(), z.unknown())
+    .nullable()
+    .default({}),
+  custom_marks: z
+    .record(z.string(), z.unknown())
+    .nullable()
+    .default({}),
 });
 
 export const ReposMarkListSchema = z.object({

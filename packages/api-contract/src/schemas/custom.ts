@@ -54,14 +54,23 @@ export const CustomShareInputSchema = z.object({
   share: z.boolean().default(false),
 });
 
-// Reason: dev-card UI reads eco_score.ecosystems[], avatar_url, name, bio, and
-// other fields from the external GitHub/profile responses. `.loose()` exposes
-// them through the orpc client without enumerating every field here.
+// Output of the /v1/external/* + /v1/external/github/users/* endpoints.
+// Three concrete shapes flow through here today:
+//   - UsersService.getTopFormUserId(id)        → {} | { actor_id, actor_login, eco_score }
+//   - UsersService.getTopFormGithubUserName(u) → same as getTopFormUserId (lookup-then-id)
+//   - UsersService.getTopFormUserName(u)       → { username, actor_id?, top_ecosystems[], total_ecosystems?, message? }
+// All fields optional + `.loose()` so the contract tolerates every variant
+// without 500 "Output validation failed". Dashboard/dev-card already cast
+// the response to their own typed views (EcoScoreApiResponse, githubUserDataSchema)
+// so no consumer type breaks.
 export const GithubUserSchema = z
   .object({
-    login: z.string(),
-    id: z.number().int(),
-    created_at: z.string(),
-    updated_at: z.string(),
+    actor_id: z.union([z.string(), z.number()]).optional(),
+    actor_login: z.string().optional(),
+    eco_score: z.object({}).loose().optional(),
+    username: z.string().optional(),
+    top_ecosystems: z.array(z.object({}).loose()).optional(),
+    total_ecosystems: z.number().int().optional(),
+    message: z.string().optional(),
   })
   .loose();

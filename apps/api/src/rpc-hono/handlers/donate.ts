@@ -1,5 +1,6 @@
 import { ORPCError } from '@orpc/server';
 import { os } from '../orpc';
+import { mapServiceError as mapNotFound } from '../error-mapping';
 
 /**
  * Donate handlers — port of api/controller/donate.controller.ts.
@@ -16,9 +17,11 @@ function requireUser(user: { id: number } | undefined): { id: number } {
 export const createDonationHandler = os.donate.createDonation.handler(
   async ({ input, context }) => {
     const user = requireUser(context.user);
-    return await context.container.services.donate.create(
-      input.repo_full_name,
-      String(user.id),
+    return await mapNotFound(() =>
+      context.container.services.donate.create(
+        input.repo_full_name,
+        String(user.id),
+      ),
     );
   },
 );
@@ -31,34 +34,25 @@ export const listDonationsHandler = os.donate.listDonations.handler(
 
 export const getDonationByIdHandler = os.donate.getDonationById.handler(
   async ({ input, context }) => {
-    try {
-      return await context.container.services.donate.detail(input.id);
-    } catch (err) {
-      throw new ORPCError('NOT_FOUND', {
-        message: err instanceof Error ? err.message : 'Repository not found',
-      });
-    }
+    return await mapNotFound(() =>
+      context.container.services.donate.detail(input.id),
+    );
   },
 );
 
 export const getDonationByNameHandler = os.donate.getDonationByName.handler(
   async ({ input, context }) => {
-    try {
-      return await context.container.services.donate.detailByName(input.name);
-    } catch (err) {
-      throw new ORPCError('NOT_FOUND', {
-        message: err instanceof Error ? err.message : 'Repository not found',
-      });
-    }
+    return await mapNotFound(() =>
+      context.container.services.donate.detailByName(input.name),
+    );
   },
 );
 
 export const updateDonationHandler = os.donate.updateDonation.handler(
   async ({ input, context }) => {
     requireUser(context.user);
-    await context.container.services.donate.update(
-      input.id,
-      input.data as never,
+    await mapNotFound(() =>
+      context.container.services.donate.update(input.id, input.data as never),
     );
     return { success: true as const };
   },

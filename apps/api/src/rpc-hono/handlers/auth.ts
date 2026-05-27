@@ -1,5 +1,6 @@
 import { ORPCError } from '@orpc/server';
 import { os } from '../orpc';
+import { mapServiceError } from '../error-mapping';
 import type { HonoRpcContext } from '../context';
 import type { JwtPayload } from '@/services/auth.service';
 
@@ -43,6 +44,9 @@ function toJwtPayload(user: { id: number; tag?: string }): JwtPayload {
   };
 }
 
+// Alias kept for the few call sites that still use the older name.
+const mapNotFound = mapServiceError;
+
 function safeParseStringArray(raw: string): string[] | undefined {
   try {
     const parsed: unknown = JSON.parse(raw);
@@ -70,107 +74,119 @@ function profileToPublic(profile: Record<string, unknown>) {
 export const authRouter = os.auth.router({
   me: os.auth.me.handler(async ({ context }) => {
     const user = requireUser(context.user);
-    try {
+    // Service tokens (uid=1 DATA_API_TOKEN) and deleted users have no row in
+    // api.auth_users — surface as NOT_FOUND so the dashboard renders a
+    // logged-out state instead of crashing with 500.
+    return await mapNotFound(async () => {
       const result = await context.container.services.auth.getUserInfo(
         toJwtPayload(user),
       );
       return profileToPublic(result.profile);
-    } catch (err) {
-      // Reason: service tokens (uid=1 DATA_API_TOKEN) and deleted users have
-      // no row in api.auth_users — the service throws plain Error('User not
-      // found'). Surface as NOT_FOUND so dashboard's fetchCurrentUser can
-      // gracefully render a logged-out state instead of crashing with 500.
-      const message = err instanceof Error ? err.message : 'auth lookup failed';
-      if (message === 'User not found') {
-        throw new ORPCError('NOT_FOUND', { message });
-      }
-      throw err;
-    }
+    });
   }),
 
   getUserExtra: os.auth.getUserExtra.handler(async ({ input, context }) => {
     const user = requireUser(context.user);
-    const result = await context.container.services.auth.getUserExtra(
-      toJwtPayload(user),
-      input.tag,
-    );
-    return result.user_extra as Record<string, unknown>;
+    return await mapServiceError(async () => {
+      const result = await context.container.services.auth.getUserExtra(
+        toJwtPayload(user),
+        input.tag,
+      );
+      return result.user_extra as Record<string, unknown>;
+    });
   }),
 
   updateUserExtra: os.auth.updateUserExtra.handler(
     async ({ input, context }) => {
       const user = requireUser(context.user);
-      await context.container.services.auth.updateUserExtra(
-        toJwtPayload(user),
-        input.tag,
-        { user_extra: input.data.user_extra },
-      );
+      await mapServiceError(async () => {
+        await context.container.services.auth.updateUserExtra(
+          toJwtPayload(user),
+          input.tag,
+          { user_extra: input.data.user_extra },
+        );
+      });
       return { success: true };
     },
   ),
 
   publicById: os.auth.publicById.handler(async ({ input, context }) => {
-    const result = await context.container.services.auth.getUserInfoFormId(
-      String(input.id),
-    );
-    return profileToPublic(result.profile);
+    return await mapNotFound(async () => {
+      const result = await context.container.services.auth.getUserInfoFormId(
+        String(input.id),
+      );
+      return profileToPublic(result.profile);
+    });
   }),
 
   updateUserByTag: os.auth.updateUserByTag.handler(
     async ({ input, context }) => {
       const user = requireUser(context.user);
-      await context.container.services.auth.updateUserInfoV2(
-        toJwtPayload(user),
-        input.data,
-        input.tag,
-      );
+      await mapServiceError(async () => {
+        await context.container.services.auth.updateUserInfoV2(
+          toJwtPayload(user),
+          input.data,
+          input.tag,
+        );
+      });
       return { success: true };
     },
   ),
 
   getUserByTagAndId: os.auth.getUserByTagAndId.handler(
     async ({ input, context }) => {
-      const result = await context.container.services.auth.getUserInfoFormIdV2(
-        input.id,
-        input.tag,
-      );
-      return profileToPublic(result.profile);
+      return await mapNotFound(async () => {
+        const result =
+          await context.container.services.auth.getUserInfoFormIdV2(
+            input.id,
+            input.tag,
+          );
+        return profileToPublic(result.profile);
+      });
     },
   ),
 
   updateMe: os.auth.updateMe.handler(async ({ input, context }) => {
     const user = requireUser(context.user);
-    await context.container.services.auth.updateUserInfo(
-      toJwtPayload(user),
-      input,
-    );
+    await mapServiceError(async () => {
+      await context.container.services.auth.updateUserInfo(
+        toJwtPayload(user),
+        input,
+      );
+    });
     return { success: true };
   }),
 
   privyTokenAuth: os.auth.privyTokenAuth.handler(async ({ input, context }) => {
-    const result = await context.container.services.auth.privyTokenAuth(
-      input.id_token,
-    );
-    return { token: result.token };
+    return await mapServiceError(async () => {
+      const result = await context.container.services.auth.privyTokenAuth(
+        input.id_token,
+      );
+      return { token: result.token };
+    });
   }),
 
   bindOpenBuild: os.auth.bindOpenBuild.handler(async ({ input, context }) => {
     const user = requireUser(context.user);
-    await context.container.services.auth.bindOpenBuildOAuth(
-      String(user.id),
-      input.code,
-    );
+    await mapServiceError(async () => {
+      await context.container.services.auth.bindOpenBuildOAuth(
+        String(user.id),
+        input.code,
+      );
+    });
     return { success: true };
   }),
 
   getOpenBuildRecord: os.auth.getOpenBuildRecord.handler(
     async ({ context }) => {
       const user = requireUser(context.user);
-      const result =
-        await context.container.services.auth.getOpenBuildUserRecord(
-          String(user.id),
-        );
-      return (result ?? null) as Record<string, unknown> | null;
+      return await mapServiceError(async () => {
+        const result =
+          await context.container.services.auth.getOpenBuildUserRecord(
+            String(user.id),
+          );
+        return (result ?? null) as Record<string, unknown> | null;
+      });
     },
   ),
 });
