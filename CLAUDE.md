@@ -155,11 +155,18 @@ The `api` project does **not** use `@vendia/serverless-express` or any framework
 
 **Each Vercel project requires env vars set in both `production` and `preview` scopes.** See `apps/<name>/.env.example` for the variable list per app.
 
-### Production routing (not on Vercel yet)
+### Production routing (Vercel-only)
 
-`dash.web3insight.ai` (production) currently still resolves through a Cloudflare Tunnel to the legacy self-hosted Docker stack. The `*.dev.web3insight.ai` records are absent. **Vercel readiness ≠ production cutover** — moving production DNS and decommissioning the Docker hosts is a separate, deliberate step.
+All 4 production domains resolve to Vercel as of the 2026-05-27 cutover:
 
-The legacy `apps/api/Dockerfile` and `apps/api/deploy/` artefacts are retained as a fallback for the self-hosted path until the Cloudflare → Vercel cutover is done.
+- `api.web3insight.ai` → `web3insight-api`
+- `dash.web3insight.ai` → `web3insight-dashboard`
+- `card.web3insight.ai` → `web3insight-dev-card`
+- `web3insight.ai` → `web3insight-web`
+
+The legacy Cloudflare Tunnel + self-hosted Docker path is decommissioned. `apps/api/Dockerfile` and `apps/api/deploy/` are kept in-repo as historical reference but not deployed anywhere.
+
+**Heads-up — `JWT_SECRET` literal:** the secret is stored verbatim in the Vercel env (`web3insight-api` project, production + preview). `$$` in a `.env` file or docker-compose loader expands to `$`, but Vercel does **not** do that substitution — what you paste in the Vercel UI is exactly what `process.env.JWT_SECRET` reads. Mint service tokens against the literal stored value, not a shell-interpolated copy.
 
 ## oRPC contract-first architecture
 
@@ -279,7 +286,8 @@ Historical lineage for context (use `git log -- apps/<name>/` for the full per-a
 - **TypeScript `|| true` in some typecheck scripts**: legacy escape valve — being phased out as type errors get fixed.
 - **`ignoreBuildErrors: true`** in `next.config.ts`: workaround for third-party types lagging behind React 19. Re-enable strict checks once libs catch up.
 - **dev-card uses `next build --webpack`**: oRPC compatibility issue with Turbopack at build time (dev with Turbopack is fine). Revisit when oRPC publishes Turbopack-compatible runtime.
-- **Production DNS still on Cloudflare Tunnel**: `dash.web3insight.ai` → legacy Docker; Vercel deployments are validated on `dev` only. E2E against Vercel previews currently blocked by Vercel SSO + local-to-Vercel HTTPS timeouts.
+- **Vercel preview deploys still blocked from local E2E**: Vercel SSO + local-to-Vercel HTTPS timeouts make running Playwright against preview URLs unreliable. E2E currently runs against prod or local dev only.
+- **Frontend `DATA_API_TOKEN` is a service JWT signed with prod `JWT_SECRET`**: dashboard/web/dev-card SSR call `api.web3insight.ai/rpc/*` via this token. If the api project's `JWT_SECRET` is rotated, this token must be re-minted (`uid=1, type=admin`) and re-set on all three frontend Vercel projects, or auth-gated endpoints (`rank/*`, `admin/*`, `auth/*`) return 401 and tables/dashboards render empty.
 
 ## Reference monorepos
 

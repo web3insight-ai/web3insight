@@ -10,8 +10,10 @@ profile cards for Web3 ecosystems (Mantle, Monad). Uses Privy for auth and
 talks to `@web3insight/api` (Hono + oRPC) via the shared
 `@web3insight/api-contract` and `@web3insight/orpc-client`.
 
-**Production URL:** https://card.web3insight.ai (still on the legacy Docker
-stack; Vercel cutover pending — see root CLAUDE.md "Production routing").
+**Production URL:** https://card.web3insight.ai — served by the
+`web3insight-dev-card` Vercel project (production branch `main`). The
+legacy Docker stack was decommissioned on 2026-05-27; see root CLAUDE.md
+"Production routing" for the full Vercel topology.
 
 ## Essential commands
 
