@@ -164,6 +164,22 @@ export class GithubService {
       token,
       Object.fromEntries(response.headers.entries()),
     );
+
+    // Reason: previously the handler returned `data` as-is on every status,
+    // so a 401 "Bad credentials" body was passed straight through to the
+    // dashboard SSR which read `data.id` (undefined) and rendered an empty
+    // skeleton. Surface the upstream status with an Error whose `.status`
+    // is picked up by mapServiceError → 4xx/5xx ORPCError.
+    if (!response.ok) {
+      const message =
+        (data as { message?: string })?.message ||
+        `GitHub API ${response.status}`;
+      const err = new Error(`GitHub API ${response.status}: ${message}`) as Error & {
+        status: number;
+      };
+      err.status = response.status;
+      throw err;
+    }
     return data;
   }
 }

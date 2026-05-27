@@ -12,9 +12,9 @@ export const activeDeveloperHandler = os.repo.activeDeveloper.handler(
         message: 'Authentication required',
       });
     }
-    return await mapServiceError(() =>
+    return (await mapServiceError(() =>
       context.container.services.repos.getRepoActiveDevelopers(input.repo_id),
-    );
+    )) as never;
   },
 );
 

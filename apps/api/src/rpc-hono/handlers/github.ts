@@ -1,5 +1,6 @@
 import { ORPCError } from '@orpc/server';
 import { os } from '../orpc';
+import { mapServiceError } from '../error-mapping';
 
 /**
  * Github proxy handler — auth-protected pass-through to api.github.com.
@@ -22,11 +23,13 @@ export const proxyHandler = os.github.proxy.handler(
         // skip object/array values — GitHub query strings don't accept nested.
       }
     }
-    const result = await context.container.services.github.get({
-      path: `/${input.path}`,
-      query,
+    return await mapServiceError(async () => {
+      const result = await context.container.services.github.get({
+        path: `/${input.path}`,
+        query,
+      });
+      return (result as Record<string, unknown>) ?? {};
     });
-    return (result as Record<string, unknown>) ?? {};
   },
 );
 
