@@ -48,6 +48,34 @@ export async function mapServiceError<T>(fn: () => Promise<T>): Promise<T> {
       // upstream provider — surface as 502 with the upstream message.
       throw new ORPCError('BAD_GATEWAY', { message });
     }
+
+    // Upstream SDK errors that follow the {status, message} convention —
+    // PrivyAPIError, Octokit RequestError, openapi-fetch, etc. — attach a
+    // numeric `.status` field. Map it to the matching ORPCError so caller-
+    // induced failures (bad Privy token → 400/401, GitHub 404, …) don't
+    // disappear into a generic 500.
+    const status = (err as { status?: unknown })?.status;
+    if (typeof status === 'number') {
+      if (status === 400)
+        throw new ORPCError('BAD_REQUEST', { message: message || `${status}` });
+      if (status === 401)
+        throw new ORPCError('UNAUTHORIZED', { message: message || `${status}` });
+      if (status === 403)
+        throw new ORPCError('FORBIDDEN', { message: message || `${status}` });
+      if (status === 404)
+        throw new ORPCError('NOT_FOUND', { message: message || `${status}` });
+      if (status === 409)
+        throw new ORPCError('CONFLICT', { message: message || `${status}` });
+      if (status === 422)
+        throw new ORPCError('BAD_REQUEST', { message: message || `${status}` });
+      if (status === 429)
+        throw new ORPCError('TOO_MANY_REQUESTS', {
+          message: message || `${status}`,
+        });
+      if (status >= 500)
+        throw new ORPCError('BAD_GATEWAY', { message: message || `${status}` });
+    }
+
     throw err;
   }
 }
