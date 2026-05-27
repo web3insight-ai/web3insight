@@ -40,7 +40,10 @@ export async function mapServiceError<T>(fn: () => Promise<T>): Promise<T> {
     if (/not configured$/i.test(message)) {
       throw new ORPCError('SERVICE_UNAVAILABLE', { message });
     }
-    if (/^OpenBuild OAuth/i.test(message) || /^Failed to get user from /i.test(message)) {
+    if (
+      /^OpenBuild OAuth/i.test(message) ||
+      /^Failed to get user from /i.test(message)
+    ) {
       // Caller-supplied OAuth code or identity token was rejected by the
       // upstream provider — surface as 502 with the upstream message.
       throw new ORPCError('BAD_GATEWAY', { message });
