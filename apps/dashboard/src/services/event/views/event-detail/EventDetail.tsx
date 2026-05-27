@@ -112,14 +112,22 @@ function EventDetailView({
 
         if (response.ok) {
           const result = await response.json();
+          // Reason: /api/analysis/events/[id] proxies to api custom.getAnalysis
+          // which returns the api.analysis_users row shape:
+          //   { id, intent, description, created_at, data: { users, ecosystem_ranking,
+          //     users_with_contributions, users_without_contributions, contribution_percentage },
+          //     github, ai, public, request_data, submitter_id, updated_at }
+          // The analytics fields live one level deeper than the previous code
+          // assumed — `result.data.<field>` was always undefined → `|| 0` → all
+          // tiles rendered 0. Read from `result.data.data.<field>` instead.
+          const analytics = result.data?.data ?? {};
           if (result.data) {
             setAnalysisData({
-              ecosystem_ranking: result.data.ecosystem_ranking || [],
-              contribution_percentage: result.data.contribution_percentage || 0,
-              users_with_contributions:
-                result.data.users_with_contributions || 0,
+              ecosystem_ranking: analytics.ecosystem_ranking || [],
+              contribution_percentage: analytics.contribution_percentage || 0,
+              users_with_contributions: analytics.users_with_contributions || 0,
               users_without_contributions:
-                result.data.users_without_contributions || 0,
+                analytics.users_without_contributions || 0,
             });
           }
         }
