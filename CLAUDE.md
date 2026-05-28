@@ -12,6 +12,38 @@ This file provides root guidance for Claude Code and other coding agents working
 - If verification cannot run, say why and report the weaker evidence inspected.
 - Never bypass hooks or CI with `--no-verify` unless the user explicitly asks and accepts the risk.
 
+### Karpathy-style coding guardrails
+
+These guardrails bias toward caution over speed. For trivial tasks, use judgment, but keep the defaults below unless the user explicitly asks for a broader move.
+
+#### 1. Think before coding
+
+- State assumptions explicitly when they matter.
+- If multiple interpretations would produce different code, ask or present the tradeoff before editing.
+- If a simpler approach exists, say so and prefer it.
+- If something is unclear, name the uncertainty instead of hiding it behind implementation.
+
+#### 2. Simplicity first
+
+- Minimum code that solves the requested problem.
+- No unrequested features, speculative flexibility, or single-use abstractions.
+- No defensive handling for impossible internal states unless the boundary is genuinely external/untrusted.
+- If a solution grows large, pause and look for the smaller version before continuing.
+
+#### 3. Surgical changes
+
+- Touch only files and lines that trace directly to the request.
+- Match existing style even when a different style would be preferable in isolation.
+- Do not refactor adjacent code, rewrite comments, or reformat unrelated files.
+- Remove only imports, variables, functions, or files made obsolete by your own change. Mention pre-existing dead code instead of deleting it.
+
+#### 4. Goal-driven execution
+
+- Convert work into verifiable success criteria before making non-trivial edits.
+- Bug fix: reproduce or identify the failing path, then verify the fix at the narrowest useful level.
+- Feature/change: define the expected behavior, implement it, then run the smallest command that could catch a regression.
+- For multi-step tasks, keep a short plan where each step has a verification path.
+
 ## Knowledge Placement
 
 - Stable repo structure, architecture facts, commands, deploy topology, and long-lived defaults belong in this root file.
