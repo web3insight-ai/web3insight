@@ -7,23 +7,11 @@
       "skillPath": "skills/api-error-handling/SKILL.md",
       "computedHash": "82850b8ca5b9641afd88dd18a75dafc8a41da64ca1ce1b5ce9ae3d42a285f93d"
     },
-    "api-rate-limiting": {
-      "source": "aj-geddes/useful-ai-prompts",
-      "sourceType": "github",
-      "skillPath": "skills/api-rate-limiting/SKILL.md",
-      "computedHash": "eea9d86f19e720a41f0187a5b3057daea56bf67ba07697e84fb341ebc7468bd0"
-    },
     "api-security-hardening": {
       "source": "aj-geddes/useful-ai-prompts",
       "sourceType": "github",
       "skillPath": "skills/api-security-hardening/SKILL.md",
       "computedHash": "cb3fac8f65a33ecaa4d8a4ef7f55097c3d0ff0d583c4b70ec28a8957a5d38d41"
-    },
-    "api-versioning-strategy": {
-      "source": "aj-geddes/useful-ai-prompts",
-      "sourceType": "github",
-      "skillPath": "skills/api-versioning-strategy/SKILL.md",
-      "computedHash": "30823b57b301d25f5385e5035905a645a3ca1531577a0efcd1817d6c0fbf2d62"
     },
     "csrf-protection": {
       "source": "aj-geddes/useful-ai-prompts",
@@ -43,23 +31,11 @@
       "skillPath": "plugins/developer-kit-typescript/skills/drizzle-orm-patterns/SKILL.md",
       "computedHash": "d63e6d73a9f579b505a5694af2f3b3200c2b5eeea147e88b9b6d1e5fce23bcbb"
     },
-    "e2e-testing-automation": {
-      "source": "aj-geddes/useful-ai-prompts",
-      "sourceType": "github",
-      "skillPath": "skills/e2e-testing-automation/SKILL.md",
-      "computedHash": "75bffcbbc0614b69e0fd97d2a518a2e7484a967577444e76b07aaedf2d0609a3"
-    },
     "frontend-design": {
       "source": "anthropics/skills",
       "sourceType": "github",
       "skillPath": "skills/frontend-design/SKILL.md",
       "computedHash": "063a0e6448123cd359ad0044cc46b0e490cc7964d45ef4bb9fd842bd2ffbca67"
-    },
-    "frontend-state-management": {
-      "source": "aj-geddes/useful-ai-prompts",
-      "sourceType": "github",
-      "skillPath": "skills/frontend-state-management/SKILL.md",
-      "computedHash": "5ffc66390843159f39df6f59a4fb5dc5504217a4d71db5774ed9e289f70a6598"
     },
     "hono": {
       "source": "yusukebe/hono-skill",
@@ -85,18 +61,6 @@
       "skillPath": "skills/markdown-documentation/SKILL.md",
       "computedHash": "bebe932f4f94560dd90ae7534f2a8731edb70a3ca33f96ad8127cb1de4464780"
     },
-    "mcp-builder": {
-      "source": "anthropics/skills",
-      "sourceType": "github",
-      "skillPath": "skills/mcp-builder/SKILL.md",
-      "computedHash": "826e46adf81e1372282e205c34e1a2ee876e72148007726e4a2512599d2fef7b"
-    },
-    "monorepo-management": {
-      "source": "aj-geddes/useful-ai-prompts",
-      "sourceType": "github",
-      "skillPath": "skills/monorepo-management/SKILL.md",
-      "computedHash": "f5c63b838740c20238d8aac21cea49baf135468732e983a55d1e30b7800f466b"
-    },
     "next-best-practices": {
       "source": "vercel-labs/next-skills",
       "sourceType": "github",
@@ -108,12 +72,6 @@
       "sourceType": "github",
       "skillPath": "skills/next-cache-components/SKILL.md",
       "computedHash": "f835d8226c28abf012cc013928e2627c8a7a046de61127ef229be1711bd1f255"
-    },
-    "next-upgrade": {
-      "source": "vercel-labs/next-skills",
-      "sourceType": "github",
-      "skillPath": "skills/next-upgrade/SKILL.md",
-      "computedHash": "e3aeb1f9e8a68d24df0c1c2e3c8ab97ede09a7251a2c76988318d02254346979"
     },
     "playwright-best-practices": {
       "source": "currents-dev/playwright-best-practices-skill",
@@ -139,12 +97,6 @@
       "skillPath": "skills/pull-request-automation/SKILL.md",
       "computedHash": "049cd75edc4311213735e22c9877c5fb3994d717fc95077df842bb08e17d029a"
     },
-    "query-caching-strategies": {
-      "source": "aj-geddes/useful-ai-prompts",
-      "sourceType": "github",
-      "skillPath": "skills/query-caching-strategies/SKILL.md",
-      "computedHash": "78f38cd61706b9017be7ecfa0b61de11b3d146f7b155e571a6887db46f2fcac7"
-    },
     "react-hook-form": {
       "source": "pproenca/dot-skills",
       "sourceType": "github",
@@ -156,18 +108,6 @@
       "sourceType": "github",
       "skillPath": "skills/secrets-management/SKILL.md",
       "computedHash": "7603b81ffb48f312e93f9950aef271b72308b865265aee5b0d7319eb2cb72096"
-    },
-    "semantic-versioning": {
-      "source": "aj-geddes/useful-ai-prompts",
-      "sourceType": "github",
-      "skillPath": "skills/semantic-versioning/SKILL.md",
-      "computedHash": "903d8cc74d40680027631393b67aca088042b5cde948ae9c4b8bb500cd449054"
-    },
-    "skill-creator": {
-      "source": "anthropics/skills",
-      "sourceType": "github",
-      "skillPath": "skills/skill-creator/SKILL.md",
-      "computedHash": "5ea13a6d9f0d4bb694405d79acd00cadec0d21bb138c4dd10fcf3c500cb835c2"
     },
     "sql-injection-prevention": {
       "source": "aj-geddes/useful-ai-prompts",
@@ -199,12 +139,6 @@
       "skillPath": "skills/turborepo/SKILL.md",
       "computedHash": "6a23ee82918e35f8848b6fc2ccbea699d740a30fee65f288201adb4e98bf3827"
     },
-    "unit-testing-framework": {
-      "source": "aj-geddes/useful-ai-prompts",
-      "sourceType": "github",
-      "skillPath": "skills/unit-testing-framework/SKILL.md",
-      "computedHash": "d94955a01a3b6986a7bc7a0b6994f590434db2f996801412e0e8c34a8f09e5b2"
-    },
     "vercel-cli-with-tokens": {
       "source": "vercel-labs/agent-skills",
       "sourceType": "github",
@@ -223,23 +157,11 @@
       "skillPath": "skills/react-best-practices/SKILL.md",
       "computedHash": "ca7b0c0c6e5f2750043f7f0cd72d16ac4e2abc48f9b5500d047a4b77a2506212"
     },
-    "vercel-react-view-transitions": {
-      "source": "vercel-labs/agent-skills",
-      "sourceType": "github",
-      "skillPath": "skills/react-view-transitions/SKILL.md",
-      "computedHash": "c8952fc9127fa0564d0cb71dccb4215a5608ac933b5831104f09173a97a46f85"
-    },
     "vitest": {
       "source": "antfu/skills",
       "sourceType": "github",
       "skillPath": "skills/vitest/SKILL.md",
       "computedHash": "669c7275f7e1379b06b2bcfa593603aead4c983b951c7e8edbc09640aa38d0a1"
-    },
-    "web-design-guidelines": {
-      "source": "vercel-labs/agent-skills",
-      "sourceType": "github",
-      "skillPath": "skills/web-design-guidelines/SKILL.md",
-      "computedHash": "f3bc47f890f42a44db1007ab390709ec368e4b8c089baee6b0007182236ac474"
     },
     "webapp-testing": {
       "source": "anthropics/skills",

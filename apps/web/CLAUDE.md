@@ -1,57 +1,44 @@
-# CLAUDE.md
+# Web App Guide
 
-Project-scoped guidance for `apps/web` (`@web3insight/web`). For monorepo-wide conventions, deployment topology, and skill policy, see `../../CLAUDE.md`.
+Scope: `apps/web/**`. Inherit the root guide; this file covers public-site rules.
 
-## Project overview
+## Surface
 
-Web3Insight public landing and product website. It is a Next.js 16 App Router app running on Vercel as the `web3insight-web` project, production domain `https://web3insight.ai`, local dev port `3001`.
+- Package: `@web3insight/web`
+- Production: `https://web3insight.ai`, Vercel project `web3insight-web`.
+- Local: `pnpm dev:web`, port `3001`.
+- Stack: Next.js 16 App Router, React 19, Tailwind 4, oRPC/TanStack Query for live stats.
 
-The app is mostly marketing/product UI, but it can read live platform stats through the shared typed oRPC client and `@web3insight/api-contract`.
-
-## Essential commands
+## Commands
 
 ```bash
-pnpm dev:web                         # local dev on :3001
-pnpm --filter @web3insight/web build
+pnpm dev:web
 pnpm --filter @web3insight/web lint
 pnpm --filter @web3insight/web typecheck
+pnpm --filter @web3insight/web build
 ```
 
-`typecheck` currently exits 0 via `|| true`; still inspect output when touching types.
+`typecheck` currently exits 0 via `|| true`; inspect output when touching types.
 
-## Structure
+## Code Map
 
 ```text
-src/app/                 # App Router layout/page/globals
-src/components/           # landing sections, blueprint visual system, UI primitives
-src/lib/orpc/             # shared oRPC client/router wiring
-src/lib/query/            # TanStack Query client/provider helpers
-src/services/api/         # API-facing repository helpers
-src/clients/http/         # legacy/generic HTTP client helpers
-src/env.ts                # @t3-oss/env-nextjs validation
+src/app/              # App Router layout/page/globals
+src/components/       # landing sections, blueprint visual system, UI primitives
+src/lib/orpc/         # shared oRPC client/router wiring
+src/lib/query/        # TanStack Query client/provider helpers
+src/services/api/     # API-facing repository helpers
+src/env.ts            # @t3-oss/env-nextjs validation
 ```
 
-## Coding rules
+## Product Rules
 
-- Prefer Server Components by default. Add `'use client'` only for animation, browser APIs, event handlers, TanStack Query, or context providers.
-- Keep copy and visuals marketing-quality; use `frontend-design` / `web-design-guidelines` for substantial UI changes.
-- Prefer the shared oRPC client and `@web3insight/query-keys` cache presets for live data. Avoid introducing new hardcoded REST calls when a contract procedure exists.
-- Keep environment reads in `src/env.ts`; do not access `process.env` ad hoc in components.
-- The old README mentions Remix/NextUI and is historical. Current code is Next.js 16 + Tailwind v4 + oRPC.
-
-## Environment
-
-Use `env.example` as the safe reference. Required for live data:
-
-- `DATA_API_URL` — backend base URL, usually `https://api.web3insight.ai`
-- `DATA_API_TOKEN` — service JWT for server-side API calls
-- `HTTP_TIMEOUT` — optional timeout
-- `NEXT_PUBLIC_UMAMI_WEBSITE_ID` — optional analytics
-
-Do not read or print `.env.local`.
+- This is the marketing/product site; keep copy and visual changes polished.
+- Prefer Server Components. Use `'use client'` only for animation, browser APIs, events, TanStack Query, or providers.
+- Prefer shared oRPC and `@web3insight/query-keys` for live data; avoid new hardcoded REST calls when a contract exists.
+- Keep env reads in `src/env.ts`; do not access `process.env` ad hoc in components.
+- Ignore old README references to Remix/NextUI; current code is Next.js 16 + Tailwind 4 + oRPC.
 
 ## Verification
 
-- UI/layout-only change: `pnpm --filter @web3insight/web lint` plus browser smoke if visual.
-- Data/API change: run `pnpm --filter @web3insight/web typecheck` and verify the RPC/network path in browser or with a minimal request.
-- Deployment issue: inspect Vercel project `web3insight-web` first, then API project if network calls fail.
+UI/layout changes need lint plus browser smoke when visual. Data changes need typecheck and RPC/network verification. Deployment issues start with `web3insight-web` Vercel logs, then `web3insight-api` if network calls fail.
