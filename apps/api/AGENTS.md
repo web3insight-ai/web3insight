@@ -17,6 +17,32 @@
 3. SQL 语句完整、可读，不做简写。
 4. 使用简体中文回复。
 
+## 开发与调试流程
+
+1. API 是 Vercel Build Output API 项目，不使用框架自动检测；本地验证入口优先跑 `pnpm --filter @web3insight/api build`，确认 `.vercel/output/functions/api/hono.func` 和 `api/cron/cache-clear.func` 生成正确。
+2. 本地联调 HTTP 时在 `apps/api` 下用 `vercel dev`（默认 3010），不要自行新增 Express/Node server 入口。
+3. 线上/预览故障先看 Vercel：部署状态 → build logs → runtime logs → function error → env scope。重点项目名：`web3insight-api`。
+4. oRPC 故障先确认路径 `/rpc/*`、输入 schema、Bearer token / cookie，再查 handler 和 service；不要把内部前端回退到 legacy `/v1/*` / `/v2/*`。
+5. 同步类故障先查 Inngest event name、step retry、cron 触发和 `src/inngest/functions/*`，确认是工作流问题后再改代码。
+6. 数据库排查默认只读：允许 `SELECT`、`EXPLAIN`、schema introspection；`INSERT/UPDATE/DELETE/DDL/迁移/回放任务` 必须先获得明确确认。
+
+## 常用验证命令
+
+```bash
+pnpm --filter @web3insight/api lint
+pnpm --filter @web3insight/api typecheck
+pnpm --filter @web3insight/api test
+pnpm --filter @web3insight/api build
+pnpm --filter @web3insight/api db:check
+```
+
+只改 contract 时还要跑：
+
+```bash
+pnpm --filter @web3insight/api-contract typecheck
+pnpm --filter @web3insight/orpc-client typecheck
+```
+
 ## 数据库 data schema（SQL 分析规则）
 
 1. data.events 表对应 gharchive 数据集的 GitHub event 事件。
@@ -54,6 +80,13 @@
 - 工具：`pnpm db:pull` —— 调用 drizzle-kit introspect，把生产数据库 schema 写到 `apps/api/drizzle/`。
 - 流程：上游 schema 有变更时跑 `pnpm db:pull`，把 diff 手工合并进 `src/db/schema/api.ts` / `data.ts`，保持 JS 字段名 snake_case、`int8` 当字符串处理、timestamp 用 `mode: 'string'`。
 - `bigint generated always as identity` 列使用 `int8Identity('col').notNull().$defaultFn(() => undefined as unknown as string)`（见 `src/db/types.ts`），让 TS 把列视为插入可选 + select 非空。
+
+## oRPC 修改顺序
+
+1. 先改 `packages/api-contract/src/routers/<router>.ts` 的 Zod schema 和 procedure 定义。
+2. 再改 `src/services/*` 或新增纯 service 方法，保持业务逻辑不依赖 Hono request。
+3. 再改 `src/rpc-hono/handlers/*`，handler 只做输入/上下文编排和返回 shape。
+4. 最后改前端 typed client 使用点，并运行受影响 package 的 typecheck。
 
 ## 重要文件
 

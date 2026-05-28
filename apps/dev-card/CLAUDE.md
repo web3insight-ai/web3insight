@@ -21,14 +21,23 @@ legacy Docker stack was decommissioned on 2026-05-27; see root CLAUDE.md
 pnpm dev:dev-card                           # local dev on :3002 (Turbopack)
 pnpm --filter @web3insight/dev-card build   # production build (webpack — see below)
 pnpm --filter @web3insight/dev-card lint
+pnpm --filter @web3insight/dev-card typecheck
 ```
 
 Production build uses webpack (`next build --webpack`) due to an oRPC +
 Turbopack compatibility issue. Dev still runs on Turbopack.
 
+## Production / debugging
+
+- Vercel project: `web3insight-dev-card`; production domain `https://card.web3insight.ai`.
+- For card creation/auth bugs, inspect browser network + cookies first, then BFF `/api/rpc`, then upstream `web3insight-api` `/rpc` logs.
+- Privy identity-token exchange ends in backend JWT stored as HTTP-only `auth-token`; stale/missing cookies usually indicate BFF/auth sync issues, not card rendering issues.
+- Do not read or print `.env.local`; use documented env names or ask for the specific value.
+
 ## Architecture
 
 ### Tech Stack
+
 - **Framework:** Next.js 16 App Router with React 19
 - **Auth:** Privy (@privy-io/react-auth)
 - **API Layer:** oRPC with TanStack Query
@@ -79,6 +88,7 @@ src/
 ### Key Patterns
 
 **oRPC API layer (BFF):**
+
 - Local BFF procedures defined in `src/orpc/router.ts` exposed at `/api/rpc`.
 - These compose calls to the upstream `@web3insight/api` via the typed
   client in `src/orpc/backend.ts`, then return shapes tailored to the card
@@ -86,6 +96,7 @@ src/
 - Protected procedures require the `auth-token` HTTP-only cookie.
 
 **Authentication flow:**
+
 1. Privy handles OAuth (GitHub, Google, wallet).
 2. `PrivyAuthSync` calls the BFF `auth.signInWithPrivy` procedure, which
    exchanges the Privy identity token for a backend JWT via
@@ -94,11 +105,14 @@ src/
 4. `useAuth` hook surfaces unified auth state to components.
 
 **Ecosystem theming:**
+
 - Mantle: teal (`#5EEAD4`)
 - Monad: purple (`#9F8EFF`)
+- OpenBuild: route/assets under `openbuild/`; keep new ecosystem routes structurally parallel to existing ones.
 - Theme config in `DevCardForm.tsx` and component-level.
 
 **Form submission:**
+
 - `useDevCardForm` manages form state and Zod validation.
 - Submits via the BFF `auth.updateProfile` procedure (which calls
   `@web3insight/api` `auth.updateUserByTag` on the contract).
