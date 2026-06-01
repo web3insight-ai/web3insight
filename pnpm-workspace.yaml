@@ -45,9 +45,9 @@ catalog:
   '@privy-io/react-auth': 3.26.0
 
   # AI
-  ai: 6.0.184
-  '@ai-sdk/openai': 3.0.64
-  '@ai-sdk/react': 3.0.186
+  ai: 6.0.194
+  '@ai-sdk/openai': 3.0.67
+  '@ai-sdk/react': 3.0.196
 
   # Backend (Hono on Vercel — the only API runtime after the L5 NestJS purge)
   hono: 4.12.19
