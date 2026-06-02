@@ -2,6 +2,12 @@ import "server-only";
 
 import type { UIMessageChunk } from "ai";
 
+import {
+  mirrorFinishStream,
+  mirrorRegisterStream,
+  mirrorResumeEvent,
+} from "./redis-resume-store";
+
 /**
  * In-memory publisher for resumable copilot streams.
  *
@@ -85,6 +91,7 @@ export function registerActiveStream(
   };
   activeStreamsBySession.set(sessionId, stream);
   streamsById.set(streamId, stream);
+  mirrorRegisterStream(sessionId, streamId);
 }
 
 export function clearActiveStream(sessionId: string): void {
@@ -97,6 +104,7 @@ export function clearActiveStream(sessionId: string): void {
   // subscriber can finish draining its buffer. It expires via the retention
   // sweep above.
   existing.finished = true;
+  mirrorFinishStream(existing.streamId);
   for (const listener of existing.listeners) {
     listener({
       eventId: existing.nextEventId,
@@ -127,6 +135,7 @@ export function publishResumeEvent(
     event,
   };
   stream.buffer.push(buffered);
+  mirrorResumeEvent(streamId, buffered.eventId, event);
   if (stream.buffer.length > MAX_BUFFER_PER_STREAM) {
     stream.buffer.splice(0, stream.buffer.length - MAX_BUFFER_PER_STREAM);
   }

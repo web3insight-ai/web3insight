@@ -341,6 +341,41 @@ samp {
     }
   }
 
+  /* Copilot reasoning trace — per-step entrance (slide down + fade). */
+  @keyframes step-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Radix Collapsible height expand/collapse (uses Radix content-height var). */
+  @keyframes collapsible-down {
+    from {
+      height: 0;
+      opacity: 0;
+    }
+    to {
+      height: var(--radix-collapsible-content-height);
+      opacity: 1;
+    }
+  }
+
+  @keyframes collapsible-up {
+    from {
+      height: var(--radix-collapsible-content-height);
+      opacity: 1;
+    }
+    to {
+      height: 0;
+      opacity: 0;
+    }
+  }
+
   .animate-fade-in {
     animation: fadeIn 400ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
@@ -359,11 +394,28 @@ samp {
     animation: cursor-blink 1s step-end infinite;
   }
 
+  /* Copilot reasoning trace — per-step entrance. */
+  .animate-step-in {
+    animation: step-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* Opt-in Radix Collapsible expand/collapse (pair with overflow-hidden). */
+  .collapsible-animated[data-state="open"] {
+    animation: collapsible-down 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .collapsible-animated[data-state="closed"] {
+    animation: collapsible-up 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .animate-fade-in,
     .animate-draw,
     .animate-fade-in-up,
-    .animate-cursor {
+    .animate-cursor,
+    .animate-step-in,
+    .collapsible-animated[data-state="open"],
+    .collapsible-animated[data-state="closed"] {
       animation: none !important;
       stroke-dashoffset: 0 !important;
     }

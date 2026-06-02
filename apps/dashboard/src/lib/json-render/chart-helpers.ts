@@ -13,11 +13,15 @@ export const CHART_COLORS = [
   "#115e59",
 ];
 
+// Reason: Recharts tooltips render as HTML, so CSS theme vars resolve at paint
+// time and follow the dashboard's light/dark theme instead of being locked to
+// light colors. (SVG axis/grid colors cannot use var() and use resolved values
+// from getRechartsDefaults() instead.)
 export const TOOLTIP_STYLE = {
-  backgroundColor: "rgba(255, 255, 255, 0.95)",
-  border: "1px solid rgba(0, 0, 0, 0.08)",
+  backgroundColor: "var(--bg-raised)",
+  border: "1px solid var(--rule)",
   borderRadius: "8px",
-  color: "#374151",
+  color: "var(--fg)",
   fontSize: "12px",
   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06)",
 } as const;
@@ -91,24 +95,39 @@ export function normalizeChartRows(
   return [];
 }
 
-// Reason: Date-like x-axis entries look better chronologically sorted.
+// Reason: Parse YYYY-MM / YYYY-MM-DD as a UTC timestamp with range validation,
+// falling back to Date.parse for other formats. Returns null when not a date.
+function parseDateValue(value: unknown): number | null {
+  if (typeof value !== "string") return null;
+
+  const trimmed = value.trim();
+  const isoMatch = /^(\d{4})-(\d{2})(?:-(\d{2}))?$/.exec(trimmed);
+  if (isoMatch) {
+    const year = Number(isoMatch[1]);
+    const month = Number(isoMatch[2]);
+    const day = isoMatch[3] ? Number(isoMatch[3]) : 1;
+    if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+    return Date.UTC(year, month - 1, day);
+  }
+
+  const parsed = Date.parse(trimmed);
+  return Number.isNaN(parsed) ? null : parsed;
+}
+
+// Reason: Reorder x-axis entries chronologically only when EVERY value parses
+// as a date; otherwise preserve the original order. Sniffing just the first
+// entry (old behavior) could reorder a partially date-like series incorrectly.
 function orderEntriesByDateIfPossible(
   entries: Array<Record<string, unknown>>,
   xKey: string,
 ): Array<Record<string, unknown>> {
-  const first = entries[0]?.[xKey];
-  if (typeof first !== "string") return entries;
+  const timestamps = entries.map((entry) => parseDateValue(entry[xKey]));
+  if (timestamps.some((ts) => ts === null)) return entries;
 
-  // Reason: Quick heuristic - if the first value looks like a date string
-  // (contains digits and dashes/slashes), attempt a date-based sort.
-  const looksLikeDate = /\d{2,4}[-/]/.test(first);
-  if (!looksLikeDate) return entries;
-
-  return [...entries].sort((a, b) => {
-    const da = new Date(String(a[xKey]));
-    const db = new Date(String(b[xKey]));
-    return da.getTime() - db.getTime();
-  });
+  return entries
+    .map((entry, index) => ({ entry, ts: timestamps[index] as number }))
+    .sort((a, b) => a.ts - b.ts)
+    .map((item) => item.entry);
 }
 
 function isComposedSeriesType(

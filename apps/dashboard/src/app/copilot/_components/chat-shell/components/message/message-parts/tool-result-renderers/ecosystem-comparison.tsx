@@ -10,6 +10,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { getRechartsDefaults } from "@/lib/charts";
+import { TOOLTIP_STYLE } from "@/lib/json-render/chart-helpers";
 import { ToolResultCard, toNumber } from "./index";
 
 interface ComparisonEntry {
@@ -58,6 +60,8 @@ export default function EcosystemComparisonResult({ data }: { data: unknown }) {
   }));
   const { note } = data;
 
+  const { axisTick, gridStroke } = getRechartsDefaults();
+
   return (
     <ToolResultCard>
       <h4 className="mb-3 text-sm font-bold text-fg">Ecosystem Comparison</h4>
@@ -66,7 +70,7 @@ export default function EcosystemComparisonResult({ data }: { data: unknown }) {
         <BarChart data={comparison}>
           <CartesianGrid
             strokeDasharray="3 3"
-            stroke="rgba(0,0,0,0.06)"
+            stroke={gridStroke}
             vertical={false}
           />
           <XAxis
@@ -74,27 +78,18 @@ export default function EcosystemComparisonResult({ data }: { data: unknown }) {
             fontSize={11}
             tickLine={false}
             axisLine={false}
-            tick={{ fill: "#9ca3af" }}
+            tick={{ fill: axisTick.fill }}
           />
           <YAxis
             fontSize={11}
             tickLine={false}
             axisLine={false}
-            tick={{ fill: "#9ca3af" }}
+            tick={{ fill: axisTick.fill }}
           />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "rgba(255, 255, 255, 0.95)",
-              border: "1px solid rgba(0, 0, 0, 0.08)",
-              borderRadius: "8px",
-              color: "#374151",
-              fontSize: "12px",
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06)",
-            }}
-          />
+          <Tooltip contentStyle={TOOLTIP_STYLE} />
           <Legend
             iconSize={8}
-            wrapperStyle={{ fontSize: "11px", color: "#9ca3af" }}
+            wrapperStyle={{ fontSize: "11px", color: "var(--fg-muted)" }}
           />
           <Bar
             dataKey="developers"

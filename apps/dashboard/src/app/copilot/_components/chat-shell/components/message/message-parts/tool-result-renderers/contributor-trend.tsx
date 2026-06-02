@@ -10,6 +10,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { getRechartsDefaults } from "@/lib/charts";
+import { TOOLTIP_STYLE } from "@/lib/json-render/chart-helpers";
 import { ToolResultCard, toNumber } from "./index";
 
 interface ContributorTrendData {
@@ -46,6 +48,8 @@ export default function ContributorTrendResult({ data }: { data: unknown }) {
     total: toNumber(t.total) ?? 0,
   }));
 
+  const { axisTick, gridStroke } = getRechartsDefaults();
+
   return (
     <ToolResultCard>
       <h4 className="mb-3 text-sm font-bold text-fg">
@@ -56,7 +60,7 @@ export default function ContributorTrendResult({ data }: { data: unknown }) {
         <ComposedChart data={chartData}>
           <CartesianGrid
             strokeDasharray="3 3"
-            stroke="rgba(0,0,0,0.06)"
+            stroke={gridStroke}
             vertical={false}
           />
           <XAxis
@@ -64,24 +68,15 @@ export default function ContributorTrendResult({ data }: { data: unknown }) {
             fontSize={11}
             tickLine={false}
             axisLine={false}
-            tick={{ fill: "#9ca3af" }}
+            tick={{ fill: axisTick.fill }}
           />
           <YAxis
             fontSize={11}
             tickLine={false}
             axisLine={false}
-            tick={{ fill: "#9ca3af" }}
+            tick={{ fill: axisTick.fill }}
           />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "rgba(255, 255, 255, 0.95)",
-              border: "1px solid rgba(0, 0, 0, 0.08)",
-              borderRadius: "8px",
-              color: "#374151",
-              fontSize: "12px",
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06)",
-            }}
-          />
+          <Tooltip contentStyle={TOOLTIP_STYLE} />
           <Bar
             dataKey="total"
             fill="#0d9488"

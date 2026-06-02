@@ -19,6 +19,7 @@ import {
   YAxis,
 } from "recharts";
 import type { ReactNode } from "react";
+import { getRechartsDefaults } from "@/lib/charts";
 import { cn } from "@/lib/utils";
 import { web3InsightCatalog } from "./catalog";
 import {
@@ -38,16 +39,17 @@ import {
 // Shared axis & grid styles
 // ---------------------------------------------------------------------------
 
+// Reason: Color is resolved per-render from the theme (see getRechartsDefaults)
+// because SVG attributes cannot read CSS vars; these consts hold only the
+// theme-independent structural props.
 const AXIS_PROPS = {
   fontSize: 11,
   tickLine: false,
   axisLine: false,
-  tick: { fill: "#9ca3af" },
 } as const;
 
 const GRID_PROPS = {
   strokeDasharray: "3 3",
-  stroke: "rgba(0,0,0,0.06)",
   vertical: false,
 } as const;
 
@@ -84,51 +86,51 @@ function renderComposedSeries(
   return series.map((s) => {
     const key = s.type + "-" + s.dataKey;
     switch (s.type) {
-    case "bar":
-      return (
-        <Bar
-          key={key}
-          dataKey={s.dataKey}
-          name={s.name}
-          fill={s.color}
-          fillOpacity={s.fillOpacity}
-          barSize={s.barSize}
-          stackId={s.stackId}
-          radius={[3, 3, 0, 0]}
-        />
-      );
-    case "line":
-      return (
-        <Line
-          key={key}
-          type={s.curveType}
-          dataKey={s.dataKey}
-          name={s.name}
-          stroke={s.color}
-          strokeWidth={s.strokeWidth}
-          dot={s.dot}
-        />
-      );
-    case "area":
-      return (
-        <Area
-          key={key}
-          type={s.curveType}
-          dataKey={s.dataKey}
-          name={s.name}
-          stroke={s.color}
-          fill={s.color}
-          fillOpacity={s.fillOpacity}
-          strokeWidth={s.strokeWidth}
-          dot={s.dot}
-        />
-      );
-    case "scatter":
-      return (
-        <Scatter key={key} dataKey={s.dataKey} name={s.name} fill={s.color} />
-      );
-    default:
-      return null;
+      case "bar":
+        return (
+          <Bar
+            key={key}
+            dataKey={s.dataKey}
+            name={s.name}
+            fill={s.color}
+            fillOpacity={s.fillOpacity}
+            barSize={s.barSize}
+            stackId={s.stackId}
+            radius={[3, 3, 0, 0]}
+          />
+        );
+      case "line":
+        return (
+          <Line
+            key={key}
+            type={s.curveType}
+            dataKey={s.dataKey}
+            name={s.name}
+            stroke={s.color}
+            strokeWidth={s.strokeWidth}
+            dot={s.dot}
+          />
+        );
+      case "area":
+        return (
+          <Area
+            key={key}
+            type={s.curveType}
+            dataKey={s.dataKey}
+            name={s.name}
+            stroke={s.color}
+            fill={s.color}
+            fillOpacity={s.fillOpacity}
+            strokeWidth={s.strokeWidth}
+            dot={s.dot}
+          />
+        );
+      case "scatter":
+        return (
+          <Scatter key={key} dataKey={s.dataKey} name={s.name} fill={s.color} />
+        );
+      default:
+        return null;
     }
   });
 }
@@ -186,6 +188,7 @@ const { registry: web3InsightRegistry } = defineRegistry(web3InsightCatalog, {
       );
       const color = props.color ?? CHART_COLORS[0];
       const height = props.height ?? 280;
+      const { axisTick, gridStroke } = getRechartsDefaults();
 
       return (
         <div>
@@ -195,13 +198,18 @@ const { registry: web3InsightRegistry } = defineRegistry(web3InsightCatalog, {
               data={chartData}
               margin={{ top: 4, right: 4, bottom: 0, left: -12 }}
             >
-              <CartesianGrid {...GRID_PROPS} />
+              <CartesianGrid {...GRID_PROPS} stroke={gridStroke} />
               <XAxis
                 dataKey={props.xKey}
                 {...AXIS_PROPS}
+                tick={{ fill: axisTick.fill }}
                 tickFormatter={formatXLabel}
               />
-              <YAxis {...AXIS_PROPS} tickFormatter={formatNumber} />
+              <YAxis
+                {...AXIS_PROPS}
+                tick={{ fill: axisTick.fill }}
+                tickFormatter={formatNumber}
+              />
               <Tooltip contentStyle={TOOLTIP_STYLE} />
               <Bar
                 dataKey={props.yKey}
@@ -224,6 +232,7 @@ const { registry: web3InsightRegistry } = defineRegistry(web3InsightCatalog, {
       );
       const color = props.color ?? CHART_COLORS[0];
       const height = props.height ?? 280;
+      const { axisTick, gridStroke } = getRechartsDefaults();
 
       return (
         <div>
@@ -233,13 +242,18 @@ const { registry: web3InsightRegistry } = defineRegistry(web3InsightCatalog, {
               data={chartData}
               margin={{ top: 4, right: 4, bottom: 0, left: -12 }}
             >
-              <CartesianGrid {...GRID_PROPS} />
+              <CartesianGrid {...GRID_PROPS} stroke={gridStroke} />
               <XAxis
                 dataKey={props.xKey}
                 {...AXIS_PROPS}
+                tick={{ fill: axisTick.fill }}
                 tickFormatter={formatXLabel}
               />
-              <YAxis {...AXIS_PROPS} tickFormatter={formatNumber} />
+              <YAxis
+                {...AXIS_PROPS}
+                tick={{ fill: axisTick.fill }}
+                tickFormatter={formatNumber}
+              />
               <Tooltip contentStyle={TOOLTIP_STYLE} />
               <Line
                 type="monotone"
@@ -268,6 +282,7 @@ const { registry: web3InsightRegistry } = defineRegistry(web3InsightCatalog, {
       );
       const height = props.height ?? 280;
       const showLegend = props.showLegend ?? false;
+      const { axisTick, gridStroke } = getRechartsDefaults();
 
       return (
         <div>
@@ -277,18 +292,23 @@ const { registry: web3InsightRegistry } = defineRegistry(web3InsightCatalog, {
               data={chartData}
               margin={{ top: 4, right: 4, bottom: 0, left: -12 }}
             >
-              <CartesianGrid {...GRID_PROPS} />
+              <CartesianGrid {...GRID_PROPS} stroke={gridStroke} />
               <XAxis
                 dataKey={props.xKey}
                 {...AXIS_PROPS}
+                tick={{ fill: axisTick.fill }}
                 tickFormatter={formatXLabel}
               />
-              <YAxis {...AXIS_PROPS} tickFormatter={formatNumber} />
+              <YAxis
+                {...AXIS_PROPS}
+                tick={{ fill: axisTick.fill }}
+                tickFormatter={formatNumber}
+              />
               <Tooltip contentStyle={TOOLTIP_STYLE} />
               {showLegend && (
                 <Legend
                   iconSize={8}
-                  wrapperStyle={{ fontSize: "11px", color: "#9ca3af" }}
+                  wrapperStyle={{ fontSize: "11px", color: "var(--fg-muted)" }}
                 />
               )}
               {renderComposedSeries(series)}

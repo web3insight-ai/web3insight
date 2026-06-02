@@ -38,6 +38,7 @@
     "@streamdown/mermaid": "^1.0.2",
     "@t3-oss/env-nextjs": "^0.13.11",
     "@tanstack/react-query": "catalog:",
+    "@upstash/redis": "^1.38.0",
     "@web3insight/api-contract": "workspace:*",
     "@web3insight/auth-privy": "workspace:*",
     "@web3insight/env-base": "workspace:*",

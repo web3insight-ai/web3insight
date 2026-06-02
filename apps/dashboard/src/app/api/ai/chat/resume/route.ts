@@ -1,5 +1,9 @@
 import { createUIMessageStreamResponse, type UIMessageChunk } from "ai";
 import {
+  getRedisActiveStreamId,
+  subscribeToRedisResumeStream,
+} from "../redis-resume-store";
+import {
   clearActiveStream,
   getActiveStreamId,
   hasResumeStream,
@@ -33,21 +37,31 @@ export async function GET(request: Request) {
       ? Number.parseInt(lastEventIdRaw, 10)
       : -1;
 
-  const streamId = getActiveStreamId(sessionId);
-  if (!streamId || !hasResumeStream(streamId)) {
-    if (streamId) {
+  const localStreamId = getActiveStreamId(sessionId);
+  const hasLocal = localStreamId !== null && hasResumeStream(localStreamId);
+
+  // Reason: When the local in-memory store misses, the original stream may live
+  // on a different serverless instance (cold start / separate lambda); fall
+  // back to the Redis mirror so resume still works cross-instance.
+  const streamId = hasLocal
+    ? localStreamId
+    : await getRedisActiveStreamId(sessionId);
+
+  if (!streamId) {
+    if (localStreamId) {
       clearActiveStream(sessionId);
     }
     return new Response(null, { status: 204 });
   }
 
+  const events = hasLocal
+    ? subscribeToResumeStream(streamId, lastEventId)
+    : subscribeToRedisResumeStream(streamId, lastEventId);
+
   const chunkStream = new ReadableStream<UIMessageChunk>({
     async start(controller) {
       try {
-        for await (const event of subscribeToResumeStream(
-          streamId,
-          lastEventId,
-        )) {
+        for await (const event of events) {
           if (event.kind === "chunk") {
             controller.enqueue(event.chunk);
           } else if (event.kind === "done") {

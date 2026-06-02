@@ -19,7 +19,7 @@ import { CopilotThreadActionsMenu } from "./components/thread/thread-actions-men
 import { useCopilotChatController } from "./hooks/use-chat-controller";
 import { useCopilotActions } from "./state/actions";
 
-export function CopilotChatShell() {
+export function CopilotChatShell({ defaultValue }: { defaultValue?: string }) {
   const {
     archivedQueryState,
     archivedThreads,
@@ -75,6 +75,7 @@ export function CopilotChatShell() {
         {/* Input — shrink-0 keeps it pinned at the bottom */}
         <div className="mx-auto w-full shrink-0 max-w-3xl px-4 pb-4">
           <PromptInput
+            defaultValue={defaultValue}
             status={status}
             onStop={actions.stopGeneration}
             onSubmit={async ({ text }) => {
