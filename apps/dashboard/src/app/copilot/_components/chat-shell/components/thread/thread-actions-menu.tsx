@@ -4,6 +4,7 @@ import {
   Loader2Icon,
   MoreHorizontalIcon,
   PlusIcon,
+  PrinterIcon,
   Share2Icon,
   TrashIcon,
 } from "lucide-react";
@@ -46,6 +47,16 @@ export function CopilotThreadActionsMenu({
   );
   const hasActiveSession = Boolean(sessionId);
 
+  // Reason: Two rAFs let layout settle (e.g. a just-closed menu) before the
+  // browser snapshots the page for printing.
+  const handlePrint = () => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.print();
+      });
+    });
+  };
+
   return (
     <div className="flex items-center gap-1">
       <Button
@@ -64,68 +75,83 @@ export function CopilotThreadActionsMenu({
       />
 
       {hasActiveSession ? (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              aria-label="More thread actions"
-              disabled={isPending}
-            >
-              {isPending ? (
-                <Loader2Icon className="size-4 animate-spin" />
-              ) : (
-                <MoreHorizontalIcon className="size-4" />
-              )}
-            </Button>
-          </DropdownMenuTrigger>
+        <>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            aria-label="Share chat"
+            disabled={isPending}
+            onClick={() => {
+              setIsShareDialogOpen(true);
+            }}
+          >
+            <Share2Icon className="size-4" />
+          </Button>
 
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              disabled={isPending}
-              onSelect={() => {
-                setIsShareDialogOpen(true);
-              }}
-            >
-              <Share2Icon className="mr-2 size-4" />
-              Share
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            {isCurrentThreadArchived ? (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            aria-label="Print chat"
+            onClick={handlePrint}
+          >
+            <PrinterIcon className="size-4" />
+          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-8"
+                aria-label="More thread actions"
+                disabled={isPending}
+              >
+                {isPending ? (
+                  <Loader2Icon className="size-4 animate-spin" />
+                ) : (
+                  <MoreHorizontalIcon className="size-4" />
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent align="end">
+              {isCurrentThreadArchived ? (
+                <DropdownMenuItem
+                  disabled={isPending}
+                  onSelect={() => {
+                    void actions.executeThreadAction("unarchive");
+                  }}
+                >
+                  <ArchiveIcon className="mr-2 size-4" />
+                  Unarchive
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem
+                  disabled={isPending}
+                  onSelect={() => {
+                    void actions.executeThreadAction("archive");
+                  }}
+                >
+                  <ArchiveIcon className="mr-2 size-4" />
+                  Archive
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
               <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
                 disabled={isPending}
                 onSelect={() => {
-                  void actions.executeThreadAction("unarchive");
+                  void actions.executeThreadAction("delete");
                 }}
               >
-                <ArchiveIcon className="mr-2 size-4" />
-                Unarchive
+                <TrashIcon className="mr-2 size-4" />
+                Delete
               </DropdownMenuItem>
-            ) : (
-              <DropdownMenuItem
-                disabled={isPending}
-                onSelect={() => {
-                  void actions.executeThreadAction("archive");
-                }}
-              >
-                <ArchiveIcon className="mr-2 size-4" />
-                Archive
-              </DropdownMenuItem>
-            )}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="text-destructive focus:text-destructive"
-              disabled={isPending}
-              onSelect={() => {
-                void actions.executeThreadAction("delete");
-              }}
-            >
-              <TrashIcon className="mr-2 size-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </>
       ) : null}
 
       {sessionId ? (

@@ -1,12 +1,17 @@
 import type { ChatStatus } from "ai";
-import { ArrowRightIcon } from "lucide-react";
 import { useAtomValue } from "jotai";
+import { ArrowRightIcon, CableIcon } from "lucide-react";
+import { useQueryState } from "nuqs";
 import { ConversationEmptyState } from "@/components/ai-elements/conversation";
 import {
   MessageBranch,
   MessageBranchContent,
 } from "@/components/ai-elements/message";
 import type { CopilotUIMessage } from "~/ai/copilot-types";
+import {
+  COPILOT_MCP_TOKENS_DIALOG_QUERY_KEY,
+  copilotDialogOpenParser,
+} from "../settings/query-state";
 import { STARTER_PROMPT_CARDS } from "../../constants";
 import { useCopilotActions } from "../../state/actions";
 import { copilotSessionIdAtom } from "../../state/atoms";
@@ -25,6 +30,10 @@ export function CopilotMessageList({
   const actions = useCopilotActions();
   const branchMetaByMessageId = useAtomValue(copilotBranchMetaByMessageIdAtom);
   const sessionId = useAtomValue(copilotSessionIdAtom);
+  const [, setMcpTokensOpen] = useQueryState(
+    COPILOT_MCP_TOKENS_DIALOG_QUERY_KEY,
+    copilotDialogOpenParser,
+  );
 
   if (messages.length === 0 && sessionId === null) {
     return (
@@ -53,6 +62,17 @@ export function CopilotMessageList({
             </button>
           ))}
         </div>
+
+        <button
+          type="button"
+          className="group inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-fg-subtle transition-colors hover:text-accent"
+          onClick={() => {
+            void setMcpTokensOpen("open");
+          }}
+        >
+          <CableIcon className="size-3" />
+          connect your tools via MCP
+        </button>
       </ConversationEmptyState>
     );
   }

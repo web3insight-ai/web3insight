@@ -4,6 +4,7 @@ import { getCopilotDb, getCopilotWriteDb } from "@/lib/db/copilot-db";
 import { isCopilotDbReady } from "@/lib/db/copilot-init";
 import { copilot_sessions } from "@/lib/db/schema/copilot";
 import { getCopilotUserId } from "@/lib/auth/copilot-auth";
+import { resolveViewerAccess } from "@/lib/auth/copilot-session-access";
 
 type RouteParams = { params: Promise<{ sessionId: string }> };
 
@@ -44,10 +45,12 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
     }
 
-    const isOwner =
-      userId !== null && session.user_id !== null && session.user_id === userId;
-    const isPublicReadable = session.access_level === "public";
-    if (!isOwner && !isPublicReadable) {
+    const { viewerAccess } = resolveViewerAccess(
+      session.access_level,
+      session.user_id,
+      userId,
+    );
+    if (viewerAccess === "none") {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
     }
 

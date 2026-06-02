@@ -4,6 +4,7 @@ import { getCopilotDb, getCopilotWriteDb } from "@/lib/db/copilot-db";
 import { isCopilotDbReady } from "@/lib/db/copilot-init";
 import { copilot_sessions } from "@/lib/db/schema/copilot";
 import { getCopilotUserId } from "@/lib/auth/copilot-auth";
+import { resolveViewerAccess } from "@/lib/auth/copilot-session-access";
 
 type RouteParams = { params: Promise<{ sessionId: string }> };
 
@@ -56,25 +57,17 @@ export async function GET(
       .limit(1);
 
     const session = rows[0];
-    if (!session) {
+    const { accessLevel, isOwner, viewerAccess } = resolveViewerAccess(
+      session?.access_level ?? null,
+      session?.user_id ?? null,
+      userId,
+    );
+
+    // Reason: Collapse "missing" and "not visible to this viewer" into one 404
+    // so the API does not reveal the existence of private sessions, matching
+    // the session and history routes.
+    if (!session || viewerAccess === "none") {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
-    }
-
-    const accessLevel = isAccessLevel(session.access_level)
-      ? session.access_level
-      : "private";
-
-    const isOwner =
-      userId !== null && session.user_id !== null && session.user_id === userId;
-
-    const viewerAccess: AccessResponse["viewerAccess"] = isOwner
-      ? "full"
-      : accessLevel === "public"
-        ? "read"
-        : "none";
-
-    if (viewerAccess === "none") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     return NextResponse.json({

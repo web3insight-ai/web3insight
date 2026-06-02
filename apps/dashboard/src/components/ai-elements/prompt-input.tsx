@@ -59,6 +59,11 @@ export function PromptInput({
     (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
 
+      // Block re-entrant sends while a turn is in flight.
+      if (status === "streaming" || status === "submitted") {
+        return;
+      }
+
       const trimmed = text.trim();
       if (!trimmed) {
         return;
@@ -71,7 +76,7 @@ export function PromptInput({
         setText(trimmed);
       });
     },
-    [onSubmit, text],
+    [onSubmit, status, text],
   );
 
   const contextValue = useMemo<PromptInputContextValue>(
@@ -112,7 +117,7 @@ export function PromptInputTextarea({
   onKeyDown,
   ...props
 }: PromptInputTextareaProps) {
-  const { text, setText } = usePromptInputContext();
+  const { status, text, setText } = usePromptInputContext();
   const resolvedValue = value ?? text;
 
   const handleKeyDown = useCallback(
@@ -133,10 +138,14 @@ export function PromptInputTextarea({
         return;
       }
 
+      // Swallow the newline, but only submit when no turn is in flight.
       event.preventDefault();
+      if (status === "streaming" || status === "submitted") {
+        return;
+      }
       event.currentTarget.form?.requestSubmit();
     },
-    [onKeyDown],
+    [onKeyDown, status],
   );
 
   return (

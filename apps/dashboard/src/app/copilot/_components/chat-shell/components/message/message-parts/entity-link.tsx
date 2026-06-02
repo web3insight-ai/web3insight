@@ -9,49 +9,7 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover";
-import { DeveloperHoverCard } from "./entity-hover-cards/developer-hover-card";
-import { EcosystemHoverCard } from "./entity-hover-cards/ecosystem-hover-card";
-import { RepositoryHoverCard } from "./entity-hover-cards/repository-hover-card";
-
-// Reason: These patterns match the entity link format that the AI system prompt
-// instructs the model to use: /developer/{username}, /ecosystem/{name},
-// /repository/{owner/repo}.
-type EntityType = "developer" | "ecosystem" | "repository";
-
-interface ParsedEntity {
-  type: EntityType;
-  identifier: string;
-}
-
-function parseEntityHref(href: string): ParsedEntity | null {
-  const developerMatch = href.match(/^\/developer\/([^/]+)$/);
-  if (developerMatch) {
-    return { type: "developer", identifier: developerMatch[1] };
-  }
-
-  const ecosystemMatch = href.match(/^\/ecosystem\/([^/]+)$/);
-  if (ecosystemMatch) {
-    return { type: "ecosystem", identifier: ecosystemMatch[1] };
-  }
-
-  const repoMatch = href.match(/^\/repository\/([^/]+\/[^/]+)$/);
-  if (repoMatch) {
-    return { type: "repository", identifier: repoMatch[1] };
-  }
-
-  return null;
-}
-
-function EntityHoverContent({ entity }: { entity: ParsedEntity }) {
-  switch (entity.type) {
-  case "developer":
-    return <DeveloperHoverCard username={entity.identifier} />;
-  case "ecosystem":
-    return <EcosystemHoverCard name={entity.identifier} />;
-  case "repository":
-    return <RepositoryHoverCard name={entity.identifier} />;
-  }
-}
+import { parseEntityHref } from "./entity-registry";
 
 /**
  * Custom link component for Streamdown that detects entity links
@@ -116,7 +74,7 @@ export function EntityLink(props: AnchorHTMLAttributes<HTMLAnchorElement>) {
           </Link>
         </PopoverTrigger>
         <PopoverContent side="top" align="start" sideOffset={8}>
-          <EntityHoverContent entity={entity} />
+          {entity.renderHoverContent()}
         </PopoverContent>
       </Popover>
     </span>

@@ -35,6 +35,12 @@ export const env = createEnv({
     // /api/ai/mcp refuses requests when this is unset.
     AUTH_SECRET: z.string().min(16).optional(),
 
+    // Reason: Upstash (REST) for cross-instance resumable copilot streams.
+    // Auto-injected by the Vercel Upstash integration; optional — the stream
+    // store falls back to in-memory when unset.
+    KV_REST_API_URL: z.string().url().optional(),
+    KV_REST_API_TOKEN: z.string().min(1).optional(),
+
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -68,6 +74,8 @@ export const env = createEnv({
     COPILOT_DATABASE_URL: process.env.COPILOT_DATABASE_URL,
     COPILOT_DATABASE_WRITE_URL: process.env.COPILOT_DATABASE_WRITE_URL,
     AUTH_SECRET: process.env.AUTH_SECRET,
+    KV_REST_API_URL: process.env.KV_REST_API_URL,
+    KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN,
     NODE_ENV: process.env.NODE_ENV,
 
     // Client vars

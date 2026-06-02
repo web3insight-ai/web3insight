@@ -60,15 +60,13 @@ function getEndpointUrl(): string {
   return `${window.location.origin}${MCP_ENDPOINT_PATH}`;
 }
 
-function buildMcpServersConfig(endpointUrl: string, token: string): string {
+function mcpServersJson(endpointUrl: string, token: string): string {
   return JSON.stringify(
     {
       mcpServers: {
         web3insight: {
           url: endpointUrl,
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         },
       },
     },
@@ -76,6 +74,67 @@ function buildMcpServersConfig(endpointUrl: string, token: string): string {
     2,
   );
 }
+
+function vscodeServersJson(endpointUrl: string, token: string): string {
+  return JSON.stringify(
+    {
+      servers: {
+        web3insight: {
+          type: "http",
+          url: endpointUrl,
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      },
+    },
+    null,
+    2,
+  );
+}
+
+// Reason: MCP clients diverge in config shape — Cursor/Claude Desktop take
+// `mcpServers`, VS Code takes `servers` + `type: "http"`, and Claude Code is a
+// CLI command. A per-client snippet removes the guesswork from setup.
+type McpClientId = "claude-code" | "cursor" | "claude-desktop" | "vscode";
+
+interface McpClientPreset {
+  id: McpClientId;
+  label: string;
+  language: "json" | "shell";
+  hint: string;
+  build: (endpointUrl: string, token: string) => string;
+}
+
+const MCP_CLIENT_PRESETS: McpClientPreset[] = [
+  {
+    id: "claude-code",
+    label: "Claude Code",
+    language: "shell",
+    hint: "Run in your terminal from the project you want to use it in.",
+    build: (endpointUrl, token) =>
+      `claude mcp add --transport http web3insight ${endpointUrl} \\\n  --header "Authorization: Bearer ${token}"`,
+  },
+  {
+    id: "cursor",
+    label: "Cursor",
+    language: "json",
+    hint: "Add to ~/.cursor/mcp.json (or .cursor/mcp.json), then restart Cursor.",
+    build: mcpServersJson,
+  },
+  {
+    id: "claude-desktop",
+    label: "Claude Desktop",
+    language: "json",
+    hint: "Add to ~/Library/Application Support/Claude/claude_desktop_config.json, then restart the app.",
+    build: mcpServersJson,
+  },
+  {
+    id: "vscode",
+    label: "VS Code",
+    language: "json",
+    hint: "Add to .vscode/mcp.json (or your user settings), then reload the window.",
+    build: vscodeServersJson,
+  },
+];
 
 function SectionLabel({ children }: { children: string }) {
   return (
@@ -103,16 +162,22 @@ export function CopilotMcpTokensDialog({
   const [createdToken, setCreatedToken] = useState<CreatedToken | null>(null);
   const [copiedToken, setCopiedToken] = useState(false);
   const [copiedConfig, setCopiedConfig] = useState(false);
+  const [selectedClient, setSelectedClient] =
+    useState<McpClientId>("claude-code");
 
   const [revokingId, setRevokingId] = useState<string | null>(null);
 
   const endpointUrl = useMemo(() => getEndpointUrl(), []);
+  const activePreset = useMemo(
+    () =>
+      MCP_CLIENT_PRESETS.find((preset) => preset.id === selectedClient) ??
+      MCP_CLIENT_PRESETS[0],
+    [selectedClient],
+  );
   const configSnippet = useMemo(
     () =>
-      createdToken
-        ? buildMcpServersConfig(endpointUrl, createdToken.token)
-        : "",
-    [createdToken, endpointUrl],
+      createdToken ? activePreset.build(endpointUrl, createdToken.token) : "",
+    [activePreset, createdToken, endpointUrl],
   );
 
   const loadTokens = useCallback(async () => {
@@ -150,6 +215,7 @@ export function CopilotMcpTokensDialog({
     setNewTokenName("");
     setCopiedToken(false);
     setCopiedConfig(false);
+    setSelectedClient("claude-code");
     void loadTokens();
   }, [isOpen, loadTokens]);
 
@@ -325,9 +391,9 @@ export function CopilotMcpTokensDialog({
                 </div>
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <div className="flex items-baseline justify-between gap-2">
-                  <SectionLabel>mcp.json snippet</SectionLabel>
+                  <SectionLabel>Client setup</SectionLabel>
                   <button
                     type="button"
                     onClick={() => handleCopy(configSnippet, "config")}
@@ -338,20 +404,36 @@ export function CopilotMcpTokensDialog({
                     ) : (
                       <CopyIcon className="size-3" />
                     )}
-                    {copiedConfig ? "Copied" : "Copy config"}
+                    {copiedConfig
+                      ? "Copied"
+                      : activePreset.language === "shell"
+                        ? "Copy command"
+                        : "Copy config"}
                   </button>
                 </div>
+
+                <div className="flex flex-wrap gap-1">
+                  {MCP_CLIENT_PRESETS.map((preset) => (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      onClick={() => setSelectedClient(preset.id)}
+                      className={
+                        preset.id === selectedClient
+                          ? "border-accent bg-accent/5 text-accent rounded-[2px] border px-2 py-1 text-[11px]"
+                          : "border-rule text-fg-muted hover:text-fg rounded-[2px] border px-2 py-1 text-[11px] transition-colors"
+                      }
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+
                 <pre className="border-rule bg-bg overflow-x-auto border p-2.5 font-mono text-[11px] leading-relaxed">
                   {configSnippet}
                 </pre>
                 <p className="text-fg-muted text-[11px] leading-relaxed">
-                  Paste into{" "}
-                  <code className="font-mono">~/.cursor/mcp.json</code>,{" "}
-                  <code className="font-mono">
-                    ~/Library/Application
-                    Support/Claude/claude_desktop_config.json
-                  </code>
-                  , or your client's equivalent, then restart the client.
+                  {activePreset.hint}
                 </p>
               </div>
             </section>

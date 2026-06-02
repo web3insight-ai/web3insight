@@ -238,8 +238,10 @@ const handler = withMcpAuth(
   ),
   verifyMcpBearerToken,
   {
+    // Reason: web3insight's MCP is bearer-only. There is no OAuth
+    // protected-resource metadata route, so advertising one would dangle
+    // (clients would 404 chasing it). Omit it rather than point at nothing.
     required: true,
-    resourceMetadataPath: "/.well-known/oauth-protected-resource",
   },
 );
 
