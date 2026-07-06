@@ -19,7 +19,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "globals": "^17.6.0",
-    "typescript-eslint": "^8.59.3"
+    "typescript-eslint": "^8.62.1"
   },
   "peerDependencies": {
     "eslint": "catalog:"
