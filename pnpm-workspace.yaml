@@ -50,8 +50,8 @@ catalog:
   '@ai-sdk/react': 3.0.186
 
   # Backend (Hono on Vercel — the only API runtime after the L5 NestJS purge)
-  hono: 4.12.19
-  '@scalar/hono-api-reference': 0.10.16
+  hono: 4.12.27
+  '@scalar/hono-api-reference': 0.11.8
   '@t3-oss/env-core': 0.13.11
   jose: 6.2.3
   inngest: 4.4.0
