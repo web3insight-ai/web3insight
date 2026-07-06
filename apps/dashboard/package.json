@@ -95,8 +95,8 @@
     "dotenv": "^17.4.2",
     "drizzle-kit": "catalog:",
     "eslint": "catalog:",
-    "eslint-config-next": "^16.2.6",
-    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-config-next": "^16.2.10",
+    "eslint-import-resolver-typescript": "^4.4.5",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
@@ -104,10 +104,10 @@
     "globals": "^17.6.0",
     "ksio": "^0.0.3",
     "postcss": "^8.5.14",
-    "prettier": "^3.8.3",
+    "prettier": "^3.9.4",
     "semver": "7.8.0",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
-    "typescript-eslint": "^8.59.3"
+    "typescript-eslint": "^8.62.1"
   }
 }

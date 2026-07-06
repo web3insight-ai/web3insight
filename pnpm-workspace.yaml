@@ -68,7 +68,7 @@ catalog:
 
   # Dev tooling
   eslint: 9.39.4
-  prettier: 3.8.3
+  prettier: 3.9.4
   vitest: 4.1.9
   '@vitest/coverage-v8': 4.1.9
 
