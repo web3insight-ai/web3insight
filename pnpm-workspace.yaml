@@ -9,7 +9,7 @@ catalog:
   '@types/node': 25.8.0
   '@types/react': 19.2.14
   '@types/react-dom': 19.2.3
-  tsx: 4.22.1
+  tsx: 4.23.0
 
   # Validation / contracts
   zod: 4.4.3
@@ -69,14 +69,14 @@ catalog:
   # Dev tooling
   eslint: 9.39.4
   prettier: 3.8.3
-  vitest: 4.1.6
-  '@vitest/coverage-v8': 4.1.6
+  vitest: 4.1.9
+  '@vitest/coverage-v8': 4.1.9
 
   # Husky / git
   husky: 9.1.7
-  'lint-staged': 17.0.5
-  syncpack: 15.2.0
-  turbo: 2.9.14
+  'lint-staged': 17.0.8
+  syncpack: 15.3.2
+  turbo: 2.10.3
 
   # Misc utilities used in multiple apps
   'date-fns': 4.4.0
