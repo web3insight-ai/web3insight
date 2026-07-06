@@ -22,7 +22,7 @@
     "@orpc/openapi": "catalog:",
     "@orpc/server": "catalog:",
     "@orpc/zod": "catalog:",
-    "@privy-io/node": "^0.18.0",
+    "@privy-io/node": "^0.24.0",
     "@scalar/hono-api-reference": "0.10.16",
     "@t3-oss/env-core": "0.13.11",
     "@web3insight/api-contract": "workspace:*",
