@@ -28,8 +28,8 @@ catalog:
   next: 16.2.6
   react: 19.2.6
   react-dom: 19.2.6
-  '@tanstack/react-query': 5.100.10
-  '@tanstack/react-query-devtools': 5.100.10
+  '@tanstack/react-query': 5.101.2
+  '@tanstack/react-query-devtools': 5.101.2
 
   # UI
   tailwindcss: 4.3.2
