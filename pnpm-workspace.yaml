@@ -59,7 +59,7 @@ catalog:
   # Data layer
   'drizzle-orm': 0.45.2
   'drizzle-kit': 0.31.10
-  pg: 8.20.0
+  pg: 8.22.0
   '@octokit/rest': 22.0.1
 
   # Logging
