@@ -34,8 +34,8 @@ catalogs:
       specifier: 1.14.8
       version: 1.14.8
     '@privy-io/react-auth':
-      specifier: 3.33.1
-      version: 3.33.1
+      specifier: 3.34.0
+      version: 3.34.0
     '@tailwindcss/postcss':
       specifier: 4.3.2
       version: 4.3.2
@@ -163,8 +163,8 @@ importers:
         specifier: 'catalog:'
         version: 1.14.8(@opentelemetry/api@1.9.1)(@orpc/contract@1.14.8(@opentelemetry/api@1.9.1))(@orpc/server@1.14.8(@opentelemetry/api@1.9.1)(crossws@0.3.5)(ws@8.20.1(bufferutil@4.1.0)(utf-8-validate@5.0.10)))(crossws@0.3.5)(ws@8.20.1(bufferutil@4.1.0)(utf-8-validate@5.0.10))(zod@4.4.3)
       '@privy-io/node':
-        specifier: ^0.24.0
-        version: 0.24.0(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10))(viem@2.52.0(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)(zod@4.4.3))
+        specifier: ^0.25.0
+        version: 0.25.0(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10))(viem@2.52.0(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)(zod@4.4.3))
       '@scalar/hono-api-reference':
         specifier: 0.11.8
         version: 0.11.8(hono@4.12.27)
@@ -285,7 +285,7 @@ importers:
         version: 1.26.0(zod@4.4.3)
       '@privy-io/react-auth':
         specifier: 'catalog:'
-        version: 3.33.1(@date-fns/tz@1.4.1)(@solana-program/system@0.10.0(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)))(@solana-program/token@0.9.0(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)))(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10))(@solana/sysvars@5.5.1(typescript@6.0.3))(@tanstack/query-core@5.101.2)(@tanstack/react-query@5.101.2(react@19.2.7))(@types/react@19.2.14)(bufferutil@4.1.0)(date-fns@4.1.0)(immer@11.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3)(use-sync-external-store@1.6.0(react@19.2.7))(utf-8-validate@5.0.10)(zod@4.4.3)
+        version: 3.34.0(@date-fns/tz@1.4.1)(@solana-program/system@0.10.0(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)))(@solana-program/token@0.9.0(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)))(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10))(@solana/sysvars@5.5.1(typescript@6.0.3))(@tanstack/query-core@5.101.2)(@tanstack/react-query@5.101.2(react@19.2.7))(@types/react@19.2.14)(bufferutil@4.1.0)(date-fns@4.1.0)(immer@11.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3)(use-sync-external-store@1.6.0(react@19.2.7))(utf-8-validate@5.0.10)(zod@4.4.3)
       '@radix-ui/react-collapsible':
         specifier: ^1.1.12
         version: 1.1.12(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -535,13 +535,13 @@ importers:
         version: 1.14.8(@opentelemetry/api@1.9.1)
       '@orpc/server':
         specifier: 'catalog:'
-        version: 1.14.8(@opentelemetry/api@1.9.1)(crossws@0.3.5)(ws@8.20.1(bufferutil@4.1.0)(utf-8-validate@5.0.10))
+        version: 1.14.8(@opentelemetry/api@1.9.1)(crossws@0.3.5)(ws@8.18.0(bufferutil@4.1.0)(utf-8-validate@5.0.10))
       '@orpc/tanstack-query':
         specifier: 'catalog:'
         version: 1.14.8(@opentelemetry/api@1.9.1)(@orpc/client@1.14.8(@opentelemetry/api@1.9.1))(@tanstack/query-core@5.101.2)
       '@privy-io/react-auth':
         specifier: 'catalog:'
-        version: 3.33.1(@date-fns/tz@1.4.1)(@solana-program/system@0.10.0(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)))(@solana-program/token@0.9.0(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)))(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10))(@solana/sysvars@5.5.1(typescript@6.0.3))(@tanstack/query-core@5.101.2)(@tanstack/react-query@5.101.2(react@19.2.7))(@types/react@19.2.14)(bufferutil@4.1.0)(date-fns@4.1.0)(immer@11.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.2.7))(utf-8-validate@5.0.10)(zod@4.4.3)
+        version: 3.34.0(@date-fns/tz@1.4.1)(@solana-program/system@0.10.0(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)))(@solana-program/token@0.9.0(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)))(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10))(@solana/sysvars@5.5.1(typescript@6.0.3))(@tanstack/query-core@5.101.2)(@tanstack/react-query@5.101.2(react@19.2.7))(@types/react@19.2.14)(bufferutil@4.1.0)(date-fns@4.1.0)(immer@11.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.2.7))(utf-8-validate@5.0.10)(zod@4.4.3)
       '@tanstack/react-query':
         specifier: 'catalog:'
         version: 5.101.2(react@19.2.7)
@@ -818,7 +818,7 @@ importers:
     dependencies:
       '@privy-io/react-auth':
         specifier: 'catalog:'
-        version: 3.33.1(@date-fns/tz@1.4.1)(@solana-program/system@0.10.0(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)))(@solana-program/token@0.9.0(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)))(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10))(@solana/sysvars@5.5.1(typescript@6.0.3))(@tanstack/query-core@5.101.2)(@types/react@19.2.14)(bufferutil@4.1.0)(date-fns@4.1.0)(immer@11.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3)(use-sync-external-store@1.6.0(react@19.2.7))(utf-8-validate@5.0.10)
+        version: 3.34.0(@date-fns/tz@1.4.1)(@solana-program/system@0.10.0(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)))(@solana-program/token@0.9.0(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)))(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10))(@solana/sysvars@5.5.1(typescript@6.0.3))(@tanstack/query-core@5.101.2)(@types/react@19.2.14)(bufferutil@4.1.0)(date-fns@4.1.0)(immer@11.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3)(use-sync-external-store@1.6.0(react@19.2.7))(utf-8-validate@5.0.10)
       '@web3insight/orpc-client':
         specifier: workspace:*
         version: link:../orpc-client
@@ -2107,7 +2107,6 @@ packages:
 
   '@metamask/sdk@0.33.1':
     resolution: {integrity: sha512-1mcOQVGr9rSrVcbKPNVzbZ8eCl1K0FATsYH3WJ/MH4WcZDWGECWrXJPNMZoEAkLxWiMe8jOQBumg2pmcDa9zpQ==}
-    deprecated: No longer maintained, superseded by https://docs.metamask.io/metamask-connect
 
   '@metamask/superstruct@3.2.1':
     resolution: {integrity: sha512-fLgJnDOXFmuVlB38rUN5SmU7hAFQcCjrg3Vrxz67KTY7YHFnSNEKvX4avmEBdOI0yTCxZjwMCFEqsC8k2+Wd3g==}
@@ -2902,7 +2901,7 @@ packages:
 
   '@paulmillr/qr@0.2.1':
     resolution: {integrity: sha512-IHnV6A+zxU7XwmKFinmYjUcwlyK9+xkG3/s9KcQhI9BjQKycrJ1JRO+FbNYPwZiPKW3je/DR0k7w8/gLa5eaxQ==}
-    deprecated: 'Switch to "qr" (new package name) for security updates: npm install qr'
+    deprecated: 'The package is now available as "qr": npm install qr'
 
   '@phosphor-icons/webcomponents@2.1.5':
     resolution: {integrity: sha512-JcvQkZxvcX2jK+QCclm8+e8HXqtdFW9xV4/kk2aL9Y3dJA2oQVt+pzbv1orkumz3rfx4K9mn9fDoMr1He1yr7Q==}
@@ -2911,8 +2910,8 @@ packages:
     resolution: {integrity: sha512-SEeaJLb3qBNF/OaXnaR1NmmBbFYk1zC0ZH/52fATcRPLFg/p791YrcyFFy44Bo9sLaGuSuLp5Q6axbb/O+v/RA==}
     engines: {node: ^14.18.0 || >=16.0.0}
 
-  '@privy-io/api-base@1.9.1':
-    resolution: {integrity: sha512-Dq7yyZyVQm71gm3d5o1VH9Ahak9gf/zXx6A6E4bx9VVZEYTevL8J3aJAvIIj1qFenc12UGUpWO3oWkn9Cpr+mw==}
+  '@privy-io/api-base@1.9.2':
+    resolution: {integrity: sha512-KN1kEfA8ePULPZV+AQX5eHUrXX1GdQ7LYFII+Esg49MFDOfUwg1fV2D0kQ6DU/0netb0onIBD2J0oyOepCIfmw==}
 
   '@privy-io/api-types@0.16.0':
     resolution: {integrity: sha512-yysnTVux0SMzbuu6doEIVlWvf3YyL/Tg+WTRacPft2wFVtDQLBMol/XbeMJeTfsbC5FQI+l2ncQxPfonVzYo+g==}
@@ -2920,8 +2919,8 @@ packages:
   '@privy-io/are-addresses-equal@0.0.9':
     resolution: {integrity: sha512-mLBv7cde8ilPYUBjHl6ke+0H3v2hoa5bdShNT0/wm7NYZByvH7/inNN+iK5nTv7D0Ti2rqcfW3UXNxub9eVOpg==}
 
-  '@privy-io/chains@0.4.0':
-    resolution: {integrity: sha512-Qjd8/IqnciBR/7S0T1MTk4F0Os8bPlVpDW6GJ42nFIcAyc/3Gmr6FHoPaEFVec4i05ZZu3k/qIk+a8tGxs/cVQ==}
+  '@privy-io/chains@0.5.0':
+    resolution: {integrity: sha512-PDpXbJf8YR30XXzOrYZc7gnLQSIjo1tOVie8qez4NARW7w2Qg1cxZN4VB3zNXzu0j4f9JabRpZ7hyTwA1GhDpA==}
 
   '@privy-io/encoding@0.2.1':
     resolution: {integrity: sha512-wNsOf/KY3LQohJRYvNwboxL4ajDqok77emQw7CxLrFJp4qfDPwTYwU5J1zF3X8wcNvJwymKZ0IAYeqHiWIQUEw==}
@@ -2931,8 +2930,8 @@ packages:
     peerDependencies:
       viem: 2.52.0
 
-  '@privy-io/js-sdk-core@0.68.0':
-    resolution: {integrity: sha512-DEwejbsz98apuck1di2SL5R/nUIRvogUtpVQ0YrD/Glrko+ts07YXR1//R/DRmOw6WxSqYVHciLG5qlr7RxfnQ==}
+  '@privy-io/js-sdk-core@0.68.1':
+    resolution: {integrity: sha512-HPpWaNo2vOMh5gRRNPUP1N7QlEaC8IfBkJ/I4wY0uy1DwHqqSyYZ2xNv77xWIDcNjtFSxDxTJB5OCw1ZoDGY1w==}
     peerDependencies:
       permissionless: ^0.2.47
       viem: 2.52.0
@@ -2942,8 +2941,8 @@ packages:
       viem:
         optional: true
 
-  '@privy-io/node@0.24.0':
-    resolution: {integrity: sha512-bMI8FViPGMLmpnwSZffPEF2W1LWTp6SGRrb4Ly5PWRWdZQh+4WZj261ZYfleIVCMmh+8iEhzlrHYkeMx4p8bdA==}
+  '@privy-io/node@0.25.0':
+    resolution: {integrity: sha512-nIdX+iZ13Dz0PLhbEdMJlC/lfsM/JZnhvM47X2qNLnr6wmes+H37S4AYjluiC/bUrL2TptjaKtKrWBl0rSMe3Q==}
     peerDependencies:
       '@solana/kit': ^5.1.0
       '@x402/evm': ^2.3.0
@@ -2965,8 +2964,8 @@ packages:
   '@privy-io/popup@0.0.4':
     resolution: {integrity: sha512-Lk5BqB//F9naVOR9tkHbrcGs55fM4ILS50tdsgIQ76Kr9i7Og4Ob5IRGIKb75P11f5hXTwAjMezRmWM/7uAsrw==}
 
-  '@privy-io/react-auth@3.33.1':
-    resolution: {integrity: sha512-TQJG7jt9Oc4M75CYzpnbldIZG4G4L7rezmhOSVfClABjHhq28U/LDnFIG8w8s/62lT8qT4n7ofVs48wtT/l0rw==}
+  '@privy-io/react-auth@3.34.0':
+    resolution: {integrity: sha512-DtqNhdJZVf6Kl6+APAdvZlfUAHJ8EdUJsvFQhSpOjY3bIfXndtEO4Rd9iFOgG1crv8pij9hmGJwQ+97dWEHRLA==}
     peerDependencies:
       '@abstract-foundation/agw-client': ^1.0.0
       '@farcaster/mini-app-solana': ^1.0.0
@@ -8521,9 +8520,6 @@ packages:
   preact@10.24.2:
     resolution: {integrity: sha512-1cSoF0aCC8uaARATfrlz4VCBqE8LwZwRfLgkxJOQwAlQt6ayTmi0D9OF7nXid1POI5SZidFuG9CnlXbDfLqY/Q==}
 
-  preact@10.29.4:
-    resolution: {integrity: sha512-GMpwh9+NJ8tSmqwIaVyFRQkiKfBEzQ+k7r7tle4W+kaJ+7wJiB9hFz9BixAomMtenPPSBfM4bZhXozGxhf0uFQ==}
-
   preact@10.29.7:
     resolution: {integrity: sha512-DCHYrK/B10yUD3ZjLfhZ3WIE/9Vf9VFUODcRE2dRomTYDpJk6z6L9wecSfhfE6M9ZTHUdyQkoC46arIDhEV84Q==}
     peerDependencies:
@@ -9744,7 +9740,6 @@ packages:
 
   uuid@9.0.1:
     resolution: {integrity: sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==}
-    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
   valtio@1.13.2:
@@ -10586,7 +10581,9 @@ snapshots:
       '@noble/hashes': 1.8.0
       clsx: 1.2.1
       eventemitter3: 5.0.4
-      preact: 10.29.4
+      preact: 10.29.7
+    transitivePeerDependencies:
+      - preact-render-to-string
 
   '@coinbase/wallet-sdk@4.3.6(@types/react@19.2.14)(bufferutil@4.1.0)(immer@11.1.8)(react@19.2.7)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.2.7))(utf-8-validate@5.0.10)(zod@3.25.76)':
     dependencies:
@@ -12428,6 +12425,26 @@ snapshots:
       - fastify
       - ws
 
+  '@orpc/server@1.14.8(@opentelemetry/api@1.9.1)(crossws@0.3.5)(ws@8.18.0(bufferutil@4.1.0)(utf-8-validate@5.0.10))':
+    dependencies:
+      '@orpc/client': 1.14.8(@opentelemetry/api@1.9.1)
+      '@orpc/contract': 1.14.8(@opentelemetry/api@1.9.1)
+      '@orpc/interop': 1.14.8
+      '@orpc/shared': 1.14.8(@opentelemetry/api@1.9.1)
+      '@orpc/standard-server': 1.14.8(@opentelemetry/api@1.9.1)
+      '@orpc/standard-server-aws-lambda': 1.14.8(@opentelemetry/api@1.9.1)
+      '@orpc/standard-server-fastify': 1.14.8(@opentelemetry/api@1.9.1)
+      '@orpc/standard-server-fetch': 1.14.8(@opentelemetry/api@1.9.1)
+      '@orpc/standard-server-node': 1.14.8(@opentelemetry/api@1.9.1)
+      '@orpc/standard-server-peer': 1.14.8(@opentelemetry/api@1.9.1)
+      cookie: 1.1.1
+    optionalDependencies:
+      crossws: 0.3.5
+      ws: 8.18.0(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+    transitivePeerDependencies:
+      - '@opentelemetry/api'
+      - fastify
+
   '@orpc/server@1.14.8(@opentelemetry/api@1.9.1)(crossws@0.3.5)(ws@8.20.1(bufferutil@4.1.0)(utf-8-validate@5.0.10))':
     dependencies:
       '@orpc/client': 1.14.8(@opentelemetry/api@1.9.1)
@@ -12534,7 +12551,7 @@ snapshots:
 
   '@pkgr/core@0.3.6': {}
 
-  '@privy-io/api-base@1.9.1':
+  '@privy-io/api-base@1.9.2':
     dependencies:
       zod: 3.25.76
 
@@ -12558,7 +12575,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@privy-io/chains@0.4.0': {}
+  '@privy-io/chains@0.5.0': {}
 
   '@privy-io/encoding@0.2.1':
     dependencies:
@@ -12572,11 +12589,11 @@ snapshots:
     dependencies:
       viem: 2.52.0(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)
 
-  '@privy-io/js-sdk-core@0.68.0(viem@2.52.0(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)(zod@4.4.3))':
+  '@privy-io/js-sdk-core@0.68.1(viem@2.52.0(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)(zod@4.4.3))':
     dependencies:
-      '@privy-io/api-base': 1.9.1
+      '@privy-io/api-base': 1.9.2
       '@privy-io/api-types': 0.16.0
-      '@privy-io/chains': 0.4.0
+      '@privy-io/chains': 0.5.0
       '@privy-io/encoding': 0.2.1
       '@privy-io/ethereum': 0.2.0(viem@2.52.0(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)(zod@4.4.3))
       '@privy-io/routes': 0.2.6
@@ -12590,11 +12607,11 @@ snapshots:
     optionalDependencies:
       viem: 2.52.0(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)(zod@4.4.3)
 
-  '@privy-io/js-sdk-core@0.68.0(viem@2.52.0(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10))':
+  '@privy-io/js-sdk-core@0.68.1(viem@2.52.0(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10))':
     dependencies:
-      '@privy-io/api-base': 1.9.1
+      '@privy-io/api-base': 1.9.2
       '@privy-io/api-types': 0.16.0
-      '@privy-io/chains': 0.4.0
+      '@privy-io/chains': 0.5.0
       '@privy-io/encoding': 0.2.1
       '@privy-io/ethereum': 0.2.0(viem@2.52.0(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10))
       '@privy-io/routes': 0.2.6
@@ -12608,7 +12625,7 @@ snapshots:
     optionalDependencies:
       viem: 2.52.0(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)
 
-  '@privy-io/node@0.24.0(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10))(viem@2.52.0(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)(zod@4.4.3))':
+  '@privy-io/node@0.25.0(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10))(viem@2.52.0(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)(zod@4.4.3))':
     dependencies:
       '@hpke/chacha20poly1305': 1.8.0
       '@hpke/core': 1.9.0
@@ -12625,7 +12642,7 @@ snapshots:
 
   '@privy-io/popup@0.0.4': {}
 
-  '@privy-io/react-auth@3.33.1(@date-fns/tz@1.4.1)(@solana-program/system@0.10.0(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)))(@solana-program/token@0.9.0(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)))(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10))(@solana/sysvars@5.5.1(typescript@6.0.3))(@tanstack/query-core@5.101.2)(@tanstack/react-query@5.101.2(react@19.2.7))(@types/react@19.2.14)(bufferutil@4.1.0)(date-fns@4.1.0)(immer@11.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.2.7))(utf-8-validate@5.0.10)(zod@4.4.3)':
+  '@privy-io/react-auth@3.34.0(@date-fns/tz@1.4.1)(@solana-program/system@0.10.0(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)))(@solana-program/token@0.9.0(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)))(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10))(@solana/sysvars@5.5.1(typescript@6.0.3))(@tanstack/query-core@5.101.2)(@tanstack/react-query@5.101.2(react@19.2.7))(@types/react@19.2.14)(bufferutil@4.1.0)(date-fns@4.1.0)(immer@11.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.2.7))(utf-8-validate@5.0.10)(zod@4.4.3)':
     dependencies:
       '@base-org/account': 1.1.1(@types/react@19.2.14)(bufferutil@4.1.0)(immer@11.1.8)(react@19.2.7)(typescript@6.0.3)(use-sync-external-store@1.4.0(react@19.2.7))(utf-8-validate@5.0.10)(zod@4.4.3)
       '@base-ui/react': 1.6.0(@date-fns/tz@1.4.1)(@types/react@19.2.14)(date-fns@4.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -12635,13 +12652,13 @@ snapshots:
       '@headlessui/react': 2.2.10(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@heroicons/react': 2.2.0(react@19.2.7)
       '@marsidev/react-turnstile': 1.5.2(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-      '@privy-io/api-base': 1.9.1
+      '@privy-io/api-base': 1.9.2
       '@privy-io/api-types': 0.16.0
       '@privy-io/are-addresses-equal': 0.0.9(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)(zod@4.4.3)
-      '@privy-io/chains': 0.4.0
+      '@privy-io/chains': 0.5.0
       '@privy-io/encoding': 0.2.1
       '@privy-io/ethereum': 0.2.0(viem@2.52.0(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)(zod@4.4.3))
-      '@privy-io/js-sdk-core': 0.68.0(viem@2.52.0(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)(zod@4.4.3))
+      '@privy-io/js-sdk-core': 0.68.1(viem@2.52.0(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)(zod@4.4.3))
       '@privy-io/popup': 0.0.4
       '@privy-io/routes': 0.2.6
       '@privy-io/urls': 0.0.4
@@ -12717,7 +12734,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@privy-io/react-auth@3.33.1(@date-fns/tz@1.4.1)(@solana-program/system@0.10.0(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)))(@solana-program/token@0.9.0(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)))(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10))(@solana/sysvars@5.5.1(typescript@6.0.3))(@tanstack/query-core@5.101.2)(@tanstack/react-query@5.101.2(react@19.2.7))(@types/react@19.2.14)(bufferutil@4.1.0)(date-fns@4.1.0)(immer@11.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3)(use-sync-external-store@1.6.0(react@19.2.7))(utf-8-validate@5.0.10)(zod@4.4.3)':
+  '@privy-io/react-auth@3.34.0(@date-fns/tz@1.4.1)(@solana-program/system@0.10.0(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)))(@solana-program/token@0.9.0(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)))(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10))(@solana/sysvars@5.5.1(typescript@6.0.3))(@tanstack/query-core@5.101.2)(@tanstack/react-query@5.101.2(react@19.2.7))(@types/react@19.2.14)(bufferutil@4.1.0)(date-fns@4.1.0)(immer@11.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3)(use-sync-external-store@1.6.0(react@19.2.7))(utf-8-validate@5.0.10)(zod@4.4.3)':
     dependencies:
       '@base-org/account': 1.1.1(@types/react@19.2.14)(bufferutil@4.1.0)(immer@11.1.8)(react@19.2.7)(typescript@6.0.3)(use-sync-external-store@1.6.0(react@19.2.7))(utf-8-validate@5.0.10)(zod@4.4.3)
       '@base-ui/react': 1.6.0(@date-fns/tz@1.4.1)(@types/react@19.2.14)(date-fns@4.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -12727,13 +12744,13 @@ snapshots:
       '@headlessui/react': 2.2.10(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@heroicons/react': 2.2.0(react@19.2.7)
       '@marsidev/react-turnstile': 1.5.2(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-      '@privy-io/api-base': 1.9.1
+      '@privy-io/api-base': 1.9.2
       '@privy-io/api-types': 0.16.0
       '@privy-io/are-addresses-equal': 0.0.9(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)(zod@4.4.3)
-      '@privy-io/chains': 0.4.0
+      '@privy-io/chains': 0.5.0
       '@privy-io/encoding': 0.2.1
       '@privy-io/ethereum': 0.2.0(viem@2.52.0(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)(zod@4.4.3))
-      '@privy-io/js-sdk-core': 0.68.0(viem@2.52.0(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)(zod@4.4.3))
+      '@privy-io/js-sdk-core': 0.68.1(viem@2.52.0(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)(zod@4.4.3))
       '@privy-io/popup': 0.0.4
       '@privy-io/routes': 0.2.6
       '@privy-io/urls': 0.0.4
@@ -12809,7 +12826,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@privy-io/react-auth@3.33.1(@date-fns/tz@1.4.1)(@solana-program/system@0.10.0(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)))(@solana-program/token@0.9.0(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)))(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10))(@solana/sysvars@5.5.1(typescript@6.0.3))(@tanstack/query-core@5.101.2)(@types/react@19.2.14)(bufferutil@4.1.0)(date-fns@4.1.0)(immer@11.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3)(use-sync-external-store@1.6.0(react@19.2.7))(utf-8-validate@5.0.10)':
+  '@privy-io/react-auth@3.34.0(@date-fns/tz@1.4.1)(@solana-program/system@0.10.0(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)))(@solana-program/token@0.9.0(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)))(@solana/kit@5.5.1(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10))(@solana/sysvars@5.5.1(typescript@6.0.3))(@tanstack/query-core@5.101.2)(@types/react@19.2.14)(bufferutil@4.1.0)(date-fns@4.1.0)(immer@11.1.8)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3)(use-sync-external-store@1.6.0(react@19.2.7))(utf-8-validate@5.0.10)':
     dependencies:
       '@base-org/account': 1.1.1(@types/react@19.2.14)(bufferutil@4.1.0)(immer@11.1.8)(react@19.2.7)(typescript@6.0.3)(use-sync-external-store@1.6.0(react@19.2.7))(utf-8-validate@5.0.10)
       '@base-ui/react': 1.6.0(@date-fns/tz@1.4.1)(@types/react@19.2.14)(date-fns@4.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -12819,13 +12836,13 @@ snapshots:
       '@headlessui/react': 2.2.10(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@heroicons/react': 2.2.0(react@19.2.7)
       '@marsidev/react-turnstile': 1.5.2(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-      '@privy-io/api-base': 1.9.1
+      '@privy-io/api-base': 1.9.2
       '@privy-io/api-types': 0.16.0
       '@privy-io/are-addresses-equal': 0.0.9(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10)
-      '@privy-io/chains': 0.4.0
+      '@privy-io/chains': 0.5.0
       '@privy-io/encoding': 0.2.1
       '@privy-io/ethereum': 0.2.0(viem@2.52.0(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10))
-      '@privy-io/js-sdk-core': 0.68.0(viem@2.52.0(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10))
+      '@privy-io/js-sdk-core': 0.68.1(viem@2.52.0(bufferutil@4.1.0)(typescript@6.0.3)(utf-8-validate@5.0.10))
       '@privy-io/popup': 0.0.4
       '@privy-io/routes': 0.2.6
       '@privy-io/urls': 0.0.4
@@ -19110,7 +19127,7 @@ snapshots:
 
   extension-port-stream@3.0.0:
     dependencies:
-      readable-stream: 3.6.2
+      readable-stream: 4.7.0
       webextension-polyfill: 0.10.0
 
   fast-content-type-parse@3.0.0: {}
@@ -20925,7 +20942,7 @@ snapshots:
       '@noble/hashes': 1.8.0
       '@scure/bip32': 1.7.0
       '@scure/bip39': 1.6.0
-      abitype: 1.2.4(typescript@6.0.3)(zod@3.25.76)
+      abitype: 1.2.4(typescript@6.0.3)(zod@3.22.4)
       eventemitter3: 5.0.1
     optionalDependencies:
       typescript: 6.0.3
@@ -20954,7 +20971,7 @@ snapshots:
       '@noble/hashes': 1.8.0
       '@scure/bip32': 1.7.0
       '@scure/bip39': 1.6.0
-      abitype: 1.2.4(typescript@6.0.3)(zod@3.25.76)
+      abitype: 1.2.4(typescript@6.0.3)(zod@3.22.4)
       eventemitter3: 5.0.1
     optionalDependencies:
       typescript: 6.0.3
@@ -20999,7 +21016,7 @@ snapshots:
       '@noble/hashes': 1.8.0
       '@scure/bip32': 1.7.0
       '@scure/bip39': 1.6.0
-      abitype: 1.2.4(typescript@6.0.3)(zod@3.25.76)
+      abitype: 1.2.4(typescript@6.0.3)(zod@3.22.4)
       eventemitter3: 5.0.1
     optionalDependencies:
       typescript: 6.0.3
@@ -21314,8 +21331,6 @@ snapshots:
       xtend: 4.0.2
 
   preact@10.24.2: {}
-
-  preact@10.29.4: {}
 
   preact@10.29.7: {}
 
@@ -22923,9 +22938,9 @@ snapshots:
       '@noble/hashes': 1.8.0
       '@scure/bip32': 1.7.0
       '@scure/bip39': 1.6.0
-      abitype: 1.2.3(typescript@6.0.3)(zod@3.25.76)
+      abitype: 1.2.3(typescript@6.0.3)(zod@3.22.4)
       isows: 1.0.7(ws@8.20.1(bufferutil@4.1.0)(utf-8-validate@5.0.10))
-      ox: 0.14.27(typescript@6.0.3)(zod@3.25.76)
+      ox: 0.14.27(typescript@6.0.3)(zod@3.22.4)
       ws: 8.20.1(bufferutil@4.1.0)(utf-8-validate@5.0.10)
     optionalDependencies:
       typescript: 6.0.3

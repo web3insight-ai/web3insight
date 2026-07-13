@@ -42,7 +42,7 @@ catalog:
   recharts: 3.8.1
 
   # Auth
-  '@privy-io/react-auth': 3.33.1
+  '@privy-io/react-auth': 3.34.0
 
   # AI
   ai: 6.0.184
