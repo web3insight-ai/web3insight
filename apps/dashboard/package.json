@@ -78,7 +78,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.5",
+    "@eslint/eslintrc": "^3.3.6",
     "@eslint/js": "^10.0.1",
     "@knosys/sdk": "^0.0.3",
     "@tailwindcss/postcss": "catalog:",
@@ -95,7 +95,7 @@
     "dotenv": "^17.4.2",
     "drizzle-kit": "catalog:",
     "eslint": "catalog:",
-    "eslint-config-next": "^16.2.10",
+    "eslint-config-next": "^16.2.11",
     "eslint-import-resolver-typescript": "^4.4.5",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
@@ -104,10 +104,10 @@
     "globals": "^17.6.0",
     "ksio": "^0.0.3",
     "postcss": "^8.5.14",
-    "prettier": "^3.9.4",
+    "prettier": "^3.9.6",
     "semver": "7.8.0",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
-    "typescript-eslint": "^8.62.1"
+    "typescript-eslint": "^8.65.0"
   }
 }
