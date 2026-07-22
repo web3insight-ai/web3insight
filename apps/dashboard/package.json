@@ -86,7 +86,7 @@
     "@types/pg": "^8.20.0",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "@typescript-eslint/eslint-plugin": "^8.59.3",
+    "@typescript-eslint/eslint-plugin": "^8.65.0",
     "@typescript-eslint/parser": "^8.59.3",
     "@web3insight/eslint-config": "workspace:*",
     "@web3insight/next-config": "workspace:*",
