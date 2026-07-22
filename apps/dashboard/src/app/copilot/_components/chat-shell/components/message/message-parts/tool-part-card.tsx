@@ -141,37 +141,37 @@ function getToolCopy(toolName: string): ToolCardCopy {
 
 function getToolStatus(state: string): ToolStatusConfig {
   switch (state) {
-    case "output-available":
-      return {
-        label: "Done",
-        tone: "completed",
-        Icon: CheckCircle2Icon,
-      };
-    case "output-error":
-      return {
-        label: "Failed",
-        tone: "error",
-        Icon: AlertTriangleIcon,
-      };
-    case "output-denied":
-      return {
-        label: "Stopped",
-        tone: "muted",
-        Icon: AlertTriangleIcon,
-      };
-    case "approval-requested":
-    case "approval-responded":
-      return {
-        label: "Pending",
-        tone: "attention",
-        Icon: SparklesIcon,
-      };
-    default:
-      return {
-        label: "Running",
-        tone: "running",
-        Icon: Loader2Icon,
-      };
+  case "output-available":
+    return {
+      label: "Done",
+      tone: "completed",
+      Icon: CheckCircle2Icon,
+    };
+  case "output-error":
+    return {
+      label: "Failed",
+      tone: "error",
+      Icon: AlertTriangleIcon,
+    };
+  case "output-denied":
+    return {
+      label: "Stopped",
+      tone: "muted",
+      Icon: AlertTriangleIcon,
+    };
+  case "approval-requested":
+  case "approval-responded":
+    return {
+      label: "Pending",
+      tone: "attention",
+      Icon: SparklesIcon,
+    };
+  default:
+    return {
+      label: "Running",
+      tone: "running",
+      Icon: Loader2Icon,
+    };
   }
 }
 

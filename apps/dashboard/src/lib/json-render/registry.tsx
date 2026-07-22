@@ -86,51 +86,51 @@ function renderComposedSeries(
   return series.map((s) => {
     const key = s.type + "-" + s.dataKey;
     switch (s.type) {
-      case "bar":
-        return (
-          <Bar
-            key={key}
-            dataKey={s.dataKey}
-            name={s.name}
-            fill={s.color}
-            fillOpacity={s.fillOpacity}
-            barSize={s.barSize}
-            stackId={s.stackId}
-            radius={[3, 3, 0, 0]}
-          />
-        );
-      case "line":
-        return (
-          <Line
-            key={key}
-            type={s.curveType}
-            dataKey={s.dataKey}
-            name={s.name}
-            stroke={s.color}
-            strokeWidth={s.strokeWidth}
-            dot={s.dot}
-          />
-        );
-      case "area":
-        return (
-          <Area
-            key={key}
-            type={s.curveType}
-            dataKey={s.dataKey}
-            name={s.name}
-            stroke={s.color}
-            fill={s.color}
-            fillOpacity={s.fillOpacity}
-            strokeWidth={s.strokeWidth}
-            dot={s.dot}
-          />
-        );
-      case "scatter":
-        return (
-          <Scatter key={key} dataKey={s.dataKey} name={s.name} fill={s.color} />
-        );
-      default:
-        return null;
+    case "bar":
+      return (
+        <Bar
+          key={key}
+          dataKey={s.dataKey}
+          name={s.name}
+          fill={s.color}
+          fillOpacity={s.fillOpacity}
+          barSize={s.barSize}
+          stackId={s.stackId}
+          radius={[3, 3, 0, 0]}
+        />
+      );
+    case "line":
+      return (
+        <Line
+          key={key}
+          type={s.curveType}
+          dataKey={s.dataKey}
+          name={s.name}
+          stroke={s.color}
+          strokeWidth={s.strokeWidth}
+          dot={s.dot}
+        />
+      );
+    case "area":
+      return (
+        <Area
+          key={key}
+          type={s.curveType}
+          dataKey={s.dataKey}
+          name={s.name}
+          stroke={s.color}
+          fill={s.color}
+          fillOpacity={s.fillOpacity}
+          strokeWidth={s.strokeWidth}
+          dot={s.dot}
+        />
+      );
+    case "scatter":
+      return (
+        <Scatter key={key} dataKey={s.dataKey} name={s.name} fill={s.color} />
+      );
+    default:
+      return null;
     }
   });
 }
