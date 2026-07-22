@@ -51,7 +51,7 @@
     "clsx": "catalog:",
     "dayjs": "1.11.20",
     "drizzle-orm": "catalog:",
-    "echarts": "6.0.0",
+    "echarts": "6.1.0",
     "echarts-for-react": "^3.0.6",
     "framer-motion": "catalog:",
     "highcharts": "^12.6.0",
