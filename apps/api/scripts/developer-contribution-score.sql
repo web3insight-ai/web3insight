@@ -97,6 +97,14 @@ pr_contributions AS (
   WHERE author_id IS NOT NULL
   GROUP BY scope_type, scope_name, author_id, repo_id, pull_request_id
 ),
+scoped_contributions AS (
+  SELECT
+    contributions.*,
+    MAX(last_contribution_at) OVER (
+      PARTITION BY scope_type, scope_name, author_id
+    ) AS last_author_activity_at
+  FROM pr_contributions contributions
+),
 active_prs AS (
   SELECT
     contributions.scope_type,
@@ -111,10 +119,12 @@ active_prs AS (
         / 86400.0
         / params.half_life_days::double precision
     ) AS decayed_points
-  FROM pr_contributions contributions
+  FROM scoped_contributions contributions
   CROSS JOIN valid_params params
   WHERE contributions.last_contribution_at IS NOT NULL
-    AND contributions.last_contribution_at >=
+    -- An active author retains older lookback contributions from other repos
+    -- in this scope. Each PR still decays from its own contribution timestamp.
+    AND contributions.last_author_activity_at >=
       params.as_of - make_interval(days => params.active_window_days)
 ),
 repo_scores AS (

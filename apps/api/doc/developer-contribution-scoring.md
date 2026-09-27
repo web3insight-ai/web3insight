@@ -28,6 +28,11 @@ The query uses a caller-supplied `as_of` time so results are repeatable. It cons
 the lookback window, omits authors whose latest author-activity event is outside the active
 window, and decays each PR's score by half every `half_life_days`.
 
+Activity is evaluated per author and scope, across that scope's repositories. An active author
+keeps older contributions within the lookback window; each retains its own decay timestamp.
+Recent activity in Solana alone does not make an author active in Ethereum, but does qualify
+that author for `web3/all`.
+
 Raw points are capped per author and repository before scores are summed across repositories.
 For a multi-ecosystem repository, the PR can contribute to each requested ecosystem. The
 `web3/all` scope includes that repository exactly once.
@@ -50,9 +55,13 @@ python3 apps/api/scripts/verify-developer-contribution-score.py
 ```
 
 The verifier starts a temporary local PostgreSQL cluster, loads synthetic events, runs the exact
-query with fixed test parameters, checks expected rankings, then stops and removes the cluster.
-It tests author attribution, merged-event deduplication, bot exclusion, inactivity, and a
-repository tagged to two ecosystems. It does not establish production performance.
+query with fixed test parameters, checks expected rankings and scores, then stops and removes
+the cluster. Raw points are compared exactly as decimals; decayed scores must be finite and
+match the expected six-decimal values within `0.000001`. The latest author-activity timestamps
+are compared as UTC datetimes.
+It tests author attribution, merged-event deduplication, bot exclusion, inactivity, older
+contributions retained across repositories, scope-specific author activity, and a repository
+tagged to two ecosystems. It does not establish production performance.
 
 For the one-hour execution requirement, run `EXPLAIN (ANALYZE, BUFFERS, SETTINGS)` against the
 agreed production-like data volume. Record PostgreSQL version, event/repository row counts,

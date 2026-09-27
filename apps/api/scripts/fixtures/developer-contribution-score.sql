@@ -25,12 +25,15 @@ INSERT INTO data.actors (actor_id, actor_login) VALUES
   (25, 'carol'),
   (30, 'maintainer'),
   (40, 'stale-author'),
-  (50, 'automation[bot]');
+  (50, 'automation[bot]'),
+  (60, 'dave');
 
 INSERT INTO data.repos (repo_id, upstream_marks) VALUES
   (100, '{"ethereum": true, "solana": true}'::jsonb),
   (200, '{"ethereum": true}'::jsonb),
-  (300, '{}'::jsonb);
+  (300, '{}'::jsonb),
+  (400, '{"solana": true}'::jsonb),
+  (500, '{"ethereum": true}'::jsonb);
 
 INSERT INTO data.events (id, actor_id, repo_id, event_type, created_at, payload) VALUES
   (
@@ -101,5 +104,37 @@ INSERT INTO data.events (id, actor_id, repo_id, event_type, created_at, payload)
     jsonb_build_object('action', 'reopened', 'pull_request', jsonb_build_object(
       'id', 1003, 'merged', false,
       'user', jsonb_build_object('id', 20, 'login', 'bob', 'type', 'User')
+    ))
+  ),
+  -- Alice is active through other repositories. This 270-day-old merged PR
+  -- remains inside the 365-day lookback and must retain its decayed score.
+  (
+    11, 10, 500, 'PullRequestEvent', '2025-12-28 00:00:00+00',
+    jsonb_build_object('action', 'opened', 'pull_request', jsonb_build_object(
+      'id', 1007, 'merged', false,
+      'user', jsonb_build_object('id', 10, 'login', 'alice', 'type', 'User')
+    ))
+  ),
+  (
+    12, 30, 500, 'PullRequestEvent', '2025-12-28 00:00:00+00',
+    jsonb_build_object('action', 'closed', 'pull_request', jsonb_build_object(
+      'id', 1007, 'merged', true,
+      'user', jsonb_build_object('id', 10, 'login', 'alice', 'type', 'User')
+    ))
+  ),
+  -- Dave is recently active only in Solana. His older Ethereum PR counts in
+  -- web3/all, but must not give him an active Ethereum ranking.
+  (
+    13, 60, 500, 'PullRequestEvent', '2025-12-28 00:00:00+00',
+    jsonb_build_object('action', 'opened', 'pull_request', jsonb_build_object(
+      'id', 1008, 'merged', false,
+      'user', jsonb_build_object('id', 60, 'login', 'dave', 'type', 'User')
+    ))
+  ),
+  (
+    14, 60, 400, 'PullRequestEvent', '2026-09-24 00:00:00+00',
+    jsonb_build_object('action', 'opened', 'pull_request', jsonb_build_object(
+      'id', 1009, 'merged', false,
+      'user', jsonb_build_object('id', 60, 'login', 'dave', 'type', 'User')
     ))
   );

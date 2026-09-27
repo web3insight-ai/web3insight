@@ -10,6 +10,8 @@ import socket
 import subprocess
 import sys
 import tempfile
+from datetime import datetime, timezone
+from decimal import Decimal
 from pathlib import Path
 
 
@@ -27,14 +29,18 @@ TEST_PARAMS = {
     6: "10",
 }
 EXPECTED = [
-    ("ecosystem", "ethereum", "1", "10", "alice", "6"),
-    ("ecosystem", "ethereum", "2", "20", "bob", "1"),
-    ("ecosystem", "ethereum", "3", "25", "carol", "1"),
-    ("ecosystem", "solana", "1", "10", "alice", "5"),
-    ("web3", "all", "1", "10", "alice", "6"),
-    ("web3", "all", "2", "20", "bob", "1"),
-    ("web3", "all", "3", "25", "carol", "1"),
+    ("ecosystem", "ethereum", "1", "10", "alice", Decimal("11"), Decimal("7.767767")),
+    ("ecosystem", "ethereum", "2", "20", "bob", Decimal("1"), Decimal("1")),
+    ("ecosystem", "ethereum", "3", "25", "carol", Decimal("1"), Decimal("1")),
+    ("ecosystem", "solana", "1", "10", "alice", Decimal("5"), Decimal("5")),
+    ("ecosystem", "solana", "2", "60", "dave", Decimal("1"), Decimal("1")),
+    ("web3", "all", "1", "10", "alice", Decimal("11"), Decimal("7.767767")),
+    ("web3", "all", "2", "60", "dave", Decimal("2"), Decimal("1.353553")),
+    ("web3", "all", "3", "20", "bob", Decimal("1"), Decimal("1")),
+    ("web3", "all", "4", "25", "carol", Decimal("1"), Decimal("1")),
 ]
+SCORE_TOLERANCE = Decimal("0.000001")
+EXPECTED_LAST_ACTIVITY = datetime(2026, 9, 24, tzinfo=timezone.utc)
 
 
 def command_path(name: str, bindir: Path) -> str:
@@ -170,15 +176,31 @@ def main() -> int:
                 if not line.strip():
                     continue
                 columns = line.split("\t")
-                actual.append((*columns[:5], columns[5].split(".", 1)[0]))
+                if len(columns) != 8:
+                    raise RuntimeError("Expected eight score-query output columns")
+                raw_points = Decimal(columns[5])
+                contribution_score = Decimal(columns[6])
+                if not raw_points.is_finite() or not contribution_score.is_finite():
+                    raise RuntimeError("Query returned a non-finite score")
+                if datetime.fromisoformat(columns[7]) != EXPECTED_LAST_ACTIVITY:
+                    raise RuntimeError("Query returned an unexpected last author-activity timestamp")
+                actual.append((*columns[:5], raw_points, contribution_score))
 
-            if actual != EXPECTED:
+            rows_match = len(actual) == len(EXPECTED) and all(
+                row[:6] == expected[:6]
+                and abs(row[6] - expected[6]) <= SCORE_TOLERANCE
+                for row, expected in zip(actual, EXPECTED)
+            )
+            if not rows_match:
                 print("Expected rows:", EXPECTED, file=sys.stderr)
                 print("Actual rows:  ", actual, file=sys.stderr)
                 return 1
 
             print(
-                "PASS: 7 expected rankings; event actors were not credited for "
+                f"PASS: {len(EXPECTED)} expected rankings and finite decayed scores; "
+                "latest author-activity timestamps match; "
+                "active authors retain lookback contributions within each scope, "
+                "event actors were not credited for "
                 "label/merge actions, repeated PR events counted once, "
                 "stale and bot authors omitted."
             )
